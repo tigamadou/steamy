@@ -1,0 +1,26 @@
+# LATEST REQUIREMENTS
+# Install this requirements file to get the latest version of each dependency.
+# If there are compatibility problems, install from `requirements.txt` instead.
+arrow
+boto3
+celery
+django
+django-admin-env-notice
+django-admin-interface
+django-celery-results
+django-dotenv
+django-extensions
+django-filter
+django-heroku
+django-storages
+djangorestframework
+djangorestframework-camel-case
+dj-database-url
+flake8
+gunicorn
+mixer
+pillow
+psycopg2-binary
+pygments
+redis
+requests

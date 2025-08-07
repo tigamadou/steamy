@@ -1,0 +1,14 @@
+## Files
+*.pyc
+*.swp
+.DS_Store
+.env
+celerybeat*
+
+## Dirs
+env/
+__pycache__/
+staticfiles/
+media/
+.data/
+.cache/
