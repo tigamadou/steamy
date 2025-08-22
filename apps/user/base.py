@@ -26,8 +26,13 @@ class UserManager(BaseUserManager):
 
 
 class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(_('email address'), max_length=255, unique=True)
+    class Role(models.TextChoices):
+        ADMIN = "admin", "Administrateur"
+        TEACHER= "teacher", "Formateur"
+        STUDENT= "student", "Apprenant"
 
+    email = models.EmailField(_('email address'), max_length=255, unique=True)
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.STUDENT)
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
@@ -59,3 +64,4 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.email
+

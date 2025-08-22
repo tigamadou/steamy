@@ -3,8 +3,7 @@ import os
 import sys
 
 import dj_database_url
-
-
+from datetime import timedelta
 # ==================================================================================================
 # CHANGE FIELDS
 # ==================================================================================================
@@ -39,6 +38,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(
 SECRET_KEY = os.environ.get('SECRET_KEY', 'local')
 DEBUG = False if ENV == PRODUCTION else True
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+# Indicateur pour autoriser l'accès à la doc (par défaut False en prod)
+ALLOW_API_DOCS = os.getenv("ALLOW_API_DOCS", "false").lower() in ("1", "true", "yes")
+
 
 AUTH_USER_MODEL = 'user.User'
 
@@ -58,15 +60,27 @@ INSTALLED_APPS = [
 
     # 3rd party
     'django_celery_results',
+    "django_celery_beat",
     'django_extensions',
     'django_filters',
     'rest_framework',
     'rest_framework.authtoken',
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
+    "channels",
+    "storages",
+
 
     # Local
     'apps.file',
     'apps.mail',
     'apps.user',
+    'apps.courses',
+    'apps.learning',
+    'apps.payments',
+    'apps.messaging',
+    'apps.analytics',
+    'apps.core',
 ]
 
 MIDDLEWARE = [
@@ -101,6 +115,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'project.wsgi.application'
+ASGI_APPLICATION = "project.asgi.application"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
@@ -173,6 +188,7 @@ LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG' if ENV == DEV else 'WARNING')
 LOG_APPNAME = os.environ.get('LOG_APPNAME', 'DJANGO')
 LOG_SYSNAME = f'{APP_NAME}-{ENV.upper()}'
 LOGGING_CONFIG = None
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -247,29 +263,63 @@ REST_FRAMEWORK = {
     ),
     'EXCEPTION_HANDLER': 'libs.exception_handler.exception_handler'
 }
-
+REST_FRAMEWORK.setdefault("DEFAULT_SCHEMA_CLASS", "drf_spectacular.openapi.AutoSchema")
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    # autres options...
+}
+SPECTACULAR_SETTINGS = {
+    "TITLE": "API - MyLearningPlatform",
+    "DESCRIPTION": "API pour la plateforme de formation",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SCHEMA_PATH_PREFIX": r"/api",
+    "SECURITY": [{"BearerAuth": []}],
+    "COMPONENTS": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+}
 ADMIN_TITLE = 'Admin'
 ADMIN_HEADER = 'Admin'
 
 WEB_URL = os.environ.get('WEB_URL', 'http://localhost:3000')
 RESET_PASSWORD_URL = '{}{}'.format(WEB_URL, '/reset-password?state={state}')
 
+# Payements
+PAYMENTS_KKIAPAY_SECRET = os.getenv("PAYMENTS_KKIAPAY_SECRET", "")
+PAYMENTS_FEDAPAY_SECRET = os.getenv("PAYMENTS_FEDAPAY_SECRET", "")
 
-# ==================================================================================================
-# FILE SETTINGS
-# ==================================================================================================
+#Messaging
+CHANNEL_LAYERS = {
+  "default": {
+    "BACKEND": "channels_redis.core.RedisChannelLayer",
+    "CONFIG": {"hosts": [("redis", 6379)]},
+  }
+}
 
 
-AWS_ACCESS_KEY_ID = os.environ.get('BUCKETEER_AWS_ACCESS_KEY_ID')
-AWS_DEFAULT_REGION = os.environ.get('BUCKETEER_AWS_REGION')
-AWS_SECRET_ACCESS_KEY = os.environ.get('BUCKETEER_AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('BUCKETEER_BUCKET_NAME')
-AWS_LOCATION = os.environ.get('AWS_LOCATION', '')
-AWS_DEFAULT_ACL = 'public-read'
-AWS_QUERYSTRING_AUTH = False
+# # ==================================================================================================
+# # FILE SETTINGS
+# # ==================================================================================================
 
-if AWS_ACCESS_KEY_ID:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# AWS_ACCESS_KEY_ID = os.environ.get('BUCKETEER_AWS_ACCESS_KEY_ID')
+# AWS_DEFAULT_REGION = os.environ.get('BUCKETEER_AWS_REGION')
+# AWS_SECRET_ACCESS_KEY = os.environ.get('BUCKETEER_AWS_SECRET_ACCESS_KEY')
+# AWS_STORAGE_BUCKET_NAME = os.environ.get('BUCKETEER_BUCKET_NAME')
+# AWS_DEFAULT_ACL = 'public-read'
+# AWS_QUERYSTRING_AUTH = False
+
+# if AWS_ACCESS_KEY_ID:
+#     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Enable file resize task by uncommenting the task decorator for apps.file.tasks.resize_images()
 # How often to check for images to resizes (in seconds)
@@ -278,6 +328,21 @@ FILE_IMAGE_SIZES = (
     {'key': 'th', 'width': 350, 'quality': 90},
     {'key': 'md', 'width': 800},
 )
+# ----------------
+# Storage / MinIO (S3-compatible)
+# ----------------
+AWS_LOCATION = os.environ.get('AWS_LOCATION', '')
+DEFAULT_FILE_STORAGE = os.getenv("DEFAULT_FILE_STORAGE", "storages.backends.s3boto3.S3Boto3Storage")
+AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "http://minio:9000")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "minioadmin")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "minioadmin")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "app-media")
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_DEFAULT_ACL = None
+# Optionally to force virtual-host style addressing:
+AWS_S3_ADDRESSING_STYLE = os.getenv("AWS_S3_ADDRESSING_STYLE", "path")
+
 
 
 # ==================================================================================================
@@ -285,13 +350,20 @@ FILE_IMAGE_SIZES = (
 # ==================================================================================================
 
 
-EMAIL_HOST = os.environ.get('SMTP_SERVER', 'smtp.postmarkapp.com')
-EMAIL_PORT = os.environ.get('SMTP_PORT', 587)
-# Required, add to Heroku config or .env file
-EMAIL_HOST_USER = os.environ.get('SMTP_USERNAME', None)
-# Required, add to Heroku config or .env file
-EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD', None)
-EMAIL_USE_TLS = True
+# EMAIL_HOST = os.environ.get('SMTP_SERVER', 'smtp.postmarkapp.com')
+# EMAIL_PORT = os.environ.get('SMTP_PORT', 587)
+# # Required, add to Heroku config or .env file
+# EMAIL_HOST_USER = os.environ.get('SMTP_USERNAME', None)
+# # Required, add to Heroku config or .env file
+# EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD', None)
+# EMAIL_USE_TLS = True
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.example.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "1") == "1"
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@example.com")
 
 SEND_MAIL = True if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD else False
 
@@ -307,19 +379,47 @@ REDIS_DB = os.environ.get('REDIS_DB', 0)
 REDIS_URL = os.environ.get(
     'REDIS_URL', f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}')
 
+# ----------------
+# Cache (Redis)
+# ----------------
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv("REDIS_URL", "redis://redis:6379/1"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+# Session + cache (optional)
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 
 # ==================================================================================================
 # CELERY / WORKERS
 # ==================================================================================================
+# ----------------
+# Celery
+# ----------------
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "django-db")  # using django_celery_results
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+# optional default task time limits
+CELERY_TASK_TIME_LIMIT = int(os.getenv("CELERY_TASK_TIME_LIMIT", 300))
+CELERY_TASK_SOFT_TIME_LIMIT = int(os.getenv("CELERY_TASK_SOFT_TIME_LIMIT", 180))
 
 
-CELERY_BROKER_URL = REDIS_URL
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_BACKEND = 'django-db'
-# Process tasks inline (no queue) if we're in test mode
-CELERY_ALWAYS_EAGER = TESTING
-CELERY_RESULT_EXTENDED = True  # Provide more data in Django Admin results
+# CELERY_BROKER_URL = REDIS_URL
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_BACKEND = 'django-db'
+# # Process tasks inline (no queue) if we're in test mode
+# CELERY_ALWAYS_EAGER = TESTING
+# CELERY_RESULT_EXTENDED = True  # Provide more data in Django Admin results
 
 # Example of how to schedule tasks
 # =================================
@@ -347,3 +447,4 @@ if TESTING:
         del DATABASES['default']['OPTIONS']['sslmode']
     except KeyError:
         pass
+
