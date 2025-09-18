@@ -9,10 +9,10 @@ from .views import (
 )
 
 router = DefaultRouter()
+router.register(r"courses", CourseViewSet, basename="course")
+router.register(r"modules", ModuleViewSet, basename="module")
+router.register(r"lessons", LessonViewSet, basename="lesson")
+router.register(r"resources", ResourceViewSet, basename="resource")
 router.register(r'paths', PathViewSet)
-router.register(r'', CourseViewSet)  # courses à la racine
-router.register(r'modules', ModuleViewSet, basename="module")
-router.register(r'lessons', LessonViewSet)
-router.register(r'resources', ResourceViewSet)
 
 urlpatterns = router.urls
