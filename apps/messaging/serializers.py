@@ -1,74 +1,97 @@
+# apps/messaging/serializers.py
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from .models import Conversation, Message, MessageAttachment, MessageReceipt, Notification
-from django.contrib.auth import get_user_model
 
-User = get_user_model()
+UserModel = get_user_model()
 
-class SimpleUserSerializer(serializers.ModelSerializer):
+
+class ConversationSerializer(serializers.ModelSerializer):
+    participants = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=UserModel.objects.all(), required=False
+    )
+
     class Meta:
-        model = User
-        fields = ("id", "email",)
+        model = Conversation
+        fields = ["id", "title", "participants", "created_at", "updated_at"]
+
+
+class CreateConversationSerializer(serializers.ModelSerializer):
+    participants = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=UserModel.objects.all(), required=False
+    )
+
+    class Meta:
+        model = Conversation
+        fields = ["id", "title", "participants"]
+
+    def create(self, validated_data):
+        participants = validated_data.pop("participants", [])
+        conv = Conversation.objects.create(**validated_data)
+        if participants:
+            conv.participants.set(participants)
+        return conv
+
 
 class MessageAttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageAttachment
-        fields = ("id", "filename", "file", "size", "uploaded_at")
-        read_only_fields = ("uploaded_at",)
+        fields = ["id", "message", "file", "filename", "size", "uploaded_at"]
+        read_only_fields = ["uploaded_at", "filename", "size"]
 
-class MessageSerializer(serializers.ModelSerializer):
-    sender = SimpleUserSerializer(read_only=True)
+    def create(self, validated_data):
+        file = validated_data.get("file")
+        if file and not validated_data.get("filename"):
+            validated_data["filename"] = getattr(file, "name", "")
+        if file and not validated_data.get("size"):
+            try:
+                file.seek(0, 2)
+                validated_data["size"] = file.tell()
+                file.seek(0)
+            except Exception:
+                pass
+        return super().create(validated_data)
+
+
+class MessageCreateSerializer(serializers.ModelSerializer):
     attachments = MessageAttachmentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Message
-        fields = ("id","conversation","sender","body","created_at","edited","deleted","attachments")
-        read_only_fields = ("sender","created_at","edited","deleted")
-
-class ConversationSerializer(serializers.ModelSerializer):
-    participants = SimpleUserSerializer(many=True, read_only=True)
-    messages = MessageSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Conversation
-        fields = ("id","title","participants","created_at","updated_at","messages")
-
-class CreateConversationSerializer(serializers.ModelSerializer):
-    participant_ids = serializers.ListField(child=serializers.IntegerField(), write_only=True)
-
-    class Meta:
-        model = Conversation
-        fields = ("id","title","participant_ids")
+        fields = ["id", "conversation", "sender", "body",
+                  "created_at", "edited", "deleted", "attachments"]
+        read_only_fields = ["id", "sender", "created_at", "edited", "deleted", "attachments"]
 
     def create(self, validated_data):
-        participants = validated_data.pop("participant_ids", [])
-        conv = Conversation.objects.create(title=validated_data.get("title",""))
-        conv.participants.add(*participants)
-        return conv
+        request = self.context.get("request")
+        if request and request.user and request.user.is_authenticated:
+            validated_data["sender"] = request.user
+        return super().create(validated_data)
 
-class MessageCreateSerializer(serializers.ModelSerializer):
+
+class MessageSerializer(serializers.ModelSerializer):
+    sender = serializers.StringRelatedField()
+    attachments = MessageAttachmentSerializer(many=True, read_only=True)
+    receipts = serializers.SerializerMethodField()
+
     class Meta:
         model = Message
-        fields = ("id","conversation","body")
+        fields = ["id", "conversation", "sender", "body", "created_at",
+                  "edited", "deleted", "attachments", "receipts"]
 
-    def create(self, validated_data):
-        request = self.context["request"]
-        validated_data["sender"] = request.user
-        msg = Message.objects.create(**validated_data)
-        # create receipts for other participants
-        conv = msg.conversation
-        for u in conv.participants.exclude(pk=request.user.pk):
-            MessageReceipt.objects.create(message=msg, user=u)
-        return msg
+    def get_receipts(self, obj):
+        return [{"user": r.user_id, "delivered_at": r.delivered_at, "read_at": r.read_at} for r in obj.receipts.all()]
+
 
 class MessageReceiptSerializer(serializers.ModelSerializer):
-    user = SimpleUserSerializer(read_only=True)
     class Meta:
         model = MessageReceipt
-        fields = ("id","message","user","delivered_at","read_at")
-        read_only_fields = ("delivered_at","read_at")
+        fields = ["id", "message", "user", "delivered_at", "read_at"]
+        read_only_fields = ["delivered_at", "read_at"]
+
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        fields = ("id","title","body","url","created_at","read")
-        read_only_fields = ("created_at",)
+        fields = ["id", "user", "title", "body", "url", "created_at", "read"]
+        read_only_fields = ["id", "created_at", "user"]

@@ -7,6 +7,7 @@ from apps.user.endpoints.public.forgot_password_step_2.views import PublicForgot
 from apps.user.endpoints.user.change_password.views import UserChangePasswordView
 from apps.user.endpoints.user.change_email.views import UserChangeEmailView
 from apps.user.endpoints.user.my_profile.views import UserMyProfileView
+from .views import UserSignupView
 
 urlpatterns = [
     path('public/user/login', PublicLoginView.as_view(),
@@ -23,4 +24,5 @@ urlpatterns = [
          name='user-change-email'),
     path('user/my-profile', UserMyProfileView.as_view(),
          name='user-my-profile'),
+    path("signup/", UserSignupView.as_view(), name="user-signup"),
 ]

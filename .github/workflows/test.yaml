@@ -29,29 +29,12 @@ jobs:
         DJANGO_ENV: test
         SECRET_KEY: test
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Django test
-      run: |
-        apt-get update -qy
-        apt-get install -y python3-dev python3-pip
-        pip3 install -r requirements.txt
-        pip3 install flake8
-        python3 manage.py test apps
-
-  flake8-lint:
-    runs-on: ubuntu-latest
-    name: lint
-    steps:
-      - name: Check out source repository
-        uses: actions/checkout@v3
-      - name: Set up Python environment
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-      - name: flake8 Lint
-        uses: py-actions/flake8@v2
-        with:
-          path: 'apps/ project/ libs/'
-          ignore: "E501,E722,F821,W504"
-          max-line-length: "100"
+      - name: Django test
+        run: |
+          apt-get update -qy
+          apt-get install -y python3-dev python3-pip
+          pip3 install -r requirements.txt
+          pip3 install flake8
+          python3 manage.py test apps

@@ -3,6 +3,7 @@ from rest_framework import viewsets, permissions, filters
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 
 from .models import Path, Course, Module, Lesson, Resource
 from .serializers import (
@@ -25,6 +26,15 @@ class IsAuthorOrAdmin(permissions.BasePermission):
         return author is not None and author.id == request.user.id
 
 
+class IsTeacherOrAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if not request.user or not request.user.is_authenticated:
+            return False
+        return request.user.is_staff or getattr(request.user, "role", None) == "teacher"
+
+
 class PathViewSet(viewsets.ModelViewSet):
     queryset = Path.objects.all()
     serializer_class = PathSerializer
@@ -34,7 +44,7 @@ class PathViewSet(viewsets.ModelViewSet):
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.select_related("author", "path").prefetch_related("modules")
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrAdmin]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsTeacherOrAdmin]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["title", "description"]
     ordering_fields = ["created_at", "price", "title"]
@@ -53,7 +63,22 @@ class CourseViewSet(viewsets.ModelViewSet):
 class ModuleViewSet(viewsets.ModelViewSet):
     queryset = Module.objects.select_related("course")
     serializer_class = ModuleSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrAdmin]
+    http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsTeacherOrAdmin, IsAuthorOrAdmin]
+
+    def create(self, request, *args, **kwargs):
+        # leave default behaviour; useful if some other code blocked create
+        return super().create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        course = serializer.validated_data.get("course")
+        if course is None:
+            raise PermissionDenied("course is required")
+        user = self.request.user
+        if user.is_staff or (course.author_id is not None and course.author_id == user.id):
+            serializer.save()
+        else:
+            raise PermissionDenied("Only course author or admin can add modules")
 
 
 class LessonViewSet(viewsets.ModelViewSet):

@@ -1,3 +1,4 @@
+from .serializers import NotificationSerializer
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,16 +12,44 @@ from .serializers import (
 )
 from .tasks import send_message_notifications_async
 from django.conf import settings
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.utils import timezone
+
 
 class IsParticipantOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user and request.user.is_staff:
             return True
-        return obj.participants.filter(pk=request.user.pk).exists() if hasattr(obj,'participants') else False
+        return obj.participants.filter(pk=request.user.pk).exists() if hasattr(obj, 'participants') else False
+
+
+class IsParticipantOrAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        # allow listing and creation for authenticated users (listing will be filtered by get_queryset)
+        return bool(request.user and request.user.is_authenticated)
+
+    def has_object_permission(self, request, view, obj):
+        if request.user and request.user.is_staff:
+            return True
+        # participants is a M2M on Conversation
+        return obj.participants.filter(pk=request.user.pk).exists()
+
 
 class ConversationViewSet(viewsets.ModelViewSet):
-    queryset = Conversation.objects.prefetch_related("participants","messages__sender")
-    permission_classes = [permissions.IsAuthenticated]
+    """
+    Conversation list: returns only conversations where the user is participant (or all if staff).
+    Object-level access is enforced by IsParticipantOrAdmin.
+    """
+    queryset = Conversation.objects.prefetch_related("participants", "messages__sender")
+    permission_classes = [permissions.IsAuthenticated, IsParticipantOrAdmin]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return self.queryset.all()
+        # only conversations where the user is a participant
+        return self.queryset.filter(participants=user)
+
     def get_serializer_class(self):
         if self.action in ("create",):
             return CreateConversationSerializer
@@ -32,9 +61,12 @@ class ConversationViewSet(viewsets.ModelViewSet):
         if self.request.user.pk not in [p.pk for p in conv.participants.all()]:
             conv.participants.add(self.request.user)
 
+
 class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.select_related("sender","conversation").prefetch_related("attachments","receipts")
+    queryset = Message.objects.select_related(
+        "sender", "conversation").prefetch_related("attachments", "receipts")
     permission_classes = [permissions.IsAuthenticated]
+
     def get_serializer_class(self):
         if self.action in ("create",):
             return MessageCreateSerializer
@@ -56,9 +88,35 @@ class MessageViewSet(viewsets.ModelViewSet):
         receipt.save()
         return Response({"ok": True})
 
+
 class AttachmentViewSet(viewsets.ModelViewSet):
     queryset = MessageAttachment.objects.select_related("message")
     serializer_class = MessageAttachmentSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
     def perform_create(self, serializer):
+        serializer.save()
+
+
+class IsOwnerOrStaff(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.user and request.user.is_staff:
+            return True
+        return obj.user_id == request.user.id
+
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrStaff]
+    http_method_names = ["get", "patch", "head", "options"]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Notification.objects.all().order_by("-created_at")
+        return Notification.objects.filter(user=user).order_by("-created_at")
+
+    def perform_update(self, serializer):
+        # ensure user cannot change owner
         serializer.save()

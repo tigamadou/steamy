@@ -2,22 +2,49 @@
 from rest_framework import serializers
 from .models import Enrollment, Progress, Certificate, Quiz, Question, Choice, Attempt
 from apps.courses.serializers import LessonSerializer  # lecture seule
+from apps.courses.models import Lesson
 
 
 class EnrollmentSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Enrollment
         fields = ["id", "user", "course", "started_at", "completed", "status", "progress"]
         read_only_fields = ["started_at", "completed", "progress"]
 
+    def validate(self, attrs):
+        user = self.context["request"].user
+        course = attrs.get("course")
+        if course is None:
+            raise serializers.ValidationError({"course": "course is required."})
+        # avoid duplicate enrollment
+        if Enrollment.objects.filter(user=user, course=course).exists():
+            raise serializers.ValidationError(
+                {"non_field_errors": "User is already enrolled in this course."})
+        return attrs
+
 
 class ProgressSerializer(serializers.ModelSerializer):
-    lesson = LessonSerializer(read_only=True)
+    enrollment = serializers.PrimaryKeyRelatedField(queryset=Enrollment.objects.all())
+    lesson = serializers.PrimaryKeyRelatedField(queryset=Lesson.objects.all())
 
     class Meta:
         model = Progress
         fields = ["id", "enrollment", "lesson", "completed", "score", "updated_at"]
-        read_only_fields = ["updated_at"]
+        read_only_fields = ["id", "updated_at"]
+
+    def validate(self, attrs):
+        # sanity: ensure lesson belongs to same course as enrollment
+        enrollment = attrs.get("enrollment")
+        lesson = attrs.get("lesson")
+        if enrollment and lesson:
+            lesson_course = lesson.module.course
+            if enrollment.course_id != lesson_course.id:
+                raise serializers.ValidationError({
+                    "lesson": "This lesson does not belong to the enrollment's course."
+                })
+        return attrs
 
 
 class CertificateSerializer(serializers.ModelSerializer):
