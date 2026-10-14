@@ -98,13 +98,11 @@ jobs:
       - name: Dépendances système (WeasyPrint, PostgreSQL)
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0
       - run: pip install -r requirements.txt
-      # Non bloquant le temps de résorber la dette historique (voir les commits suivants)
+      # En cas d'échec : `make fix-api`, puis committer
       - name: Lint (Ruff)
-        continue-on-error: true
         run: ruff check --output-format=github .
       - name: Format (Ruff)
-        continue-on-error: true
-        run: ruff format --check .
+        run: ruff format --check --diff .
       - name: Migrations manquantes ?
         run: python manage.py makemigrations --check --dry-run
       - name: Tests
