@@ -332,7 +332,16 @@ FILE_IMAGE_SIZES = (
 # Storage S3-compatible (RustFS en local, voir compose.yml racine)
 # ----------------
 AWS_LOCATION = os.environ.get('AWS_LOCATION', '')
-DEFAULT_FILE_STORAGE = os.getenv("DEFAULT_FILE_STORAGE", "storages.backends.s3boto3.S3Boto3Storage")
+# Django ≥ 5.1 ignore DEFAULT_FILE_STORAGE : le backend passe par STORAGES.
+# La variable d'env garde son nom pour pouvoir basculer (ex : FileSystemStorage en test).
+STORAGES = {
+    "default": {
+        "BACKEND": os.getenv("DEFAULT_FILE_STORAGE", "storages.backends.s3boto3.S3Boto3Storage"),
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "http://rustfs:9000")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
