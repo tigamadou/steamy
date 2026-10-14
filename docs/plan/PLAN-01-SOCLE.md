@@ -1,5 +1,15 @@
 # PLAN-01 — Socle : nettoyage, décisions, produit, architecture
 
+> ⚠️ **Document historique (août 2026), non maintenu.** Ce plan de réécriture de la documentation date d'avant le
+> choix de l'architecture réelle. Il prévoit une stack « Next.js + MySQL/Prisma » qui a été abandonnée au profit de
+> Next.js (front) + API Django/PostgreSQL. Ses « lots 0-6 » sont des lots de *documentation*, sans rapport avec les lots
+> d'implémentation des écrans.
+> Documents à jour :
+> - [alignement des specs](../alignement/ARBITRAGES.md) ;
+> - [spec technique](../SPEC-TECHNIQUE.md) ;
+> - [infrastructure](../infra/README.md) ;
+> - plans d'implémentation par lot dans `docs/plans/`.
+
 **Couvre les lots 0, 1 et 2 du [plan directeur](PLAN-00-DIRECTEUR.md).**
 Ces trois lots sont **séquentiels et bloquants** : rien du lot 3 ou 4 ne peut commencer avant.
 

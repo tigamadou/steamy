@@ -1,128 +1,329 @@
 # Spécification écrans — Partie 1 : Site public & Authentification
 
-Complément de [SPEC-TECHNIQUE.md](SPEC-TECHNIQUE.md) §5. Couvre 66 écrans : `WL` (21), `W` (17), `WP` (12), mobile `01`-`16` (16).
+Complément de [SPEC-TECHNIQUE.md](SPEC-TECHNIQUE.md) §5. Couvre le **lot 1 · Public** et le **lot 2 · Authentification**.
+Les décisions citées (S1-S12, D1-D76) sont dans [alignement/ARBITRAGES.md](alignement/ARBITRAGES.md) et priment ; les
+statuts, le vocabulaire et les conventions d'API sont dans [alignement/CONVENTIONS.md](alignement/CONVENTIONS.md).
+La maquette de référence est `design/` (`screens-public-web.jsx`, `screens-auth-web.jsx`,
+`screens-auth-parent-web.jsx`).
 
-**Légende** : **[I]** implémenté (état React) · **[D]** déclaré (cliquable, sans handler) · **[S]** statique.
+| Lot | Écrans | Nombre |
+| --- | --- | ---: |
+| 1 · Public | `PublicShell`, WL01, WL06-WL21 (WL08 fusionné dans WL21), WL22-WL24 à concevoir | 20 |
+| 2 · Authentification | WL02-WL05, W01-W19 (sans W09/W17), WP01-WP12 | 33 |
+
+Auth mobile `01`-`16` (`screens-auth.jsx`) : **hors périmètre** (voir CONVENTIONS), non décrite ici.
+
+**Statuts** : **v1** à implémenter dans le lot · **Reporté** hors v1 · **À concevoir** absent de la maquette.
+
+**Règles communes aux deux lots**
+- Parent obligatoire à tout âge (S3) : aucune mention « moins de 16 ans » dans les écrans ni les textes.
+- Apprenant de 10 à 17 ans (D23).
+- Registre : **tutoiement** pour l'apprenant et le site public grand public ; **vouvoiement** pour tous les écrans
+  destinés au parent ou à l'enseignant (WL02-WL05, WP01-WP12, formulaires B2B et contact).
+- Chiffres vitrine, offres, textes légaux, blog, guides, FAQ : contenu éditorial versionné dans `apps/web` (MDX/TS),
+  rendu statiquement (D10), cohérent avec le jeu de démonstration unique (D2).
+- Référentiels (pays, liens de parenté, classes, objectifs, handicap, catégories) servis par l'API, jamais codés en
+  dur ; `PhoneInput` avec choix du pays, stockage E.164 (D3).
+- Erreurs d'API en français avec un `code` métier stable affiché par le formulaire (D4).
 
 ---
 
-## 5.1 Site public pré-login — `WL01`-`WL21` · `screens-public-web.jsx`
+# Lot 1 · Public
 
-### Chrome commun
+Pages accessibles sans connexion. Elles consomment l'API par un **client anonyme cachable** (sans lecture des
+cookies), pour rester statiques ou mises en cache. Mineurs sur les pages publiques : pseudonyme et avatar seulement,
+opt-in parental, modération a priori (D15, SPEC-TECHNIQUE §4.6).
 
-**`WLNavBar`** (sticky, `backdrop-filter: blur(8px)`) — présent sur toutes les pages via `PublicShell`, sauf `WL02`-`WL05` (reset MDP, qui utilisent `WebShell`).
+## 1.1 Chrome commun — `PublicShell`
 
-| Élément | Action | Cible |
+Présent sur toutes les pages du lot 1. (WL02-WL05 utilisent `WebShell`, voir lot 2.)
+
+**`WLNavBar`** (sticky, flou d'arrière-plan)
+
+| Élément | Cible |
+| --- | --- |
+| Logo | WL01 |
+| Accueil · Parcours · Boutique · Écoles | WL01 · WL06 · WL07 · WL11 |
+| Ressources ▾ (menu déroulant) | Blog WL17 · Événements WL21 · Guides WL20 |
+| À propos | WL10 |
+| « Se connecter » (ghost) | W16 |
+| « Créer un compte » (primary) | W03 |
+
+- L'onglet actif est surligné en `--primary-600` ; « Ressources » est actif sur WL17, WL18, WL20, WL21, WL23.
+- Utilisateur connecté : les deux boutons sont remplacés par l'accès à son espace (WD01, WPD01 ou WT01 selon le rôle).
+- **Ne pas porter** : l'onglet « Défis » (WL13 reporté, S7) ; les entrées « Ateliers » (WL08 fusionné, S8),
+  « Communauté » (WL19) et « Tutoriels » (WL15) du mega-menu ; l'interception `onWheel`/`stopPropagation` de
+  `PublicShell` et `WL01_Landing` (artefact du canvas).
+
+**`WLFooter`** — fond `--ink-900`, 4 colonnes, bandeau `© 2026 Steamy · Cotonou, Bénin` + icônes sociales
+(liens externes). Cibles (D17) :
+
+| Colonne | Lien | Cible |
 | --- | --- | --- |
-| Logo | **[D]** clic | `WL01` |
-| Accueil · Parcours · Boutique · Écoles · Défis | **[D]** clic | `WL01` · `WL06` · `WL07` · `WL11` · `WL13` |
-| **Ressources ▾** | **[I]** `useState(resOpen)` → mega-menu 2 colonnes, 6 entrées | Blog `WL17` · Ateliers `WL08` · Communauté `WL19` · Guides `WL20` · Événements `WL21` · Tutoriels `WL15` |
-| À propos | **[D]** clic | `WL10` |
-| « Se connecter » (ghost) | **[D]** | `W16` |
-| « Créer un compte » (primary) | **[D]** | `W03` |
+| Produit | Parcours · Boutique de kits · Steamy Events · Tarifs | WL06 · WL07 · WL21 · WL11 |
+| Aide | Centre d'aide · Nous contacter · Consentement parent | WL24 (FAQ) · WL24 (formulaire) · WL09, section consentement |
+| Légal | CGU · Mentions légales · Confidentialité | WL09, onglet correspondant |
 
-L'onglet actif est surligné en `--primary-600` ; `Ressources` est actif si la page courante appartient aux 6 IDs de ressources.
+**`WLJoinBanner`** — bandeau de conversion sur WL06, WL07, WL10, WL22. CTA « Créer un compte » → W03. Copie :
+« Chaque apprenant est rattaché à un parent qui valide en 1 min. Paiement Mobile Money, sans carte bancaire. »
 
-**`WLFooter`** — fond `--ink-900`, 4 colonnes : marque + tagline, Produit (Parcours, Boutique de kits, Steamy Events, Tarifs), Aide (Centre d'aide, Nous contacter, Consentement parent), Légal (CGU, Mentions légales, Confidentialité). Bandeau bas : `© 2026 Steamy · Cotonou, Bénin` + 3 icônes sociales (`assets/insta.svg`, `x.svg`, `linkedin.svg`, blanchies par filtre CSS). Tous les liens sont **[D]**.
+**Composant à créer** : variante DS `outline-inverse` (bouton outline sur fond coloré), au lieu du `style` inline de
+la maquette (CTA final de WL01).
 
-**`WLJoinBanner`** — bandeau de conversion réutilisé sur `WL06`, `WL07`, `WL08`, `WL10`, `WL13`. CTA « Créer un compte » **[D]** → `W03`. Copie porteuse de règle : « Chaque apprenant est rattaché à un parent qui valide en 1 min. Paiement Mobile Money, sans carte bancaire. »
-
-> **Note d'implémentation** : `PublicShell` et `WL01_Landing` interceptent `onWheel` (`e.stopPropagation()`) pour permettre le scroll interne dans l'artboard du canvas. **À supprimer au portage** — c'est un artefact du canvas, pas un comportement produit.
+**Données / API** : aucune (navigation statique).
 
 ---
 
-### WL01 · Accueil
-
-Page la plus longue du site (8 sections). Scroll vertical interne.
+## 1.2 WL01 · Accueil — v1
 
 | Section | Contenu | Actions |
 | --- | --- | --- |
-| Hero | Badge « 🚀 Plateforme STEM des 10–17 ans », H1 52px, sous-titre, `Mascot pose="cheer" size=300`, 4 particules décoratives | « Créer un compte gratuit » **[D]** → `W03` · « Comment ça marche » (outline + icône play) **[D]** → ancre section 4 |
-| Preuve sociale | 4 avatars empilés (`🦊🐼🦉🐯`) + « 1 000+ apprenants au Bénin & alentours » | **[S]** |
-| Stats | Bande `--ink-900` : 1 000+ Apprenants · 2 500 Certifications · 350 Parcours & cours · 20 Instructeurs | **[S]** |
-| Piliers | 4 `WLPillarCard` : Parcours guidés · Kits physiques · Badges & certif · Suivi parent | **[S]** |
-| Parcours populaires | 3 `CourseCard` (Robotique gratuit, Scratch gratuit, Capteurs 18 000 F) | Cartes **[D]** → `WL06`/détail · « Explorer tout le catalogue » **[D]** → `WL06` |
-| Comment ça marche | 3 `WLStep` numérotés : Crée ton compte / Explore le catalogue / Paie & commence | **[S]** |
-| Teaser boutique | Bandeau dégradé cyan, badge « 🛒 Boutique » | « Voir la boutique » (amber) **[D]** → `WL07` |
-| Espace parent | `Mascot pose="idle"` + argumentaire sécurité | « Créer un compte parent » (outline) **[D]** → `WP01` |
-| Devenir instructeur | Carte 🎓 | « Rejoindre l'équipe » **[D]** → formulaire non conçu |
-| CTA final | Bandeau dégradé primaire, `Mascot pose="wave"` | « Créer un compte gratuit » (amber) **[D]** → `W03` · « J'ai déjà un compte » **[D]** → `W16` |
+| Hero | Badge « Plateforme STEM des 10–17 ans », H1, sous-titre, `Mascot cheer`, particules | « Créer un compte gratuit » → W03 · « Comment ça marche » → **ancre** vers la section du même nom (D16) |
+| Preuve sociale | Avatars emoji empilés + chiffre d'apprenants | — |
+| Stats | Bande `--ink-900`, 4 chiffres | — |
+| Piliers | 4 `WLPillarCard` : Parcours guidés · Kits physiques · Badges & certif · Suivi parent | — |
+| Parcours populaires | 3 `CourseCard` (parcours mis en avant) | Carte → WL22 · « Explorer tout le catalogue » → WL06 |
+| Comment ça marche | 3 `WLStep` : Crée ton compte / Explore le catalogue / Paie & commence | Cible de l'ancre |
+| Teaser boutique | Bandeau cyan | « Voir la boutique » → WL07 |
+| Espace parent | `Mascot idle` + argumentaire sécurité | « Créer un compte parent » → WP01 |
+| Devenir instructeur | Carte recrutement | « Rejoindre l'équipe » → WL24, sujet « Rejoindre l'équipe » (voir points ouverts) |
+| CTA final | Bandeau primaire, `Mascot wave` | « Créer un compte gratuit » → W03 · « J'ai déjà un compte » (`outline-inverse`) → W16 |
 
-**Attention portage** : le bouton « J'ai déjà un compte » du CTA final surcharge `variant="outline"` par un `style` inline (fond translucide, bordure blanche) — cas d'usage à couvrir par une variante `outline-inverse` du DS plutôt qu'un override.
+**Ne pas porter** : chiffres codés en dur (« 1 000+ », « 2 500 », « 350 », « 20 ») — ils viennent du contenu
+éditorial (D2, D10) ; toute mention de « mode hors ligne » (D16).
 
----
-
-### WL02-WL05 · Réinitialisation du mot de passe
-
-Ces 4 écrans utilisent **`WebShell`** (split brand/form), pas `PublicShell`. Séquence stricte.
-
-| ID | Écran | Champs | Actions |
-| --- | --- | --- | --- |
-| `WL02` | Mot de passe oublié | `PhoneInput` (hint « Le numéro lié à ton compte Steamy ») | « Recevoir le code » **[D]** → `WL03` · « Se connecter » **[D]** → `W16` |
-| `WL03` | Code OTP | `OTPInput` 6 cases (valeur mock `0421`, `activeIndex=4`) | « Vérifier le code » **[D]** → `WL04` · compte à rebours `00:38` **[S]** · « Modifier le numéro » **[D]** → `WL02` |
-| `WL04` | Nouveau mot de passe | 2 × `PasswordInput` + 3 `PwReq` (≥ 8 car. ✓ · lettre+chiffre ✓ · différent de l'ancien ✗) | « Enregistrer le mot de passe » **[D]** → `WL05` |
-| `WL05` | Réinitialisé ✓ | Célébration : `WLConfetti`, `Mascot pose="cheer" hue=success`, bordure verte 3px | « Se connecter » **[D]** → `W16` |
-
-> **Incohérence** : le reset se fait par **téléphone** (`WL02`), or l'apprenant n'a pas de numéro propre dans le modèle « sous-compte parent ». Ce flux ne peut concerner que le **parent** (et l'enseignant). Le parcours de reset pour l'apprenant est celui décrit en `WD12` (« demande à ton parent de le réinitialiser depuis ton profil ») et `WPD03` — mais **aucun écran parent ne porte cette action**. Trou fonctionnel, voir §8.9.
+**Données / API** : `catalog` (parcours publiés mis en avant). Chiffres : contenu éditorial.
 
 ---
 
-### WL06-WL09 · Pages catalogue & légales
+## 1.3 WL06 · Projets & Parcours — v1
+
+H1 + baseline, bande de filtres `Tag` par catégorie (Tous + catégories du catalogue), grille de `CourseCard`,
+`WLJoinBanner`.
+
+- Filtres **contrôlés** et reflétés dans l'URL (partage, SEO) ; la catégorie peut venir de WL16.
+- Carte → WL22. Lien « Toutes les catégories » → WL16.
+- **Ne pas porter** : les 4 catégories codées en dur (WL16 en affiche 6) : la liste vient de l'API.
+
+**Données / API** : `catalog` (parcours publiés, filtrables par catégorie ; catégories).
+
+## 1.4 WL07 · Boutique de kits — v1
+
+Même structure que WL06 : filtres par catégorie de kit, grille de `WKKitCard`, `WLJoinBanner`.
+
+- **Checkout invité** (D12) : « Ajouter » ajoute au panier sans connexion ; la carte ouvre le détail WK02 ; le tunnel
+  WK02-WK07 est accessible hors connexion (WK04 « Informations invité »).
+- Une fois connecté, le panier passe côté serveur (D38).
+- **Ne pas porter** : le renvoi vers « créer un compte » sur « Ajouter » ; `KIT_CATALOG` codé en dur.
+
+**Données / API** : `shop` (kits publiés, catégories de kits, panier invité).
+
+## 1.5 WL08 · Ateliers — fusionné dans WL21 (S8)
+
+Pas de route propre. Les entrées du menu et du footer pointent vers WL21.
+**Ne pas porter** : les 3 cartes de WL08, dont les données divergent de WL21.
+
+## 1.6 WL09 · Pages légales — v1
+
+Onglets `tabs-pill` : CGU · Mentions légales · Confidentialité, chacun adressable par URL (liens du footer, de W02 et
+de W04). Blocs titre/paragraphe, « Dernière mise à jour » lue dans le contenu.
+
+- **Section « Consentement parental »** (cible du footer, D17) : qui valide (toujours un parent ou tuteur, à tout âge),
+  ce que voit le parent (D20), durée de validité d'une demande (7 jours, D21), effet d'un refus (D22).
+- **Corrections de contenu** :
+  - CGU § Compte & âge : « Le compte d'un apprenant (10 à 17 ans) est toujours validé par un parent ou tuteur légal »
+    (S3, D23).
+  - Confidentialité § Données collectées : l'apprenant n'a **pas de numéro de téléphone** ; distinguer les données
+    de l'apprenant (prénom, nom, identifiant, date de naissance, localité, classe ; genre et handicap facultatifs,
+    avec leur finalité, D6) et celles du parent (téléphone, email facultatif).
+  - Confidentialité § Mineurs : données sous le contrôle du parent référent, à tout âge ; règles d'affichage public
+    (D15) ; aucun marketing vers les mineurs (D6).
+  - Droits : la suppression du compte d'un apprenant est validée par son parent (D40).
+- Texte juridique de départ, **à faire valider juridiquement** (D6).
+
+**Ne pas porter** : « moins de 16 ans » (deux occurrences), « numéro » dans les données de l'apprenant.
+
+**Données / API** : aucune (contenu éditorial).
+
+## 1.7 WL10 · À propos — v1
+
+Hero mission, bande de chiffres, 3 valeurs (`WLPillarCard`), équipe (`Avatar` + rôle), `WLJoinBanner`. Page
+statique. **Ne pas porter** : chiffres codés en dur (contenu éditorial, D2).
+**Données / API** : aucune.
+
+## 1.8 WL11 · Écoles (B2B) — v1
+
+Hero + `Mascot focus`, 3 offres (Classe · École, carte `featured` · Réseau sur devis), « Pensé pour les formateurs »,
+**formulaire de devis**.
+
+- **Tous les CTA mènent au formulaire de devis** (D13) : « Choisir » fait défiler jusqu'au formulaire avec l'offre
+  présélectionnée.
+- Formulaire (vouvoiement) : Établissement*, Personne à contacter*, Email*, Téléphone* (`PhoneInput`), offre,
+  message facultatif → « Envoyer la demande » : confirmation en place ; l'équipe est notifiée par email (D13).
+- Offres, prix et quotas : contenu éditorial ; les quotas sont contrôlés par le serveur (D61).
+- **Ne pas porter** : « tableau de bord établissement » (pas en v1, D61) et « API & intégrations » dans les offres.
+
+**Données / API** : `public` (demande de devis `QuoteRequest`), `referentials` (pays du `PhoneInput`).
+
+## 1.9 WL12-WL15, WL19 · Communauté — Reporté (S7)
+
+| ID | Écran |
+| --- | --- |
+| WL12 | Profil public d'instructeur (« Suivre ») |
+| WL13 | Défis |
+| WL14 | Classements |
+| WL15 | Tutoriels partagés |
+| WL19 | Communauté (forum) |
+
+Hors v1 : ni modèle, ni API, ni écran de création. Aucun lien entrant en v1 (menu, footer, cartes). Une éventuelle
+version vitrine statique sans action respecterait D15.
+
+## 1.10 WL16 · Catégories — v1
+
+Cartes catégorie (bandeau couleur, emoji, nombre de parcours publiés, flèche). Carte → WL06 filtré sur la catégorie.
+Entrée : lien depuis WL06 (« Toutes les catégories »).
+**Données / API** : `catalog` (catégories avec compteur de parcours publiés).
+
+## 1.11 WL17 · Blog et WL18 · Article — v1
+
+- **WL17** : article à la une (visuel, catégorie, titre, chapô, auteur · date · temps de lecture) + articles
+  secondaires. Carte → WL18. Les catégories sont des libellés ; pagination dès que la liste dépasse une page.
+- **WL18** : conteneur de lecture 760px, fil d'Ariane Blog › Catégorie › Titre, ligne d'auteur, visuel, corps
+  (H2 + paragraphes, 16px / `line-height 1.7`), pied « Partager : » (`WLSocial light`, liens de partage).
+- Articles en MDX dans `apps/web` (D10). Un article ne montre un mineur que selon D15.
+
+**Données / API** : aucune (contenu éditorial).
+
+## 1.12 WL20 · Guides gratuits — v1
+
+Grille de guides PDF (couverture, titre, « PDF · n pages ») + encart sticky d'inscription.
+
+- « Télécharger » : **téléchargement libre**, sans email (D14).
+- Encart newsletter **facultatif** : Email* + case de consentement explicite non cochée → « Recevoir les guides » ;
+  mention « Zéro spam. Désinscription en 1 clic. » (D14).
+- Pas de marketing vers les mineurs (D6) : l'encart s'adresse aux parents et enseignants, au vouvoiement.
+- **Ne pas porter** : le libellé « Ton email ».
+
+**Données / API** : `public` (inscription newsletter / lead). PDF : fichiers statiques.
+
+## 1.13 WL21 · Événements — v1
+
+Calendrier des Steamy Events (S8), liste verticale : pastille date 64×64 couleur de catégorie, titre,
+« lieu · créneau », `Badge` prix (vert si gratuit), « Voir l'événement ». Pas de `WLJoinBanner`.
+
+- Remplace WL08 (S8). Les événements peuvent être **payants** : le prix affiché est celui du serveur.
+- Entrée → **WL23**. L'inscription se fait depuis WL23, jamais directement depuis la liste.
+- **Ne pas porter** : « Inscris-toi en quelques secondes » (la participation exige l'accord du parent).
+
+**Données / API** : `events` (événements publiés à venir).
+
+## 1.14 WL22 · Fiche parcours publique — À concevoir (D11)
+
+**Objectif** : page indexable d'un parcours, cible des cartes publiques (WL01, WL06), sans exposer le contenu des
+missions.
+**Arrivée** : cartes de WL01 et WL06, liens partagés, moteurs de recherche.
+**Contenu** (variante de WC04 dans `PublicShell`) : visuel, catégorie, difficulté, titre, description, prix ou
+« Gratuit », durée indicative, kit requis le cas échéant, plan du parcours (projets, niveaux et **titres** des missions
+uniquement), certification délivrée, `WLJoinBanner`.
+**Actions** :
+- Visiteur : « Commencer » / « Demander à mon parent » → W03 (retour sur la fiche après connexion) ; « Se connecter »
+  → W16.
+- Connecté : redirection vers WC04.
+- Parcours exigeant un kit (D36) : « Voir le kit » → WK02 ; mention « s'obtient avec le Kit Code fourni avec le
+  kit ».
+
+**Données / API** : `catalog` (détail public d'un parcours, sans contenu des missions).
+
+## 1.15 WL23 · Fiche événement — À concevoir (S8, §8.11)
+
+**Objectif** : détail d'un Steamy Event, public, réutilisé dans les espaces connectés (WD10, WPD06).
+**Arrivée** : WL21, notifications, liens partagés.
+**Contenu** : date et créneau, lieu ou « En ligne », catégorie, description, public visé (âges), places restantes,
+prix ou « Gratuit », rappel « Participation soumise à l'accord du parent ».
+**Actions** :
+- Visiteur : « Participer » → W16 (puis retour sur la fiche) ou W03.
+- Apprenant connecté : « Demander à participer » → candidature WD11 ; accord du parent puis, si payant, paiement par
+  le parent (S8, D41, D53).
+- Parent connecté : « Inscrire mon enfant » → WPD12 (paiement inclus si payant, D53).
+- Complet ou passé : CTA désactivé avec motif.
+
+**Données / API** : `events` (détail d'un événement publié, places restantes).
+
+## 1.16 WL24 · Aide & contact — À concevoir (D17)
+
+**Objectif** : centre d'aide public et point de contact unique.
+**Arrivée** : footer (Centre d'aide, Nous contacter), « Besoin d'aide ? Nous contacter » de `WebShell`, W18,
+« Rejoindre l'équipe » (WL01), mot de passe oublié de l'apprenant (W16).
+**Contenu** :
+- **FAQ statique** (D10, D41) par thème : compte et consentement, paiement Mobile Money, kits et livraison,
+  événements, mot de passe oublié (apprenant → son parent ; parent → WL02).
+- **Formulaire de contact** (vouvoiement) : Nom*, Email ou téléphone*, Sujet* (liste : question, paiement,
+  livraison, changement de parent, rejoindre l'équipe, autre), Message* → « Envoyer » : confirmation en place.
+**Actions** : ancres FAQ / formulaire adressables par URL ; sujet présélectionnable par paramètre.
+
+**Données / API** : `public` (message de contact). FAQ : contenu éditorial.
+
+## 1.17 Enveloppes transverses WX01-WX03
+
+Décrites avec les états transverses (SPEC-TECHNIQUE §6). « Mode hors ligne » (WX01) est **retiré en v1** (D16).
+
+---
+
+# Lot 2 · Authentification
+
+Connexion, inscription de l'apprenant avec consentement parental, inscription du parent, mot de passe oublié.
+Le compte enseignant est créé **sur invitation**, jamais par inscription libre (S5) ; l'admin se connecte à part
+(WAD15, S4).
+
+## 2.1 Règles du lot
+
+| Sujet | Règle |
+| --- | --- |
+| Identifiants (S4) | Apprenant : identifiant + mot de passe. Parent : téléphone + OTP SMS à l'inscription, puis téléphone + mot de passe. Enseignant : email + mot de passe. Admin : WAD15 |
+| Âge (D23) | 10 à 17 ans, contrôlé par le serveur ; cohérence âge (W05) / date de naissance (W11) vérifiée |
+| OTP (D24) | 6 chiffres, valable 5 min, 3 essais, renvoi après 60 s, plafond quotidien par numéro et par IP |
+| Mot de passe (D25) | 8 caractères minimum, au moins une lettre et un chiffre, validé côté serveur. `PwReq` partout identiques : « Au moins 8 caractères » · « Au moins une lettre et un chiffre » |
+| Demande en attente (D21) | Compte inactif + session « inscription en cours » + **code de reprise** affiché ; expiration au bout de 7 jours |
+| Refus (D22) | Clôt la demande ; nouvelle demande au même parent possible après 30 jours ; changement de parent par modération admin ; compte en attente purgé, identifiant libéré |
+| Ce que voit le parent (D20) | Prénom, nom, identifiant, âge, lien de parenté |
+| SMS (S10) | Fournisseur derrière une interface abstraite, envoi asynchrone (Celery) ; faux fournisseur en local et en CI |
+| Session | Session Django + CSRF, pas de token (S12) ; throttling sur connexion, inscription, OTP et reset (D1) |
+
+**Composants** : `PwReq`, `UserTypeCard`, `ChoiceCard`, `GoalChip` sont définis dans le fichier mobile hors
+périmètre : à promouvoir dans le design system. Utilisés aussi : `PhoneInput`, `OTPInput`, `PasswordInput`, `Field`,
+`Checkbox`.
+
+## 2.2 Shell `WebShell`
+
+Split 480px / reste.
+- **Panneau marque** (gauche) : dégradé `accent → accent2` (par défaut `--primary-500` → `--primary-700`), `Logo white`,
+  décor, slot `brand`, pied « La plateforme robotique & STEM des jeunes d'Afrique francophone. »
+- **Panneau formulaire** (droite) : topbar 64px avec barre de progression (`step`/`total`) et « Besoin d'aide ?
+  **Nous contacter** » → WL24 ; contenu centré `max-width: 460px` (kicker, H1, sous-titre, enfants, slot `cta`).
+
+Props : `kicker`, `title`, `sub`, `step`, `total`, `children`, `cta`, `brand`, `accent`, `accent2`.
+Hors `WebShell` : W01, W07, W14, W15 (mises en page plein écran).
+
+## 2.3 WL02-WL05 · Mot de passe oublié — v1 (D26)
+
+Réservé au **parent** (et à l'enseignant), au **vouvoiement**. L'apprenant n'a pas de canal : son parent réinitialise
+son mot de passe depuis WPD03 (§8.9). Séquence stricte dans `WebShell`.
 
 | ID | Écran | Contenu | Actions |
 | --- | --- | --- | --- |
-| `WL06` | Projets & Parcours | H1 + baseline, `filter-strip` 5 `Tag` (Tous, Robotique, Programmation, Électronique, IA), grille 3 col × 6 `CourseCard` | Tags **[D]** (non contrôlés ici, contrairement à `WD07`) · cartes **[D]** → détail · `WLJoinBanner` |
-| `WL07` | Boutique de kits | Même structure, 5 `Tag` (Tous, Robotique, Électronique, Capteurs/IA, Énergie), grille des 6 `WKKitCard` issus de `KIT_CATALOG` | Tags **[D]** · « Ajouter » sur chaque kit **[D]** → invite à créer un compte · `WLJoinBanner` |
-| `WL08` | Ateliers | 3 cartes événement (Challenge Robot Sumo · Atelier Électronique · Hackathon IA Junior) avec bandeau coloré, date, lieu, description, `Badge` prix | « S'inscrire » par carte **[D]** → `W03` si non connecté · `WLJoinBanner` |
-| `WL09` | Pages légales | **[I]** `useState(tab)` → 3 onglets `tabs-pill` : CGU · Mentions légales · Confidentialité. Contenu structuré en blocs titre/paragraphe | Onglets **[I]** · « Dernière mise à jour : mai 2026 » **[S]** |
+| WL02 | Mot de passe oublié | `PhoneInput` (« Le numéro lié à votre compte Steamy ») | « Recevoir le code » → WL03 · « Se connecter » → W16 |
+| WL03 | Code | `OTPInput` 6 cases, compte à rebours de renvoi (60 s), erreurs inline (code invalide, expiré, essais épuisés) | « Vérifier le code » → WL04 · « Renvoyer le code » · « Modifier le numéro » → WL02 |
+| WL04 | Nouveau mot de passe | 2 × `PasswordInput` + `PwReq` (D25) | « Enregistrer le mot de passe » → WL05 |
+| WL05 | Mot de passe réinitialisé | Célébration (`WLConfetti`, `Mascot cheer` succès, bordure verte) | « Se connecter » → W16 |
 
-**`WL09` — contenu réel présent** (contrairement à ce qu'indique `HANDOFF.md` §6 qui le donne pour « gabarit sans contenu ») :
-- **CGU** : 1. Objet · 2. Compte & âge (consentement < 16 ans) · 3. Paiements (Mobile Money exclusif, aucune donnée bancaire) · 4. Contenus (propriété Steamy / Tech It All Engineering & Services).
-- **Mentions** : Éditeur (Tech It All Engineering & Services, Cotonou) · Hébergement · Contact `contact@steamy.bj`.
-- **Confidentialité** : Données collectées · Mineurs (contrôle du parent référent) · Aucun marketing tiers · Droit à la suppression.
+- WL02 répond de la même façon que le numéro existe ou non (pas d'énumération de comptes).
+- Les sessions ouvertes sont fermées après réinitialisation.
+- **Ne pas porter** : le tutoiement (« Indique ton numéro… », « ton compte ») ; le code mock à 4 chiffres et
+  `activeIndex` ; le compte à rebours figé ; la règle « Différent de l'ancien » (hors D25).
 
-C'est un **contenu juridique de départ à faire valider**, pas un lorem ipsum.
+**Données / API** : `auth` (demande de code, vérification, nouveau mot de passe), `referentials` (pays).
 
----
-
-### WL10-WL16 · Marque, B2B, communauté
-
-| ID | Écran | Contenu & actions |
-| --- | --- | --- |
-| `WL10` | À propos | Hero mission (H1 46px), bande stats `--ink-900` (2024 Création · 1 000+ Apprenants · 12 Villes · 350 Parcours), 3 valeurs (`WLPillarCard`), 4 membres d'équipe (`Avatar` + rôle), `WLJoinBanner`. Tout **[S]** |
-| `WL11` | Écoles (B2B) | Hero dégradé primaire + `Mascot focus`. **3 offres** : Classe 50 000 F/mois (≤ 30 élèves) · **École 180 000 F/mois** (≤ 5 classes, tableau de bord établissement, kits préférentiels, formation formateurs — carte `featured`, badge « Le plus choisi ») · Réseau sur devis (illimité, multi-établissements, accompagnement, **API & intégrations**). Boutons « Choisir » **[D]**. Section « Pensé pour les formateurs » (4 arguments). **Formulaire de devis** : Établissement*, Personne à contacter*, Email*, Téléphone* → « Envoyer la demande » **[D]** |
-| `WL12` | Profil public | Colonne gauche : `Avatar` 104, nom, rôle instructeur, 3 stats (18 Parcours · 1.2k Apprenants · 4.9★), « Suivre » **[D]**, « Voir ses parcours » **[D]**. Colonne droite : À propos, 4 `Medal` (3 débloquées + 1 `locked`), 3 `CourseCard` créés |
-| `WL13` | Défis | 4 challenges en grille 2×2, layout horizontal (bandeau coloré 120px + contenu). Chaque carte : titre, `Badge` récompense (🏆), `Badge` niveau, « ⏳ Clôture le … · 👥 n participants », bouton « Participer » **[D]**. `WLJoinBanner` |
-| `WL14` | Classements | **[I]** `useState(tab)` : « Cette semaine » / « Tous les temps » (⚠️ ne change pas les données). **Podium** 3 places (hauteurs 150/116/96, or pour le 1er) + liste des rangs 4-7 avec `Avatar`, `Badge` 🏅 badges, points |
-| `WL15` | Tutoriels partagés | `active="tutos"`. H1 + « Des mini-tutos créés par la communauté Steamy. **Apprends une astuce, puis partage les tiennes.** ». Grille 3 col de **6 tutoriels** : vignette 120px couleur de catégorie + emoji 48px, **bouton play rond 40px en incrustation bas-droite** (fond blanc translucide, icône `play` primaire) **[D]** → lecture, titre 2 lignes, pied « Par <auteur> · <durée> » et « ❤ <likes> ». `WLJoinBanner`. ⚠️ Aucun écran de **création/soumission** de tutoriel n'existe alors que la baseline y invite (§8.11) |
-| `WL16` | Catégories | 6 cartes catégorie (Robotique 42 · Électronique 28 · Programmation 36 · IA 18 · Mécanique 15 · Énergie 12), bandeau couleur 120px + emoji 56px, compteur de parcours, `Icon arrow-right`. Cartes **[D]** → `WL06` filtré |
-
----
-
-### WL17-WL21 · Ressources
-
-| ID | Écran | Contenu & actions |
-| --- | --- | --- |
-| `WL17` | Blog (liste) | `active="blog"`. H1 « Le blog Steamy » + « Conseils, retours d'expérience et actus du STEM en Afrique francophone. ». **Layout éditorial 1.3fr/1fr** : à gauche l'article **à la une** (visuel 260px dégradé robotique, `Badge` « À la une · Robotique », H2 24px, chapô, « Par Koffi A. · 28 mai 2026 · **6 min de lecture** ») ; à droite 3 cartes secondaires en colonne (vignette 72px couleur, catégorie en primaire, titre, date). Toutes **[D]** → `WL18`. ⚠️ **Ni pagination, ni filtre par catégorie** alors que 4 catégories sont affichées (Robotique, Parents, Communauté, Code) |
-| `WL18` | Article | `active="blog"`. Conteneur **760px** (largeur de lecture, plus étroit que le `WL_WRAP` 1120px des autres pages). Fil « Blog › Robotique › **Débuter en robotique à 12 ans** ». `Badge` catégorie, H1 38px, **ligne d'auteur** (`Avatar 🦉 40` + « Koffi Adékambi · 28 mai 2026 · 6 min de lecture »), visuel 280px. **Corps = 3 blocs H2 + paragraphe** (« Pas besoin d'un labo » · « Construire d'abord, comprendre ensuite » · « Trois projets pour démarrer ») — corps en 16px / `line-height 1.7`, `font-weight 500` (seul endroit du dépôt où le corps de texte descend sous 600). **Pied de partage** : séparateur + « Partager : » + `WLSocial light` (icônes sombres, 20px) **[D]**. ⚠️ Pas d'articles liés, pas de commentaires, pas de CTA de conversion |
-| `WL19` | Communauté | Hero centré (`Badge` 💬, H1 40px) + 3 stats (3 200 Membres · 1 450 Projets partagés · 8 900 Discussions). Colonne principale : `SectionHeader` « Discussions récentes » + « Tout voir » **[D]**, 3 fils (emoji, titre, « Par X · tag catégorie », `Badge` 💬 réponses). Colonne latérale : carte `Mascot wave` + « Créer un compte » **[D]** |
-| `WL20` | Guides gratuits | **Capture de lead.** Grille 3 guides PDF (couverture couleur 140px, titre, « PDF · n pages », bouton « Télécharger » **[D]**). Encart **sticky** (`top: 80`) : « Reçois tous les guides » + `Field` email* + « Recevoir les guides » **[D]** + mention « Zéro spam. Désinscription en 1 clic. » |
-| `WL21` | Événements / calendrier | `active="evenements"`. H1 « Événements & ateliers » + « Le calendrier des prochains rendez-vous Steamy. **Inscris-toi en quelques secondes.** ». **Liste calendaire verticale** (4 entrées, pas une grille) : **pastille date 64×64** couleur de catégorie (jour 24px + mois abrégé 11px : `14 JUIN`, `28 JUIN`, `12 JUIL`, `26 JUIL`), titre 16px, « 📍 <lieu> · 🕒 <créneau> » (`Cotonou · Espace TIA` 09:00–17:00 · `Porto-Novo` 14:00–16:30 · `En ligne` **48 h** · `En ligne` 15:00–17:00), `Badge` prix (vert si Gratuit), bouton **« S'inscrire »** (taille `md`, pas `sm`) **[D]**. **Pas de `WLJoinBanner`** ici — seule page ressource sans bandeau de conversion |
-
----
-
-## 5.2 Auth apprenant · web — `W01`-`W19` · `screens-auth-web.jsx`
-
-### Shell `WebShell`
-
-Split 480px / reste.
-
-- **Panneau marque** (gauche) : dégradé `accent → accent2` (par défaut `--primary-500` → `--primary-700`), `Logo white`, 2 cercles décoratifs + 4 particules, slot `brand` centré, pied « La plateforme robotique & STEM des jeunes d'Afrique francophone. »
-- **Panneau formulaire** (droite) : topbar 64px avec **barre de progression** (`step`/`total` en segments) à gauche et « Besoin d'aide ? **Nous contacter** » **[D]** à droite ; contenu centré `max-width: 460px` (kicker, H1 36px, sous-titre, slot enfants, slot `cta`).
-
-Props : `kicker`, `title`, `sub`, `step`, `total`, `children`, `cta`, `brand`, `accent`, `accent2`.
-
-### Parcours nominal
+## 2.4 Parcours d'inscription de l'apprenant
 
 ```
 W01 → W02 → W03 ─(apprenant)→ W04 → W05 → W06 → W07 ─┬→ W08 → W10 → W11 → W12 → W13 → W14 → W15
@@ -132,121 +333,170 @@ W01 → W02 → W03 ─(apprenant)→ W04 → W05 → W06 → W07 ─┬→ W08 
       W03 ─(parent)→ WP01
 ```
 
-| ID | Écran | Éléments & actions | Détails |
+Numérotation des étapes affichée (kicker et barre de progression) :
+
+| Écran | Kicker | Barre |
+| --- | --- | --- |
+| W03 | « Créer un compte » | — |
+| W04 · W05 · W06 | « Inscription · étape 1/4 » · « 2/4 » · « 3/4 · Consentement parental » | 1 à 3 / 4 |
+| W07 · W08 | — (attente / résultat) | — |
+| W10 | « Inscription · étape 4/4 » | 4 / 4 |
+| W11 · W12 · W13 · W14 | « Profil 1/4 » · « 2/4 » · « 3/4 » · « 4/4 » | 1 à 4 / 4 |
+
+## 2.5 W01-W08 · Inscription et consentement — v1
+
+| ID | Écran | Contenu | Actions |
 | --- | --- | --- | --- |
-| `W01` | Splash | Plein écran dégradé primaire, 6 particules, `Mascot wave 200`, `Logo white 100`, « Apprends · Construis · Joue », `Loader` | **[S]** — transition auto vers `W02` |
-| `W02` | Accueil | Grille 2×2 de 4 arguments (🤖 Parcours guidés · 📦 Kits physiques · 🏆 Challenges · 👨‍👩‍👧 Suivi parent) | « Créer un compte gratuit » **[D]** → `W03` · « J'ai déjà un compte » **[D]** → `W16` · liens conditions/confidentialité **[D]** → `WL09`. Brand : `Mascot cheer 260` + pastille « Plus de 12 000 jeunes inscrits » ⚠️ (incohérent avec « 1 000+ » de `WL01`, voir §8.8) |
-| `W03` | Type d'utilisateur | 2 `UserTypeCard` : « Un·e apprenant·e » (🚀, sélectionnée) / « Un parent » (👨‍👩‍👧, `--cat-ia`) | Cartes **[D]** exclusives · « Continuer » **[D]** → `W04` ou `WP01` |
-| `W04` | Identité & identifiant | `Field` Prénom* + Nom* (grille 2 col), `Field` Identifiant* (hint « C'est ce que tu utiliseras pour te connecter »), `Checkbox` politique de confidentialité (coché) | « Continuer » **[D]** → `W05` · « Connecte-toi » **[D]** → `W16`. Kicker « Étape 1/4 » |
-| `W05` | Âge | **Stepper visuel** : bouton `−` (outline) / cadran 180×180 bordure primaire affichant `13` + « ans » / bouton `+` (primary). Encart ambre : « On va demander l'accord d'un parent à l'étape suivante » | Steppers **[D]** · « Continuer » **[D]** → `W06`. ⚠️ Bornes min/max non spécifiées (produit 10-17 ans) |
-| `W06` | Numéro du parent | `PhoneInput`* (hint « Maman, papa, tutrice, oncle… une personne adulte qui s'occupe de toi »), `<select>` Lien de parenté (Mère / Père / Tuteur·rice / Autre). **Accent différent** : `--cat-ia` → `#7B23DA` | « Envoyer la demande au parent » **[D]** → `W07`. Kicker « Étape 2/4 · Consentement parental » |
-| `W07` | Attente consentement | **Hors `WebShell`** : carte centrée 540px, `Mascot sleep 160` dans un cercle `--primary-50`, H1 « On attend l'accord de ton parent… », numéro rappelé en gras, pastille `Loader` + « En attente… » | « Renvoyer la demande » (ghost) **[D]**. Comportement attendu : **polling** ou push jusqu'à résolution |
-| `W08` | Accord reçu | Célébration : 7 confettis, carte bordure `--success-500` 3px, `Mascot cheer hue=success 190`, « Super, c'est validé ! », « **Marie** a accepté ton inscription » | « Continuer » (secondary) **[D]** → `W10` |
-| ~~`W09`~~ | ~~OTP enfant~~ | **CODE MORT** — `screens-auth-web.jsx:959`, aucun artboard ne le rend | **Ne pas implémenter.** Vestige du modèle pré-refonte (numéro propre à l'apprenant) |
-| `W10` | Mot de passe | 2 × `PasswordInput`*, encadré 3 `PwReq` (≥ 8 caractères ✓ · une majuscule ou un chiffre ✓ · pas trop évident ✗) | « Valider mon mot de passe » **[D]** → `W11`. Brand : les 4 règles en clair |
-| `W11` | Profil 1 · infos | `step=1 total=4`. Date de naissance*, Pays de résidence* (`<select>` Bénin/Togo/Côte d'Ivoire/Burkina Faso + 🇧🇯), Localité (ville/quartier)*, Email (optionnel, hint « pour la facture et les news ») | « Suivant » **[D]** → `W12` |
-| `W12` | Profil 2 · école | `step=2`. Niveau d'études/classe* (`<select>` 5ème/6ème/4ème ⚠️ ordre incohérent), **Genre*** : 3 `ChoiceCard` (👧 Fille sélectionnée / 👦 Garçon / 🌟 Autre), Situation de handicap (`<select>` Aucune/Visuel/Auditif/Moteur/Autre, hint « On adapte les parcours en fonction si besoin ») | « Suivant » **[D]** → `W13`. ⚠️ **Ces deux champs alimentent les KPI d'inclusion de `WAD02`** — voir §8.3 |
-| `W13` | Objectifs | `step=3`. 10 `GoalChip` (Construire des robots ✓, Apprendre à coder ✓, Découvrir l'IA, Comprendre l'électronique ✓, Créer un jeu, Concourir aux challenges, Bricoler chez moi, Domotique, Aller plus loin que l'école ✓, Créativité numérique). Contrainte affichée : **« Sélectionne au moins 2 objectifs »** | Chips **[D]** multi-sélection · CTA dynamique « Suivant · 4 sélectionnés » **[D]** → `W14` |
-| `W14` | Avatar | **Hors `WebShell`** : topbar avec 4/4 segments pleins, grille 5×2 de 10 avatars 120×120 (🦊🐼🐸🐯🐙🦉🐲🐝🦄🐢), chacun sur une couleur de catégorie. Le 6ᵉ (🦉) est sélectionné : double anneau ambre + pastille ✓ | Avatars **[D]** exclusifs · « Terminer mon profil 🚀 » (secondary) **[D]** → `W15` |
-| `W15` | Bienvenue | Célébration plein écran : 7 confettis, `Avatar emoji="🦉" size=200 ring`, H1 56px « Bienvenue, **Léa** ! 🎉 », **carte cadeau** ambre « Cadeau de bienvenue · 1 parcours gratuit débloqué ! » | « Découvrir le catalogue » **[D]** → `WC01` · « Aller sur mon dashboard » (outline) **[D]** → `WD02` |
-| `W16` | Connexion | `Field` Identifiant*, `PasswordInput`* | « Se connecter » **[D]** → `WD01` · « Mot de passe oublié ? » **[D]** → `WL02` · « Inscris-toi » **[D]** → `W03`. Brand : « 👀 Tu as 3 missions en attente. » ⚠️ Donnée personnalisée affichée **avant** authentification |
-| ~~`W17`~~ | ~~OTP invalide~~ | **CODE MORT** — `screens-auth-web.jsx:1722` | **Ne pas implémenter** |
-| `W18` | Consentement refusé | **Terminal.** `Mascot sad 160` sur `--error-50`, « Inscription non validée », « **Marie** n'a pas accepté ton inscription pour le moment », **encart motif** : « Motif indiqué : "On en reparle à la maison d'abord." » | « Changer de parent » (outline) **[D]** · « Réessayer plus tard » **[D]**. ⚠️ **Contredit l'invariant « refus terminal, pas de contournement »** — voir §8.4 |
-| `W19` | Identifiant déjà utilisé | Reprise de `W04` avec `Field` en erreur : « Cet identifiant est déjà associé à un compte Steamy. », `Input error` | « Se connecter » **[D]** → `W16` · « Réessayer l'inscription » **[D]** → `W04` |
+| W01 | Splash | Plein écran dégradé primaire, `Mascot wave`, `Logo white`, « Apprends · Construis · Joue », `Loader` | Transition automatique vers W02 |
+| W02 | Accueil | 4 arguments (Parcours guidés · Kits physiques · Challenges · Suivi parent). Brand : `Mascot cheer` + chiffre vitrine (contenu éditorial) | « Créer un compte gratuit » → W03 · « J'ai déjà un compte » → W16 · liens CGU / confidentialité → WL09 |
+| W03 | Type d'utilisateur | 2 `UserTypeCard` exclusives : « Un·e apprenant·e » / « Un parent » (pas d'enseignant, S5) | « Continuer » → W04 ou WP01 |
+| W04 | Identité & identifiant | Prénom*, Nom*, Identifiant* (« C'est ce que tu utiliseras pour te connecter »), `Checkbox` CGU + confidentialité (non cochée) | « Continuer » → W05, ou W19 si l'identifiant est pris · « Connecte-toi » → W16 |
+| W05 | Âge | Stepper `−` / cadran / `+`, borné de 10 à 17 (D23). Sous-titre : « Un parent validera toujours ton inscription » | « Continuer » → W06 |
+| W06 | Numéro du parent | `PhoneInput`* avec pays (« Maman, papa, tutrice, oncle… une personne adulte qui s'occupe de toi »), Lien de parenté* (référentiel). Accent `--cat-ia` | « Envoyer la demande au parent » → W07 : le serveur crée le compte inactif et envoie le SMS |
+| W07 | Attente du consentement | Carte centrée, `Mascot sleep`, « On attend l'accord de ton parent… », numéro rappelé, `Loader` « En attente… ». **Code de reprise** affiché en grand avec « Note-le : il te permet de reprendre ton inscription » et la date d'expiration (7 jours, D21) | Mise à jour automatique (polling) → W08 ou W18 · « Renvoyer la demande » (soumis aux plafonds SMS) |
+| W08 | Accord reçu | Célébration, « Super, c'est validé ! », « **{Prénom du parent}** a accepté ton inscription » | « Continuer » → W10 |
+
+**Reprise d'inscription** (D21) : état de W07 « Reprendre mon inscription » (Identifiant + Code de reprise),
+accessible depuis W16 et W02 ; il rouvre la session « inscription en cours » et affiche W07, W08 ou W18 selon l'état
+de la demande. Absent de la maquette (voir points ouverts).
+
+**Ne pas porter** :
+- W02 : « Plus de 12 000 jeunes inscrits ».
+- W03 : kicker « Étape 1 ».
+- W04 et W05 : le double kicker « Étape 1/4 ».
+- W04 : case de politique pré-cochée.
+- W05 : stepper sans bornes.
+
+**Données / API** :
+- `auth` : session, CSRF.
+- `accounts` : disponibilité de l'identifiant (`USERNAME_TAKEN`), création de l'inscription en attente avec demande
+  de consentement, état de la demande, renvoi, reprise par code.
+- `referentials` : pays, liens de parenté.
+
+## 2.6 W10-W15 · Mot de passe et profil — v1
+
+| ID | Écran | Contenu | Actions |
+| --- | --- | --- | --- |
+| W10 | Mot de passe | 2 × `PasswordInput`* + `PwReq` (D25). Brand : les mêmes règles | « Valider mon mot de passe » → W11 : le compte devient actif |
+| W11 | Profil 1 · infos | Date de naissance* (cohérente avec l'âge de W05, D23), Pays de résidence*, Localité (ville/quartier)*, Email (facultatif, « pour la facture et les news ») | « Suivant » → W12 |
+| W12 | Profil 2 · école | Classe* (référentiel, ordre scolaire), Genre (3 `ChoiceCard`, **facultatif**), Situation de handicap (facultatif) avec mention de la finalité (D6) | « Suivant » → W13 |
+| W13 | Objectifs | `GoalChip` multi-sélection (référentiel), **au moins 2** | CTA « Suivant · n sélectionnés » → W14 (désactivé sous 2) |
+| W14 | Avatar | Plein écran, barre 4/4, grille de 10 avatars, sélection exclusive (double anneau ambre + ✓) | « Terminer mon profil 🚀 » → W15 |
+| W15 | Bienvenue | Célébration, `Avatar` choisi, « Bienvenue, **{prénom}** ! ». Carte : « Commence par un parcours gratuit » (D27) | « Voir les parcours gratuits » → WC01 filtré sur les parcours gratuits · « Aller sur mon tableau de bord » → WD02 (accueil nouvel utilisateur) |
+
+- Genre, handicap, date de naissance et localité alimentent les KPI d'inclusion (D75).
+- **Ne pas porter** :
+  - W10 : règles « une majuscule ou un chiffre » et « pas trop évident ».
+  - W12 : classes dans le désordre (« 5ème, 6ème, 4ème ») ; Genre obligatoire.
+  - W14 : avatar présélectionné.
+  - W15 : « 1 parcours gratuit débloqué ».
+
+**Données / API** : `auth` (définition du mot de passe), `accounts` (profil apprenant), `referentials` (pays, classes,
+objectifs, situations de handicap, avatars).
+
+## 2.7 W16 · Connexion — v1 (S4)
+
+Écran **unique** pour l'apprenant, le parent et l'enseignant.
+- Champ « **Identifiant ou numéro** »* (l'email de l'enseignant y est accepté), `PasswordInput`* ; le serveur résout
+  le type d'identifiant.
+- « Se connecter » → espace du rôle : WD01 (apprenant), WPD01 (parent), WT01 (enseignant) ; retour à la page
+  d'origine si la connexion a été demandée depuis une page (WL22, WL23…).
+- « Mot de passe oublié ? » : choix « Je suis parent ou enseignant » → WL02, ou « Je suis apprenant » → message
+  « **Demande à ton parent** de réinitialiser ton mot de passe depuis son espace » (D26).
+- « Reprendre mon inscription » → reprise W07 (D21). « Inscris-toi » → W03.
+- Erreur générique sur identifiants invalides ; compte en attente de consentement → reprise W07.
+- **Ne pas porter** : le seul champ « Identifiant » ; « 👀 Tu as 3 missions en attente. » (donnée personnelle avant
+  authentification).
+
+**Données / API** : `auth` (CSRF, connexion, déconnexion, session courante avec rôle).
+
+## 2.8 W18 · Consentement refusé — v1 (D22)
+
+**Terminal.** `Mascot sad` sur `--error-50`, « Inscription non validée », « **{Prénom du parent}** n'a pas accepté ton
+inscription », encart du motif choisi par le parent (et ses précisions). Texte : « Tu pourras refaire une demande à ce
+parent dans 30 jours. »
+
+- Actions : « Retour à l'accueil » → W02 · « Besoin d'aide ? » → WL24 (changement de parent, traité par la modération
+  admin).
+- Après affichage, le compte en attente est purgé et l'identifiant libéré.
+- **Ne pas porter** : « Changer de parent » et « Réessayer plus tard ».
+
+**Données / API** : `accounts` (état de la demande avec motif).
+
+## 2.9 W19 · Identifiant déjà utilisé — v1
+
+État d'erreur de W04 : `Field` Identifiant en erreur, « Cet identifiant est déjà associé à un compte Steamy. »
+(code `USERNAME_TAKEN`). Actions : « Se connecter » → W16 · « Choisir un autre identifiant » (correction en place).
+**Données / API** : `accounts` (disponibilité de l'identifiant).
+
+## 2.10 W09, W17 · Hors périmètre
+
+Code mort de la maquette (OTP apprenant, `screens-auth-web.jsx`) : **ne pas implémenter**. L'apprenant n'a pas de
+téléphone (S4) ; les erreurs d'OTP du parent sont des états inline de WP02 et WL03.
 
 ---
 
-## 5.3 Auth parent · web — `WP01`-`WP12` · `screens-auth-parent-web.jsx`
+## 2.11 Inscription du parent — `WP01`-`WP12` · `screens-auth-parent-web.jsx`
 
-Même `WebShell`, mêmes couleurs primaires (choix explicite : « la distinction parent/apprenant passe par le copy & le contenu, pas la couleur »). **Registre : vouvoiement.**
-
-### Parcours
+Même `WebShell`, mêmes couleurs primaires. **Registre : vouvoiement.**
 
 ```
-WP01 → WP02 → WP03 → WP04 ─(invitation)→ WP05 ─┬→ WP06 → WP07 → WP08 → WP09 → WP10
-                          └(création directe)→ WP07 …    └→ WP11 → WP12 (terminal)
+WP01 → WP02 → WP03 → WP04 ─(demande reçue)→ WP05 ─┬→ WP06 → WP07 → WP08 → WP09 → WP10
+                          └(création directe)→ WP07 …   └→ WP11 → WP12 (terminal)
 ```
 
-| ID | Écran | Éléments & actions |
-| --- | --- | --- |
-| `WP01` | Créer un compte | Prénom*, Nom* (2 col), `PhoneInput`*, `Checkbox` politique. → « **Recevoir mon code par SMS** » **[D]** → `WP02` · « Connectez-vous » **[D]** → `W16`. Brand : `Mascot wave` + « Accompagnez ses premiers pas. 👨‍👩‍👧 » |
-| `WP02` | OTP | `OTPInput` 6 (mock `3214`, `activeIndex=4`), compte à rebours `00:42`, « Modifier le numéro » **[D]**. → « Vérifier le code » **[D]** → `WP03` |
-| `WP03` | Mot de passe | 2 × `PasswordInput`* + 3 `PwReq`. Brand : les 4 règles au vouvoiement. → « Valider mon mot de passe » **[D]** → `WP04` |
-| `WP04` | Invitation enfant ? | **Branchement clé.** 2 `UserTypeCard` : « ✉️ Oui, j'ai reçu une invitation » (sélectionnée) / « ➕ Non, je crée mon espace ». → « Continuer » **[D]** → `WP05` ou `WP07` |
-| `WP05` | Demande de l'enfant | **Carte enfant** : `Avatar 🦉 56 ring`, « Léa Adjovi », « lea.adjovi · 13 ans », `Badge` « En attente ». **Bloc « Informations renseignées »** : Lien de parenté (« Vous êtes sa mère ») · Niveau/classe (4ème) · Localité · Centres d'intérêt. Encart confidentialité. → « **Accepter la demande** » (secondary) **[D]** → `WP06` · « Refuser » (ghost) **[D]** → `WP11` |
-| `WP06` | Demande acceptée | Célébration (`WPConfetti`, bordure verte). « **Léa** vient d'être prévenue : elle peut poursuivre son inscription. » → « Compléter mon profil » **[D]** → `WP07` |
-| `WP07` | Profil 1 · localisation | `step=1 total=3`. Pays* (`<select>` + 🇧🇯), Localité*, Email (optionnel, « pour les factures et le suivi »). Justification affichée : « Pour la facturation, la livraison des kits et les événements près de chez vous. » → « Suivant » **[D]** |
-| `WP08` | Profil 2 · à propos | `step=2`. Genre (3 `ChoiceCard` : 👩 Femme / 👨 Homme / 🌟 Autre), Situation de handicap (`<select>`), Profession (optionnel, placeholder « Infirmière, commerçante, ingénieur… »). **Tout facultatif** → « Suivant » **[D]** |
-| `WP09` | Profil 3 · enfants | `step=3`. Nombre d'enfants à inscrire* (`<select>` 1/2/3/4+), **Objectifs pour l'enfant*** : 8 `GoalChip` orientés parent (🎓 Réussite scolaire ✓, 🤖 Découvrir la robotique ✓, 💻 Apprendre à coder, 🧠 S'initier à l'IA, 🛠 Une activité à la maison ✓, 🏆 Participer à des concours, 🤝 Confiance en soi, 🚀 Préparer son orientation). Contrainte : **au moins un objectif** → « Terminer mon profil 🚀 » (secondary) **[D]** → `WP10` |
-| `WP10` | Bienvenue parent | Célébration : `Mascot cheer` cerclé primaire, H1 56px, **carte récapitulative** « 1 enfant rattaché · Léa, 13 ans · inscription en cours ». → « Aller sur mon tableau de bord » **[D]** → `WPD01` · « Ajouter un enfant » (outline) **[D]** → `WPD04` |
-| `WP11` | Motifs de refus | **Motif obligatoire** (`<select>` : Mon enfant est trop jeune / On en discute à la maison d'abord / Je n'ai pas demandé cette inscription / Autre raison) + `textarea` Précisions (optionnel, placeholder « Un mot pour ton enfant… » ⚠️ tutoiement dans un écran parent). Brand : « Le refus est définitif pour cette demande. Votre enfant pourra refaire une demande plus tard. » → « **Confirmer le refus** » (danger) **[D]** → `WP12` · « Annuler » (ghost) **[D]** → `WP05` |
-| `WP12` | Refus envoyé | **Terminal.** Cercle neutre ✋, « Demande refusée », « Léa a été informée de votre décision. **Aucune inscription n'a été créée.** » → « Retour à l'accueil » (outline) **[D]** |
+Le SMS de consentement (envoyé en W06) contient un lien vers la demande : parent sans compte → WP01 (numéro
+prérempli) ; parent déjà inscrit → W16 puis WPD05 (même contenu que WP05).
 
-> **En-tête de fichier périmé** : `screens-auth-parent-web.jsx` annonce « 10 écrans (WP01–WP10) » alors qu'il en définit 12.
+### WP01-WP04 · Compte — v1
 
----
-
-## 5.4 Auth apprenant · mobile — `01`-`16` · `screens-auth.jsx`
-
-**⚠️ Zone divergente. Le web fait référence.**
-
-Ces 16 écrans appliquent encore l'**ancien modèle** : l'apprenant possède son propre numéro de téléphone et reçoit un OTP (`09`). La refonte « sous-compte parent » a supprimé cette étape côté web (`W09`/`W17` retirés du flux).
-
-| Aspect | Mobile (`screens-auth.jsx`) | Web (référence) |
-| --- | --- | --- |
-| Identifiant apprenant | **Téléphone** (`04` « Téléphone & nom ») | **Identifiant texte** (`W04`) |
-| Vérification | **OTP à l'apprenant** (`09`) | Supprimée |
-| Dimensions | 360×760 (l'en-tête du fichier dit 780 — erreur) | 1240×760 |
-
-### Primitives mobile (à conserver au redesign)
-
-| Composant | Rôle |
-| --- | --- |
-| `Phone` | Wrapper colonne pleine hauteur, `overflow:hidden` |
-| `StatusBar` | Barre d'état simulée (9:41, réseau, batterie), prop `dark` |
-| `TopBar` | Retour (`arrow-left` 40×40) + segments de progression + slot droit |
-| `ScreenTitle` | kicker + H1 26px + sous-titre |
-| `CTA` | Zone d'action collée en bas (`margin-top:auto`), padding `12px 20px 24px` |
-
-### Écrans, actions et interactions
-
-Parcours : `01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11 → 12 → 13 → 14 → 15`, avec `02 → 16` pour un compte existant.
-
-| ID | Écran | Contenu, actions & interactions | Écart / web |
+| ID | Écran | Contenu | Actions |
 | --- | --- | --- | --- |
-| `01` | Splash | `Phone` dégradé primaire, `StatusBar dark`. 5 particules ambre en `position:absolute`, `Mascot wave 140`, `Logo white 56`, « Apprends · Construis · Joue », `Loader` en pied (36px de marge basse). Aucune action — **transition automatique** vers `02` | Aligné (`W01`) |
-| `02` | Accueil | `StatusBar`. Cercle `--primary-100` 200px avec `Mascot cheer 150` + 2 pastilles décoratives (ambre haut-gauche, verte bas-droite). H1 30px « Bienvenue chez **Steamy.** » (point en ambre), baseline. `CTA` : « Créer un compte » (block lg) **[D]** → `03` · « J'ai déjà un compte » (outline block) **[D]** → `16` | ⚠️ Pas de grille des 4 arguments produit, contrairement à `W02` |
-| `03` | Type d'utilisateur | `TopBar` (retour seul, pas de segments). `ScreenTitle` « Tu es… ? ». **2 `UserTypeCard`** empilées (layout horizontal : pastille 64px, titre 18px, sous-titre, `chevron-right`) — « Un·e apprenant·e » 🚀 sélectionnée (fond primaire plein, ombre 6px) / « Un parent » 👨‍👩‍👧 (`--cat-ia`). `CTA` « Continuer » **[D]** → `04` ou parcours parent **inexistant en mobile** | Aligné (`W03`). **Définit `UserTypeCard`**, réutilisé par `W03` et `WP04` |
-| `04` | **Téléphone & nom** | `ScreenTitle` kicker « Étape 1/4 ». Zone scrollable (`flex:1; overflow:auto`) : Prénom*, Nom*, **`PhoneInput`*** (valeur `01 90 12 34 56`), `Checkbox` politique de confidentialité (coché). `CTA` « **Recevoir mon code** » **[D]** → `09` | 🔴 **Divergent.** `W04` demande un **identifiant texte** et enchaîne sur l'âge. Ici l'apprenant a son propre numéro et l'écran annonce déjà l'OTP. **Définit `Checkbox`** |
-| `05` | Âge | Stepper centré : `−` (56×56 outline) / cadran 140×140 bordure primaire affichant `13` + « ans » / `+` (56×56 primary). **Encart ambre conditionnel** : « **Tu as moins de 16 ans** : on va demander l'accord d'un parent à l'étape suivante. ». Sous-titre : « **Pour les moins de 16 ans**, on demandera l'accord de tes parents. » `CTA` « Continuer » **[D]** → `06` | 🔴 **Divergent sur la règle.** Le web (`W05`) affirme « Un parent validera **toujours** ton inscription » — le mobile conditionne à < 16 ans. C'est l'ancienne règle |
-| `06` | Numéro parent | **Encart pédagogique** (fond `--primary-50`) : `Mascot idle 56` + « Pas de panique ! » + « Ton parent recevra juste un SMS pour valider ton inscription. Ça prend 1 min. ». `PhoneInput`* (hint « Maman, papa, tutrice, oncle… une personne adulte qui s'occupe de toi. »), `<select>` Lien de parenté (Mère/Père/Tuteur·rice/Autre). `CTA` « Envoyer la demande » **[D]** → `07` | Libellé d'artboard : « 06 · Numéro parent **(<16)** » — confirme le conditionnement |
-| `07` | Attente consentement | Cercle `--primary-50` 180px + `Mascot sleep 150`. H1 24px « On attend l'accord de ton parent… », numéro rappelé en gras. **Pastille d'attente** : `Loader` + « En attente ». `CTA` « Renvoyer la demande » (ghost block) **[D]**. Polling attendu | Aligné (`W07`) |
-| `08` | Accord reçu | **5 confettis** en `absolute`, cercle `--success-100` 200px + `Mascot cheer 170 hue=success`. H1 26px vert « Super, c'est validé ! », « **Marie** a accepté ton inscription. » `CTA` « Continuer » (secondary block lg) **[D]** → `09`. **Pas de `TopBar`** — pas de retour possible | Aligné (`W08`) |
-| `09` | **OTP** | `ScreenTitle` kicker « Étape 2/4 » · « Vérifie ton numéro » · « On t'a envoyé un code à 6 chiffres au +229 01 90 12 34 56. ». `OTPInput` (mock `3214`, `activeIndex=4`), compte à rebours « Renvoyer le code dans **00:42** », bouton texte « Modifier le numéro » **[D]** → `04`. `CTA` « Vérifier » **[D]** → `10` | 🔴 **À SUPPRIMER.** Équivalent web `W09` retiré du flux (code mort). L'apprenant n'a plus de numéro propre |
-| `10` | Mot de passe | 2 × `PasswordInput`* + encadré 3 `PwReq` (≥ 8 caractères ✓ · une majuscule ou un chiffre ✓ · pas trop évident ✗). `CTA` « Valider mon mot de passe » **[D]** → `11`. **Définit `PwReq`** (porteur de la politique de mot de passe) | Aligné (`W10`) |
-| `11` | Profil 1 · infos | `TopBar step={1} total={4}`. Zone scrollable : Date de naissance*, Pays de résidence* (`<select>` 4 pays + 🇧🇯), Localité (ville/quartier)*, Email (optionnel, hint « pour la facture et les news »). `CTA` « Suivant » **[D]** | Aligné (`W11`) |
-| `12` | Profil 2 · école | `TopBar step={2}`. Niveau/classe* (`<select>` 5ème/6ème/4ème — **même ordre incohérent qu'en web**), **Genre*** (3 `ChoiceCard` : 👧 Fille sélectionnée / 👦 Garçon / 🌟 Autre), Situation de handicap (`<select>` 5 valeurs). `CTA` « Suivant » **[D]**. **Définit `ChoiceCard`** | Aligné (`W12`) |
-| `13` | Objectifs | `TopBar step={3}`. **9 `GoalChip`** en `flex-wrap` (4 pré-sélectionnés : Construire des robots, Apprendre à coder, Comprendre l'électronique, Aller plus loin que l'école). `CTA` « Suivant » **[D]**. **Définit `GoalChip`** | ⚠️ **9 objectifs contre 10 en web** — « 🎨 Créativité numérique » manque. Et **aucune contrainte de minimum affichée** (`W13` impose « au moins 2 ») |
-| `14` | Avatar | `TopBar step={4}`. **Grille 3×3** (`aspectRatio: 1`) de **9 avatars** issus de la constante `AVATARS`, le 6ᵉ (🦉) sélectionné : double anneau ambre + pastille ✓ 22px. `CTA` « Terminer mon profil 🚀 » (secondary block lg) **[D]** → `15` | ⚠️ **9 avatars contre 10 en web** — « 🐢 » manque. La palette n'est pas la même entre les deux plateformes |
-| `15` | Bienvenue | `Phone` dégradé `--primary-50` → `--bg`. `Avatar 🦉 120 ring`, H1 28px « Bienvenue, **Léa** ! ». `CTA` bouton unique **[D]** | ⚠️ **Pas de carte « Cadeau de bienvenue · 1 parcours gratuit débloqué »**, ni de double CTA (catalogue / dashboard) comme en `W15` |
-| `16` | Connexion existant | `ScreenTitle` « Bon retour ! » · « Connecte-toi pour reprendre tes parcours. ». **`PhoneInput`*** + `PasswordInput`*. `CTA` « Se connecter » (block lg) **[D]** | 🔴 **Divergent.** `W16` authentifie par **identifiant**. ⚠️ **Ni « Mot de passe oublié ? » ni « Inscris-toi »**, présents en web |
+| WP01 | Créer un compte | Prénom*, Nom*, `PhoneInput`*, `Checkbox` CGU + confidentialité. Brand : `Mascot wave` + « Accompagnez ses premiers pas. » | « Recevoir mon code par SMS » → WP02 · « Connectez-vous » → W16 |
+| WP02 | Code SMS | `OTPInput` 6 cases (D24), compte à rebours de renvoi, erreurs inline | « Vérifier le code » → WP03 · « Renvoyer le code » · « Modifier le numéro » → WP01 |
+| WP03 | Mot de passe | 2 × `PasswordInput`* + `PwReq` (D25) | « Valider mon mot de passe » → WP04 |
+| WP04 | Demande reçue ? | 2 `UserTypeCard` : « Oui, mon enfant m'a envoyé une demande » / « Non, je crée mon espace » | « Continuer » → WP05 ou WP07 |
 
-### Synthèse des écarts mobile → web
+**Ne pas porter** : code mock « 3214 » et `activeIndex` ; règles « majuscule ou chiffre » et « pas trop évident » ;
+« Brand : les 4 règles ».
+**Données / API** : `auth` (OTP d'inscription, mot de passe), `accounts` (création du compte parent),
+`referentials` (pays).
 
-| Écart | Écrans | Gravité |
-| --- | --- | --- |
-| Authentification par téléphone au lieu d'identifiant | `04`, `16` | 🔴 Modèle de données |
-| Étape OTP apprenant à supprimer | `09` (et l'annonce en `04`) | 🔴 Flux |
-| Consentement conditionné à « < 16 ans » au lieu de systématique | `05`, `06` | 🔴 Règle métier |
-| Pas de reset de mot de passe, pas de lien d'inscription | `16` | 🟠 Fonctionnel |
-| Pas de contrainte « au moins 2 objectifs » | `13` | 🟠 Validation |
-| Référentiels divergents : 9 objectifs vs 10, 9 avatars vs 10 | `13`, `14` | 🟠 Données |
-| Cadeau de bienvenue absent | `15` | 🟡 Produit |
-| Arguments produit absents de l'accueil | `02` | 🟡 Conversion |
-| Pas de branche parent (`WP01`-`WP12` sans équivalent) | `03` | 🟠 ~16 écrans à concevoir |
+### WP05-WP06, WP11-WP12 · Consentement — v1
 
-**Recommandation** : ne pas porter cette zone telle quelle. Le réalignement fait partie du chantier « Parité mobile », qui couvre par ailleurs **156 écrans sans aucune maquette 360×760**. Les 5 primitives mobile (`Phone`, `StatusBar`, `TopBar`, `ScreenTitle`, `CTA`) sont en revanche réutilisables telles quelles.
+| ID | Écran | Contenu | Actions |
+| --- | --- | --- | --- |
+| WP05 | Demande de l'enfant | Carte enfant : initiales (pas d'avatar), **prénom, nom, identifiant, âge**, lien de parenté (« Vous êtes sa mère »), `Badge` « En attente », date d'expiration. Encart : « Les données ne servent qu'au suivi pédagogique, jamais à du marketing. » | « Accepter la demande » → WP06 · « Refuser » → WP11 |
+| WP06 | Demande acceptée | Célébration. « **{Prénom}** peut maintenant terminer son inscription. » | « Compléter mon profil » → WP07 |
+| WP11 | Refus | Motif* (Mon enfant est trop jeune / Nous en discutons d'abord à la maison / Je n'ai pas demandé cette inscription / Autre raison) + Précisions facultatives (« Un mot pour votre enfant… »). Brand : « Le refus clôt cette demande. Votre enfant pourra vous en refaire une dans 30 jours. » | « Confirmer le refus » (danger) → WP12 · « Annuler » → WP05 |
+| WP12 | Refus envoyé | Terminal. ✋, « Demande refusée », « {Prénom} verra votre décision. Aucune inscription n'a été créée. » | « Retour à l'accueil » → WPD01 |
 
-**Recommandation** : ne pas porter cette zone telle quelle. La réaligner sur le modèle web (identifiant + suppression de l'OTP apprenant) fait partie du chantier de design « Parité mobile », qui couvre par ailleurs **156 écrans non conçus** en 360×760.
+- WP05 n'affiche que ce que D20 autorise ; le profil de l'enfant (W11-W14) se fait après l'accord.
+- Demande d'origine enseignant (D60) : WP05 affiche l'enseignant et la classe, et le parent y crée l'identifiant de
+  l'enfant (détail au lot 5).
+- **Ne pas porter** :
+  - WP05 : avatar 🦉, bloc « Informations renseignées » (classe, localité, centres d'intérêt).
+  - WP06 : « vient d'être prévenue » (l'enfant n'a pas de canal ; il l'apprend en W07).
+  - WP11 : placeholder « Un mot pour ton enfant… » (tutoiement).
+  - Le refus « définitif » sans délai.
 
-**Contrainte technique** : `screens-auth.jsx` s'auto-montait historiquement sur `#root`. Un garde `if (!window.STEAMY_NO_AUTOMOUNT)` a été ajouté ; `App.html` doit déclarer `window.STEAMY_NO_AUTOMOUNT = true` **avant** de charger le fichier, sinon double montage.
+**Données / API** : `accounts` (détail de la demande, décision accepter / refuser avec motif), `referentials` (motifs
+de refus).
+
+### WP07-WP10 · Profil parent — v1
+
+| ID | Écran | Contenu | Actions |
+| --- | --- | --- | --- |
+| WP07 | Profil 1/3 · localisation | Pays*, Localité*, Email (facultatif, « pour les factures et le suivi »). « Pour la facturation, la livraison des kits et les événements près de chez vous. » | « Suivant » → WP08 |
+| WP08 | Profil 2/3 · à propos | Genre (Femme / Homme / Autre), Situation de handicap, Profession — **tout facultatif** | « Suivant » → WP09 |
+| WP09 | Profil 3/3 · enfants | Nombre d'enfants à inscrire*, Objectifs pour l'enfant* (au moins un, référentiel) | « Terminer mon profil 🚀 » → WP10 |
+| WP10 | Bienvenue | Célébration, carte récapitulative des enfants rattachés (« Léa, 13 ans · inscription en cours ») ou « Aucun enfant rattaché » | « Aller sur mon tableau de bord » → WPD01 · « Ajouter un enfant » → WPD04 |
+
+**Données / API** : `accounts` (profil parent, enfants rattachés), `referentials` (pays, objectifs, situations de
+handicap).
+
+### Ne pas porter (fichier)
+
+- `screens-auth-parent-web.jsx` : l'en-tête annonce 10 écrans (WP01-WP10), le fichier en définit 12.
+- `screens-auth-web.jsx` : l'en-tête annonce 16 écrans, W09 et W17 compris.
+- `screens-public-web.jsx` : l'en-tête liste Défis, Classements, Tutoriels, Communauté et Ateliers.
