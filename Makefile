@@ -4,7 +4,7 @@ API     := $(COMPOSE) run --rm api
 
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
-        test-api lint-api psql flower clean
+        test-api lint-api psql flower clean openapi
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -60,6 +60,9 @@ test-api: ## Lance les tests de l'API
 
 lint-api: ## Lint de l'API
 	$(API) python -m flake8 --ignore E501,E722,F821,W504 apps/ project/ libs/
+
+openapi: ## Régénère apps/api/openapi.yaml (contrat front/back, à committer)
+	$(API) python manage.py spectacular --file openapi.yaml --validate
 
 psql: ## Console PostgreSQL
 	$(COMPOSE) exec postgres psql -U steamy steamy

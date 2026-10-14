@@ -275,6 +275,11 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
+    # Le schéma doit refléter le JSON réellement émis (camelCase via djangorestframework-camel-case)
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
+    ],
     "SCHEMA_PATH_PREFIX": r"/api",
     "SECURITY": [{"BearerAuth": []}],
     "COMPONENTS": {

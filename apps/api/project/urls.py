@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
-from apps.core.views import presign_upload
+from apps.core.views import health, presign_upload
 
 from .views import api_root
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
@@ -32,6 +32,7 @@ urlpatterns = [
     path("api/analytics/", include("apps.analytics.urls")),
     # path("api/core/presign/", include("apps.core.views.presign_upload")),
     path("api/core/presign/", presign_upload, name="presign-upload"),
+    path("api/health/", health, name="health"),
 
     # DRF API
     path('api/', api_root, name='index'),
