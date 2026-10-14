@@ -663,8 +663,8 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 moyen · 🟢 mineur.
 `--shadow-card(-hover)`, `.app-sidebar__item.is-active`, `.welcome-card`, `.cat-project.is-current` et l'animation
 `pulse` codent encore `rgba(91,63,224,…)` (ancien violet), et `README`/`HANDOFF`/`CLAUDE.md` de la maquette parlent
 encore du violet.
-**Ouvert** (aucun arbitrage). Proposition : entériner le magenta des tokens, dériver les `rgba` de `--primary-500`
-avant le premier composant (lot 1).
+**Résolu : C1.** La primaire est le magenta `#9E1B9A`, qui est aussi la couleur du logo. Les `rgba` violets sont à
+dériver de `--primary-500` avant le premier composant (lot 1). Les notes de la maquette sont périmées sur ce point.
 
 ### 8.2 🔴 L'apprenant a encore un téléphone et un OTP
 WD13 affiche un téléphone, WD18 « Changer de numéro », WD20 un numéro Mobile Money, WL02-WL05 au tutoiement.
@@ -706,7 +706,7 @@ l'enfant via WPD04, pas par lien d'inscription).
 | « Mode hors ligne » | WX01 | Retiré (D16) |
 | « Demander un changement de parent » | WD22 | Pas de bouton en v1 ; modération admin (D41, D22) |
 | « Créer une classe » | WT03 | Écran `WT13` à concevoir |
-| « Rejoindre l'équipe » | WL01 | Ouvert : §8.18 |
+| « Rejoindre l'équipe » | WL01 | Résolu : §8.18 |
 | Export CSV/PDF, Soumettre | WAD04 | Asynchrone, soumission verrouillante (D74) |
 | RBAC réel | WAD13 | Groupes Django (D71) |
 | Fiche événement | WD10, WPD06, WL21 | Écran `WL23` à concevoir (S8) |
@@ -781,10 +781,24 @@ scène de WC02b et WD16 ; `title="Bientôt"` ; commentaire de travail `screens-a
 | Pages publiques rendues dynamiques par `getServerApi()` | lot 1 | Client anonyme cachable (§1.2) |
 | JetBrains Mono chargée dans le layout | `apps/web` | À retirer (§1.4) |
 
-### 8.18 Points encore ouverts
+### 8.18 Points tranchés après l'alignement
 
-| Point | Proposition |
+Tous les points restés ouverts pendant la réécriture des specs sont tranchés dans les compléments C1-C12 de
+[ARBITRAGES.md](alignement/ARBITRAGES.md) :
+
+| Point | Décision |
 | --- | --- |
+| Identité chromatique (§8.1) | C1 : magenta `#9E1B9A` |
+| Registre de l'enseignant | C2 : vouvoiement |
+| Sélection des candidats aux Steamy Events | C3 : confirmée par l'accord (et le paiement) du parent |
+| Activation, mot de passe oublié et école de l'enseignant | C6 : activation par lien email (variante de WL04, `auth/teacher-invitations/`), code par email, toujours rattaché à une `School` |
+| Connexion du personnel, résolution de « Identifiant ou numéro » sur W16 | C7 |
+| Barème de points et seuils de rang (D34), note des parcours | C8 : dans `PlatformSettings`, fixés avant le lot 3 ; `rating` masqué en v1 |
+| « Institutions » (KPI, D75) | Écoles (`School`) sous offre active |
+| « Rejoindre l'équipe » (WL01) | Vers WL24 avec le sujet « Candidature » |
+| Collection de badges (D39) | Écran à concevoir après la v1 ; `GET learning/badges/` existe dès le lot 3 |
+
+--- | --- |
 | Identité chromatique (§8.1) | Magenta des tokens ; purge des `rgba` violets au lot 1 |
 | Activation du compte enseignant invité : aucun écran | Lien email → variante de WL04 (« Définir votre mot de passe ») ; `auth/teacher-invitations/` (§7.2) |
 | Connexion du personnel par W16 | Refusée : le personnel passe uniquement par WAD15 ; la session obtenue sert aussi à `/api/backoffice/` |

@@ -123,7 +123,7 @@ Font foi, dans cet ordre : [ARBITRAGES](alignement/ARBITRAGES.md) (S1-S12, D1-D7
 
 ### Shell
 
-`AppShell` avec la navigation enseignant. **Registre : tutoiement** (SPEC-TECHNIQUE §4.5). À confirmer : `WL02`-`WL05`, partagés avec le parent, vouvoient l'enseignant (D26). Utilisateur issu de la session.
+`AppShell` avec la navigation enseignant. **Registre : vouvoiement** (C2), comme pour le parent et le personnel. Utilisateur issu de la session.
 
 | Nav | Icône | Écrans rattachés |
 | --- | --- | --- |
@@ -358,7 +358,7 @@ La répartition des écrans hors libellés de `WAD13` (événements, commandes) 
 
 Ce sont des **enveloppes** applicables à toute vue, livrées avec le lot 1 dans le design system et réutilisées par tous les espaces. Ce ne sont pas des pages.
 
-Composant générique `WXState({ pose, emoji, title, body, primaryLabel, secondaryLabel })` : carte centrée, mascotte dans un cercle, titre, corps, 1 ou 2 boutons. Les textes suivent le registre de l'espace (tutoiement apprenant et enseignant, vouvoiement parent, neutre admin).
+Composant générique `WXState({ pose, emoji, title, body, primaryLabel, secondaryLabel })` : carte centrée, mascotte dans un cercle, titre, corps, 1 ou 2 boutons. Les textes suivent le registre de l'espace (tutoiement apprenant, vouvoiement parent et enseignant, neutre admin).
 
 | ID | État | Statut | Contenu | Actions |
 | --- | --- | --- | --- | --- |
