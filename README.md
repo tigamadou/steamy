@@ -11,7 +11,7 @@ Monorepo de Steamy, plateforme e-learning de robotique/STEM pour les 10–17 ans
 | `packages/api-client/` | Client d'API typé, généré depuis `apps/api/openapi.yaml` |
 | `design/` | Prototype de design (canvas React statique, 172 écrans) — référence visuelle |
 | `docs/` | Spécifications et plans |
-| `infra/` | Docker Compose, configuration de déploiement *(à venir)* |
+| `infra/` | Déploiement : Ansible (VPS), charts Helm (k3s), script de déploiement — voir [`infra/README.md`](infra/README.md) |
 
 ## Démarrage local
 
@@ -41,9 +41,15 @@ Après une modification de `requirements.txt`, lancer `make build`.
 Après toute modification d'un serializer ou d'une vue : `make openapi`, puis committer
 `openapi.yaml` et `packages/api-client/src/schema.d.ts`. La CI vérifie qu'ils sont à jour.
 
-## Déploiement
+## CI/CD
 
-| Déclencheur GitHub | Environnement |
+- **CI** (`.github/workflows/ci.yml`, à chaque PR) : tests et contrat OpenAPI de l'API, lint/typecheck/build
+  du front, build des images, validation des charts. Check requis pour merger : `ci-ok`.
+- **CD** (`.github/workflows/deploy.yml`), piloté par les GitHub Releases :
+
+| Déclencheur | Environnement |
 | --- | --- |
-| Publication d'une **pre-release** | staging |
-| Publication d'une **release** | production |
+| Publication d'une **pre-release** (`v1.4.0-rc.1`) | staging |
+| Publication d'une **release** (`v1.4.0`), après approbation | production — mêmes images que la pre-release |
+
+Mise en place des serveurs, secrets et procédure de release : [`infra/README.md`](infra/README.md).

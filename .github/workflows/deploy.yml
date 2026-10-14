@@ -1,0 +1,200 @@
+# Déploiement continu, piloté par les GitHub Releases :
+#   pre-release publiée (ex : v1.4.0-rc.1)  → build des images → STAGING
+#   release publiée     (ex : v1.4.0)       → promotion des MÊMES images → PRODUCTION
+#
+# Une release de prod ne reconstruit jamais rien : elle exige que le commit ait
+# déjà été construit (et donc déployé en staging) par une pre-release.
+name: Deploy
+
+on:
+  release:
+    types: [prereleased, released]
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      environment: ${{ steps.meta.outputs.environment }}
+      sha: ${{ steps.meta.outputs.sha }}
+    steps:
+      - id: meta
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          ACTION: ${{ github.event.action }}
+        run: |
+          if [[ ! "$TAG" =~ ^v?([0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?)$ ]]; then
+            echo "::error::Tag « $TAG » invalide : attendu vX.Y.Z (release) ou vX.Y.Z-rc.N (pre-release)"
+            exit 1
+          fi
+          version="${BASH_REMATCH[1]}"
+          if [[ "$ACTION" == prereleased ]]; then
+            environment=staging
+          else
+            environment=production
+            if [[ "$version" == *-* ]]; then
+              echo "::error::$version porte un suffixe de pre-release : la publier comme pre-release, pas comme release."
+              exit 1
+            fi
+          fi
+          {
+            echo "version=$version"
+            echo "environment=$environment"
+            # Pour un événement release, GITHUB_SHA est le commit pointé par le tag
+            echo "sha=${GITHUB_SHA::12}"
+          } >> "$GITHUB_OUTPUT"
+          echo "🚀 $version → $environment"
+
+  images:
+    needs: meta
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - name: api
+            context: apps/api
+            file: apps/api/Dockerfile
+          - name: web
+            context: .
+            file: apps/web/Dockerfile
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/steamy-${{ matrix.name }}
+      VERSION: ${{ needs.meta.outputs.version }}
+      SHA_TAG: sha-${{ needs.meta.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image déjà construite pour ce commit ?
+        id: existing
+        run: |
+          if docker buildx imagetools inspect "$IMAGE:$SHA_TAG" >/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Production sans pre-release préalable → refus
+        if: needs.meta.outputs.environment == 'production' && steps.existing.outputs.found != 'true'
+        run: |
+          echo "::error::Aucune image $IMAGE:$SHA_TAG. Publier d'abord une pre-release sur ce commit et la valider en staging."
+          exit 1
+      - name: Build et push
+        if: steps.existing.outputs.found != 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          target: prod
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ env.SHA_TAG }}
+            ${{ env.IMAGE }}:${{ env.VERSION }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ env.VERSION }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+      - name: Promotion de l'image existante (même digest, sans rebuild)
+        if: steps.existing.outputs.found == 'true'
+        run: docker buildx imagetools create --tag "$IMAGE:$VERSION" "$IMAGE:$SHA_TAG"
+
+  charts:
+    needs: meta
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    env:
+      VERSION: ${{ needs.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.22.0
+      - name: Packaging et publication des charts (OCI sur GHCR)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
+          for chart in steamy-platform steamy; do
+            helm package "infra/helm/$chart" --version "$VERSION" --app-version "$VERSION" -d dist
+            helm push "dist/$chart-$VERSION.tgz" "oci://$REGISTRY/charts"
+          done
+
+  deploy:
+    needs: [meta, images, charts]
+    runs-on: ubuntu-latest
+    # L'environnement « production » exige une approbation (réglage GitHub)
+    environment:
+      name: ${{ needs.meta.outputs.environment }}
+      url: ${{ vars.APP_URL }}
+    concurrency:
+      group: deploy-${{ needs.meta.outputs.environment }}
+      cancel-in-progress: false
+    steps:
+      - name: Clé SSH de déploiement
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+
+      - name: Secrets de l'environnement → fichier transmis sur stdin
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.RUSTFS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.RUSTFS_SECRET_KEY }}
+          WASABI_ACCESS_KEY_ID: ${{ secrets.WASABI_ACCESS_KEY_ID }}
+          WASABI_SECRET_ACCESS_KEY: ${{ secrets.WASABI_SECRET_ACCESS_KEY }}
+          EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+          PAYMENTS_KKIAPAY_SECRET: ${{ secrets.PAYMENTS_KKIAPAY_SECRET }}
+          PAYMENTS_FEDAPAY_SECRET: ${{ secrets.PAYMENTS_FEDAPAY_SECRET }}
+          GHCR_PULL_USER: ${{ vars.GHCR_PULL_USER }}
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+        run: |
+          umask 077
+          for key in SECRET_KEY AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY WASABI_ACCESS_KEY_ID \
+                     WASABI_SECRET_ACCESS_KEY EMAIL_HOST_USER EMAIL_HOST_PASSWORD \
+                     PAYMENTS_KKIAPAY_SECRET PAYMENTS_FEDAPAY_SECRET GHCR_PULL_USER GHCR_PULL_TOKEN; do
+            value="${!key}"
+            [[ -z "$value" ]] && continue
+            if [[ "$value" == *$'\n'* ]]; then echo "::error::$key contient un retour à la ligne"; exit 1; fi
+            printf '%s=%s\n' "$key" "$value"
+          done > "$RUNNER_TEMP/secrets.env"
+
+      - name: Déploiement sur ${{ needs.meta.outputs.environment }}
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          VERSION: ${{ needs.meta.outputs.version }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "deploy@$DEPLOY_HOST" "deploy $VERSION" < "$RUNNER_TEMP/secrets.env"
+
+      - name: Nettoyage
+        if: always()
+        run: rm -f "$RUNNER_TEMP/secrets.env" ~/.ssh/deploy_key
+
+      - name: Vérification après déploiement
+        env:
+          API_URL: ${{ vars.API_URL }}
+        run: |
+          for _ in $(seq 1 20); do
+            if curl -fsS "$API_URL/api/health/"; then echo; echo "✅ API en bonne santé"; exit 0; fi
+            sleep 6
+          done
+          echo "::error::$API_URL/api/health/ ne répond pas après le déploiement"
+          exit 1
