@@ -7,11 +7,18 @@ from apps.user.endpoints.public.forgot_password_step_2.views import PublicForgot
 from apps.user.endpoints.user.change_password.views import UserChangePasswordView
 from apps.user.endpoints.user.change_email.views import UserChangeEmailView
 from apps.user.endpoints.user.my_profile.views import UserMyProfileView
+from apps.user.endpoints.session.views import CsrfView, SessionLoginView, SessionLogoutView
 from .views import UserSignupView
 
 urlpatterns = [
     path('public/user/login', PublicLoginView.as_view(),
          name='public-user-login'),
+    # Session (front web)
+    path('public/user/csrf', CsrfView.as_view(), name='public-user-csrf'),
+    path('public/user/session-login', SessionLoginView.as_view(),
+         name='public-user-session-login'),
+    path('user/session-logout', SessionLogoutView.as_view(),
+         name='user-session-logout'),
     path('public/user/signup', PublicSignupView.as_view(),
          name='public-user-signup'),
     path('public/user/forgot-password-step-1', PublicForgotPasswordStep1View.as_view(),

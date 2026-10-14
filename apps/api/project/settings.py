@@ -307,6 +307,8 @@ RESET_PASSWORD_URL = '{}{}'.format(WEB_URL, '/reset-password?state={state}')
 
 # Origines du front autorisées à appeler l'API avec les cookies de session (CORS)
 CORS_ALLOWED_ORIGINS = [o for o in os.getenv('CORS_ALLOWED_ORIGINS', WEB_URL).split(',') if o]
+# Origines autorisées à envoyer des requêtes protégées par CSRF (le front est sur un autre sous-domaine)
+CSRF_TRUSTED_ORIGINS = [o for o in os.getenv('CSRF_TRUSTED_ORIGINS', WEB_URL).split(',') if o]
 
 # Payements
 PAYMENTS_KKIAPAY_SECRET = os.getenv("PAYMENTS_KKIAPAY_SECRET", "")
@@ -485,5 +487,4 @@ if DEPLOYED:
     # Domaine parent partagé par le front et l'API (ex : ".steamy.africa")
     SESSION_COOKIE_DOMAIN = os.getenv('COOKIE_DOMAIN') or None
     CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN
-    CSRF_TRUSTED_ORIGINS = [o for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o]
     SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))

@@ -864,6 +864,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/public/user/csrf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["public_user_csrf_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/public/user/forgot-password-step-1": {
         parameters: {
             query?: never;
@@ -906,6 +922,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["public_user_login_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/user/session-login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["public_user_session_login_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1012,6 +1044,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["user_my_profile_partial_update"];
+        trace?: never;
+    };
+    "/api/user/session-logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["user_session_logout_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
@@ -1150,6 +1198,9 @@ export interface components {
         CreateSignedFileRequest: {
             fileName: string;
             acl?: string;
+        };
+        CsrfToken: {
+            csrfToken: string;
         };
         /**
          * @description Modified from rest_framework.authtoken.serializers.AuthTokenSerializer
@@ -1915,6 +1966,10 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "admin" | "teacher" | "student";
+        SessionLoginResponse: {
+            userId: number;
+            csrfToken: string;
+        };
         UserChangeEmailRequest: {
             password: string;
             newEmail: string;
@@ -4724,6 +4779,25 @@ export interface operations {
             };
         };
     };
+    public_user_csrf_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsrfToken"];
+                };
+            };
+        };
+    };
     public_user_forgot_password_step_1_create: {
         parameters: {
             query?: never;
@@ -4789,6 +4863,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CustomAuthToken"];
+                };
+            };
+        };
+    };
+    public_user_session_login_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CustomAuthTokenRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionLoginResponse"];
                 };
             };
         };
@@ -4960,6 +5057,24 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["UserMyProfile"];
                 };
+            };
+        };
+    };
+    user_session_logout_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

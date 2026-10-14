@@ -4,6 +4,7 @@ import createClient, { type ClientOptions } from "openapi-fetch";
 
 import type { components, paths } from "./schema";
 
+export { CSRF_COOKIE, csrfMiddleware, SESSION_COOKIE } from "./csrf";
 export type { components, paths };
 export type Schemas = components["schemas"];
 

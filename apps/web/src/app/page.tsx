@@ -25,6 +25,21 @@ async function ApiStatus() {
   return <p className={className}>{text}</p>;
 }
 
+async function fetchCurrentEmail(): Promise<string | undefined> {
+  try {
+    const api = await getServerApi();
+    const { data } = await api.GET("/api/user/my-profile");
+    return data?.email;
+  } catch {
+    return undefined;
+  }
+}
+
+async function SessionStatus() {
+  const email = await fetchCurrentEmail();
+  return <p className="text-ink-500">{email ? `Connecté : ${email}` : "Non connecté"}</p>;
+}
+
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
@@ -34,6 +49,9 @@ export default function Home() {
         <ApiStatus />
       </Suspense>
       <BrowserApiStatus />
+      <Suspense>
+        <SessionStatus />
+      </Suspense>
     </main>
   );
 }

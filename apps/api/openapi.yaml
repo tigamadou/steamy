@@ -3055,6 +3055,18 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/public/user/csrf:
+    get:
+      operationId: public_user_csrf_retrieve
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfToken'
+          description: ''
   /api/public/user/forgot-password-step-1:
     post:
       operationId: public_user_forgot_password_step_1_create
@@ -3120,6 +3132,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomAuthToken'
+          description: ''
+  /api/public/user/session-login:
+    post:
+      operationId: public_user_session_login_create
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomAuthTokenRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionLoginResponse'
           description: ''
   /api/public/user/signup:
     post:
@@ -3276,6 +3306,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserMyProfile'
           description: ''
+  /api/user/session-logout:
+    post:
+      operationId: user_session_logout_create
+      tags:
+      - user
+      security:
+      - cookieAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
 components:
   schemas:
     Attempt:
@@ -3630,6 +3672,13 @@ components:
           minLength: 1
       required:
       - fileName
+    CsrfToken:
+      type: object
+      properties:
+        csrfToken:
+          type: string
+      required:
+      - csrfToken
     CustomAuthToken:
       type: object
       description: |-
@@ -5210,6 +5259,16 @@ components:
         * `admin` - Administrateur
         * `teacher` - Formateur
         * `student` - Apprenant
+    SessionLoginResponse:
+      type: object
+      properties:
+        userId:
+          type: integer
+        csrfToken:
+          type: string
+      required:
+      - csrfToken
+      - userId
     UserChangeEmailRequest:
       type: object
       properties:
