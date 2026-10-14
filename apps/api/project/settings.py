@@ -305,6 +305,9 @@ ADMIN_HEADER = 'Admin'
 WEB_URL = os.environ.get('WEB_URL', 'http://localhost:3000')
 RESET_PASSWORD_URL = '{}{}'.format(WEB_URL, '/reset-password?state={state}')
 
+# Origines du front autorisées à appeler l'API avec les cookies de session (CORS)
+CORS_ALLOWED_ORIGINS = [o for o in os.getenv('CORS_ALLOWED_ORIGINS', WEB_URL).split(',') if o]
+
 # Payements
 PAYMENTS_KKIAPAY_SECRET = os.getenv("PAYMENTS_KKIAPAY_SECRET", "")
 PAYMENTS_FEDAPAY_SECRET = os.getenv("PAYMENTS_FEDAPAY_SECRET", "")

@@ -124,6 +124,8 @@ services:
     environment:
       COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
       API_URL: http://api:8000
+      # URL de l'API vue par le navigateur
+      PUBLIC_API_URL: http://localhost:8000
     ports:
       - "3000:3000"
     volumes:

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Suspense } from "react";
 
+import { BrowserApiStatus } from "@/components/browser-api-status";
 import { getServerApi } from "@/lib/api";
 
 const STATUS_MESSAGES = {
@@ -32,6 +33,7 @@ export default function Home() {
       <Suspense fallback={<p className="text-ink-500">Vérification de l&apos;API…</p>}>
         <ApiStatus />
       </Suspense>
+      <BrowserApiStatus />
     </main>
   );
 }

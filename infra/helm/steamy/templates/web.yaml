@@ -28,6 +28,9 @@ spec:
             # Appels serveur → API par le réseau interne du cluster
             - name: API_URL
               value: http://steamy-api
+            # Appels navigateur → API, servie au client par /runtime-config
+            - name: PUBLIC_API_URL
+              value: {{ printf "https://%s" .Values.hosts.api | quote }}
           ports:
             - name: http
               containerPort: 3000
