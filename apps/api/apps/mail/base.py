@@ -75,7 +75,7 @@ class MailBase:
 
         if admin_feedback and request is not None:
             mail_url = reverse(
-                'admin:%s_%s_change' % ('mail', 'mail'),
+                'admin:mail_mail_change',
                 args=[mail.id],
             )
             msg = format_html(

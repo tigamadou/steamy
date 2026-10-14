@@ -15,11 +15,6 @@ class Layout(models.Model):
     def __str__(self):
         return self.name
 
-    @staticmethod
-    def render(layout_string, body_string):
-        pieces = layout_string.split('{body}')
-        return ''.join([pieces[0], body_string, pieces[1]])
-
     def save(self, *args, **kwargs):
         if '{body}' not in self.body:
             raise ValidationError({
@@ -29,6 +24,11 @@ class Layout(models.Model):
                 '''.strip()
             })
         return super().save(*args, **kwargs)
+
+    @staticmethod
+    def render(layout_string, body_string):
+        pieces = layout_string.split('{body}')
+        return ''.join([pieces[0], body_string, pieces[1]])
 
 
 class Template(models.Model):
@@ -44,6 +44,9 @@ class Template(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f'<Template: {self.name}>'
+
     @property
     def last_email_sent(self):
         return (
@@ -51,9 +54,6 @@ class Template(models.Model):
             .filter(name=self.name)
             .first()
         )
-
-    def __str__(self):
-        return f'<Template: {self.name}>'
 
     @staticmethod
     def _render(input, data):
@@ -94,12 +94,12 @@ class Mail(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f'<Mail: {self.name} - {self.user.email}>'
-
     class Meta:
         verbose_name = 'mail'
         verbose_name_plural = ' Outbox'  # leading space, orders it first in admin
+
+    def __str__(self):
+        return f'<Mail: {self.name} - {self.user.email}>'
 
     @property
     def email(self):

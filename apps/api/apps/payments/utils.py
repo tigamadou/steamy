@@ -47,7 +47,7 @@ def handle_provider_event(provider_name: str, data: dict):
     try:
         order = Order.objects.get(reference=reference)
     except Order.DoesNotExist:
-        raise ValueError("order not found")
+        raise ValueError("order not found") from None
 
     payment, _ = Payment.objects.get_or_create(
         order=order,

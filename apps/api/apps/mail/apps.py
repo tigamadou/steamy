@@ -21,7 +21,7 @@ class MailConfig(AppConfig):
             for app_config in django_apps.get_app_configs():
                 try:
                     mail_module = import_module(f'{app_config.name}.mail')
-                    for name, obj in inspect.getmembers(mail_module):
+                    for _name, obj in inspect.getmembers(mail_module):
                         if inspect.isclass(obj) and obj is not MailBase and issubclass(obj, MailBase):
                             try:
                                 get_template(obj.get_template())

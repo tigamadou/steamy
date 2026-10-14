@@ -1,7 +1,11 @@
 # apps/analytics/views.py
+import csv
+
 from django.core.cache import cache
 from django.db.models import Sum
+from django.http import HttpResponse
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import permissions, serializers, status, viewsets
@@ -74,10 +78,6 @@ def dashboard_summary(request):
     }
     cache.set(cache_key, payload, CACHE_TTL)
     return Response(payload)
-import csv
-
-from django.http import HttpResponse
-from django.utils.dateparse import parse_date
 
 
 @extend_schema(

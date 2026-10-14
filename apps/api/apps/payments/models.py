@@ -25,13 +25,13 @@ class Order(models.Model):
     reference = models.CharField(max_length=128, unique=True)  # ex: ORDER-20250101-XXXX
     metadata = models.JSONField(null=True, blank=True)  # any extra data
 
+    def __str__(self):
+        return f"Order {self.reference} - {self.user}"
+
     def mark_paid(self, when=None):
         self.paid = True
         self.paid_at = when or timezone.now()
         self.save()
-
-    def __str__(self):
-        return f"Order {self.reference} - {self.user}"
 
 
 class OrderItem(models.Model):
@@ -69,6 +69,9 @@ class Payment(models.Model):
             models.Index(fields=["order"]),
         ]
 
+    def __str__(self):
+        return f"{self.provider} - {self.amount} ({'OK' if self.success else 'PENDING'})"
+
     def mark_success(self, tx_id=None, when=None):
         self.success = True
         if tx_id:
@@ -77,9 +80,6 @@ class Payment(models.Model):
         self.save()
         # mark order paid
         self.order.mark_paid(when=self.received_at)
-
-    def __str__(self):
-        return f"{self.provider} - {self.amount} ({'OK' if self.success else 'PENDING'})"
 
 
 class Invoice(models.Model):

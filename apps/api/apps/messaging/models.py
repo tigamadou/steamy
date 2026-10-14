@@ -15,7 +15,7 @@ class Conversation(models.Model):
     def __str__(self):
         if self.title:
             return self.title
-        return "Conversation %d" % self.id
+        return f"Conversation {self.id}"
 
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
@@ -53,6 +53,9 @@ class MessageReceipt(models.Model):
 
     class Meta:
         unique_together = ("message", "user")
+
+    def __str__(self):
+        return f"Accusé {self.message_id} → {self.user_id}"
 
 class Notification(models.Model):
     """
