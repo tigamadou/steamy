@@ -136,3 +136,16 @@ Ces points sont apparus pendant la réécriture des specs. Les arbitrages ci-des
 | C10 | Kits | Le parent peut acheter un kit directement depuis son espace. Quand l'enfant demande un kit, le parent saisit l'adresse dans WPD15 ; le stock n'est réservé qu'au paiement. Les Kit Codes d'une commande sont visibles dans WPD07. Un invité suit sa commande par un lien SMS | ✅ |
 | C11 | Invitation par un enseignant | Si l'enfant a déjà un compte, le parent l'accepte en rattachant le compte existant à la classe, au lieu de créer un identifiant | ✅ |
 | C12 | Divers | Notifications : dans l'app et par email (pas de push sans application mobile). Factures : réservées au payeur (parent). Identifiant de l'apprenant : non modifiable. Brochure WL11 : téléchargement libre. Newsletter WL20 : réservée aux adultes. Un ticket Steamy Events rend la candidature gratuite, avec accord du parent toujours requis | ✅ |
+
+## Compléments issus des plans d'implémentation
+
+| # | Question | Recommandation | Statut |
+| --- | --- | --- | --- |
+| C13 | Numéro de parent déjà inscrit (WP01) : faut-il le signaler ? | Non, la réponse reste neutre pour ne pas révéler qu'un numéro est inscrit. L'OTP est envoyé dans tous les cas ; une fois le numéro vérifié, un compte existant mène à la connexion | ⏳ |
+| C14 | Code de reprise d'inscription perdu (C5) | Pas de régénération : l'enfant recommence l'inscription. Une nouvelle demande vers le **même numéro de parent** annule la demande en attente et libère l'identifiant | ⏳ |
+| C15 | Code de la messagerie (S11) | Supprimé du dépôt, conservé sous le tag git `archive/messaging`. `Notification` passe dans l'app `notifications` | ⏳ |
+| C16 | Fuseau horaire | Stockage en UTC. `TIME_ZONE = "Africa/Porto-Novo"` pour l'affichage, les tâches planifiées et les rapports | ⏳ |
+| C17 | Paiement reçu sur une commande expirée | Honoré si le stock (ou la place pour un événement) est encore disponible. Sinon, remboursement automatique et notification | ⏳ |
+| C18 | Maquettes des écrans à concevoir (WL22-WL24, WD23, WPD15, WT13) | Produites dans `design/`, dans de nouveaux fichiers d'écrans avec le même design system, puis validées avant leur développement | ⏳ |
+| C19 | Quotas d'une école (import d'élèves) | Les invitations en attente comptent dans le quota. Import partiel : les lignes hors quota ou invalides sont renvoyées en erreur ligne par ligne. CSV et Excel, 200 lignes maximum | ⏳ |
+| C20 | Sessions | Stockées en base avec cache (`cached_db`) au lieu du seul cache Redis. Session du personnel limitée à 8 h | ⏳ |
