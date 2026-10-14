@@ -1,0 +1,36 @@
+# OS / éditeurs
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Secrets & env locaux (seuls les .env.example sont versionnés)
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Données des conteneurs locaux
+.data/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+coverage/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+staticfiles/
+
+# Claude Code (réglages locaux)
+.claude/settings.local.json
