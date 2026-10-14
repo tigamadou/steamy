@@ -5,7 +5,7 @@ WEB     := $(COMPOSE) run --rm --no-deps web sh -c
 
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
-        test-api lint-api psql flower clean openapi lint-web typecheck-web
+        test-api lint-api fix-api psql flower clean openapi lint-web typecheck-web
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -60,8 +60,11 @@ seed: ## Charge les fixtures (compte admin, gabarits d'e-mails)
 test-api: ## Lance les tests de l'API
 	$(API) pytest
 
-lint-api: ## Lint de l'API
-	$(API) python -m flake8 --ignore E501,E722,F821,W504 apps/ project/ libs/
+lint-api: ## Lint et format de l'API (vérification seule)
+	$(API) sh -c "ruff check . && ruff format --check ."
+
+fix-api: ## Corrige automatiquement le lint et formate l'API
+	$(API) sh -c "ruff check --fix . && ruff format ."
 
 # --- Contrat front/back -----------------------------------------------------
 openapi: ## Régénère openapi.yaml + les types TS du client (à committer)

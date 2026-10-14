@@ -98,11 +98,13 @@ jobs:
       - name: Dépendances système (WeasyPrint, PostgreSQL)
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpq-dev libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0
       - run: pip install -r requirements.txt
-      # TODO : rendre bloquant après la migration vers Ruff (~170 erreurs historiques,
-      # dont des classes définies deux fois dans apps/courses/serializers.py)
-      - name: Lint (non bloquant pour l'instant)
+      # Non bloquant le temps de résorber la dette historique (voir les commits suivants)
+      - name: Lint (Ruff)
         continue-on-error: true
-        run: python -m flake8 --ignore E501,E722,F821,W504 apps/ project/ libs/
+        run: ruff check --output-format=github .
+      - name: Format (Ruff)
+        continue-on-error: true
+        run: ruff format --check .
       - name: Migrations manquantes ?
         run: python manage.py makemigrations --check --dry-run
       - name: Tests
