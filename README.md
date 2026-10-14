@@ -41,15 +41,21 @@ Après une modification de `requirements.txt`, lancer `make build`.
 Après toute modification d'un serializer ou d'une vue : `make openapi`, puis committer
 `openapi.yaml` et `packages/api-client/src/schema.d.ts`. La CI vérifie qu'ils sont à jour.
 
+## Workflow Git
+
+Gitflow : `main` = production, `development` = intégration. **Aucun commit direct sur ces deux branches** :
+tout passe par une branche `feature/…`, `fix/…`, `release/…` ou `hotfix/…` et une pull request.
+Détails, nommage et publication d'une version : [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## CI/CD
 
-- **CI** (`.github/workflows/ci.yml`, à chaque PR) : tests et contrat OpenAPI de l'API, lint/typecheck/build
+- **CI** (`.github/workflows/ci.yml`, à chaque PR et à chaque fusion dans `main` ou `development`) : tests et contrat OpenAPI de l'API, lint/typecheck/build
   du front, build des images, validation des charts. Check requis pour merger : `ci-ok`.
 - **CD** (`.github/workflows/deploy.yml`), piloté par les GitHub Releases :
 
 | Déclencheur | Environnement |
 | --- | --- |
-| Publication d'une **pre-release** (`v1.4.0-rc.1`) | staging |
-| Publication d'une **release** (`v1.4.0`), après approbation | production — mêmes images que la pre-release |
+| Publication d'une **pre-release** (`v1.4.0-rc.1`) sur la branche `release/1.4.0` | staging |
+| Publication d'une **release** (`v1.4.0`) sur le même commit, après approbation | production — mêmes images que la pre-release |
 
 Architecture, mise en place des serveurs, publication d'une version et exploitation : [`docs/infra/`](docs/infra/README.md).

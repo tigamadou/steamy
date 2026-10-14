@@ -1,4 +1,4 @@
-# Intégration continue : à chaque PR et à chaque push sur main.
+# Intégration continue : à chaque PR et à chaque push sur main et development (gitflow).
 # Seules les parties touchées sont testées ; le job `ci-ok` agrège le résultat
 # et c'est LUI qu'on rend obligatoire dans la protection de branche.
 name: CI
@@ -6,7 +6,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, development]
 
 concurrency:
   group: ci-${{ github.ref }}

@@ -4,7 +4,7 @@ Deux workflows GitHub Actions :
 
 | Workflow | Déclencheur | Rôle |
 | --- | --- | --- |
-| [`ci.yml`](../../.github/workflows/ci.yml) | Chaque PR, chaque push sur `main` | Vérifier que rien n'est cassé |
+| [`ci.yml`](../../.github/workflows/ci.yml) | Chaque PR, chaque push sur `main` et `development` | Vérifier que rien n'est cassé |
 | [`deploy.yml`](../../.github/workflows/deploy.yml) | Publication d'une **GitHub Release** | Construire, publier et déployer |
 
 ---
@@ -21,7 +21,8 @@ Le job `changes` détecte les parties modifiées, et seuls les jobs concernés t
 | `helm` | `infra/**`, workflows | `helm lint` et rendu des deux charts pour staging et prod, validation des manifestes (kubeconform), shellcheck du script de déploiement |
 | **`ci-ok`** | toujours | Agrège les résultats : succès si chaque job a réussi ou a été sauté |
 
-**Protection de `main`** : rendre obligatoire le seul check `ci-ok`. Comme les jobs sont conditionnels,
+**Protection de `main` et `development`** (gitflow, voir [`CONTRIBUTING.md`](../../CONTRIBUTING.md)) :
+PR obligatoire, push direct interdit, et rendre obligatoire le seul check `ci-ok`. Comme les jobs sont conditionnels,
 exiger chacun d'eux bloquerait les PR où ils ne tournent pas.
 
 Une nouvelle poussée sur la même branche annule l'exécution en cours (`concurrency`).
@@ -56,15 +57,18 @@ sequenceDiagram
 
 ### Étapes
 
-1. **GitHub → Releases → Draft a new release.**
-   - Tag `v1.4.0-rc.1`, cible `main` (ou le commit voulu).
-   - Cocher **Set as a pre-release**, puis publier.
-   - Déploiement automatique en **staging**.
-2. **Recette en staging.** Si une correction est nécessaire, faire un nouveau commit puis une nouvelle pre-release `v1.4.0-rc.2`.
-3. **Release finale.**
-   - Nouvelle release `v1.4.0` créée **sur le même commit** que la rc validée, **sans** cocher pre-release.
-   - GitHub demande une approbation.
-   - Une fois approuvée, la version est déployée en **production**.
+Le dépôt suit gitflow : une version se prépare sur une branche `release/x.y.z` (ou `hotfix/x.y.z`).
+Le pas-à-pas complet, y compris la clôture de la branche, est dans [`CONTRIBUTING.md`](../../CONTRIBUTING.md#publier-une-version).
+
+1. **Pre-release** : tag `v1.4.0-rc.1`, cible **`release/1.4.0`**, case *Set as a pre-release* cochée →
+   déploiement automatique en **staging**.
+2. **Recette en staging.** Une correction se fait par une PR vers `release/1.4.0`, puis une nouvelle pre-release `v1.4.0-rc.2`.
+3. **Release** : tag `v1.4.0`, cible `release/1.4.0` (**le même commit** que la rc validée), case pre-release décochée →
+   approbation → **production**.
+4. Fusion de `release/1.4.0` dans `main` puis dans `development` (merge commit).
+
+Le tag de prod doit pointer sur le commit de la rc et non sur le merge commit de `main` : un merge commit
+est un nouveau commit, pour lequel aucune image n'a été construite. Le déploiement serait refusé.
 
 ### Règles appliquées automatiquement
 

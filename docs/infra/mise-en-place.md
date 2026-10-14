@@ -132,10 +132,12 @@ Dans **Settings → Environments**, créer `staging` et `production`. Sur `produ
 
 ### Protection de branche
 
-Dans **Settings → Branches → `main`**, configurer :
+Le dépôt suit gitflow ([`CONTRIBUTING.md`](../../CONTRIBUTING.md)). Dans **Settings → Rules → Rulesets**
+(ou *Settings → Branches*), protéger **`main` et `development`** :
 
-- PR obligatoire ;
-- check obligatoire : **`ci-ok`**.
+- PR obligatoire (pas de push direct) ;
+- check obligatoire : **`ci-ok`** ;
+- force-push et suppression interdits.
 
 ## 8. Premier déploiement
 
