@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Nunito } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const nunito = Nunito({
+// Polices versionnées dans src/fonts (variables, sous-ensemble latin, licence OFL) :
+// le build ne dépend pas de Google Fonts, injoignable depuis certains environnements de CI.
+const nunito = localFont({
+  src: "../fonts/nunito-latin-wght-normal.woff2",
   variable: "--font-nunito",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: "200 1000",
+  display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const jetbrainsMono = localFont({
+  src: "../fonts/jetbrains-mono-latin-wght-normal.woff2",
   variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-  weight: ["500", "600"],
+  weight: "100 800",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
