@@ -17,13 +17,6 @@ from .tasks import send_message_notifications_async
 
 
 class IsParticipantOrAdmin(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.user and request.user.is_staff:
-            return True
-        return obj.participants.filter(pk=request.user.pk).exists() if hasattr(obj, 'participants') else False
-
-
-class IsParticipantOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         # allow listing and creation for authenticated users (listing will be filtered by get_queryset)
         return bool(request.user and request.user.is_authenticated)

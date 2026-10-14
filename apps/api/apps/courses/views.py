@@ -4,10 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.response import Response
 
-from apps.courses.models import Course  # si pas déjà importé
-
 from .models import Course, Lesson, Module, Path, Resource
-from .permissions import IsTeacherOrAdmin
 from .serializers import (
     CourseDetailSerializer,
     CourseListSerializer,
@@ -97,12 +94,12 @@ class ModuleViewSet(viewsets.ModelViewSet):
             try:
                 return Course.objects.get(pk=course_pk)
             except Course.DoesNotExist:
-                raise NotFound("Parent course not found (pk=%s)" % course_pk)
+                raise NotFound(f"Parent course not found (pk={course_pk})") from None
         if course_slug:
             try:
                 return Course.objects.get(slug=course_slug)
             except Course.DoesNotExist:
-                raise NotFound("Parent course not found (slug=%s)" % course_slug)
+                raise NotFound(f"Parent course not found (slug={course_slug})") from None
         # nothing found
         return None
 
@@ -141,7 +138,7 @@ class LessonViewSet(viewsets.ModelViewSet):
                 m = Module.objects.get(pk=module_pk)
                 return m, m.course
             except Module.DoesNotExist:
-                raise NotFound("Parent module not found (pk=%s)" % module_pk)
+                raise NotFound(f"Parent module not found (pk={module_pk})") from None
         # try nested under course + module id in body - fallback
         return None, None
 
@@ -170,10 +167,10 @@ class ResourceViewSet(viewsets.ModelViewSet):
         lesson_pk = self.kwargs.get("lesson_pk") or self.kwargs.get("lesson_id")
         if lesson_pk:
             try:
-                l = Lesson.objects.get(pk=lesson_pk)
-                return l, l.module.course
+                parent = Lesson.objects.get(pk=lesson_pk)
+                return parent, parent.module.course
             except Lesson.DoesNotExist:
-                raise NotFound("Parent lesson not found (pk=%s)" % lesson_pk)
+                raise NotFound(f"Parent lesson not found (pk={lesson_pk})") from None
         return None, None
 
     def perform_create(self, serializer):
