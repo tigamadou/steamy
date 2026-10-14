@@ -55,7 +55,8 @@ COPY --chown=app:app . /app
 # Fichiers statiques (admin, docs) servis par WhiteNoise
 RUN python manage.py collectstatic --noinput
 
-USER app
+# UID numérique : requis par runAsNonRoot côté Kubernetes
+USER 10001
 EXPOSE 8000
 
 # Les migrations ne tournent PAS ici : Job Helm dédié, avant chaque déploiement.

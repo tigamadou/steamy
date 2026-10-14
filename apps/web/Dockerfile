@@ -32,6 +32,7 @@ WORKDIR /app
 COPY --from=build --chown=node:node /repo/apps/web/.next/standalone ./
 COPY --from=build --chown=node:node /repo/apps/web/.next/static ./apps/web/.next/static
 COPY --from=build --chown=node:node /repo/apps/web/public ./apps/web/public
-USER node
+# UID numérique : requis par runAsNonRoot côté Kubernetes (node = 1000)
+USER 1000
 EXPOSE 3000
 CMD ["node", "apps/web/server.js"]
