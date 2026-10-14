@@ -111,7 +111,7 @@ Légende du statut : ⏳ à décider · ✅ décidé.
 | D70 | Rôle de l'admin dans les consentements (WAD08) | **Suivi** uniquement : demandes en attente, relances, litiges, changement de parent. Pas de validation à la place du parent | ✅ |
 | D71 | RBAC | `is_staff` ouvre l'accès au back-office ; 4 groupes Django (Super-admin, Contenu, Support, Finance) ; le rôle `admin` disparaît de `User.role` | ✅ |
 | D72 | 2FA | django-otp (TOTP), exigé à la fois sur l'admin Django et sur les endpoints back-office de l'API | ✅ |
-| D73 | Statuts des KPI (`kpiStatus`) | Manuel non saisi → « En attente » ; sans cible ou valeur texte → « Renseignée » ; en dessous de la cible → « Hors-cible » sous 70 %, « En dessous » de 70 à 100 % | ✅ |
+| D73 | Statuts des KPI (`kpiStatus`) | Cible atteinte ou dépassée → « Atteinte » ; manuel non saisi → « En attente » ; sans cible ou valeur texte → « Renseignée » ; en dessous de la cible → « Hors-cible » sous 70 %, « En dessous » de 70 à 100 % | ✅ |
 | D74 | Rapport trimestriel | « Soumettre » verrouille le rapport ; export CSV/PDF généré en asynchrone | ✅ |
 | D75 | KPI d'inclusion (§8.3) | Alimentés par le profil (genre, date de naissance, handicap, localité qualifiée). Les « institutions » sont à modéliser ou abandonner | ✅ |
 | D76 | Réseaux Mobile Money (§8.12) | Réglage par réseau (Celtiis inclus) et par pays, lu publiquement par le formulaire de paiement | ✅ |

@@ -27,14 +27,14 @@ Les plans de lot renvoient à ces identifiants. Le détail de chaque étape est 
 
 | ID | Contenu | Requise avant |
 | --- | --- | --- |
-| `API-0` | Correctifs de sécurité S1-S9, fermeture des endpoints inutiles, throttling, locale `fr`, codes d'erreur, nettoyage (messagerie gelée, login token, `api_root`) | Tout déploiement |
-| `API-1` | Socle : remise à zéro des migrations, nouveau modèle d'identité et rôles, conventions d'URL (`/api/<domaine>/`), domaine `auth` (session), référentiels, renommage `TrackingEvent`, notifications extraites | Lot 1 |
+| `API-0` | Correctifs de sécurité S1-S9, fermeture des endpoints inutiles, throttling, locale `fr`, codes d'erreur, nettoyage (routes de messagerie, login token, `api_root`) | Tout déploiement |
+| `API-1` | Socle : remise à zéro des migrations, nouveau modèle d'identité et rôles, conventions d'URL (`/api/<domaine>/`), domaine `auth` (session), référentiels, renommage `TrackingEvent`, notifications extraites, messagerie supprimée (tag `archive/messaging`, C15), sessions `cached_db` (C20) | Lot 1 |
 | `API-L1` | Catalogue public (Course/Project/Level/Mission en lecture, catégories, publication), Steamy Events en lecture, formulaires publics (devis, contact, leads), kits en lecture | Lot 1 |
 | `API-L2` | Inscriptions apprenant et parent, consentement, OTP SMS (interface + faux fournisseur, comparaison des fournisseurs), connexion multi-identifiants, mot de passe oublié, activation enseignant | Lot 2 |
 | `API-L3a` | Pédagogie : arbre, progression séquentielle, quiz et tentatives, badges, points, rang, certificats, Vimeo, wishlist, tableau de bord, préférences de notification | Lot 3 (dashboard, catalogue, WJ) |
 | `API-L3b` | Commerce : commandes typées, paiements (interface + prestataire choisi après comparaison), webhook durci, Kit Codes, demandes de paiement, boutique (kits, panier, stock, livraison), inscriptions aux événements | Lot 3 (WA, WK) |
 | `API-L4` | Parent : enfants, demandes à valider, accord sur les événements, rapport hebdomadaire, suppression | Lot 4 |
-| `API-L5` | Écoles, classes, invitations et import, évaluations, commentaires, décrochage | Lot 5 |
+| `API-L5` | Écoles, classes, invitations et import, évaluations, commentaires, décrochage, propositions d'événements | Lot 5 (et étape 4.10 du lot 4) |
 | `API-L6` | Back-office : RBAC (groupes), 2FA, admin Django enregistré et thémé, KPI et rapports d'impact, réglages | Lot 6 |
 
 ## Ordre de travail
@@ -49,11 +49,16 @@ API-0 ──► API-1 ──► API-L1 ──► API-L2 ──► API-L3a ──
   avancer pendant que le front du lot précédent se termine.
 - **Comparaisons de prestataires** : celle du SMS se fait avant `API-L2`, celle du paiement avant `API-L3b` (S9,
   S10).
+- **Étape 4.10** (consentement d'origine enseignant, `WPD05`) dépend d'`API-L5` : elle est **livrée avec le lot 5**,
+  après `API-L5` et avant l'étape 5.9 (parcours de bout en bout). Le lot 4 est terminé sans elle.
+- **Maquettes à concevoir** (C18) : WL22-WL24 (étape 1.2), WD23 (3.3a), WPD15 (4.0), WT13 (5.2) sont dessinées dans
+  `design/`, dans un nouveau fichier `screens-<espace>-a-concevoir-web.jsx`, et validées avant leur développement.
 
 ## Règles communes à tous les plans
 
-- **Gitflow.** Chaque étape d'un plan correspond à une branche `feature/…` créée depuis `development`, et à une PR vers
-  `development` avec une CI verte (`ci-ok`). Aucun commit direct sur `main` ni sur `development`. Une étape doit être
+- **Gitflow.** Chaque étape d'un plan correspond à une branche `feature/<lot>-<sujet>` créée depuis `development`
+  (`<lot>` ∈ `api`, `lot1` … `lot6` ; `<sujet>` en kebab-case, par exemple `feature/lot3-quiz`,
+  `feature/api-l2-4-decision-parent`), et à une PR vers `development` avec une CI verte (`ci-ok`). Aucun commit direct sur `main` ni sur `development`. Une étape doit être
   livrable seule et ne casse rien.
 - **Contrat front/API.** Toute modification d'API passe par `make openapi`. Le front n'appelle l'API qu'à travers le
   client généré (`getServerApi`, `getBrowserApi`).
@@ -86,11 +91,16 @@ Les URL sont en français, avec un *route group* et un layout par espace :
 | Public | `(public)` | `/` | `/parcours`, `/parcours/[slug]` (WL22), `/boutique`, `/boutique/[slug]`, `/evenements`, `/evenements/[slug]` (WL23), `/ecoles`, `/a-propos`, `/blog`, `/blog/[slug]`, `/guides`, `/categories`, `/legal/[doc]`, `/aide` (WL24) |
 | Authentification | `(auth)` | `/` | `/connexion`, `/inscription`, `/inscription/apprenant/…`, `/inscription/parent/…`, `/mot-de-passe-oublie/…`, `/activation/[token]` |
 | Apprenant | `(apprenant)` | `/apprenant` | `/apprenant` (WD01), `/apprenant/parcours`, `/apprenant/catalogue`, `/apprenant/parcours/[slug]/…`, `/apprenant/souhaits`, `/apprenant/boutique/…`, `/apprenant/profil/…` |
-| Parent | `(parent)` | `/parent` | `/parent`, `/parent/enfants/[id]`, `/parent/demandes/[id]` (WPD15), `/parent/commandes` |
+| Parent | `(parent)` | `/parent` | `/parent`, `/parent/enfants/[id]`, `/parent/consentements/[id]` (WPD05), `/parent/demandes/[id]` (WPD15), `/parent/evenements`, `/parent/commandes`, `/parent/boutique/…` |
 | Enseignant | `(enseignant)` | `/enseignant` | `/enseignant`, `/enseignant/classes/[id]`, `/enseignant/eleves/[id]` |
 | Back-office | `(backoffice)` | `/backoffice` | `/backoffice` (WAD01), `/backoffice/impact/…` (WAD02-WAD05) |
 
 - **Pas de `/admin` côté front.** L'admin Django est servi par l'API sur son propre domaine (`api.<domaine>/admin/`).
 - **Contrôle du rôle.** Le layout de chaque espace vérifie le rôle côté serveur (session) et redirige vers
-  `/connexion` si l'utilisateur n'a pas accès.
+  `/connexion?next=<chemin>` si l'utilisateur n'a pas accès.
+- **Retour après connexion.** Un seul paramètre, `?next=`, partout (`/connexion?next=…`, `/inscription?next=…`) :
+  chemin interne uniquement, validé par `safeNext()` (lot 2). L'admin Django (WAD15) accepte `next` vers
+  `<WEB_URL>/backoffice` seulement.
+- **Paramètres d'URL partagés.** WL24 : `/aide?sujet=<sujet>#contact` (`question`, `paiement`, `livraison`,
+  `changement-parent`, `candidature`, `autre`) ; « Rejoindre l'équipe » → `/aide?sujet=candidature#contact`.
 - **Pages publiques en cache.** Elles utilisent un client API anonyme, ce qui permet de les mettre en cache.

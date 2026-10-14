@@ -31,7 +31,7 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 Découpée en trois PR livrables séparément. Aucune ne dépend d'un endpoint d'API-L1.
 
-### 1.0a · Outillage, tokens, assets — `feature/front-socle-outillage` · M
+### 1.0a · Outillage, tokens, assets — `feature/lot1-socle-outillage` · M
 
 | Contenu | Détail |
 | --- | --- |
@@ -47,7 +47,7 @@ Découpée en trois PR livrables séparément. Aucune ne dépend d'un endpoint d
 **Recette** : `make test-web` et `make e2e` passent en local ; la CI exécute `e2e` sur une PR qui ne touche que
 `apps/api/` ; aucune occurrence de `91, 63, 224` ni de `jetbrains` dans `apps/web/src`.
 
-### 1.0b · Design system de base — `feature/design-system-base` · L
+### 1.0b · Design system de base — `feature/lot1-design-system` · L
 
 Port de `design/ds-*.jsx` dans `apps/web/src/components/ds/` (un dossier par composant, export nommé, test colocalisé).
 
@@ -66,12 +66,13 @@ Port de `design/ds-*.jsx` dans `apps/web/src/components/ds/` (un dossier par com
 | `SkeletonBlock` | Skeleton structurel (§6) |
 | `CourseCard` | Carte = lien ; pastille « Gratuit » si `isFree` ; **difficulté** (pas « niveau », S2) ; pas de `rating` (C8) ; cœur absent en public (`onFav` facultatif, lot 3) |
 | `WKKitCard` | Mode « vitrine » au lot 1 (voir 1.4) |
+| `Accordion`, `FaqAccordion` | `details/summary` accessible ; `FaqAccordion` (FAQ par thème, recherche locale facultative) sert WL24 et sera réutilisé par WD12, WPD13, WT11 |
 
 **Tests** : rendu, variantes, clavier, `vitest-axe` sur chaque composant ; `PhoneInput` : changement de pays, sortie
 E.164, numéro invalide. **Recette** : contrastes AA (aucun texte en `--ink-400`), focus visible sur tout élément
 interactif, aucun `rgba` ni hex en dur hors `tokens.css`.
 
-### 1.0c · Shell public, enveloppes, SEO — `feature/socle-public` · M
+### 1.0c · Shell public, enveloppes, SEO — `feature/lot1-socle-public` · M
 
 | Contenu | Détail |
 | --- | --- |
@@ -94,12 +95,12 @@ les entrées reportées sont absentes.
 
 | Étape | Branche | Écrans · routes | Taille |
 | --- | --- | --- | --- |
-| 1.1 | `feature/public-accueil-catalogue` | WL01 `/`, WL06 `/parcours`, WL16 `/categories` | M |
-| 1.2 | `feature/public-conception-wl22-24` | Maquettes WL22, WL23, WL24 (conception) | S |
-| 1.3 | `feature/public-fiche-parcours` | WL22 `/parcours/[slug]` | M |
-| 1.4 | `feature/public-evenements-boutique` | WL21 `/evenements`, WL23 `/evenements/[slug]`, WL07 `/boutique` | M |
-| 1.5 | `feature/public-editorial` | WL09 `/legal/[doc]`, WL10 `/a-propos`, WL17 `/blog`, WL18 `/blog/[slug]`, WL20 `/guides` | M |
-| 1.6 | `feature/public-formulaires` | WL11 `/ecoles`, WL24 `/aide` | M |
+| 1.1 | `feature/lot1-accueil-catalogue` | WL01 `/`, WL06 `/parcours`, WL16 `/categories` | M |
+| 1.2 | `feature/lot1-conception-wl22-24` | Maquettes WL22, WL23, WL24 (conception) | S |
+| 1.3 | `feature/lot1-fiche-parcours` | WL22 `/parcours/[slug]` | M |
+| 1.4 | `feature/lot1-evenements-boutique` | WL21 `/evenements`, WL23 `/evenements/[slug]`, WL07 `/boutique` | M |
+| 1.5 | `feature/lot1-editorial` | WL09 `/legal/[doc]`, WL10 `/a-propos`, WL17 `/blog`, WL18 `/blog/[slug]`, WL20 `/guides` | M |
+| 1.6 | `feature/lot1-formulaires` | WL11 `/ecoles`, WL24 `/aide` | M |
 
 ### 1.1 · Accueil, catalogue, catégories — M
 
@@ -119,7 +120,8 @@ les entrées reportées sont absentes.
 ### 1.2 · Conception de WL22, WL23, WL24 — S
 
 Maquettes produites **à partir des composants existants** (aucun nouveau style) dans un nouveau fichier
-`design/screens-public-a-concevoir-web.jsx`, ajouté à `App.html` (vue « Public »), validées avant 1.3, 1.4 et 1.6.
+`design/screens-public-a-concevoir-web.jsx`, ajouté à `App.html` (vue « Public »), validées avant 1.3, 1.4 et 1.6
+(C18).
 
 | Écran | Base | Contenu à dessiner (spec 1.14-1.16) |
 | --- | --- | --- |
@@ -133,8 +135,8 @@ Maquettes produites **à partir des composants existants** (aucun nouveau style)
 
 - Route `/parcours/[slug]`, données via `'use cache'` + `cacheTag('catalog')`, `generateMetadata` (titre,
   description, image OG), JSON-LD `Course`, slug ajouté au sitemap ; `notFound()` si non publié.
-- CTA visiteur : « Commencer » / « Demander à mon parent » → `/inscription?retour=/parcours/<slug>` ; « Se
-  connecter » → `/connexion?retour=…`. La redirection d'un connecté vers WC04 est ajoutée au lot 3 (via `NavAccount`
+- CTA visiteur : « Commencer » / « Demander à mon parent » → `/inscription?next=/parcours/<slug>` ; « Se
+  connecter » → `/connexion?next=…` (paramètre unique, README). La redirection d'un connecté vers WC04 est ajoutée au lot 3 (via `NavAccount`
   / redirection côté client, pour garder la page en cache). « Voir le kit » (D36) : affiché au lot 3 avec WK02 ; au
   lot 1, mention seule.
 - **API** (API-L1) : `GET catalog/courses/{slug}/` — **aucun contenu de mission** dans la réponse (vérifié par un
@@ -146,7 +148,7 @@ Maquettes produites **à partir des composants existants** (aucun nouveau style)
 - **WL21** : liste des événements publiés à venir, pastille couleur de catégorie, `Badge` prix (vert si gratuit,
   prix serveur en FCFA) → WL23. Pas de `WLJoinBanner`, pas d'« Inscris-toi en quelques secondes ». État vide :
   « Aucun événement à venir ».
-- **WL23** `/evenements/[slug]` : CTA visiteur « Participer » → `/connexion?retour=…` ou `/inscription` ; complet ou
+- **WL23** `/evenements/[slug]` : CTA visiteur « Participer » → `/connexion?next=…` ou `/inscription` ; complet ou
   passé : CTA désactivé avec motif. Les CTA connectés (WD11 au lot 3, WPD12 au lot 4) sont ajoutés par ces lots ;
   composant `EventDetail` exporté pour être réutilisé dans WD10 et WPD06. JSON-LD `Event`.
 - **WL07** : grille `WKKitCard` + filtres. Le checkout invité (D12) et WK02 arrivent au lot 3 : au lot 1, mode
@@ -178,8 +180,8 @@ Maquettes produites **à partir des composants existants** (aucun nouveau style)
   message → confirmation en place.
 - **WL24** `/aide` : FAQ statique `content/faq/` (compte et consentement, Mobile Money, kits et livraison,
   événements, mot de passe oublié : apprenant → son parent, parent → `/mot-de-passe-oublie`) ; formulaire de contact :
-  Nom*, Email ou téléphone*, Sujet* (`?sujet=` présélectionne : question, paiement, livraison, changement de parent,
-  candidature, autre), Message* ; ancres `#faq` et `#contact`.
+  Nom*, Email ou téléphone*, Sujet* (`?sujet=` présélectionne : `question`, `paiement`, `livraison`,
+  `changement-parent`, `candidature`, `autre`), Message* ; ancres `#faq` et `#contact`.
 - **API** (API-L1, API-1) : `POST public/quote-requests/`, `POST public/contact-messages/`,
   `GET referentials/countries/` (lu côté serveur en cache, passé à `PhoneInput`).
 - **Tests** : Vitest (validation, mapping des `fields`, `THROTTLED`) ; Playwright « devis » (CTA d'offre → formulaire
@@ -227,10 +229,10 @@ src/lib/{api-public,api-errors,routes}.ts · e2e/
 
 | Lot | Composants |
 | --- | --- |
-| **1 (créés ici)** | DS : `Icon`, `Logo`, `Mascot`, `Button` (+ `outline-inverse`), `Badge`, `Tag`, `Avatar`, `Loader`, `Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `PhoneInput`, `Toast`, `Tabs`, `SkeletonBlock`, `CourseCard`, `WKKitCard` (vitrine). Public : `PublicShell`, `PublicNav` + `MegaMenu`, `NavAccount`, `PublicFooter`, `WLJoinBanner`, `WLSectionHead`, `WLPillarCard`, `WLStep`, `WLSocial`, `CategoryCard`, `EventRow`, `EventDetail`, `BlogCard`, `GuideCard`, `OfferCard`, `Breadcrumb`, `Accordion`. États : `WXState`, `AppStateBoundary`, `OfflineGate` |
-| 2 | `WebShell`, `PasswordInput`, `OTPInput`, `PwReq` (D25), `GoalChip`, `ProgressSteps`, `UserTypeCard`, `ChoiceCard`, `Modal` (premier besoin) |
-| 3 | `AppShell`, `StatPill`, `ProgressBar`, `Medal`, `MissionItem`, `Quiz`, `QuizAttemptRow`, `NotifItem`, `Toggle`, `SectionHeader`, `SettingsRow`, `QuickActionTile`, `Section`, `InfoCard`, `WANetworkCard`, `PaymentForm` ; activation du cœur de `CourseCard` et du panier de `WKKitCard` |
-| 6 | `AdminShell`, `Sparkline`, `BarChart`, `DonutChart`, `StatCard`, `DataTable`, `SegmentedControl` |
+| **1 (créés ici)** | DS : `Icon`, `Logo`, `Mascot`, `Button` (+ `outline-inverse`), `Badge`, `Tag`, `Avatar`, `Loader`, `Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `PhoneInput`, `Toast`, `Tabs`, `SkeletonBlock`, `CourseCard`, `WKKitCard` (vitrine). DS (suite) : `Accordion`, `FaqAccordion`, `Breadcrumb`. Public : `PublicShell`, `PublicNav` + `MegaMenu`, `NavAccount`, `PublicFooter`, `WLJoinBanner`, `WLSectionHead`, `WLPillarCard`, `WLStep`, `WLSocial`, `CategoryCard`, `EventRow`, `EventDetail` (réutilisés dans les shells connectés), `BlogCard`, `GuideCard`, `OfferCard`. États : `WXState`, `AppStateBoundary`, `OfflineGate` |
+| 2 | `WebShell`, `PasswordInput`, `NewPasswordFields`, `OTPInput`, `PwReq` (D25), `GoalChip`, `AvatarPicker`, `ProgressSteps`, `UserTypeCard`, `ChoiceCard`, `Modal` (premier besoin), `Celebration`, `ConsentRequestCard` |
+| 3 | `AppShell`, `StatPill`, `ProgressBar`, `Medal`, `MissionItem`, `Quiz`, `QuizAttemptRow`, `NotifItem`, `Toggle`, `SectionHeader`, `SettingsRow`, `QuickActionTile`, `Section`, `InfoCard`, `WANetworkCard`, `PaymentForm`, `PaymentStatusPanel`, `AddressForm`, `ShippingTimeline`, `VimeoPlayer`, `KitCodeInput` ; activation du cœur de `CourseCard` et du panier de `WKKitCard` |
+| 6 | `AdminShell` et primitives data-viz `Sparkline`, `BarChart`, `DonutChart`, `StatCard`, `DataTable`, `SegmentedControl`, rangés dans `src/components/backoffice/` (réservés au back-office, §2.5) |
 
 ## Dépendances vers l'API
 
@@ -247,11 +249,11 @@ src/lib/{api-public,api-errors,routes}.ts · e2e/
 
 Ordre conseillé : 1.0a → 1.0b → 1.0c → (1.2 et 1.5 en parallèle, sans API) → 1.1 → 1.3 → 1.4 → 1.6.
 
-**Besoins d'API à confirmer dans API-L1** (non explicites au §7) : parcours « mis en avant » de WL01 (`?featured=`
-ou `sort=`), compteur `courseCount` dans `catalog/categories/`, filtre `?upcoming=` et `seatsLeft` sur `events/`,
-catégories de kits (`shop/kits/?category=` et source de la liste), `fields` détaillés sur les trois `POST public/*`,
-throttling anonyme de ces `POST` (API-0), contenu D2 couvrant chaque état (catégorie vide, événement complet, passé,
-payant, gratuit).
+**Besoins d'API intégrés à API-L1 et au §7** : `Course.featured` et `catalog/courses/?featured=` (WL01),
+`courseCount` dans `catalog/categories/`, `events/?upcoming=` et `seatsLeft`, `Kit.category` et
+`shop/kits/?category=` (catégories du référentiel `catalog/categories/`), `fields` détaillés et throttle dédié sur
+les trois `POST public/*` (API-L1.4), jeu D2 couvrant chaque état (catégorie vide, événement complet, passé, payant,
+gratuit).
 
 ## Risques
 
@@ -265,6 +267,13 @@ payant, gratuit).
 | Contenu éditorial (légal, blog, guides PDF, FAQ) non fourni | Gabarits MDX et contenus de départ ; validation juridique de WL09 (D6) suivie hors code |
 | Canonical et indexation avec une image promue staging → prod | `metadataBase` = domaine de prod ; `noindex` posé par l'ingress de staging |
 | Exposition de données de mineurs | Aucune donnée d'apprenant consommée au lot 1 ; relecture D15 des contenus ; test « pas de contenu de mission » sur WL22 |
+
+## Points ouverts
+
+| Point | Bloque |
+| --- | --- |
+| Validation juridique des textes légaux de WL09 et de la mention de finalité (D6) | Mise en production (pas le développement) |
+| Contenus éditoriaux définitifs (blog, guides PDF, FAQ, chiffres vitrine) | Recette de 1.5 et 1.6 (gabarits de départ en attendant) |
 
 ## Critères de fin de lot
 

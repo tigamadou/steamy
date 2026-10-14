@@ -34,7 +34,9 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 | Modèles `impact` (`KpiDefinition`, `KpiValue`, `ImpactReport`, `ReportExport`), `PlatformSettings`, `AuditLog`, `Announcement` ; calcul des KPI ; endpoints §7.8 ; permission DRF staff + OTP + groupe | Écrans : admin Django (`admin.py`, gabarits, actions, thème, connexion WAD15) et pages Next.js |
 
 Les étapes 6.1 à 6.5 vivent dans `apps/api` mais ne créent **pas** d'endpoint : elles enregistrent et configurent
-l'admin. Les modèles métier qu'elles exposent sont créés par `API-1` à `API-L5`.
+l'admin. Les modèles métier qu'elles exposent sont créés par `API-1` à `API-L5`. Elles **portent** les PR `API-L6.1`
+(2FA : 6.1), `API-L6.2` (thème, RBAC, actions : 6.1 à 6.5) et `API-L6.3` (réglages : 6.5) : une seule PR par sujet,
+pas de doublon avec PLAN-API. `API-L6.4` (Impact Tracker, endpoints §7.8) précède 6.7 à 6.9.
 
 ## Arborescence des routes
 
@@ -96,18 +98,18 @@ par l'API ; l'affichage est « T1 2026 ».
   `setup_staff_groups`), jamais à la main. Un test fige la matrice.
 - Super-admin est un **groupe** qui reçoit toutes les permissions ; `is_superuser` est réservé à un compte de secours,
   soumis lui aussi au TOTP.
-- La répartition des écrans hors libellés de WAD13 (événements, commandes) reste une proposition de la spec : à
-  confirmer à la recette de 6.1.
+- La répartition des écrans hors libellés de WAD13 (événements, commandes) suit la proposition de la spec (voir
+  Points ouverts).
 
 ## Étapes
 
-### 6.1 · Socle staff : groupes, TOTP, WAD15, thème, audit — `feature/backoffice-socle-staff` · **L**
+### 6.1 · Socle staff : groupes, TOTP, WAD15, thème, audit — `feature/lot6-socle-staff` · **L**
 
 | Rubrique | Contenu |
 | --- | --- |
 | Écrans | WAD15 (connexion), index de l'admin |
 | Réalisation | Admin Django (`apps/api`) |
-| Dépendances | `API-0` (locale `fr`, `api-auth/` supprimé), `API-1` (`User` refondu, `is_staff`), `API-L6` (permission DRF, `AuditLog`) |
+| Dépendances | `API-0` (locale `fr`, `api-auth/` supprimé), `API-1` (`User` refondu, `is_staff`, `AuditLog` en API-1.6, `accounts/me/` en API-1.2) ; réalise `API-L6.1` (permission DRF `IsStaffVerified`) |
 
 Réalisation :
 1. **django-otp** : `django_otp`, `django_otp.plugins.otp_totp` dans `INSTALLED_APPS`, `OTPMiddleware` après
@@ -126,12 +128,13 @@ Réalisation :
    `--ink-900`…`--ink-50` de `design/ds-tokens.css`, aucun magenta, logo monochrome, bandeau d'environnement
    staging/production). `X_FRAME_OPTIONS = "SAMEORIGIN"` pour les modales de django-admin-interface. Lien
    « Pilotage » vers `WEB_URL/backoffice` dans l'en-tête.
-6. **Session staff** : durée plus courte que celle des familles (ex. 8 h, `set_expiry` à la connexion), invalidée à la
-   désactivation du compte ou à la réinitialisation du TOTP.
+6. **Session staff** : 8 h (C20, `set_expiry` à la connexion ; moteur `cached_db`), invalidée à la désactivation du
+   compte ou à la réinitialisation du TOTP.
 7. **Audit** : `AuditedAdminMixin` (base de tous les `ModelAdmin`) journalise ajout, modification (champs changés),
    suppression et actions dans `AuditLog` (acteur, action, cible, données, IP). Connexions réussies et échouées, échecs
    OTP journalisés. `AuditLogAdmin` en lecture seule, Super-admin uniquement.
-8. **Exposition au front** : `GET accounts/me/` renvoie `isStaff`, `otpVerified`, `staffGroups` (via `API-L6`).
+8. **Exposition au front** : `GET accounts/me/` renvoie `isStaff`, `otpVerified`, `staffGroups` (champs prévus en
+   API-1.2, `otpVerified` alimenté ici).
 9. **Nettoyage** : désenregistrer les modèles gelés ou supprimés (`messaging`, `Path`, anciens `courses`) ;
    `TrackingEvent` en lecture seule ; `django_celery_beat`/`results` visibles du seul Super-admin.
 
@@ -143,7 +146,7 @@ hérite d'`AuditedAdminMixin` (test d'introspection du registre).
 Recette : un membre de chaque groupe se connecte par WAD15 avec TOTP et ne voit que ses modèles ; l'admin est en
 français, monochrome ; toute modification apparaît dans le journal.
 
-### 6.2 · Utilisateurs, consentements, équipe (WAD06-WAD08, WAD13) — `feature/admin-comptes-consentements` · **L**
+### 6.2 · Utilisateurs, consentements, équipe (WAD06-WAD08, WAD13) — `feature/lot6-comptes-consentements` · **L**
 
 | Écran | `ModelAdmin` et comportement |
 | --- | --- |
@@ -163,7 +166,7 @@ Super-admin non supprimable ; changement de parent sans acceptation → lien inc
 Recette : sur le jeu D2, retrouver Léa Adjovi par identifiant, voir son parent et ses consentements, relancer une
 demande en attente, inviter un enseignant rattaché à une école.
 
-### 6.3 · Contenu des parcours (WAD09) — `feature/admin-contenu-parcours` · **M**
+### 6.3 · Contenu des parcours (WAD09) — `feature/lot6-contenu-parcours` · **M**
 
 | Rubrique | Contenu |
 | --- | --- |
@@ -180,7 +183,7 @@ modification du prix sans effet sur les `OrderItem` existants.
 
 Recette : créer un parcours complet (2 projets, niveaux, missions Vimeo, quiz), le publier, le voir dans WL22 et WC.
 
-### 6.4 · Boutique, commandes, paiements (WAD10, WAD11) — `feature/admin-boutique-paiements` · **M**
+### 6.4 · Boutique, commandes, paiements (WAD10, WAD11) — `feature/lot6-boutique-paiements` · **M**
 
 | Écran | `ModelAdmin` et comportement |
 | --- | --- |
@@ -193,7 +196,7 @@ Tests : aucune voie de l'admin ne passe une commande à `paid` ; transitions de 
 révocation d'un code déjà utilisé refusée ; Support ne voit pas `payload` ; Contenu ne voit pas les paiements ;
 agrégats égaux à un calcul de référence sur le jeu D2.
 
-### 6.5 · Steamy Events et réglages (WAD12, WAD14) — `feature/admin-events-reglages` · **M**
+### 6.5 · Steamy Events et réglages (WAD12, WAD14) — `feature/lot6-events-reglages` · **M**
 
 | Écran | `ModelAdmin` et comportement |
 | --- | --- |
@@ -205,7 +208,7 @@ Tests : aucune action ne fait passer une candidature à `accepted` (S3, C3) ; re
 payée → `Refund` créé ; singleton non dupliquable ; désactiver un réseau le retire de l'endpoint public ; seuil hors
 bornes refusé.
 
-### 6.6 · Socle Next.js du back-office — `feature/backoffice-shell` · **M**
+### 6.6 · Socle Next.js du back-office — `feature/lot6-backoffice-shell` · **M**
 
 | Rubrique | Contenu |
 | --- | --- |
@@ -220,7 +223,7 @@ API consommée : `GET accounts/me/`, `POST auth/logout/`. Tests : Vitest sur cha
 accessibilité) ; Playwright : visiteur anonyme et parent redirigés vers WAD15, staff vérifié voit le shell, Contenu
 ouvre `/backoffice/impact` → page d'accès refusé.
 
-### 6.7 · WAD01 Vue d'ensemble — `feature/backoffice-vue-ensemble` · **S**
+### 6.7 · WAD01 Vue d'ensemble — `feature/lot6-vue-ensemble` · **S**
 
 | Rubrique | Contenu |
 | --- | --- |
@@ -229,7 +232,7 @@ ouvre `/backoffice/impact` → page d'accès refusé.
 | API | `GET backoffice/overview/` (§7.8). « À traiter » renvoie, pour les seuls groupes de l'utilisateur, `{ kind, count, adminPath }` : consentements en attente (WAD08, D70), paiements échoués (WAD11), candidatures à suivre (WAD12). Le front ne construit pas les filtres Django |
 | Tests | Vitest : états vide, chargement, erreur. pytest (`API-L6`) : compteurs sur le jeu D2, entrées filtrées par groupe. Playwright : Support clique « Consentements en attente » → liste Django filtrée |
 
-### 6.8 · Impact Tracker : tableau de bord et détail (WAD02, WAD03) — `feature/backoffice-impact-kpi` · **L**
+### 6.8 · Impact Tracker : tableau de bord et détail (WAD02, WAD03) — `feature/lot6-impact-kpi` · **L**
 
 | Rubrique | Contenu |
 | --- | --- |
@@ -248,7 +251,7 @@ main), table de vérité de `kpiStatus` (indisponible, en attente, renseignée, 
 atteinte ≥ 100 %), bornes de période. Vitest : rendu de chaque statut. Playwright : Finance change de période →
 valeurs rechargées, ouvre un indicateur.
 
-### 6.9 · Rapport trimestriel, saisie manuelle, exports (WAD04, WAD05) — `feature/backoffice-impact-rapport` · **L**
+### 6.9 · Rapport trimestriel, saisie manuelle, exports (WAD04, WAD05) — `feature/lot6-impact-rapport` · **L**
 
 | Rubrique | Contenu |
 | --- | --- |
@@ -282,7 +285,7 @@ API-L6 (KPI, rapports, exports) ──────────► 6.6 ──► 
 | Risque | Effet | Parade |
 | --- | --- | --- |
 | Cookie de session partagé (domaine parent) et 2FA | Une session staff non vérifiée par OTP, ou volée sur le front, ouvre l'API | Vérification OTP **côté API** à chaque requête `/api/backoffice/` (pas seulement dans le layout) ; personnel refusé sur W16 (C7) ; session staff courte ; `SameSite=Lax`, `Secure`, `HttpOnly` ; `next` limité à `WEB_URL` |
-| Sessions en cache Redis (`SESSION_ENGINE` cache) | Éviction → déconnexion et nouvel OTP | Base `cached_db` ou Redis sans éviction pour les sessions ; à trancher en 6.1 |
+| Sessions perdues (éviction Redis) | Déconnexion et nouvel OTP | Sessions `cached_db` (C20, API-1.1) |
 | Perte d'appareil TOTP | Membre bloqué ; contournement tentant | Réinitialisation par un Super-admin uniquement, journalisée ; compte de secours `is_superuser` documenté dans `docs/infra/exploitation.md` |
 | Données des mineurs | Exposition de genre, handicap, localité, contacts | Champs sensibles par permission (D6), lecture seule, pas d'export de masse dans l'admin (action « exporter » désactivée), audit des consultations de fiches, `msisdn` masqué |
 | Admin contournant un invariant | Consentement, candidature ou paiement validé à la main | Statuts en lecture seule, actions passant par les services métier, tests d'invariants dans chaque étape |
@@ -290,16 +293,17 @@ API-L6 (KPI, rapports, exports) ──────────► 6.6 ──► 
 | Inlines Django pour l'arbre pédagogique | Saisie laborieuse pour le groupe Contenu | Pages chaînées ; mesurer à la recette avant d'ajouter une dépendance (django-nested-admin) |
 | Thème admin difficile à rendre monochrome | Incohérence visuelle | Thème versionné en fixture ; surcharges CSS limitées à un fichier |
 
-## Points ouverts et hypothèses
+## Points ouverts
 
-| Point | Hypothèse retenue |
-| --- | --- |
-| Libellé du statut atteint : « Validée » (SPEC-ECRANS §5.14) ou « Atteinte » (SPEC-TECHNIQUE §4.5) ; D73 ne le nomme pas | Code `met`, libellé fourni par le serveur : à arbitrer, « Atteinte » proposé |
-| « Institutions » : non collectées (WAD05, SPEC-ECRANS) ou `School` sous offre active (§8.18) | §8.18 retenu (plus récent) ; la carte « non collectés » de WAD05 devient vide |
-| `EventApplication.pending_review` et « revue finale par le personnel » (§3.4) contre C3 (accord parental qui confirme) | C3 retenu : WAD12 = suivi + refus exceptionnel avec remboursement |
-| « Valider la saisie » (WAD05) non défini par D74 | Contrôle de complétude des KPI manuels et marque les valeurs comme validées ; la soumission exige une saisie validée |
-| Litige sur un consentement, modération D15, changement de parent | Champs `disputedAt`/`disputeNote`, modèle de revue du profil public et flux de changement de parent à ajouter dans `API-L6` |
-| Exposition `isStaff`, `otpVerified`, `staffGroups` | Ajoutés à `GET accounts/me/` (absent de §7.3) |
+Tranchés depuis la rédaction : statut ≥ cible = « Atteinte » (§4.5, SPEC-ECRANS-3 alignée) ; « Institutions » =
+`School` sous offre active (§8.18) ; pas de `pending_review`, WAD12 = suivi + refus exceptionnel avec remboursement
+(C3) ; litiges, modération D15 et changement de parent intégrés à `API-L6.2` (`disputedAt`, `PublicProfileReview`,
+`replacesLink`) ; `isStaff`, `otpVerified`, `staffGroups` dans `accounts/me/` ; sessions (C20).
+
+| Point | Hypothèse de travail | Bloque |
+| --- | --- | --- |
+| « Valider la saisie » (WAD05) non défini par D74 | Contrôle de complétude des KPI manuels, valeurs marquées validées ; « Soumettre » exige une saisie validée | 6.9 (à confirmer par le produit) |
+| Répartition par groupe des entrées « événements » et « commandes » (WAD13), proposée par la spec | Matrice ci-dessus | Recette de 6.1 |
 
 ## Critères de fin de lot
 

@@ -108,7 +108,7 @@ Aucune donnée personnelle, code, `challengeId` ni `resetToken` dans une URL. Se
 
 ## Composants ajoutés au design system
 
-Dans `apps/web/src/components/` (atomes, composés, layouts selon le rangement du lot 1). Chacun a ses tests Vitest
+Dans `apps/web/src/components/ds/` (rangement du lot 1 : un dossier par composant, export nommé). Chacun a ses tests Vitest
 (rendu, clavier, `aria-*`, états) et une entrée dans la page de démonstration du DS si le lot 1 en crée une.
 
 | Composant | Source maquette | Exigences |
@@ -138,19 +138,19 @@ Dans `apps/web/src/components/` (atomes, composés, layouts selon le rangement d
 
 ## Étapes
 
-### 2.0 Socle de l'authentification · `feature/auth-socle` · **M**
+### 2.0 Socle de l'authentification · `feature/lot2-socle` · **M**
 
 | Volet | Contenu |
 | --- | --- |
 | DS | Tous les composants du tableau ci-dessus, sauf `ResumeCodeCard` et `PendingPill` (livrés en 2.4) |
 | Lib | `lib/auth/session.ts` (`getCurrentUser()` server-only, `accounts/me/`), `homeForRole()` (`learner` → `/apprenant`, `parent` → `/parent`, `teacher` → `/enseignant`, profil incomplet → W11 ou WP07), `safeNext()` (chemin relatif commençant par `/`, refuse `//`, `\`, schémas, et tout préfixe hors liste blanche), `logout()` (`POST auth/logout/` + `router.refresh()`), `identifier.ts` (C7), hook `useReferential()` |
 | Gardes | `proxy.ts` ; layouts `(apprenant)`, `(parent)`, `(enseignant)` avec `RoleGate` sous `<Suspense>` et page d'attente minimale (prénom + « Se déconnecter ») tant que les lots 3-5 ne sont pas livrés |
-| Outillage E2E | Helpers Playwright : lecture du **faux fournisseur SMS** et des emails (Mailpit, déjà dans `compose.yml`), création de données via `make seed` (D2) |
+| Outillage E2E | Helpers Playwright : lecture du **faux fournisseur SMS** et des emails dans Mailpit (déjà dans `compose.yml` ; un SMS y arrive comme email adressé à `<e164>@sms.test`, API-L2.0b), création de données via `make seed` (D2) |
 | API | `API-1` : `auth/csrf`, `auth/login`, `auth/logout`, `accounts/me`, `referentials/*` |
 | Tests | Vitest : chaque composant (clavier, collage OTP, bornes du stepper, E.164 par pays, `PwReq` en phase avec D25), `safeNext`, `homeForRole`, `identifier` (table de cas C7) |
 | Recette | Composants conformes à la maquette, utilisables au clavier seul, contrastes AA ; aucun référentiel en dur |
 
-### 2.1 Connexion W16 et redirection · `feature/auth-connexion` · **M**
+### 2.1 Connexion W16 et redirection · `feature/lot2-connexion` · **M**
 
 | Volet | Contenu |
 | --- | --- |
@@ -161,7 +161,7 @@ Dans `apps/web/src/components/` (atomes, composés, layouts selon le rangement d
 | Tests | Vitest : erreurs par code, choix « mot de passe oublié ». Playwright : connexion apprenant, parent et enseignant du jeu de démo → bon espace ; `next` externe ignoré ; apprenant sur `/parent` → redirigé ; déconnexion |
 | Recette | Les trois rôles atterrissent dans leur espace ; compte du personnel refusé sans indice ; registre tutoiement côté apprenant |
 
-### 2.2 Mot de passe oublié et activation enseignant · `feature/auth-mot-de-passe` · **M**
+### 2.2 Mot de passe oublié et activation enseignant · `feature/lot2-mot-de-passe` · **M**
 
 | Volet | Contenu |
 | --- | --- |
@@ -172,7 +172,7 @@ Dans `apps/web/src/components/` (atomes, composés, layouts selon le rangement d
 | Tests | Vitest : bascule SMS/email, erreurs OTP, concordance. Playwright : reset parent par SMS (faux fournisseur) puis connexion avec le nouveau mot de passe et ancienne session invalidée ; reset enseignant par email (Mailpit) ; numéro inconnu → même réponse ; 3 codes faux → `OTP_TOO_MANY_ATTEMPTS` ; activation depuis le lien Mailpit puis réutilisation du lien → `INVITATION_INVALID` |
 | Recette | Vouvoiement partout ; aucune règle « Différent de l'ancien » ; aucun compte à rebours figé |
 
-### 2.3 Inscription apprenant W01-W06, W19 · `feature/auth-inscription-apprenant` · **L**
+### 2.3 Inscription apprenant W01-W06, W19 · `feature/lot2-inscription-apprenant` · **L**
 
 | Volet | Contenu |
 | --- | --- |
@@ -183,39 +183,39 @@ Dans `apps/web/src/components/` (atomes, composés, layouts selon le rangement d
 | Tests | Vitest : W04 (C7, CGU obligatoire, `USERNAME_TAKEN` → W19), W05 (bornes), W06 (`CONSENT_COOLDOWN`). Playwright : W02 → W06 jusqu'à l'envoi du SMS de consentement (lu dans le faux fournisseur) |
 | Recette | Kickers et barres conformes à SPEC-ECRANS §2.4 ; aucune mention « moins de 16 ans » (S3) ; aucun élément « Ne pas porter » de §2.5 |
 
-### 2.4 Attente, reprise et issue W07, W08, W18 · `feature/auth-consentement-apprenant` · **M**
+### 2.4 Attente, reprise et issue W07, W08, W18 · `feature/lot2-consentement-apprenant` · **M**
 
 | Volet | Contenu |
 | --- | --- |
 | Écrans | W07 : `FullScreenStage`, `Mascot sleep`, numéro du parent rappelé (masqué), `PendingPill`, `ResumeCodeCard` + date d'expiration (7 jours, D21), « Renvoyer la demande ». Reprise `/inscription/reprendre` (C5) : identifiant + code → W07, W08 ou W18. W08 : `Celebration`, « {Prénom du parent} a accepté ton inscription » → W10. W18 : `Mascot sad`, motif et précisions du parent, « Tu pourras refaire une demande à ce parent dans 30 jours », « Retour à l'accueil » / « Besoin d'aide ? » → WL24 |
 | Polling | `GET auth/learner-signup/` toutes les 15 s, suspendu quand l'onglet est caché (`visibilitychange`), arrêté sur un état terminal, recul progressif en cas d'erreur réseau |
-| Code de reprise | Renvoyé une seule fois par l'API (haché côté serveur). Affiché à la première arrivée sur W07 avec « J'ai noté mon code » ; copie en `sessionStorage` de l'onglet pour survivre à un rechargement, effacée à W08 ou W18. Voir point ouvert n° 2 |
+| Code de reprise | Renvoyé une seule fois par l'API (haché côté serveur), **non régénérable** (C14). Affiché à la première arrivée sur W07 avec « J'ai noté mon code » ; copie en `sessionStorage` de l'onglet pour survivre à un rechargement, effacée à W08 ou W18. Code perdu : l'enfant recommence l'inscription (W03) ; la nouvelle demande au même numéro annule l'ancienne et libère l'identifiant |
 | API | `API-L2` : `auth/learner-signup/` (GET), `…/resume/`, `accounts/consent-requests/{id}/resend/` (plafonds SMS) |
 | Tests | Vitest : transitions de W07 (pending → accepted/refused/expired), throttling du renvoi. Playwright : **reprise** dans un nouveau contexte navigateur (code lu à W07) ; code faux → `RESUME_CODE_INVALID` ; connexion W16 d'un compte en attente → reprise préremplie |
 | Recette | W18 sans « Changer de parent » ni « Réessayer plus tard » ; après W18, l'identifiant est de nouveau disponible (D22) |
 
-### 2.5 Mot de passe et profil apprenant W10-W15 · `feature/auth-profil-apprenant` · **M**
+### 2.5 Mot de passe et profil apprenant W10-W15 · `feature/lot2-profil-apprenant` · **M**
 
 | Volet | Contenu |
 | --- | --- |
 | Écrans | W10 `NewPasswordFields` → `POST auth/learner-signup/password/` (active et connecte). W11 date de naissance, pays, localité, email facultatif. W12 classe (ordre scolaire), genre (3 `ChoiceCard`, facultatif), handicap (facultatif), **mention de finalité** (D6). W13 `GoalChip`, CTA « Suivant · n sélectionnés » désactivé sous 2. W14 `AvatarPicker` plein écran, barre 4/4. W15 `Celebration`, `Avatar` choisi, « Commence par un parcours gratuit » (D27) → `/apprenant/catalogue?prix=gratuit`, « Aller sur mon tableau de bord » → `/apprenant` |
-| État | Un `PATCH accounts/me/learner-profile/` par étape (reprise possible) ; `accounts/me` indique l'étape de profil restante, et `homeForRole` y renvoie à la connexion (même parcours pour l'enfant créé par son parent, D51) |
+| État | Un `PATCH accounts/me/learner-profile/` par étape (reprise possible) ; `accounts/me` indique l'étape de profil restante (`profileStep`, API-L2.5), et `homeForRole` y renvoie à la connexion (même parcours pour l'enfant créé par son parent, D51) |
 | API | `API-L2` ; `referentials/school-grades/`, `goals/`, `avatars/`, `disabilities/`, `localities/?country=` |
 | Tests | Vitest : `BIRTHDATE_AGE_MISMATCH`, champs facultatifs vraiment facultatifs, sélection minimale des objectifs, aucun avatar présélectionné |
 | Recette | Pas de « 1 parcours gratuit débloqué » ; règles W10 = D25 exactement ; genre et handicap jamais obligatoires |
 
-### 2.6 Inscription parent WP01-WP04, WP07-WP10 · `feature/auth-inscription-parent` · **L**
+### 2.6 Inscription parent WP01-WP04, WP07-WP10 · `feature/lot2-inscription-parent` · **L**
 
 | Volet | Contenu |
 | --- | --- |
 | Écrans | WP01 prénom, nom, `PhoneInput`, CGU → `POST auth/parent-signup/`. WP02 `OTPInput` + `ResendCountdown`, « Modifier le numéro » → WP01. WP03 `NewPasswordFields` → connecté. WP04 2 `UserTypeCard` : « Oui, mon enfant m'a envoyé une demande » → demandes en attente pour ce numéro (une → WP05, plusieurs → liste, aucune → message et WP07) ; « Non, je crée mon espace » → WP07. WP07-WP09 profil (`PATCH accounts/me/parent-profile/`), WP08 tout facultatif. WP10 `Celebration`, enfants rattachés (`GET accounts/children/`) ou « Aucun enfant rattaché », → `/parent` ou WPD04 |
-| État | `challengeId` en `sessionStorage` (WP01 → WP02), effacé à WP03 ; si un jeton de consentement est en attente (arrivée par le lien SMS), WP04 est sauté et la demande ouverte directement |
-| API | `API-L2` : `auth/parent-signup/`, `…/verify/`, `…/password/`, `auth/otp/resend/`, `accounts/me/parent-profile/`, `accounts/consent-requests/?status=pending`, `accounts/children/` |
-| Sécurité | OTP selon D24 ; `PHONE_TAKEN` traité par un message neutre qui oriente vers W16 et WL02 (voir point ouvert n° 6) |
+| État | `challengeId` en `sessionStorage` (WP01 → WP02), effacé à WP03 ; arrivée par le lien SMS : numéro prérempli à WP01 par `POST accounts/consent-requests/preview/` (numéro masqué), puis WP04 sauté et la demande ouverte directement |
+| API | `API-L2` : `auth/parent-signup/`, `…/verify/`, `…/password/`, `auth/otp/resend/`, `accounts/me/parent-profile/`, `accounts/consent-requests/?status=pending` (demandes adressées au numéro vérifié), `accounts/consent-requests/preview/`, `accounts/children/` |
+| Sécurité | OTP selon D24 ; numéro déjà inscrit : réponse neutre à WP01, OTP envoyé quand même ; après vérification, `existingAccount` → W16 avec message « Vous avez déjà un compte » (C13) |
 | Tests | Vitest : WP02 (collage, erreurs, renvoi à 60 s avec timers simulés), WP04 (trois cas). Playwright : inscription parent seule (code lu dans le faux fournisseur) → WP10 → `/parent` |
 | Recette | Vouvoiement ; pas de code « 3214 » ni de « 4 règles » ; carte WP10 cohérente avec le jeu D2 |
 
-### 2.7 Décision du parent WP05, WP06, WP11, WP12 · `feature/auth-decision-parent` · **M**
+### 2.7 Décision du parent WP05, WP06, WP11, WP12 · `feature/lot2-decision-parent` · **M**
 
 | Volet | Contenu |
 | --- | --- |
@@ -225,7 +225,7 @@ Dans `apps/web/src/components/` (atomes, composés, layouts selon le rangement d
 | Tests | Vitest : `ConsentRequestCard` n'affiche que les champs D20, motif obligatoire, états `expired` / `already_resolved`. Playwright : voir 2.8 |
 | Recette | Pas d'avatar 🦉 ni de bloc « Informations renseignées » ; pas de refus « définitif » ; WP12 « Aucune inscription n'a été créée » |
 
-### 2.8 Parcours bout en bout et recette du lot · `feature/auth-parcours-e2e` · **S**
+### 2.8 Parcours bout en bout et recette du lot · `feature/lot2-parcours-e2e` · **S**
 
 Playwright sur la stack Docker (`make e2e`, seed D2), faux fournisseur SMS et Mailpit, un fichier par parcours,
 données isolées par test (numéros et identifiants uniques).
@@ -276,7 +276,7 @@ fournisseurs SMS (S10) n'est pas bloquante pour le front : le faux fournisseur s
 | `API-L2` en retard | 2.2 à 2.8 bloqués | 2.0 et 2.1 avancent sur `API-1` ; composants testés avec un client simulé |
 | Cookies de session entre `web` et `api` en local (domaine parent, `SameSite=Lax`) | Session absente côté navigateur, E2E instables | Valider en 2.0 sur la stack Docker avec un vrai `POST auth/login/` |
 | SMS asynchrones (Celery) | E2E instables | Helper qui attend le message dans le faux fournisseur avec délai borné, jamais de `sleep` |
-| Code de reprise perdu | Enfant bloqué jusqu'à l'expiration | Confirmation « J'ai noté mon code », copie de l'onglet, renvoi vers WL24 |
+| Code de reprise perdu | Enfant obligé de recommencer (C14) | Confirmation « J'ai noté mon code », copie de l'onglet ; la nouvelle demande annule l'ancienne et libère l'identifiant |
 | Espaces des rôles absents avant les lots 3-5 | Redirection vers une page vide | Pages d'attente minimales gardées par rôle (2.0) |
 | Divergence de `PwReq` entre écrans | Incohérence D25 | Constante unique + test qui compare aux règles de l'API |
 
@@ -291,17 +291,14 @@ fournisseurs SMS (S10) n'est pas bloquante pour le front : le faux fournisseur s
 - Composants DS du lot documentés et réutilisables par les lots 3 (W11-W14 → WD17), 4 (`ConsentRequestCard` →
   WPD05, `NewPasswordFields` → WPD03) et 5 (activation, variante enseignant de WP05).
 
-## Points ouverts (à trancher avec `API-L2`)
+## Points ouverts
 
-1. **W01** : interprété comme un splash d'entrée de `/inscription`, et non comme une page.
-2. **Code de reprise** : l'API ne le renvoie qu'une fois ; faut-il un endpoint pour en régénérer un ? À défaut,
-   copie en `sessionStorage` (2.4).
-3. **WP01 prérempli** depuis le lien SMS (SPEC-ECRANS §2.11) : aucun endpoint du §7 ne lit le numéro à partir du
-   jeton avant authentification. Proposition : `POST accounts/consent-requests/preview/` `{ token }` → numéro masqué.
-4. **WP04 « Oui »** suppose que l'API rattache les demandes en attente au numéro vérifié par OTP.
-5. **`accounts/me`** doit exposer l'étape de profil restante (W11-W14, WP07-WP09) pour la redirection après connexion.
-6. **`PHONE_TAKEN`** à WP01 révèle qu'un numéro est inscrit : accepter ce compromis ou envoyer l'OTP quand même et
-   orienter vers W16 après vérification.
-7. **Faux fournisseur SMS lisible en E2E** : proposition de l'envoyer vers Mailpit (`<e164>@sms.test`), ce qui évite
-   un endpoint de test dans l'API.
-8. **WL02 côté enseignant** : la spec ne décrit que `PhoneInput` ; ce plan ajoute la bascule vers l'email (C6).
+Les points soulevés pendant la rédaction sont tranchés : W01 = splash d'entrée (spec §2.4) ; code de reprise non
+régénérable (C14) ; préremplissage de WP01 par `accounts/consent-requests/preview/` et rattachement des demandes au
+numéro vérifié (API-L2.4) ; `profileStep` dans `accounts/me/` (API-L2.5) ; réponse neutre à WP01 (C13) ; faux SMS
+lisible dans Mailpit (API-L2.0b) ; bascule email de WL02 pour l'enseignant (C6).
+
+| Point | Bloque |
+| --- | --- |
+| Choix du fournisseur SMS après comparaison (S10, ADR-SMS) | Branchement réel avant la mise en production (le faux fournisseur suffit au lot) |
+| Validation juridique de la mention de finalité de W12 (D6) | Mise en production |

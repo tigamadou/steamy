@@ -18,11 +18,12 @@ paiement `WA03`, états `WA04`/`WA05`/`WA07`, suivi `WK07`).
 | `API-L4` (enfants, demandes à valider, accord sur les événements, rapport hebdomadaire, suppression) | [PLAN-API](PLAN-API.md) | Tout le lot |
 | `API-L3b` (commandes typées, paiements, webhook, Kit Codes, demandes de paiement, boutique, inscriptions aux événements) | PLAN-API | 4.4, 4.5, 4.6 |
 | `API-L3a` (progression, tentatives, journal `LearningActivity`, préférences de notification) | PLAN-API | 4.2, 4.8, 4.9 |
-| `API-L5` (`Classroom`, invitations `WT06`, commentaires des enseignants) | PLAN-API | 4.10, bloc commentaires de `WPD03` |
-| Lot 1 : design system, layouts, états `WX` (chargement, vide, erreur, hors ligne), FAQ versionnée (D10), `WL23` | LOT-1-PUBLIC | Tout le lot, 4.6, 4.9 |
-| Lot 2 : session, contrôle du rôle, `PhoneInput`, `PasswordInput` + `PwReq` (D25), `WP05`/`WP11` (contenu et modale), retour après `W16` (`?next=`), réclamation du jeton SMS de consentement | LOT-2-AUTH | 4.1, 4.2, 4.3 |
-| Lot 3 : `AppShell` paramétré, cloche et compteur, `PaymentForm` (`WA03`), attente et résultats (`WA04`/`WA05`/`WA07`), composants boutique `WK01`-`WK07`, Kit Codes, événements côté apprenant (`WD10`/`WD11`) | LOT-3-APPRENANT | 4.1, 4.4, 4.5, 4.6 |
-| Faux fournisseurs SMS et paiement (S9, S10), avec boîte d'envoi et webhook simulé exploitables par Playwright | API-L2, API-L3b | Parcours Playwright |
+| `API-L5` (`Classroom`, invitations `WT06`, commentaires des enseignants) | PLAN-API | 4.10 (**livrée avec le lot 5**), bloc commentaires de `WPD03` (masqué tant qu'`API-L5` n'est pas livrée) |
+| Lot 1 : design system, layouts, états `WX` (chargement, vide, erreur, hors ligne), FAQ versionnée (D10) et `FaqAccordion`, `WL23` (`EventRow`, `EventDetail`) | LOT-1-PUBLIC | Tout le lot, 4.6, 4.9 |
+| Lot 2 : session, contrôle du rôle, `PhoneInput`, `PasswordInput` + `PwReq` (D25), `NewPasswordFields`, `OTPInput`, `ConsentRequestCard` (`WP05`), modale de `WP11`, retour après `W16` (`?next=`), réclamation du jeton SMS de consentement | LOT-2-AUTH | 4.1, 4.2, 4.3, 4.9 |
+| Lot 3 : `AppShell` paramétré, cloche et compteur, `StatPill`, `QuizAttemptRow`, `WeeklyActivityBars`, `Section`, `InfoCard`, `SettingsRow`, `Toggle`, `AddressForm`, `PaymentForm` (`WA03`), `PaymentStatusPanel` (`WA04`/`WA05`/`WA07`), `ShippingTimeline`, composants boutique `WK01`-`WK07`, Kit Codes, événements côté apprenant (`WD10`/`WD11`) | LOT-3-APPRENANT | 4.1, 4.2, 4.4, 4.5, 4.6, 4.8, 4.9 |
+| Faux fournisseurs SMS (lu dans Mailpit, API-L2.0b) et paiement (pilotable par numéro de test, API-L3b.0b) | API-L2, API-L3b | Parcours Playwright |
+| Maquette de `WPD15` validée (C18, étape 4.0) | Produit | 4.4 |
 
 ## Arborescence des routes
 
@@ -66,27 +67,28 @@ cloche → `WPD14` (aucune entrée active).
 
 | Étape | Branche | Écrans | Taille | Dépend de |
 | --- | --- | --- | --- | --- |
-| 4.0 | `feature/conception-wpd15` | Conception `WPD15` (+ états de `WPD05`, modales) | S | — |
-| 4.1 | `feature/parent-accueil` | Layout, `WPD01`, `WPD14` | M | API-L4 |
-| 4.2 | `feature/parent-enfants` | `WPD02`, `WPD03`, `WPD04`, `WPD10` | L | 4.1 |
-| 4.3 | `feature/parent-consentement` | `WPD05` (origines enfant et parent) | M | 4.1 |
-| 4.4 | `feature/parent-demande-paiement` | `WPD15` | L | 4.0, 4.1 |
-| 4.5 | `feature/parent-commandes` | `WPD07`, suivi, achat direct de kit | M | 4.4 |
-| 4.6 | `feature/parent-evenements` | `WPD06`, `WL23` (shell parent), `WPD12` | M | 4.4 |
-| 4.7 | `feature/parent-suppressions` | `WPD09`, validation de `WD15` | M | 4.2 |
-| 4.8 | `feature/parent-rapport-hebdo` | `WPD11` | M | 4.2 |
-| 4.9 | `feature/parent-parametres-aide` | `WPD08`, `WPD13` | M | 4.1, 4.7 |
-| 4.10 | `feature/parent-consentement-enseignant` | `WPD05` variante enseignant (D60, C11) | S | 4.3, API-L5 |
+| 4.0 | `feature/lot4-conception-wpd15` | Conception `WPD15` (+ états de `WPD05`, modales) | S | — |
+| 4.1 | `feature/lot4-accueil` | Layout, `WPD01`, `WPD14` | M | API-L4 |
+| 4.2 | `feature/lot4-enfants` | `WPD02`, `WPD03`, `WPD04`, `WPD10` | L | 4.1 |
+| 4.3 | `feature/lot4-consentement` | `WPD05` (origines enfant et parent) | M | 4.1 |
+| 4.4 | `feature/lot4-demande-paiement` | `WPD15` | L | 4.0, 4.1 |
+| 4.5 | `feature/lot4-commandes` | `WPD07`, suivi, achat direct de kit | M | 4.4 |
+| 4.6 | `feature/lot4-evenements` | `WPD06`, `WL23` (shell parent), `WPD12` | M | 4.4 |
+| 4.7 | `feature/lot4-suppressions` | `WPD09`, validation de `WD15` | M | 4.2 |
+| 4.8 | `feature/lot4-rapport-hebdo` | `WPD11` | M | 4.2 |
+| 4.9 | `feature/lot4-parametres-aide` | `WPD08`, `WPD13` | M | 4.1, 4.7 |
+| 4.10 | `feature/lot4-consentement-enseignant` | `WPD05` variante enseignant (D60, C11) — **livrée avec le lot 5** | S | 4.3, API-L5 |
 
-4.2, 4.3 et 4.4 peuvent avancer en parallèle après 4.1. Chaque étape ajoute ses entrées dans la nav et ses cibles
+4.2, 4.3 et 4.4 peuvent avancer en parallèle après 4.1. 4.10 attend `API-L5` : elle est livrée pendant le lot 5,
+avant l'étape 5.9 (voir l'ordre de travail du [README](README.md)). Chaque étape ajoute ses entrées dans la nav et ses cibles
 dans la table des liens de notification (`WPD14`) au fur et à mesure.
 
 ### 4.0 · Conception de `WPD15` et des états manquants — S
 
 | Rubrique | Contenu |
 | --- | --- |
-| Livrable | Maquette ajoutée dans `design/screens-parent-dashboard-web.jsx` (nouvel écran `WPD15`), validée par le produit **avant** 4.4 |
-| À concevoir | `WPD15` en 3 variantes d'objet (parcours, kit avec adresse + zone + frais, événement) et 7 états (en attente, attente de confirmation, payée, échec, refusée, expirée, annulée par l'enfant, kit en rupture) ; modale « Refuser la demande » (motif facultatif) ; `WPD05` variante enseignant (D60) et état lecture seule (expirée, déjà traitée) ; modale de réinitialisation du mot de passe (`WPD03`) ; modale de refus d'une candidature (`WPD06`) |
+| Livrable | Maquette dans un nouveau fichier `design/screens-parent-a-concevoir-web.jsx` (même design system), ajouté à `App.html`, validée par le produit **avant** 4.4 (C18) |
+| À concevoir | `WPD15` en 3 variantes d'objet (parcours, kit avec adresse + zone + frais, événement) et 8 états (en attente, attente de confirmation, payée, échec, refusée, expirée, annulée par l'enfant, kit en rupture) ; modale « Refuser la demande » (motif facultatif) ; `WPD05` variante enseignant (D60) et état lecture seule (expirée, déjà traitée) ; modale de réinitialisation du mot de passe (`WPD03`) ; modale de refus d'une candidature (`WPD06`) |
 | Contraintes | Reprend `WA03` (C1 : magenta), carte enfant de `WPD05`, montants serveur, mention « Paiement sécurisé · aucune carte bancaire », mobile 360 px d'abord (le lien SMS s'ouvre sur téléphone) |
 | Recette | Toutes les variantes et tous les états dessinés ; aucun prix, réseau ou délai en dur ; vouvoiement |
 
@@ -95,7 +97,7 @@ dans la table des liens de notification (`WPD14`) au fur et à mesure.
 | Rubrique | Contenu |
 | --- | --- |
 | Écrans | Layout `(parent)`, `WPD01`, `WPD14` |
-| Composants | `ParentNav` (config de l'`AppShell`), `PendingActionList` + `PendingActionRow` (type → icône, libellé, CTA, cible), `ChildCard`, `StatTile`, `NotificationList` (onglets, « Tout marquer comme lu »), `notificationHref(type)` |
+| Composants | `ParentNav` (config de l'`AppShell`), `PendingActionList` + `PendingActionRow` (type → icône, libellé, CTA, cible), `ChildCard`, `StatPill` (lot 3), `NotificationList` (onglets, « Tout marquer comme lu »), `notificationHref(type)` |
 | API | `GET accounts/me/` (nom, sous-titre, compteurs) · `GET accounts/pending-actions/` · `GET accounts/children/` · `GET notifications/?unread=` · `GET notifications/unread-count/` · `POST notifications/{id}/read/` · `POST notifications/read-all/` (§7.3, §7.7) |
 | Règles | « À valider » regroupe consentements → `WPD05`, paiements → `WPD15`, candidatures → `WPD06`, suppressions → `WPD09` (D52, §4.2). Stat « À valider » = longueur de la liste renvoyée. Aucune alerte de connexion (D56). Utilisateur issu de la session, jamais en dur |
 | Tests unitaires | `PendingActionRow` pour chacun des 4 types ; `notificationHref` pour tous les types de §5.11 ; état vide sans enfant (CTA « Ajouter un enfant ») ; compteur de la cloche décrémenté après lecture |
@@ -107,8 +109,8 @@ dans la table des liens de notification (`WPD14`) au fur et à mesure.
 | Rubrique | Contenu |
 | --- | --- |
 | Écrans | `WPD02`, `WPD03` (+ modale de réinitialisation), `WPD04`, `WPD10` |
-| Composants | `ChildRow` (statuts actif · demande à examiner · suppression programmée), `ChildProfileCard`, `CourseProgressList`, `AttemptList` (statut serveur `ok`/`warn`/`ko`, D31), `TeacherComments` (lecture seule), `ResetChildPasswordDialog`, `ChildForm` (création et modification) |
-| API | `GET/POST accounts/children/` · `GET/PATCH accounts/children/{id}/` · `POST accounts/children/{id}/password-reset/` · `GET auth/username-availability/` · `GET referentials/relationships/`, `school-grades/`, `localities/`, `disabilities/` · `GET classrooms/comments/?learnerId=` (API-L5) |
+| Composants | `ChildRow` (statuts actif · demande à examiner · suppression programmée), `ChildProfileCard`, `CourseProgressList`, `AttemptList` (liste de `QuizAttemptRow` du lot 3, statut serveur `ok`/`warn`/`ko`, D31), `TeacherComments` (lecture seule), `ResetChildPasswordDialog`, `ChildForm` (création et modification) |
+| API | `GET/POST accounts/children/` · `GET/PATCH accounts/children/{id}/` (progression et tentatives récentes incluses, API-L4.1) · `POST accounts/children/{id}/password-reset/` · `GET auth/username-availability/` · `GET referentials/relationships/`, `school-grades/`, `localities/`, `disabilities/` · `GET classrooms/comments/?learnerId=` (API-L5) |
 | Règles | `WPD02` « en attente » = demande reçue (D50), CTA « Examiner » → `WPD05`, pas de « Relancer l'invitation ». `WPD04` : date de naissance (10-17 ans, D23) et lien de parenté obligatoires (D51), identifiant non numérique et sans `@` (C7), mot de passe `PwReq` (D25), redirection vers `WPD03` avec rappel de l'identifiant. `WPD10` : identifiant non modifiable (C12), genre et handicap facultatifs avec finalité (D6), localité qualifiée (D75), erreur `BIRTHDATE_AGE_MISMATCH`. Réinitialisation : « Communiquez-le à votre enfant » (D26) |
 | Tests unitaires | `ChildForm` : erreurs serveur `USERNAME_TAKEN`, `AGE_OUT_OF_RANGE`, `PASSWORD_TOO_WEAK` affichées au champ ; `ChildRow` pour les 3 statuts ; `TeacherComments` vide tant qu'API-L5 n'est pas livrée |
 | Playwright | Le parent crée un enfant → l'enfant se connecte sur `W16` et arrive sur `W11` ; le parent réinitialise le mot de passe → l'ancien est refusé, le nouveau accepté |
@@ -131,9 +133,9 @@ dans la table des liens de notification (`WPD14`) au fur et à mesure.
 | Rubrique | Contenu |
 | --- | --- |
 | Écran | `WPD15` (maquette de 4.0) |
-| Composants | `PaymentRequestSummary` (carte enfant + objet : parcours / kit / événement), `DeliveryAddressForm` (kit : préremplie depuis `WPD08`, zone, frais serveur), réutilisés du lot 3 : `PaymentForm` (`WA03`), `PaymentPending` (`WA04`, interrogation du statut), `PaymentSuccess`/`PaymentFailure` (`WA05`/`WA07`) ; `DeclineRequestDialog` |
+| Composants | `PaymentRequestSummary` (carte enfant + objet : parcours / kit / événement), `DeclineRequestDialog` ; réutilisés du lot 3 : `AddressForm` (kit : préremplie depuis `WPD08`, zone, frais serveur), `PaymentForm` (`WA03`), `PaymentStatusPanel` (attente `WA04` avec interrogation du statut, succès `WA05`, échec `WA07`), au registre `vous` |
 | API | `GET payments/payment-requests/{id}/` · `POST payments/orders/` `{ kind, paymentRequestId, deliveryAddress? }` → total serveur · `POST payments/orders/{reference}/payments/` `{ country, network, msisdn }` · `GET payments/payments/{id}/` · `POST payments/payment-requests/{id}/decline/` · `GET shop/delivery-zones/?country=` · `GET/PUT accounts/me/delivery-address/` · `GET referentials/countries/`, `payment-networks/?country=` (§7.5, §7.7) |
-| Règles | Accès : parent du bénéficiaire uniquement, sinon « Demande introuvable ». Lien SMS → `W16` → retour ici. Montants affichés tels que reçus (D37). Kit : adresse saisie ici, stock réservé à l'initiation, libéré après 30 min (C10, D38) ; rupture → paiement impossible, refus proposé. Événement : candidature acceptée au paiement (S8, C3). Webhook seule source de vérité (S9) : le succès n'est affiché que sur `succeeded`. Expiration à 7 jours, annulation par l'enfant (C4) → lecture seule. Mobile Money préféré prérempli (`WPD08`) |
+| Règles | Accès : parent du bénéficiaire uniquement, sinon « Demande introuvable ». Lien SMS → `W16` → retour ici. Montants affichés tels que reçus (D37). Kit : adresse saisie ici, stock réservé à la création de la commande au moment de payer, libéré après 30 min (C10, D38) ; rupture → paiement impossible, refus proposé. Événement : candidature acceptée au paiement (S8, C3). Webhook seule source de vérité (S9) : le succès n'est affiché que sur `succeeded`. Paiement arrivé après expiration : honoré si disponible, sinon remboursé et notifié (C17). Expiration à 7 jours, annulation par l'enfant (C4) → lecture seule. Mobile Money préféré prérempli (`WPD08`) |
 | Tests unitaires | Rendu des 3 objets et des 8 états ; aucun montant calculé côté client ; `OUT_OF_STOCK`, `ORDER_EXPIRED`, `ORDER_ALREADY_PAID`, `NETWORK_UNAVAILABLE`, `PAYMENT_FAILED` traduits ; double clic sur « Payer » sans double initiation |
 | Playwright | **Enfant demande un parcours → parent paie → l'enfant accède** : apprenant sur `WC05` « Demander à mon parent » (`WA02`) → SMS → parent `W16` → `WPD15` → paiement → webhook simulé → succès → l'enfant voit le parcours dans `WD23` et ouvre `WC06a`. Variantes : échec puis réessai ; demande de kit avec adresse → commande visible en `WPD07` ; refus → `WA02` passe à « refusée » |
 | Recette | Un autre parent obtient « Demande introuvable » ; aucun numéro complet dans les journaux front ; échec affiché avec la raison du prestataire et « Réessayer » |
@@ -155,7 +157,7 @@ dans la table des liens de notification (`WPD14`) au fur et à mesure.
 | Rubrique | Contenu |
 | --- | --- |
 | Écrans | `WPD06`, `WL23` dans le shell parent, `WPD12` |
-| Composants | `EventCard` (lot 1), `EventApplicationRow` (événement, enfant, statut, Accepter / Refuser), `RefuseApplicationDialog` (motif facultatif), `EventSignupForm` (`<select>` des enfants actifs, motivation, récapitulatif + `PaymentForm` si payant) |
+| Composants | `EventRow`, `EventDetail` (lot 1), `EventApplicationRow` (événement, enfant, statut, Accepter / Refuser), `RefuseApplicationDialog` (motif facultatif), `EventSignupForm` (`<select>` des enfants actifs, motivation, récapitulatif + `PaymentForm` si payant) |
 | API | `GET events/` · `GET events/{slug}/` · `GET events/applications/` · `POST events/applications/{id}/accept/` (payant → demande de paiement) · `POST …/refuse/` · `POST events/{slug}/applications/` `{ childId, motivation? }` · `POST payments/orders/` `{ kind: "event", … }` (§7.5, §7.6) |
 | Règles | Accepter un événement payant → `WPD15` ; la candidature n'est acceptée qu'au paiement (D53, S8). Pas de sélection par Steamy : l'accord (et le paiement) **confirme** l'inscription dans la limite des places (C3) ; `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés. Ticket Steamy Events : candidature gratuite, accord toujours requis (C12). Prix serveur |
 | Tests unitaires | `EventApplicationRow` pour chaque statut ; `EventSignupForm` gratuit / payant ; enfants non actifs exclus |
@@ -178,7 +180,7 @@ dans la table des liens de notification (`WPD14`) au fur et à mesure.
 | Rubrique | Contenu |
 | --- | --- |
 | Écran | `WPD11` |
-| Composants | `WeekNavigator` (`?semaine=`), `WeeklyStats` (temps, missions, quiz réussis), `ActivityHistogram` (7 jours, accessible : tableau de données en alternative), `CourseProgressList`, `WeeklyEmailNotice` |
+| Composants | `WeekNavigator` (`?semaine=`), `WeeklyStats` (temps, missions, quiz réussis), `WeeklyActivityBars` (lot 3, 7 jours, tableau de données en alternative), `CourseProgressList`, `WeeklyEmailNotice` |
 | API | `GET accounts/children/{id}/weekly-report/?week=` (§7.3, alimenté par `LearningActivity`, D55) |
 | Règles | Encart « Envoyé chaque semaine à <email> » ou lien « Ajouter un email » → `WPD08` (D55). Pas de bouton d'envoi ponctuel |
 | Tests | Unitaires : semaine vide, semaine sans email. Playwright : navigation vers la semaine précédente |
@@ -189,31 +191,27 @@ dans la table des liens de notification (`WPD14`) au fur et à mesure.
 | Rubrique | Contenu |
 | --- | --- |
 | Écrans | `WPD08`, `WPD13` |
-| Composants | Sections `ProfileSection`, `LoginSection` (changement de mot de passe, changement de numéro avec OTP), `DeliveryPaymentSection`, `NotificationPrefsSection`, `DangerZone` ; `FaqSearch` (recherche locale) |
+| Composants | Sections bâties sur `Section`, `InfoCard`, `SettingsRow`, `Toggle` (lot 3) : profil, connexion (`NewPasswordFields`, changement de numéro avec `OTPInput`), livraison et paiement (`AddressForm`), notifications, `DangerZone` ; FAQ en `FaqAccordion` (lot 1) avec recherche locale |
 | API | `PATCH accounts/me/` · `PATCH accounts/me/parent-profile/` · `POST accounts/me/password/` · `POST accounts/me/email/` · `POST accounts/me/phone-change/` + `…/verify/` · `GET/PUT accounts/me/delivery-address/` · `GET/PATCH notifications/preferences/` · `POST/DELETE accounts/me/deletion-request/` (§7.3, §7.7) |
 | Règles | Changement de numéro par OTP sur le nouveau numéro (D24). Suppression du compte désactivée tant qu'un enfant est rattaché (`CHILDREN_STILL_LINKED`, D54), transfert via le support. FAQ versionnée (D10), sans invitation par téléphone ni réseaux en dur (D76) ; « Contacter le support » → `WL24` |
 | Tests | Unitaires : `DangerZone` désactivée avec enfants ; OTP (`OTP_INVALID`, `OTP_RESEND_TOO_EARLY`). Playwright : changement de numéro puis connexion avec le nouveau numéro |
 | Recette | Les préférences de notification sont prises en compte (pas de rapport par email si désactivé) |
 
-### 4.10 · Consentement d'origine enseignant — S
+### 4.10 · Consentement d'origine enseignant — S · livrée avec le lot 5
 
 | Rubrique | Contenu |
 | --- | --- |
 | Écran | `WPD05`, variante enseignant |
 | Contenu | Nom de l'enseignant, classe, établissement, parcours (D60). Acceptation : création de l'identifiant (champs de `WPD04` préremplis) puis l'élève rejoint la classe ; si l'enfant a déjà un compte, choix « Rattacher {Prénom} à la classe » sans nouvel identifiant (C11) |
-| API | `POST accounts/consent-requests/{id}/accept/` `{ username, password }` ou `{ learnerId }` (C11, à préciser dans API-L5) |
+| API | `POST accounts/consent-requests/{id}/accept/` `{ username, password }` ou `{ learnerId }` (C11, API-L5.2) |
 | Tests | Playwright (lot 5 disponible) : invitation `WT06` → SMS → parent accepte → l'élève apparaît dans `WT04` |
 
-## Dépendances vers l'API à confirmer dans `API-L4`
+## Dépendances vers l'API intégrées à `API-L4`
 
-| Besoin | Constat | Proposition |
-| --- | --- | --- |
-| Progression et tentatives d'un enfant (`WPD03`) | §7.4 ne prévoit que les endpoints de l'apprenant | Inclure progression et tentatives récentes dans `GET accounts/children/{id}/`, ou `learning/…?learnerId=` filtré par lien parental |
-| Kit Codes d'une commande (C10) | Absents de §7.5 | Champ `kitCodes` dans `GET payments/orders/{reference}/`, visible du payeur seul |
-| Reprise de paiement d'une commande sans demande (`WPD07`) | `WPD15` ne couvre que les `PaymentRequest` | Réutiliser `POST payments/orders/{reference}/payments/` depuis le détail de commande |
-| Acceptation C11 (enfant déjà inscrit) | `accept` ne prévoit que `{ username, password }` | Ajouter `{ learnerId }` |
-| Semaine du rapport | Paramètre absent de §7.3 | `?week=AAAA-Www` |
-| Liens de notification | `Notification.url` = chemin front | L'API émet les routes de ce plan (`/parent/demandes/<id>`…) |
+Les besoins relevés pendant la rédaction sont intégrés à PLAN-API et au §7 de la spec technique : progression et
+tentatives dans `GET accounts/children/{id}/` ; `kitCodes` dans `GET payments/orders/{reference}/` (payeur seul) ;
+reprise du paiement d'une commande sans demande par `POST payments/orders/{reference}/payments/` ; `{ learnerId }` à
+l'acceptation (C11, API-L5.2) ; `?week=AAAA-Www` sur le rapport ; `Notification.url` = routes de ce plan.
 
 ## Risques
 
@@ -229,7 +227,8 @@ dans la table des liens de notification (`WPD14`) au fur et à mesure.
 
 ## Critères de fin de lot
 
-- `WPD01`-`WPD15` livrés selon la définition de « terminé » du README, au vouvoiement, en 360 px et sur bureau.
+- `WPD01`-`WPD15` livrés selon la définition de « terminé » du README, au vouvoiement, en 360 px et sur bureau
+  (la variante enseignant de `WPD05`, étape 4.10, est livrée avec le lot 5).
 - Les trois parcours Playwright passent sur la stack Docker avec `make seed` : **enfant demande un parcours → parent
   paie → l'enfant accède**, **refus de consentement**, **accord à un événement payant** ; plus achat direct de kit et
   création d'enfant.
@@ -239,11 +238,12 @@ dans la table des liens de notification (`WPD14`) au fur et à mesure.
 - Aucun accès possible aux données d'un enfant, d'une commande ou d'une demande d'une autre famille (tests de refus).
 - `make openapi` à jour, client généré seul utilisé, CI verte (`ci-ok`) sur chaque PR.
 
-## Points supposés ou contradictoires
+## Points ouverts
 
-| Point | Choix retenu |
+Les points supposés lors de la rédaction sont tranchés : `pending_review` retiré (C3) ; `WA03`-`WA07` = états de
+`WPD15` dans le shell parent, rendus par `PaymentForm` et `PaymentStatusPanel` du lot 3 ; routes `/parent/…`
+ajoutées au README ; noms des composants alignés sur LOT-3.
+
+| Point | Bloque |
 | --- | --- |
-| §3.4 prévoit un statut `pending_review` et une « revue finale par le personnel » ; §4.3 parle de candidature « passée en revue » après paiement | C3 fait foi : l'accord (et le paiement) **confirme** l'inscription ; WAD12 ne sert qu'au suivi et au refus exceptionnel |
-| SPEC-ECRANS-2 §5.5 place `WA05`/`WA07` « hors shell » côté parent ; §5.11 décrit succès et échec comme états de `WPD15` | États dans `WPD15`, dans le shell parent |
-| Routes absentes de la table du README (`consentements`, `evenements`, `boutique`, `notifications`…) | Proposées ci-dessus, dans le préfixe `/parent` |
-| Noms des composants du lot 3 (`PaymentForm`, `PaymentPending`…) | Supposés ; à aligner sur LOT-3-APPRENANT |
+| Choix du prestataire de paiement après comparaison (S9, ADR-Paiement) | Branchement réel (le faux prestataire suffit au lot) |

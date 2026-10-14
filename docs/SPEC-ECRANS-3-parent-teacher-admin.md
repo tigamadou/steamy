@@ -72,10 +72,10 @@ Font foi, dans cet ordre : [ARBITRAGES](alignement/ARBITRAGES.md) (S1-S12, D1-D7
 | --- | --- |
 | Objectif | Page où le parent règle ce que son enfant a demandé : parcours (`WA02`), kit (`WK08`), événement payant (`WPD06`, `WD11`). Cible du lien SMS et des notifications |
 | Accès | Parent authentifié **et** parent du bénéficiaire. Le lien SMS mène à `W16` puis revient ici. Autre utilisateur → erreur « Demande introuvable ». Nav active : Accueil |
-| Contenu | Carte enfant (bénéficiaire) ; objet de la demande : parcours (titre, kit requis éventuel), kit (articles et quantités, **adresse de livraison** préremplie depuis `WPD08` et modifiable, frais de la zone), événement (date, lieu) ; **montant total calculé par le serveur** ; formulaire repris de `WA03` : Pays · Réseau (référentiel par pays, D76) · Numéro (prérempli) ; mention « Paiement sécurisé · aucune carte bancaire » |
-| Actions | « Payer <montant> » → attente de confirmation (instructions de validation sur le téléphone, interrogation du statut) → succès (récapitulatif, lien vers `WPD07`) ou échec (raison du prestataire, « Réessayer », « Changer de numéro », comme `WA07`/`WK09`). « Refuser la demande » (motif facultatif) → l'enfant est notifié |
-| États | En attente · payée · refusée · expirée · annulée par l'enfant · kit en rupture (paiement impossible, proposer le refus) |
-| Règles | Webhook source de vérité (S9). Pour un kit, le stock est réservé à l'initiation du paiement et libéré après 30 min sans paiement (D38). Pour un événement, la candidature passe à « acceptée » au paiement |
+| Contenu | Carte enfant (bénéficiaire) ; objet de la demande : parcours (titre, kit requis éventuel), kit (articles et quantités, **adresse de livraison** préremplie depuis `WPD08` et modifiable, frais de la zone), événement (date, lieu) ; **montant total calculé par le serveur** ; formulaire `PaymentForm` (`WA03`, livré au lot 3) : Pays · Réseau (référentiel par pays, D76) · Numéro (prérempli) ; mention « Paiement sécurisé · aucune carte bancaire » |
+| Actions | « Payer <montant> » → attente de confirmation (`WA04` : instructions de validation sur le téléphone, interrogation du statut) → succès (`WA05` : récapitulatif, lien vers `WPD07`) ou échec (`WA07` : raison du prestataire, « Réessayer », « Changer de numéro »), rendus par `PaymentStatusPanel` (lot 3) dans le shell parent. « Refuser la demande » (motif facultatif) → l'enfant est notifié |
+| États | En attente · attente de confirmation (`WA04`) · payée (`WA05`) · échec (`WA07`) · refusée · expirée · annulée par l'enfant · kit en rupture (paiement impossible, proposer le refus) |
+| Règles | Webhook source de vérité (S9). Pour un kit, le stock est réservé à l'initiation du paiement et libéré après 30 min sans paiement (D38). Pour un événement, la candidature passe à « acceptée » au paiement, sans revue par le personnel (C3). Paiement reçu après expiration de la commande : honoré si le stock ou la place est encore disponible, sinon remboursé (C17) |
 
 ### Données / API
 
@@ -310,7 +310,7 @@ La répartition des écrans hors libellés de `WAD13` (événements, commandes) 
 | Pas de cible, ou valeur textuelle | Renseignée | info |
 | Valeur < 70 % de la cible | Hors-cible | erreur |
 | 70 % ≤ valeur < 100 % de la cible | En dessous | ambre |
-| Valeur ≥ cible | Validée | succès |
+| Valeur ≥ cible | Atteinte | succès |
 
 ### Plateforme et système (admin Django, sauf `WAD15`)
 
@@ -322,7 +322,7 @@ La répartition des écrans hors libellés de `WAD13` (événements, commandes) 
 | `WAD09` | Contenu / Parcours | v1 · admin Django | `Course` avec inlines Projet → Niveau → Mission (S2) et quiz (formatif au niveau, sommatif au projet). Colonnes : parcours, catégorie, difficulté, accès (gratuit / payant + prix), kit requis, inscrits, statut (publié / brouillon). Filtres : catégorie, difficulté, accès, kit, statut. Mission : `vimeoId` et/ou contenu |
 | `WAD10` | Boutique et commandes | v1 · admin Django | **Kits** : prix, catégorie, difficulté, parcours compatibles, stock (badge à 3 seuils : rupture / < 10 / en stock). **Zones de livraison** : frais et délai (D38). **Commandes kit** : réf., articles, payeur, bénéficiaire, statut de paiement, statut de livraison ; filtres ; action « changer le statut de livraison » (notifie le payeur). **Kit Codes** : lecture par commande, révocation. **Alertes de réassort** |
 | `WAD11` | Paiements Mobile Money | v1 · admin Django | Colonnes : référence, payeur, bénéficiaire, type de commande, réseau, montant, date, statut. Filtres : statut, réseau, pays, type ; `date_hierarchy` (remplace le sélecteur Mois / Trimestre). Agrégats (volume, taux d'échec) en tête de liste ou dans `WAD01` |
-| `WAD12` | Steamy Events | v1 · admin Django | **Événements** (`SteamyEvent`) : titre, date, lieu, capacité, prix (gratuit / payant, S8), publication. **Candidatures** (`EventApplication`) : élève, âge, événement, accord parental, paiement, statut ; filtres. L'accord du parent est un invariant serveur : aucune acceptation avant lui, quel que soit l'âge (S3) |
+| `WAD12` | Steamy Events | v1 · admin Django | **Événements** (`SteamyEvent`) : titre, date, lieu, capacité, prix (gratuit / payant, S8), publication. **Candidatures** (`EventApplication`) : élève, âge, événement, accord parental, paiement, statut ; filtres. L'accord du parent est un invariant serveur : aucune acceptation avant lui, quel que soit l'âge (S3). **Pas de sélection** : l'accord (et le paiement si payant) confirme l'inscription dans la limite des places (C3) ; le personnel suit, et peut seulement refuser exceptionnellement une candidature (motif obligatoire, remboursement si elle était payée) |
 | `WAD13` | Équipe et rôles | v1 · admin Django | `User` (`is_staff`) + `Group` : Super-admin, Contenu, Support, Finance (D71). Invitation d'un membre ; enrôlement TOTP obligatoire (D72) |
 | `WAD14` | Paramètres | v1 · admin Django | Réglages (singleton) : mode maintenance, inscriptions ouvertes, **réseaux Mobile Money par pays, Celtiis compris** (D76, lus publiquement par les formulaires de paiement), fournisseur SMS actif (S10), **seuil de décrochage** (7 jours par défaut, D66), annonce plateforme (diffusée en notification, D7) |
 | `WAD15` | Connexion admin | v1 · Django | Page de connexion Django unique, hors shell : email professionnel, mot de passe, code TOTP à 6 chiffres (« Saisissez le code de votre application d'authentification »). « Connexion sécurisée ». Mention « Connexion chiffrée · journalisée » |

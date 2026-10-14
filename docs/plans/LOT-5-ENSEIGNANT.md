@@ -25,11 +25,12 @@ Vocabulaire : la maquette dit « formateur » et « À corriger » ; l'interface
 
 | Livré par | Réutilisé ici |
 | --- | --- |
-| Lot 1 | Design system (tokens magenta C1, atomes, `Field`, `PhoneInput` E.164, `Tabs`, `Modal`, `EmptyState` avec Zeti), enveloppes d'état (chargement, vide, erreur, hors ligne), `WL23` (fiche événement), `WL24` (formulaire de contact), FAQ statique MDX (D10), outillage Vitest + Playwright |
-| Lot 2 | Activation enseignant `/activation/[token]` (variante de WL04, `auth/teacher-invitations/`), W16 email + mot de passe, WL02-WL05 avec code email, `getServerApi` / `getBrowserApi`, gestion des codes d'erreur (D4) |
-| Lot 3 | `AppShell` paramétré (nav, cloche, menu), `StatPill`, `SectionHeader`, `QuizAttemptRow`, `MissionItem`, `ProgressBar`, arbre Projet → Niveau → Mission, écran de notifications et préférences de l'apprenant (modèles pour WT12 et WT08) |
-| Lot 4 | WPD05 avec origine enseignant (acceptation = création de l'identifiant, ou rattachement d'un compte existant C11), `WPDSection` / lignes de réglages, affichage des commentaires côté parent et apprenant (`GET classrooms/comments/`) |
-| `API-L5` | Tous les endpoints `classrooms` (§7.6) et les compléments listés plus bas ; `make seed` avec une école, un enseignant invité, deux classes, des élèves actifs, des invitations en attente, refusées et expirées, des tentatives `ko` et un élève inactif depuis plus de 7 jours (D2) |
+| Lot 1 | Design system (tokens magenta C1, atomes, `Field`, `PhoneInput` E.164, `Tabs`, `CourseCard`), états vides et enveloppes d'état en `WXState` avec `Mascot` (Zeti), `WL23` (`EventRow`, `EventDetail`), `WL24` (formulaire de contact), FAQ statique MDX (D10) en `FaqAccordion`, outillage Vitest + Playwright |
+| Lot 2 | `Modal`, `NewPasswordFields` + `PwReq`, activation enseignant `/activation/[token]` (variante de WL04, `auth/teacher-invitations/`), W16 email + mot de passe, WL02-WL05 avec code email, `safeNext()` et retour par `?next=`, gestion des codes d'erreur (D4) |
+| Lot 3 | `AppShell` paramétré (nav, cloche, menu), `StatPill`, `SectionHeader`, `QuizAttemptRow`, `MissionItem`, `ProgressBar`, `Section`, `InfoCard`, `SettingsRow`, `Toggle`, `NotifItem`, lecteur de mission (`VimeoPlayer`, `MissionBlocks`), arbre Projet → Niveau → Mission, écran de notifications et préférences de l'apprenant (modèles pour WT12 et WT08) |
+| Lot 4 | Affichage des commentaires côté parent (`WPD03`). L'étape **4.10** (WPD05 d'origine enseignant : création de l'identifiant ou rattachement d'un compte existant, C11) dépend d'`API-L5` : elle est **livrée pendant ce lot**, avant 5.9 |
+| `API-L5` | Tous les endpoints `classrooms` (§7.6) et `API-L5.1` à `API-L5.5` ; `make seed` avec une école, un enseignant invité, deux classes, des élèves actifs, des invitations en attente, refusées et expirées, des tentatives `ko` et un élève inactif depuis plus de 7 jours (D2) |
+| Produit | Maquette de `WT13` dans `design/screens-enseignant-a-concevoir-web.jsx`, validée avant 5.2 (C18) |
 
 ## Arborescence des routes
 
@@ -61,8 +62,9 @@ src/app/(enseignant)/enseignant/
 ```
 
 - `params` et `searchParams` sont des `Promise` (Next.js 16) : les attendre dans les pages serveur.
-- Lecture côté serveur (`getServerApi`) ; mutations par actions serveur ou `getBrowserApi`, puis `revalidatePath`.
-- Après une redirection de connexion, retour sur la page demandée (`?suivant=`), géré par le layout du lot 2.
+- Lecture côté serveur (`getServerApi`) ; mutations en Client Components par `getBrowserApi()`, puis `router.refresh()`
+  (même règle qu'aux lots 2 et 3).
+- Après une redirection de connexion, retour sur la page demandée (`?next=`), géré par le layout du lot 2.
 
 ## Endpoints consommés et compléments à `API-L5`
 
@@ -81,22 +83,22 @@ src/app/(enseignant)/enseignant/
 | `GET referentials/relationships/` · `countries/` · `school-grades/` | WT06, WT13 |
 | `POST public/contact-messages/` | WT11, WT08 (fermeture de compte) |
 
-**Absents du §7.6, à ajouter à `API-L5`** (à valider avec le plan d'API) :
+**Compléments intégrés à `API-L5` et au §7.6** :
 
-| Besoin | Endpoint proposé |
-| --- | --- |
-| École, offre, quotas restants, parcours de l'offre | `GET classrooms/school/` → `{ name, learnerQuota, learnersUsed, classroomQuota, classroomsUsed, courses[] }` |
-| Renommer une classe (parcours figé si élèves) | `PATCH classrooms/{id}/` |
-| Retirer un élève | `POST classrooms/{id}/members/{memberId}/remove/` (statut `left`) |
-| Tentatives et commentaires d'un élève sur le parcours de la classe | inclus dans `GET classrooms/learners/{id}/?classroomId=` |
-| Mission en lecture seule | `GET classrooms/courses/{slug}/missions/{id}/` |
-| Proposer un événement à une classe | `POST events/{slug}/proposals/` `{ classroomId }` → notifications élèves et parents |
-| Candidatures de mes élèves | `GET classrooms/event-applications/` (lecture seule) |
-| Résultat d'import par ligne | `errors[{ line, code, data }]` avec les codes `DUPLICATE_ROW`, `PHONE_INVALID`, `MALFORMED_ROW`, `ALREADY_IN_CLASSROOM`, `CLASSROOM_QUOTA_EXCEEDED` (à ajouter au catalogue D4) |
+| Besoin | Endpoint | Étape |
+| --- | --- | --- |
+| École, offre, quotas restants, parcours de l'offre | `GET classrooms/school/` → `{ name, learnerQuota, learnersUsed, classroomQuota, classroomsUsed, courses[] }` | API-L5.1 |
+| Renommer une classe (parcours figé si élèves) | `PATCH classrooms/{id}/` | API-L5.1 |
+| Retirer un élève | `POST classrooms/{id}/members/{memberId}/remove/` (statut `left`) | API-L5.1 |
+| Tentatives et commentaires d'un élève sur le parcours de la classe | inclus dans `GET classrooms/learners/{id}/?classroomId=` | API-L5.3 |
+| Mission en lecture seule | `GET classrooms/courses/{slug}/missions/{id}/` | API-L5.3 |
+| Proposer un événement à une classe | `POST events/{slug}/proposals/` `{ classroomId }` → notifications élèves et parents | API-L5.5 |
+| Candidatures de mes élèves | `GET classrooms/event-applications/` (lecture seule) | API-L5.5 |
+| Résultat d'import par ligne | `errors[{ line, code, data }]` : `DUPLICATE_ROW`, `PHONE_INVALID`, `MALFORMED_ROW`, `ALREADY_IN_CLASSROOM`, `LEARNER_QUOTA_EXCEEDED` ; fichier trop long : `IMPORT_TOO_LARGE` (catalogue §7.1) | API-L5.2 |
 
 ## Étapes
 
-### 5.1 · Shell, accueil et navigation — `feature/enseignant-shell-accueil` · **M**
+### 5.1 · Shell, accueil et navigation — `feature/lot5-shell-accueil` · **M**
 
 | Rubrique | Contenu |
 | --- | --- |
@@ -107,31 +109,31 @@ src/app/(enseignant)/enseignant/
 | Tests | Unitaires : nav active selon la route, registre (aucun « tu » dans les libellés, contrôle par snapshot de textes) ; redirection d'un apprenant ou d'un parent hors de `/enseignant` |
 | Recette | Les compteurs correspondent au seed ; « Commenter » ouvre WT05 sur la tentative ; aucun « À corriger » |
 
-### 5.2 · Classes — `feature/enseignant-classes` · **M**
+### 5.2 · Classes — `feature/lot5-classes` · **M**
 
 | Rubrique | Contenu |
 | --- | --- |
 | Écrans | `WT03`, `WT13` (création et édition), `WT04` |
 | Composants | `QuotaNotice` (élèves et classes restants) ; `ClassroomForm` (nom*, parcours* limité à l'offre, niveau scolaire facultatif, établissement en lecture seule) ; `MemberRow` (actif : dernière activité, progression, statut serveur, badge « Décrochage ») ; `InvitationRow` (« En attente du parent », date ; refusée ou expirée signalée) ; `ConfirmDialog` « Retirer de la classe » |
 | API | `classrooms/`, `classrooms/school/`, `PATCH classrooms/{id}/`, `classrooms/{id}/members/`, retrait |
-| Règles | WT13 conçu dans le DS à partir de la spec (pas de maquette) ; parcours désactivé en édition dès qu'il y a un membre ; bouton « Créer » désactivé si quota atteint, mais l'erreur serveur reste affichée (`CLASSROOM_QUOTA_EXCEEDED`, parcours hors offre, nom déjà pris) |
+| Règles | WT13 d'après sa maquette validée (C18) ; parcours désactivé en édition dès qu'il y a un membre ; bouton « Créer » désactivé si quota atteint, mais l'erreur serveur reste affichée (`CLASSROOM_QUOTA_EXCEEDED`, parcours hors offre, nom déjà pris) |
 | Tests | Unitaires : formulaire (validation, erreurs serveur mappées sur les champs), lignes d'invitation par statut ; Playwright : création → WT04 vide → CTA vers WT06 |
 | Recette | Création redirige vers WT04 de la nouvelle classe ; retrait confirmé fait disparaître l'élève et libère le quota |
 
-### 5.3 · Ajout d'élèves et import — `feature/enseignant-ajout-eleves` · **L**
+### 5.3 · Ajout d'élèves et import — `feature/lot5-ajout-eleves` · **L**
 
 | Rubrique | Contenu |
 | --- | --- |
 | Écran | `WT06` (onglets Individuel / Import par lot) et son état « Résultat d'import » |
 | Individuel | Prénom* · Nom* · Téléphone du parent* (`PhoneInput`) · Lien de parenté* (référentiel) · Classe* (présélectionnée par `?classe=`). Encart consentement SMS (D60). « Envoyer la demande » → confirmation et retour à WT04 |
-| Lot | Fichier CSV ou Excel, ou liste collée ; colonnes Prénom, Nom, Téléphone du parent, Lien de parenté ; modèle CSV téléchargeable ; aperçu des 5 premières lignes avant envoi ; Classe* ; « Importer et envoyer les demandes » |
+| Lot | Fichier CSV ou Excel (200 lignes maximum, C19), ou liste collée ; colonnes Prénom, Nom, Téléphone du parent, Lien de parenté ; modèle CSV téléchargeable ; aperçu des 5 premières lignes avant envoi ; Classe* ; « Importer et envoyer les demandes » |
 | Résultat | `ImportReport` : une ligne par entrée avec son statut (envoyée · doublon · numéro invalide · ligne malformée · déjà dans la classe · quota dépassé) ; filtres « Erreurs seulement » ; lignes en erreur éditables en place, puis « Renvoyer les lignes corrigées » (nouvel import des seules lignes corrigées) |
 | API | `POST classrooms/{id}/invitations/`, `POST …/invitations/import/`, `classrooms/school/` (quota restant affiché avant l'envoi) |
-| Règles | Le front ne valide que la forme (colonnes, champs vides) ; doublons, numéros, quotas et appartenance sont décidés par le serveur. Import partiel : les lignes valides dans la limite du quota partent, les autres reviennent en erreur. Aucun téléphone de l'élève (D60) ; aucune mention « moins de 16 ans » (S3) |
+| Règles | Le front ne valide que la forme (colonnes, champs vides) ; doublons, numéros, quotas et appartenance sont décidés par le serveur. Import partiel : les lignes valides dans la limite du quota partent, les autres reviennent en erreur (C19). Les invitations en attente comptent dans le quota affiché. Aucun téléphone de l'élève (D60) ; aucune mention « moins de 16 ans » (S3) |
 | Tests | Unitaires : parsing de la liste collée (séparateurs `;`, `,`, tabulation), rendu de chaque code d'erreur, édition et renvoi des lignes ; Playwright : import d'un fichier de 6 lignes dont 1 doublon, 1 numéro invalide, 1 ligne malformée, 1 élève déjà présent et 1 dépassement de quota → rapport conforme → correction du numéro → renvoi → ligne « envoyée » |
 | Recette | Les invitations apparaissent « En attente du parent » dans WT04 ; le SMS est émis par le faux fournisseur (S10) |
 
-### 5.4 · Profil élève et commentaires — `feature/enseignant-profil-eleve` · **M**
+### 5.4 · Profil élève et commentaires — `feature/lot5-profil-eleve` · **M**
 
 | Rubrique | Contenu |
 | --- | --- |
@@ -142,7 +144,7 @@ src/app/(enseignant)/enseignant/
 | Tests | Unitaires : envoi, longueur max, état d'erreur ; API (dans `API-L5`) : accès croisé refusé ; Playwright : commenter une tentative `ko` → elle sort de « À revoir » → le commentaire est visible côté apprenant (WD01) et parent (WPD03) |
 | Recette | Le payload de la page ne contient aucun champ sensible (vérifié dans le test de contrat) |
 
-### 5.5 · Évaluations « À revoir » — `feature/enseignant-evaluations` · **S**
+### 5.5 · Évaluations « À revoir » — `feature/lot5-evaluations` · **S**
 
 | Rubrique | Contenu |
 | --- | --- |
@@ -151,7 +153,7 @@ src/app/(enseignant)/enseignant/
 | Tests | Unitaires : filtres ↔ `searchParams`, pagination, état vide par filtre |
 | Recette | Aucune action de correction ou de modification de note (D65) |
 
-### 5.6 · Parcours encadrés — `feature/enseignant-parcours` · **M**
+### 5.6 · Parcours encadrés — `feature/lot5-parcours` · **M**
 
 | Rubrique | Contenu |
 | --- | --- |
@@ -161,7 +163,7 @@ src/app/(enseignant)/enseignant/
 | Tests | Unitaires : arbre avec compteurs ; un parcours non encadré → 404 |
 | Recette | Seuls les parcours des classes de l'enseignant apparaissent (D64) |
 
-### 5.7 · Événements — `feature/enseignant-evenements` · **S**
+### 5.7 · Événements — `feature/lot5-evenements` · **S**
 
 | Rubrique | Contenu |
 | --- | --- |
@@ -171,7 +173,7 @@ src/app/(enseignant)/enseignant/
 | Règles | Proposer = notification seulement ; chaque élève candidate seul, avec l'accord de son parent, qui confirme l'inscription (S8, C3) |
 | Tests | Unitaires : modale, double proposition à la même classe (message serveur) |
 
-### 5.8 · Paramètres, notifications, aide — `feature/enseignant-parametres-notifs-aide` · **M**
+### 5.8 · Paramètres, notifications, aide — `feature/lot5-parametres-notifs-aide` · **M**
 
 | Rubrique | Contenu |
 | --- | --- |
@@ -180,7 +182,7 @@ src/app/(enseignant)/enseignant/
 | `WT11` | FAQ statique MDX (créer une classe, ajouter des élèves, revoir une tentative, échanger avec un parent par les commentaires) + formulaire `WL24` |
 | Tests | Unitaires : résolution `type` → route, préférences optimistes avec retour arrière en cas d'erreur ; Playwright : changement de mot de passe puis reconnexion |
 
-### 5.9 · Parcours de bout en bout et durcissement — `feature/enseignant-e2e` · **S**
+### 5.9 · Parcours de bout en bout et durcissement — `feature/lot5-e2e` · **S**
 
 | Parcours Playwright (stack Docker, faux fournisseurs SMS et email) |
 | --- |
@@ -204,7 +206,7 @@ API-L5 (endpoints classrooms + compléments + seed)
    ├─► 5.6 (après 5.1)    │
    ├─► 5.7 (après 5.2)    │
    └─► 5.8 (après 5.1) ───┘
-Lot 2 (activation) et lot 4 (WPD05 origine enseignant) sont requis pour 5.9.
+Lot 2 (activation) et l'étape 4.10 du lot 4 (WPD05 origine enseignant, livrée pendant ce lot) sont requis pour 5.9.
 ```
 
 ## Risques
@@ -213,18 +215,23 @@ Lot 2 (activation) et lot 4 (WPD05 origine enseignant) sont requis pour 5.9.
 | --- | --- |
 | Fuite de données de mineurs vers l'enseignant (D64) | Sérialiseurs dédiés côté API, sans champ sensible ; querysets filtrés par classes de l'enseignant ; test de contrat front qui échoue si un champ interdit apparaît ; tests d'accès croisé (correctif de sécurité S4, §4.7) |
 | Commentaires utilisés comme messagerie | Pas de réponse possible, ni côté élève ni côté parent ; longueur bornée ; journalisés (`AuditLog`) |
-| Import : fichiers volumineux, encodage, Excel | Limite de lignes et de taille (à fixer dans `API-L5`, par ex. 200 lignes, 1 Mo) ; UTF-8 et Latin-1 acceptés ; parsing Excel côté serveur pour un seul référentiel de numéros de ligne ; throttling |
+| Import : fichiers volumineux, encodage, Excel | 200 lignes (C19) et 1 Mo maximum ; UTF-8 et Latin-1 acceptés ; parsing Excel côté serveur pour un seul référentiel de numéros de ligne ; throttling |
 | Import : rafale de SMS (coût, spam) | Envoi par tâche Celery, plafond par enseignant et par jour, doublons écartés par le serveur |
 | Quotas contournés par des requêtes concurrentes | Contrôle transactionnel côté serveur ; le front n'affiche qu'une indication et rafraîchit après chaque envoi |
-| Invitations en attente comptées ou non dans le quota | À trancher dans `API-L5` (hypothèse : comptées, libérées au refus ou à l'expiration) |
-| Écran WT13 sans maquette | Conception dans le DS existant, revue visuelle avant la PR de 5.2 |
+| Écran WT13 à concevoir | Maquette dans `design/` validée avant 5.2 (C18) |
 | Écart maquette ↔ spec (« formateur », « À corriger », âge, Bio, téléphone de l'élève) | Table « À ne pas porter » de la spec relue à chaque PR |
+
+## Points ouverts
+
+Aucun point propre au lot : quotas et import sont tranchés par C19, la maquette de WT13 par C18, le retour après
+connexion par `?next=` (README). Le choix du fournisseur SMS (S10) ne bloque que le branchement réel.
 
 ## Critères de fin de lot
 
 - `WT01`-`WT13` livrés, conformes à la spec alignée, avec tous leurs états et la définition de « terminé » du README.
 - Aucune entrée de navigation sans cible ; aucun « À corriger », « formateur » ou tutoiement dans l'espace.
 - Les parcours Playwright de 5.9 passent en CI (`ci-ok`) sur la stack Docker.
-- Les compléments d'API listés ci-dessus sont intégrés au §7.6 et au client généré (`make openapi`).
+- Les compléments d'API listés ci-dessus sont livrés (§7.6) et présents dans le client généré (`make openapi`).
+- L'étape 4.10 (WPD05 d'origine enseignant) est livrée et couverte par le parcours « Invitation complète ».
 - Recette sur le seed (D2) par le produit, y compris l'acceptation côté parent et l'affichage des commentaires côté
   apprenant et parent.

@@ -86,7 +86,7 @@ la maquette (CTA final de WL01).
 | Comment ça marche | 3 `WLStep` : Crée ton compte / Explore le catalogue / Paie & commence | Cible de l'ancre |
 | Teaser boutique | Bandeau cyan | « Voir la boutique » → WL07 |
 | Espace parent | `Mascot idle` + argumentaire sécurité | « Créer un compte parent » → WP01 |
-| Devenir instructeur | Carte recrutement | « Rejoindre l'équipe » → WL24, sujet « Rejoindre l'équipe » (voir points ouverts) |
+| Devenir instructeur | Carte recrutement | « Rejoindre l'équipe » → WL24, sujet « Candidature » présélectionné (`/aide?sujet=candidature#contact`, §8.18 de la spec technique) |
 | CTA final | Bandeau primaire, `Mascot wave` | « Créer un compte gratuit » → W03 · « J'ai déjà un compte » (`outline-inverse`) → W16 |
 
 **Ne pas porter** : chiffres codés en dur (« 1 000+ », « 2 500 », « 350 », « 20 ») — ils viennent du contenu
@@ -258,8 +258,9 @@ prix ou « Gratuit », rappel « Participation soumise à l'accord du parent ».
 - **FAQ statique** (D10, D41) par thème : compte et consentement, paiement Mobile Money, kits et livraison,
   événements, mot de passe oublié (apprenant → son parent ; parent → WL02).
 - **Formulaire de contact** (vouvoiement) : Nom*, Email ou téléphone*, Sujet* (liste : question, paiement,
-  livraison, changement de parent, rejoindre l'équipe, autre), Message* → « Envoyer » : confirmation en place.
-**Actions** : ancres FAQ / formulaire adressables par URL ; sujet présélectionnable par paramètre.
+  livraison, changement de parent, candidature, autre), Message* → « Envoyer » : confirmation en place.
+**Actions** : ancres FAQ / formulaire adressables par URL (`#faq`, `#contact`) ; sujet présélectionnable par le
+paramètre `?sujet=` (`question`, `paiement`, `livraison`, `changement-parent`, `candidature`, `autre`).
 
 **Données / API** : `public` (message de contact). FAQ : contenu éditorial.
 
@@ -358,7 +359,9 @@ Numérotation des étapes affichée (kicker et barre de progression) :
 
 **Reprise d'inscription** (D21) : état de W07 « Reprendre mon inscription » (Identifiant + Code de reprise),
 accessible depuis W16 et W02 ; il rouvre la session « inscription en cours » et affiche W07, W08 ou W18 selon l'état
-de la demande. Absent de la maquette (voir points ouverts).
+de la demande. Absent de la maquette : état conçu avec le lot 2 (C5). Le code n'est **pas régénérable** : en cas de
+perte, l'enfant recommence l'inscription ; la nouvelle demande au même numéro annule l'ancienne et libère
+l'identifiant (C14).
 
 **Ne pas porter** :
 - W02 : « Plus de 12 000 jeunes inscrits ».
@@ -400,7 +403,8 @@ objectifs, situations de handicap, avatars).
 - Champ « **Identifiant ou numéro** »* (l'email de l'enseignant y est accepté), `PasswordInput`* ; le serveur résout
   le type d'identifiant.
 - « Se connecter » → espace du rôle : WD01 (apprenant), WPD01 (parent), WT01 (enseignant) ; retour à la page
-  d'origine si la connexion a été demandée depuis une page (WL22, WL23…).
+  d'origine si la connexion a été demandée depuis une page (WL22, WL23…), passée par le paramètre `?next=` (chemin
+  interne uniquement).
 - « Mot de passe oublié ? » : choix « Je suis parent ou enseignant » → WL02, ou « Je suis apprenant » → message
   « **Demande à ton parent** de réinitialiser ton mot de passe depuis son espace » (D26).
 - « Reprendre mon inscription » → reprise W07 (D21). « Inscris-toi » → W03.
@@ -452,8 +456,8 @@ prérempli) ; parent déjà inscrit → W16 puis WPD05 (même contenu que WP05).
 
 | ID | Écran | Contenu | Actions |
 | --- | --- | --- | --- |
-| WP01 | Créer un compte | Prénom*, Nom*, `PhoneInput`*, `Checkbox` CGU + confidentialité. Brand : `Mascot wave` + « Accompagnez ses premiers pas. » | « Recevoir mon code par SMS » → WP02 · « Connectez-vous » → W16 |
-| WP02 | Code SMS | `OTPInput` 6 cases (D24), compte à rebours de renvoi, erreurs inline | « Vérifier le code » → WP03 · « Renvoyer le code » · « Modifier le numéro » → WP01 |
+| WP01 | Créer un compte | Prénom*, Nom*, `PhoneInput`*, `Checkbox` CGU + confidentialité. Brand : `Mascot wave` + « Accompagnez ses premiers pas. » | « Recevoir mon code par SMS » → WP02 (réponse neutre même si le numéro est déjà inscrit, C13) · « Connectez-vous » → W16 |
+| WP02 | Code SMS | `OTPInput` 6 cases (D24), compte à rebours de renvoi, erreurs inline | « Vérifier le code » → WP03, ou W16 si un compte existe déjà pour ce numéro (C13) · « Renvoyer le code » · « Modifier le numéro » → WP01 |
 | WP03 | Mot de passe | 2 × `PasswordInput`* + `PwReq` (D25) | « Valider mon mot de passe » → WP04 |
 | WP04 | Demande reçue ? | 2 `UserTypeCard` : « Oui, mon enfant m'a envoyé une demande » / « Non, je crée mon espace » | « Continuer » → WP05 ou WP07 |
 

@@ -58,6 +58,9 @@ exigence) · **[S]** statique.
   cookies**, cachable, pour rester statiques/ISR : `getServerApi()` rend la page dynamique.
 - **Contrat** : `openapi.yaml` est généré par drf-spectacular et versionné ; le client TS en dérive. Toute route du §7
   doit être typée dans le schéma (pas de `APIView` sans serializer).
+- **Dates** : stockage en UTC ; `TIME_ZONE = "Africa/Porto-Novo"` pour l'affichage, les tâches planifiées et les
+  rapports (C16).
+- **Sessions** : moteur `cached_db` (base + cache) ; session du personnel limitée à 8 h (C20).
 - **URL de l'API** lue à l'exécution (`/runtime-config`), pas au build : la même image est promue de staging à prod.
 - **Conventions** (D5) : `/api/<domaine>/…/` avec slash final, kebab-case, JSON en camelCase, erreurs en français
   avec `code` métier (D4, §7.1).
@@ -68,7 +71,7 @@ Une app Django par domaine d'API (§7). S1 : pas de données réelles, les **mig
 
 | App | Contenu | Sort de l'existant |
 | --- | --- | --- |
-| `accounts` | `User`, profils, lien parent↔enfant, consentement, OTP, suppression | Remplace `user` (modèle `AbstractEmailUser` incompatible) |
+| `accounts` | `User`, profils, lien parent↔enfant, consentement, OTP, suppression ; sert aussi le domaine d'URL `auth` (pas d'app nommée `auth` : collision avec `django.contrib.auth`) | Remplace `user` (modèle `AbstractEmailUser` incompatible) |
 | `catalog` | Catégories, `Course`, `Project`, `Level`, `Mission`, quiz (contenu) | Remplace `courses` ; `Path` supprimé (S2) |
 | `learning` | Inscriptions, progression, tentatives, badges, points, certificats, journal d'activité | Refonte de `learning` |
 | `wishlist` | Liste de souhaits | À créer |
@@ -83,7 +86,7 @@ Une app Django par domaine d'API (§7). S1 : pas de données réelles, les **mig
 | `core` | Health, presign, `PlatformSettings`, `AuditLog` | Garder, compléter |
 | `analytics` | `TrackingEvent` (télémétrie), agrégats | `Event` renommé ; endpoints fermés |
 | `mail`, `file` | Emails transactionnels, fichiers | Garder (`file` après correction des permissions) |
-| `messaging` | Conversations, websocket | **Gelée** (S11) : routes retirées, code non maintenu |
+| `messaging` | Conversations, websocket | **Supprimée** du dépôt (S11, C15), conservée sous le tag git `archive/messaging` |
 
 ### 1.4 Contraintes produit
 
@@ -152,10 +155,13 @@ consommateur). Tokens déjà portés dans `apps/web/src/styles/tokens.css`.
 | `NotifItem` | `notification` | Champs `type`, `tone`, `url` (D7) |
 | `UserTypeCard`, `ChoiceCard` | `selected`, `onSelect` | Promus depuis le fichier mobile ; boutons radio accessibles |
 | `SectionHeader`, `SettingsRow`, `QuickActionTile`, `SkeletonBlock` | | Promus depuis `screens-dashboard-web.jsx` |
-| `WPDSection`, `WPDInfoCard` | | Promus depuis le fichier parent (cassent le cycle WD13 → parent) ; à renommer `Section`, `InfoCard` |
+| `Section`, `InfoCard` | | Ex-`WPDSection`, `WPDInfoCard`, promus depuis le fichier parent (cassent le cycle WD13 → parent) ; livrés au lot 3, réutilisés aux lots 4 et 5 |
 | `WANetworkCard` | `network`, `selected` | Promu depuis l'achat (casse le cycle WD20 → achat). **Liste des réseaux servie par l'API** par pays (D76) |
 | `WKKitCard` | `kit` | Boutique et WL07 |
-| `PaymentForm` | `amount`, `onSubmit` | Pays + réseau + numéro, mention « Paiement sécurisé · aucune carte bancaire ». Partagé par WA03, WK06, WPD15 |
+| `PaymentForm` | `amount`, `onSubmit`, `register` | Pays + réseau + numéro, mention « Paiement sécurisé · aucune carte bancaire ». Partagé par WA03, WK06, WPD12, WPD15. Livré au lot 3 |
+| `PaymentStatusPanel` | `paymentId`, `register` | Attente (WA04), succès (WA05), échec (WA07, WK09) ; interroge le statut du paiement. Livré au lot 3 |
+| `FaqAccordion` | `items` | FAQ statique (D10) : WL24 (lot 1), WD12, WPD13, WT11 |
+| `AddressForm` | `value`, `zones` | Adresse + zone de livraison (D38) : WD19, WK05, WPD08, WPD15. Livré au lot 3 |
 
 ### 2.4 Layouts
 
@@ -172,7 +178,8 @@ pas conçu ; aucun `title="Bientôt"`.
 ### 2.5 Data-viz (back-office Next.js uniquement)
 
 `Sparkline` · `BarChart` · `DonutChart` · `StatCard` · `DataTable` · `SegmentedControl`. SVG, monochrome par défaut,
-couleur par prop. Utilisés par WAD01-WAD05 (lot 6).
+couleur par prop. Utilisés par WAD01-WAD05 (lot 6), rangés dans `src/components/backoffice/` (import interdit hors
+du back-office).
 
 ### 2.6 Règles
 
@@ -199,8 +206,9 @@ Les migrations sont réinitialisées (S1). Tous les montants sont en **FCFA (XOF
 | `ParentProfile` | `email?`, `profession?`, `locality`, `gender?`, `disability?`, `goalsForChildren[]` | `email` sert au rapport hebdomadaire (D55) | à créer |
 | `TeacherProfile` | `school?`, `phone?`, `specialty`, `bio`, `verifiedAt?` | Compte créé **sur invitation** uniquement (S5) | à créer |
 | `ParentChildLink` | `parent`, `learner`, `relationship`, `consentRequest` | **Un parent par apprenant**, obligatoire à tout âge (S3). Changement de parent : modération admin uniquement (D22) | à créer |
-| `ConsentRequest` | `origin` ∈ `learner`\|`parent`\|`teacher`, `subject` (instantané : prénom, nom, identifiant, âge, lien de parenté), `learner?`, `requestedBy`, `parentPhone`, `parent?`, `classroom?`, `status` ∈ `pending`\|`accepted`\|`refused`\|`expired`\|`cancelled`, `tokenHash`, `expiresAt`, `refusalReason?`, `refusalNote?`, `resolvedAt` | Toujours tranchée par le parent (D70). Expire à 7 jours (D21). Refus terminal pour la demande ; nouvelle demande au même numéro après 30 jours (D22). Origine `parent` : créée acceptée par WPD04. Origine `teacher` : sans compte apprenant, créé à l'acceptation (D60) | à créer |
-| `SignupSession` | `learner`, `resumeCodeHash`, `step`, `expiresAt` | Compte inactif + session « inscription en cours » + code de reprise (D21). Purge du compte et libération de l'identifiant à l'expiration ou au refus | à créer |
+| `ConsentRequest` | `origin` ∈ `learner`\|`parent`\|`teacher`, `subject` (instantané : prénom, nom, identifiant, âge, lien de parenté), `learner?`, `requestedBy`, `parentPhone`, `parent?`, `classroom?`, `replacesLink?` (changement de parent), `status` ∈ `pending`\|`accepted`\|`refused`\|`expired`\|`cancelled`, `tokenHash`, `expiresAt`, `refusalReason?`, `refusalNote?`, `resolvedAt`, `disputedAt?`, `disputeNote?` | Toujours tranchée par le parent (D70). Expire à 7 jours (D21). Refus terminal pour la demande ; nouvelle demande au même numéro après 30 jours (D22, C9). Une nouvelle demande d'origine `learner` vers le même numéro annule la demande en attente (C14). Origine `parent` : créée acceptée par WPD04. Origine `teacher` : sans compte apprenant, créé à l'acceptation, ou rattachement d'un enfant existant (D60, C11). Changement de parent (D22) : demande créée par le support, le lien n'est remplacé qu'à l'acceptation. Litige marqué par le support (D70) | à créer |
+| `SignupSession` | `learner`, `resumeCodeHash`, `step`, `expiresAt` | Compte inactif + session « inscription en cours » + code de reprise (D21), affiché une seule fois et **non régénérable** (C14). Purge du compte et libération de l'identifiant à l'expiration ou au refus | à créer |
+| `PublicProfileReview` | `learner`, `pseudonym`, `avatar`, `status` ∈ `pending`\|`approved`\|`rejected`, `reviewedBy?` | Modération a priori de l'affichage public d'un mineur (D15, WAD08) | à créer |
 | `OtpChallenge` | `phone`, `purpose` ∈ `parent_signup`\|`password_reset`\|`phone_change`, `codeHash`, `expiresAt`, `attempts`, `lastSentAt` | 6 chiffres, 5 min, 3 essais, renvoi après 60 s, plafond quotidien par numéro et par IP (D24) | à créer |
 | `PasswordResetToken` | `user`, `tokenHash`, `expiresAt` | Émis après OTP valide (WL03) | à refondre (reset par lien email) |
 | `DeletionRequest` | `user`, `requestedBy`, `status` ∈ `pending_parent`\|`scheduled`\|`cancelled`\|`done`, `reason?`, `scheduledFor` | Désactivation puis anonymisation à J+30, annulable ; factures conservées (D40, D54). Compte parent : seulement sans enfant rattaché (D54) | à créer |
@@ -211,10 +219,10 @@ Les migrations sont réinitialisées (S1). Tous les montants sont en **FCFA (XOF
 | Entité | Champs clés | Règles | API |
 | --- | --- | --- | --- |
 | `Category` | `slug`, `label`, `color`, `icon`, `order` | Référentiel unique pour WL06, WL16, WC (D3) | à créer |
-| `Course` (Parcours) | `slug`, `title`, `category`, `difficulty` ∈ `beginner`\|`intermediate`\|`advanced`, `isFree`, `price`, `requiredKit?`, `coverImage`, `trailerVimeoId?`, `durationHours`, `description`, `outcomes[]`, `audience`, `prerequisites[]`, `status` ∈ `draft`\|`published`, `certificateEnabled` | Unité vendue et inscriptible (S2). `requiredKit` ⇒ accès **uniquement** par Kit Code (D36). Créé dans l'admin Django (groupe Contenu, S5) | à refondre (`Path` supprimé) |
+| `Course` (Parcours) | `slug`, `title`, `category`, `difficulty` ∈ `beginner`\|`intermediate`\|`advanced`, `isFree`, `price`, `requiredKit?`, `coverImage`, `trailerVimeoId?`, `durationHours`, `description`, `outcomes[]`, `audience`, `prerequisites[]`, `status` ∈ `draft`\|`published`, `featured`, `certificateEnabled` | Unité vendue et inscriptible (S2). `requiredKit` ⇒ accès **uniquement** par Kit Code (D36). Créé dans l'admin Django (groupe Contenu, S5) | à refondre (`Path` supprimé) |
 | `Project` (Projet) | `course`, `order`, `title`, `durationHours`, `objectives[]`, `prerequisites[]`, `materials[]`, `badge` | Porte la sommative | à refondre (ex-`Module`) |
-| `Level` (Niveau) | `project`, `order`, `title`, `durationMin`, `introVimeoId?`, `introSummary`, `badge` | Porte la formative | à créer |
-| `Mission` | `level`, `order`, `title`, `durationMin`, `icon`, `vimeoId?`, `blocks[]` (texte, média, astuce) | Vidéo sur Vimeo | à refondre (ex-`Lesson`/`Resource`) |
+| `Level` (Niveau) | `project`, `order`, `title`, `durationMin`, `introVimeoId?`, `introVimeoHash?`, `introSummary`, `badge` | Porte la formative | à créer |
+| `Mission` | `level`, `order`, `title`, `durationMin`, `icon`, `vimeoId?`, `vimeoHash?`, `blocks[]` (texte, média, astuce) | Vidéo Vimeo non listée : `vimeoId` + `vimeoHash` exposés seulement à un inscrit sur une mission déverrouillée | à refondre (ex-`Lesson`/`Resource`) |
 | `Quiz` | `kind` ∈ `formative`\|`summative`, `level?` \| `project?` (exactement un), `threshold` (70 / 80 par défaut), `timeLimitSec?`, `retryCooldownSec` (600 en sommative) | Rattaché au niveau (formative) ou au projet (sommative) (S2) | à refondre (rattaché au `Course`, seuil 50 %) |
 | `Question`, `Choice` | `text`, `order`, `concept`, `remediationMission`, `weight` / `text`, `isCorrect` | `isCorrect` **jamais exposé** à l'apprenant | à refondre |
 | `Enrollment` | `learner`, `course`, `source` ∈ `free`\|`order`\|`kit_code`\|`classroom`, `order?`, `kitCode?`, `classroom?`, `status` ∈ `active`\|`completed`, `progressPct`, `completedAt?` | Créé uniquement par le serveur selon la source (§4.3) | à refondre |
@@ -223,43 +231,44 @@ Les migrations sont réinitialisées (S1). Tous les montants sont en **FCFA (XOF
 | `LearningActivity` | `learner`, `date`, `mission?`, `seconds` | Journal du temps d'apprentissage : streak (D34) et rapport hebdomadaire (D55) | à créer |
 | `Badge`, `LearnerBadge` | `kind` ∈ `level`\|`project`\|`course`, cible, `label`, `icon` / `learner`, `badge`, `awardedAt` | Attribué par le serveur à la réussite | à créer |
 | `PointsEntry` | `learner`, `amount`, `reason`, `source` | Barème par mission/quiz dans `PlatformSettings` (D34) ; `LearnerProfile.points` en cache. `rank` dérivé des points | à créer |
-| `Certificate` | `enrollment`, `number`, `pdf`, `issuedAt` | Conditions D33 ; PDF généré en asynchrone | à refondre |
+| `Certificate` | `enrollment`, `number`, `pdf?`, `pdfStatus` ∈ `pending`\|`ready`, `issuedAt` | Conditions D33 ; PDF généré en asynchrone | à refondre |
 | `WishlistItem` | `learner`, `course` | Unique par couple (`wishlist`) | à créer |
 
 ### 3.3 Commerce (`shop`, `payments`)
 
 | Entité | Champs clés | Règles | API |
 | --- | --- | --- | --- |
-| `Kit` | `slug`, `name`, `price`, `difficulty`, `description`, `contents[]`, `images[]`, `compatibleCourses[]`, `stockQuantity`, `active` | | à créer |
+| `Kit` | `slug`, `name`, `category`, `price`, `difficulty`, `description`, `contents[]`, `images[]`, `compatibleCourses[]`, `stockQuantity`, `active` | | à créer |
 | `StockReservation` | `kit`, `orderItem`, `quantity`, `expiresAt` | Réservé à la commande, libéré après 30 min sans paiement (D38) | à créer |
 | `Cart`, `CartItem` | `user` / `kit`, `quantity` | Côté serveur une fois connecté ; panier invité côté navigateur, envoyé à la commande (D38) | à créer |
 | `DeliveryZone` | `country`, `name`, `fee`, `delayLabel` | Frais de port par zone (D38) ; une seule promesse de délai par zone | à créer |
-| `RestockAlert` | `kit`, `phone`, `notifiedAt?` | Un seul SMS (D38) | à créer |
-| `Order` | `reference`, `kind` ∈ `course`\|`kit`\|`event`, `payer?` (parent) \| `guest` (prénom, nom, téléphone), `beneficiary?` (apprenant), `status` ∈ `pending`\|`paid`\|`cancelled`\|`refunded`, `shippingStatus?` ∈ `preparing`\|`shipped`\|`delivered`, `subtotal`, `shippingFee`, `total`, `deliveryAddress` (instantané), `paymentRequest?`, `guestAccessTokenHash?`, `paidAt?`, `expiresAt` | Payeur ≠ bénéficiaire ; **prix toujours calculé par le serveur** (D37). Invité : kits uniquement (D12) | à refondre (`paid` booléen, prix client) |
+| `RestockAlert` | `kit`, `phone?` \| `user?`, `notifiedAt?` | Un seul SMS (D38) pour un invité ou un parent ; notification in-app pour un apprenant, sans téléphone (D30) | à créer |
+| `Order` | `reference`, `kind` ∈ `course`\|`kit`\|`event`, `payer?` (parent) \| `guest` (prénom, nom, téléphone), `beneficiary?` (apprenant), `status` ∈ `pending`\|`paid`\|`cancelled`\|`refunded`, `shippingStatus?` ∈ `preparing`\|`shipped`\|`delivered`, `subtotal`, `shippingFee`, `total`, `deliveryAddress` (instantané), `paymentRequest?`, `guestAccessTokenHash?`, `paidAt?`, `expiresAt` | Payeur ≠ bénéficiaire ; **prix toujours calculé par le serveur** (D37). Invité : kits uniquement (D12), accès par jeton opaque (C10). Paiement reçu après `expiresAt` : honoré si le stock ou la place est encore disponible, sinon remboursé automatiquement (C17) | à refondre (`paid` booléen, prix client) |
 | `OrderItem` | `order`, `course?` \| `kit?` \| `eventApplication?`, `title`, `unitPrice`, `quantity`, `total` | Instantané du prix serveur | à refondre |
 | `Payment` | `order`, `provider`, `providerTransactionId`, `country`, `network`, `msisdn`, `amount`, `status` ∈ `initiated`\|`pending`\|`succeeded`\|`failed`, `failureCode?`, `failureReason?`, `payload`, `confirmedAt?` | Initié par le serveur ; seul le **webhook** vérifié fait foi (S9) | à refondre (`success` booléen, pas d'initiation) |
 | `Invoice` | `order`, `number`, `pdf`, `issuedAt` | Générée en asynchrone au paiement ; conservée après suppression de compte (D40) | existe (à brancher) |
 | `Refund` | `payment`, `amount`, `reason`, `processed` | Traité depuis l'admin Django (Finance) | existe |
 | `KitCode` | `code`, `kit`, `orderItem`, `redeemedBy?`, `redeemedCourse?`, `redeemedAt?` | Format `STEAMY-XXXX-XXXX`, Crockford base32, insensible à la casse, consommation atomique, tentatives limitées (D35). Généré à la commande de kit, imprimé sur la notice (D36) | à créer |
-| `PaymentRequest` | `requestedBy` (apprenant), `parent`, `kind`, `course?` \| `items[]` \| `eventApplication?`, `amount`, `status` ∈ `pending`\|`paid`\|`declined`\|`expired`, `order?`, `lastSentAt` | Demande de paiement de l'enfant au parent ; lien SMS vers `WPD15` (D52) | à créer |
+| `PaymentRequest` | `requestedBy` (apprenant), `parent`, `kind`, `course?` \| `items[]` \| `eventApplication?`, `amount`, `status` ∈ `pending`\|`paid`\|`declined`\|`expired`\|`cancelled`, `order?`, `lastSentAt` | Demande de paiement de l'enfant au parent ; lien SMS vers `WPD15` (D52). Expire à 7 jours, renvoi limité, annulable par l'enfant (C4) | à créer |
 
 ### 3.4 Événements (`events`)
 
 | Entité | Champs clés | Règles | API |
 | --- | --- | --- | --- |
 | `SteamyEvent` | `slug`, `title`, `emoji`, `color`, `startsAt`, `endsAt`, `place`, `city`, `price` (0 = gratuit), `capacity`, `applicationDeadline`, `description`, `status` ∈ `draft`\|`published` | Distinct de la télémétrie (`TrackingEvent`). WL08 fusionné dans WL21 (S8) | à créer |
-| `EventApplication` | `event`, `learner`, `appliedBy` (apprenant ou parent), `motivation`, `selfLevel`, `status` ∈ `pending_parent`\|`pending_payment`\|`pending_review`\|`accepted`\|`refused`\|`cancelled`, `order?`, `ticket?`, `parentDecidedAt?` | Accord parental **systématique** (S3, S8). Événement payant : paiement par le parent (D41, D53). Revue finale par le personnel (WAD12, admin Django) | à créer |
+| `EventApplication` | `event`, `learner`, `appliedBy` (apprenant ou parent), `motivation`, `selfLevel`, `status` ∈ `pending_parent`\|`pending_payment`\|`accepted`\|`refused`\|`cancelled`, `order?`, `ticket?`, `parentDecidedAt?`, `refusalReason?` | Accord parental **systématique** (S3, S8). Événement payant : paiement par le parent (D41, D53). **Pas de sélection par Steamy** : l'accord du parent, plus le paiement si payant, confirme l'inscription dans la limite des places (C3). Le personnel suit et peut refuser exceptionnellement, avec remboursement (WAD12) | à créer |
+| `EventProposal` | `event`, `classroom`, `teacher` | Proposition d'un événement à une classe (WT09) : notification seulement, unique par couple | à créer |
 | `EventTicket` | `learner`, `enrollment` (origine), `usedBy?` | Ticket offert à la certification, attribué **une seule fois** (D33) ; couvre le prix d'une candidature | à créer |
 
 ### 3.5 Encadrement (`classrooms`)
 
 | Entité | Champs clés | Règles | API |
 | --- | --- | --- | --- |
-| `School` | `name`, `country`, `city`, `offer`, `learnerQuota`, `classroomQuota`, `validUntil` | Minimale ; quotas contrôlés par le serveur ; pas de tableau de bord établissement en v1 (D61) | à créer |
+| `School` | `name`, `country`, `city`, `offer`, `courses[]` (parcours de l'offre), `learnerQuota`, `classroomQuota`, `validUntil` | Minimale ; quotas contrôlés par le serveur, invitations en attente comprises (C19) ; pas de tableau de bord établissement en v1 (D61) | à créer |
 | `TeacherInvitation` | `email`, `school?`, `invitedBy`, `tokenHash`, `expiresAt`, `acceptedAt?` | Seule voie de création d'un compte enseignant (S5) | à créer |
 | `Classroom` | `school`, `teacher`, `course`, `name`, `color`, `archivedAt?` | **Une classe = un parcours** ; accès couvert par l'offre B2B (D62) | à créer |
 | `ClassroomMembership` | `classroom`, `learner`, `consentRequest`, `status` ∈ `invited`\|`active`\|`left`, `joinedAt?` | L'élève rejoint après acceptation du parent (D60). Crée l'`Enrollment` (`source=classroom`) | à créer |
-| `TeacherComment` | `teacher`, `learner`, `classroom`, `visibility` ∈ `learner`\|`parent`\|`both`, `body` | À sens unique, notifié ; pas de messagerie (D63, S11) | à créer |
+| `TeacherComment` | `teacher`, `learner`, `classroom`, `attempt?`, `body` | À sens unique, notifié, toujours visible de l'apprenant **et** de son parent, sans choix de visibilité ; pas de messagerie (D63, S11) | à créer |
 
 ### 3.6 Notifications (`notifications`)
 
@@ -302,6 +311,7 @@ Toutes ces règles sont des **invariants serveur**. L'interface les reflète, el
 | Personnel : email + mot de passe + TOTP (django-otp), exigé sur l'admin Django **et** `/api/backoffice/` | S4, D72 |
 | Un seul écran de connexion (W16), champ « Identifiant ou numéro » résolu par le serveur ; le personnel se connecte à part (WAD15) | S4 |
 | Inscription libre : apprenant (W01-W19) et parent (WP01-WP12) uniquement ; le rôle n'est **jamais** choisi par le client | S1, S5 |
+| Inscription parent : réponse neutre si le numéro est déjà inscrit ; l'OTP est envoyé dans tous les cas, puis un compte existant mène à la connexion | C13 |
 | Âge entre 10 et 17 ans, cohérent avec la date de naissance | D23 |
 | Mot de passe : 8 caractères minimum, une lettre et un chiffre, validé par le serveur | D25 |
 | Mot de passe oublié (WL02-WL05) : parent et enseignant. L'apprenant le fait réinitialiser par son parent (WPD03) | D26 |
@@ -320,6 +330,8 @@ Trois origines, une seule décision : celle du parent (D60, D70).
 - Le parent voit seulement ce qui existe à ce stade : prénom, nom, identifiant, âge, lien de parenté (D20).
 - Refus : clôt la demande ; nouvelle demande au même parent après 30 jours ; compte en attente purgé et identifiant
   libéré ; changement de parent par la modération admin uniquement (D22).
+- Code de reprise perdu : pas de régénération, l'enfant recommence ; une nouvelle demande au même numéro annule la
+  demande en attente et libère l'identifiant (C14).
 - Expiration à 7 jours (D21). L'admin **suit** (attente, relances, litiges), il ne valide jamais à la place du parent
   (D70).
 - Toute autre action sensible de l'enfant passe par le parent : paiement (§4.3), candidature à un événement (S8),
@@ -334,7 +346,8 @@ Trois origines, une seule décision : celle du parent (D60, D70).
 | Paiement initié par le serveur auprès du prestataire ; **le webhook signé fait foi** (montant, devise, référence vérifiés) ; idempotent | S9 |
 | Mobile Money uniquement : pays + réseau + numéro. Réseaux activables par pays (Celtiis inclus), lus publiquement | D76 |
 | L'échec est un état de premier plan, avec raison explicite et nouvelle tentative possible | WA07, WK09 |
-| Après paiement (une seule fois, en transaction) : inscription, `KitCode` générés, facture asynchrone, stock confirmé, candidature passée en revue | D36, D37 |
+| Après paiement (une seule fois, en transaction) : inscription, `KitCode` générés, facture asynchrone, stock confirmé, candidature confirmée | D36, D37, C3 |
+| Paiement reçu sur une commande expirée : honoré si le stock (ou la place) est encore disponible, sinon remboursement automatique et notification | C17 |
 | Parcours avec kit : accès **uniquement** par Kit Code, qui débloque le parcours gratuitement | D36 |
 | Stock réservé 30 min ; commande non payée annulée à l'échéance | D38 |
 | Devise FCFA exclusivement, affichée « FCFA » | §8.8 |
@@ -395,7 +408,7 @@ et S8 sont supprimés.
 
 Autres règles : CSRF sur toute écriture ; cookies `Secure`, `HttpOnly` (session), `SameSite=Lax` ; CORS limité au
 domaine du front ; `/api/docs/` et `/api/schema/` hors production ou réservés au personnel ; journal d'audit (§3.7)
-pour les actions du personnel.
+pour les actions du personnel ; sessions `cached_db`, session du personnel limitée à 8 h (C20).
 
 ---
 
@@ -494,7 +507,8 @@ Catalogue des codes métier (extensible, chaque code a son message français) :
 | Comptes | `CONSENT_REQUEST_EXPIRED`, `CONSENT_ALREADY_RESOLVED`, `CONSENT_COOLDOWN`, `CONSENT_PHONE_MISMATCH`, `CHILDREN_STILL_LINKED`, `BIRTHDATE_AGE_MISMATCH` |
 | Pédagogie | `PAYMENT_REQUIRED`, `KIT_CODE_REQUIRED`, `CONTENT_LOCKED`, `NOT_ENROLLED`, `QUIZ_COOLDOWN` |
 | Commerce | `PARENT_APPROVAL_REQUIRED`, `KIT_CODE_INVALID`, `KIT_CODE_ALREADY_USED`, `KIT_CODE_NOT_COMPATIBLE`, `OUT_OF_STOCK`, `DELIVERY_ZONE_UNAVAILABLE`, `NETWORK_UNAVAILABLE`, `ORDER_EXPIRED`, `ORDER_ALREADY_PAID`, `PAYMENT_FAILED` |
-| Événements, classes, pilotage | `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED`, `CLASSROOM_QUOTA_EXCEEDED`, `REPORT_LOCKED` |
+| Événements, classes, pilotage | `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED`, `EVENT_ALREADY_PROPOSED`, `CLASSROOM_QUOTA_EXCEEDED`, `LEARNER_QUOTA_EXCEEDED`, `COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`, `REPORT_LOCKED` |
+| Import d'élèves (par ligne) | `DUPLICATE_ROW`, `MALFORMED_ROW`, `PHONE_INVALID`, `ALREADY_IN_CLASSROOM`, `LEARNER_QUOTA_EXCEEDED` ; fichier : `IMPORT_TOO_LARGE` (> 200 lignes, C19) |
 
 ### 7.2 `auth`
 
@@ -508,8 +522,8 @@ Catalogue des codes métier (extensible, chaque code a son message français) :
 | `GET auth/learner-signup/` → étape, statut du consentement | W07, W08, W18 | à créer |
 | `POST auth/learner-signup/resume/` `{ username, resumeCode }` | W07, W16 | à créer |
 | `POST auth/learner-signup/password/` `{ password }` → active et connecte | W10 | à créer |
-| `POST auth/parent-signup/` `{ firstName, lastName, phone, privacyAccepted }` → `{ challengeId }` | WP01 | à créer |
-| `POST auth/parent-signup/verify/` `{ challengeId, code }` | WP02 | à créer |
+| `POST auth/parent-signup/` `{ firstName, lastName, phone, privacyAccepted }` → `{ challengeId }` (réponse identique si le numéro est déjà inscrit, C13) | WP01 | à créer |
+| `POST auth/parent-signup/verify/` `{ challengeId, code }` → `{ existingAccount }` (compte existant → W16, C13) | WP02 | à créer |
 | `POST auth/parent-signup/password/` `{ password }` → connecte | WP03 | à créer |
 | `POST auth/otp/resend/` `{ challengeId }` | WP02, WL03 | à créer |
 | `POST auth/password-reset/` `{ identifier }` → `{ challengeId }` | WL02 | à aligner (`forgot-password-step-1`, lien email) |
@@ -521,7 +535,7 @@ Catalogue des codes métier (extensible, chaque code a son message français) :
 
 | Endpoint | Écrans | État |
 | --- | --- | --- |
-| `GET accounts/me/` (identité, rôle, statut, profil, compteurs du shell) | tous les shells | à aligner (`user/my-profile`) |
+| `GET accounts/me/` (identité, rôle, statut, profil, étape de profil restante `profileStep` pour W11-W14 / WP07-WP09, données du shell : avatar, classe, ville, compteurs ; personnel : `isStaff`, `otpVerified`, `staffGroups`) | tous les shells, redirection après W16, garde de WAD01-WAD05 | à aligner (`user/my-profile`) |
 | `PATCH accounts/me/` | WD17, WPD08, WT08 | à créer |
 | `PATCH accounts/me/learner-profile/` | W11-W14, WD17 | à créer |
 | `PATCH accounts/me/parent-profile/` | WP07-WP09, WPD08 | à créer |
@@ -534,37 +548,38 @@ Catalogue des codes métier (extensible, chaque code a son message français) :
 | `POST accounts/me/deletion-request/` · `DELETE` (annuler) | WD15, WPD08 | à créer |
 | `POST accounts/consent-requests/` `{ parentPhone, relationship }` (session d'inscription) | W06 | à créer |
 | `POST accounts/consent-requests/{id}/resend/` | W07 | à créer |
+| `POST accounts/consent-requests/preview/` `{ token }` → numéro du parent masqué (public, throttlé ; aucune donnée de l'enfant) | WP01 (prérempli depuis le lien SMS) | à créer |
 | `POST accounts/consent-requests/claim/` `{ token }` (jeton du lien SMS, après connexion du parent) | WP04, WPD05 | à créer |
-| `GET accounts/consent-requests/?status=` · `GET …/{id}/` | WPD01, WPD02, WP05, WPD05 | à créer |
-| `POST accounts/consent-requests/{id}/accept/` (`{ username, password }` si origine enseignant) | WP05, WP06, WPD05 | à créer |
+| `GET accounts/consent-requests/?status=` (demandes adressées au numéro vérifié du parent) · `GET …/{id}/` | WP04, WPD01, WPD02, WP05, WPD05 | à créer |
+| `POST accounts/consent-requests/{id}/accept/` (origine enseignant : `{ username, password }` ou `{ learnerId }` pour rattacher un enfant existant, C11) | WP05, WP06, WPD05 | à créer |
 | `POST accounts/consent-requests/{id}/refuse/` `{ reason, note? }` | WP11, WP12, WPD05 | à créer |
 | `GET accounts/children/` · `POST` `{ firstName, lastName, birthDate, relationship, username, password }` | WPD01, WPD02, WP09, WPD04 | à créer |
-| `GET/PATCH accounts/children/{id}/` | WPD03, WPD10 | à créer |
+| `GET/PATCH accounts/children/{id}/` (le `GET` inclut la progression par parcours et les tentatives récentes) | WPD03, WPD10 | à créer |
 | `POST accounts/children/{id}/password-reset/` `{ password }` | WPD03 | à créer |
 | `POST accounts/children/{id}/deletion/` `{ reason, note? }` · `DELETE` (annuler) | WPD09 | à créer |
 | `POST accounts/deletion-requests/{id}/approve/` · `…/refuse/` | WPD01 | à créer |
-| `GET accounts/children/{id}/weekly-report/` | WPD11 | à créer |
+| `GET accounts/children/{id}/weekly-report/?week=AAAA-Www` | WPD11 | à créer |
 | `GET accounts/pending-actions/` (consentements, paiements, candidatures, suppressions) | WPD01 | à créer |
 
 ### 7.4 `catalog`, `learning`, `wishlist`
 
 | Endpoint | Écrans | État |
 | --- | --- | --- |
-| `GET catalog/categories/` | WL06, WL16, WC01 | à créer |
-| `GET catalog/courses/?category=&difficulty=&price=&sort=&page=` (public, publiés seulement) | WL06, WL16, WC01-WC03 | à aligner (`courses/courses/`) |
+| `GET catalog/categories/` (avec `courseCount` publiés) | WL06, WL16, WC01 | à créer |
+| `GET catalog/courses/?category=&difficulty=&price=&featured=&q=&sort=&page=` (public, publiés seulement, indépendant de la session) | WL01, WL06, WL16, WC01-WC03, WD02 | à aligner (`courses/courses/`) |
 | `GET catalog/courses/{slug}/` (sans contenu des missions) | WL22, WC04, WC05 | à aligner |
 | `GET learning/dashboard/` (points, streak, rang, reprise, recommandations courtes) | WD01, WD02 | à créer |
 | `GET learning/enrollments/` | WD23, WC06a | à aligner (`learning/enrollments/`, filtre propriétaire) |
 | `POST learning/enrollments/` `{ courseSlug }` (gratuit seulement, sinon `PAYMENT_REQUIRED`/`KIT_CODE_REQUIRED`) | WC04, W15 | à aligner (`courses/{id}/enroll`, S7) |
 | `GET learning/enrollments/{courseSlug}/tree/` | WC06a, WC06b, WJ09 | à créer |
 | `GET learning/projects/{id}/` · `levels/{id}/` · `missions/{id}/` | WJ01, WJ02, WJ03 | à créer (remplace `modules`, `lessons`, `resources`) |
-| `POST learning/missions/{id}/complete/` | WJ03 | à aligner (`learning/progress/`) |
+| `POST learning/missions/{id}/complete/` → `next` (mission ou quiz suivant) | WJ03 | à aligner (`learning/progress/`) |
 | `POST learning/activity/` `{ missionId, seconds }` | WJ03 | à créer |
 | `GET learning/quizzes/{id}/` (sans corrigé) | WJ04, WJ10 | à aligner (`learning/quizzes/`) |
-| `POST learning/quizzes/{id}/attempts/` `{ answers }` → score, statut, `failedConcepts`, remédiation, badge, points | WJ05, WJ06, WJ08, WJ11 | à aligner (`learning/attempts/`) |
-| `GET learning/attempts/?status=` · `GET …/{id}/` | WD07, WD08, WD09 | à aligner |
+| `POST learning/quizzes/{id}/attempts/` `{ answers }` (envoi groupé) → score, statut, `failedConcepts`, remédiation, badge, points, `retryInSec`, `next` | WJ05, WJ06, WJ08, WJ11 | à aligner (`learning/attempts/`) |
+| `GET learning/attempts/?status=` (+ agrégats du bandeau : taux, nombre, parfaits, streak) · `GET …/{id}/` | WD07, WD08, WD09 | à aligner |
 | `GET learning/badges/` | WJ06, WJ11 | à créer |
-| `GET learning/certificates/` · `GET …/{id}/download/` | WJ07, WD21 | à aligner (`learning/certificates/`) |
+| `GET learning/certificates/` (avec `pdfStatus`) · `GET …/{id}/download/` | WJ07, WD21 | à aligner (`learning/certificates/`) |
 | `GET learning/progress/` · `GET learning/recommendations/` | WD21 | à créer |
 | `GET wishlist/` · `PUT wishlist/{courseSlug}/` · `DELETE wishlist/{courseSlug}/` | WC01-WC05, WW01-WW03 | à créer |
 
@@ -572,41 +587,47 @@ Catalogue des codes métier (extensible, chaque code a son message français) :
 
 | Endpoint | Écrans | État |
 | --- | --- | --- |
-| `GET shop/kits/` · `GET shop/kits/{slug}/` (public) | WL07, WK01, WK02, WK11 | à créer |
+| `GET shop/kits/?category=` · `GET shop/kits/{slug}/` (public) | WL07, WK01, WK02, WK11 | à créer |
 | `GET shop/cart/` · `POST shop/cart/items/` · `PATCH/DELETE shop/cart/items/{id}/` | WK03, WK10 | à créer |
 | `GET shop/delivery-zones/?country=` (public) | WK05 | à créer |
-| `POST shop/kits/{slug}/restock-alerts/` `{ phone }` (public) | WK11 | à créer |
+| `POST shop/kits/{slug}/restock-alerts/` `{ phone }` (invité) ou sans corps (connecté : notification in-app, D30) | WK11 | à créer |
 | `POST payments/orders/` `{ kind, items, beneficiaryId?, guest?, deliveryAddress?, paymentRequestId? }` → total serveur (parent ou invité) | WK04-WK06, WPD12, WPD15 | à refondre (`payments/orders/`, prix client) |
 | `GET payments/orders/?status=` (payeur ou bénéficiaire) | WD14, WPD07 | à refondre |
-| `GET payments/orders/{reference}/` (invité : jeton d'accès opaque) | WA05, WK07 | à refondre |
+| `GET payments/orders/{reference}/` (invité : jeton opaque en en-tête `X-Guest-Token`, C10 ; `kitCodes` visibles du payeur seul) | WA05, WK07, WPD07 | à refondre |
 | `GET payments/orders/{reference}/invoice/` | WD14, WPD07 | à créer |
-| `POST payments/orders/{reference}/payments/` `{ country, network, msisdn }` → initiation | WA03, WK06, WPD15 | à créer |
+| `POST payments/orders/{reference}/payments/` `{ country, network, msisdn }` → initiation (invité : `X-Guest-Token` ; aussi reprise d'une commande en attente sans demande) | WA03, WK06, WPD07, WPD12, WPD15 | à créer |
 | `GET payments/payments/{id}/` → `initiated`\|`pending`\|`succeeded`\|`failed` + raison | WA04, WA05, WA07, WK09 | à refondre (`payments/payments/`) |
 | `POST payments/webhook/{provider}/` (signé, idempotent) | — | à aligner (S5) |
 | `POST payments/kit-codes/redeem/` `{ code, courseSlug }` | WA01, WA06 | à créer |
 | `POST payments/payment-requests/` `{ kind, courseSlug? \| items? \| eventApplicationId? }` (apprenant) | WA02, WK08 | à créer |
 | `POST payments/payment-requests/{id}/resend/` | WA02, WK08 | à créer |
 | `GET payments/payment-requests/?status=` · `GET …/{id}/` | WPD01, WPD15 | à créer |
+| `POST payments/payment-requests/{id}/cancel/` (apprenant, C4) | WA02, WK08 | à créer |
 | `POST payments/payment-requests/{id}/decline/` | WPD15 | à créer |
 
 ### 7.6 `events`, `classrooms`
 
 | Endpoint | Écrans | État |
 | --- | --- | --- |
-| `GET events/` · `GET events/{slug}/` (public) | WL21, WL23, WD10, WPD06, WT09 | à créer |
+| `GET events/?upcoming=` · `GET events/{slug}/` (public, avec `seatsLeft`) | WL21, WL23, WD10, WPD06, WT09 | à créer |
+| `GET events/tickets/` (tickets Steamy Events de l'apprenant, D33) | WJ07, WD10, WD11 | à créer |
+| `POST events/{slug}/proposals/` `{ classroomId }` (enseignant ; notification des élèves et parents) | WT09 | à créer |
 | `POST events/{slug}/applications/` `{ motivation, selfLevel }` (apprenant) ou `{ childId, motivation? }` (parent) | WD11, WPD12 | à créer |
 | `GET events/applications/` (les siennes ou celles des enfants) | WD10, WPD06 | à créer |
 | `POST events/applications/{id}/accept/` (événement payant → demande de paiement) · `…/refuse/` | WPD06, WPD15 | à créer |
 | `GET classrooms/dashboard/` | WT01 | à créer |
-| `GET classrooms/` · `POST classrooms/` `{ name, courseSlug }` | WT03, WT13 | à créer |
-| `GET classrooms/{id}/` · `GET classrooms/{id}/members/` | WT04 | à créer |
+| `GET classrooms/school/` (école, offre, parcours de l'offre, quotas utilisés et restants) | WT03, WT06, WT13 | à créer |
+| `GET classrooms/` · `POST classrooms/` `{ name, courseSlug, schoolGrade? }` | WT03, WT13 | à créer |
+| `GET classrooms/{id}/` · `PATCH classrooms/{id}/` (parcours figé dès qu'il y a un membre) · `GET classrooms/{id}/members/` | WT04, WT13 | à créer |
+| `POST classrooms/{id}/members/{memberId}/remove/` (statut `left`) | WT04 | à créer |
 | `POST classrooms/{id}/invitations/` `{ firstName, lastName, parentPhone, relationship }` | WT06 | à créer |
-| `POST classrooms/{id}/invitations/import/` (CSV) → `{ created[], errors[{ line, code }] }` | WT06 | à créer |
-| `GET classrooms/learners/{id}/` (sans données sensibles) | WT05 | à créer |
-| `POST classrooms/learners/{id}/comments/` `{ body, visibility }` | WT05 | à créer |
+| `POST classrooms/{id}/invitations/import/` (CSV ou Excel, 200 lignes max, import partiel) → `{ created[], errors[{ line, code, data }] }` (C19) | WT06 | à créer |
+| `GET classrooms/learners/{id}/?classroomId=` (sans données sensibles ; tentatives et commentaires du parcours de la classe) | WT05 | à créer |
+| `POST classrooms/learners/{id}/comments/` `{ body, attemptId? }` (visible de l'apprenant et du parent, D63) | WT05 | à créer |
 | `GET classrooms/comments/?learnerId=` (apprenant : les siens ; parent : ses enfants) | WD01, WPD03 | à créer |
 | `GET classrooms/reviews/?status=` (« À revoir ») | WT01, WT07 | à créer |
-| `GET classrooms/courses/` · `GET classrooms/courses/{slug}/` | WT02, WT10 | à créer |
+| `GET classrooms/courses/` · `GET classrooms/courses/{slug}/` · `GET classrooms/courses/{slug}/missions/{id}/` (lecture seule) | WT02, WT10 | à créer |
+| `GET classrooms/event-applications/` (candidatures des élèves, lecture seule) | WT09 | à créer |
 
 ### 7.7 `notifications`, `referentials`, `public`, `core`
 
@@ -627,7 +648,7 @@ Les écrans WAD06-WAD15 sont dans l'admin Django et n'ont **pas** d'API.
 
 | Endpoint | Écrans | État |
 | --- | --- | --- |
-| `GET backoffice/overview/` | WAD01 | à créer (remplace `analytics/dashboard/summary/`) |
+| `GET backoffice/overview/` (« À traiter » : `{ kind, count, adminPath }` filtré par groupe) | WAD01 | à créer (remplace `analytics/dashboard/summary/`) |
 | `GET backoffice/kpis/?period=` · `GET backoffice/kpis/{code}/` | WAD02, WAD03 | à créer |
 | `GET backoffice/impact-reports/{period}/` | WAD04 | à créer |
 | `PATCH backoffice/impact-reports/{period}/values/` | WAD05 | à créer |
@@ -783,32 +804,28 @@ scène de WC02b et WD16 ; `title="Bientôt"` ; commentaire de travail `screens-a
 
 ### 8.18 Points tranchés après l'alignement
 
-Tous les points restés ouverts pendant la réécriture des specs sont tranchés dans les compléments C1-C12 de
-[ARBITRAGES.md](alignement/ARBITRAGES.md) :
+Tous les points restés ouverts pendant la réécriture des specs et des plans sont tranchés dans les compléments
+C1-C20 de [ARBITRAGES.md](alignement/ARBITRAGES.md) :
 
 | Point | Décision |
 | --- | --- |
-| Identité chromatique (§8.1) | C1 : magenta `#9E1B9A` |
+| Identité chromatique (§8.1) | C1 : magenta `#9E1B9A` ; purge des `rgba` violets au lot 1 |
 | Registre de l'enseignant | C2 : vouvoiement |
-| Sélection des candidats aux Steamy Events | C3 : confirmée par l'accord (et le paiement) du parent |
+| Sélection des candidats aux Steamy Events | C3 : confirmée par l'accord (et le paiement) du parent ; WAD12 = suivi et refus exceptionnel avec remboursement |
 | Activation, mot de passe oublié et école de l'enseignant | C6 : activation par lien email (variante de WL04, `auth/teacher-invitations/`), code par email, toujours rattaché à une `School` |
 | Connexion du personnel, résolution de « Identifiant ou numéro » sur W16 | C7 |
 | Barème de points et seuils de rang (D34), note des parcours | C8 : dans `PlatformSettings`, fixés avant le lot 3 ; `rating` masqué en v1 |
 | « Institutions » (KPI, D75) | Écoles (`School`) sous offre active |
-| « Rejoindre l'équipe » (WL01) | Vers WL24 avec le sujet « Candidature » |
+| « Rejoindre l'équipe » (WL01) | Vers WL24 avec le sujet « Candidature » (`/aide?sujet=candidature`) |
 | Collection de badges (D39) | Écran à concevoir après la v1 ; `GET learning/badges/` existe dès le lot 3 |
-
---- | --- |
-| Identité chromatique (§8.1) | Magenta des tokens ; purge des `rgba` violets au lot 1 |
-| Activation du compte enseignant invité : aucun écran | Lien email → variante de WL04 (« Définir votre mot de passe ») ; `auth/teacher-invitations/` (§7.2) |
-| Connexion du personnel par W16 | Refusée : le personnel passe uniquement par WAD15 ; la session obtenue sert aussi à `/api/backoffice/` |
-| Mot de passe oublié de l'enseignant (D26) | Même écrans WL02-WL05, code envoyé par email au lieu du SMS |
-| Résolution de « Identifiant ou numéro » sur W16 | `@` → email ; chiffres ou `+` → téléphone (pays par défaut : Bénin, sélecteur discret) ; sinon identifiant. Un identifiant apprenant ne peut être ni numérique ni contenir `@` |
-| Barème de points et seuils de rang (D34) | Valeurs dans `PlatformSettings`, à fixer avant le lot 3 ; à défaut retirer « +200 points » et le rang |
-| « Institutions » (KPI, D75) | Compter les `School` sous offre active |
-| « Rejoindre l'équipe » (WL01) | Renvoyer vers WL24 avec le sujet « Candidature » |
-| Note des parcours (`rating`) sans modèle d'avis | Masquée en v1 |
-| Collection de badges (D39) | Écran à concevoir après la v1 ; `GET learning/badges/` existe dès le lot 3 |
+| Numéro de parent déjà inscrit (WP01) | C13 : réponse neutre |
+| Code de reprise perdu | C14 : non régénérable |
+| Code de la messagerie | C15 : supprimé, tag `archive/messaging` |
+| Fuseau horaire | C16 : UTC en base, `Africa/Porto-Novo` |
+| Paiement sur une commande expirée | C17 : honoré si disponible, sinon remboursé |
+| Maquettes des écrans à concevoir | C18 : nouveaux fichiers dans `design/`, validés avant le développement |
+| Quotas d'une école, import d'élèves | C19 |
+| Sessions | C20 : `cached_db`, personnel 8 h |
 
 ---
 

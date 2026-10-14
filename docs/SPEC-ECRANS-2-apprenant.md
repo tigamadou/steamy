@@ -70,7 +70,8 @@ Rattachement des sous-écrans (entrée `active`) :
 | `catalog` | `WC01`-`WC05`, `WA01`-`WA02`, `WA06`, boutique `WK` |
 | `wishlist` | `WW01`-`WW03` |
 | `profile` | `WD12`-`WD19`, `WD21`, `WD22` |
-| Hors shell (plein écran) | `WJ06`, `WJ11` ; `WA05`, `WA07` (côté parent, voir §5.9) |
+| Hors shell (plein écran) | `WJ06`, `WJ11` |
+| Côté parent (shell parent, lot 4) | `WA03`, `WA04`, `WA05`, `WA07` : états de `WPD15`, voir §5.9 |
 
 ### Éléments
 
@@ -309,8 +310,10 @@ Toute suppression réversible de l'espace apprenant suit ce modèle de toast ave
 
 L'apprenant ne paie jamais (S3, D30). Il débloque un parcours **avec un Kit Code** (parcours avec kit) ou **en le
 demandant à son parent** (parcours payant sans kit). `WA03`, `WA04`, `WA05` et `WA07` décrivent le paiement fait par
-le **parent** : ils sont repris dans `WPD15` (demande de paiement, D52) et dans les achats faits depuis l'espace
-parent, avec le shell parent.
+le **parent**. Ils sont livrés au **lot 3** sous forme de composants (`PaymentForm` pour `WA03`, `PaymentStatusPanel`
+pour l'attente `WA04`, le succès `WA05` et l'échec `WA07`), d'abord exercés par le checkout invité (`WK06`, `WK09`).
+Côté parent, ce ne sont pas des pages : ce sont les **états de `WPD15`** (demande de paiement, D52), dans le shell
+parent, livrés au **lot 4**, comme les achats faits depuis l'espace parent.
 
 ```
 WC05 ─┬─ parcours avec kit ──→ WA01 ─┬─ code valide ──→ inscription → WC06a (toast « Parcours débloqué »)
@@ -327,7 +330,7 @@ WC05 ─┬─ parcours avec kit ──→ WA01 ─┬─ code valide ──→ 
 | `WA02` | Demande à ton parent | v1 · apprenant | **Chemin unique de paiement de l'apprenant.** Récapitulatif (parcours, prix en FCFA). « On a envoyé une demande de paiement à Marie. Tu recevras une notification dès qu'elle aura réglé. » Statut : en attente / réglée / échouée / expirée. « Relancer mon parent » (relance limitée) · « Annuler la demande ». Quitte l'attente sur notification ou changement de statut |
 | `WA03` | Formulaire Mobile Money | v1 · parent | Récap (« Parcours … pour Léa », prix calculé par le serveur). Pays, réseau Mobile Money (réseaux actifs du pays, D76), numéro (`PhoneInput` dépendant du pays, E.164). « Payer n FCFA » → `WA04`. Mention « Paiement sécurisé · aucune carte bancaire » |
 | `WA04` | Paiement en cours | v1 · parent | « Valide la demande sur ton téléphone » (vouvoiement côté parent). Attente non bloquante : suivi du statut de la commande ; le webhook du prestataire fait foi (S9). Au-delà d'un délai, message « toujours en attente » + lien vers ses commandes |
-| `WA05` | Paiement réussi | v1 · parent | Plein écran succès : « Le parcours … est débloqué pour Léa. La facture vous a été envoyée. » « Retour » → espace parent. L'apprenant reçoit une notification ; l'inscription est créée par le serveur |
+| `WA05` | Paiement réussi | v1 · parent | Succès (état de `WPD15`, `PaymentStatusPanel`) : « Le parcours … est débloqué pour Léa. La facture vous a été envoyée. » « Retour » → espace parent. L'apprenant reçoit une notification ; l'inscription est créée par le serveur |
 | `WA06` | Kit Code invalide | v1 · apprenant | État d'erreur de `WA01`, message selon le `code` renvoyé : code inconnu · déjà utilisé · trop de tentatives (réessai bloqué temporairement). « Réessayer » ; « Le code ne marche pas ? Contacter le support » → `WL24` |
 | `WA07` | Paiement échoué | v1 · parent | « Aucun montant n'a été débité. » Raison traduite en français depuis le prestataire. « Changer de numéro » → `WA03` · « Réessayer le paiement » |
 

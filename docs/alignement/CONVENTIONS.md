@@ -14,6 +14,9 @@ plans d'implémentation.
 | `WPD15` | Demande de paiement (parcours, kit ou événement demandé par l'enfant ; reprend WA03) | 4 | D52, S8 |
 | `WT13` | Créer une classe | 5 | §8.11 |
 
+Leurs maquettes sont produites dans `design/`, dans de nouveaux fichiers d'écrans (`screens-<espace>-a-concevoir-web.jsx`)
+avec le même design system, et validées avant leur développement (C18).
+
 Les **états** à concevoir restent attachés à leur écran (par exemple, les erreurs d'import de WT06 sont un état de
 WT06, et le refus de consentement côté parent est une modale de WPD05 qui reprend le contenu de WP11).
 
@@ -70,11 +73,11 @@ Rôles :
 - Authentification : session Django + CSRF (`/api/auth/csrf/`, `/api/auth/login/`, `/api/auth/logout/` : les chemins
   existants sont à renommer). Pas de token DRF (S12).
 - Erreurs : en français (locale `fr`), avec un `code` métier stable (D4).
-- Domaines envisagés :
+- Domaines :
 
   | Domaine | Contenu |
   | --- | --- |
-  | `auth` | Session, connexion, OTP, mot de passe oublié |
+  | `auth` | Session, connexion, OTP, mot de passe oublié. Servi par l'app `accounts` : aucune app Django ne s'appelle `auth` (collision avec `django.contrib.auth`) |
   | `accounts` | Profils, lien parent↔enfant, consentements, suppression |
   | `catalog` | Parcours publics, catégories |
   | `learning` | Inscriptions, arbre, missions, quiz, badges, certificats |
@@ -86,4 +89,4 @@ Rôles :
   | `notifications` | Notifications et préférences |
   | `referentials` | Pays, réseaux, classes scolaires, objectifs… |
   | `public` | Devis B2B, leads, contact |
-  | `backoffice` | Back-office |
+  | `backoffice` | Back-office (servi par l'app `impact`) |

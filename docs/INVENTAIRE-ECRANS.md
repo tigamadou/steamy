@@ -163,11 +163,11 @@ Hors périmètre : modèle divergent (téléphone, OTP et règle « < 16 ans » 
 |---|---|---|---|---|---|
 | 100 | `WA01` | Saisie du Kit Code | 3 | v1 | D35, D36 |
 | 101 | `WA02` | Paiement par le parent | 3 | v1 | Demande de paiement (D52) |
-| 102 | `WA03` | Formulaire de paiement Mobile Money | 3 | v1 | Réseaux par pays (D76) |
-| 103 | `WA04` | Paiement en cours | 3 | v1 |  |
-| 104 | `WA05` | Paiement réussi | 3 | v1 |  |
+| 102 | `WA03` | Formulaire de paiement Mobile Money | 3 | v1 | Composant `PaymentForm` (lot 3, exercé par WK06) ; côté parent : état de WPD15 (lot 4). Réseaux par pays (D76) |
+| 103 | `WA04` | Paiement en cours | 3 | v1 | Composant `PaymentStatusPanel` (lot 3) ; côté parent : état de WPD15 (lot 4) |
+| 104 | `WA05` | Paiement réussi | 3 | v1 | Composant `PaymentStatusPanel` (lot 3) ; côté parent : état de WPD15 (lot 4) |
 | 105 | `WA06` | Kit Code invalide | 3 | v1 | D35 |
-| 106 | `WA07` | Paiement échoué | 3 | v1 |  |
+| 106 | `WA07` | Paiement échoué | 3 | v1 | Composant `PaymentStatusPanel` (lot 3, exercé par WK09) ; côté parent : état de WPD15 (lot 4) |
 
 ## Déroulement pédagogique · `screens-journey-web.jsx` · 11 écrans
 
@@ -271,7 +271,8 @@ Next.js pour WAD01-WAD05 (monochrome, `--primary-*` banni) ; admin Django pour W
 
 ## Écrans à concevoir
 
-Absents de la maquette. Leurs états (erreurs d'import de WT06, modale de refus de WPD05…) restent attachés à l'écran
+Absents de la maquette. Leurs maquettes sont produites dans `design/`, dans de nouveaux fichiers d'écrans avec le même
+design system, puis validées avant leur développement (C18). Leurs états (erreurs d'import de WT06, modale de refus de WPD05…) restent attachés à l'écran
 existant et ne figurent pas ici.
 
 | ID | Écran | Lot | Statut | Origine |
@@ -302,5 +303,7 @@ La collection de badges (D39) n'est pas conçue en v1 : l'entrée « Badges » d
 
 - Lot 1 : WL08 compte en v1 mais est servi par la page WL21 (S8). Reportés : WL12-WL15, WL19 (S7).
 - Lot 3 : hors périmètre = WD20 (moyens de paiement de l'apprenant, D30).
+- Lot 3 : WA03, WA04, WA05 et WA07 sont livrés comme composants (`PaymentForm`, `PaymentStatusPanel`), réutilisés par
+  le checkout invité (WK06, WK09) ; côté parent, ce sont des états de WPD15 dans le shell parent (lot 4).
 - Hors périmètre non comptés : `W09`, `W17` (code mort), `screens-welcome-web.jsx`.
 - Total général : 172 écrans de maquette + 6 à concevoir = 178.

@@ -44,10 +44,12 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 | Prérequis | Origine | Utilisé par |
 | --- | --- | --- |
-| Atomes : `Button`, `Field`, `Input`, `PhoneInput`, `Checkbox`, `Badge`, `Tag`, `Avatar`, `Loader`, `Toast`, `Modal`, `ProgressBar` ; `CourseCard`, `WKKitCard` | Lot 1 (WL06, WL07) | Tout le lot |
+| Atomes : `Button`, `Field`, `Input`, `PhoneInput`, `Checkbox`, `Badge`, `Tag`, `Avatar`, `Loader`, `Toast`, `SkeletonBlock`, `Breadcrumb`, `FaqAccordion` ; `CourseCard`, `WKKitCard`, `EventDetail` | Lot 1 (WL06, WL07, WL23, WL24) | Tout le lot |
+| `Modal`, `AvatarPicker`, `GoalChip`, `Celebration`, `NewPasswordFields` | Lot 2 | WD16, WD17, WD18, WJ06, WJ11 |
 | `PublicShell`, enveloppes `error.tsx` / `loading.tsx` / hors ligne (WX01-WX03), client API anonyme cachable | Lot 1 | 3.7 (invité), états |
 | Vitest + Testing Library, Playwright sur la stack Docker, `make seed` | Lot 1, étape 1.0 | Tous les tests |
 | Session (`lib/auth/session.ts` : `getCurrentUser()`, `homeForRole()`, `safeNext()`, `logout()`), `proxy.ts`, retour par `?next=` après `W16`, `PasswordInput`, `PwReq` | Lot 2 | Layout apprenant, `WD18` |
+| Maquette de `WD23` dans `design/screens-apprenant-a-concevoir-web.jsx`, validée (C18) | Produit | 3.3a |
 | `API-L3a` publiée et `make openapi` à jour | PLAN-API | 3.1 à 3.5 |
 | `API-L3b` (prestataire choisi après la comparaison S9, faux prestataire en local et CI) | PLAN-API | 3.6 à 3.8 |
 | Barème de points et paliers de rang dans `PlatformSettings` (C8) | Produit, avant le lot 3 | Pastilles Points/Rang |
@@ -175,7 +177,7 @@ définition de « terminé » du README pour tous ses écrans.
 | `HeaderSearch` | « Rechercher un parcours… » → `/apprenant/catalogue?q=` | DS |
 | `LogoutModal` (WD16) | `Modal` avec portail, piège de focus, `Échap`, clic extérieur ; `logout()` du lot 2 | DS |
 | `learnerNav` | Config : Accueil, Mes parcours, Catalogue, Mes souhaits, Badges (`hidden: true`), Profil | `features/shell` |
-| Promotions depuis `screens-dashboard-web.jsx` | `SectionHeader`, `StatPill`, `QuickActionTile`, `SkeletonBlock`, `SettingsRow`, `Toggle` (rôle `switch`) | DS, avec stories de tests |
+| Promotions depuis `screens-dashboard-web.jsx` | `SectionHeader`, `StatPill`, `ProgressBar`, `QuickActionTile`, `SettingsRow`, `Toggle` (rôle `switch`) ; `SkeletonBlock` vient du lot 1 | DS, avec stories de tests |
 
 **Données** : `GET accounts/me/` (prénom, initiale, avatar, « classe · ville »), `GET notifications/unread-count/`
 (rendu à chaque navigation, rafraîchi toutes les 60 s quand l'onglet est visible ; pas de websocket, S11).
@@ -197,8 +199,8 @@ squelette du shell pendant le chargement de la session.
 | WD12 | `/apprenant/aide` | FAQ statique versionnée (D10), recherche locale, accordéon ; questions de la spec (Kit Code, mot de passe → parent, D26) ; « Contacter le support » → `WL24` |
 
 **API** : `GET learning/dashboard/`, `GET catalog/courses/?price=free&difficulty=beginner` (WD02),
-`notifications/*` (§7.7). **Composants** : `NotifItem` (DS, lot 1 ou ici), `ResumeCard`, `FaqAccordion` (réutilisé
-par `WPD13`). **Tests** : unitaires (WD01 sans points, notification lue au clic, toggle email désactivé sans
+`notifications/*` (§7.7). **Composants** : `NotifItem` (DS, créé ici), `ResumeCard` ; `FaqAccordion` vient du lot 1 (WL24) et sert aussi
+`WPD13` et `WT11`. **Tests** : unitaires (WD01 sans points, notification lue au clic, toggle email désactivé sans
 adresse) ; Playwright : marquer tout comme lu met le compteur du shell à 0.
 
 ### 3.2 · Catalogue, fiche parcours et souhaits — L
@@ -225,7 +227,7 @@ kit) ; Playwright « souhaits » : ajouter depuis WC01, retirer depuis WW01, ann
 
 | Écran | Route | Points clés |
 | --- | --- | --- |
-| WD23 | `/apprenant/parcours` | À concevoir (D39), d'après la spec : onglets En cours / Terminés, carte (difficulté, %, « Projet n · Niveau n », prochaine mission, dernière activité, badge « Classe de … »), « Continuer » → `WJ03`, Terminés → certificat. Bandeau « En attente de ton parent » (branché en 3.6). Vide → `WC01?prix=gratuit`. Squelette de 3 cartes. Maquette rapide validée avant le code |
+| WD23 | `/apprenant/parcours` | À concevoir (D39), d'après la spec : onglets En cours / Terminés, carte (difficulté, %, « Projet n · Niveau n », prochaine mission, dernière activité, badge « Classe de … »), « Continuer » → `WJ03`, Terminés → certificat. Bandeau « En attente de ton parent » (branché en 3.6). Vide → `WC01?prix=gratuit`. Squelette de 3 cartes. Maquette dans `design/screens-apprenant-a-concevoir-web.jsx`, validée avant le code (C18) |
 | WC06a / WC06b | `/apprenant/parcours/[slug]` | En-tête compact, liste des projets ; projet déplié via `?projet=` (lien partageable) ; `MissionItem` `locked` non focusable ; carte « Mot de ton enseignant » si `classrooms/comments` renvoie des éléments (D63) |
 | WJ01 | `…/projets/[projectId]` | Objectifs, prérequis, matériel, niveaux, « Ta progression », « Récompenses du projet » |
 | WJ02 | `…/niveaux/[levelId]` | Intro Vimeo (`introVimeoId`), missions du niveau, « Commencer la 1ʳᵉ mission » |
@@ -246,13 +248,13 @@ d'une mission verrouillée → `LockedContentState`.
 
 | Écran | Route | Points clés |
 | --- | --- | --- |
-| WJ04 / WJ10 | `…/quiz/[quizId]` | Encart « Obtiens au moins {threshold} % » (seuil de l'API). `Quiz` question par question ; choix = `radio` focusables ; correction de chaque réponse demandée au serveur si l'API la fournit, sinon envoi groupé ; `timeLimitSec` optionnel (pas de `00:42`). Brouillon des réponses conservé en `sessionStorage` (rechargement) ; « Envoyer » protégé contre la double soumission. Loader + message pendant la correction (§6) |
+| WJ04 / WJ10 | `…/quiz/[quizId]` | Encart « Obtiens au moins {threshold} % » (seuil de l'API). `Quiz` question par question ; choix = `radio` focusables ; réponses envoyées **en une fois** à la fin (`POST …/attempts/`, aucun corrigé avant) ; `timeLimitSec` optionnel (pas de `00:42`). Brouillon des réponses conservé en `sessionStorage` (rechargement) ; « Envoyer » protégé contre la double soumission. Loader + message pendant la correction (§6) |
 | WJ05 / WJ08 | `…/quiz/[quizId]/resultats/[attemptId]` | Un seul écran paramétré par `kind`, `threshold`, `passed`, `status`. Réussite : score, « Niveau validé », récap, « Voir mon badge ». Échec : questions et concepts à revoir avec liens `remediationMission` → `WJ03` ; sommative : bouton « Réessayer » désactivé avec compte à rebours issu de `retryInSec` (D32), annoncé en `aria-live` à l'expiration ; formative : réessai immédiat (C8) |
 | WJ06 | `(plein-ecran)/…/niveaux/[levelId]/badge` | Médaille, points gagnés si l'API les renvoie, « Niveau suivant » → cible renvoyée par l'API (`WJ02` suivant ou `WJ10`) |
 | WJ11 | `(plein-ecran)/…/projets/[projectId]/badge` | Badge de projet, score, « Projet suivant » ou `WJ07` |
 
-**Composants** : `Quiz` (DS), `QuizResult`, `QuestionReview`, `RetryCountdown`, `Medal` (DS), `Confetti` (respecte
-`prefers-reduced-motion`). Aucun lien « Voir mes badges » (D39).
+**Composants** : `Quiz` (DS), `QuizResult`, `QuestionReview`, `RetryCountdown`, `Medal` (DS), `Celebration` (lot 2,
+respecte `prefers-reduced-motion`). Aucun lien « Voir mes badges » (D39).
 
 **API** : `GET learning/quizzes/{id}/` (sans corrigé), `POST learning/quizzes/{id}/attempts/` (score, `status`,
 `failedConcepts`, remédiation, badge, points, `retryInSec`), `GET learning/attempts/{id}/`, `GET learning/badges/`.
@@ -293,8 +295,9 @@ DOM avant soumission) ; Playwright P1 (§8).
 | WD22 | `/apprenant/profil/parent` | Nom, lien de parenté, statut ; pas de téléphone complet, pas de changement de parent (D41) |
 | WD15 | `/apprenant/profil/suppression` | Texte D40 (J+30, factures conservées), motif facultatif, envoi → état « Demande envoyée à ton parent » ; annulation possible tant que `pending_parent` |
 
-**Composants** : `SettingsRow` (DS), `ProfileForm`, `AvatarPicker`, `AddressForm` (réutilisé par `WK05` et
-`WPD08`). **API** : `accounts/me/`, `me/learner-profile/`, `me/password/`, `me/delivery-address/`, `me/parent/`,
+**Composants** : `SettingsRow` (DS), `Section` et `InfoCard` (DS, ex-`WPDSection`/`WPDInfoCard` de la maquette,
+promus ici pour WD13 et réutilisés par WPD08 et WT08), `ProfileForm`, `AvatarPicker` (lot 2), `AddressForm` (DS,
+réutilisé par `WK05`, `WPD08` et `WPD15`). **API** : `accounts/me/`, `me/learner-profile/`, `me/password/`, `me/delivery-address/`, `me/parent/`,
 `me/deletion-request/`, `referentials/*`. **Tests** : unitaires (erreurs de champ issues de `fields`) ; Playwright :
 modifier le profil puis recharger.
 
@@ -309,8 +312,8 @@ modifier le profil puis recharger.
 | WD23 (fin) | | Bandeau des demandes en attente |
 | WA03, WA04, WA05, WA07 | — (composants) | `PaymentForm` (DS) : pays (`referentials/countries`), réseaux actifs du pays (`payment-networks/?country=`, D76) en `WANetworkCard` (radios), numéro `PhoneInput` E.164, « Payer n FCFA » (montant serveur), mention « Paiement sécurisé · aucune carte bancaire ». `PaymentStatusPanel` : attente (instructions, interrogation de `GET payments/payments/{id}/`, message « toujours en attente » après 2 min + lien vers les commandes), succès, échec (raison du prestataire, « Changer de numéro », « Réessayer »). Prop `register` (`tu`/`vous`) ; textes de WA04/WA05/WA07 au vouvoiement |
 
-**API** : `POST payments/kit-codes/redeem/`, `POST payments/payment-requests/`, `…/{id}/resend/`, annulation
-(`DELETE` ou `…/cancel/`, à confirmer dans `API-L3b`), `GET payments/payment-requests/?status=` et `…/{id}/`,
+**API** : `POST payments/kit-codes/redeem/`, `POST payments/payment-requests/`, `…/{id}/resend/`,
+`…/{id}/cancel/` (API-L3b.5), `GET payments/payment-requests/?status=` et `…/{id}/`,
 `GET payments/orders/?status=`, `referentials/countries/`, `payment-networks/`.
 
 **Tests** : unitaires (`KitCodeInput`, `PaymentForm` sans réseau en dur, `PaymentStatusPanel` dans ses 3 états) ;
@@ -321,7 +324,7 @@ Playwright P2 et P3 (§8).
 | Écran | Routes | Points clés |
 | --- | --- | --- |
 | WK01 | `/apprenant/boutique` (connecté) ; `/boutique` = WL07 (lot 1) | Filtres par catégorie, tri ; `WKKitCard` focusable, **Difficulté** ; « Ajouter » → toast ; vide |
-| WK02 / WK11 | `/apprenant/boutique/[slug]`, `/boutique/[slug]` | Galerie, contenu, parcours compatibles (→ `WC05` connecté, `WL22` invité), stock (« Plus que n »), délai de la zone (jamais « 3-5 jours » en dur). Rupture : alerte de réassort, invité → `PhoneInput` (`POST shop/kits/{slug}/restock-alerts/`), apprenant → abonnement in-app sans téléphone (D30 ; endpoint à confirmer dans `API-L3b`) |
+| WK02 / WK11 | `/apprenant/boutique/[slug]`, `/boutique/[slug]` | Galerie, contenu, parcours compatibles (→ `WC05` connecté, `WL22` invité), stock (« Plus que n »), délai de la zone (jamais « 3-5 jours » en dur). Rupture : alerte de réassort, invité → `PhoneInput` (`POST shop/kits/{slug}/restock-alerts/`), apprenant → abonnement in-app sans téléphone (D30 ; même endpoint, sans corps, API-L3b.3) |
 | WK03 / WK10 | `/apprenant/boutique/panier`, `/boutique/panier` | `WKCartRow`, `WKQtyStepper` borné par le stock serveur, récap (livraison « calculée à l'étape suivante »). CTA selon le contexte : invité « Commander » → WK04 ; apprenant « Demander à mon parent » (3.7c). Vide → WK01 |
 
 **Panier** : invité en `localStorage` (identifiants et quantités seulement, D38), connecté côté serveur
@@ -339,7 +342,7 @@ reste cachable : prix et stock sont relus côté client au moment d'ajouter.
 | WK04 | `/boutique/commande/coordonnees` | Prénom, nom, téléphone (`PhoneInput`), acceptation CGV / confidentialité (`WL09`) ; « Vous avez un compte ? Se connecter » → `W16` avec retour au panier fusionné. Vouvoiement |
 | WK05 | `/boutique/commande/livraison` | `AddressForm` + zone (référentiel `shop/delivery-zones/?country=`) ; frais et délai affichés dès le choix (lus dans la zone, pas calculés) |
 | WK06 / WK09 | `/boutique/commande/paiement` | `POST payments/orders/` (`kind=kit`, `items`, `guest`, `deliveryAddress`) → total serveur et heure limite de réservation (30 min, D38) ; `PaymentForm` → `POST payments/orders/{reference}/payments/` → `PaymentStatusPanel`. Échec = WK09 dans le shell public : panier conservé, « Aucun montant n'a été débité » seulement si l'API le confirme. `OUT_OF_STOCK`, `ORDER_EXPIRED`, `NETWORK_UNAVAILABLE` gérés |
-| WK07 | `/boutique/commandes/[reference]` | Référence, timeline issue de `shippingStatus`, mention du Kit Code imprimé sur la notice, « Télécharger le reçu », « Retour à la boutique ». Accès invité par jeton opaque (lien SMS, C10) : page `noindex`, `Referrer-Policy: no-referrer`, jeton jamais journalisé |
+| WK07 | `/boutique/commandes/[reference]` | Référence, `ShippingTimeline` (DS, réutilisée par WPD07) issue de `shippingStatus`, mention du Kit Code imprimé sur la notice, « Télécharger le reçu », « Retour à la boutique ». Accès invité par jeton opaque (lien SMS, C10 ; transmis à l'API en en-tête `X-Guest-Token`) : page `noindex`, `Referrer-Policy: no-referrer`, jeton jamais journalisé |
 
 L'état du tunnel (coordonnées, adresse) vit en `sessionStorage` jusqu'à la création de la commande ; il ne contient
 aucun montant. Le parcours parent (WK05 → WK06 sans WK04) réutilise ces composants au lot 4.
@@ -376,19 +379,21 @@ Activation du drapeau `events` (raccourci de WD01, ticket de WJ07).
 
 ## 7. Dépendances vers l'API
 
-| Sous-lot | Étape | Endpoints (§7) | Points à confirmer avec PLAN-API |
+Les besoins relevés pendant la rédaction sont intégrés à `API-L3a`/`API-L3b` et au §7 de la spec technique.
+
+| Sous-lot | Étape | Endpoints (§7) | Précisions intégrées |
 | --- | --- | --- | --- |
-| 3.0 | API-1, API-L3a | `accounts/me/`, `auth/logout/`, `notifications/unread-count/` | Champs du shell dans `accounts/me/` (classe, ville, avatar) |
-| 3.1 | API-L3a | `learning/dashboard/`, `notifications/*`, `catalog/courses/` | `points`/`rank` à `null` tant que C8 n'est pas réglé |
-| 3.2 | API-L1, API-L3a | `catalog/*`, `learning/enrollments/`, `wishlist/*` | `isFavorite` et état d'inscription dans la liste pour éviter N+1 appels |
-| 3.3a | API-L3a | `learning/enrollments/{slug}/tree/`, `projects|levels|missions/{id}/`, `missions/{id}/complete/`, `activity/`, `classrooms/comments/` | `next` (cible suivante) renvoyé par `complete/` ; `vimeoHash` ; lecture des commentaires avant API-L5 |
-| 3.3b | API-L3a | `learning/quizzes/{id}/`, `quizzes/{id}/attempts/`, `attempts/{id}/`, `badges/` | Correction question par question ou envoi groupé ; `retryInSec` ; cible suivante après badge |
-| 3.3c | API-L3a (+ L3b pour le ticket) | `learning/certificates/*`, `recommendations/` | Statut de génération du PDF |
-| 3.4 | API-L3a | `learning/attempts/`, `learning/progress/` | Agrégats du bandeau WD07 |
+| 3.0 | API-1, API-L3a | `accounts/me/`, `auth/logout/`, `notifications/unread-count/` | Données du shell (avatar, classe, ville) dans `accounts/me/` |
+| 3.1 | API-L3a | `learning/dashboard/`, `notifications/*`, `catalog/courses/` | `points`/`rank` à `null` tant que le barème C8 n'est pas saisi |
+| 3.2 | API-L1, API-L3a | `catalog/*`, `learning/enrollments/`, `wishlist/*` | Le catalogue reste indépendant de la session (cache) : favoris et inscriptions lus une fois par `GET wishlist/` et `GET learning/enrollments/`, fusionnés côté front |
+| 3.3a | API-L3a | `learning/enrollments/{slug}/tree/`, `projects|levels|missions/{id}/`, `missions/{id}/complete/`, `activity/`, `classrooms/comments/` | `next` renvoyé par `complete/` ; `vimeoHash` ; commentaires absents (pas d'erreur) avant API-L5 |
+| 3.3b | API-L3a | `learning/quizzes/{id}/`, `quizzes/{id}/attempts/`, `attempts/{id}/`, `badges/` | Envoi groupé ; `retryInSec` ; `next` après le badge |
+| 3.3c | API-L3a (+ L3b pour le ticket) | `learning/certificates/*`, `recommendations/`, `events/tickets/` | `pdfStatus` du certificat |
+| 3.4 | API-L3a | `learning/attempts/`, `learning/progress/` | Agrégats du bandeau WD07 dans `learning/attempts/` |
 | 3.5 | API-L3a | `accounts/me/*`, `referentials/*` | — |
-| 3.6 | API-L3b | `payments/kit-codes/redeem/`, `payment-requests/*`, `orders/`, `payments/{id}/` | Annulation d'une demande (C4) ; prénom du parent dans la demande |
-| 3.7a-c | API-L3b | `shop/kits/*`, `shop/cart/*`, `shop/delivery-zones/`, `restock-alerts/`, `payments/orders/*` | Authentification invitée des appels suivant la création de commande (jeton opaque en en-tête) ; alerte de réassort in-app pour l'apprenant ; zones de livraison renvoyant frais et délai |
-| 3.8 | API-L3b | `events/*` | Ticket de l'apprenant dans `events/applications/` ou un endpoint dédié |
+| 3.6 | API-L3b | `payments/kit-codes/redeem/`, `payment-requests/*` (dont `cancel/`), `orders/`, `payments/{id}/` | Prénom du parent dans la demande |
+| 3.7a-c | API-L3b | `shop/kits/*`, `shop/cart/*`, `shop/delivery-zones/`, `restock-alerts/`, `payments/orders/*` | `X-Guest-Token` ; alerte de réassort in-app pour l'apprenant ; zones avec frais et délai |
+| 3.8 | API-L3b | `events/*`, `events/tickets/` | — |
 
 ## 8. Tests
 
@@ -410,10 +415,9 @@ contraire au bon sens (par exemple 90 % mais `passed: false`) doit être affich�
 | P6 | Event : WD10 → WL23 → WD11 → WD10 « En attente de ton parent » ; second envoi refusé | 3.8 |
 | P7 | Souhaits avec annulation (3.2) ; contrôle d'accès (3.0) ; mission verrouillée (3.3a) | 3.0-3.3a |
 
-**Outillage requis** (à prévoir dans `API-L3a`/`API-L3b`) : délai de sommative raccourci dans le jeu de test
-(`PlatformSettings`), faux prestataire de paiement à issue pilotable (numéro de test → succès ou échec, webhook
-simulé), commande de test « payer la demande n » pour P3 tant que `WPD15` (lot 4) n'existe pas, Celery actif pour le
-PDF. Le parcours complet enfant → parent (P3 de bout en bout) est repris au lot 4.
+**Outillage requis** (créé dans PLAN-API) : `seed_demo --e2e` avec délai de sommative raccourci et Celery actif
+dans la stack `e2e` (API-L3a) ; faux prestataire pilotable par numéro de test et commande `pay_payment_request <id>`
+pour P3 tant que `WPD15` (lot 4) n'existe pas (API-L3b.0b). Le parcours complet enfant → parent (P3 de bout en bout) est repris au lot 4.
 
 ### 8.3 Données de démonstration (D2)
 
@@ -438,17 +442,25 @@ livraison, deux événements (gratuit, payant). Tous les compteurs affichés son
 | Dérive du DS entre lots | Composants dupliqués | Promotions au DS dans les sous-lots qui les introduisent ; `AppShell` sans logique apprenant |
 | Lien SMS invité (jeton dans l'URL) | Fuite du suivi | Jeton opaque, `noindex`, `no-referrer`, expiration côté API |
 
-## 10. Critères de fin de lot
+## 10. Points ouverts
+
+| Point | Bloque |
+| --- | --- |
+| Valeurs du barème de points et des paliers de rang (C8), à saisir dans `PlatformSettings` | Affichage des pastilles Points/Rang (masquées sinon) |
+| Choix du prestataire de paiement après comparaison KKiaPay / FedaPay (S9, ADR-Paiement) | Branchement réel (le faux prestataire suffit au lot) |
+| Offre Vimeo permettant la restriction de domaine et vidéos de démo | 3.3a en conditions réelles |
+
+## 11. Critères de fin de lot
 
 - Les 62 écrans respectent la définition de « terminé » du README (spec alignée, 360 px → bureau, français et bon
   registre, accessibilité AA, tous les états, aucune donnée en dur, tests).
 - `AppShell` est dans le DS, paramétré uniquement par ses props, et prêt pour les navigations parent et enseignant.
-- Composants promus et testés : `StatPill`, `SectionHeader`, `QuickActionTile`, `SkeletonBlock`, `SettingsRow`,
-  `Toggle`, `MissionItem`, `Quiz`, `QuizAttemptRow`, `NotifItem`, `Medal`, `WANetworkCard`, `PaymentForm`,
-  `PaymentStatusPanel`, `VimeoPlayer`, `AddressForm`, `KitCodeInput`.
+- Composants promus et testés : `StatPill`, `SectionHeader`, `ProgressBar`, `QuickActionTile`, `SettingsRow`,
+  `Toggle`, `Section`, `InfoCard`, `MissionItem`, `Quiz`, `QuizAttemptRow`, `NotifItem`, `Medal`, `WANetworkCard`,
+  `PaymentForm`, `PaymentStatusPanel`, `ShippingTimeline`, `VimeoPlayer`, `AddressForm`, `KitCodeInput`.
 - Aucun calcul de règle métier côté front (recherche dans le code : aucun seuil, délai, barème ni montant codé en dur).
 - Parcours Playwright P1 à P7 verts en CI sur la stack Docker avec le jeu D2.
 - Aucun appel hors du client généré ; `make openapi` à jour.
 - Drapeaux `unlock` et `events` retirés (fonctionnalités livrées).
-- Les lots 4 et 5 peuvent démarrer : `AppShell`, `PaymentForm`, `PaymentStatusPanel`, `FaqAccordion`, `AddressForm`
-  et les composants de tunnel boutique sont réutilisables sans modification.
+- Les lots 4 et 5 peuvent démarrer : `AppShell`, `PaymentForm`, `PaymentStatusPanel`, `AddressForm`, `Section`,
+  `InfoCard`, `ShippingTimeline` et les composants de tunnel boutique sont réutilisables sans modification.
