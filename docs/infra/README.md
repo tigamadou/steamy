@@ -100,4 +100,3 @@ flowchart LR
 - **WebSockets en local** : `runserver` ne les sert pas (ils fonctionnent en staging/prod via gunicorn + uvicorn).
 - **Un seul nœud par environnement** : une panne du VPS interrompt le service jusqu'à son retour
   ou sa reconstruction (Ansible + restauration depuis Wasabi). C'est le compromis assumé du mono-nœud.
-- **Lint de l'API non bloquant** en CI (~170 erreurs historiques), en attendant la migration vers Ruff.

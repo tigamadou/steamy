@@ -57,7 +57,8 @@ Ordre de démarrage garanti par `depends_on` : postgres/redis/rustfs → migrati
 | `make manage c="createsuperuser"` | Commande `manage.py` quelconque |
 | `make migrate` / `make makemigrations` | Migrations Django |
 | `make seed` | Charge les fixtures (compte admin, gabarits d'e-mails) |
-| `make test-api` / `make lint-api` | Tests et lint de l'API |
+| `make test-api` | Tests de l'API |
+| `make lint-api` / `make fix-api` | Vérifier / corriger automatiquement le lint et le format de l'API (Ruff) |
 | `make lint-web` / `make typecheck-web` | Lint et typecheck du front |
 | `make openapi` | Régénère le contrat OpenAPI et les types TypeScript |
 | `make clean` | ⚠️ Arrête tout **et supprime toutes les données locales** |

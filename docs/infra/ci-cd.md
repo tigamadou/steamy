@@ -17,7 +17,7 @@ précédent. Sur une PR, c'est le diff de la PR qui compte.
 
 | Job | Lancé si modification de | Vérifie |
 | --- | --- | --- |
-| `api` | `apps/api/**` | Tests (pytest, avec PostgreSQL et Redis), migrations manquantes, contrat OpenAPI à jour et sans avertissement, lint (**non bloquant** pour l'instant) |
+| `api` | `apps/api/**` | Tests (pytest, avec PostgreSQL et Redis), migrations manquantes, contrat OpenAPI à jour et sans avertissement, lint et format (Ruff) |
 | `web` | `apps/web/**`, `packages/**`, `openapi.yaml`, fichiers pnpm | Types du client à jour, lint, typecheck, build |
 | `images` | API ou front | Les images de production se construisent (sans push) |
 | `helm` | `infra/**`, workflows | `helm lint` et rendu des deux charts pour staging et prod, validation des manifestes (kubeconform), shellcheck du script de déploiement |
