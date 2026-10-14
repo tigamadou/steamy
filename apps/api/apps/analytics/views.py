@@ -1,5 +1,7 @@
 # apps/analytics/views.py
-from rest_framework import viewsets, permissions, status
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from rest_framework import serializers, viewsets, permissions, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from django.utils import timezone
@@ -32,6 +34,13 @@ class EventViewSet(viewsets.ModelViewSet):
         return Response(ser.data, status=status.HTTP_201_CREATED)
 
 
+class DashboardSummarySerializer(serializers.Serializer):
+    total_users = serializers.IntegerField()
+    events_last_7_days = serializers.IntegerField()
+    revenue_last_30_days = serializers.FloatField()
+
+
+@extend_schema(responses=DashboardSummarySerializer)
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def dashboard_summary(request):
@@ -69,6 +78,13 @@ import csv
 from django.http import HttpResponse
 from django.utils.dateparse import parse_date
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter("start", OpenApiTypes.DATE, description="Par défaut : il y a 7 jours"),
+        OpenApiParameter("end", OpenApiTypes.DATE, description="Par défaut : aujourd'hui"),
+    ],
+    responses={(200, "text/csv"): OpenApiResponse(OpenApiTypes.BINARY, description="Export CSV des événements")},
+)
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def export_events_csv(request):

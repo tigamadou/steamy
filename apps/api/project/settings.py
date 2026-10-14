@@ -288,16 +288,7 @@ SPECTACULAR_SETTINGS = {
         "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
     ],
     "SCHEMA_PATH_PREFIX": r"/api",
-    "SECURITY": [{"BearerAuth": []}],
-    "COMPONENTS": {
-        "securitySchemes": {
-            "BearerAuth": {
-                "type": "http",
-                "scheme": "bearer",
-                "bearerFormat": "JWT"
-            }
-        }
-    },
+    # Schémas d'auth (cookieAuth, tokenAuth) déduits de DEFAULT_AUTHENTICATION_CLASSES
 }
 ADMIN_TITLE = 'Admin'
 ADMIN_HEADER = 'Admin'

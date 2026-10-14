@@ -4,16 +4,6 @@ info:
   version: 1.0.0
   description: API pour la plateforme de formation
 paths:
-  /api/:
-    get:
-      operationId: root_retrieve
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      - BearerAuth: []
-      responses:
-        '200':
-          description: No response body
   /api/analytics/dashboard/summary/:
     get:
       operationId: analytics_dashboard_summary_retrieve
@@ -25,10 +15,13 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardSummary'
+          description: ''
   /api/analytics/events/:
     get:
       operationId: analytics_events_list
@@ -65,7 +58,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -90,7 +82,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '201':
@@ -117,7 +108,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -149,7 +139,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -180,7 +169,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -206,7 +194,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '204':
@@ -214,15 +201,32 @@ paths:
   /api/analytics/export/events.csv:
     get:
       operationId: analytics_export_events.csv_retrieve
+      parameters:
+      - in: query
+        name: end
+        schema:
+          type: string
+          format: date
+        description: 'Par défaut : aujourd''hui'
+      - in: query
+        name: start
+        schema:
+          type: string
+          format: date
+        description: 'Par défaut : il y a 7 jours'
       tags:
       - analytics
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: Export CSV des événements
   /api/core/presign/:
     post:
       operationId: core_presign_create
@@ -231,13 +235,22 @@ paths:
         returns: {"key": "...", "presign": {...}}
       tags:
       - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PresignUploadRequestRequest'
+        required: true
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignUploadResponse'
+          description: ''
   /api/courses/courses/:
     get:
       operationId: courses_courses_list
@@ -271,7 +284,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -293,7 +305,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -315,7 +326,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -343,7 +353,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -369,7 +378,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -390,7 +398,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -417,7 +424,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -458,7 +464,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -480,7 +485,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -503,7 +507,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -532,7 +535,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -559,7 +561,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -581,7 +582,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -618,7 +618,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -640,7 +639,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -663,7 +661,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -692,7 +689,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -719,7 +715,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -741,7 +736,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -778,7 +772,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -800,7 +793,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -822,7 +814,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -850,7 +841,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -876,7 +866,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -897,7 +886,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -934,7 +922,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -956,7 +943,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -979,7 +965,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -1008,7 +993,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1035,7 +1019,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1057,7 +1040,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -1084,7 +1066,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -1106,7 +1087,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1127,7 +1107,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -1179,7 +1158,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1200,7 +1178,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -1223,7 +1200,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1251,7 +1227,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1278,7 +1253,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1300,7 +1274,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -1325,7 +1298,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1366,7 +1338,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1389,7 +1360,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1430,7 +1400,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -1452,7 +1421,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -1475,7 +1443,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -1504,7 +1471,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1531,7 +1497,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1553,7 +1518,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -1590,7 +1554,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1611,7 +1574,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -1634,7 +1596,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1662,7 +1623,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1689,7 +1649,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1711,7 +1670,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -1748,7 +1706,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1769,7 +1726,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -1792,7 +1748,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1820,7 +1775,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1847,7 +1801,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -1869,7 +1822,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -1906,7 +1858,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -1928,7 +1879,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -1951,7 +1901,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -1980,7 +1929,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2007,7 +1955,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2029,7 +1976,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -2066,7 +2012,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -2088,7 +2033,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -2111,7 +2055,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '200':
@@ -2140,7 +2083,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2167,7 +2109,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2189,7 +2130,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -2226,7 +2166,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2250,7 +2189,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -2273,7 +2211,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2304,7 +2241,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2334,7 +2270,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2356,7 +2291,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -2396,7 +2330,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2419,7 +2352,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -2445,7 +2377,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2475,7 +2406,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2505,7 +2435,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2530,7 +2459,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -2567,7 +2495,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2588,7 +2515,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -2611,7 +2537,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2639,7 +2564,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2666,7 +2590,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2688,7 +2611,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -2713,7 +2635,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2754,7 +2675,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2769,14 +2689,14 @@ paths:
       - in: path
         name: id
         schema:
-          type: string
+          type: integer
+        description: A unique integer value identifying this notification.
         required: true
       tags:
       - messaging
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2790,7 +2710,8 @@ paths:
       - in: path
         name: id
         schema:
-          type: string
+          type: integer
+        description: A unique integer value identifying this notification.
         required: true
       tags:
       - messaging
@@ -2802,7 +2723,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2843,7 +2763,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2864,7 +2783,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -2887,7 +2805,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2915,7 +2832,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2942,7 +2858,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -2964,7 +2879,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '204':
           description: No response body
@@ -3001,7 +2915,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -3024,7 +2937,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -3039,22 +2951,32 @@ paths:
         Generic webhook entrypoint for external providers.
         - provider_name: "kkiapay" or "fedapay"
         The request.body should be validated by provider-specific verification code.
+      summary: Webhook des prestataires de paiement (appelé par KKiaPay / FedaPay,
+        pas par le front)
       parameters:
       - in: path
         name: provider_name
         schema:
           type: string
+          enum:
+          - fedapay
+          - kkiapay
         required: true
       tags:
       - payments
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      - BearerAuth: []
-      - {}
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookAck'
+          description: ''
   /api/public/user/csrf:
     get:
       operationId: public_user_csrf_retrieve
@@ -3081,7 +3003,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '201':
@@ -3100,7 +3021,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '201':
@@ -3125,7 +3045,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -3165,7 +3084,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '201':
@@ -3188,7 +3106,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '201':
@@ -3211,7 +3128,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           description: No response body
@@ -3229,7 +3145,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           description: No response body
@@ -3252,7 +3167,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '201':
           content:
@@ -3268,7 +3182,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -3283,7 +3196,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -3298,7 +3210,6 @@ paths:
       security:
       - tokenAuth: []
       - cookieAuth: []
-      - BearerAuth: []
       responses:
         '200':
           content:
@@ -3313,7 +3224,6 @@ paths:
       - user
       security:
       - cookieAuth: []
-      - BearerAuth: []
       - {}
       responses:
         '204':
@@ -3707,6 +3617,20 @@ components:
       required:
       - email
       - password
+    DashboardSummary:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+        eventsLast7Days:
+          type: integer
+        revenueLast30Days:
+          type: number
+          format: double
+      required:
+      - eventsLast7Days
+      - revenueLast30Days
+      - totalUsers
     Enrollment:
       type: object
       properties:
@@ -3974,7 +3898,9 @@ components:
             $ref: '#/components/schemas/MessageAttachment'
           readOnly: true
         receipts:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/ReceiptSummary'
           readOnly: true
       required:
       - attachments
@@ -4961,6 +4887,40 @@ components:
       - id
       - order
       - provider
+    PresignUploadRequestRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+          minLength: 1
+        contentType:
+          type: string
+          minLength: 1
+      required:
+      - filename
+    PresignUploadResponse:
+      type: object
+      properties:
+        key:
+          type: string
+        presign:
+          $ref: '#/components/schemas/PresignedPost'
+      required:
+      - key
+      - presign
+    PresignedPost:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+      - fields
+      - url
     Profile:
       type: object
       properties:
@@ -5190,6 +5150,23 @@ components:
       required:
       - course
       - title
+    ReceiptSummary:
+      type: object
+      properties:
+        user:
+          type: integer
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+        readAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - deliveredAt
+      - readAt
+      - user
     Resource:
       type: object
       properties:
@@ -5352,6 +5329,13 @@ components:
       required:
       - email
       - password
+    WebhookAck:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required:
+      - ok
   securitySchemes:
     cookieAuth:
       type: apiKey

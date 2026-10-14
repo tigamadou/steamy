@@ -1,5 +1,6 @@
 # apps/messaging/serializers.py
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from .models import Conversation, Message, MessageAttachment, MessageReceipt, Notification
 
@@ -69,6 +70,12 @@ class MessageCreateSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+class ReceiptSummarySerializer(serializers.Serializer):
+    user = serializers.IntegerField()
+    delivered_at = serializers.DateTimeField(allow_null=True)
+    read_at = serializers.DateTimeField(allow_null=True)
+
+
 class MessageSerializer(serializers.ModelSerializer):
     sender = serializers.StringRelatedField()
     attachments = MessageAttachmentSerializer(many=True, read_only=True)
@@ -79,6 +86,7 @@ class MessageSerializer(serializers.ModelSerializer):
         fields = ["id", "conversation", "sender", "body", "created_at",
                   "edited", "deleted", "attachments", "receipts"]
 
+    @extend_schema_field(ReceiptSummarySerializer(many=True))
     def get_receipts(self, obj):
         return [{"user": r.user_id, "delivered_at": r.delivered_at, "read_at": r.read_at} for r in obj.receipts.all()]
 

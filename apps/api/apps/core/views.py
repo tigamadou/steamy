@@ -8,6 +8,23 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from apps.core.storage_utils import get_presigned_post_for_upload
 
+class PresignUploadRequestSerializer(serializers.Serializer):
+    filename = serializers.CharField()
+    content_type = serializers.CharField(required=False)
+
+
+class PresignedPostSerializer(serializers.Serializer):
+    url = serializers.URLField()
+    # Champs à renvoyer tels quels dans le formulaire multipart d'upload
+    fields = serializers.DictField(child=serializers.CharField())
+
+
+class PresignUploadResponseSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    presign = PresignedPostSerializer()
+
+
+@extend_schema(request=PresignUploadRequestSerializer, responses=PresignUploadResponseSerializer)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def presign_upload(request):

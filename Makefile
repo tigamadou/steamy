@@ -65,7 +65,7 @@ lint-api: ## Lint de l'API
 
 # --- Contrat front/back -----------------------------------------------------
 openapi: ## Régénère openapi.yaml + les types TS du client (à committer)
-	$(API) python manage.py spectacular --file openapi.yaml --validate
+	$(API) python manage.py spectacular --file openapi.yaml --validate --fail-on-warn
 	$(WEB) "corepack enable && pnpm api-client:generate"
 
 # --- Front Next.js ------------------------------------------------------------

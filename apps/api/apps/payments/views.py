@@ -1,5 +1,7 @@
 # apps/payments/views.py
-from rest_framework import viewsets, permissions, status
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
+from rest_framework import serializers, viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
@@ -30,6 +32,13 @@ class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
 
 # Webhook endpoint for providers (unprotected CSRF exempt; verify signature inside)
+@extend_schema(
+    summary="Webhook des prestataires de paiement (appelé par KKiaPay / FedaPay, pas par le front)",
+    parameters=[OpenApiParameter("provider_name", str, OpenApiParameter.PATH, enum=["kkiapay", "fedapay"])],
+    request=OpenApiTypes.OBJECT,
+    responses={200: inline_serializer("WebhookAck", {"ok": serializers.BooleanField()})},
+    auth=[],
+)
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([permissions.AllowAny])

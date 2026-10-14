@@ -112,6 +112,9 @@ class NotificationViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "patch", "head", "options"]
 
     def get_queryset(self):
+        # Génération du schéma OpenAPI : pas d'utilisateur réel
+        if getattr(self, "swagger_fake_view", False):
+            return Notification.objects.none()
         user = self.request.user
         if user.is_staff:
             return Notification.objects.all().order_by("-created_at")

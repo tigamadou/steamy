@@ -100,7 +100,7 @@ jobs:
         run: pytest
       - name: Contrat OpenAPI à jour ?
         run: |
-          python manage.py spectacular --file /tmp/openapi.yaml --validate
+          python manage.py spectacular --file /tmp/openapi.yaml --validate --fail-on-warn
           if ! diff -q openapi.yaml /tmp/openapi.yaml; then
             echo "::error file=apps/api/openapi.yaml::openapi.yaml n'est plus à jour : lancer \`make openapi\` et committer."
             diff -u openapi.yaml /tmp/openapi.yaml | head -50

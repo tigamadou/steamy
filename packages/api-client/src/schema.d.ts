@@ -4,22 +4,6 @@
  */
 
 export interface paths {
-    "/api/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["root_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/analytics/dashboard/summary/": {
         parameters: {
             query?: never;
@@ -853,6 +837,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
+         * Webhook des prestataires de paiement (appelé par KKiaPay / FedaPay, pas par le front)
          * @description Generic webhook entrypoint for external providers.
          *     - provider_name: "kkiapay" or "fedapay"
          *     The request.body should be validated by provider-specific verification code.
@@ -1218,6 +1203,12 @@ export interface components {
             email: string;
             password: string;
         };
+        DashboardSummary: {
+            totalUsers: number;
+            eventsLast7Days: number;
+            /** Format: double */
+            revenueLast30Days: number;
+        };
         Enrollment: {
             readonly id: number;
             course: number;
@@ -1326,7 +1317,7 @@ export interface components {
             edited?: boolean;
             deleted?: boolean;
             readonly attachments: components["schemas"]["MessageAttachment"][];
-            readonly receipts: string;
+            readonly receipts: components["schemas"]["ReceiptSummary"][];
         };
         MessageAttachment: {
             readonly id: number;
@@ -1844,6 +1835,21 @@ export interface components {
             readonly createdAt: string;
             providerPayload?: unknown;
         };
+        PresignUploadRequestRequest: {
+            filename: string;
+            contentType?: string;
+        };
+        PresignUploadResponse: {
+            key: string;
+            presign: components["schemas"]["PresignedPost"];
+        };
+        PresignedPost: {
+            /** Format: uri */
+            url: string;
+            fields: {
+                [key: string]: string;
+            };
+        };
         Profile: {
             bio?: string | null;
             /** Format: uri */
@@ -1932,6 +1938,13 @@ export interface components {
             /** Format: decimal */
             passScore?: string;
         };
+        ReceiptSummary: {
+            user: number;
+            /** Format: date-time */
+            deliveredAt: string | null;
+            /** Format: date-time */
+            readAt: string | null;
+        };
         Resource: {
             readonly id: number;
             lesson: number;
@@ -2006,6 +2019,9 @@ export interface components {
             role?: components["schemas"]["RoleEnum"];
             profile?: components["schemas"]["ProfileRequest"];
         };
+        WebhookAck: {
+            ok: boolean;
+        };
     };
     responses: never;
     parameters: never;
@@ -2015,24 +2031,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    root_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     analytics_dashboard_summary_retrieve: {
         parameters: {
             query?: never;
@@ -2042,12 +2040,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DashboardSummary"];
+                };
             };
         };
     };
@@ -2199,19 +2198,26 @@ export interface operations {
     };
     "analytics_export_events.csv_retrieve": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Par défaut : aujourd'hui */
+                end?: string;
+                /** @description Par défaut : il y a 7 jours */
+                start?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
+            /** @description Export CSV des événements */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "text/csv": string;
+                };
             };
         };
     };
@@ -2222,14 +2228,19 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PresignUploadRequestRequest"];
+            };
+        };
         responses: {
-            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PresignUploadResponse"];
+                };
             };
         };
     };
@@ -4522,7 +4533,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: string;
+                /** @description A unique integer value identifying this notification. */
+                id: number;
             };
             cookie?: never;
         };
@@ -4543,7 +4555,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: string;
+                /** @description A unique integer value identifying this notification. */
+                id: number;
             };
             cookie?: never;
         };
@@ -4764,18 +4777,25 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                provider_name: string;
+                provider_name: "fedapay" | "kkiapay";
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+            };
+        };
         responses: {
-            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WebhookAck"];
+                };
             };
         };
     };
