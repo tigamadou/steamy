@@ -124,8 +124,11 @@ jobs:
         with:
           version: v3.22.0
       - name: Packaging et publication des charts (OCI sur GHCR)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_ACTOR: ${{ github.actor }}
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
+          echo "$GH_TOKEN" | helm registry login ghcr.io -u "$GH_ACTOR" --password-stdin
           for chart in steamy-platform steamy; do
             helm package "infra/helm/$chart" --version "$VERSION" --app-version "$VERSION" -d dist
             helm push "dist/$chart-$VERSION.tgz" "oci://$REGISTRY/charts"
@@ -134,6 +137,8 @@ jobs:
   deploy:
     needs: [meta, images, charts]
     runs-on: ubuntu-latest
+    # steamy-deploy attend au plus 3 × 10 min (plateforme, base prête, application), plus la marge
+    timeout-minutes: 45
     # L'environnement « production » exige une approbation (réglage GitHub)
     environment:
       name: ${{ needs.meta.outputs.environment }}
