@@ -1,0 +1,5 @@
+environment: staging
+postgres:
+  storage: 5Gi
+rustfs:
+  storage: 10Gi

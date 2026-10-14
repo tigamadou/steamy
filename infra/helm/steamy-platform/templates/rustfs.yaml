@@ -1,0 +1,95 @@
+# Stockage objet S3-compatible (médias de cours, certificats PDF, avatars…)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: steamy-rustfs
+  labels:
+    {{- include "platform.labels" . | nindent 4 }}
+spec:
+  serviceName: steamy-rustfs
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: steamy-rustfs }
+  template:
+    metadata:
+      labels:
+        {{- include "platform.labels" . | nindent 8 }}
+        app.kubernetes.io/name: steamy-rustfs
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: rustfs
+          image: {{ .Values.rustfs.image }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+          env:
+            - { name: RUSTFS_ADDRESS, value: "0.0.0.0:9000" }
+            - { name: RUSTFS_CONSOLE_ENABLE, value: "false" }
+            - name: RUSTFS_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: {{ .Values.secretName }}, key: AWS_ACCESS_KEY_ID } }
+            - name: RUSTFS_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: {{ .Values.secretName }}, key: AWS_SECRET_ACCESS_KEY } }
+          ports:
+            - { name: s3, containerPort: 9000 }
+          readinessProbe:
+            httpGet: { path: /health, port: s3 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: s3 }
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { memory: 512Mi }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources: { requests: { storage: {{ .Values.rustfs.storage }} } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: steamy-rustfs
+  labels:
+    {{- include "platform.labels" . | nindent 4 }}
+spec:
+  selector: { app.kubernetes.io/name: steamy-rustfs }
+  ports:
+    - { name: s3, port: 9000, targetPort: s3 }
+---
+# Crée le bucket média s'il n'existe pas (idempotent)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: steamy-rustfs-bucket
+  labels:
+    {{- include "platform.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 10
+  template:
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: create-bucket
+          image: {{ .Values.backups.rcloneImage }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+          args: ["mkdir", "rustfs:{{ .Values.rustfs.bucket }}"]
+          env:
+            {{- include "platform.rcloneRustfs" . | nindent 12 }}

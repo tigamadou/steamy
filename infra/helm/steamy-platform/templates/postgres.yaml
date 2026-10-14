@@ -1,0 +1,71 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: steamy-db
+  labels:
+    {{- include "platform.labels" . | nindent 4 }}
+spec:
+  instances: {{ .Values.postgres.instances }}
+  imageName: {{ .Values.postgres.image }}
+  # Base `app`, propriétaire `app` ; CloudNativePG génère le Secret `steamy-db-app`
+  # (clé `uri`) lu par l'application.
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+  storage:
+    size: {{ .Values.postgres.storage }}
+  resources:
+    {{- toYaml .Values.postgres.resources | nindent 4 }}
+  # Archivage continu des WAL vers Wasabi → restauration à n'importe quel instant
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: wasabi
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: wasabi
+  labels:
+    {{- include "platform.labels" . | nindent 4 }}
+spec:
+  retentionPolicy: {{ .Values.backups.postgresRetention | quote }}
+  configuration:
+    destinationPath: {{ include "platform.backupPrefix" . }}/postgres/
+    endpointURL: {{ .Values.backups.wasabi.endpoint }}
+    s3Credentials:
+      accessKeyId:
+        name: {{ .Values.secretName }}
+        key: WASABI_ACCESS_KEY_ID
+      secretAccessKey:
+        name: {{ .Values.secretName }}
+        key: WASABI_SECRET_ACCESS_KEY
+    wal:
+      compression: gzip
+    data:
+      compression: gzip
+  instanceSidecarConfiguration:
+    env:
+      # Contournement documenté pour les stockages S3-compatibles (boto3 récent)
+      - name: AWS_REQUEST_CHECKSUM_CALCULATION
+        value: when_required
+      - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+        value: when_required
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: steamy-db-daily
+  labels:
+    {{- include "platform.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backups.postgresSchedule | quote }}
+  backupOwnerReference: self
+  immediate: true
+  cluster:
+    name: steamy-db
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io

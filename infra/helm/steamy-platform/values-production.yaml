@@ -1,0 +1,8 @@
+environment: production
+postgres:
+  storage: 20Gi
+  resources:
+    requests: { cpu: 250m, memory: 1Gi }
+    limits: { memory: 2Gi }
+rustfs:
+  storage: 50Gi

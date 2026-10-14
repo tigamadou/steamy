@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: steamy
+  labels:
+    {{- include "steamy.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  tls:
+    - hosts:
+        - {{ .Values.hosts.web }}
+        - {{ .Values.hosts.api }}
+      secretName: steamy-tls
+  rules:
+    - host: {{ .Values.hosts.web }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: steamy-web, port: { name: http } }
+    - host: {{ .Values.hosts.api }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: steamy-api, port: { name: http } }

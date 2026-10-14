@@ -1,0 +1,13 @@
+# TODO : remplacer les domaines une fois le DNS choisi
+environment: production
+hosts:
+  web: steamy.example
+  api: api.steamy.example
+  cookieDomain: .steamy.example
+api:
+  replicas: 2
+  gunicornWorkers: 3
+web:
+  replicas: 2
+worker:
+  concurrency: 4

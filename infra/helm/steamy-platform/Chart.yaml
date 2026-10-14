@@ -1,0 +1,7 @@
+apiVersion: v2
+name: steamy-platform
+description: Services d'état de Steamy (PostgreSQL, RustFS, Redis) et leurs sauvegardes vers Wasabi
+type: application
+# Réécrits par la CI au packaging
+version: 0.0.0
+appVersion: "0.0.0"

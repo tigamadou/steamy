@@ -1,0 +1,34 @@
+# Migrations Django, AVANT la mise à jour des pods (hook Helm).
+# Si elles échouent, le déploiement s'arrête et l'ancienne version reste en place.
+# ⚠️ Les migrations doivent rester compatibles avec la version N-1 qui tourne encore
+# pendant le rolling update (pas de suppression de colonne dans la même release).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: steamy-migrate
+  labels:
+    {{- include "steamy.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrate
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: {{ .Values.migrate.activeDeadlineSeconds }}
+  template:
+    metadata:
+      labels:
+        {{- include "steamy.labels" . | nindent 8 }}
+        app.kubernetes.io/component: migrate
+    spec:
+      restartPolicy: Never
+      {{- include "steamy.podDefaults" . | nindent 6 }}
+      containers:
+        - name: migrate
+          image: {{ include "steamy.image" (dict "root" . "name" "api") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- include "steamy.containerSecurity" . | nindent 10 }}
+          command: ["python", "manage.py", "migrate", "--noinput"]
+          env:
+            {{- include "steamy.apiEnv" . | nindent 12 }}

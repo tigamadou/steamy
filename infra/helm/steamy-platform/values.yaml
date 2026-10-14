@@ -1,0 +1,37 @@
+# Prérequis installés par Ansible (infra/ansible) : cert-manager, opérateur
+# CloudNativePG et plugin Barman Cloud.
+# Secrets lus dans `steamy-secrets` (créé au déploiement depuis les GitHub Environments) :
+#   AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY   → identifiants RustFS
+#   WASABI_ACCESS_KEY_ID / WASABI_SECRET_ACCESS_KEY
+
+environment: staging
+secretName: steamy-secrets
+
+postgres:
+  image: ghcr.io/cloudnative-pg/postgresql:17
+  instances: 1
+  storage: 10Gi
+  resources:
+    requests: { cpu: 100m, memory: 512Mi }
+    limits: { memory: 1Gi }
+
+redis:
+  image: redis:7.4.9
+  storage: 1Gi
+
+rustfs:
+  image: rustfs/rustfs:1.0.1
+  storage: 20Gi
+  bucket: steamy-media
+
+backups:
+  wasabi:
+    region: eu-west-2                       # TODO : région du bucket Wasabi
+    endpoint: https://s3.eu-west-2.wasabisys.com
+    bucket: steamy-backups                  # TODO : nom du bucket Wasabi
+  # Wasabi facture chaque objet au moins 90 jours : une rétention plus courte
+  # ne fait rien économiser.
+  postgresRetention: 90d
+  postgresSchedule: "0 0 2 * * *"           # base backup quotidien, 02:00 (WAL en continu)
+  mediaSchedule: "0 3 * * *"                # copie RustFS → Wasabi, 03:00
+  rcloneImage: rclone/rclone:1.75.2

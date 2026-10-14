@@ -1,0 +1,47 @@
+# Copie quotidienne des médias RustFS vers Wasabi.
+# `copy` (et non `sync`) : un fichier supprimé dans RustFS reste dans la sauvegarde,
+# ce qui protège d'une suppression accidentelle ou malveillante.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: steamy-media-backup
+  labels:
+    {{- include "platform.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backups.mediaSchedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile: { type: RuntimeDefault }
+          containers:
+            - name: rclone
+              image: {{ .Values.backups.rcloneImage }}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities: { drop: ["ALL"] }
+              args:
+                - copy
+                - rustfs:{{ .Values.rustfs.bucket }}
+                - wasabi:{{ .Values.backups.wasabi.bucket }}/{{ .Values.environment }}/media
+                - --checksum
+                - --stats-one-line
+                - -v
+              env:
+                {{- include "platform.rcloneRustfs" . | nindent 16 }}
+                - { name: RCLONE_CONFIG_WASABI_TYPE, value: s3 }
+                - { name: RCLONE_CONFIG_WASABI_PROVIDER, value: Wasabi }
+                - { name: RCLONE_CONFIG_WASABI_REGION, value: {{ .Values.backups.wasabi.region | quote }} }
+                - { name: RCLONE_CONFIG_WASABI_ENDPOINT, value: {{ .Values.backups.wasabi.endpoint | quote }} }
+                - name: RCLONE_CONFIG_WASABI_ACCESS_KEY_ID
+                  valueFrom: { secretKeyRef: { name: {{ .Values.secretName }}, key: WASABI_ACCESS_KEY_ID } }
+                - name: RCLONE_CONFIG_WASABI_SECRET_ACCESS_KEY
+                  valueFrom: { secretKeyRef: { name: {{ .Values.secretName }}, key: WASABI_SECRET_ACCESS_KEY } }

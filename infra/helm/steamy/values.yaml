@@ -1,0 +1,65 @@
+# Valeurs communes. Les spécificités d'environnement sont dans values-<env>.yaml.
+# Les secrets ne sont JAMAIS ici : ils viennent du Secret `steamy-secrets`,
+# créé à chaque déploiement depuis les GitHub Environments (voir infra/deploy/).
+
+environment: staging          # staging | production → DJANGO_ENV
+
+image:
+  registry: ghcr.io/tigamadou
+  # Remplacé au déploiement par la version de la release
+  tag: ""
+  pullPolicy: IfNotPresent
+imagePullSecrets:
+  - name: ghcr-pull
+
+secretName: steamy-secrets
+
+hosts:
+  web: ""                     # ex : app.steamy.example
+  api: ""                     # ex : api.steamy.example
+  cookieDomain: ""            # ex : .steamy.example (partagé front/API)
+
+ingress:
+  className: traefik
+  clusterIssuer: letsencrypt
+
+# Services fournis par le chart steamy-platform (même namespace)
+platform:
+  databaseSecret: steamy-db-app   # Secret généré par CloudNativePG (clé `uri`)
+  redisHost: steamy-redis
+  s3Endpoint: http://steamy-rustfs:9000
+  s3Bucket: steamy-media
+
+email:
+  host: ""
+  port: 587
+  useTls: true
+  from: no-reply@steamy.example
+
+api:
+  replicas: 1
+  gunicornWorkers: 2
+  resources:
+    requests: { cpu: 100m, memory: 384Mi }
+    limits: { memory: 768Mi }
+
+worker:
+  replicas: 1
+  concurrency: 2
+  resources:
+    requests: { cpu: 50m, memory: 256Mi }
+    limits: { memory: 768Mi }
+
+beat:
+  resources:
+    requests: { cpu: 10m, memory: 128Mi }
+    limits: { memory: 256Mi }
+
+web:
+  replicas: 1
+  resources:
+    requests: { cpu: 50m, memory: 192Mi }
+    limits: { memory: 512Mi }
+
+migrate:
+  activeDeadlineSeconds: 600

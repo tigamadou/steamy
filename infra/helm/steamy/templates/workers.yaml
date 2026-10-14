@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: steamy-worker
+  labels:
+    {{- include "steamy.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      {{- include "steamy.selector" "worker" | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "steamy.labels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      {{- include "steamy.podDefaults" . | nindent 6 }}
+      # Laisse le temps aux tâches en cours (envoi SMS, PDF…) de se terminer
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: worker
+          image: {{ include "steamy.image" (dict "root" . "name" "api") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- include "steamy.containerSecurity" . | nindent 10 }}
+          command: ["celery", "-A", "project", "worker", "-l", "INFO", "--concurrency", {{ .Values.worker.concurrency | quote }}]
+          env:
+            {{- include "steamy.apiEnv" . | nindent 12 }}
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+---
+# Planificateur Celery : UNE seule instance, sinon les tâches planifiées partent en double.
+# Recreate garantit qu'il n'y en a jamais deux pendant un déploiement.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: steamy-beat
+  labels:
+    {{- include "steamy.labels" . | nindent 4 }}
+    app.kubernetes.io/component: beat
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "steamy.selector" "beat" | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "steamy.labels" . | nindent 8 }}
+        app.kubernetes.io/component: beat
+    spec:
+      {{- include "steamy.podDefaults" . | nindent 6 }}
+      containers:
+        - name: beat
+          image: {{ include "steamy.image" (dict "root" . "name" "api") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- include "steamy.containerSecurity" . | nindent 10 }}
+          command: ["celery", "-A", "project", "beat", "-l", "INFO", "--schedule", "/tmp/celerybeat-schedule"]
+          env:
+            {{- include "steamy.apiEnv" . | nindent 12 }}
+          resources:
+            {{- toYaml .Values.beat.resources | nindent 12 }}

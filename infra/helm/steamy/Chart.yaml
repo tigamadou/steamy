@@ -1,0 +1,7 @@
+apiVersion: v2
+name: steamy
+description: Application Steamy (front Next.js, API Django, workers Celery)
+type: application
+# Réécrits par la CI au packaging : version = tag de la release (sans le "v")
+version: 0.0.0
+appVersion: "0.0.0"
