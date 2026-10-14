@@ -1,0 +1,5 @@
+# Commits de formatage pur, ignorés par git blame (GitHub les ignore automatiquement).
+# En local : git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style(api): formatage de tout le code avec ruff format
+04268b34ccf9303eaa6cb7791e552e677f0331c2
