@@ -89,7 +89,8 @@ flowchart LR
 | TLS Let's Encrypt | ❌ | Nécessite un vrai domaine |
 | Wasabi réel | ❌ | Nécessite le bucket |
 | Playbook Ansible sur un vrai VPS | ❌ | Nécessite les serveurs |
-| **Restauration PostgreSQL** | ❌ | **À répéter en staging avant d'en avoir besoin** |
+| Restauration PostgreSQL (à côté, à un instant précis, reconstruction après perte du serveur) | ✅ | Procédures de la doc déroulées dans le k3s de test, avec un faux Wasabi |
+| **Restauration sur le vrai Wasabi** | ❌ | **À répéter en staging avant d'en avoir besoin** |
 
 ## Limites connues
 

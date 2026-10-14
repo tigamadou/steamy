@@ -16,7 +16,7 @@
 ```
 <bucket>/                         ex : steamy-backups
 ├── staging/
-│   ├── postgres/steamy-db/        sauvegardes complètes (base/) et WAL (wals/), gzip
+│   ├── postgres/steamy-db/        <serverName>/ : sauvegardes complètes (base/) et WAL (wals/), gzip
 │   └── media/                     copie du bucket steamy-media
 └── production/
     ├── postgres/steamy-db/
@@ -67,11 +67,25 @@ YAML
 
 ### Restaurer PostgreSQL
 
-> ⚠️ **Procédure non encore testée sur un vrai Wasabi.** La répéter en staging dès la mise en place,
-> puis tous les 6 mois, et corriger cette page si besoin.
+Deux situations, deux procédures :
 
-CloudNativePG ne restaure jamais par-dessus une base existante : il crée un **nouveau** cluster à partir des
-sauvegardes. La méthode recommandée consiste à restaurer à côté, vérifier, puis recopier les données.
+| Situation | Procédure |
+| --- | --- |
+| La base tourne, mais des données ont été perdues ou abîmées (suppression, migration ratée) | [Restaurer à côté, puis recopier](#restaurer-à-côté-puis-recopier) : la base en service n'est jamais touchée avant vérification |
+| La base n'existe plus (VPS perdu, volume détruit) | [Reconstruire depuis Wasabi](#reconstruire-depuis-wasabi-serveur-perdu) : option `postgres.restore` du chart |
+
+> ✅ Les deux procédures ont été déroulées telles qu'écrites dans un k3s de test : restauration au dernier état
+> et à un instant précis, avec un faux Wasabi (RustFS). À répéter **en staging sur le vrai Wasabi**
+> dès la mise en place, puis tous les 6 mois.
+
+Dans les deux cas, CloudNativePG ne restaure jamais par-dessus une base existante : il **crée** un cluster à
+partir d'une sauvegarde complète, puis rejoue les WAL jusqu'à l'instant voulu.
+
+Le **dossier de sauvegarde** à relire est le `serverName` en vigueur : la valeur `postgres.serverName` de
+`infra/helm/steamy-platform/values-<env>.yaml`, ou `steamy-db` par défaut. Pour le retrouver :
+`k get cluster steamy-db -o jsonpath='{.spec.plugins[0].parameters.serverName}'`.
+
+#### Restaurer à côté, puis recopier
 
 **1. Créer un cluster restauré à côté de la base actuelle**
 
@@ -97,9 +111,9 @@ spec:
         name: barman-cloud.cloudnative-pg.io
         parameters:
           barmanObjectName: wasabi
-          serverName: steamy-db
+          serverName: steamy-db      # dossier de sauvegarde en vigueur (voir plus haut)
 YAML
-k get cluster steamy-db-restore -w        # attendre "Cluster in healthy state"
+k wait cluster/steamy-db-restore --for=condition=Ready --timeout=30m
 ```
 
 Ce cluster n'archive pas ses WAL : il ne risque donc pas d'écraser les sauvegardes existantes.
@@ -107,7 +121,7 @@ Ce cluster n'archive pas ses WAL : il ne risque donc pas d'écraser les sauvegar
 **2. Vérifier les données restaurées**
 
 ```bash
-k exec -it steamy-db-restore-1 -- psql -U postgres app -c 'SELECT count(*) FROM user_user;'
+k exec -it steamy-db-restore-1 -c postgres -- psql -U postgres app -c 'SELECT count(*) FROM user_user;'
 ```
 
 **3. Remettre les données en service**
@@ -120,25 +134,52 @@ k exec -it steamy-db-restore-1 -- psql -U postgres app -c 'SELECT count(*) FROM 
   # 1. Couper l'application (plus aucune écriture)
   k scale deploy steamy-web steamy-api steamy-worker steamy-beat --replicas=0
   # 2. Copier la base restaurée dans la base de production
-  k exec steamy-db-restore-1 -- pg_dump -U postgres -Fc app > /tmp/app.dump
-  k exec -i steamy-db-1 -- pg_restore -U postgres -d app --clean --if-exists --no-owner --role=app < /tmp/app.dump
+  k exec steamy-db-restore-1 -c postgres -- pg_dump -U postgres -Fc app > /tmp/app.dump
+  k exec -i steamy-db-1 -c postgres -- pg_restore -U postgres -d app --clean --if-exists --no-owner --role=app < /tmp/app.dump
+  rm /tmp/app.dump
   # 3. Relancer : un redéploiement de la version courante remet les bons nombres de répliques
   ```
 
   Pour relancer, refaire *Re-run all jobs* sur le dernier workflow Deploy (voir [Exploitation](exploitation.md)).
+  `pg_restore` doit se terminer sans erreur. C'est le cas tant que toutes les tables appartiennent à `app`,
+  ce qui est garanti puisque ce sont les migrations Django, exécutées en tant que `app`, qui les créent.
 
 **4. Supprimer le cluster de restauration** : `k delete cluster steamy-db-restore`.
 
-### Perte complète du serveur
+#### Reconstruire depuis Wasabi (serveur perdu)
 
-1. Préparer un nouveau VPS avec Ansible ([Mise en place](mise-en-place.md)).
-2. Déployer.
+Sur un serveur neuf, ou après la perte du volume, un déploiement normal recréerait une base **vide**.
+L'archivage refuserait alors d'écrire dans le dossier existant, ce qui protège les anciennes sauvegardes,
+mais ne reconstruit pas la base. L'option `postgres.restore` du chart `steamy-platform` reconstruit la base à
+sa création depuis Wasabi.
 
-**Limite actuelle** : le chart crée alors une base **vide**. L'archivage refuse d'écrire dans un dossier Wasabi
-déjà utilisé, ce qui protège les anciennes sauvegardes, mais la base ne se reconstruit pas toute seule.
-Il faut restaurer en suivant la procédure ci-dessus (cluster `steamy-db-restore`, puis copie dans `steamy-db`),
-puis changer le `serverName` d'archivage pour repartir sur un dossier propre.
-Une option `postgres.restore` dans le chart `steamy-platform` rendrait cette reprise automatique : c'est un chantier à prévoir.
+1. **Préparer le serveur** avec Ansible ([Mise en place](mise-en-place.md), étapes 1, 2, 6 et 7).
+   Le DNS doit pointer vers la nouvelle IP, et `DEPLOY_HOST` et `DEPLOY_KNOWN_HOSTS` doivent être mis à jour.
+2. **Activer la reconstruction** dans `infra/helm/steamy-platform/values-<env>.yaml` :
+
+   ```yaml
+   postgres:
+     serverName: steamy-db-2          # NOUVEAU dossier : la base reconstruite archive à partir de zéro
+     restore:
+       enabled: true
+       fromServerName: steamy-db      # dossier de sauvegarde à relire (l'ancien serverName)
+       targetTime: ""                 # vide = dernier état archivé ; sinon "2026-10-14 09:30:00+00"
+   ```
+
+   Le chart refuse un `serverName` identique à `fromServerName`.
+3. **Publier une version** contenant ce changement : pre-release, puis release pour la prod. Le déploiement
+   crée la base à partir de la sauvegarde. Compter quelques minutes, plus le temps de télécharger la base depuis Wasabi.
+4. **Vérifier** : `k get cluster steamy-db` doit indiquer `ContinuousArchiving=True`, et l'application doit
+   afficher les données attendues.
+5. **Restaurer les médias** ([plus bas](#restaurer-les-médias)).
+6. **À la release suivante**, repasser `restore.enabled: false`, mais **garder le nouveau `serverName`**.
+
+Laisser l'option activée ou la désactiver est sans effet sur une base existante (vérifié) : elle n'agit qu'à la
+création du cluster. Il faut quand même la désactiver, sinon une future perte de la base relancerait une reconstruction
+depuis l'ancien dossier.
+
+**Perte de données maximale** : ce qui a été écrit depuis le dernier WAL archivé, soit au plus environ
+5 minutes (l'archivage se déclenche au plus tard toutes les 5 minutes).
 
 ## Médias (RustFS)
 

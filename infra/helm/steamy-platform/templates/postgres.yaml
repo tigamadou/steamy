@@ -9,10 +9,37 @@ spec:
   imageName: {{ .Values.postgres.image }}
   # Base `app`, propriétaire `app` ; CloudNativePG génère le Secret `steamy-db-app`
   # (clé `uri`) lu par l'application.
+  # Le bootstrap ne sert qu'à la CRÉATION du cluster : base vide, ou reconstruite
+  # depuis les sauvegardes Wasabi (postgres.restore).
   bootstrap:
+  {{- with .Values.postgres.restore }}
+  {{- if .enabled }}
+    recovery:
+      source: sauvegarde
+      database: app
+      owner: app
+      {{- with .targetTime }}
+      recoveryTarget:
+        targetTime: {{ . | quote }}
+      {{- end }}
+  {{- else }}
     initdb:
       database: app
       owner: app
+  {{- end }}
+  {{- end }}
+  {{- if .Values.postgres.restore.enabled }}
+  {{- if eq .Values.postgres.serverName .Values.postgres.restore.fromServerName }}
+  {{- fail "postgres.serverName doit différer de postgres.restore.fromServerName : la base reconstruite archive dans un dossier vierge" }}
+  {{- end }}
+  externalClusters:
+    - name: sauvegarde
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: wasabi
+          serverName: {{ required "postgres.restore.fromServerName est obligatoire" .Values.postgres.restore.fromServerName | quote }}
+  {{- end }}
   storage:
     size: {{ .Values.postgres.storage }}
   resources:
@@ -23,6 +50,8 @@ spec:
       isWALArchiver: true
       parameters:
         barmanObjectName: wasabi
+        # Dossier d'archivage : <bucket>/<env>/postgres/<serverName>/
+        serverName: {{ .Values.postgres.serverName | quote }}
 ---
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore

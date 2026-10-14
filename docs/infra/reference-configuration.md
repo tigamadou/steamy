@@ -92,6 +92,10 @@ Il est recréé à chaque déploiement.
 | --- | --- | --- |
 | `environment` | `staging` | Préfixe des sauvegardes dans Wasabi |
 | `postgres.image` / `instances` / `storage` / `resources` | `postgresql:17` / 1 / 10 Gi | PostgreSQL |
+| `postgres.serverName` | `steamy-db` | Dossier des sauvegardes dans Wasabi. Ne change qu'après une reconstruction |
+| `postgres.restore.enabled` | `false` | Reconstruit la base depuis Wasabi **à sa création** (sans effet sur une base existante) |
+| `postgres.restore.fromServerName` | `steamy-db` | Dossier de sauvegarde à relire. Doit différer de `serverName` |
+| `postgres.restore.targetTime` | `""` | Instant de restauration (vide = dernier état archivé) |
 | `redis.image` / `storage` | `redis:7.4.9` / 1 Gi | Redis |
 | `rustfs.image` / `storage` / `bucket` | `rustfs:1.0.1` / 20 Gi / `steamy-media` | RustFS |
 | `secretsChecksum` | — | Empreinte des identifiants RustFS, calculée par `steamy-deploy` |

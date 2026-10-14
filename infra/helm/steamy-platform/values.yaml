@@ -16,6 +16,16 @@ postgres:
   resources:
     requests: { cpu: 100m, memory: 512Mi }
     limits: { memory: 1Gi }
+  # Dossier des sauvegardes dans Wasabi. Un cluster n'archive que dans un dossier
+  # vierge : après une reconstruction, passer à un nouveau nom (steamy-db-2…).
+  serverName: steamy-db
+  # Reconstruction depuis Wasabi, prise en compte UNIQUEMENT à la création du
+  # cluster (serveur neuf, base supprimée). Sans effet sur une base existante.
+  # Procédure : docs/infra/donnees-et-sauvegardes.md
+  restore:
+    enabled: false
+    fromServerName: steamy-db   # dossier de sauvegarde à relire
+    targetTime: ""              # ex : "2026-10-14 09:30:00+00" ; vide = dernier état archivé
 
 redis:
   image: redis:7.4.9
