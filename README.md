@@ -11,7 +11,7 @@ Monorepo de Steamy, plateforme e-learning de robotique/STEM pour les 10–17 ans
 | `packages/api-client/` | Client d'API typé, généré depuis `apps/api/openapi.yaml` |
 | `design/` | Prototype de design (canvas React statique, 172 écrans) — référence visuelle |
 | `docs/` | Spécifications et plans |
-| `infra/` | Déploiement : Ansible (VPS), charts Helm (k3s), script de déploiement — voir [`infra/README.md`](infra/README.md) |
+| `infra/` | Déploiement : Ansible (VPS), charts Helm (k3s), script de déploiement — documentation : [`docs/infra/`](docs/infra/README.md) |
 
 ## Démarrage local
 
@@ -52,4 +52,4 @@ Après toute modification d'un serializer ou d'une vue : `make openapi`, puis co
 | Publication d'une **pre-release** (`v1.4.0-rc.1`) | staging |
 | Publication d'une **release** (`v1.4.0`), après approbation | production — mêmes images que la pre-release |
 
-Mise en place des serveurs, secrets et procédure de release : [`infra/README.md`](infra/README.md).
+Architecture, mise en place des serveurs, publication d'une version et exploitation : [`docs/infra/`](docs/infra/README.md).
