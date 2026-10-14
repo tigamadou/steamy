@@ -115,3 +115,24 @@ Légende du statut : ⏳ à décider · ✅ décidé.
 | D74 | Rapport trimestriel | « Soumettre » verrouille le rapport ; export CSV/PDF généré en asynchrone | ✅ |
 | D75 | KPI d'inclusion (§8.3) | Alimentés par le profil (genre, date de naissance, handicap, localité qualifiée). Les « institutions » sont à modéliser ou abandonner | ✅ |
 | D76 | Réseaux Mobile Money (§8.12) | Réglage par réseau (Celtiis inclus) et par pays, lu publiquement par le formulaire de paiement | ✅ |
+
+---
+
+## Compléments issus de l'alignement de la documentation
+
+Ces points sont apparus pendant la réécriture des specs. Les arbitrages ci-dessus ne les tranchaient pas.
+
+| # | Question | Recommandation | Statut |
+| --- | --- | --- | --- |
+| C1 | Couleur primaire (§8.1) | Entériner le magenta `#9E1B9A` des tokens. Dériver toutes les ombres et surbrillances de `--primary-500`, sans `rgba` violet codé en dur, avant le premier composant | ⏳ |
+| C2 | Registre de l'enseignant | Vouvoiement, comme pour le parent et le personnel | ⏳ |
+| C3 | Steamy Events : sélection des candidats | Pas de sélection par Steamy : l'accord du parent, plus le paiement si l'événement est payant, **confirme** l'inscription, dans la limite des places (premier arrivé). WAD12 sert au suivi et au refus exceptionnel, avec remboursement | ⏳ |
+| C4 | Durée de vie d'une demande de paiement (WA02, WK08, WPD15) | 7 jours, renvoi limité, annulable par l'enfant | ⏳ |
+| C5 | Code de reprise d'inscription (D21) | Saisi dans un état de W07 « Reprendre mon inscription » (identifiant + code), accessible depuis W02 et W16 | ⏳ |
+| C6 | Comptes enseignants | Activation par un lien email vers une variante de WL04 « Activer votre compte ». Mot de passe oublié : mêmes écrans WL02-WL05 avec un code envoyé **par email**. Toujours rattachés à une `School` ; quotas d'élèves et de classes selon l'offre | ⏳ |
+| C7 | Champ « Identifiant ou numéro » de W16 | Contient `@` → email ; chiffres ou `+` → téléphone ; sinon identifiant. Un identifiant d'apprenant ne peut donc être ni entièrement numérique ni contenir `@`. Les comptes du personnel sont refusés sur W16 (connexion par WAD15). « Mot de passe oublié ? » demande d'abord « parent ou enseignant » ou « apprenant » | ⏳ |
+| C8 | Gamification | Barème de points et paliers de rang réglables dans `PlatformSettings`, fixés avant le lot 3. Une formative ratée se repasse immédiatement. Note des parcours (`rating`) masquée en v1, faute de modèle d'avis | ⏳ |
+| C9 | Refus de consentement | La demande refusée est conservée 30 jours, pour que W18 puisse l'afficher. Le délai de 30 jours avant une nouvelle demande s'applique au **numéro du parent** | ⏳ |
+| C10 | Kits | Le parent peut acheter un kit directement depuis son espace. Quand l'enfant demande un kit, le parent saisit l'adresse dans WPD15 ; le stock n'est réservé qu'au paiement. Les Kit Codes d'une commande sont visibles dans WPD07. Un invité suit sa commande par un lien SMS | ⏳ |
+| C11 | Invitation par un enseignant | Si l'enfant a déjà un compte, le parent l'accepte en rattachant le compte existant à la classe, au lieu de créer un identifiant | ⏳ |
+| C12 | Divers | Notifications : dans l'app et par email (pas de push sans application mobile). Factures : réservées au payeur (parent). Identifiant de l'apprenant : non modifiable. Brochure WL11 : téléchargement libre. Newsletter WL20 : réservée aux adultes. Un ticket Steamy Events rend la candidature gratuite, avec accord du parent toujours requis | ⏳ |
