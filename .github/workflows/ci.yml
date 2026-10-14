@@ -186,6 +186,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: azure/setup-helm@v4
+        with:
+          version: v3.22.0   # même version que les serveurs (infra/ansible/group_vars/all.yml)
       - name: Lint et rendu des charts (staging et prod)
         run: |
           for chart in steamy steamy-platform; do
@@ -205,10 +207,12 @@ jobs:
       - name: Shellcheck du script de déploiement
         run: shellcheck infra/deploy/steamy-deploy.sh
 
-  # Point de contrôle unique pour la protection de branche
+  # Point de contrôle unique pour la protection de branche.
+  # `changes` est surveillé aussi : s'il échoue, tous les autres jobs sont sautés,
+  # et « tout sauté » ne doit pas passer pour un succès.
   ci-ok:
     if: always()
-    needs: [api, web, image-api, image-web, helm]
+    needs: [changes, api, web, image-api, image-web, helm]
     runs-on: ubuntu-latest
     steps:
       - name: Tous les jobs exécutés ont réussi
