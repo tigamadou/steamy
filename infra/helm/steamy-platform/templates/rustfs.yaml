@@ -12,6 +12,11 @@ spec:
     matchLabels: { app.kubernetes.io/name: steamy-rustfs }
   template:
     metadata:
+      {{- with .Values.secretsChecksum }}
+      # Redémarre RustFS quand ses identifiants changent
+      annotations:
+        steamy.io/secrets-checksum: {{ . | quote }}
+      {{- end }}
       labels:
         {{- include "platform.labels" . | nindent 8 }}
         app.kubernetes.io/name: steamy-rustfs

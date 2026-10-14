@@ -60,6 +60,11 @@ kubectl -n "$NAMESPACE" create secret docker-registry ghcr-pull \
   --docker-server=ghcr.io --docker-username="$(secret GHCR_PULL_USER)" \
   --docker-password="$(secret GHCR_PULL_TOKEN)" --dry-run=client -o yaml | kubectl apply -f - >/dev/null
 
+# Empreintes des secrets : un secret modifié redémarre les pods qui l'utilisent,
+# même quand la version ne change pas (les pods ne relisent pas un Secret modifié).
+app_checksum="$(sha256sum < "$workdir/app.env" | cut -c1-16)"
+platform_checksum="$(grep -E '^AWS_(ACCESS_KEY_ID|SECRET_ACCESS_KEY)=' "$workdir/app.env" | sha256sum | cut -c1-16)"
+
 # --- 3. Charts de la version demandée ---------------------------------------------
 export HELM_REGISTRY_CONFIG="$workdir/registry.json"
 secret GHCR_PULL_TOKEN | helm registry login ghcr.io -u "$(secret GHCR_PULL_USER)" --password-stdin >/dev/null
@@ -72,7 +77,9 @@ done
 # Pas de --atomic ici : un rollback automatique pourrait supprimer des volumes de données.
 log "plateforme…"
 helm upgrade --install steamy-platform "$workdir/steamy-platform" -n "$NAMESPACE" \
-  -f "$workdir/steamy-platform/values-${STEAMY_ENV}.yaml" --wait --timeout 10m
+  -f "$workdir/steamy-platform/values-${STEAMY_ENV}.yaml" \
+  --set secretsChecksum="$platform_checksum" \
+  --wait --timeout 10m
 kubectl -n "$NAMESPACE" wait cluster.postgresql.cnpg.io/steamy-db --for=condition=Ready --timeout=10m >/dev/null
 
 # --- 5. Application (migrations en pre-upgrade, rollback automatique si échec) ----
@@ -80,6 +87,7 @@ log "application…"
 helm upgrade --install steamy "$workdir/steamy" -n "$NAMESPACE" \
   -f "$workdir/steamy/values-${STEAMY_ENV}.yaml" \
   --set image.tag="$version" \
+  --set secretsChecksum="$app_checksum" \
   --atomic --wait --timeout 10m
 
 log "✅ $version déployée sur $STEAMY_ENV"

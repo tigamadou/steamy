@@ -13,6 +13,8 @@ imagePullSecrets:
   - name: ghcr-pull
 
 secretName: steamy-secrets
+# Empreinte des secrets, calculée par steamy-deploy : la modifier redémarre les pods
+secretsChecksum: ""
 
 hosts:
   web: ""                     # ex : app.steamy.example

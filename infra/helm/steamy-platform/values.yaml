@@ -6,6 +6,8 @@
 
 environment: staging
 secretName: steamy-secrets
+# Empreinte des identifiants RustFS, calculée par steamy-deploy
+secretsChecksum: ""
 
 postgres:
   image: ghcr.io/cloudnative-pg/postgresql:17

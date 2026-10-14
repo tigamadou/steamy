@@ -17,6 +17,14 @@ app.kubernetes.io/component: {{ . }}
 {{ .root.Values.image.registry }}/steamy-{{ .name }}:{{ $tag }}
 {{- end }}
 
+{{/* Redémarre les pods quand les secrets changent (même version redéployée) */}}
+{{- define "steamy.podAnnotations" -}}
+{{- with .Values.secretsChecksum }}
+annotations:
+  steamy.io/secrets-checksum: {{ . | quote }}
+{{- end }}
+{{- end }}
+
 {{- define "steamy.podDefaults" -}}
 {{- with .Values.imagePullSecrets }}
 imagePullSecrets:

@@ -12,6 +12,7 @@ spec:
       {{- include "steamy.selector" "worker" | nindent 6 }}
   template:
     metadata:
+      {{- include "steamy.podAnnotations" . | nindent 6 }}
       labels:
         {{- include "steamy.labels" . | nindent 8 }}
         app.kubernetes.io/component: worker
@@ -48,6 +49,7 @@ spec:
       {{- include "steamy.selector" "beat" | nindent 6 }}
   template:
     metadata:
+      {{- include "steamy.podAnnotations" . | nindent 6 }}
       labels:
         {{- include "steamy.labels" . | nindent 8 }}
         app.kubernetes.io/component: beat

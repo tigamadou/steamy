@@ -14,6 +14,7 @@ spec:
     rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
   template:
     metadata:
+      {{- include "steamy.podAnnotations" . | nindent 6 }}
       labels:
         {{- include "steamy.labels" . | nindent 8 }}
         app.kubernetes.io/component: api
