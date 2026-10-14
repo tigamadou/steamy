@@ -23,7 +23,6 @@ def test_user_signup_with_role_and_profile():
 
     response = client.post(url, payload, format="json")  # <-- APIClient supporte "format"
     assert response.status_code == 201
-    data = response.json()
 
     user = User.objects.get(email="student@example.com")
     assert user.role == "student"
@@ -44,7 +43,6 @@ def test_user_signup_without_profile():
 
     response = client.post(url, payload, format="json")
     assert response.status_code == 201
-    data = response.json()
 
     user = User.objects.get(email="teacher@example.com")
     assert user.role == "teacher"

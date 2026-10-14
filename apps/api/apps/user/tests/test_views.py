@@ -42,7 +42,7 @@ def test_public_signup_view_perform_create_calls_send_welcome_email(db, monkeypa
     assert called["user"].email == created_user.email
 
 
-def test_public_signup_view_perform_create_handles_missing_user(monkeypatch):
+def test_public_signup_view_perform_create_handles_missing_user(db, monkeypatch):
     """
     Si serializer.save() retourne un id invalide / l'utilisateur est introuvable,
     on s'attend à une exception (ou comportement défini). Ici on vérifie que si
@@ -63,7 +63,7 @@ def test_public_signup_view_perform_create_handles_missing_user(monkeypatch):
     view = PublicSignupView()
     serializer = BadSerializer()
 
-    with pytest.raises(Exception):
+    with pytest.raises(User.DoesNotExist):
         view.perform_create(serializer)
 
     assert called["count"] == 0

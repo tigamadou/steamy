@@ -128,7 +128,7 @@ def test_student_enroll_and_access_lessons():
     course = Course.objects.create(
         title="Enrollable", slug="enrollable", author=teacher, published=True)
     module = Module.objects.create(course=course, title="M1", order=0)
-    lesson = Lesson.objects.create(module=module, title="L1", content="xxx", order=0)
+    Lesson.objects.create(module=module, title="L1", content="xxx", order=0)
 
     enroll_url = reverse("course-enroll", args=[course.slug])  # needs @action detail named "enroll"
 

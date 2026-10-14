@@ -110,7 +110,7 @@ def test_attempt_manual_grade_updates_score_and_passed_flag():
     course = Course.objects.create(title="Cquiz", slug="cquiz", author=teacher, published=True)
     quiz = Quiz.objects.create(course=course, title="Final Quiz", pass_score="50.0")
     q1 = Question.objects.create(quiz=quiz, text="Q1", kind="mcq", weight="1.0")
-    c1 = Choice.objects.create(question=q1, text="Good", is_correct=True)
+    Choice.objects.create(question=q1, text="Good", is_correct=True)
     c2 = Choice.objects.create(question=q1, text="Bad", is_correct=False)
 
     # create attempt (via ORM for simplicity)

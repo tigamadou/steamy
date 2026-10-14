@@ -31,9 +31,9 @@ def find_course_action_url(course, action_names=None):
             continue
     # give up with a helpful message
     raise RuntimeError(
-        "Could not find enroll action URL. Checked names: %s. "
+        f"Could not find enroll action URL. Checked names: {', '.join(action_names)}. "
         "Make sure CourseViewSet has an @action(detail=True, name='enroll') "
-        "or register the router basename 'course'." % (", ".join(action_names))
+        "or register the router basename 'course'."
     )
 
 
@@ -49,7 +49,7 @@ def test_student_can_enroll_and_access_lessons():
     course = Course.objects.create(title="Enrollable Course",
                                    slug="enrollable-2", author=teacher, published=True)
     module = Module.objects.create(course=course, title="M1", order=0)
-    lesson = Lesson.objects.create(module=module, title="L1", content="xxx", order=0)
+    Lesson.objects.create(module=module, title="L1", content="xxx", order=0)
 
     # trouver URL d'enroll (helper tolérant)
     enroll_url = find_course_action_url(course)
