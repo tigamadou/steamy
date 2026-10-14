@@ -37,3 +37,4 @@ staticfiles/
 
 # Surcharges Docker Compose personnelles (secrets de dev, ports…)
 compose.override.yml
+.pnpm-store/

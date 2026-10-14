@@ -110,6 +110,31 @@ services:
       api-migrate:
         condition: service_completed_successfully
 
+  # Front Next.js (hot reload). Dépendances installées dans des volumes Docker
+  # pour ne pas mélanger les binaires natifs macOS et Linux.
+  web:
+    image: node:24.18.0-alpine
+    working_dir: /repo
+    command: >
+      sh -c "corepack enable
+      && pnpm install --frozen-lockfile --store-dir /pnpm-store --config.confirm-modules-purge=false
+      && pnpm --filter @steamy/web dev --hostname 0.0.0.0"
+    environment:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+      API_URL: http://api:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/repo
+      - node_modules:/repo/node_modules
+      - web_node_modules:/repo/apps/web/node_modules
+      - api_client_node_modules:/repo/packages/api-client/node_modules
+      - web_next:/repo/apps/web/.next
+      - pnpm_store:/pnpm-store
+    depends_on:
+      api:
+        condition: service_started
+
   # Supervision Celery, à la demande : `make flower`
   flower:
     <<: *api
@@ -122,3 +147,8 @@ volumes:
   postgres_data:
   redis_data:
   rustfs_data:
+  node_modules:
+  web_node_modules:
+  api_client_node_modules:
+  web_next:
+  pnpm_store:

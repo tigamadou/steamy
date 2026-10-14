@@ -1,10 +1,11 @@
 # Point d'entrée unique du monorepo. `make help` pour la liste.
 COMPOSE := docker compose
 API     := $(COMPOSE) run --rm api
+WEB     := $(COMPOSE) run --rm --no-deps web sh -c
 
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
-        test-api lint-api psql flower clean openapi
+        test-api lint-api psql flower clean openapi lint-web typecheck-web
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -13,6 +14,7 @@ help: ## Affiche cette aide
 up: ## Démarre toute la stack en arrière-plan
 	$(COMPOSE) up -d --build
 	@echo ""
+	@echo "  Web        http://localhost:3000"
 	@echo "  API        http://localhost:8000/api/   (docs : /api/docs/)"
 	@echo "  Admin      http://localhost:8000/admin/"
 	@echo "  RustFS     http://localhost:9001        (rustfsadmin / rustfsadmin)"
@@ -25,7 +27,7 @@ build: ## Reconstruit les images (après modif de requirements.txt)
 	$(COMPOSE) build
 
 restart: ## Redémarre les services applicatifs
-	$(COMPOSE) restart api worker beat
+	$(COMPOSE) restart api worker beat web
 
 logs: ## Suit les logs (ex : make logs s=api)
 	$(COMPOSE) logs -f $(s)
@@ -61,8 +63,17 @@ test-api: ## Lance les tests de l'API
 lint-api: ## Lint de l'API
 	$(API) python -m flake8 --ignore E501,E722,F821,W504 apps/ project/ libs/
 
-openapi: ## Régénère apps/api/openapi.yaml (contrat front/back, à committer)
+# --- Contrat front/back -----------------------------------------------------
+openapi: ## Régénère openapi.yaml + les types TS du client (à committer)
 	$(API) python manage.py spectacular --file openapi.yaml --validate
+	$(WEB) "corepack enable && pnpm api-client:generate"
+
+# --- Front Next.js ------------------------------------------------------------
+lint-web: ## Lint du front
+	$(WEB) "corepack enable && pnpm lint"
+
+typecheck-web: ## Vérification TypeScript (web + api-client)
+	$(WEB) "corepack enable && pnpm typecheck"
 
 psql: ## Console PostgreSQL
 	$(COMPOSE) exec postgres psql -U steamy steamy

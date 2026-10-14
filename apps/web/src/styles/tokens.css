@@ -1,0 +1,135 @@
+/* Tokens du design system Steamy — portés depuis design/ds-tokens.css.
+   Les polices sont auto-hébergées via next/font (plus d'@import Google Fonts).
+   Toute évolution d'un token se fait ici ET dans le prototype design/. */
+
+:root {
+    /* ─── Palette · Primaires (indigo/violet) ─────────────────────── */
+    --primary-50: #FCEDFC;
+    --primary-100: #F9D2F7;
+    --primary-200: #F1A7EF;
+    --primary-300: #E76EE3;
+    --primary-400: #DD2CD7;
+    --primary-500: #9E1B9A;
+    --primary-600: #861382;
+    --primary-700: #690D65;
+    --primary-800: #4A0748;
+    --primary-900: #2F042E;
+    /* ─── Palette · Secondaire (vert d'action / réussite) ─────────── */
+    --success-50: #E7FBEF;
+    --success-100: #C7F4D5;
+    --success-200: #8FE6AC;
+    --success-300: #5DD884;
+    --success-400: #3BCB6A;
+    --success-500: #22C55E;
+    /* "go" - passé / validé / mission terminée */
+    --success-600: #16A34A;
+    --success-700: #0F7A36;
+    --success-800: #0A5526;
+    /* ─── Palette · Tertiaire (ambre / récompense) ────────────────── */
+    --amber-50: #FFF8E1;
+    --amber-100: #FFEDB3;
+    --amber-200: #FFE082;
+    --amber-300: #FFD24D;
+    --amber-400: #FFC020;
+    --amber-500: #F59E0B;
+    /* badges, étoiles, Points */
+    --amber-600: #D27D04;
+    --amber-700: #9A5B02;
+    /* ─── Sémantiques ─────────────────────────────────────────────── */
+    --error-50: #FFECEC;
+    --error-100: #FFD1D1;
+    --error-300: #FF8A8A;
+    --error-500: #EF4444;
+    /* échec, suppression, erreur */
+    --error-600: #DC2626;
+    --error-700: #991B1B;
+    --warning-500: var(--amber-500);
+    --info-500: #0EA5E9;
+    /* ─── Couleurs "fun" pour catégories de parcours ──────────────── */
+    --cat-robotique: #5B3FE0;
+    /* violet */
+    --cat-electronique: #0EA5E9;
+    /* cyan */
+    --cat-code: #EC4899;
+    /* rose */
+    --cat-ia: #14B8A6;
+    /* teal */
+    --cat-mecanique: #F59E0B;
+    /* ambre */
+    --cat-energie: #84CC16;
+    /* lime */
+    /* ─── Neutres (warm gray) ─────────────────────────────────────── */
+    --ink-900: #161325;
+    /* texte principal */
+    --ink-800: #2A2640;
+    --ink-700: #3F3A5C;
+    --ink-600: #5B5479;
+    /* texte secondaire */
+    --ink-500: #7A7396;
+    --ink-400: #A39DBE;
+    /* texte désactivé */
+    --ink-300: #C8C3DB;
+    /* bordures fortes */
+    --ink-200: #E1DEEC;
+    /* bordures */
+    --ink-100: #EFEDF5;
+    /* surfaces alt */
+    --ink-50: #F7F6FB;
+    /* surfaces */
+    --bg: #FAFAF7;
+    /* fond app warm */
+    --surface: #FFFFFF;
+    /* ─── Typographie ─────────────────────────────────────────────── */
+    --font-sans: var(--font-nunito), system-ui, -apple-system, sans-serif;
+    --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+    /* échelle (mobile-first, ratio ~1.2) */
+    --text-xs: 12px;
+    --lh-xs: 16px;
+    --text-sm: 14px;
+    --lh-sm: 20px;
+    --text-base: 16px;
+    --lh-base: 24px;
+    --text-md: 18px;
+    --lh-md: 26px;
+    --text-lg: 22px;
+    --lh-lg: 28px;
+    --text-xl: 28px;
+    --lh-xl: 34px;
+    --text-2xl: 36px;
+    --lh-2xl: 42px;
+    --text-3xl: 44px;
+    --lh-3xl: 50px;
+    --text-4xl: 56px;
+    --lh-4xl: 62px;
+    /* ─── Espacement (4/8 grid) ───────────────────────────────────── */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 20px;
+    --sp-6: 24px;
+    --sp-8: 32px;
+    --sp-10: 40px;
+    --sp-12: 48px;
+    --sp-16: 64px;
+    --sp-20: 80px;
+    /* ─── Rayons ──────────────────────────────────────────────────── */
+    --r-sm: 8px;
+    --r-md: 12px;
+    --r-lg: 16px;
+    --r-xl: 20px;
+    --r-2xl: 28px;
+    --r-pill: 999px;
+    /* ─── Ombres "candy" (Duolingo-style - élévation marquée bas) ── */
+    --shadow-pop-sm: 0 2px 0 rgba(15, 13, 38, 0.08);
+    --shadow-pop-md: 0 4px 0 rgba(15, 13, 38, 0.10);
+    --shadow-card: 0 1px 0 rgba(15, 13, 38, 0.04), 0 4px 16px rgba(91, 63, 224, 0.06);
+    --shadow-card-hover: 0 1px 0 rgba(15, 13, 38, 0.06), 0 12px 28px rgba(91, 63, 224, 0.14);
+    --shadow-modal: 0 24px 64px rgba(15, 13, 38, 0.24);
+    /* ─── Animation ───────────────────────────────────────────────── */
+    --ease-out: cubic-bezier(.22, 1, .36, 1);
+    --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
+    --dur-fast: 120ms;
+    --dur-base: 200ms;
+    --dur-slow: 360ms;
+}
