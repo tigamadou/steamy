@@ -1,13 +1,13 @@
 # apps/messaging/consumers.py
-import json
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from .models import Conversation, Message, MessageReceipt
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
 
 class ConversationConsumer(AsyncJsonWebsocketConsumer):
     """
@@ -20,7 +20,7 @@ class ConversationConsumer(AsyncJsonWebsocketConsumer):
     """
 
     async def connect(self):
-        self.conversation_id = self.scope['url_route']['kwargs'].get('conversation_id')
+        self.conversation_id = self.scope["url_route"]["kwargs"].get("conversation_id")
         self.group_name = f"conversation_{self.conversation_id}"
 
         user = self.scope.get("user")
@@ -105,19 +105,23 @@ class ConversationConsumer(AsyncJsonWebsocketConsumer):
         Called when a message is broadcast to the group.
         forward it to WS client.
         """
-        await self.send_json({
-            "action": "message",
-            "message": event["message"],
-        })
+        await self.send_json(
+            {
+                "action": "message",
+                "message": event["message"],
+            }
+        )
 
     async def chat_presence(self, event):
-        await self.send_json({
-            "action": "presence",
-            "event": event.get("event"),
-            "user_id": event.get("user_id"),
-            "username": event.get("email"),
-            "timestamp": event.get("timestamp"),
-        })
+        await self.send_json(
+            {
+                "action": "presence",
+                "event": event.get("event"),
+                "user_id": event.get("user_id"),
+                "username": event.get("email"),
+                "timestamp": event.get("timestamp"),
+            }
+        )
 
     # ---------- DB helpers (sync -> async) ----------
     @database_sync_to_async
@@ -144,6 +148,7 @@ class MessagingConsumer(AsyncJsonWebsocketConsumer):
     Optional global channel - e.g. for system-wide notifications or presence.
     For now it simply accepts authenticated connections.
     """
+
     async def connect(self):
         user = self.scope.get("user")
         if not user or not user.is_authenticated:

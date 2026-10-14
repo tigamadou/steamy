@@ -1,4 +1,3 @@
-import pytest
 from types import SimpleNamespace
 
 # on suppose que le module est apps.core.s3_client
@@ -48,7 +47,13 @@ def test_generate_presigned_post_includes_content_type_and_conditions(monkeypatc
     class FakeClient:
         def generate_presigned_post(self, Bucket, Key, ExpiresIn, Fields, Conditions):
             # return quelque chose que l'on peut inspecter
-            return {"Bucket": Bucket, "Key": Key, "ExpiresIn": ExpiresIn, "Fields": Fields, "Conditions": Conditions}
+            return {
+                "Bucket": Bucket,
+                "Key": Key,
+                "ExpiresIn": ExpiresIn,
+                "Fields": Fields,
+                "Conditions": Conditions,
+            }
 
     monkeypatch.setattr(s3_client, "get_s3_client", lambda: FakeClient())
 
@@ -70,7 +75,13 @@ def test_generate_presigned_post_without_content_type(monkeypatch, settings):
 
     class FakeClient:
         def generate_presigned_post(self, Bucket, Key, ExpiresIn, Fields, Conditions):
-            return {"Bucket": Bucket, "Key": Key, "ExpiresIn": ExpiresIn, "Fields": Fields, "Conditions": Conditions}
+            return {
+                "Bucket": Bucket,
+                "Key": Key,
+                "ExpiresIn": ExpiresIn,
+                "Fields": Fields,
+                "Conditions": Conditions,
+            }
 
     monkeypatch.setattr(s3_client, "get_s3_client", lambda: FakeClient())
 
@@ -86,7 +97,9 @@ def test_generate_presigned_url_uses_client(monkeypatch, settings):
 
     class FakeClient:
         def generate_presigned_url(self, ClientMethod, Params, ExpiresIn):
-            return f"https://presigned.example/{Params['Key']}?method={ClientMethod}&exp={ExpiresIn}"
+            return (
+                f"https://presigned.example/{Params['Key']}?method={ClientMethod}&exp={ExpiresIn}"
+            )
 
     monkeypatch.setattr(s3_client, "get_s3_client", lambda: FakeClient())
 

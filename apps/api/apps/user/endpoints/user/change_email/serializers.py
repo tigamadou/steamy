@@ -8,19 +8,19 @@ class UserChangeEmailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('password', 'new_email')
+        fields = ("password", "new_email")
         extra_kwargs = {
-            'password': {'write_only': True},
+            "password": {"write_only": True},
         }
 
     def validate_password(self, value):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if not user.check_password(value):
-            raise ValidationError('Invalid password.')
+            raise ValidationError("Invalid password.")
         return value
 
     def create(self, validated_data):
-        user = self.context['request'].user
-        user.email = validated_data['new_email']
+        user = self.context["request"].user
+        user.email = validated_data["new_email"]
         user.save()
         return user

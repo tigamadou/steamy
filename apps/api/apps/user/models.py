@@ -1,8 +1,11 @@
-from .base import AbstractEmailUser
 from django.db import models
+
+from .base import AbstractEmailUser
+
 
 class User(AbstractEmailUser):
     pass
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")

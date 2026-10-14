@@ -6,7 +6,9 @@ from rest_framework import serializers
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+
 from apps.core.storage_utils import get_presigned_post_for_upload
+
 
 class PresignUploadRequestSerializer(serializers.Serializer):
     filename = serializers.CharField()

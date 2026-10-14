@@ -1,26 +1,19 @@
-from .serializers import NotificationSerializer
-from rest_framework import viewsets, permissions, status
+from django.utils import timezone
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
 
 from .models import Conversation, Message, MessageAttachment, MessageReceipt, Notification
 from .serializers import (
-    ConversationSerializer, CreateConversationSerializer,
-    MessageSerializer, MessageCreateSerializer, MessageAttachmentSerializer,
-    MessageReceiptSerializer, NotificationSerializer
+    ConversationSerializer,
+    CreateConversationSerializer,
+    MessageAttachmentSerializer,
+    MessageCreateSerializer,
+    MessageSerializer,
+    NotificationSerializer,
 )
 from .tasks import send_message_notifications_async
-from django.conf import settings
-from rest_framework.parsers import MultiPartParser, FormParser
-from django.utils import timezone
-
-
-class IsParticipantOrAdmin(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.user and request.user.is_staff:
-            return True
-        return obj.participants.filter(pk=request.user.pk).exists() if hasattr(obj, 'participants') else False
 
 
 class IsParticipantOrAdmin(permissions.BasePermission):
@@ -40,6 +33,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     Conversation list: returns only conversations where the user is participant (or all if staff).
     Object-level access is enforced by IsParticipantOrAdmin.
     """
+
     queryset = Conversation.objects.prefetch_related("participants", "messages__sender")
     permission_classes = [permissions.IsAuthenticated, IsParticipantOrAdmin]
 
@@ -63,8 +57,9 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.select_related(
-        "sender", "conversation").prefetch_related("attachments", "receipts")
+    queryset = Message.objects.select_related("sender", "conversation").prefetch_related(
+        "attachments", "receipts"
+    )
     permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
@@ -78,7 +73,10 @@ class MessageViewSet(viewsets.ModelViewSet):
         msg = serializer.save()
         # kick off async notifications to participants (email/push)
         send_message_notifications_async.delay(msg.id)
-        return Response(MessageSerializer(msg, context={"request": request}).data, status=status.HTTP_201_CREATED)
+        return Response(
+            MessageSerializer(msg, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     @action(detail=True, methods=["post"])
     def mark_read(self, request, pk=None):

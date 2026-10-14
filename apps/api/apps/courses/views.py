@@ -1,21 +1,16 @@
 # courses/views.py
-from apps.courses.models import Course  # si pas déjà importé
-from rest_framework.exceptions import PermissionDenied, NotFound
-from rest_framework import permissions
-from .permissions import IsTeacherOrAdmin
-from rest_framework import viewsets, permissions, filters
-from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
+from rest_framework import filters, permissions, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.response import Response
 
-from .models import Path, Course, Module, Lesson, Resource
+from .models import Course, Lesson, Module, Path, Resource
 from .serializers import (
-    PathSerializer,
-    CourseListSerializer,
     CourseDetailSerializer,
-    ModuleSerializer,
+    CourseListSerializer,
     LessonSerializer,
+    ModuleSerializer,
+    PathSerializer,
     ResourceSerializer,
 )
 
@@ -58,6 +53,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         if self.action in ["list"]:
             return CourseListSerializer
         return CourseDetailSerializer
+
     # ... reste inchangé ...
 
     def perform_create(self, serializer):
@@ -73,6 +69,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         """
         course = self.get_object()
         from apps.learning.models import Enrollment
+
         user = request.user
         en, created = Enrollment.objects.get_or_create(user=user, course=course)
         if created:
@@ -92,19 +89,20 @@ class ModuleViewSet(viewsets.ModelViewSet):
         if course:
             return course
         # 2) try common nested kwarg names
-        course_pk = self.kwargs.get("course_pk") or self.kwargs.get(
-            "course_id") or self.kwargs.get("pk")
+        course_pk = (
+            self.kwargs.get("course_pk") or self.kwargs.get("course_id") or self.kwargs.get("pk")
+        )
         course_slug = self.kwargs.get("course_slug") or self.kwargs.get("slug")
         if course_pk:
             try:
                 return Course.objects.get(pk=course_pk)
             except Course.DoesNotExist:
-                raise NotFound("Parent course not found (pk=%s)" % course_pk)
+                raise NotFound(f"Parent course not found (pk={course_pk})") from None
         if course_slug:
             try:
                 return Course.objects.get(slug=course_slug)
             except Course.DoesNotExist:
-                raise NotFound("Parent course not found (slug=%s)" % course_slug)
+                raise NotFound(f"Parent course not found (slug={course_slug})") from None
         # nothing found
         return None
 
@@ -117,7 +115,11 @@ class ModuleViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("course is required to create a module")
 
         # permission check: only staff, course author or teacher can create
-        if not (user.is_staff or (course.author_id and course.author_id == user.id) or getattr(user, "role", None) == "teacher"):
+        if not (
+            user.is_staff
+            or (course.author_id and course.author_id == user.id)
+            or getattr(user, "role", None) == "teacher"
+        ):
             raise PermissionDenied("Only course author or admin (or teacher) can add modules")
 
         # save: if course was not in validated_data (nested route), pass it explicitly
@@ -143,7 +145,7 @@ class LessonViewSet(viewsets.ModelViewSet):
                 m = Module.objects.get(pk=module_pk)
                 return m, m.course
             except Module.DoesNotExist:
-                raise NotFound("Parent module not found (pk=%s)" % module_pk)
+                raise NotFound(f"Parent module not found (pk={module_pk})") from None
         # try nested under course + module id in body - fallback
         return None, None
 
@@ -152,7 +154,11 @@ class LessonViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if module is None:
             raise PermissionDenied("module is required to create a lesson")
-        if not (user.is_staff or (course.author_id and course.author_id == user.id) or getattr(user, "role", None) == "teacher"):
+        if not (
+            user.is_staff
+            or (course.author_id and course.author_id == user.id)
+            or getattr(user, "role", None) == "teacher"
+        ):
             raise PermissionDenied("Only course author or admin (or teacher) can add lessons")
         if "module" in serializer.validated_data:
             serializer.save()
@@ -172,10 +178,10 @@ class ResourceViewSet(viewsets.ModelViewSet):
         lesson_pk = self.kwargs.get("lesson_pk") or self.kwargs.get("lesson_id")
         if lesson_pk:
             try:
-                l = Lesson.objects.get(pk=lesson_pk)
-                return l, l.module.course
+                parent = Lesson.objects.get(pk=lesson_pk)
+                return parent, parent.module.course
             except Lesson.DoesNotExist:
-                raise NotFound("Parent lesson not found (pk=%s)" % lesson_pk)
+                raise NotFound(f"Parent lesson not found (pk={lesson_pk})") from None
         return None, None
 
     def perform_create(self, serializer):
@@ -183,7 +189,11 @@ class ResourceViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if lesson is None:
             raise PermissionDenied("lesson is required to create a resource")
-        if not (user.is_staff or (course.author_id and course.author_id == user.id) or getattr(user, "role", None) == "teacher"):
+        if not (
+            user.is_staff
+            or (course.author_id and course.author_id == user.id)
+            or getattr(user, "role", None) == "teacher"
+        ):
             raise PermissionDenied("Only course author or admin (or teacher) can add resources")
         if "lesson" in serializer.validated_data:
             serializer.save()

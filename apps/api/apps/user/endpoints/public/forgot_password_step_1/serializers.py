@@ -9,7 +9,7 @@ class PublicForgotPasswordStep1Serializer(serializers.Serializer):
     email = serializers.EmailField(write_only=True)
 
     def create(self, validated_data):
-        email = validated_data['email'].lower()
+        email = validated_data["email"].lower()
         try:
             user = get_user_model().objects.get(email=email)
         except get_user_model().DoesNotExist:

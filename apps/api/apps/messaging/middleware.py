@@ -1,16 +1,17 @@
 # apps/messaging/middleware.py
 import urllib.parse
+
+import jwt
+from channels.db import database_sync_to_async
+from channels.middleware import BaseMiddleware
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.tokens import UntypedToken
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.contrib.auth.models import AnonymousUser
 from django.db import close_old_connections
-from channels.middleware import BaseMiddleware
-from channels.db import database_sync_to_async
-import jwt
-from django.conf import settings
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.tokens import UntypedToken
 
 User = get_user_model()
+
 
 @database_sync_to_async
 def get_user(user_id):
@@ -19,12 +20,14 @@ def get_user(user_id):
     except User.DoesNotExist:
         return AnonymousUser()
 
+
 class TokenAuthMiddleware(BaseMiddleware):
     """
     Custom middleware that takes ?token=<jwt> from the websocket querystring,
     verifies it (SimpleJWT UntypedToken), and populates scope['user'].
     Fallback to anonymous if token invalid or absent.
     """
+
     async def __call__(self, scope, receive, send):
         # close old DB connections to avoid usage across threads
         close_old_connections()

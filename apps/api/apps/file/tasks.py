@@ -2,14 +2,13 @@ import io
 import logging
 import mimetypes
 
+import requests
 from celery import shared_task
 from django.conf import settings
 from PIL import Image as PImage
-import requests
 
-from .libs import upload_file, create_read_url
+from .libs import create_read_url, upload_file
 from .models import File
-
 
 log = logging.getLogger(__name__)
 
@@ -32,13 +31,13 @@ def _get_format(file_obj):
     else:
         file_mime, encoding = mimetypes.guess_type(file_obj.s3_object_key)
 
-    if file_mime in ('image/jpeg', 'image/jpg'):
-        return 'JPEG'
+    if file_mime in ("image/jpeg", "image/jpg"):
+        return "JPEG"
 
-    if file_mime == 'image/png':
-        return 'PNG'
+    if file_mime == "image/png":
+        return "PNG"
 
-    raise Exception('unsupported image mime type: {0}'.format(file_mime))
+    raise Exception(f"unsupported image mime type: {file_mime}")
 
 
 def resize_images():
@@ -46,9 +45,7 @@ def resize_images():
     Get all images to be resized and push into their own tasks
     """
     images = File.objects.filter(
-        mime_type__in=File.IMAGE_MIME_TYPES,
-        is_resized=False,
-        is_private=False
+        mime_type__in=File.IMAGE_MIME_TYPES, is_resized=False, is_private=False
     ).all()
     [resize_image.delay(img.id) for img in images]
 
@@ -60,22 +57,20 @@ def resize_image(file_id):
     res = requests.get(file_url, stream=True)
 
     if res.status_code >= 300:
-        raise Exception('{0}: {1}'.format(res.status_code, res.content))
+        raise Exception(f"{res.status_code}: {res.content}")
 
     orig = PImage.open(res.raw)
-    acl = 'private' if file_obj.is_private else 'public-read'
+    acl = "private" if file_obj.is_private else "public-read"
 
     for size in settings.FILE_IMAGE_SIZES:
         mem = io.BytesIO()
         img = orig.copy()
 
-        img.thumbnail(_get_size(img, size['width']), PImage.ANTIALIAS)
-        img.save(mem,
-                 format=_get_format(file_obj),
-                 quality=size.get('quality', 95))
+        img.thumbnail(_get_size(img, size["width"]), PImage.ANTIALIAS)
+        img.save(mem, format=_get_format(file_obj), quality=size.get("quality", 95))
 
         mem.seek(0)
-        upload_file(file_obj.get_variant(size['key']), mem, acl=acl)
+        upload_file(file_obj.get_variant(size["key"]), mem, acl=acl)
 
         mem.close()
         img.close()

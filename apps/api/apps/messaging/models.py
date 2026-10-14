@@ -1,13 +1,14 @@
-from django.db import models
 from django.conf import settings
-from django.utils import timezone
+from django.db import models
 
 User = settings.AUTH_USER_MODEL
+
 
 class Conversation(models.Model):
     """
     Conversation entre plusieurs utilisateurs (groupe) ou 2 personnes.
     """
+
     title = models.CharField(max_length=255, blank=True)
     participants = models.ManyToManyField(User, related_name="conversations")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -16,11 +17,16 @@ class Conversation(models.Model):
     def __str__(self):
         if self.title:
             return self.title
-        return "Conversation %d" % self.id
+        return f"Conversation {self.id}"
+
 
 class Message(models.Model):
-    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
-    sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="sent_messages")
+    conversation = models.ForeignKey(
+        Conversation, on_delete=models.CASCADE, related_name="messages"
+    )
+    sender = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="sent_messages"
+    )
     body = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
@@ -33,6 +39,7 @@ class Message(models.Model):
     def __str__(self):
         return f"Msg {self.pk} by {self.sender}"
 
+
 class MessageAttachment(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="attachments")
     file = models.FileField(upload_to="message_attachments/%Y/%m/%d/")
@@ -43,10 +50,12 @@ class MessageAttachment(models.Model):
     def __str__(self):
         return self.filename or f"Attach {self.pk}"
 
+
 class MessageReceipt(models.Model):
     """
     Read / delivered / seen status per recipient.
     """
+
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="receipts")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="message_receipts")
     delivered_at = models.DateTimeField(null=True, blank=True)
@@ -55,10 +64,15 @@ class MessageReceipt(models.Model):
     class Meta:
         unique_together = ("message", "user")
 
+    def __str__(self):
+        return f"Accusé {self.message_id} → {self.user_id}"
+
+
 class Notification(models.Model):
     """
     Internal notification for user (for dashboard / bell icon)
     """
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
     title = models.CharField(max_length=255)
     body = models.TextField(blank=True)

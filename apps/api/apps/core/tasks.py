@@ -1,8 +1,9 @@
 # core/tasks.py
+
 from celery import shared_task
 from django.core.management import call_command
-import os
-from django.conf import settings
+from django.utils import timezone
+
 
 @shared_task
 def run_db_backup(dump_path="/tmp/db-backup.sql"):
@@ -15,8 +16,10 @@ def run_db_backup(dump_path="/tmp/db-backup.sql"):
         print("db backup failed:", e)
     return True
 
+
 @shared_task
 def clear_expired_sessions():
     from django.contrib.sessions.models import Session
+
     Session.objects.filter(expire_date__lt=timezone.now()).delete()
     return True

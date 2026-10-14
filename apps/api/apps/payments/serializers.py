@@ -1,11 +1,14 @@
 # apps/payments/serializers.py
 from rest_framework import serializers
-from .models import Order, OrderItem, Payment, Invoice, Refund
+
+from .models import Order, OrderItem, Payment, Refund
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = ["id", "title", "content_type", "object_id", "unit_price", "quantity", "total"]
+
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
@@ -19,6 +22,7 @@ class OrderSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop("items", [])
         # generate a reference if not provided
         import uuid
+
         if not validated_data.get("reference"):
             validated_data["reference"] = f"ORD-{uuid.uuid4().hex[:10].upper()}"
         order = Order.objects.create(**validated_data)
@@ -32,12 +36,32 @@ class OrderSerializer(serializers.ModelSerializer):
         order.save()
         return order
 
+
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ["id","order","provider","provider_transaction_id","amount","currency","success","created_at","provider_payload"]
+        fields = [
+            "id",
+            "order",
+            "provider",
+            "provider_transaction_id",
+            "amount",
+            "currency",
+            "success",
+            "created_at",
+            "provider_payload",
+        ]
+
 
 class RefundSerializer(serializers.ModelSerializer):
     class Meta:
         model = Refund
-        fields = ["id","payment","amount","reason","created_at","processed","provider_refund_id"]
+        fields = [
+            "id",
+            "payment",
+            "amount",
+            "reason",
+            "created_at",
+            "processed",
+            "provider_refund_id",
+        ]

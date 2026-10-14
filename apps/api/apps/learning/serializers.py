@@ -1,8 +1,9 @@
 # apps/learning/serializers.py
 from rest_framework import serializers
-from .models import Enrollment, Progress, Certificate, Quiz, Question, Choice, Attempt
-from apps.courses.serializers import LessonSerializer  # lecture seule
+
 from apps.courses.models import Lesson
+
+from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
 
 
 class EnrollmentSerializer(serializers.ModelSerializer):
@@ -21,7 +22,8 @@ class EnrollmentSerializer(serializers.ModelSerializer):
         # avoid duplicate enrollment
         if Enrollment.objects.filter(user=user, course=course).exists():
             raise serializers.ValidationError(
-                {"non_field_errors": "User is already enrolled in this course."})
+                {"non_field_errors": "User is already enrolled in this course."}
+            )
         return attrs
 
 
@@ -41,9 +43,9 @@ class ProgressSerializer(serializers.ModelSerializer):
         if enrollment and lesson:
             lesson_course = lesson.module.course
             if enrollment.course_id != lesson_course.id:
-                raise serializers.ValidationError({
-                    "lesson": "This lesson does not belong to the enrollment's course."
-                })
+                raise serializers.ValidationError(
+                    {"lesson": "This lesson does not belong to the enrollment's course."}
+                )
         return attrs
 
 
@@ -82,6 +84,7 @@ class AttemptCreateSerializer(serializers.ModelSerializer):
     Atttempt: client envoie `data` : {question_id: choice_id} pour MCQ/TF
     On calcule le score côté serveur à la sauvegarde via create()
     """
+
     class Meta:
         model = Attempt
         fields = ["id", "user", "quiz", "created_at", "score", "passed", "data"]
@@ -111,7 +114,11 @@ class AttemptCreateSerializer(serializers.ModelSerializer):
                     correct = selected.filter(is_correct=True).count()
                     # naive: points if all selected are correct and number matches
                     correct_total = q.choices.filter(is_correct=True).count()
-                    if correct_total and correct == correct_total and selected.count() == correct_total:
+                    if (
+                        correct_total
+                        and correct == correct_total
+                        and selected.count() == correct_total
+                    ):
                         earned += float(q.weight)
                 else:
                     try:

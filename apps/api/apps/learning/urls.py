@@ -1,8 +1,14 @@
 # apps/learning/urls.py
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    EnrollmentViewSet, ProgressViewSet, CertificateViewSet,
-    QuizViewSet, QuestionViewSet, ChoiceViewSet, AttemptViewSet
+    AttemptViewSet,
+    CertificateViewSet,
+    ChoiceViewSet,
+    EnrollmentViewSet,
+    ProgressViewSet,
+    QuestionViewSet,
+    QuizViewSet,
 )
 
 router = DefaultRouter()

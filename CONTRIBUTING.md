@@ -95,6 +95,7 @@ Le correctif passe par une PR vers `hotfix/1.4.1`. Ensuite :
 
 ```bash
 make test-api                 # si l'API a changé
+make fix-api                  # lint et format de l'API (Ruff), corrections automatiques
 make openapi                  # si un serializer ou une vue a changé, puis committer les fichiers générés
 make lint-web typecheck-web   # si le front a changé
 ```

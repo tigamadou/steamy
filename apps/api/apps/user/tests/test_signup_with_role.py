@@ -1,8 +1,7 @@
 import pytest
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from rest_framework.test import APIClient
-from apps.user.models import Profile
 
 User = get_user_model()
 
@@ -24,7 +23,6 @@ def test_user_signup_with_role_and_profile():
 
     response = client.post(url, payload, format="json")  # <-- APIClient supporte "format"
     assert response.status_code == 201
-    data = response.json()
 
     user = User.objects.get(email="student@example.com")
     assert user.role == "student"
@@ -45,7 +43,6 @@ def test_user_signup_without_profile():
 
     response = client.post(url, payload, format="json")
     assert response.status_code == 201
-    data = response.json()
 
     user = User.objects.get(email="teacher@example.com")
     assert user.role == "teacher"

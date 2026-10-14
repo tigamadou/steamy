@@ -1,7 +1,6 @@
 # apps/learning/models.py
-from django.db import models
 from django.conf import settings
-from django.utils import timezone
+from django.db import models
 
 User = settings.AUTH_USER_MODEL
 
@@ -14,11 +13,15 @@ class Enrollment(models.Model):
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="enrollments")
-    course = models.ForeignKey("courses.Course", on_delete=models.CASCADE, related_name="enrollments")
+    course = models.ForeignKey(
+        "courses.Course", on_delete=models.CASCADE, related_name="enrollments"
+    )
     started_at = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
-    progress = models.DecimalField(max_digits=5, decimal_places=2, default=0)  # pourcentage 0.00 - 100.00
+    progress = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0
+    )  # pourcentage 0.00 - 100.00
 
     class Meta:
         unique_together = ("user", "course")
@@ -29,8 +32,12 @@ class Enrollment(models.Model):
 
 
 class Progress(models.Model):
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="progress_items")
-    lesson = models.ForeignKey("courses.Lesson", on_delete=models.CASCADE, related_name="progress_entries")
+    enrollment = models.ForeignKey(
+        Enrollment, on_delete=models.CASCADE, related_name="progress_items"
+    )
+    lesson = models.ForeignKey(
+        "courses.Lesson", on_delete=models.CASCADE, related_name="progress_entries"
+    )
     completed = models.BooleanField(default=False)
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -43,7 +50,9 @@ class Progress(models.Model):
 
 
 class Certificate(models.Model):
-    enrollment = models.OneToOneField(Enrollment, on_delete=models.CASCADE, related_name="certificate")
+    enrollment = models.OneToOneField(
+        Enrollment, on_delete=models.CASCADE, related_name="certificate"
+    )
     issued_at = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to="certificates/%Y/%m/%d/", null=True, blank=True)
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
@@ -56,7 +65,9 @@ class Certificate(models.Model):
 class Quiz(models.Model):
     course = models.ForeignKey("courses.Course", on_delete=models.CASCADE, related_name="quizzes")
     title = models.CharField(max_length=255)
-    pass_score = models.DecimalField(max_digits=5, decimal_places=2, default=50.0)  # seuil d'obtention
+    pass_score = models.DecimalField(
+        max_digits=5, decimal_places=2, default=50.0
+    )  # seuil d'obtention
 
     def __str__(self):
         return f"{self.course} - {self.title}"
@@ -93,7 +104,9 @@ class Attempt(models.Model):
     # total score (0-100)
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     passed = models.BooleanField(default=False)
-    data = models.JSONField(blank=True, null=True)  # stocke les réponses {question_id: choice_id/answer}
+    data = models.JSONField(
+        blank=True, null=True
+    )  # stocke les réponses {question_id: choice_id/answer}
 
     class Meta:
         ordering = ("-created_at",)

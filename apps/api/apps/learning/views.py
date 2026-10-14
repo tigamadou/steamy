@@ -1,13 +1,18 @@
 # apps/learning/views.py
-from rest_framework import viewsets, permissions, filters, status
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Enrollment, Progress, Certificate, Quiz, Question, Choice, Attempt
+from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
 from .serializers import (
-    EnrollmentSerializer, ProgressSerializer, CertificateSerializer,
-    QuizSerializer, QuestionSerializer, ChoiceSerializer,
-    AttemptSerializer, AttemptCreateSerializer
+    AttemptCreateSerializer,
+    AttemptSerializer,
+    CertificateSerializer,
+    ChoiceSerializer,
+    EnrollmentSerializer,
+    ProgressSerializer,
+    QuestionSerializer,
+    QuizSerializer,
 )
 
 
@@ -15,7 +20,11 @@ class IsOwnerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user and request.user.is_staff:
             return True
-        owner = getattr(obj, "user", None) or getattr(obj, "enrollment", None) and getattr(obj.enrollment, "user", None)
+        owner = (
+            getattr(obj, "user", None)
+            or getattr(obj, "enrollment", None)
+            and getattr(obj.enrollment, "user", None)
+        )
         return owner and owner.id == request.user.id
 
 

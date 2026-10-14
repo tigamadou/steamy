@@ -18,13 +18,11 @@ from apps.messaging.middleware import TokenAuthMiddleware  # noqa: E402
 # choose middleware stack:
 # - AuthMiddlewareStack uses session cookie auth
 # - TokenAuthMiddleware wraps AuthMiddlewareStack to support ?token=JWT
-application = ProtocolTypeRouter({
-    "http": django_asgi_app,
-    "websocket": TokenAuthMiddleware(
-        AuthMiddlewareStack(
-            URLRouter(
-                messaging_routing.websocket_urlpatterns
-            )
-        )
-    ),
-})
+application = ProtocolTypeRouter(
+    {
+        "http": django_asgi_app,
+        "websocket": TokenAuthMiddleware(
+            AuthMiddlewareStack(URLRouter(messaging_routing.websocket_urlpatterns))
+        ),
+    }
+)

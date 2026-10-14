@@ -1,6 +1,7 @@
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import ConversationViewSet, MessageViewSet, AttachmentViewSet, NotificationViewSet
-from django.urls import path, include
+
+from .views import AttachmentViewSet, ConversationViewSet, MessageViewSet, NotificationViewSet
 
 router = DefaultRouter()
 router.register(r"conversations", ConversationViewSet)

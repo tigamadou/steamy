@@ -10,5 +10,5 @@ class PublicLoginView(ObtainAuthToken):
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-        token = Token.objects.get(key=response.data['token'])
-        return Response({'token': token.key, 'userId': token.user_id})
+        token = Token.objects.get(key=response.data["token"])
+        return Response({"token": token.key, "userId": token.user_id})

@@ -2,7 +2,7 @@ from django import http
 from django.conf import settings
 
 
-class CorsMiddleware(object):
+class CorsMiddleware:
     """
     CORS de l'API.
 
@@ -30,5 +30,7 @@ class CorsMiddleware(object):
             response["Access-Control-Allow-Origin"] = "*"
         response["Vary"] = ", ".join(filter(None, [response.get("Vary"), "Origin"]))
         response["Access-Control-Allow-Methods"] = "DELETE, GET, OPTIONS, PATCH, POST, PUT"
-        response["Access-Control-Allow-Headers"] = "accept, accept-encoding, authorization, content-type, dnt, origin, user-agent, x-csrftoken, x-requested-with, sentry-trace"
+        response["Access-Control-Allow-Headers"] = (
+            "accept, accept-encoding, authorization, content-type, dnt, origin, user-agent, x-csrftoken, x-requested-with, sentry-trace"
+        )
         return response

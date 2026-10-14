@@ -1,5 +1,5 @@
-import json
 import base64
+import json
 
 
 def dict_to_base64(d):

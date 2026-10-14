@@ -1,9 +1,12 @@
 # apps/payments/utils.py
-import hmac
 import hashlib
-from django.conf import settings
-from .models import Order, Payment
+import hmac
 from decimal import Decimal
+
+from django.conf import settings
+
+from .models import Order, Payment
+
 
 def verify_provider_webhook(provider_name: str, request):
     """
@@ -22,6 +25,7 @@ def verify_provider_webhook(provider_name: str, request):
 
     computed = hmac.new(secret.encode(), request.body, hashlib.sha256).hexdigest()
     return hmac.compare_digest(computed, signature)
+
 
 def handle_provider_event(provider_name: str, data: dict):
     """
@@ -44,13 +48,17 @@ def handle_provider_event(provider_name: str, data: dict):
     try:
         order = Order.objects.get(reference=reference)
     except Order.DoesNotExist:
-        raise ValueError("order not found")
+        raise ValueError("order not found") from None
 
     payment, _ = Payment.objects.get_or_create(
         order=order,
         provider=provider_name,
         provider_transaction_id=tx_id,
-        defaults={"amount": Decimal(amount) if amount else order.total, "currency": order.currency, "provider_payload": data},
+        defaults={
+            "amount": Decimal(amount) if amount else order.total,
+            "currency": order.currency,
+            "provider_payload": data,
+        },
     )
 
     # update payload & raw

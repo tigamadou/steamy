@@ -1,21 +1,23 @@
 # apps/payments/views.py
+import json
+
+from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
-from rest_framework import serializers, viewsets, permissions, status
+from rest_framework import permissions, serializers, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
-import json
 
 from .models import Order, Payment
 from .serializers import OrderSerializer, PaymentSerializer
+
 
 class IsAdminOrOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user and request.user.is_staff:
             return True
         return getattr(obj, "user", None) and obj.user == request.user
+
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.prefetch_related("items").all()
@@ -26,15 +28,19 @@ class OrderViewSet(viewsets.ModelViewSet):
         # force user to the request user
         serializer.save(user=self.request.user)
 
+
 class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Payment.objects.select_related("order").all()
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
 
+
 # Webhook endpoint for providers (unprotected CSRF exempt; verify signature inside)
 @extend_schema(
     summary="Webhook des prestataires de paiement (appelé par KKiaPay / FedaPay, pas par le front)",
-    parameters=[OpenApiParameter("provider_name", str, OpenApiParameter.PATH, enum=["kkiapay", "fedapay"])],
+    parameters=[
+        OpenApiParameter("provider_name", str, OpenApiParameter.PATH, enum=["kkiapay", "fedapay"])
+    ],
     request=OpenApiTypes.OBJECT,
     responses={200: inline_serializer("WebhookAck", {"ok": serializers.BooleanField()})},
     auth=[],
@@ -56,7 +62,7 @@ def provider_webhook(request, provider_name: str):
 
     # Basic structure: provider sends back transaction status & reference
     # Implement provider-specific verification logic in utils.verify_provider_webhook
-    from .utils import verify_provider_webhook, handle_provider_event
+    from .utils import handle_provider_event, verify_provider_webhook
 
     if not verify_provider_webhook(provider_name, request):
         return Response({"detail": "invalid signature"}, status=status.HTTP_400_BAD_REQUEST)

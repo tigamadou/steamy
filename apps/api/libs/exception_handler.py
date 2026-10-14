@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError as DjangoValidationError
-
 from rest_framework import status
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
@@ -19,7 +18,7 @@ def exception_handler(exc, context):
     """
 
     if isinstance(exc, DjangoValidationError):
-        if hasattr(exc, 'message_dict'):
+        if hasattr(exc, "message_dict"):
             exc = DRFValidationError(detail=exc.message_dict)
         else:
             exc = DRFValidationError(detail=exc.message)
@@ -28,7 +27,4 @@ def exception_handler(exc, context):
 
 
 def unknown_exception_handler(exception):
-    return Response(
-        {"error": str(exception)},
-        status=status.HTTP_500_INTERNAL_SERVER_ERROR
-    )
+    return Response({"error": str(exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

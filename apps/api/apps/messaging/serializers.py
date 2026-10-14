@@ -2,6 +2,7 @@
 from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+
 from .models import Conversation, Message, MessageAttachment, MessageReceipt, Notification
 
 UserModel = get_user_model()
@@ -59,8 +60,16 @@ class MessageCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ["id", "conversation", "sender", "body",
-                  "created_at", "edited", "deleted", "attachments"]
+        fields = [
+            "id",
+            "conversation",
+            "sender",
+            "body",
+            "created_at",
+            "edited",
+            "deleted",
+            "attachments",
+        ]
         read_only_fields = ["id", "sender", "created_at", "edited", "deleted", "attachments"]
 
     def create(self, validated_data):
@@ -83,12 +92,24 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ["id", "conversation", "sender", "body", "created_at",
-                  "edited", "deleted", "attachments", "receipts"]
+        fields = [
+            "id",
+            "conversation",
+            "sender",
+            "body",
+            "created_at",
+            "edited",
+            "deleted",
+            "attachments",
+            "receipts",
+        ]
 
     @extend_schema_field(ReceiptSummarySerializer(many=True))
     def get_receipts(self, obj):
-        return [{"user": r.user_id, "delivered_at": r.delivered_at, "read_at": r.read_at} for r in obj.receipts.all()]
+        return [
+            {"user": r.user_id, "delivered_at": r.delivered_at, "read_at": r.read_at}
+            for r in obj.receipts.all()
+        ]
 
 
 class MessageReceiptSerializer(serializers.ModelSerializer):

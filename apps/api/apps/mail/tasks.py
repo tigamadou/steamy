@@ -5,7 +5,6 @@ from celery import shared_task
 from django.conf import settings
 from django.core.mail import send_mail as dj_send_mail
 
-
 log = logging.getLogger(__name__)
 
 
@@ -48,7 +47,7 @@ def send_email(mail_id):
     mail = Mail.objects.get(pk=mail_id)
 
     if not settings.SEND_MAIL:
-        log.info('SEND_MAIL is not True! {}'.format(mail))
+        log.info(f"SEND_MAIL is not True! {mail}")
         mail.status = Mail.TEST
         mail.save()
         return

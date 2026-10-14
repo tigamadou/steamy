@@ -1,0 +1,24 @@
+# Outillage de l'API. Les dépendances restent dans requirements.txt.
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+# Migrations générées par Django : ni lint ni formatage
+extend-exclude = ["**/migrations/**"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",  # pycodestyle
+    "F",       # pyflakes : imports inutilisés, noms indéfinis, redéfinitions…
+    "I",       # tri des imports (isort)
+    "UP",      # syntaxe Python moderne
+    "B",       # bugbear : pièges courants
+    "DJ",      # bonnes pratiques Django
+]
+ignore = [
+    "E501",    # longueur de ligne : gérée par `ruff format` ; restent des chaînes et commentaires longs
+    "DJ001",   # CharField null=True : corriger demande des migrations de données, à traiter à part
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["apps", "libs", "project"]
