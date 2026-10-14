@@ -1,19 +1,19 @@
-from .serializers import NotificationSerializer
-from rest_framework import viewsets, permissions, status
+from django.utils import timezone
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
 
 from .models import Conversation, Message, MessageAttachment, MessageReceipt, Notification
 from .serializers import (
-    ConversationSerializer, CreateConversationSerializer,
-    MessageSerializer, MessageCreateSerializer, MessageAttachmentSerializer,
-    MessageReceiptSerializer, NotificationSerializer
+    ConversationSerializer,
+    CreateConversationSerializer,
+    MessageAttachmentSerializer,
+    MessageCreateSerializer,
+    MessageSerializer,
+    NotificationSerializer,
 )
 from .tasks import send_message_notifications_async
-from django.conf import settings
-from rest_framework.parsers import MultiPartParser, FormParser
-from django.utils import timezone
 
 
 class IsParticipantOrAdmin(permissions.BasePermission):

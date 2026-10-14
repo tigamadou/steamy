@@ -1,13 +1,13 @@
 from django.contrib import messages
 from django.template import engines
+from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.text import get_valid_filename
-from django.urls import reverse
 
 from . import tasks
-from .models import Mail
-from .libs.serialize import serialize
 from .libs.camel_space_to_spaces import camel_space_to_spaces
+from .libs.serialize import serialize
+from .models import Mail
 
 
 class MailBase:
@@ -44,9 +44,7 @@ class MailBase:
             return cls.template
         except AttributeError:
             name = cls.get_name()
-            path = 'email/{name}.html'.format(
-                name=get_valid_filename(camel_space_to_spaces(name))
-            )
+            path = f'email/{get_valid_filename(camel_space_to_spaces(name))}.html'
             return path
 
     @classmethod

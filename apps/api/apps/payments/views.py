@@ -1,15 +1,16 @@
 # apps/payments/views.py
+import json
+
+from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
-from rest_framework import serializers, viewsets, permissions, status
+from rest_framework import permissions, serializers, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
-import json
 
 from .models import Order, Payment
 from .serializers import OrderSerializer, PaymentSerializer
+
 
 class IsAdminOrOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -56,7 +57,7 @@ def provider_webhook(request, provider_name: str):
 
     # Basic structure: provider sends back transaction status & reference
     # Implement provider-specific verification logic in utils.verify_provider_webhook
-    from .utils import verify_provider_webhook, handle_provider_event
+    from .utils import handle_provider_event, verify_provider_webhook
 
     if not verify_provider_webhook(provider_name, request):
         return Response({"detail": "invalid signature"}, status=status.HTTP_400_BAD_REQUEST)

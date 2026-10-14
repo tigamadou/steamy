@@ -1,4 +1,3 @@
-import pytest
 from types import SimpleNamespace
 
 # on suppose que le module est apps.core.s3_client

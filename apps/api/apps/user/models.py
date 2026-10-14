@@ -1,5 +1,7 @@
-from .base import AbstractEmailUser
 from django.db import models
+
+from .base import AbstractEmailUser
+
 
 class User(AbstractEmailUser):
     pass

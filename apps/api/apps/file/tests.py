@@ -1,12 +1,12 @@
-from django.test import override_settings
 from unittest import skipIf
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from mixer.backend.django import mixer
 from rest_framework.test import APITestCase
-from urllib.parse import urlparse
+
 from .models import File
 
 

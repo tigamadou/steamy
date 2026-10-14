@@ -1,7 +1,7 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password as django_validate_password
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from django.contrib.auth.password_validation import validate_password as django_validate_password
-from django.contrib.auth import get_user_model
 
 
 class UserChangePasswordSerializer(serializers.ModelSerializer):

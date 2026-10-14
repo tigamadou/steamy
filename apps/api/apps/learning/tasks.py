@@ -1,7 +1,9 @@
+import weasyprint  # example if you install weasyprint
 from celery import shared_task
 from django.core.files.base import ContentFile
+
 from .models import Certificate
-import weasyprint  # example if you install weasyprint
+
 
 @shared_task
 def generate_certificate_pdf(certificate_id):

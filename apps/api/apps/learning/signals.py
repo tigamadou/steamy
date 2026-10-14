@@ -1,9 +1,10 @@
 # apps/learning/signals.py
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Attempt, Progress, Enrollment, Certificate
-from apps.courses.models import Lesson
-from decimal import Decimal
+
+from .models import Attempt, Certificate, Enrollment
+
 
 @receiver(post_save, sender=Attempt)
 def on_attempt_saved(sender, instance: Attempt, created, **kwargs):

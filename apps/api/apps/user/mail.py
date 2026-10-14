@@ -1,7 +1,7 @@
 from django.conf import settings
 
-from libs.encode import dict_to_base64
 from apps.mail.models import Mail
+from libs.encode import dict_to_base64
 
 
 def send_forgot_password_email(user, reset_token):

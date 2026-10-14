@@ -2,6 +2,7 @@
 import boto3
 from django.conf import settings
 
+
 def generate_presigned_post(bucket_name, key, content_type, expires_in=3600):
     s3 = boto3.client(
         "s3",

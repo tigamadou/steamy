@@ -2,7 +2,7 @@ from django import http
 from django.conf import settings
 
 
-class CorsMiddleware(object):
+class CorsMiddleware:
     """
     CORS de l'API.
 

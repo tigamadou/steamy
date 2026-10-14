@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.utils.html import format_html, mark_safe
 
-from .models import Mail, Template, Layout
 from .libs.pretty_json import make_pretty_json
+from .models import Layout, Mail, Template
 
 
 @admin.register(Template)
@@ -21,21 +21,18 @@ class TemplateAdmin(admin.ModelAdmin):
         data = obj.last_email_sent.data if obj.last_email_sent else obj.data_example
         layout = obj.layout.html if obj.layout else '{body}'
         return mark_safe(
-            '''
+            f'''
                 <div>
                     <br />
                     <h3>Subject</h3>
                     <br />
-                    {0}
+                    {obj.render(obj.subject, data)}
                     <br /><br />
                     <h3>Body</h3>
                     <br />
-                    {1}
+                    {layout.format(body=obj.render(obj.body, data))}
                 </div>
-            '''.format(
-                obj.render(obj.subject, data),
-                layout.format(body=obj.render(obj.body, data))
-            )
+            '''
         )
 
 

@@ -1,6 +1,7 @@
 # courses/admin.py
 from django.contrib import admin
-from .models import Path, Course, Module, Lesson, Resource
+
+from .models import Course, Lesson, Module, Path, Resource
 
 
 @admin.register(Path)

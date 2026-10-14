@@ -1,8 +1,7 @@
 import json
 
 from django.utils.html import mark_safe
-
-from pygments import highlight, lexers, formatters
+from pygments import formatters, highlight, lexers
 
 
 def make_pretty_json(data):

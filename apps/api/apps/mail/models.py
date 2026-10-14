@@ -1,7 +1,7 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.template import engines
-from django.core.exceptions import ValidationError
 
 from .tasks import send_email
 
@@ -53,7 +53,7 @@ class Template(models.Model):
         )
 
     def __str__(self):
-        return '<Template: {0}>'.format(self.name)
+        return f'<Template: {self.name}>'
 
     @staticmethod
     def _render(input, data):
@@ -95,7 +95,7 @@ class Mail(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return '<Mail: {0} - {1}>'.format(self.name, self.user.email)
+        return f'<Mail: {self.name} - {self.user.email}>'
 
     class Meta:
         verbose_name = 'mail'

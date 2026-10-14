@@ -1,5 +1,5 @@
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from mixer.backend.django import mixer
 from rest_framework.test import APITestCase
 

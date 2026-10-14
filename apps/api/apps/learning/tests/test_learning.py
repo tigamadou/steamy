@@ -1,10 +1,10 @@
 import pytest
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.test import APIClient
-from django.contrib.auth import get_user_model
 
-from apps.courses.models import Course, Module, Lesson
-from apps.learning.models import Enrollment, Progress, Certificate, Quiz, Question, Choice, Attempt
+from apps.courses.models import Course, Lesson, Module
+from apps.learning.models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
 
 User = get_user_model()
 

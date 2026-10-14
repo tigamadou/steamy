@@ -1,6 +1,8 @@
 # apps/analytics/admin.py
 from django.contrib import admin
-from .models import Event, DailyAggregatedStat
+
+from .models import DailyAggregatedStat, Event
+
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):

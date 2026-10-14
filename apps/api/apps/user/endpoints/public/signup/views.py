@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import generics, permissions
 
 from apps.user import mail
+
 from .serializers import PublicSignupSerializer
 
 

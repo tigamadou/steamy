@@ -1,21 +1,19 @@
 # courses/views.py
-from apps.courses.models import Course  # si pas déjà importé
-from rest_framework.exceptions import PermissionDenied, NotFound
-from rest_framework import permissions
-from .permissions import IsTeacherOrAdmin
-from rest_framework import viewsets, permissions, filters
-from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
+from rest_framework import filters, permissions, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.response import Response
 
-from .models import Path, Course, Module, Lesson, Resource
+from apps.courses.models import Course  # si pas déjà importé
+
+from .models import Course, Lesson, Module, Path, Resource
+from .permissions import IsTeacherOrAdmin
 from .serializers import (
-    PathSerializer,
-    CourseListSerializer,
     CourseDetailSerializer,
-    ModuleSerializer,
+    CourseListSerializer,
     LessonSerializer,
+    ModuleSerializer,
+    PathSerializer,
     ResourceSerializer,
 )
 

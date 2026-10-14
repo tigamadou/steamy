@@ -1,13 +1,14 @@
 from django.urls import path
 
-from apps.user.endpoints.public.login.views import PublicLoginView
-from apps.user.endpoints.public.signup.views import PublicSignupView
 from apps.user.endpoints.public.forgot_password_step_1.views import PublicForgotPasswordStep1View
 from apps.user.endpoints.public.forgot_password_step_2.views import PublicForgotPasswordStep2View
-from apps.user.endpoints.user.change_password.views import UserChangePasswordView
-from apps.user.endpoints.user.change_email.views import UserChangeEmailView
-from apps.user.endpoints.user.my_profile.views import UserMyProfileView
+from apps.user.endpoints.public.login.views import PublicLoginView
+from apps.user.endpoints.public.signup.views import PublicSignupView
 from apps.user.endpoints.session.views import CsrfView, SessionLoginView, SessionLogoutView
+from apps.user.endpoints.user.change_email.views import UserChangeEmailView
+from apps.user.endpoints.user.change_password.views import UserChangePasswordView
+from apps.user.endpoints.user.my_profile.views import UserMyProfileView
+
 from .views import UserSignupView
 
 urlpatterns = [

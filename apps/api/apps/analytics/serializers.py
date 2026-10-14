@@ -1,6 +1,8 @@
 # apps/analytics/serializers.py
 from rest_framework import serializers
-from .models import Event, DailyAggregatedStat
+
+from .models import DailyAggregatedStat, Event
+
 
 class EventSerializer(serializers.ModelSerializer):
     class Meta:

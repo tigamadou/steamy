@@ -6,7 +6,6 @@ import boto3
 from botocore.exceptions import ClientError
 from django.conf import settings
 
-
 log = logging.getLogger(__name__)
 
 
@@ -102,7 +101,7 @@ def signed_url(
         ext_len = len(file_ext) + 1
         file_name = file_name[:-ext_len]
 
-    destination_name = '{0}/{1}.{2}'.format(directory, file_name, file_ext)
+    destination_name = f'{directory}/{file_name}.{file_ext}'
     s3 = boto3.client(
         's3',
         aws_access_key_id=key,

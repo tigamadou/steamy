@@ -1,6 +1,6 @@
 import logging
-from celery import shared_task
 
+from celery import shared_task
 
 log = logging.getLogger(__name__)
 

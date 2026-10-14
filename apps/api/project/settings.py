@@ -1,9 +1,10 @@
 import logging.config
 import os
 import sys
+from datetime import timedelta
 
 import dj_database_url
-from datetime import timedelta
+
 # ==================================================================================================
 # CHANGE FIELDS
 # ==================================================================================================

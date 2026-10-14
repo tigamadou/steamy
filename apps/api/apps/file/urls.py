@@ -2,7 +2,6 @@ from django.urls import path
 
 from . import views
 
-
 urlpatterns = [
     path('user/files/create-signed-file', views.CreateSignedFile.as_view(), name='create-signed-file'),
     path('files', views.UploadFile.as_view(), name='upload-file'),

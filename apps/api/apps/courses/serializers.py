@@ -1,7 +1,12 @@
 # courses/serializers.py
-from apps.courses.models import Course as CourseModel, Module as ModuleModel, Path as PathModel, Lesson as LessonModel
 from rest_framework import serializers
-from .models import Path, Course, Module, Lesson, Resource
+
+from apps.courses.models import Course as CourseModel
+from apps.courses.models import Lesson as LessonModel
+from apps.courses.models import Module as ModuleModel
+from apps.courses.models import Path as PathModel
+
+from .models import Course, Lesson, Module, Path, Resource
 
 
 class ResourceSerializer(serializers.ModelSerializer):

@@ -1,10 +1,6 @@
-import pytest
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 
-from apps.user.base import AbstractEmailUser
 from apps.user.models import Profile  # si ton fichier models est apps.user.models
-
 
 User = get_user_model()
 

@@ -1,15 +1,15 @@
 # apps/analytics/views.py
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
-from rest_framework import serializers, viewsets, permissions, status
-from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.response import Response
-from django.utils import timezone
 from django.core.cache import cache
 from django.db.models import Sum
+from django.utils import timezone
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from rest_framework import permissions, serializers, status, viewsets
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
 
-from .models import Event, DailyAggregatedStat
-from .serializers import EventSerializer, DailyAggregatedStatSerializer
+from .models import DailyAggregatedStat, Event
+from .serializers import EventSerializer
 
 CACHE_TTL = 60  # seconds for simple endpoints (adjust)
 
@@ -75,8 +75,10 @@ def dashboard_summary(request):
     cache.set(cache_key, payload, CACHE_TTL)
     return Response(payload)
 import csv
+
 from django.http import HttpResponse
 from django.utils.dateparse import parse_date
+
 
 @extend_schema(
     parameters=[

@@ -1,12 +1,10 @@
-import io
 import pytest
+from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from rest_framework.test import APIClient
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.contrib.auth import get_user_model
-from types import SimpleNamespace
 
-from apps.messaging.models import Conversation, Message, MessageAttachment, MessageReceipt, Notification
+from apps.messaging.models import Conversation, MessageReceipt, Notification
 
 User = get_user_model()
 

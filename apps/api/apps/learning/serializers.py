@@ -1,8 +1,9 @@
 # apps/learning/serializers.py
 from rest_framework import serializers
-from .models import Enrollment, Progress, Certificate, Quiz, Question, Choice, Attempt
-from apps.courses.serializers import LessonSerializer  # lecture seule
+
 from apps.courses.models import Lesson
+
+from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
 
 
 class EnrollmentSerializer(serializers.ModelSerializer):

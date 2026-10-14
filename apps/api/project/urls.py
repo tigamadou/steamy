@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+
 from apps.core.views import health, presign_upload
 
 from .views import api_root
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 # try to use sidecar if available, otherwise fallback to standard SpectacularSwaggerView
 try:

@@ -1,8 +1,9 @@
+
 import pytest
-from types import SimpleNamespace
 from django.contrib.auth import get_user_model
-from apps.user.endpoints.public.signup.views import PublicSignupView
+
 import apps.user.mail as user_mail_module
+from apps.user.endpoints.public.signup.views import PublicSignupView
 
 User = get_user_model()
 

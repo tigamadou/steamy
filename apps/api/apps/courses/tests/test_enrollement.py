@@ -1,8 +1,9 @@
 import pytest
-from django.urls import reverse, NoReverseMatch
-from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
-from apps.courses.models import Course, Module, Lesson
+from django.urls import NoReverseMatch, reverse
+from rest_framework.test import APIClient
+
+from apps.courses.models import Course, Lesson, Module
 from apps.learning.models import Enrollment
 
 User = get_user_model()

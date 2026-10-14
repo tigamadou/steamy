@@ -6,5 +6,5 @@ class LearningConfig(AppConfig):
     name = 'apps.learning'
 
     def ready(self):
-        # importe les signaux
-        import apps.learning.signals
+        # Import pour son effet : enregistre les signaux (progression, certificats)
+        import apps.learning.signals  # noqa: F401

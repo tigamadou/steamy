@@ -1,7 +1,12 @@
 from celery import shared_task
-from django.conf import settings
+
+from apps.messaging.utils import (
+    create_push_notification_for_message,
+    send_email_notification_for_message,
+)
+
 from .models import Message
-from apps.messaging.utils import send_email_notification_for_message, create_push_notification_for_message
+
 
 @shared_task
 def send_message_notifications_async(message_id):

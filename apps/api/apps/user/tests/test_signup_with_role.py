@@ -1,8 +1,7 @@
 import pytest
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from rest_framework.test import APIClient
-from apps.user.models import Profile
 
 User = get_user_model()
 

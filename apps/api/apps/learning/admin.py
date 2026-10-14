@@ -1,6 +1,8 @@
 # apps/learning/admin.py
 from django.contrib import admin
-from .models import Enrollment, Progress, Certificate, Quiz, Question, Choice, Attempt
+
+from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
+
 
 @admin.register(Enrollment)
 class EnrollmentAdmin(admin.ModelAdmin):

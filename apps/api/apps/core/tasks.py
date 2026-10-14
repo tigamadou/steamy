@@ -1,8 +1,8 @@
 # core/tasks.py
+
 from celery import shared_task
 from django.core.management import call_command
-import os
-from django.conf import settings
+
 
 @shared_task
 def run_db_backup(dump_path="/tmp/db-backup.sql"):

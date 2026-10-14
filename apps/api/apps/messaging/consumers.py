@@ -1,11 +1,10 @@
 # apps/messaging/consumers.py
-import json
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from .models import Conversation, Message, MessageReceipt
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 

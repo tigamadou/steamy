@@ -1,11 +1,12 @@
 # apps/analytics/tasks.py
+from datetime import timedelta
+
 from celery import shared_task
-from django.utils import timezone
 from django.db.models import Count, Sum
-from datetime import timedelta, date
-from .models import Event, DailyAggregatedStat
-from apps.courses.models import Course
-from django.contrib.auth import get_user_model
+from django.utils import timezone
+
+from .models import DailyAggregatedStat, Event
+
 
 @shared_task
 def aggregate_daily_stats(day=None):
@@ -23,7 +24,6 @@ def aggregate_daily_stats(day=None):
     end = timezone.datetime.combine(day, timezone.datetime.max.time(), tzinfo=timezone.utc)
 
     # 1) views per course (event_type == 'course_view' and entity_type == 'course')
-    from django.db.models import Q
     qs = Event.objects.filter(event_type="course_view", entity_type="course", created_at__range=(start, end))
     # group by entity_id (course id/slug)
     views = qs.values("entity_id").annotate(count=Count("id"))

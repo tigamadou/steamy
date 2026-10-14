@@ -1,10 +1,11 @@
 # apps/courses/urls.py
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    PathViewSet,
     CourseViewSet,
-    ModuleViewSet,
     LessonViewSet,
+    ModuleViewSet,
+    PathViewSet,
     ResourceViewSet,
 )
 
