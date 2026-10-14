@@ -1,5 +1,7 @@
 # CI/CD
 
+> Le détail technique de chaque job et de chaque étape est dans [Workflows GitHub](workflows-github.md).
+
 Deux workflows GitHub Actions :
 
 | Workflow | Déclencheur | Rôle |
