@@ -1,5 +1,7 @@
 # CI/CD
 
+> Le détail technique de chaque job et de chaque étape est dans [Workflows GitHub](workflows-github.md).
+
 Deux workflows GitHub Actions :
 
 | Workflow | Déclencheur | Rôle |
@@ -18,10 +20,15 @@ précédent. Sur une PR, c'est le diff de la PR qui compte.
 | Job | Lancé si modification de | Vérifie |
 | --- | --- | --- |
 | `api` | `apps/api/**` | Tests (pytest, avec PostgreSQL et Redis), migrations manquantes, contrat OpenAPI à jour et sans avertissement, lint et format (Ruff) |
-| `web` | `apps/web/**`, `packages/**`, `openapi.yaml`, fichiers pnpm | Types du client à jour, lint, typecheck, build |
-| `images` | API ou front | Les images de production se construisent (sans push) |
-| `helm` | `infra/**`, workflows | `helm lint` et rendu des deux charts pour staging et prod, validation des manifestes (kubeconform), shellcheck du script de déploiement |
+| `image-api` | `apps/api/**` | L'image de production de l'API se construit (sans push) |
+| `web` | `apps/web/**`, `packages/**`, `openapi.yaml`, fichiers pnpm, `.nvmrc`, `.dockerignore` | Types du client à jour, lint, typecheck, build |
+| `image-web` | idem `web` | L'image de production du front se construit (sans push) |
+| `helm` | `infra/**`, `deploy.yml` | `helm lint` et rendu des deux charts pour staging et prod, validation des manifestes (kubeconform), shellcheck du script de déploiement |
 | **`ci-ok`** | toujours | Agrège les résultats : succès si chaque job a réussi ou a été sauté |
+
+Exemples : une PR qui ne touche que le front lance `web` et `image-web` ; une PR de documentation ne
+lance que `changes` et `ci-ok`. **Seule une modification de `ci.yml` relance tous les jobs**, pour vérifier
+que la CI elle-même fonctionne encore.
 
 **Protection de `main` et `development`** (gitflow, voir [`CONTRIBUTING.md`](../../CONTRIBUTING.md)) :
 PR obligatoire, push direct interdit, et rendre obligatoire le seul check `ci-ok`. Comme les jobs sont conditionnels,
@@ -78,7 +85,7 @@ est un nouveau commit, pour lequel aucune image n'a été construite. Le déploi
 | --- | --- |
 | Tag au format `vX.Y.Z` ou `vX.Y.Z-suffixe`, sinon échec | job `meta` |
 | Une release (non pre-release) ne peut pas porter de suffixe `-rc…` | job `meta` |
-| La prod ne reconstruit **jamais** d'image : elle réutilise celle de la pre-release du même commit, avec le même digest. Si aucune pre-release n'a construit ce commit, le déploiement échoue | job `images` |
+| La prod ne reconstruit **jamais** d'image : elle réutilise celle de la pre-release du même commit, avec le même digest. Si aucune pre-release n'a construit ce commit, le déploiement échoue | job `images` de `deploy.yml` |
 | Une pre-release ne peut pas être déployée en prod, même par erreur | `steamy-deploy` sur le serveur |
 | Un seul déploiement à la fois par environnement | `concurrency` (CI) + `flock` (serveur) |
 | Approbation humaine avant la prod | réglage de l'environnement GitHub `production` |

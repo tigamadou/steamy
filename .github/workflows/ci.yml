@@ -38,21 +38,28 @@ jobs:
           # ne doit pas masquer une API cassée plus tôt. Sur main/development : diff
           # depuis le push précédent. Ignoré pour les PR (diff de la PR).
           base: ${{ startsWith(github.ref_name, 'hotfix/') && 'main' || (github.ref_name == 'main' && 'main' || 'development') }}
+          # Chaque partie ne déclenche que ses propres jobs. Seule une modification
+          # de CE fichier relance tout : c'est le seul moyen de vérifier la CI elle-même.
           filters: |
-            api:
-              - 'apps/api/**'
+            ci: &ci
               - '.github/workflows/ci.yml'
+            api:
+              - *ci
+              - 'apps/api/**'
             web:
+              - *ci
               - 'apps/web/**'
               - 'packages/**'
-              - 'apps/api/openapi.yaml'
+              - 'apps/api/openapi.yaml'   # contrat → types TypeScript du front
               - 'package.json'
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
-              - '.github/workflows/ci.yml'
+              - '.nvmrc'
+              - '.dockerignore'           # contexte de build de l'image web
             infra:
+              - *ci
               - 'infra/**'
-              - '.github/workflows/**'
+              - '.github/workflows/deploy.yml'
 
   api:
     needs: changes
@@ -137,31 +144,40 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm build
 
-  images:
+  # Une image par job : modifier le front ne reconstruit pas l'image de l'API
+  image-api:
     needs: changes
-    if: needs.changes.outputs.api == 'true' || needs.changes.outputs.web == 'true'
+    if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - name: api
-            context: apps/api
-            file: apps/api/Dockerfile
-          - name: web
-            context: .
-            file: apps/web/Dockerfile
     steps:
       - uses: actions/checkout@v5
       - uses: docker/setup-buildx-action@v3
-      - name: Build de l'image ${{ matrix.name }} (sans push)
+      - name: Build de l'image api (sans push)
         uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.file }}
+          context: apps/api
+          file: apps/api/Dockerfile
           target: prod
           push: false
-          cache-from: type=gha,scope=${{ matrix.name }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+  image-web:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - name: Build de l'image web (sans push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          target: prod
+          push: false
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
 
   helm:
     needs: changes
@@ -170,6 +186,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: azure/setup-helm@v4
+        with:
+          version: v3.22.0   # même version que les serveurs (infra/ansible/group_vars/all.yml)
       - name: Lint et rendu des charts (staging et prod)
         run: |
           for chart in steamy steamy-platform; do
@@ -189,10 +207,12 @@ jobs:
       - name: Shellcheck du script de déploiement
         run: shellcheck infra/deploy/steamy-deploy.sh
 
-  # Point de contrôle unique pour la protection de branche
+  # Point de contrôle unique pour la protection de branche.
+  # `changes` est surveillé aussi : s'il échoue, tous les autres jobs sont sautés,
+  # et « tout sauté » ne doit pas passer pour un succès.
   ci-ok:
     if: always()
-    needs: [api, web, images, helm]
+    needs: [changes, api, web, image-api, image-web, helm]
     runs-on: ubuntu-latest
     steps:
       - name: Tous les jobs exécutés ont réussi
