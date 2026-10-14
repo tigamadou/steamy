@@ -13,11 +13,7 @@ from .models import Mail
 class MailBase:
     @classmethod
     def process_args(cls, user, request=None, *args, **kwargs):
-        return {
-            'user': user,
-            'request': request,
-            **kwargs
-        }
+        return {"user": user, "request": request, **kwargs}
 
     @classmethod
     def get_name(cls):
@@ -25,7 +21,7 @@ class MailBase:
             return cls.name
         except AttributeError:
             name = cls.__name__
-            if name.startswith('Mail'):
+            if name.startswith("Mail"):
                 name = name[4:]
             return name
 
@@ -44,18 +40,18 @@ class MailBase:
             return cls.template
         except AttributeError:
             name = cls.get_name()
-            path = f'email/{get_valid_filename(camel_space_to_spaces(name))}.html'
+            path = f"email/{get_valid_filename(camel_space_to_spaces(name))}.html"
             return path
 
     @classmethod
     def render_body(cls, ctx):
-        django_engine = engines['django']
+        django_engine = engines["django"]
         template = django_engine.get_template(cls.get_template())
         return template.render(ctx)
 
     @classmethod
     def render_subject(cls, ctx):
-        django_engine = engines['django']
+        django_engine = engines["django"]
         template = django_engine.from_string(cls.get_subject())
         return template.render(ctx)
 
@@ -65,17 +61,13 @@ class MailBase:
         body = cls.render_body(ctx)
         subject = cls.render_subject(ctx)
         mail = Mail.objects.create(
-            name=cls.get_name(),
-            user=user,
-            data=ctx,
-            body=body,
-            subject=subject
+            name=cls.get_name(), user=user, data=ctx, body=body, subject=subject
         )
         tasks.send_email(mail.id)  # Sets a background task to send the email
 
         if admin_feedback and request is not None:
             mail_url = reverse(
-                'admin:mail_mail_change',
+                "admin:mail_mail_change",
                 args=[mail.id],
             )
             msg = format_html(

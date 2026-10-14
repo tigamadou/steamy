@@ -10,6 +10,7 @@ class EventAdmin(admin.ModelAdmin):
     list_filter = ("event_type", "entity_type")
     search_fields = ("entity_id", "user__email")
 
+
 @admin.register(DailyAggregatedStat)
 class DailyAggregatedStatAdmin(admin.ModelAdmin):
     list_display = ("date", "group_by", "key", "metric", "value")

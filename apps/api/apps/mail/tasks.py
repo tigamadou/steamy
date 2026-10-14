@@ -47,7 +47,7 @@ def send_email(mail_id):
     mail = Mail.objects.get(pk=mail_id)
 
     if not settings.SEND_MAIL:
-        log.info(f'SEND_MAIL is not True! {mail}')
+        log.info(f"SEND_MAIL is not True! {mail}")
         mail.status = Mail.TEST
         mail.save()
         return

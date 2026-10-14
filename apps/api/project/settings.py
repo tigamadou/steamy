@@ -10,9 +10,9 @@ import dj_database_url
 # ==================================================================================================
 
 
-APP_NAME = 'Dev App'
-DEFAULT_FROM_EMAIL = 'hello@inputlogic.ca'
-DEFAULT_FROM_NAME = 'Input Logic Dev'
+APP_NAME = "Dev App"
+DEFAULT_FROM_EMAIL = "hello@inputlogic.ca"
+DEFAULT_FROM_NAME = "Input Logic Dev"
 
 
 # ==================================================================================================
@@ -20,13 +20,13 @@ DEFAULT_FROM_NAME = 'Input Logic Dev'
 # ==================================================================================================
 
 
-DEV = 'dev'
-STAGING = 'staging'
-PRODUCTION = 'production'
-TEST = 'test'
-ENV = os.environ.get('DJANGO_ENV', DEV)
-TESTING = 'test' in sys.argv or ENV == TEST
-LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG' if ENV == DEV else 'WARNING')
+DEV = "dev"
+STAGING = "staging"
+PRODUCTION = "production"
+TEST = "test"
+ENV = os.environ.get("DJANGO_ENV", DEV)
+TESTING = "test" in sys.argv or ENV == TEST
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG" if ENV == DEV else "WARNING")
 
 
 # ==================================================================================================
@@ -34,140 +34,133 @@ LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG' if ENV == DEV else 'WARNING')
 # ==================================================================================================
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__))).replace('/project', '')
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))).replace("/project", "")
 DEPLOYED = ENV in (STAGING, PRODUCTION)
 DEBUG = not DEPLOYED
 
 if DEPLOYED:
     # En staging/prod, l'absence de ces variables doit empêcher le démarrage
-    SECRET_KEY = os.environ['SECRET_KEY']
-    ALLOWED_HOSTS = os.environ['ALLOWED_HOSTS'].split(',')
+    SECRET_KEY = os.environ["SECRET_KEY"]
+    ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
 else:
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'local')
-    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+    SECRET_KEY = os.environ.get("SECRET_KEY", "local")
+    ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
 # Indicateur pour autoriser l'accès à la doc (par défaut False en prod)
 ALLOW_API_DOCS = os.getenv("ALLOW_API_DOCS", "false").lower() in ("1", "true", "yes")
 
 
-AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = "user.User"
 
 INSTALLED_APPS = [
     # Custom Admin settings (must be before django.contrib.admin)
-    'django_admin_env_notice',
-    'admin_interface',
-    'colorfield',
-
+    "django_admin_env_notice",
+    "admin_interface",
+    "colorfield",
     # Django core
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.messages',
-    'django.contrib.sessions',
-    'django.contrib.staticfiles',
-
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.messages",
+    "django.contrib.sessions",
+    "django.contrib.staticfiles",
     # 3rd party
-    'django_celery_results',
+    "django_celery_results",
     "django_celery_beat",
-    'django_extensions',
-    'django_filters',
-    'rest_framework',
-    'rest_framework.authtoken',
+    "django_extensions",
+    "django_filters",
+    "rest_framework",
+    "rest_framework.authtoken",
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "channels",
     "storages",
-
-
     # Local
-    'apps.file',
-    'apps.mail',
-    'apps.user',
-    'apps.courses',
-    'apps.learning',
-    'apps.payments',
-    'apps.messaging',
-    'apps.analytics',
-    'apps.core',
+    "apps.file",
+    "apps.mail",
+    "apps.user",
+    "apps.courses",
+    "apps.learning",
+    "apps.payments",
+    "apps.messaging",
+    "apps.analytics",
+    "apps.core",
 ]
 
 MIDDLEWARE = [
-    'libs.corsmiddleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "libs.corsmiddleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'project.urls'
+ROOT_URLCONF = "project.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'django_admin_env_notice.context_processors.from_settings'
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "django_admin_env_notice.context_processors.from_settings",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'project.wsgi.application'
+WSGI_APPLICATION = "project.wsgi.application"
 ASGI_APPLICATION = "project.asgi.application"
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 if ENV in (STAGING, PRODUCTION):
-    DATABASES = {
-        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
-    }
+    DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('POSTGRES_DB', 'django'),
-            'USER': os.environ.get('POSTGRES_USER', 'postgres'),
-            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
-            'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB", "django"),
+            "USER": os.environ.get("POSTGRES_USER", "postgres"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", ""),
+            "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
         },
     }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 
 # ==================================================================================================
@@ -192,50 +185,47 @@ else:
 # ==================================================================================================
 
 
-LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG' if ENV == DEV else 'WARNING')
-LOG_APPNAME = os.environ.get('LOG_APPNAME', 'DJANGO')
-LOG_SYSNAME = f'{APP_NAME}-{ENV.upper()}'
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG" if ENV == DEV else "WARNING")
+LOG_APPNAME = os.environ.get("LOG_APPNAME", "DJANGO")
+LOG_SYSNAME = f"{APP_NAME}-{ENV.upper()}"
 LOGGING_CONFIG = None
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'root': {
-        'level': 'ERROR',
-        'handlers': ['console', 'papertrail'],
+    "version": 1,
+    "disable_existing_loggers": False,
+    "root": {
+        "level": "ERROR",
+        "handlers": ["console", "papertrail"],
     },
-    'formatters': {
-        'custom': {
-            'format': '\
+    "formatters": {
+        "custom": {
+            "format": "\
                 %(levelname)s %(message)s \
-                (in %(module)s.%(funcName)s:%(lineno)s by %(name)s)',
-            'datefmt': '%Y-%m-%dT%H:%M:%S',
+                (in %(module)s.%(funcName)s:%(lineno)s by %(name)s)",
+            "datefmt": "%Y-%m-%dT%H:%M:%S",
         },
-        'simple': {
-            'format': f'\
+        "simple": {
+            "format": f"\
                 %(asctime)s {LOG_SYSNAME} {LOG_APPNAME} \
-                [%(process)d]: %(levelname)s %(message)s',
-            'datefmt': '%Y-%m-%dT%H:%M:%S',
+                [%(process)d]: %(levelname)s %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S",
         },
     },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'custom'
-        },
-        'papertrail': {
-            'class': 'logging.handlers.SysLogHandler',
-            'formatter': 'simple',
-            'address': ('logs7.papertrailapp.com', 52333)
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "custom"},
+        "papertrail": {
+            "class": "logging.handlers.SysLogHandler",
+            "formatter": "simple",
+            "address": ("logs7.papertrailapp.com", 52333),
         },
     },
-    'loggers': {
-        'apps': {'level': LOG_LEVEL},
-        'libs': {'level': LOG_LEVEL},
-        'project': {'level': LOG_LEVEL},
-        'django': {'level': 'INFO' if ENV == DEV else 'WARNING'},
-        'gunicorn': {'level': 'WARNING'},
-    }
+    "loggers": {
+        "apps": {"level": LOG_LEVEL},
+        "libs": {"level": LOG_LEVEL},
+        "project": {"level": LOG_LEVEL},
+        "django": {"level": "INFO" if ENV == DEV else "WARNING"},
+        "gunicorn": {"level": "WARNING"},
+    },
 }
 logging.config.dictConfig(LOGGING)
 
@@ -246,30 +236,26 @@ logging.config.dictConfig(LOGGING)
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': (
-        'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
+    "DEFAULT_RENDERER_CLASSES": (
+        "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
     ),
-    'DEFAULT_PARSER_CLASSES': (
-        'djangorestframework_camel_case.parser.CamelCaseJSONParser',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
+    "DEFAULT_PARSER_CLASSES": ("djangorestframework_camel_case.parser.CamelCaseJSONParser",),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
         # SessionAuthentication may interfere with mobile API requests.
         # If you are experiencing ssues, try commenting out the following line.
-        'rest_framework.authentication.SessionAuthentication',
+        "rest_framework.authentication.SessionAuthentication",
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 25,
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.OrderingFilter",
+        "rest_framework.filters.SearchFilter",
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 25,
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.OrderingFilter',
-        'rest_framework.filters.SearchFilter',
-    ),
-    'EXCEPTION_HANDLER': 'libs.exception_handler.exception_handler'
+    "EXCEPTION_HANDLER": "libs.exception_handler.exception_handler",
 }
 REST_FRAMEWORK.setdefault("DEFAULT_SCHEMA_CLASS", "drf_spectacular.openapi.AutoSchema")
 SIMPLE_JWT = {
@@ -291,27 +277,27 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api",
     # Schémas d'auth (cookieAuth, tokenAuth) déduits de DEFAULT_AUTHENTICATION_CLASSES
 }
-ADMIN_TITLE = 'Admin'
-ADMIN_HEADER = 'Admin'
+ADMIN_TITLE = "Admin"
+ADMIN_HEADER = "Admin"
 
-WEB_URL = os.environ.get('WEB_URL', 'http://localhost:3000')
-RESET_PASSWORD_URL = '{}{}'.format(WEB_URL, '/reset-password?state={state}')
+WEB_URL = os.environ.get("WEB_URL", "http://localhost:3000")
+RESET_PASSWORD_URL = "{}{}".format(WEB_URL, "/reset-password?state={state}")
 
 # Origines du front autorisées à appeler l'API avec les cookies de session (CORS)
-CORS_ALLOWED_ORIGINS = [o for o in os.getenv('CORS_ALLOWED_ORIGINS', WEB_URL).split(',') if o]
+CORS_ALLOWED_ORIGINS = [o for o in os.getenv("CORS_ALLOWED_ORIGINS", WEB_URL).split(",") if o]
 # Origines autorisées à envoyer des requêtes protégées par CSRF (le front est sur un autre sous-domaine)
-CSRF_TRUSTED_ORIGINS = [o for o in os.getenv('CSRF_TRUSTED_ORIGINS', WEB_URL).split(',') if o]
+CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", WEB_URL).split(",") if o]
 
 # Payements
 PAYMENTS_KKIAPAY_SECRET = os.getenv("PAYMENTS_KKIAPAY_SECRET", "")
 PAYMENTS_FEDAPAY_SECRET = os.getenv("PAYMENTS_FEDAPAY_SECRET", "")
 
-#Messaging
+# Messaging
 CHANNEL_LAYERS = {
-  "default": {
-    "BACKEND": "channels_redis.core.RedisChannelLayer",
-    "CONFIG": {"hosts": [os.getenv("CHANNELS_REDIS_URL", "redis://redis:6379/2")]},
-  }
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [os.getenv("CHANNELS_REDIS_URL", "redis://redis:6379/2")]},
+    }
 }
 
 
@@ -334,13 +320,13 @@ CHANNEL_LAYERS = {
 # How often to check for images to resizes (in seconds)
 FILE_IMAGE_RESIZE_SCHEDULE = 60
 FILE_IMAGE_SIZES = (
-    {'key': 'th', 'width': 350, 'quality': 90},
-    {'key': 'md', 'width': 800},
+    {"key": "th", "width": 350, "quality": 90},
+    {"key": "md", "width": 800},
 )
 # ----------------
 # Storage S3-compatible (RustFS en local, voir compose.yml racine)
 # ----------------
-AWS_LOCATION = os.environ.get('AWS_LOCATION', '')
+AWS_LOCATION = os.environ.get("AWS_LOCATION", "")
 # Django ≥ 5.1 ignore DEFAULT_FILE_STORAGE : le backend passe par STORAGES.
 # La variable d'env garde son nom pour pouvoir basculer (ex : FileSystemStorage en test).
 STORAGES = {
@@ -360,7 +346,6 @@ AWS_S3_SIGNATURE_VERSION = "s3v4"
 AWS_DEFAULT_ACL = None
 # Optionally to force virtual-host style addressing:
 AWS_S3_ADDRESSING_STYLE = os.getenv("AWS_S3_ADDRESSING_STYLE", "path")
-
 
 
 # ==================================================================================================
@@ -391,11 +376,10 @@ SEND_MAIL = True if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD else False
 # ==================================================================================================
 
 
-REDIS_HOST = os.environ.get('REDIS_HOST')
-REDIS_PORT = os.environ.get('REDIS_PORT', 6379)
-REDIS_DB = os.environ.get('REDIS_DB', 0)
-REDIS_URL = os.environ.get(
-    'REDIS_URL', f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}')
+REDIS_HOST = os.environ.get("REDIS_HOST")
+REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
+REDIS_DB = os.environ.get("REDIS_DB", 0)
+REDIS_URL = os.environ.get("REDIS_URL", f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}")
 
 # ----------------
 # Cache (Redis)
@@ -406,7 +390,7 @@ CACHES = {
         "LOCATION": os.getenv("REDIS_URL", "redis://redis:6379/1"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+        },
     }
 }
 # Session + cache (optional)
@@ -420,7 +404,9 @@ SESSION_CACHE_ALIAS = "default"
 # Celery
 # ----------------
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "django-db")  # using django_celery_results
+CELERY_RESULT_BACKEND = os.getenv(
+    "CELERY_RESULT_BACKEND", "django-db"
+)  # using django_celery_results
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -462,7 +448,7 @@ CELERY_TASK_SOFT_TIME_LIMIT = int(os.getenv("CELERY_TASK_SOFT_TIME_LIMIT", 180))
 
 if TESTING:
     try:
-        del DATABASES['default']['OPTIONS']['sslmode']
+        del DATABASES["default"]["OPTIONS"]["sslmode"]
     except KeyError:
         pass
 
@@ -473,10 +459,10 @@ if TESTING:
 
 
 if DEPLOYED:
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     # Domaine parent partagé par le front et l'API (ex : ".steamy.africa")
-    SESSION_COOKIE_DOMAIN = os.getenv('COOKIE_DOMAIN') or None
+    SESSION_COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") or None
     CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN
-    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))
+    SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "0"))

@@ -3,10 +3,9 @@ from django.db import models
 
 
 class File(models.Model):
-    IMAGE_MIME_TYPES = ('image/jpeg', 'image/png')
+    IMAGE_MIME_TYPES = ("image/jpeg", "image/png")
 
-    owner = models.ForeignKey(
-        get_user_model(), on_delete=models.CASCADE, related_name='files')
+    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="files")
     upload = models.FileField()
     mime_type = models.CharField(max_length=25)
     is_private = models.BooleanField(default=False)
@@ -23,7 +22,7 @@ class File(models.Model):
         return self.mime_type in File.IMAGE_MIME_TYPES
 
     def delete(self, *args, **kwargs):
-        """ Delete the actual file, when the model instance is deleted.
+        """Delete the actual file, when the model instance is deleted.
 
         See: https://docs.djangoproject.com/en/3.1/ref/models/fields/#django.db.models.fields.files.FieldFile.delete
         """

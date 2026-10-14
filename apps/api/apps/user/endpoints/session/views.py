@@ -8,6 +8,7 @@ X-CSRFToken : on l'obtient avec GET /api/public/user/csrf (qui pose aussi le coo
 
 Le login par token (/api/public/user/login) reste disponible pour les autres clients.
 """
+
 from django.contrib.auth import login, logout
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
@@ -44,7 +45,9 @@ class SessionLoginView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
-    @extend_schema(request=CustomAuthTokenSerializer, responses=SessionLoginResponseSerializer, auth=[])
+    @extend_schema(
+        request=CustomAuthTokenSerializer, responses=SessionLoginResponseSerializer, auth=[]
+    )
     def post(self, request):
         enforce_csrf(request)
         serializer = CustomAuthTokenSerializer(data=request.data, context={"request": request})

@@ -12,5 +12,5 @@ class PublicSignupView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         data = serializer.save()
-        user = get_user_model().objects.get(id=data['user_id'])
+        user = get_user_model().objects.get(id=data["user_id"])
         mail.send_welcome_email(user)

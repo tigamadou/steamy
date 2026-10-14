@@ -12,4 +12,10 @@ def generate_presigned_post(bucket_name, key, content_type, expires_in=3600):
         config=None,
         region_name=settings.AWS_S3_REGION_NAME,
     )
-    return s3.generate_presigned_post(bucket_name, key, ExpiresIn=expires_in, Fields={"Content-Type": content_type}, Conditions=[["content-length-range", 0, settings.MAX_UPLOAD_SIZE]])
+    return s3.generate_presigned_post(
+        bucket_name,
+        key,
+        ExpiresIn=expires_in,
+        Fields={"Content-Type": content_type},
+        Conditions=[["content-length-range", 0, settings.MAX_UPLOAD_SIZE]],
+    )

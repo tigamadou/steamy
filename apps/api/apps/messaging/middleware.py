@@ -12,6 +12,7 @@ from rest_framework_simplejwt.tokens import UntypedToken
 
 User = get_user_model()
 
+
 @database_sync_to_async
 def get_user(user_id):
     try:
@@ -19,12 +20,14 @@ def get_user(user_id):
     except User.DoesNotExist:
         return AnonymousUser()
 
+
 class TokenAuthMiddleware(BaseMiddleware):
     """
     Custom middleware that takes ?token=<jwt> from the websocket querystring,
     verifies it (SimpleJWT UntypedToken), and populates scope['user'].
     Fallback to anonymous if token invalid or absent.
     """
+
     async def __call__(self, scope, receive, send):
         # close old DB connections to avoid usage across threads
         close_old_connections()

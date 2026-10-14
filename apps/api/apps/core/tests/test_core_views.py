@@ -17,12 +17,14 @@ def test_presign_upload_returns_presign_data(api_rf, monkeypatch, user):
     def fake_get_presigned_post_for_upload(filename, content_type=None):
         return {"key": f"uploads/{filename}", "presign": {"url": "http://rustfs/..."}}
 
-    monkeypatch.setattr("apps.core.views.get_presigned_post_for_upload",
-                        fake_get_presigned_post_for_upload)
+    monkeypatch.setattr(
+        "apps.core.views.get_presigned_post_for_upload", fake_get_presigned_post_for_upload
+    )
 
     # préciser aussi format="json"
-    req = api_rf.post("/fake-url/", data={"filename": "avatar.png",
-                      "content_type": "image/png"}, format="json")
+    req = api_rf.post(
+        "/fake-url/", data={"filename": "avatar.png", "content_type": "image/png"}, format="json"
+    )
     force_authenticate(req, user=user)
     resp = presign_upload(req)
 

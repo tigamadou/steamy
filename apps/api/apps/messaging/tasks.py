@@ -11,7 +11,7 @@ from .models import Message
 @shared_task
 def send_message_notifications_async(message_id):
     try:
-        msg = Message.objects.select_related("conversation","sender").get(pk=message_id)
+        msg = Message.objects.select_related("conversation", "sender").get(pk=message_id)
     except Message.DoesNotExist:
         return False
     conv = msg.conversation
@@ -19,7 +19,13 @@ def send_message_notifications_async(message_id):
     for u in recipients:
         # create internal notification
         from .models import Notification
-        Notification.objects.create(user=u, title=f"Nouveau message de {msg.sender}", body=msg.body[:200], url=f"/app/conversations/{conv.pk}/")
+
+        Notification.objects.create(
+            user=u,
+            title=f"Nouveau message de {msg.sender}",
+            body=msg.body[:200],
+            url=f"/app/conversations/{conv.pk}/",
+        )
         # send email async if user opted in
         send_email_notification_for_message.delay(u.pk, msg.pk)
         # optional: push notification (FCM/APNs) create job

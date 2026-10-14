@@ -1,4 +1,3 @@
-
 import pytest
 from django.contrib.auth import get_user_model
 
@@ -48,6 +47,7 @@ def test_public_signup_view_perform_create_handles_missing_user(db, monkeypatch)
     on s'attend à une exception (ou comportement défini). Ici on vérifie que si
     get() lève, la fonction laisse remonter l'erreur — tu peux adapter selon ton code.
     """
+
     class BadSerializer:
         def save(self):
             return {"user_id": 999999999}

@@ -17,11 +17,13 @@ from .serializers import EventSerializer
 
 CACHE_TTL = 60  # seconds for simple endpoints (adjust)
 
+
 class EventViewSet(viewsets.ModelViewSet):
     """
     Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
     Clients (frontend/mobile/backend) envoient les events ici.
     """
+
     queryset = Event.objects.all().order_by("-created_at")
     serializer_class = EventSerializer
     permission_classes = [permissions.AllowAny]  # souvent public, mais tu peux limiter
@@ -59,6 +61,7 @@ def dashboard_summary(request):
 
     # global metrics: total users, total events last 7 days, revenue last 30 days (from DailyAggregatedStat)
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
     total_users = User.objects.count()
 
@@ -66,10 +69,12 @@ def dashboard_summary(request):
     last7 = now - timezone.timedelta(days=7)
     events_last7 = Event.objects.filter(created_at__date__gte=last7).count()
 
-    revenue_last30 = DailyAggregatedStat.objects.filter(
-        metric="revenue",
-        date__gte=now - timezone.timedelta(days=30)
-    ).aggregate(total=Sum("value"))["total"] or 0
+    revenue_last30 = (
+        DailyAggregatedStat.objects.filter(
+            metric="revenue", date__gte=now - timezone.timedelta(days=30)
+        ).aggregate(total=Sum("value"))["total"]
+        or 0
+    )
 
     payload = {
         "total_users": total_users,
@@ -85,20 +90,40 @@ def dashboard_summary(request):
         OpenApiParameter("start", OpenApiTypes.DATE, description="Par défaut : il y a 7 jours"),
         OpenApiParameter("end", OpenApiTypes.DATE, description="Par défaut : aujourd'hui"),
     ],
-    responses={(200, "text/csv"): OpenApiResponse(OpenApiTypes.BINARY, description="Export CSV des événements")},
+    responses={
+        (200, "text/csv"): OpenApiResponse(
+            OpenApiTypes.BINARY, description="Export CSV des événements"
+        )
+    },
 )
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def export_events_csv(request):
-    start = parse_date(request.GET.get("start")) or (timezone.now().date() - timezone.timedelta(days=7))
+    start = parse_date(request.GET.get("start")) or (
+        timezone.now().date() - timezone.timedelta(days=7)
+    )
     end = parse_date(request.GET.get("end")) or timezone.now().date()
-    qs = Event.objects.filter(created_at__date__gte=start, created_at__date__lte=end).order_by('created_at')
+    qs = Event.objects.filter(created_at__date__gte=start, created_at__date__lte=end).order_by(
+        "created_at"
+    )
 
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="events_{start}_{end}.csv"'
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="events_{start}_{end}.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(['created_at','event_type','entity_type','entity_id','user_id','value','metadata'])
+    writer.writerow(
+        ["created_at", "event_type", "entity_type", "entity_id", "user_id", "value", "metadata"]
+    )
     for e in qs.iterator():
-        writer.writerow([e.created_at.isoformat(), e.event_type, e.entity_type, e.entity_id, getattr(e.user,'id',None), e.value, e.metadata])
+        writer.writerow(
+            [
+                e.created_at.isoformat(),
+                e.event_type,
+                e.entity_type,
+                e.entity_id,
+                getattr(e.user, "id", None),
+                e.value,
+                e.metadata,
+            ]
+        )
     return response

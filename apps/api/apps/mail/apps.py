@@ -9,20 +9,25 @@ from django.template.loader import get_template
 
 
 class MailConfig(AppConfig):
-    name = 'apps.mail'
+    name = "apps.mail"
 
     def ready(self):
 
         @register
         def mailbase_check(app_configs, **kwargs):
             from .base import MailBase
+
             errors = []
 
             for app_config in django_apps.get_app_configs():
                 try:
-                    mail_module = import_module(f'{app_config.name}.mail')
+                    mail_module = import_module(f"{app_config.name}.mail")
                     for _name, obj in inspect.getmembers(mail_module):
-                        if inspect.isclass(obj) and obj is not MailBase and issubclass(obj, MailBase):
+                        if (
+                            inspect.isclass(obj)
+                            and obj is not MailBase
+                            and issubclass(obj, MailBase)
+                        ):
                             try:
                                 get_template(obj.get_template())
                             except TemplateDoesNotExist:

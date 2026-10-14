@@ -13,7 +13,7 @@ Django app to manage email templates and sending via the admin interface.
 We ship [fixtures for two default emails](https://github.com/inputlogic/django-api-starter/blob/master/mail-templates.json) to be used by the `user` app. Once you have a template defined, you can trigger sending a mail using that template via the `Mail.send` static method:
 
 ```python
-Mail.send('WelcomeUser', user)
+Mail.send("WelcomeUser", user)
 ```
 
 [Example `mails.py`](https://github.com/inputlogic/django-api-starter/blob/master/apps/user/mail.py) for the user app.

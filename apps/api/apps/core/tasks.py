@@ -16,8 +16,10 @@ def run_db_backup(dump_path="/tmp/db-backup.sql"):
         print("db backup failed:", e)
     return True
 
+
 @shared_task
 def clear_expired_sessions():
     from django.contrib.sessions.models import Session
+
     Session.objects.filter(expire_date__lt=timezone.now()).delete()
     return True

@@ -88,8 +88,9 @@ def test_create_attachment_for_message():
 
     client.force_authenticate(user=alice)
     # create a message first
-    msg_resp = client.post(reverse("message-list"),
-                           {"conversation": conv.id, "body": "file it"}, format="json")
+    msg_resp = client.post(
+        reverse("message-list"), {"conversation": conv.id, "body": "file it"}, format="json"
+    )
     assert msg_resp.status_code == 201
     message_id = msg_resp.json()["id"]
 
@@ -113,8 +114,9 @@ def test_mark_read_creates_receipt_and_updates_read_at():
     conv.participants.set([alice, bob])
 
     client.force_authenticate(user=alice)
-    msg_resp = client.post(reverse("message-list"),
-                           {"conversation": conv.id, "body": "read this"}, format="json")
+    msg_resp = client.post(
+        reverse("message-list"), {"conversation": conv.id, "body": "read this"}, format="json"
+    )
     assert msg_resp.status_code == 201
     message_id = msg_resp.json()["id"]
 
@@ -162,8 +164,9 @@ def test_user_cannot_access_others_notification_and_can_mark_read():
     # try to GET bob's notification -> should be 403 or 404
     url_bob = reverse("notification-detail", args=[n_bob.id])
     resp = client.get(url_bob, format="json")
-    assert resp.status_code in (
-        403, 404), f"expected forbidden or not found, got {resp.status_code}: {resp.content}"
+    assert resp.status_code in (403, 404), (
+        f"expected forbidden or not found, got {resp.status_code}: {resp.content}"
+    )
 
     # alice can GET her own notification
     url_alice = reverse("notification-detail", args=[n_alice.id])

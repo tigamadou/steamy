@@ -26,6 +26,7 @@ def verify_provider_webhook(provider_name: str, request):
     computed = hmac.new(secret.encode(), request.body, hashlib.sha256).hexdigest()
     return hmac.compare_digest(computed, signature)
 
+
 def handle_provider_event(provider_name: str, data: dict):
     """
     Handle provider event payload.
@@ -53,7 +54,11 @@ def handle_provider_event(provider_name: str, data: dict):
         order=order,
         provider=provider_name,
         provider_transaction_id=tx_id,
-        defaults={"amount": Decimal(amount) if amount else order.total, "currency": order.currency, "provider_payload": data},
+        defaults={
+            "amount": Decimal(amount) if amount else order.total,
+            "currency": order.currency,
+            "provider_payload": data,
+        },
     )
 
     # update payload & raw

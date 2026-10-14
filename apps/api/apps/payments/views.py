@@ -18,6 +18,7 @@ class IsAdminOrOwner(permissions.BasePermission):
             return True
         return getattr(obj, "user", None) and obj.user == request.user
 
+
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.prefetch_related("items").all()
     serializer_class = OrderSerializer
@@ -27,15 +28,19 @@ class OrderViewSet(viewsets.ModelViewSet):
         # force user to the request user
         serializer.save(user=self.request.user)
 
+
 class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Payment.objects.select_related("order").all()
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
 
+
 # Webhook endpoint for providers (unprotected CSRF exempt; verify signature inside)
 @extend_schema(
     summary="Webhook des prestataires de paiement (appelé par KKiaPay / FedaPay, pas par le front)",
-    parameters=[OpenApiParameter("provider_name", str, OpenApiParameter.PATH, enum=["kkiapay", "fedapay"])],
+    parameters=[
+        OpenApiParameter("provider_name", str, OpenApiParameter.PATH, enum=["kkiapay", "fedapay"])
+    ],
     request=OpenApiTypes.OBJECT,
     responses={200: inline_serializer("WebhookAck", {"ok": serializers.BooleanField()})},
     auth=[],

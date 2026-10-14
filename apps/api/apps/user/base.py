@@ -28,32 +28,34 @@ class UserManager(BaseUserManager):
 class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
     class Role(models.TextChoices):
         ADMIN = "admin", "Administrateur"
-        TEACHER= "teacher", "Formateur"
-        STUDENT= "student", "Apprenant"
+        TEACHER = "teacher", "Formateur"
+        STUDENT = "student", "Apprenant"
 
-    email = models.EmailField(_('email address'), max_length=255, unique=True)
+    email = models.EmailField(_("email address"), max_length=255, unique=True)
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.STUDENT)
     is_staff = models.BooleanField(
-        _('staff status'),
+        _("staff status"),
         default=False,
-        help_text=_('Designates whether the user can log into this admin site.')
+        help_text=_("Designates whether the user can log into this admin site."),
     )
     is_active = models.BooleanField(
-        _('active'),
+        _("active"),
         default=True,
-        help_text=_('Designates whether this user should be treated as '
-                    'active. Unselect this instead of deleting accounts.')
+        help_text=_(
+            "Designates whether this user should be treated as "
+            "active. Unselect this instead of deleting accounts."
+        ),
     )
-    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+    date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     class Meta:
         abstract = True
-        ordering = ['email']
+        ordering = ["email"]
 
     def clean(self):
         super().clean()
@@ -64,4 +66,3 @@ class AbstractEmailUser(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.email
-

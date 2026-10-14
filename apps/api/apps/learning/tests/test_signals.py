@@ -11,7 +11,9 @@ User = get_user_model()
 def setup(db):
     teacher = User.objects.create_user(email="prof@example.com", password="pw", role="teacher")
     student = User.objects.create_user(email="eleve@example.com", password="pw", role="student")
-    course = Course.objects.create(title="Robotique", slug="robotique", author=teacher, published=True)
+    course = Course.objects.create(
+        title="Robotique", slug="robotique", author=teacher, published=True
+    )
     quiz = Quiz.objects.create(course=course, title="Quiz final")
     return student, course, quiz
 

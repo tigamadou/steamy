@@ -15,8 +15,12 @@ def find_course_action_url(course, action_names=None):
     Essaie d'abord les noms les plus probables et slug avant pk.
     """
     if action_names is None:
-        action_names = ("course-enroll", "course-enroll-action",
-                        "course-enrolls", "course-enroll-list")
+        action_names = (
+            "course-enroll",
+            "course-enroll-action",
+            "course-enrolls",
+            "course-enroll-list",
+        )
 
     # try slug first (common when lookup_field='slug')
     tries = []
@@ -41,13 +45,16 @@ def find_course_action_url(course, action_names=None):
 def test_student_can_enroll_and_access_lessons():
     client = APIClient()
     teacher = User.objects.create_user(
-        email="teacher-enroll@example.com", password="pw", role="teacher")
+        email="teacher-enroll@example.com", password="pw", role="teacher"
+    )
     student = User.objects.create_user(
-        email="student-enroll@example.com", password="pw", role="student")
+        email="student-enroll@example.com", password="pw", role="student"
+    )
 
     # create course + module + lesson
-    course = Course.objects.create(title="Enrollable Course",
-                                   slug="enrollable-2", author=teacher, published=True)
+    course = Course.objects.create(
+        title="Enrollable Course", slug="enrollable-2", author=teacher, published=True
+    )
     module = Module.objects.create(course=course, title="M1", order=0)
     Lesson.objects.create(module=module, title="L1", content="xxx", order=0)
 
@@ -56,18 +63,21 @@ def test_student_can_enroll_and_access_lessons():
 
     # student non-auth ne peut pas enroll (ou reçoit 401/403)
     resp = client.post(enroll_url, format="json")
-    assert resp.status_code in (
-        401, 403), f"anonymous enrolling should be blocked, got {resp.status_code}: {resp.content}"
+    assert resp.status_code in (401, 403), (
+        f"anonymous enrolling should be blocked, got {resp.status_code}: {resp.content}"
+    )
 
     # student auth peut enroll
     client.force_authenticate(user=student)
     resp = client.post(enroll_url, format="json")
-    assert resp.status_code in (
-        200, 201), f"enroll should succeed, got {resp.status_code}: {resp.content}"
+    assert resp.status_code in (200, 201), (
+        f"enroll should succeed, got {resp.status_code}: {resp.content}"
+    )
 
     # verify enrollment created in DB
-    assert Enrollment.objects.filter(user=student, course=course).exists(
-    ), "Enrollment record must be created after enroll action"
+    assert Enrollment.objects.filter(user=student, course=course).exists(), (
+        "Enrollment record must be created after enroll action"
+    )
 
     # après inscription, student doit avoir accès aux leçons du cours
     # on tente d'abord lesson-list global si disponible
@@ -100,24 +110,30 @@ def test_student_can_enroll_and_access_lessons():
             got_ok = True
             break
 
-    assert got_ok, f"After enroll the student should be able to access course lessons; tried: {lessons_url_candidates}"
+    assert got_ok, (
+        f"After enroll the student should be able to access course lessons; tried: {lessons_url_candidates}"
+    )
 
 
 @pytest.mark.django_db
 def test_teacher_cannot_enroll_as_student_but_can_manage_course():
     client = APIClient()
     teacher = User.objects.create_user(
-        email="teacher2-enroll@example.com", password="pw", role="teacher")
+        email="teacher2-enroll@example.com", password="pw", role="teacher"
+    )
     other_teacher = User.objects.create_user(
-        email="teacher-other@example.com", password="pw", role="teacher")
+        email="teacher-other@example.com", password="pw", role="teacher"
+    )
     # course authored by teacher
     course = Course.objects.create(
-        title="Manage Course", slug="manage-course", author=teacher, published=True)
+        title="Manage Course", slug="manage-course", author=teacher, published=True
+    )
 
     enroll_url = find_course_action_url(course)
 
     # another teacher (authenticated) tries to enroll -> business rule may allow or disallow
     client.force_authenticate(user=other_teacher)
     resp = client.post(enroll_url, format="json")
-    assert resp.status_code in (
-        200, 201, 403), f"unexpected status for other teacher enrolling: {resp.status_code}"
+    assert resp.status_code in (200, 201, 403), (
+        f"unexpected status for other teacher enrolling: {resp.status_code}"
+    )

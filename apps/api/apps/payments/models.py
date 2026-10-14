@@ -5,16 +5,19 @@ from django.utils import timezone
 
 User = settings.AUTH_USER_MODEL
 
+
 class PaymentProvider(models.TextChoices):
     KKIA = "kkiapay", "Kkiapay"
     FEDA = "fedapay", "FedaPay"
     # add more providers as needed
+
 
 class Order(models.Model):
     """
     Représente une commande initiée par un utilisateur.
     Une Order peut contenir plusieurs OrderItems (course ou parcours).
     """
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
     total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     currency = models.CharField(max_length=8, default="XOF")
@@ -37,7 +40,9 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     content_type = models.CharField(max_length=64, null=True, blank=True)  # ex: "course", "path"
-    object_id = models.CharField(max_length=128, null=True, blank=True)  # id/slug of the purchased object
+    object_id = models.CharField(
+        max_length=128, null=True, blank=True
+    )  # id/slug of the purchased object
     title = models.CharField(max_length=255)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
     quantity = models.PositiveIntegerField(default=1)
@@ -52,6 +57,7 @@ class Payment(models.Model):
     Un enregistrement d'une tentative de paiement via un provider externe.
     provider_payload: raw webhook / response from provider
     """
+
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="payments")
     provider = models.CharField(max_length=32, choices=PaymentProvider.choices)
     provider_transaction_id = models.CharField(max_length=256, null=True, blank=True)

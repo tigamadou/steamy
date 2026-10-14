@@ -40,19 +40,30 @@ class CourseListSerializer(serializers.ModelSerializer):
     # show author as string (email) and path as id/title composite
     author = serializers.StringRelatedField(read_only=True)
     path = serializers.PrimaryKeyRelatedField(
-        queryset=Path.objects.all(), required=False, allow_null=True)
+        queryset=Path.objects.all(), required=False, allow_null=True
+    )
 
     class Meta:
         model = Course
-        fields = ["id", "title", "slug", "description",
-                  "author", "path", "published", "price", "created_at"]
+        fields = [
+            "id",
+            "title",
+            "slug",
+            "description",
+            "author",
+            "path",
+            "published",
+            "price",
+            "created_at",
+        ]
 
 
 class CourseDetailSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True, read_only=True)
     author = serializers.StringRelatedField(read_only=True)
     path = serializers.PrimaryKeyRelatedField(
-        queryset=Path.objects.all(), required=False, allow_null=True)
+        queryset=Path.objects.all(), required=False, allow_null=True
+    )
 
     class Meta:
         model = Course

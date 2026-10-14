@@ -5,8 +5,10 @@ from rest_framework.reverse import reverse
 
 
 @extend_schema(exclude=True)
-@api_view(['GET'])
+@api_view(["GET"])
 def api_root(request, format=None):
-    return Response({
-        'users': reverse('user-list', request=request, format=format),
-    })
+    return Response(
+        {
+            "users": reverse("user-list", request=request, format=format),
+        }
+    )

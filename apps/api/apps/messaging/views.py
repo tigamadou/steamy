@@ -33,6 +33,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     Conversation list: returns only conversations where the user is participant (or all if staff).
     Object-level access is enforced by IsParticipantOrAdmin.
     """
+
     queryset = Conversation.objects.prefetch_related("participants", "messages__sender")
     permission_classes = [permissions.IsAuthenticated, IsParticipantOrAdmin]
 
@@ -56,8 +57,9 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.select_related(
-        "sender", "conversation").prefetch_related("attachments", "receipts")
+    queryset = Message.objects.select_related("sender", "conversation").prefetch_related(
+        "attachments", "receipts"
+    )
     permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
@@ -71,7 +73,10 @@ class MessageViewSet(viewsets.ModelViewSet):
         msg = serializer.save()
         # kick off async notifications to participants (email/push)
         send_message_notifications_async.delay(msg.id)
-        return Response(MessageSerializer(msg, context={"request": request}).data, status=status.HTTP_201_CREATED)
+        return Response(
+            MessageSerializer(msg, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     @action(detail=True, methods=["post"])
     def mark_read(self, request, pk=None):
