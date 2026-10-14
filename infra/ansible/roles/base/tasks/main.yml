@@ -1,0 +1,76 @@
+- name: Paquets de base
+  ansible.builtin.apt:
+    name: [curl, ca-certificates, ufw, fail2ban, unattended-upgrades]
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Mises à jour de sécurité automatiques
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    mode: "0644"
+
+- name: Comptes administrateurs
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups: sudo
+    append: true
+    shell: /bin/bash
+  loop: "{{ admin_users }}"
+
+- name: Clés SSH des administrateurs
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.pubkey }}"
+  loop: "{{ admin_users }}"
+
+- name: Sudo sans mot de passe pour les administrateurs (comptes sans mot de passe)
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/steamy-admins
+    content: |
+      {% for u in admin_users %}
+      {{ u.name }} ALL=(ALL) NOPASSWD:ALL
+      {% endfor %}
+    mode: "0440"
+    validate: visudo -cf %s
+
+- name: Durcissement SSH (clé uniquement, pas de root)
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/10-steamy.conf
+    content: |
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      PermitRootLogin no
+      X11Forwarding no
+      MaxAuthTries 3
+    mode: "0644"
+    validate: sshd -t -f %s
+  notify: Redémarrer sshd
+
+- name: Pare-feu — réseaux internes de k3s (pods et services)
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ item }}"
+  loop: [10.42.0.0/16, 10.43.0.0/16]
+
+- name: Pare-feu — SSH, HTTP, HTTPS uniquement (l'API Kubernetes 6443 reste fermée)
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop: ["22", "80", "443"]
+
+- name: Pare-feu — tout le reste refusé
+  community.general.ufw:
+    state: enabled
+    policy: deny
+    direction: incoming
+
+- name: Service fail2ban actif
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true

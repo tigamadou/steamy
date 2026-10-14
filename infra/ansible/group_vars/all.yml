@@ -1,0 +1,23 @@
+# --- Versions épinglées (les monter ici, puis rejouer le playbook) -------------
+k3s_version: v1.36.5+k3s1
+# Helm 3 volontairement : Helm 4 a renommé --atomic (utilisé par steamy-deploy)
+helm_version: v3.22.0
+cert_manager_version: v1.21.2
+cnpg_version: "1.30.1"
+cnpg_barman_plugin_version: v0.15.1
+
+# --- Comptes ---------------------------------------------------------------------
+# Administrateurs humains : clés publiques autorisées (mot de passe désactivé)
+admin_users: []
+#  - name: amadou
+#    pubkey: "ssh-ed25519 AAAA… amadou@laptop"
+
+# Clé publique de la CI, restreinte à la commande `steamy-deploy` : à définir
+# PAR SERVEUR dans inventory.yml (la clé privée va dans le secret DEPLOY_SSH_KEY
+# du GitHub Environment correspondant).
+deploy_ci_pubkey: ""
+
+# --- Application -------------------------------------------------------------------
+ghcr_owner: tigamadou
+steamy_namespace: steamy
+letsencrypt_email: ""     # TODO : adresse de contact Let's Encrypt

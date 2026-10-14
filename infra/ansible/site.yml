@@ -1,0 +1,19 @@
+# Prépare un VPS Steamy de zéro, de façon idempotente (rejouable à volonté).
+#   ansible-playbook site.yml --limit staging
+- name: Serveur Steamy (k3s mono-nœud)
+  hosts: all
+  become: true
+  pre_tasks:
+    - name: Variables obligatoires renseignées
+      ansible.builtin.assert:
+        that:
+          - steamy_env in ['staging', 'production']
+          - deploy_ci_pubkey | length > 0
+          - letsencrypt_email | length > 0
+          - admin_users | length > 0
+        fail_msg: "Compléter inventory.yml et group_vars/all.yml (voir infra/README.md)"
+  roles:
+    - base
+    - k3s
+    - platform
+    - deploy

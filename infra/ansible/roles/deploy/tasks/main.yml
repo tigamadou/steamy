@@ -1,0 +1,50 @@
+- name: Compte `deploy` (utilisé uniquement par la CI)
+  ansible.builtin.user:
+    name: deploy
+    shell: /bin/bash
+    password: "!"
+
+- name: Dossiers du compte deploy
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: deploy
+    group: deploy
+    mode: "0700"
+  loop: [/home/deploy/.kube, /home/deploy/.ssh]
+
+- name: Accès kubectl/helm du compte deploy
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: /home/deploy/.kube/config
+    remote_src: true
+    owner: deploy
+    group: deploy
+    mode: "0600"
+
+- name: Dossier de configuration
+  ansible.builtin.file:
+    path: /etc/steamy
+    state: directory
+    mode: "0755"
+
+- name: Configuration de steamy-deploy
+  ansible.builtin.template:
+    src: deploy.env.j2
+    dest: /etc/steamy/deploy.env
+    mode: "0644"
+
+- name: Script steamy-deploy (commande forcée de la clé CI)
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../deploy/steamy-deploy.sh"
+    dest: /usr/local/bin/steamy-deploy
+    mode: "0755"
+
+- name: Clé CI restreinte à `steamy-deploy` (ni shell, ni tunnel, ni agent)
+  ansible.builtin.copy:
+    dest: /home/deploy/.ssh/authorized_keys
+    content: |
+      command="/usr/local/bin/steamy-deploy",restrict {{ deploy_ci_pubkey }}
+    owner: deploy
+    group: deploy
+    mode: "0600"

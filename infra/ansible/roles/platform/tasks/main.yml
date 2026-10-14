@@ -1,0 +1,56 @@
+# Briques installées une fois par cluster (opérateurs et CRD).
+# Les ressources de Steamy elles-mêmes sont déployées par steamy-deploy.
+- name: Installation de cert-manager {{ cert_manager_version }}
+  ansible.builtin.command: >
+    k3s kubectl apply --server-side
+    -f https://github.com/cert-manager/cert-manager/releases/download/{{ cert_manager_version }}/cert-manager.yaml
+  # apply --server-side ne distingue pas « inchangé » : rapporté comme non modifié
+  changed_when: false
+
+- name: Attente de cert-manager
+  ansible.builtin.command: k3s kubectl -n cert-manager wait deploy --all --for=condition=Available --timeout=300s
+  changed_when: false
+
+- name: Émetteur Let's Encrypt (challenge HTTP via Traefik)
+  ansible.builtin.shell: |
+    set -o pipefail
+    cat <<YAML | k3s kubectl apply -f -
+    apiVersion: cert-manager.io/v1
+    kind: ClusterIssuer
+    metadata:
+      name: letsencrypt
+    spec:
+      acme:
+        server: https://acme-v02.api.letsencrypt.org/directory
+        email: {{ letsencrypt_email }}
+        privateKeySecretRef:
+          name: letsencrypt-account
+        solvers:
+          - http01:
+              ingress:
+                ingressClassName: traefik
+    YAML
+  args:
+    executable: /bin/bash
+  register: platform_apply_issuer
+  changed_when: "'unchanged' not in platform_apply_issuer.stdout"
+
+- name: Opérateur CloudNativePG {{ cnpg_version }}
+  ansible.builtin.command: >
+    k3s kubectl apply --server-side
+    -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-{{ cnpg_version.rsplit('.', 1)[0] }}/releases/cnpg-{{ cnpg_version }}.yaml
+  changed_when: false
+
+- name: CloudNativePG prêt
+  ansible.builtin.command: k3s kubectl -n cnpg-system wait deploy/cnpg-controller-manager --for=condition=Available --timeout=300s
+  changed_when: false
+
+- name: Plugin Barman Cloud (sauvegardes vers Wasabi) {{ cnpg_barman_plugin_version }}
+  ansible.builtin.command: >
+    k3s kubectl apply --server-side
+    -f https://github.com/cloudnative-pg/plugin-barman-cloud/releases/download/{{ cnpg_barman_plugin_version }}/manifest.yaml
+  changed_when: false
+
+- name: Plugin Barman Cloud prêt
+  ansible.builtin.command: k3s kubectl -n cnpg-system wait deploy/barman-cloud --for=condition=Available --timeout=300s
+  changed_when: false

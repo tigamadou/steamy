@@ -1,0 +1,20 @@
+# Copier en inventory.yml (gitignoré) et compléter.
+# Prérequis sur chaque VPS (Ubuntu 24.04 ou Debian 12) : un compte avec sudo
+# joignable en SSH par clé (`ansible_user`).
+all:
+  children:
+    staging:
+      hosts:
+        steamy-staging:
+          ansible_host: 203.0.113.10
+          ansible_user: ubuntu
+          steamy_env: staging
+          # Clé publique de la CI pour CET environnement (une clé par environnement)
+          deploy_ci_pubkey: "ssh-ed25519 AAAA… steamy-ci-staging"
+    production:
+      hosts:
+        steamy-prod:
+          ansible_host: 203.0.113.20
+          ansible_user: ubuntu
+          steamy_env: production
+          deploy_ci_pubkey: "ssh-ed25519 AAAA… steamy-ci-production"
