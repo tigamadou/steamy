@@ -167,7 +167,7 @@ Cela veut dire qu'une demande "ajoute le dashboard parent" se traduit par **fabr
 - Mascotte **Zeti** (petit robot) accompagne onboarding, états vides, célébrations - 6 poses : `idle/wave/cheer/focus/sad/sleep`
 - Esthétique **candy "Duolingo-inspired"** : boutons à ombre marquée vers le bas, press visible, animations success/failure expressives
 - Logo officiel gradient orange-magenta + tagline "**Nous formons les inventeurs de demain**" (visible sous le wordmark dans `assets/steamy_logo.png`)
-- Palette violet `#5B3FE0` reste la signature de l'app (coexiste volontairement avec le logo orange-magenta jusqu'à arbitrage)
+- Couleur primaire : magenta `--primary-500` (`#9E1B9A`), la couleur du logo. Le violet `#5B3FE0` ne sert plus qu'à `--cat-robotique` (arbitrage C1, `docs/alignement/ARBITRAGES.md`)
 
 ### Reference user flows (source-of-truth)
 
@@ -203,7 +203,7 @@ Tout flow nouveau ou modifié doit d'abord être lu depuis `user flows/*.mmd` (d
 ## Conventions visuelles & identité
 
 - Logo officiel : `assets/steamy_logo.png` (PNG 995×263, gradient orange-magenta + wordmark "steamy" + tagline). Toujours via `<Logo height={…} />`, jamais en re-rendant le wordmark en texte.
-- Palette violet `--primary-500` (`#5B3FE0`) reste la couleur signature de l'app malgré le logo orange-magenta - c'est volontaire pour l'instant, on coexiste.
+- Couleur primaire : magenta `--primary-500` (`#9E1B9A`), la même que le logo. Ne jamais coder l'ancien violet en dur (`rgba(91,63,224,…)`).
 - Deux assets PNG via `<Logo>` : `steamy_logo.png` (coloré, fond opaque → fonds clairs) et `logo_landscape_white_tight.png` (blanc, transparent → fonds foncés via prop `white`). **Ne pas réintroduire de filtre `brightness(0) invert(1)`** : le fond opaque du logo coloré donnerait un rectangle blanc. Le `logo_landscape_white.png` brut (carré, 78% de padding) ne doit pas être utilisé directement - d'où le `_tight` recadré.
 - Chaque sous-page d'app utilise `<WebAppShell active="xxx" headerTitle="…" headerSearch={…} notifDot={…}>` avec `active` parmi `home`/`catalog`/`wishlist`/`badges`/`profile`. Les sous-routes d'une zone (ex : notifs vues depuis le dashboard) gardent l'`active` du parent.
 

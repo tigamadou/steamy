@@ -468,7 +468,7 @@ Ce sont les **seules** orphelines du dépôt. Les 172 autres fonctions d'écran 
 
 #### Double identité chromatique, décision non tranchée
 
-L'app est violette (`--primary-500`, `#5B3FE0`), le logo officiel est en gradient orange-magenta. **La coexistence est volontaire mais n'a jamais été arbitrée.**
+**Arbitré (C1)** : la primaire est le magenta `--primary-500` (`#9E1B9A`), la couleur du logo. Le violet `#5B3FE0` ne sert plus qu'à la catégorie Robotique ; les ombres encore codées en violet sont à corriger.
 
 Ce n'est pas un bug à corriger de ta propre initiative. C'est une décision de marque à faire trancher **avant** de figer le thème.
 
