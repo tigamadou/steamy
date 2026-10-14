@@ -16,7 +16,7 @@ def test_presign_upload_requires_filename(api_rf, user):
 
 def test_presign_upload_returns_presign_data(api_rf, monkeypatch, user):
     def fake_get_presigned_post_for_upload(filename, content_type=None):
-        return {"key": f"uploads/{filename}", "presign": {"url": "http://minio/..."}}
+        return {"key": f"uploads/{filename}", "presign": {"url": "http://rustfs/..."}}
 
     monkeypatch.setattr("apps.core.views.get_presigned_post_for_upload",
                         fake_get_presigned_post_for_upload)

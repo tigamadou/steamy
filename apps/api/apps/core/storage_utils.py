@@ -2,7 +2,7 @@
 from django.core.files.storage import default_storage
 from django.conf import settings
 import uuid
-from .minio_client import generate_presigned_post, generate_presigned_url
+from .s3_client import generate_presigned_post, generate_presigned_url
 
 def random_key(prefix="uploads", filename=None):
     ext = ""

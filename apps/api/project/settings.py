@@ -329,13 +329,13 @@ FILE_IMAGE_SIZES = (
     {'key': 'md', 'width': 800},
 )
 # ----------------
-# Storage / MinIO (S3-compatible)
+# Storage S3-compatible (RustFS en local, voir compose.yml racine)
 # ----------------
 AWS_LOCATION = os.environ.get('AWS_LOCATION', '')
 DEFAULT_FILE_STORAGE = os.getenv("DEFAULT_FILE_STORAGE", "storages.backends.s3boto3.S3Boto3Storage")
-AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "http://minio:9000")
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "minioadmin")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "minioadmin")
+AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "http://rustfs:9000")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "app-media")
 AWS_S3_SIGNATURE_VERSION = "s3v4"

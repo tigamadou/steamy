@@ -1,16 +1,16 @@
 import pytest
 from types import SimpleNamespace
 
-# on suppose que le module est apps.core.minio_client
-import apps.core.minio_client as minio_client
+# on suppose que le module est apps.core.s3_client
+import apps.core.s3_client as s3_client
 
 
 def test_get_s3_client_calls_boto3_with_settings(monkeypatch, settings):
-    # arrange settings (exemple MinIO)
-    settings.AWS_S3_ENDPOINT_URL = "http://minio:9000/"
+    # arrange settings (exemple RustFS)
+    settings.AWS_S3_ENDPOINT_URL = "http://rustfs:9000/"
     settings.AWS_ACCESS_KEY_ID = "AKIA_TEST"
     settings.AWS_SECRET_ACCESS_KEY = "SECRET_TEST"
-    # region peut être absente pour MinIO — on la définit ici pour vérifier aussi ce cas
+    # region peut être absente pour un stockage S3-compatible — on la définit ici pour vérifier aussi ce cas
     settings.AWS_S3_REGION_NAME = "eu-west-1"
 
     called = {}
@@ -21,10 +21,10 @@ def test_get_s3_client_calls_boto3_with_settings(monkeypatch, settings):
         return "FAKE_CLIENT"
 
     # monkeypatch boto3 client
-    monkeypatch.setattr(minio_client, "boto3", SimpleNamespace(client=fake_boto3_client))
+    monkeypatch.setattr(s3_client, "boto3", SimpleNamespace(client=fake_boto3_client))
 
     # act
-    client = minio_client.get_s3_client()
+    client = s3_client.get_s3_client()
 
     # assert
     assert client == "FAKE_CLIENT"
@@ -38,7 +38,7 @@ def test_get_s3_client_calls_boto3_with_settings(monkeypatch, settings):
     assert called["kwargs"]["aws_access_key_id"] == settings.AWS_ACCESS_KEY_ID
     assert called["kwargs"]["aws_secret_access_key"] == settings.AWS_SECRET_ACCESS_KEY
 
-    # region_name peut être None pour MinIO — on utilise .get pour être tolérant
+    # region_name peut être None pour un stockage S3-compatible — on utilise .get pour être tolérant
     assert called["kwargs"].get("region_name") == getattr(settings, "AWS_S3_REGION_NAME", None)
 
 
@@ -50,10 +50,10 @@ def test_generate_presigned_post_includes_content_type_and_conditions(monkeypatc
             # return quelque chose que l'on peut inspecter
             return {"Bucket": Bucket, "Key": Key, "ExpiresIn": ExpiresIn, "Fields": Fields, "Conditions": Conditions}
 
-    monkeypatch.setattr(minio_client, "get_s3_client", lambda: FakeClient())
+    monkeypatch.setattr(s3_client, "get_s3_client", lambda: FakeClient())
 
     # act with content_type
-    presigned = minio_client.generate_presigned_post(
+    presigned = s3_client.generate_presigned_post(
         "path/to/file.jpg", content_type="image/jpeg", expires_in=123, bucket=None
     )
 
@@ -72,9 +72,9 @@ def test_generate_presigned_post_without_content_type(monkeypatch, settings):
         def generate_presigned_post(self, Bucket, Key, ExpiresIn, Fields, Conditions):
             return {"Bucket": Bucket, "Key": Key, "ExpiresIn": ExpiresIn, "Fields": Fields, "Conditions": Conditions}
 
-    monkeypatch.setattr(minio_client, "get_s3_client", lambda: FakeClient())
+    monkeypatch.setattr(s3_client, "get_s3_client", lambda: FakeClient())
 
-    presigned = minio_client.generate_presigned_post("file.txt", content_type=None)
+    presigned = s3_client.generate_presigned_post("file.txt", content_type=None)
 
     assert presigned["Bucket"] == settings.AWS_STORAGE_BUCKET_NAME
     assert presigned["Fields"] == {}
@@ -88,9 +88,9 @@ def test_generate_presigned_url_uses_client(monkeypatch, settings):
         def generate_presigned_url(self, ClientMethod, Params, ExpiresIn):
             return f"https://presigned.example/{Params['Key']}?method={ClientMethod}&exp={ExpiresIn}"
 
-    monkeypatch.setattr(minio_client, "get_s3_client", lambda: FakeClient())
+    monkeypatch.setattr(s3_client, "get_s3_client", lambda: FakeClient())
 
-    url = minio_client.generate_presigned_url(
+    url = s3_client.generate_presigned_url(
         "some/key.png", method="get_object", expires_in=900, bucket=None
     )
     assert "some/key.png" in url

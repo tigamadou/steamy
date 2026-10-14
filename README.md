@@ -18,12 +18,21 @@ Monorepo de Steamy, plateforme e-learning de robotique/STEM pour les 10–17 ans
 Tous les services tournent dans Docker. Prérequis : Docker Desktop et `make`.
 
 ```bash
-make up      # démarre la stack
-make down    # l'arrête
+make up      # démarre la stack (premier build : quelques minutes)
+make seed    # charge le compte admin et les gabarits d'e-mails
 make help    # liste toutes les commandes
 ```
 
-*(Les cibles `make` arrivent avec l'intégration Docker de l'étape suivante.)*
+| Service | URL |
+| --- | --- |
+| API | http://localhost:8000/api/ — docs : `/api/docs/` |
+| Admin Django | http://localhost:8000/admin/ |
+| Console RustFS (S3) | http://localhost:9001 — `rustfsadmin` / `rustfsadmin` |
+| Mailpit (e-mails capturés) | http://localhost:8025 |
+| PostgreSQL | `localhost:5432` — `steamy` / `steamy` |
+
+Le code de `apps/api` est monté dans les conteneurs : le serveur Django recharge à chaud.
+Après une modification de `requirements.txt`, lancer `make build`.
 
 ## Déploiement
 

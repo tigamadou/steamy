@@ -34,3 +34,6 @@ staticfiles/
 
 # Claude Code (réglages locaux)
 .claude/settings.local.json
+
+# Surcharges Docker Compose personnelles (secrets de dev, ports…)
+compose.override.yml

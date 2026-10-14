@@ -1,4 +1,4 @@
-# core/minio_client.py
+# core/s3_client.py
 import boto3
 from django.conf import settings
 

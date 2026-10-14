@@ -25,5 +25,5 @@ def on_attempt_saved(sender, instance: Attempt, created, **kwargs):
             # si pas de certificat -> en créer un (file généré par tâche Celery)
             if not hasattr(enrollment, "certificate"):
                 cert = Certificate.objects.create(enrollment=enrollment, score=instance.score)
-                # TODO: lancer une tâche Celery pour générer le fichier PDF et uploader sur MinIO
+                # TODO: lancer une tâche Celery pour générer le fichier PDF et uploader sur le stockage S3
                 # example: tasks.generate_certificate.delay(cert.id)

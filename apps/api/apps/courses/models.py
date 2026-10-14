@@ -105,7 +105,7 @@ class Lesson(models.Model):
 class Resource(models.Model):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="resources")
     title = models.CharField(max_length=255, blank=True)
-    # FileField uses default storage (django-storages + MinIO if configured in settings)
+    # FileField uses default storage (django-storages + stockage S3 if configured in settings)
     file = models.FileField(upload_to="resources/%Y/%m/%d/", blank=True, null=True)
     external_url = models.URLField(blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)

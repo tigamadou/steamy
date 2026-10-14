@@ -1,0 +1,124 @@
+# Stack de développement local : tous les services tournent dans Docker.
+# Point d'entrée : `make up` (voir `make help`).
+# Ne PAS utiliser en production : identifiants de dev, runserver, montage du code.
+
+x-api: &api
+  build: ./apps/api
+  env_file: infra/dev/api.env
+  volumes:
+    - ./apps/api:/app
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_started
+
+services:
+  postgres:
+    image: postgres:17.2
+    environment:
+      POSTGRES_DB: steamy
+      POSTGRES_USER: steamy
+      POSTGRES_PASSWORD: steamy
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d steamy -U steamy"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4
+    volumes:
+      - redis_data:/data
+
+  # Stockage objet S3-compatible (remplace MinIO)
+  rustfs:
+    image: rustfs/rustfs:1.0.1
+    environment:
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+    ports:
+      - "9000:9000" # API S3
+      - "9001:9001" # Console web
+    volumes:
+      - rustfs_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Crée le bucket média au démarrage (idempotent)
+  rustfs-init:
+    image: amazon/aws-cli:2.22.0
+    environment:
+      AWS_ACCESS_KEY_ID: rustfsadmin
+      AWS_SECRET_ACCESS_KEY: rustfsadmin
+      AWS_DEFAULT_REGION: us-east-1
+    entrypoint: ["sh", "-c"]
+    command:
+      - aws --endpoint-url http://rustfs:9000 s3api head-bucket --bucket steamy-media 2>/dev/null
+        || aws --endpoint-url http://rustfs:9000 s3 mb s3://steamy-media
+    depends_on:
+      rustfs:
+        condition: service_healthy
+
+  # Capture tous les e-mails sortants : http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:v1.21
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    ports:
+      - "8025:8025"
+
+  api-migrate:
+    <<: *api
+    command: python manage.py migrate --noinput
+
+  api:
+    <<: *api
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      api-migrate:
+        condition: service_completed_successfully
+      rustfs-init:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_started
+
+  worker:
+    <<: *api
+    command: celery -A project worker -l INFO
+    depends_on:
+      api-migrate:
+        condition: service_completed_successfully
+
+  beat:
+    <<: *api
+    command: celery -A project beat -l INFO
+    depends_on:
+      api-migrate:
+        condition: service_completed_successfully
+
+  # Supervision Celery, à la demande : `make flower`
+  flower:
+    <<: *api
+    profiles: ["tools"]
+    command: celery -A project flower --address=0.0.0.0 --port=5555
+    ports:
+      - "5555:5555"
+
+volumes:
+  postgres_data:
+  redis_data:
+  rustfs_data:
