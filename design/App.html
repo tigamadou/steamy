@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Steamy · App</title>
+  <link rel="stylesheet" href="ds-tokens.css" />
+  <style>
+    html,
+    body,
+    #root {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      background: #f0eee9;
+    }
+
+    /* ── FleetView : navigation latérale masquable (chrome au-dessus du canvas) ── */
+
+    .fleet-toggle {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 121;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--ink-900);
+      color: #fff;
+      border: 0;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font: 800 13px var(--font-sans);
+      box-shadow: 0 8px 24px rgba(27, 17, 71, .25);
+    }
+
+    .fleet-toggle:hover {
+      background: var(--ink-800);
+    }
+
+    .fleet-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 119;
+      background: rgba(15, 13, 38, .4);
+      animation: fleet-fade .18s ease;
+    }
+
+    @keyframes fleet-fade {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .fleet-nav {
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 256px;
+      z-index: 120;
+      background: var(--ink-900);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      font-family: var(--font-sans);
+      box-shadow: 0 8px 40px rgba(27, 17, 71, .35);
+      transition: transform .22s var(--ease-out);
+    }
+
+    .fleet-nav__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 16px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .fleet-nav__close {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 0;
+      cursor: pointer;
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fleet-nav__close:hover {
+      background: rgba(255, 255, 255, .16);
+    }
+
+    .fleet-nav__body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 12px 24px;
+    }
+
+    .fleet-nav__group {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--ink-400);
+      padding: 14px 12px 6px;
+    }
+
+    .fleet-nav__item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 0;
+      cursor: pointer;
+      background: transparent;
+      color: rgba(255, 255, 255, .65);
+      font: 800 14px var(--font-sans);
+      text-align: left;
+      transition: background .12s, color .12s;
+    }
+
+    .fleet-nav__item:hover {
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+    }
+
+    .fleet-nav__item.is-active {
+      background: var(--primary-500);
+      color: #fff;
+    }
+
+    .fleet-nav__item .ico {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script>
+    // Empêche l'auto-mount du <App /> de screens-auth.jsx - on rebranche notre propre App ci-dessous.
+    window.STEAMY_NO_AUTOMOUNT = true;
+  </script>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"
+    integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"
+    integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"
+    integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y"
+    crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="ds-mascot.jsx"></script>
+  <script type="text/babel" src="ds-icons.jsx"></script>
+  <script type="text/babel" src="ds-atoms.jsx"></script>
+  <script type="text/babel" src="ds-complex.jsx"></script>
+  <script type="text/babel" src="ds-charts.jsx"></script>
+  <script type="text/babel" src="screens-auth-web.jsx"></script>
+  <script type="text/babel" src="screens-auth.jsx"></script>
+  <script type="text/babel" src="screens-auth-parent-web.jsx"></script>
+  <script type="text/babel" src="screens-public-web.jsx"></script>
+  <script type="text/babel" src="screens-dashboard-web.jsx"></script>
+  <script type="text/babel" src="screens-catalog-web.jsx"></script>
+  <script type="text/babel" src="screens-wishlist-web.jsx"></script>
+  <script type="text/babel" src="screens-purchase-web.jsx"></script>
+  <script type="text/babel" src="screens-journey-web.jsx"></script>
+  <script type="text/babel" src="screens-parent-dashboard-web.jsx"></script>
+  <script type="text/babel" src="screens-kit-shop-web.jsx"></script>
+  <script type="text/babel" src="screens-teacher-dashboard-web.jsx"></script>
+  <script type="text/babel" src="screens-admin-web.jsx"></script>
+  <script type="text/babel" src="screens-states-web.jsx"></script>
+
+  <script type="text/babel" data-presets="env,react">
+    // Vues groupées par persona. Les `id` restent les clés du routing (window.XxxFlowWeb).
+    const NAV_GROUPS = [
+      {
+        title: 'Apprenant', items: [
+          { id: 'dashboard', label: 'Dashboard', icon: '🎯' },
+          { id: 'catalog', label: 'Catalogue', icon: '🧭' },
+          { id: 'wishlist', label: 'Souhaits', icon: '❤' },
+          { id: 'purchase', label: 'Achat parcours', icon: '💳' },
+          { id: 'journey', label: 'Déroulement', icon: '🚀' },
+        ]
+      },
+      { title: 'Parent', items: [{ id: 'parentdash', label: 'Dashboard parent', icon: '🏠' }] },
+      { title: 'Formateur', items: [{ id: 'teacherdash', label: 'Dashboard formateur', icon: '👩‍🏫' }] },
+      { title: 'Boutique', items: [{ id: 'kitshop', label: 'Boutique de kit', icon: '🛒' }] },
+      { title: 'Admin', items: [{ id: 'admin', label: 'Espace admin', icon: '⚙' }] },
+      {
+        title: 'Steamy site & Auth', items: [
+          { id: 'public', label: 'Steamy site', icon: '🌐' },
+          { id: 'web', label: 'Auth · Web', icon: '🖥' },
+          { id: 'parent', label: 'Auth · Parent', icon: '👨‍👩‍👧' },
+          { id: 'mobile', label: 'Auth · Mobile', icon: '📱' },
+        ]
+      },
+      { title: 'Système', items: [{ id: 'states', label: 'États transversaux', icon: '🛟' }] },
+    ];
+
+    function SideNav({ value, onChange, open, onClose }) {
+      return (
+        <nav className="fleet-nav" style={{ transform: open ? 'translateX(0)' : 'translateX(-110%)' }} aria-hidden={!open}>
+          <div className="fleet-nav__head">
+            <Logo height={26} white />
+            <button className="fleet-nav__close" onClick={onClose} aria-label="Masquer la navigation">
+              <Icon name="arrow-left" size={18} color="#fff" />
+            </button>
+          </div>
+          <div className="fleet-nav__body">
+            {NAV_GROUPS.map(g => (
+              <div key={g.title}>
+                <div className="fleet-nav__group">{g.title}</div>
+                {g.items.map(it => (
+                  <button key={it.id} className={['fleet-nav__item', value === it.id && 'is-active'].filter(Boolean).join(' ')} onClick={() => onChange(it.id)}>
+                    <span className="ico">{it.icon}</span>{it.label}
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+        </nav>
+      );
+    }
+
+    function NavToggle({ onClick }) {
+      return (
+        <button className="fleet-toggle" onClick={onClick} aria-label="Afficher la navigation">
+          <span style={{ fontSize: 16, lineHeight: 1 }}>☰</span> Vues
+        </button>
+      );
+    }
+
+    function App() {
+      const [view, setView] = React.useState(() => localStorage.getItem('steamy-flow') || 'dashboard');
+      const [navOpen, setNavOpen] = React.useState(true);
+      React.useEffect(() => {
+        localStorage.setItem('steamy-flow', view);
+      }, [view]);
+      const Flow =
+        view === 'mobile' ? window.AuthFlow :
+          view === 'web' ? window.AuthFlowWeb :
+            view === 'parent' ? window.AuthParentFlowWeb :
+              view === 'public' ? window.PublicFlowWeb :
+                view === 'catalog' ? window.CatalogFlowWeb :
+                  view === 'wishlist' ? window.WishlistFlowWeb :
+                    view === 'purchase' ? window.PurchaseFlowWeb :
+                      view === 'journey' ? window.JourneyFlowWeb :
+                        view === 'parentdash' ? window.ParentDashFlowWeb :
+                          view === 'teacherdash' ? window.TeacherDashFlowWeb :
+                            view === 'kitshop' ? window.KitShopFlowWeb :
+                              view === 'admin' ? window.AdminFlowWeb :
+                                view === 'states' ? window.StatesFlowWeb :
+                                  window.DashboardFlowWeb;
+      return (
+        <>
+          {!navOpen && <NavToggle onClick={() => setNavOpen(true)} />}
+          {navOpen && <div className="fleet-backdrop" onClick={() => setNavOpen(false)} />}
+          <SideNav value={view} open={navOpen} onChange={(id) => { setView(id); setNavOpen(false); }} onClose={() => setNavOpen(false)} />
+          {Flow ? <Flow /> : <div style={{ padding: 40, fontFamily: 'var(--font-sans)' }}>Chargement…</div>}
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+
+</html>
