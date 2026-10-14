@@ -3,7 +3,9 @@
 # Ne PAS utiliser en production : identifiants de dev, runserver, montage du code.
 
 x-api: &api
-  build: ./apps/api
+  build:
+    context: ./apps/api
+    target: dev
   env_file: infra/dev/api.env
   volumes:
     - ./apps/api:/app

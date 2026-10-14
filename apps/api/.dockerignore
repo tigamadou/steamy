@@ -17,3 +17,8 @@ venv/
 venv/*
 node_modules/
 *.env
+.git
+.pytest_cache/
+staticfiles/
+media/
+Dockerfile

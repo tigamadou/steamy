@@ -1,0 +1,12 @@
+# Contexte de build racine (image web). L'image API a son propre contexte : apps/api/
+**/node_modules
+**/.next
+.git
+.pnpm-store
+.data
+apps/api
+design
+docs
+infra
+**/.env
+**/.env.*

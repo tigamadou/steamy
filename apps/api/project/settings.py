@@ -35,9 +35,16 @@ LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG' if ENV == DEV else 'WARNING')
 
 BASE_DIR = os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))).replace('/project', '')
-SECRET_KEY = os.environ.get('SECRET_KEY', 'local')
-DEBUG = False if ENV == PRODUCTION else True
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+DEPLOYED = ENV in (STAGING, PRODUCTION)
+DEBUG = not DEPLOYED
+
+if DEPLOYED:
+    # En staging/prod, l'absence de ces variables doit empêcher le démarrage
+    SECRET_KEY = os.environ['SECRET_KEY']
+    ALLOWED_HOSTS = os.environ['ALLOWED_HOSTS'].split(',')
+else:
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'local')
+    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 # Indicateur pour autoriser l'accès à la doc (par défaut False en prod)
 ALLOW_API_DOCS = os.getenv("ALLOW_API_DOCS", "false").lower() in ("1", "true", "yes")
 
@@ -306,7 +313,7 @@ PAYMENTS_FEDAPAY_SECRET = os.getenv("PAYMENTS_FEDAPAY_SECRET", "")
 CHANNEL_LAYERS = {
   "default": {
     "BACKEND": "channels_redis.core.RedisChannelLayer",
-    "CONFIG": {"hosts": [("redis", 6379)]},
+    "CONFIG": {"hosts": [os.getenv("CHANNELS_REDIS_URL", "redis://redis:6379/2")]},
   }
 }
 
@@ -462,3 +469,18 @@ if TESTING:
     except KeyError:
         pass
 
+
+# ==================================================================================================
+# SÉCURITÉ HTTP (staging / prod, derrière l'ingress Traefik qui termine le TLS)
+# ==================================================================================================
+
+
+if DEPLOYED:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # Domaine parent partagé par le front et l'API (ex : ".steamy.africa")
+    SESSION_COOKIE_DOMAIN = os.getenv('COOKIE_DOMAIN') or None
+    CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN
+    CSRF_TRUSTED_ORIGINS = [o for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o]
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))
