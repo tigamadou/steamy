@@ -1,4 +1,6 @@
-# Intégration continue : à chaque PR et à chaque push sur main et development (gitflow).
+# Intégration continue, sur toutes les branches :
+# - à chaque push, pour être prévenu dès qu'une branche casse quelque chose ;
+# - à chaque PR, sur le résultat de la fusion avec la branche cible.
 # Seules les parties touchées sont testées ; le job `ci-ok` agrège le résultat
 # et c'est LUI qu'on rend obligatoire dans la protection de branche.
 name: CI
@@ -6,7 +8,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, development]
+    branches: ["**"]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -26,9 +28,16 @@ jobs:
       infra: ${{ steps.filter.outputs.infra }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          # Sur un push, on compare TOUTE la branche à sa branche d'origine (gitflow),
+          # pas seulement au push précédent : un dernier push qui ne touche que la doc
+          # ne doit pas masquer une API cassée plus tôt. Sur main/development : diff
+          # depuis le push précédent. Ignoré pour les PR (diff de la PR).
+          base: ${{ startsWith(github.ref_name, 'hotfix/') && 'main' || (github.ref_name == 'main' && 'main' || 'development') }}
           filters: |
             api:
               - 'apps/api/**'

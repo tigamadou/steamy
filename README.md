@@ -49,7 +49,7 @@ Détails, nommage et publication d'une version : [`CONTRIBUTING.md`](CONTRIBUTIN
 
 ## CI/CD
 
-- **CI** (`.github/workflows/ci.yml`, à chaque PR et à chaque fusion dans `main` ou `development`) : tests et contrat OpenAPI de l'API, lint/typecheck/build
+- **CI** (`.github/workflows/ci.yml`, à chaque push sur toutes les branches et à chaque PR) : tests et contrat OpenAPI de l'API, lint/typecheck/build
   du front, build des images, validation des charts. Check requis pour merger : `ci-ok`.
 - **CD** (`.github/workflows/deploy.yml`), piloté par les GitHub Releases :
 

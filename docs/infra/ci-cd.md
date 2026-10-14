@@ -4,14 +4,16 @@ Deux workflows GitHub Actions :
 
 | Workflow | Déclencheur | Rôle |
 | --- | --- | --- |
-| [`ci.yml`](../../.github/workflows/ci.yml) | Chaque PR, chaque push sur `main` et `development` | Vérifier que rien n'est cassé |
+| [`ci.yml`](../../.github/workflows/ci.yml) | Chaque push sur **n'importe quelle branche**, chaque PR | Vérifier que rien n'est cassé |
 | [`deploy.yml`](../../.github/workflows/deploy.yml) | Publication d'une **GitHub Release** | Construire, publier et déployer |
 
 ---
 
 ## Intégration continue (`ci.yml`)
 
-Le job `changes` détecte les parties modifiées, et seuls les jobs concernés tournent :
+Le job `changes` détecte les parties modifiées, et seuls les jobs concernés tournent. Sur un push, la branche
+entière est comparée à sa branche d'origine (`development`, ou `main` pour un `hotfix/…`), pas seulement au push
+précédent. Sur une PR, c'est le diff de la PR qui compte.
 
 | Job | Lancé si modification de | Vérifie |
 | --- | --- | --- |
