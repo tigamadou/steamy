@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L1.2
+Statut : 🟡 en cours · Prochaine tâche : API-L1.3
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -176,11 +176,19 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > réécrire `learning.0001` déjà fusionnée ; l'app disparaîtra à la refonte des migrations de `learning`
   > (API-L3a). Les droits du groupe Contenu viennent de la matrice des groupes du lot 6.1 (`setup_staff_groups`) ;
   > `Course` déclare la permission `publish_course`. Ordre par glisser-déposer : `django-admin-sortable2`.
-- [ ] **API-L1.2** Endpoints catalogue · `feature/api-l1-2-catalogue-api`
-  - [ ] `GET catalog/categories/` (avec `courseCount`)
-  - [ ] `GET catalog/courses/` (filtres `category`, `difficulty`, `price`, `featured`, `q`, `sort`)
-  - [ ] `GET catalog/courses/{slug}/` sans `blocks` ni `vimeoId` de mission (D11), publiés uniquement
-  - [ ] Tests : brouillon invisible (liste et détail 404), détail sans contenu de mission, aucune écriture possible
+- [x] **API-L1.2** Endpoints catalogue · `feature/api-l1-2-catalogue-api` · PR #37
+  - [x] `GET catalog/categories/` (avec `courseCount`)
+  - [x] `GET catalog/courses/` (filtres `category`, `difficulty`, `price`, `featured`, `q`, `sort`)
+  - [x] `GET catalog/courses/{slug}/` sans `blocks` ni `vimeoId` de mission (D11), publiés uniquement
+  - [x] Tests : brouillon invisible (liste et détail 404), détail sans contenu de mission, aucune écriture possible
+  - [x] Matrice d'accès du domaine (`apps/catalog/tests/test_access_matrix.py`) ; couverture 100 % du code modifié
+  > Décisions : réponses sans session (`authentication_classes = []`, ni `Vary: Cookie` ni cookie posé) et
+  > `Cache-Control: public, max-age=300`. `price` ∈ `free|paid` ; `sort` ∈ `popular` (défaut : nombre
+  > d'inscriptions, puis mis en avant, puis récents) `|recent|price-asc|price-desc|title` ; valeur inconnue → 400
+  > `VALIDATION_ERROR` sur le champ. Paramètres validés par un serializer : `ChoiceFilter` de django-filter 22.1 est
+  > incompatible avec Django 5. Catégories non paginées. Le détail expose la bande-annonce (`trailerVimeoId/Hash`,
+  > ADR 0004) et le plan : projets (objectifs, prérequis, matériel), niveaux (`introSummary`), missions (titre,
+  > durée, icône), `missionCount`.
 - [ ] **API-L1.3** Événements en lecture · `feature/api-l1-3-events`
   - [ ] App `events` : `SteamyEvent` (§3.4) + admin
   - [ ] `GET events/?upcoming=`, `GET events/{slug}/` (`seatsLeft` calculé)

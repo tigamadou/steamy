@@ -119,13 +119,17 @@ def paid_course(db):
 
 
 @pytest.mark.django_db
-def test_s6_mission_content_is_not_served_by_the_old_routes(paid_course, user):
+def test_s6_mission_content_is_never_served_publicly(paid_course, user):
     # Le contenu des missions n'est servi qu'à un inscrit (API-L3a) ; les routes de `courses` ont disparu.
     for client in (APIClient(), APIClient()):
         for url in (f"/api/courses/courses/{paid_course.slug}/", "/api/courses/lessons/"):
             resp = client.get(url)
             assert resp.status_code == 404 and "CONTENU-SECRET" not in resp.content.decode()
         client.force_authenticate(user)
+
+    # Le catalogue public donne le plan du parcours, jamais le contenu des missions (D11, API-L1.2).
+    detail = APIClient().get(f"/api/catalog/courses/{paid_course.slug}/")
+    assert detail.status_code == 200 and "CONTENU-SECRET" not in detail.content.decode()
 
 
 # --- S7 · Inscription gratuite à un parcours payant ----------------------------------------
