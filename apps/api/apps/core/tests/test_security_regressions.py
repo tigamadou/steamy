@@ -134,3 +134,41 @@ def test_s7_paid_course_cannot_be_enrolled_for_free(paid_course, user):
     assert via_course.status_code == 402 and via_learning.status_code == 402
     assert via_course.json()["detail"]
     assert not Enrollment.objects.filter(user=user).exists()
+
+
+# --- S4 · Listes non filtrées par propriétaire ----------------------------------------------
+
+
+@pytest.mark.django_db
+def test_s4_lists_only_return_the_callers_objects(user):
+    from apps.courses.models import Course
+    from apps.learning.models import Attempt, Certificate, Enrollment, Quiz
+    from apps.messaging.models import Notification
+    from apps.payments.models import Order, Payment
+
+    other = User.objects.create_user(email="autre@example.com", password="secret123")
+    course = Course.objects.create(title="Gratuit", slug="gratuit", published=True, price=0)
+    enrollment = Enrollment.objects.create(user=other, course=course)
+    Certificate.objects.create(enrollment=enrollment, score=90)
+    Attempt.objects.create(user=other, quiz=Quiz.objects.create(course=course, title="Q"))
+    order = Order.objects.create(user=other, reference="REF-AUTRE", total=1000)
+    Payment.objects.create(order=order, provider="kkiapay", amount=1000)
+    Notification.objects.create(user=other, title="Privée", body="x")
+
+    client = APIClient()
+    client.force_authenticate(user)
+    for url in [
+        "/api/learning/enrollments/",
+        "/api/learning/progress/",
+        "/api/learning/attempts/",
+        "/api/learning/certificates/",
+        "/api/payments/orders/",
+        "/api/payments/payments/",
+        "/api/messaging/notifications/",
+    ]:
+        resp = client.get(url)
+        assert resp.status_code == 200, url
+        assert resp.json()["results"] == [], url
+
+    # Et l'objet d'autrui n'existe pas pour l'appelant.
+    assert client.get(f"/api/payments/orders/{order.id}/").status_code == 404

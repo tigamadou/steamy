@@ -8,31 +8,27 @@ from rest_framework import permissions, serializers, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
+from libs.scoping import OwnedByRequestUserMixin
+
 from .models import Order, Payment
 from .serializers import OrderSerializer, PaymentSerializer
 
 
-class IsAdminOrOwner(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.user and request.user.is_staff:
-            return True
-        return getattr(obj, "user", None) and obj.user == request.user
-
-
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(OwnedByRequestUserMixin, viewsets.ModelViewSet):
     queryset = Order.objects.prefetch_related("items").all()
     serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         # force user to the request user
         serializer.save(user=self.request.user)
 
 
-class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
+class PaymentViewSet(OwnedByRequestUserMixin, viewsets.ReadOnlyModelViewSet):
     queryset = Payment.objects.select_related("order").all()
     serializer_class = PaymentSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdminOrOwner]
+    permission_classes = [permissions.IsAuthenticated]
+    owner_field = "order__user"
 
 
 # Webhook endpoint for providers (unprotected CSRF exempt; verify signature inside)

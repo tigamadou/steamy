@@ -61,7 +61,7 @@ def test_user_cannot_access_others_notification_and_can_mark_read():
 
 
 @pytest.mark.django_db
-def test_staff_can_list_all_notifications():
+def test_staff_sees_only_their_own_notifications():
     client = APIClient()
     staff = User.objects.create_user(email="admin_n@example.com", password="pw", is_staff=True)
     user = User.objects.create_user(email="u_n@example.com", password="pw")
@@ -70,6 +70,5 @@ def test_staff_can_list_all_notifications():
     url = reverse("notification-list")
     resp = client.get(url, format="json")
     assert resp.status_code == 200
-    data = resp.json()
-    items = data.get("results", data)
-    assert len(items) >= 1
+    # Pas de passe-droit pour le personnel dans l'API publique (S4) : il passe par le back-office.
+    assert resp.json()["results"] == []

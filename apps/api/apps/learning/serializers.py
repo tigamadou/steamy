@@ -41,6 +41,12 @@ class ProgressSerializer(serializers.ModelSerializer):
         fields = ["id", "enrollment", "lesson", "completed", "score", "updated_at"]
         read_only_fields = ["id", "updated_at"]
 
+    def validate_enrollment(self, enrollment):
+        # On ne déclare de progression que sur sa propre inscription (S4).
+        if enrollment.user_id != self.context["request"].user.id:
+            raise serializers.ValidationError("Inscription introuvable.")
+        return enrollment
+
     def validate(self, attrs):
         # sanity: ensure lesson belongs to same course as enrollment
         enrollment = attrs.get("enrollment")

@@ -4,6 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
+from libs.scoping import OwnedByRequestUserMixin
+
 from .models import Conversation, Message, MessageAttachment, MessageReceipt, Notification
 from .serializers import (
     ConversationSerializer,
@@ -97,27 +99,9 @@ class AttachmentViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 
-class IsOwnerOrStaff(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.user and request.user.is_staff:
-            return True
-        return obj.user_id == request.user.id
-
-
-class NotificationViewSet(viewsets.ModelViewSet):
+class NotificationViewSet(OwnedByRequestUserMixin, viewsets.ModelViewSet):
+    queryset = Notification.objects.order_by("-created_at")
     serializer_class = NotificationSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrStaff]
+    permission_classes = [permissions.IsAuthenticated]
+    # Seul « read » se modifie : marquer comme lue.
     http_method_names = ["get", "patch", "head", "options"]
-
-    def get_queryset(self):
-        # Génération du schéma OpenAPI : pas d'utilisateur réel
-        if getattr(self, "swagger_fake_view", False):
-            return Notification.objects.none()
-        user = self.request.user
-        if user.is_staff:
-            return Notification.objects.all().order_by("-created_at")
-        return Notification.objects.filter(user=user).order_by("-created_at")
-
-    def perform_update(self, serializer):
-        # ensure user cannot change owner
-        serializer.save()
