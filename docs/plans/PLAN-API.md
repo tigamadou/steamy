@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-1.4
+Statut : 🟡 en cours · Prochaine tâche : API-1.5
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -111,11 +111,18 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > utilisateur connecté (et le CSRF). 409 est déclaré par l'opération qui le renvoie (`error_responses(409)`),
   > les autres statuts automatiquement (`libs/schema.py`). Codes ajoutés au catalogue : génériques DRF
   > (`PARSE_ERROR`, `METHOD_NOT_ALLOWED`…), `SERVER_ERROR`, `EMAIL_TAKEN`.
-- [ ] **API-1.4** Notifications · `feature/api-1-notifications`
-  - [ ] App `notifications` : `Notification`, `NotificationPreference`
-  - [ ] Endpoints §7.7 : `notifications/`, `unread-count/`, `{id}/read/`, `read-all/`, `preferences/`
-  - [ ] Service `notify(user, type, …)` (base + email selon la préférence, C12)
-  - [ ] Tests : scoping propriétaire, préférences respectées
+- [x] **API-1.4** Notifications · `feature/api-1-notifications` · PR #22
+  - [x] App `notifications` : `Notification`, `NotificationPreference`
+  - [x] Endpoints §7.7 : `notifications/`, `unread-count/`, `{id}/read/`, `read-all/`, `preferences/`
+  - [x] Service `notify(user, type, …)` (base + email selon la préférence, C12)
+  - [x] Tests : scoping propriétaire, préférences respectées
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : catégories par rôle (apprenant : apprentissage, récompenses, encadrement, Steamy Events, paiements ;
+  > parent : consentements et validations, paiements, progression, Steamy Events ; enseignant : progression, tentatives
+  > à revoir, Steamy Events) + `account` toujours envoyée. Dans l'application : toujours ; email activé par défaut,
+  > réglable par catégorie, envoyé à l'adresse de contact (profil, ou email de connexion de l'enseignant) par Celery
+  > après validation de la transaction. `notify(user, category, type, title, …)`. `url` contrainte à un chemin du
+  > front. Restrictions propres aux mineurs (D6, D30) en API-L3a.6.
 - [ ] **API-1.5** Référentiels (D3) · `feature/api-1-referentiels`
   - [ ] App `referentials` : `Country`, `PaymentNetwork` (Celtiis inclus, D76), `SchoolGrade`, `Goal`, `Avatar`, `Disability`, `Relationship`, `RefusalReason`, `Locality`
   - [ ] Données initiales par migration de données

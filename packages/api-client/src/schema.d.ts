@@ -649,6 +649,98 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/notifications/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Notifications du compte connecté, les plus récentes d'abord (WD04, WPD14, WT12, cloche des shells). */
+        get: operations["notifications_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/{id}/read/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Notifications du compte connecté, les plus récentes d'abord (WD04, WPD14, WT12, cloche des shells). */
+        post: operations["notifications_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/preferences/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Préférences par catégorie (WD06, WPD08, WT08). Dans l'application : toujours actif. Email : réglable, envoyé
+         *     seulement si une adresse est renseignée (`emailAddress`).
+         */
+        get: operations["notifications_preferences_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description Préférences par catégorie (WD06, WPD08, WT08). Dans l'application : toujours actif. Email : réglable, envoyé
+         *     seulement si une adresse est renseignée (`emailAddress`).
+         */
+        patch: operations["notifications_preferences_partial_update"];
+        trace?: never;
+    };
+    "/api/notifications/read-all/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Notifications du compte connecté, les plus récentes d'abord (WD04, WPD14, WT12, cloche des shells). */
+        post: operations["notifications_read_all_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/unread-count/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Notifications du compte connecté, les plus récentes d'abord (WD04, WPD14, WT12, cloche des shells). */
+        get: operations["notifications_unread_count_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/payments/orders/": {
         parameters: {
             query?: never;
@@ -795,6 +887,30 @@ export interface components {
         AttemptCreateRequest: {
             quiz: number;
             data?: unknown;
+        };
+        /**
+         * @description * `learning` - Apprentissage
+         *     * `rewards` - Récompenses
+         *     * `coaching` - Encadrement
+         *     * `events` - Steamy Events
+         *     * `payments` - Paiements
+         *     * `consents` - Consentements et validations
+         *     * `progress` - Progression
+         *     * `reviews` - Tentatives à revoir
+         *     * `account` - Compte
+         * @enum {string}
+         */
+        CategoryEnum: "learning" | "rewards" | "coaching" | "events" | "payments" | "consents" | "progress" | "reviews" | "account";
+        CategoryPreference: {
+            category: components["schemas"]["CategoryEnum"];
+            readonly label: string;
+            /** @description Toujours actif */
+            readonly inApp: boolean;
+            email: boolean;
+        };
+        CategoryPreferenceRequest: {
+            category: components["schemas"]["CategoryEnum"];
+            email: boolean;
         };
         Certificate: {
             readonly id: number;
@@ -1038,6 +1154,21 @@ export interface components {
             readonly lessons: components["schemas"]["LessonSummary"][];
             readonly course: number;
         };
+        Notification: {
+            readonly id: number;
+            readonly type: string;
+            readonly category: components["schemas"]["CategoryEnum"];
+            readonly tone: components["schemas"]["ToneEnum"];
+            readonly icon: string;
+            /** Titre */
+            readonly title: string;
+            readonly message: string;
+            readonly url: string;
+            /** Format: date-time */
+            readonly readAt: string | null;
+            /** Format: date-time */
+            readonly createdAt: string;
+        };
         /** @enum {unknown} */
         NullEnum: null;
         Order: {
@@ -1168,6 +1299,21 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Module"][];
         };
+        PaginatedNotificationList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["Notification"][];
+        };
         PaginatedOrderList: {
             /** @example 123 */
             count?: number;
@@ -1262,6 +1408,9 @@ export interface components {
             currentPassword: string;
             newPassword: string;
         };
+        PatchedPreferencesUpdateRequest: {
+            categories?: components["schemas"]["CategoryPreferenceRequest"][];
+        };
         PatchedProgressRequest: {
             enrollment?: number;
             lesson?: number;
@@ -1280,6 +1429,14 @@ export interface components {
             readonly success: boolean;
             /** Format: date-time */
             readonly createdAt: string;
+        };
+        Preferences: {
+            /**
+             * Format: email
+             * @description Adresse qui recevra les emails, null si aucune
+             */
+            readonly emailAddress: string | null;
+            categories: components["schemas"]["CategoryPreference"][];
         };
         PresignUploadRequestRequest: {
             filename: string;
@@ -1338,6 +1495,10 @@ export interface components {
             passScore?: string;
             readonly questions: components["schemas"]["Question"][];
         };
+        ReadAll: {
+            /** @description Nombre de notifications marquées comme lues */
+            updated: number;
+        };
         Resource: {
             readonly id: number;
             readonly lesson: number;
@@ -1364,6 +1525,15 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "learner" | "parent" | "teacher";
+        /**
+         * @description * `info` - Information
+         *     * `success` - Succès
+         *     * `warning` - Attention
+         *     * `danger` - Problème
+         *     * `primary` - Mise en avant
+         * @enum {string}
+         */
+        ToneEnum: "info" | "success" | "warning" | "danger" | "primary";
         TrackingEvent: {
             readonly id: number;
             readonly user: number | null;
@@ -1383,6 +1553,9 @@ export interface components {
             /** Format: decimal */
             value?: string | null;
             metadata?: unknown;
+        };
+        UnreadCount: {
+            count: number;
         };
         WebhookAck: {
             ok: boolean;
@@ -3269,6 +3442,310 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    notifications_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /** @description Seulement les non lues */
+                unread?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedNotificationList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    notifications_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this notification. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Notification"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    notifications_preferences_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Preferences"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    notifications_preferences_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedPreferencesUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Preferences"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    notifications_read_all_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadAll"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    notifications_unread_count_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnreadCount"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

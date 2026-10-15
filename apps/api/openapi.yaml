@@ -1774,6 +1774,265 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/notifications/:
+    get:
+      operationId: notifications_list
+      description: Notifications du compte connecté, les plus récentes d'abord (WD04,
+        WPD14, WT12, cloche des shells).
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: unread
+        schema:
+          type: boolean
+        description: Seulement les non lues
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/notifications/{id}/read/:
+    post:
+      operationId: notifications_read_create
+      description: Notifications du compte connecté, les plus récentes d'abord (WD04,
+        WPD14, WT12, cloche des shells).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this notification.
+        required: true
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/notifications/preferences/:
+    get:
+      operationId: notifications_preferences_retrieve
+      description: |-
+        Préférences par catégorie (WD06, WPD08, WT08). Dans l'application : toujours actif. Email : réglable, envoyé
+        seulement si une adresse est renseignée (`emailAddress`).
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preferences'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    patch:
+      operationId: notifications_preferences_partial_update
+      description: |-
+        Préférences par catégorie (WD06, WPD08, WT08). Dans l'application : toujours actif. Email : réglable, envoyé
+        seulement si une adresse est renseignée (`emailAddress`).
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPreferencesUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preferences'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/notifications/read-all/:
+    post:
+      operationId: notifications_read_all_create
+      description: Notifications du compte connecté, les plus récentes d'abord (WD04,
+        WPD14, WT12, cloche des shells).
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadAll'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/notifications/unread-count/:
+    get:
+      operationId: notifications_unread_count_retrieve
+      description: Notifications du compte connecté, les plus récentes d'abord (WD04,
+        WPD14, WT12, cloche des shells).
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCount'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/payments/orders/:
     get:
       operationId: payments_orders_list
@@ -2137,6 +2396,57 @@ components:
           nullable: true
       required:
       - quiz
+    CategoryEnum:
+      enum:
+      - learning
+      - rewards
+      - coaching
+      - events
+      - payments
+      - consents
+      - progress
+      - reviews
+      - account
+      type: string
+      description: |-
+        * `learning` - Apprentissage
+        * `rewards` - Récompenses
+        * `coaching` - Encadrement
+        * `events` - Steamy Events
+        * `payments` - Paiements
+        * `consents` - Consentements et validations
+        * `progress` - Progression
+        * `reviews` - Tentatives à revoir
+        * `account` - Compte
+    CategoryPreference:
+      type: object
+      properties:
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        label:
+          type: string
+          readOnly: true
+        inApp:
+          type: boolean
+          readOnly: true
+          description: Toujours actif
+        email:
+          type: boolean
+      required:
+      - category
+      - email
+      - inApp
+      - label
+    CategoryPreferenceRequest:
+      type: object
+      properties:
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        email:
+          type: boolean
+      required:
+      - category
+      - email
     Certificate:
       type: object
       properties:
@@ -2738,6 +3048,56 @@ components:
       - lessons
       - order
       - title
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        type:
+          type: string
+          readOnly: true
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategoryEnum'
+          readOnly: true
+        tone:
+          allOf:
+          - $ref: '#/components/schemas/ToneEnum'
+          readOnly: true
+        icon:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        message:
+          type: string
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+        readAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category
+      - createdAt
+      - icon
+      - id
+      - message
+      - readAt
+      - title
+      - tone
+      - type
+      - url
     NullEnum:
       enum:
       - null
@@ -2960,6 +3320,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Module'
+    PaginatedNotificationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
     PaginatedOrderList:
       type: object
       properties:
@@ -3092,6 +3472,13 @@ components:
       required:
       - currentPassword
       - newPassword
+    PatchedPreferencesUpdateRequest:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryPreferenceRequest'
     PatchedProgressRequest:
       type: object
       properties:
@@ -3147,6 +3534,22 @@ components:
       - provider
       - providerTransactionId
       - success
+    Preferences:
+      type: object
+      properties:
+        emailAddress:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+          description: Adresse qui recevra les emails, null si aucune
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryPreference'
+      required:
+      - categories
+      - emailAddress
     PresignUploadRequestRequest:
       type: object
       properties:
@@ -3293,6 +3696,14 @@ components:
       - id
       - questions
       - title
+    ReadAll:
+      type: object
+      properties:
+        updated:
+          type: integer
+          description: Nombre de notifications marquées comme lues
+      required:
+      - updated
     Resource:
       type: object
       properties:
@@ -3348,6 +3759,20 @@ components:
         * `learner` - Apprenant
         * `parent` - Parent
         * `teacher` - Enseignant
+    ToneEnum:
+      enum:
+      - info
+      - success
+      - warning
+      - danger
+      - primary
+      type: string
+      description: |-
+        * `info` - Information
+        * `success` - Succès
+        * `warning` - Attention
+        * `danger` - Problème
+        * `primary` - Mise en avant
     TrackingEvent:
       type: object
       properties:
@@ -3409,6 +3834,13 @@ components:
           nullable: true
       required:
       - eventType
+    UnreadCount:
+      type: object
+      properties:
+        count:
+          type: integer
+      required:
+      - count
     WebhookAck:
       type: object
       properties:
