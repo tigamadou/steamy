@@ -91,7 +91,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `GET accounts/me/` (identité, rôle, statut, `profileStep`, champs personnel ; données du shell avec les référentiels en API-1.5)
   - [x] `POST accounts/me/password/`, `POST accounts/me/email/`
   - [x] Pagination `page`/`pageSize`
-  - [x] Front : `apps/web/src/lib/api-browser.ts` et `apps/web/src/app/page.tsx` mis à jour, `packages/api-client` régénéré
+  - [x] Front : `apps/web/src/lib/api-browser.ts` mis à jour (`page.tsx` n'appelle plus l'API depuis le socle front, PR #18), `packages/api-client` régénéré
   - [x] Retirer le commentaire d'en-tête de `session/views.py` (login par token)
   - [x] Tests : CSRF exigé sur login et logout, throttle de login par IP **et** par identifiant
   - [x] Couverture 100 % (lignes et branches) du code modifié
@@ -179,14 +179,14 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] `make openapi` committé
 
 ### API-L2 · Inscriptions, consentement, OTP, connexion — ⬜ à faire
-- [ ] **API-L2.0a** Comparaison SMS (S10) · `feature/api-l2-0a-adr-sms` · doc
-  - [ ] Comparer coût par SMS et par pays, couverture MTN/Moov/Celtiis, délivrabilité, expéditeur « STEAMY », API et webhooks, sandbox, FCFA, support local
-  - [ ] Écrire l'**ADR-SMS** (critères éliminatoires : pas d'API serveur, pas de couverture Bénin)
+- [x] **API-L2.0a** Comparaison SMS (S10) · `feature/api-l2-0a-adr-sms` · doc
+  - [x] Comparer coût par SMS et par pays, couverture MTN/Moov/Celtiis, délivrabilité, expéditeur « STEAMY », API et webhooks, sandbox, FCFA, support local
+  - [x] Écrire l'**ADR-SMS** (critères éliminatoires : pas d'API serveur, pas de couverture Bénin)
 - [ ] **API-L2.0b** Interface SMS · `feature/api-l2-0b-sms`
   - [ ] `notifications/sms/` : `SmsProvider.send(phone, text) → message_id`
   - [ ] `FakeSmsProvider` : journalise et envoie le SMS comme email à Mailpit (`<e164>@sms.test`), jamais activable si `DEPLOYED`
   - [ ] Tâche `send_sms` avec réessais exponentiels
-  - [ ] Fournisseur réel branché après l'ADR
+  - [ ] `TwilioProvider` (fournisseur réel, ADR 0002) branché, sélection par `SMS_PROVIDER`
   - [ ] Tests : faux SMS lisible dans Mailpit, refus du faux fournisseur si `DEPLOYED`
 - [ ] **API-L2.1** OTP · `feature/api-l2-1-otp`
   - [ ] `OtpChallenge` : code haché, 6 chiffres, 5 min, 3 essais, renvoi après 60 s
@@ -274,8 +274,8 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 
 ### API-L3b · Commerce, boutique, événements payants — ⬜ à faire
 - [ ] **API-L3b.0a** Comparaison paiement (S9) · `feature/api-l3b-0a-adr-paiement` · doc
-  - [ ] Comparer KKiaPay et FedaPay : réseaux par pays (MTN, Moov, Celtiis), frais, initiation côté serveur, webhook signé, vérification de transaction, remboursements par API, sandbox, reversement, XOF
-  - [ ] Écrire l'**ADR-Paiement** (un principal + un secours)
+  - [x] Comparer KKiaPay et FedaPay : réseaux par pays (MTN, Moov, Celtiis), frais, initiation côté serveur, webhook signé, vérification de transaction, remboursements par API, sandbox, reversement, XOF
+  - [x] Écrire l'**ADR-Paiement** (un principal + un secours)
   - [ ] Faire valider le format de `Invoice` par la comptabilité
 - [ ] **API-L3b.0b** Interface paiement · `feature/api-l3b-0b-paiement`
   - [ ] `payments/providers/` : `PaymentProvider` (`initiate`, `verify_webhook`, `parse_event`, `fetch_status`, `refund`)
@@ -401,13 +401,13 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 ### ADR et comparaisons de prestataires
 - [ ] **ADR à écrire** (`docs/adr/`)
   - [x] Identité et connexion (avant API-1.1) : [ADR 0001](../adr/0001-identite-et-connexion.md)
-  - [ ] SMS (avant API-L2.0b)
+  - [x] SMS (avant API-L2.0b)
   - [ ] Médias (Vimeo) (avant API-L3a.1)
-  - [ ] Paiement (avant API-L3b.0b)
+  - [x] Paiement (avant API-L3b.0b)
   - [ ] PDF et stockage privé (avant API-L3a.4)
 - [ ] **Comparaisons de prestataires**
-  - [ ] SMS (S10), avant API-L2 : voir API-L2.0a
-  - [ ] Paiement (S9), avant API-L3b : voir API-L3b.0a
+  - [x] SMS (S10), avant API-L2 : voir API-L2.0a
+  - [x] Paiement (S9), avant API-L3b : voir API-L3b.0a
 - [ ] **Points ouverts** (« Reste à décider »)
   - [ ] Valeurs du barème de points et des paliers de rang (C8), avant L3a.3
   - [ ] Format des factures validé par la comptabilité, avant L3b.2
@@ -592,7 +592,7 @@ Bénin.
 
 | PR | Contenu | Taille |
 | --- | --- | --- |
-| `API-L2.0b` Interface SMS | `notifications/sms/` : `SmsProvider.send(phone, text) → message_id`, `FakeSmsProvider` (journalise et **envoie le SMS comme email à Mailpit**, adressé à `<e164>@sms.test`, lisible par pytest et Playwright sans endpoint de test ; **jamais** activable si `DEPLOYED`), tâche `send_sms` avec réessais exponentiels ; fournisseur réel ajouté après l'ADR | M |
+| `API-L2.0b` Interface SMS | `notifications/sms/` : `SmsProvider.send(phone, text) → message_id`, `FakeSmsProvider` (journalise et **envoie le SMS comme email à Mailpit**, adressé à `<e164>@sms.test`, lisible par pytest et Playwright sans endpoint de test ; **jamais** activable si `DEPLOYED`), tâche `send_sms` avec réessais exponentiels ; `TwilioProvider` seul fournisseur réel (ADR 0002 : Twilio, remplaçable via l'interface) | M |
 | `API-L2.1` OTP | `OtpChallenge` (§3.1) : code haché, 6 chiffres, 5 min, 3 essais, renvoi après 60 s, plafond quotidien par numéro **et** par IP (valeurs dans `PlatformSettings`, D24) ; `POST auth/otp/resend/` ; codes `OTP_*` | M |
 | `API-L2.2` Inscription parent | `POST auth/parent-signup/`, `…/verify/`, `…/password/` (WP01-WP03) ; réponse neutre si le numéro est déjà inscrit (C13 : OTP envoyé quand même, pas de `PHONE_TAKEN`) ; `…/verify/` renvoie `existingAccount` (compte existant → W16) ; compte créé seulement après OTP valide | M |
 | `API-L2.3` Inscription apprenant | `GET auth/username-availability/` (throttlé : énumération), `POST/GET auth/learner-signup/`, `…/resume/` (C5), `…/password/` ; `SignupSession` + code de reprise haché, renvoyé une seule fois, non régénérable (D21, C14) ; âge 10-17 (D23) ; `POST accounts/consent-requests/` (origine `learner`, SMS au parent avec lien à jeton ; une nouvelle demande vers le même numéro annule la demande en attente et libère l'identifiant, C14), `…/{id}/resend/` | L |
@@ -780,7 +780,7 @@ peut pas accepter un consentement à la place du parent (D70).
 | ADR | Avant | Contenu |
 | --- | --- | --- |
 | Identité et connexion | API-1.1 | `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé |
-| SMS | API-L2.0b | Comparaison S10, fournisseur retenu, interface, faux fournisseur, coûts |
+| SMS | API-L2.0b | Comparaison S10, Twilio retenu et remplaçable, interface, faux fournisseur, coûts |
 | Médias (Vimeo) | API-L3a.1 | Vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de mode hors ligne (D16) |
 | Paiement | API-L3b.0b | Comparaison S9, principal + secours, webhook et réconciliation, paiement tardif, remboursements |
 | PDF et stockage privé | API-L3a.4 | WeasyPrint, Celery, RustFS privé, URL présignées courtes |
