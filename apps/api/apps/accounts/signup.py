@@ -142,14 +142,14 @@ def consent_url(token: str) -> str:
     return f"{settings.WEB_URL}/consentement/{token}"
 
 
-def _send_consent_sms(consent: ConsentRequest, ip: str) -> None:
+def send_consent_sms(consent: ConsentRequest, ip: str, text: str = CONSENT_SMS) -> None:
     """Nouveau jeton à chaque envoi : seul le dernier lien reçu est valable."""
     consume_send_quota(consent.parent_phone, ip, PlatformSettings.load())
     token = secrets.token_urlsafe(24)
     consent.token_hash = hash_token(token)
     consent.last_sent_at = timezone.now()
     consent.save(update_fields=["token_hash", "last_sent_at", "updated_at"])
-    queue_sms(consent.parent_phone, CONSENT_SMS.format(url=consent_url(token)), purpose="consent")
+    queue_sms(consent.parent_phone, text.format(url=consent_url(token)), purpose="consent")
 
 
 def _same_child(subject: dict, learner: User) -> bool:
@@ -222,7 +222,7 @@ def create_learner_consent_request(
         )
         signup.expires_at = expires_at
         signup.save(update_fields=["expires_at", "updated_at"])
-        _send_consent_sms(consent, ip)
+        send_consent_sms(consent, ip)
     return consent
 
 
@@ -233,7 +233,7 @@ def resend_consent_request(consent: ConsentRequest, ip: str) -> ConsentRequest:
         raise ApiError("CONSENT_REQUEST_EXPIRED")
     if consent_resend_in_seconds(consent) > 0:
         raise ApiError("OTP_RESEND_TOO_EARLY", "Patiente un peu avant de renvoyer le SMS.")
-    _send_consent_sms(consent, ip)
+    send_consent_sms(consent, ip)
     return consent
 
 

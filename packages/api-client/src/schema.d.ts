@@ -790,6 +790,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/learning/activity/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Temps de vidéo réellement lu (ADR 0004 §7), envoyé par le lecteur toutes les 30 s, à la pause et à la fin.
+         *     Mission accessible seulement ; secondes plafonnées par appel et par jour.
+         */
+        post: operations["learning_activity_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/learning/attempts/": {
         parameters: {
             query?: never;
@@ -816,6 +836,78 @@ export interface paths {
         };
         /** @description Une de mes tentatives (WD08, WJ05, WJ08) ; celle d'un autre apprenant n'existe pas (404). */
         get: operations["learning_attempts_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/learning/badges/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Mes badges (WJ06, WJ11), les plus récents d'abord ; `?course=` pour un parcours. */
+        get: operations["learning_badges_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/learning/certificates/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Mes certificats (WJ07, WD21), avec l'état de leur PDF. */
+        get: operations["learning_certificates_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/learning/certificates/{id}/download/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Téléchargement (ADR 0005 §6) : redirection 302 vers une URL présignée de 5 minutes, jamais stockée ; sans
+         *     stockage objet (CI), le fichier est servi directement. PDF pas prêt : 409 `PDF_NOT_READY`. Le certificat d'un
+         *     autre apprenant n'existe pas (404).
+         */
+        get: operations["learning_certificates_download_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/learning/dashboard/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Accueil de l'apprenant (WD01 ; WD02 si rien à reprendre). */
+        get: operations["learning_dashboard_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -910,6 +1002,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/learning/progress/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Ma progression (WD21) : temps, points, badges, histogramme des 7 jours, maîtrise par catégorie. */
+        get: operations["learning_progress_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/learning/projects/{id}/": {
         parameters: {
             query?: never;
@@ -955,6 +1064,23 @@ export interface paths {
         put?: never;
         /** @description Envoi groupé des réponses (WJ04, WJ10) : correction serveur, statut D31, délai D32. */
         post: operations["learning_quizzes_attempts_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/learning/recommendations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Parcours recommandés (WD21, WJ07) : publiés, non suivis, liés aux objectifs d'abord. */
+        get: operations["learning_recommendations_list"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1393,10 +1519,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/wishlist/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Mes souhaits (WW01), triés ; parcours publiés seulement. */
+        get: operations["wishlist_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/wishlist/{course_slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Ajoute un parcours publié (WC01-WC05) : 201, ou 200 s'il y était déjà. */
+        put: operations["wishlist_update"];
+        post?: never;
+        /** @description Retire un parcours (WW01, annulable par un nouveau `PUT`) : 204, qu'il y soit ou non. */
+        delete: operations["wishlist_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Activity: {
+            /** @description Secondes retenues après plafonnement */
+            secondsCounted: number;
+            secondsToday: number;
+            streakDays: number;
+        };
+        ActivityRequestRequest: {
+            missionId: number;
+            /** @description Secondes réellement lues */
+            seconds: number;
+        };
         AnswerRequest: {
             questionId: number;
             choiceId: number;
@@ -1422,6 +1594,8 @@ export interface components {
             pointsEarned: number;
             /** Format: date-time */
             createdAt: string;
+            /** @description Badge du niveau ou du projet, si la tentative est réussie (WJ06, WJ11) */
+            badge: components["schemas"]["Badge"] | null;
             failedConcepts: string[];
             remediation: components["schemas"]["Remediation"][];
             questions: components["schemas"]["QuestionReview"][];
@@ -1477,6 +1651,20 @@ export interface components {
              */
             color: string;
         };
+        Badge: {
+            id: number;
+            kind: components["schemas"]["BadgeKindEnum"];
+            label: string;
+            icon: string;
+            description: string;
+        };
+        /**
+         * @description * `level` - Niveau
+         *     * `project` - Projet
+         *     * `course` - Parcours
+         * @enum {string}
+         */
+        BadgeKindEnum: "level" | "project" | "course";
         Category: {
             slug: string;
             /** Libellé */
@@ -1527,6 +1715,34 @@ export interface components {
              */
             icon: string;
         };
+        Certificate: {
+            id: number;
+            /** @description CERT-AAAA-NNNNNN */
+            number: string;
+            course: components["schemas"]["CourseRef"];
+            /** Format: date-time */
+            issuedAt: string;
+            /**
+             * @description `pending` : « Préparation… », interroger de nouveau ; `failed` : échec signalé au Support
+             *
+             *     * `pending` - En préparation
+             *     * `ready` - Prêt
+             *     * `failed` - Échec
+             */
+            pdfStatus: components["schemas"]["PdfStatusEnum"];
+        };
+        /** @description Conditions D33 (100 % des missions, toutes les sommatives réussies), certificat et ticket (WJ07, WJ09). */
+        Certification: {
+            eligible: boolean;
+            missionsDone: number;
+            missionCount: number;
+            summativesPassed: number;
+            summativeCount: number;
+            certificateEnabled: boolean;
+            certificate: components["schemas"]["Certificate"] | null;
+            /** @description Ticket Steamy Events offert à la certification */
+            eventTicket: boolean;
+        };
         /** @description Réponse proposée, sans le corrigé. */
         Choice: {
             id: number;
@@ -1568,7 +1784,7 @@ export interface components {
         ConsentRequest: {
             readonly id: number;
             /** Origine */
-            readonly origin: components["schemas"]["RoleEnum"];
+            readonly origin: components["schemas"]["OriginEnum"];
             readonly status: string;
             readonly firstName: string;
             readonly lastName: string;
@@ -1715,11 +1931,29 @@ export interface components {
         CsrfToken: {
             csrfToken: string;
         };
+        /** @description Accueil (WD01) ; `resume` absent → WD02. `points` et `rank` à null tant que le barème n'est pas fixé (C8). */
+        Dashboard: {
+            firstName: string;
+            points: number | null;
+            rank: components["schemas"]["Rank"] | null;
+            streakDays: number;
+            secondsToday: number;
+            /** @description Parcours à reprendre */
+            resume: components["schemas"]["Enrollment"] | null;
+            counters: components["schemas"]["LearnerCounters"];
+            /** @description 3 parcours recommandés */
+            recommendations: components["schemas"]["Recommendation"][];
+        };
         DashboardSummary: {
             totalUsers: number;
             eventsLast7Days: number;
             /** Format: double */
             revenueLast30Days: number;
+        };
+        DaySeconds: {
+            /** Format: date */
+            date: string;
+            seconds: number;
         };
         /**
          * @description * `beginner` - Débutant
@@ -1829,6 +2063,7 @@ export interface components {
          *     * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
          *     * `PAYMENT_FAILED` - PAYMENT_FAILED
          *     * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
+         *     * `PDF_NOT_READY` - PDF_NOT_READY
          *     * `PERMISSION_DENIED` - PERMISSION_DENIED
          *     * `PHONE_INVALID` - PHONE_INVALID
          *     * `PHONE_TAKEN` - PHONE_TAKEN
@@ -1845,7 +2080,7 @@ export interface components {
          *     * `VALIDATION_ERROR` - VALIDATION_ERROR
          * @enum {string}
          */
-        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUIRED" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
         FieldError: {
             code: string;
             message: string;
@@ -1928,9 +2163,29 @@ export interface components {
             /** @description Champ piège : toujours vide */
             website?: string;
         };
+        LearnerBadge: {
+            id: number;
+            kind: components["schemas"]["BadgeKindEnum"];
+            label: string;
+            icon: string;
+            description: string;
+            /** Format: date-time */
+            awardedAt: string;
+            course: components["schemas"]["CourseRef"];
+            projectId: number | null;
+            levelId: number | null;
+        };
         LearnerConsentRequestRequest: {
             parentPhone: string;
             relationship: string;
+        };
+        LearnerCounters: {
+            activeEnrollments: number;
+            completedEnrollments: number;
+            certificates: number;
+            badges: number;
+            /** @description Parcours dans « Mes souhaits » */
+            wishlist: number;
         };
         LearnerPasswordRequest: {
             password: string;
@@ -2045,6 +2300,12 @@ export interface components {
             user: components["schemas"]["Me"];
             csrfToken: string;
         };
+        Mastery: {
+            category: components["schemas"]["CategorySummary"];
+            missionsDone: number;
+            missionCount: number;
+            pct: number;
+        };
         /** @description Identité et rôle du compte connecté : sert aux shells, à la redirection après W16 et aux gardes (§7.3). */
         Me: {
             readonly id: number;
@@ -2077,6 +2338,8 @@ export interface components {
             /** @description Session du personnel validée par TOTP (D72) ; toujours faux pour un persona. */
             readonly otpVerified: boolean;
             readonly staffGroups: string[];
+            /** @description Compteurs du shell de l'apprenant (parcours, certificats, badges), null pour les autres rôles */
+            readonly counters: components["schemas"]["LearnerCounters"] | null;
         };
         /**
          * @description * `pending` - En attente de consentement
@@ -2140,6 +2403,8 @@ export interface components {
         MissionComplete: {
             missionId: number;
             progressPct: number;
+            /** @description 0 si déjà terminée ou sans barème (C8) */
+            pointsEarned: number;
             /** @description Mission suivante, ou certification si le parcours est fait */
             next: components["schemas"]["NextStep"];
         };
@@ -2248,6 +2513,14 @@ export interface components {
             /** Format: decimal */
             readonly total: string;
         };
+        /**
+         * @description * `learner` - Apprenant
+         *     * `parent` - Parent
+         *     * `teacher` - Enseignant
+         *     * `support` - Support
+         * @enum {string}
+         */
+        OriginEnum: "learner" | "parent" | "teacher" | "support";
         /** @description Défi OTP en cours : sert au compte à rebours de WP02 / WL03. */
         OtpChallenge: {
             /** Format: uuid */
@@ -2291,6 +2564,21 @@ export interface components {
                 perfectCount: number;
                 streakDays: number;
             };
+        };
+        PaginatedCertificateList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["Certificate"][];
         };
         PaginatedClassroomList: {
             /** @example 123 */
@@ -2366,6 +2654,21 @@ export interface components {
              */
             previous?: string | null;
             results?: components["schemas"]["Kit"][];
+        };
+        PaginatedLearnerBadgeList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["LearnerBadge"][];
         };
         PaginatedMemberList: {
             /** @example 123 */
@@ -2456,6 +2759,21 @@ export interface components {
              */
             previous?: string | null;
             results?: components["schemas"]["SupervisedCourse"][];
+        };
+        PaginatedWishlistItemList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["WishlistItem"][];
         };
         ParentProfile: {
             readonly locality: components["schemas"]["Locality"] | null;
@@ -2572,6 +2890,13 @@ export interface components {
             /** @description Code ISO du pays */
             country: string;
         };
+        /**
+         * @description * `pending` - En préparation
+         *     * `ready` - Prêt
+         *     * `failed` - Échec
+         * @enum {string}
+         */
+        PdfStatusEnum: "pending" | "ready" | "failed";
         Preferences: {
             /**
              * Format: email
@@ -2597,6 +2922,19 @@ export interface components {
         };
         /** @enum {string} */
         ProfileStepEnum: "learner-info" | "learner-school" | "learner-goals" | "learner-avatar" | "parent-location" | "parent-about" | "parent-children";
+        /** @description Ma progression (WD21). */
+        Progress: {
+            /** @description Du lundi à aujourd'hui */
+            weekSeconds: number;
+            /** @description 7 derniers jours, du plus ancien à aujourd'hui */
+            lastDays: components["schemas"]["DaySeconds"][];
+            points: number | null;
+            rank: components["schemas"]["Rank"] | null;
+            streakDays: number;
+            counters: components["schemas"]["LearnerCounters"];
+            /** @description Par catégorie des parcours suivis */
+            mastery: components["schemas"]["Mastery"][];
+        };
         /** @description Projet (WJ01). */
         ProjectDetail: {
             id: number;
@@ -2724,6 +3062,13 @@ export interface components {
             /** @description Champ piège : toujours vide */
             website?: string;
         };
+        Rank: {
+            label: string;
+            minPoints: number;
+            nextLabel: string | null;
+            /** @description Points du palier suivant */
+            nextAt: number | null;
+        };
         ReadAll: {
             /** @description Nombre de notifications marquées comme lues */
             updated: number;
@@ -2731,6 +3076,28 @@ export interface components {
         /** @description Réponse neutre, identique qu'il y ait eu enregistrement, doublon ou robot. */
         Received: {
             ok: boolean;
+        };
+        Recommendation: {
+            slug: string;
+            /** Titre */
+            title: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** Gratuit */
+            isFree?: boolean;
+            /** Prix (FCFA) */
+            price?: number;
+            /** @description Visuel des cartes */
+            emoji?: string;
+            readonly requiredKit: components["schemas"]["RequiredKit"] | null;
+            readonly coverImage: string | null;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** Mis en avant */
+            featured?: boolean;
+            /** @description Catégorie liée aux objectifs de l'apprenant */
+            readonly matchesGoals: boolean;
         };
         /** @description Projet ou niveau cité (fil d'Ariane, position). */
         Ref: {
@@ -3020,7 +3387,7 @@ export interface components {
             value?: string | null;
             metadata?: unknown;
         };
-        /** @description Arbre du parcours (WC06a, WC06b, WJ09) : titres, durées et états, sans contenu. */
+        /** @description Arbre du parcours (WC06a, WC06b, WJ07, WJ09) : titres, durées et états, sans contenu. */
         Tree: {
             id: number;
             course: components["schemas"]["CourseList"];
@@ -3040,6 +3407,7 @@ export interface components {
             /** @description Niveau de la prochaine étape */
             currentLevel: components["schemas"]["Ref"] | null;
             next: components["schemas"]["NextStep"];
+            certification: components["schemas"]["Certification"];
             projects: components["schemas"]["TreeProject"][];
         };
         TreeLevel: {
@@ -3078,6 +3446,11 @@ export interface components {
         };
         WebhookNack: {
             ok: boolean;
+        };
+        WishlistItem: {
+            course: components["schemas"]["CourseList"];
+            /** Format: date-time */
+            addedAt: string;
         };
     };
     responses: never;
@@ -5476,6 +5849,61 @@ export interface operations {
             };
         };
     };
+    learning_activity_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivityRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Activity"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     learning_attempts_list: {
         parameters: {
             query?: {
@@ -5567,6 +5995,214 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_badges_list: {
+        parameters: {
+            query?: {
+                /** @description Slug du parcours */
+                course?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedLearnerBadgeList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_certificates_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCertificateList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_certificates_download_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Fichier PDF */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Redirection vers l'URL présignée */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_dashboard_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5920,6 +6556,49 @@ export interface operations {
             };
         };
     };
+    learning_progress_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Progress"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     learning_projects_retrieve: {
         parameters: {
             query?: never;
@@ -6074,6 +6753,51 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_recommendations_list: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Recommendation"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7107,6 +7831,181 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KitDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    wishlist_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /**
+                 * @description * `recent` - Ajoutés récemment
+                 *     * `title` - Titre
+                 *     * `price` - Prix croissant
+                 */
+                sort?: "recent" | "title" | "price";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedWishlistItemList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    wishlist_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WishlistItem"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WishlistItem"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    wishlist_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             404: {
