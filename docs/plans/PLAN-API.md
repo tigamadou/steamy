@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L3a.3
+Statut : 🟡 en cours · Prochaine tâche : API-L3a.4
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -290,6 +290,8 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 ### API-L3a · Pédagogie — 🟡 en cours
 - [ ] **Préalables**
   - [ ] Barème de points et paliers de rang saisis dans `PlatformSettings` (C8)
+    > Le code est prêt (L3a.3) et le seed met des valeurs de démonstration ; les valeurs réelles restent à fixer
+    > par l'équipe (point ouvert « Reste à décider »), à saisir dans l'admin.
   - [x] **ADR-Médias (Vimeo)** : vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de hors ligne (D16)
 - [x] **API-L3a.1** Inscriptions et arbre · `feature/api-l3a-1-inscriptions` · PR #64
   - [x] `Enrollment` (`source`), `MissionProgress`
@@ -338,10 +340,23 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `next.type` gagne `quiz` (+ `quizKind`, `levelId` nul pour une sommative). `GET learning/attempts/`
   > (`?status=ok|warn|ko&quiz=`) ajoute `summary {attemptCount, successRate, perfectCount, streakDays}` sur toutes
   > les tentatives (filtres ignorés).
-- [ ] **API-L3a.3** Gamification · `feature/api-l3a-3-gamification`
-  - [ ] `PointsEntry`, `Badge`, `LearnerBadge`, `LearningActivity`
-  - [ ] `POST learning/activity/` (secondes plafonnées, anti-gonflage)
-  - [ ] Streak (fuseau `TIME_ZONE`), rang dérivé, `GET learning/badges/`
+- [x] **API-L3a.3** Gamification · `feature/api-l3a-3-gamification` · PR #68
+  - [x] `PointsEntry`, `Badge`, `LearnerBadge`, `LearningActivity`
+  - [x] `POST learning/activity/` (secondes plafonnées, anti-gonflage)
+  - [x] Streak (fuseau `TIME_ZONE`), rang dérivé, `GET learning/badges/`
+  - [x] Points et badge dans les réponses de `missions/{id}/complete/` (`pointsEarned`) et des tentatives (`pointsEarned`, `badge`)
+  - [x] Seed : badge par niveau, projet et parcours ; barème et paliers de démonstration ; points, badges et streak de 5 jours de Léa
+  > Décisions : `Badge` dans `catalog` (contenu, matrice des groupes), un par niveau, projet ou parcours
+  > (contrainte « la cible de son type, et elle seule ») ; `LearnerBadge`, `PointsEntry`, `LearningActivity` dans
+  > `learning`. Barème `points_scale` : clés `mission`, `formative`, `summative`, `course` ; un événement
+  > (`mission:<id>`, `quiz:<id>`, `course:<id>`) ne rapporte qu'une fois (contrainte d'unicité), une formative ou
+  > une sommative seulement à sa première réussite. Barème vide : aucun point (`pointsEarned = 0`) et `points` /
+  > `rank` à `null` dans le tableau de bord (L3a.5). Rang dérivé à la lecture de `rank_thresholds`
+  > (`{label, minPoints, nextLabel, nextAt}`), `LearnerProfile.rank` n'est pas utilisé. Activité :
+  > `{missionId, seconds}` (1 à 3600), mission accessible seulement, 120 s retenues au plus par appel et 4 h par
+  > jour (verrou sur le profil) ; mission terminée et quiz passé comptent aussi (ligne à 0 s). Streak calculé à la
+  > lecture (jours consécutifs jusqu'à aujourd'hui ou hier), `LearnerProfile.streakDays` gardé en cache.
+  > `GET learning/badges/?course=` : badges obtenus, paginés.
 - [ ] **API-L3a.4** Certificats · `feature/api-l3a-4-certificats`
   - [x] **ADR PDF et stockage privé** (WeasyPrint, Celery, RustFS privé, URL présignées courtes)
   - [ ] Conditions D33 en transaction ; `Certificate.number` séquentiel

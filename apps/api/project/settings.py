@@ -322,6 +322,7 @@ SPECTACULAR_SETTINGS = {
         "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
         "AttemptStatusEnum": "apps.learning.models.QuizAttempt.Status",
         "QuizKindEnum": "apps.catalog.models.Quiz.Kind",
+        "BadgeKindEnum": "apps.catalog.models.Badge.Kind",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
