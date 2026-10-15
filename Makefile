@@ -2,10 +2,13 @@
 COMPOSE := docker compose
 API     := $(COMPOSE) run --rm api
 WEB     := $(COMPOSE) run --rm --no-deps web sh -c
+# Stack des parcours Playwright : projet séparé, sans port publié (cohabite avec `make up`)
+E2E     := docker compose -p steamy-e2e -f compose.yml -f compose.e2e.yml
 
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
-        test-api lint-api fix-api psql flower clean openapi lint-web typecheck-web
+        test-api lint-api fix-api psql flower clean openapi lint-web typecheck-web \
+        test-web e2e e2e-down
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -77,6 +80,17 @@ lint-web: ## Lint du front
 
 typecheck-web: ## Vérification TypeScript (web + api-client)
 	$(WEB) "corepack enable && pnpm typecheck"
+
+test-web: ## Tests de composants du front (Vitest)
+	$(WEB) "corepack enable && pnpm test"
+
+e2e: ## Parcours Playwright sur la stack Docker (web en image prod, données rechargées)
+	$(E2E) up -d --build --wait web
+	$(MAKE) migrate seed COMPOSE="$(E2E)"
+	$(E2E) run --rm playwright
+
+e2e-down: ## Arrête la stack e2e et supprime ses données
+	$(E2E) --profile e2e down -v
 
 psql: ## Console PostgreSQL
 	$(COMPOSE) exec postgres psql -U steamy steamy
