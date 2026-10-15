@@ -63,7 +63,7 @@ plan.
 | --- | --- | --- | --- |
 | [PLAN-API](PLAN-API.md) | 🟡 en cours | API-0 ✅ (PR #5 à #9) · API-1 ✅ (PR #12, #15, #17, #21 à #25) · API-L1 ✅ (PR #33, #37, #40, #41, #43) · API-L2 : L2.0b à L2.7 (PR #29, #32, #34, #39, #42, #44 à #46) ; parcours Playwright avec le lot 2 · API-L3a : L3a.1 (PR #64), L3a.2 (PR #66) | API-L3a.3 |
 | [LOT-1-PUBLIC](LOT-1-PUBLIC.md) | ✅ terminé | 1.0 à 1.6 fusionnées (PR #18, #19, #30, #36, #47 à #50, #58) · critères de fin et validation C18 (PR #59) | — |
-| [LOT-2-AUTH](LOT-2-AUTH.md) | 🟡 en cours | 2.0 (PR #31) · 2.1 (PR #35) | 2.2 (après API-L2) |
+| [LOT-2-AUTH](LOT-2-AUTH.md) | 🟡 en cours | 2.0 (PR #31) · 2.1 (PR #35) · 2.2 à 2.8 (PR #51 à #57) | Critères de fin du lot (CI, correctifs API signalés) |
 | [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | ⬜ à faire | — | 3.0 (après API-1 et API-L3a) |
 | [LOT-4-PARENT](LOT-4-PARENT.md) | ⬜ à faire | — | 4.0 conception de WPD15 (sans prérequis d'API) |
 | [LOT-5-ENSEIGNANT](LOT-5-ENSEIGNANT.md) | ⬜ à faire | — | 5.1 (après API-L5) |

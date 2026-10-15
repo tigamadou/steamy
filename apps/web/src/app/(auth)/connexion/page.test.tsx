@@ -11,6 +11,6 @@ describe("ConnexionPage (W16)", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Bon retour, on t'avait gardé une place !");
     expect(screen.getByText("Connecte-toi pour reprendre tes parcours.")).toBeInTheDocument();
     expect(screen.queryByText(/missions en attente/)).not.toBeInTheDocument();
-    expect(metadata.title).toBe("Connexion · Steamy");
+    expect(metadata.title).toBe("Connexion");
   });
 });
