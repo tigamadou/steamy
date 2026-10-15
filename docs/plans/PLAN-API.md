@@ -377,12 +377,19 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Seed enrichi (commandes, kits en rupture…)
   - [ ] `make openapi` committé
 
-### API-L4 · Espace parent — ⬜ à faire
+### API-L4 · Espace parent — 🟡 en cours
 - [ ] **API-L4.1** Enfants · `feature/api-l4-1-enfants`
-  - [ ] `GET/POST accounts/children/` (consentement origine `parent`, D51)
-  - [ ] `GET/PATCH accounts/children/{id}/` (`publicDisplayAllowed` D15, progression et tentatives récentes)
-  - [ ] `POST …/password-reset/` (§8.9), `GET accounts/me/parent/`
-  - [ ] Tests : parent A ne lit ni ne modifie l'enfant de B (toutes les routes)
+  - [x] `GET/POST accounts/children/` (consentement origine `parent`, D51)
+  - [x] `GET/PATCH accounts/children/{id}/` (`publicDisplayAllowed` D15)
+  - [ ] Progression par parcours et tentatives récentes dans `GET accounts/children/{id}/` (attend API-L3a.1 et L3a.2)
+  - [x] `POST …/password-reset/` (§8.9), `GET accounts/me/parent/`
+  - [x] Tests : parent A ne lit ni ne modifie l'enfant de B (toutes les routes)
+  > Décisions : `children/` ne liste que les enfants rattachés (comptes anonymisés exclus) ; l'enfant « en attente »
+  > de WPD02 (D50) vient de `consent-requests/?status=pending`, sans lien encore. `PATCH` : prénom, nom, date de
+  > naissance (`AGE_OUT_OF_RANGE`, `BIRTHDATE_AGE_MISMATCH`), classe, localité, genre, handicap,
+  > `publicDisplayAllowed` ; identifiant et mot de passe ignorés. Genre, handicap et localité seulement dans le
+  > détail (D6). `me/parent/` : nom et lien de parenté, ni numéro ni email (WD22). Enum `UserStatusEnum` nommé
+  > dans le schéma (collision des `status`).
 - [ ] **API-L4.2** À valider · `feature/api-l4-2-a-valider`
   - [ ] `GET accounts/pending-actions/` (D52)
   - [ ] `POST events/applications/{id}/accept/` (payant → `PaymentRequest`/commande, D53), `…/refuse/`
