@@ -481,6 +481,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.accounts.tasks.purge_refused_requests",
         "schedule": crontab(minute=30, hour=3),
     },
+    "detect-dropouts": {
+        "task": "apps.classrooms.tasks.detect_dropouts",
+        "schedule": crontab(minute=0, hour=7),
+    },
 }
 # optional default task time limits
 CELERY_TASK_TIME_LIMIT = int(os.getenv("CELERY_TASK_TIME_LIMIT", 300))
