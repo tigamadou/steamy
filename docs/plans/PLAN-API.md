@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L1.1
+Statut : 🟡 en cours · Prochaine tâche : API-L1.2
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -160,11 +160,22 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Front compilé contre le nouveau client
   - [x] Plus aucune route hors `/api/<domaine>/…/` (routeurs DRF passés en `SimpleRouter` : ni vue racine ni suffixe `.format`)
 
-### API-L1 · Catalogue public, événements, formulaires, kits — ⬜ à faire
-- [ ] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog`
-  - [ ] Modèles `Category`, `Course`, `Project`, `Level`, `Mission` (`vimeoId`, `blocks` JSON validé)
-  - [ ] Suppression de `courses`
-  - [ ] Admin Django (groupe Contenu, ordre par glisser via `order`)
+### API-L1 · Catalogue public, événements, formulaires, kits — 🟡 en cours
+- [x] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog` · PR #NUM
+  - [x] Modèles `Category`, `Course`, `Project`, `Level`, `Mission` (`vimeoId`, `blocks` JSON validé)
+  - [x] Suppression de `courses`
+  - [x] Admin Django (groupe Contenu, ordre par glisser via `order`)
+  - [x] `learning` rattaché au catalogue (`Enrollment.course`, `Quiz.course`, `Progress.mission`)
+  - [x] Seed : 6 catégories (dont une vide), 4 parcours publiés complets dont un mis en avant, un brouillon
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : `requiredKit` arrive avec `shop.Kit` en API-L1.5 (le modèle n'existe pas encore) ; le `badge` des
+  > projets et niveaux arrive avec `Badge` en API-L3a. Ajouts à §3.2 : `Course.emoji` (visuel des cartes de la
+  > maquette), `trailerVimeoHash` (ADR 0004, point V2), contrainte « gratuit ⇔ prix nul ». `blocks` : liste de
+  > `{type: text|tip, text}` ou `{type: media, src, alt, caption?}` (`src` en https ou chemin du stockage).
+  > `courses` n'a plus ni modèle ni route : il ne garde que ses migrations (`0002` supprime ses tables), pour ne pas
+  > réécrire `learning.0001` déjà fusionnée ; l'app disparaîtra à la refonte des migrations de `learning`
+  > (API-L3a). Les droits du groupe Contenu viennent de la matrice des groupes du lot 6.1 (`setup_staff_groups`) ;
+  > `Course` déclare la permission `publish_course`. Ordre par glisser-déposer : `django-admin-sortable2`.
 - [ ] **API-L1.2** Endpoints catalogue · `feature/api-l1-2-catalogue-api`
   - [ ] `GET catalog/categories/` (avec `courseCount`)
   - [ ] `GET catalog/courses/` (filtres `category`, `difficulty`, `price`, `featured`, `q`, `sort`)

@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "drf_spectacular_sidecar",
+    "adminsortable2",
     "storages",
     "django_otp",
     "django_otp.plugins.otp_totp",
@@ -83,7 +84,9 @@ INSTALLED_APPS = [
     "apps.file",
     "apps.mail",
     "apps.accounts",
+    # Coquille : ne garde que ses migrations (tables supprimées en 0002), voir apps/courses/__init__.py
     "apps.courses",
+    "apps.catalog",
     "apps.learning",
     "apps.payments",
     "apps.analytics",

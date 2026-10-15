@@ -84,6 +84,10 @@ def test_s12_token_header_does_not_authenticate(user):
         "/api/payments/",
         "/api/analytics/",
         "/api/courses/courses.json",
+        # Ancienne app `courses`, remplacée par `catalog` (API-L1.1)
+        "/api/courses/courses/",
+        "/api/courses/lessons/",
+        "/api/courses/resources/",
     ],
 )
 @pytest.mark.django_db
@@ -105,25 +109,23 @@ def test_websocket_is_not_served():
 
 @pytest.fixture
 def paid_course(db):
-    from apps.courses.models import Course, Lesson, Module
+    from apps.catalog.tests.factories import MissionFactory
 
-    course = Course.objects.create(title="Payant", slug="payant", published=True, price=5000)
-    module = Module.objects.create(course=course, title="M1", order=0)
-    Lesson.objects.create(module=module, title="L1", content="CONTENU-SECRET", order=0)
-    return course
+    mission = MissionFactory(
+        level__project__course__paid=True,
+        blocks=[{"type": "text", "text": "CONTENU-SECRET"}],
+    )
+    return mission.level.project.course
 
 
 @pytest.mark.django_db
-def test_s6_lesson_content_requires_enrollment(paid_course, user):
-    anonymous = APIClient()
-    assert anonymous.get("/api/courses/lessons/").status_code == 401
-    # Le détail public du parcours donne le plan, jamais le contenu.
-    detail = anonymous.get(f"/api/courses/courses/{paid_course.slug}/")
-    assert detail.status_code == 200 and "CONTENU-SECRET" not in detail.content.decode()
-
-    not_enrolled = APIClient()
-    not_enrolled.force_authenticate(user)
-    assert not_enrolled.get("/api/courses/lessons/").json()["results"] == []
+def test_s6_mission_content_is_not_served_by_the_old_routes(paid_course, user):
+    # Le contenu des missions n'est servi qu'à un inscrit (API-L3a) ; les routes de `courses` ont disparu.
+    for client in (APIClient(), APIClient()):
+        for url in (f"/api/courses/courses/{paid_course.slug}/", "/api/courses/lessons/"):
+            resp = client.get(url)
+            assert resp.status_code == 404 and "CONTENU-SECRET" not in resp.content.decode()
+        client.force_authenticate(user)
 
 
 # --- S7 · Inscription gratuite à un parcours payant ----------------------------------------
@@ -135,13 +137,9 @@ def test_s7_paid_course_cannot_be_enrolled_for_free(paid_course, user):
 
     client = APIClient()
     client.force_authenticate(user)
-    via_course = client.post(f"/api/courses/courses/{paid_course.slug}/enroll/")
-    via_learning = client.post(
-        "/api/learning/enrollments/", {"course": paid_course.id}, format="json"
-    )
+    resp = client.post("/api/learning/enrollments/", {"course": paid_course.id}, format="json")
 
-    assert via_course.status_code == 402 and via_learning.status_code == 402
-    assert via_course.json()["code"] == via_learning.json()["code"] == "PAYMENT_REQUIRED"
+    assert resp.status_code == 402 and resp.json()["code"] == "PAYMENT_REQUIRED"
     assert not Enrollment.objects.filter(user=user).exists()
 
 
@@ -150,13 +148,13 @@ def test_s7_paid_course_cannot_be_enrolled_for_free(paid_course, user):
 
 @pytest.mark.django_db
 def test_s4_lists_only_return_the_callers_objects(user):
-    from apps.courses.models import Course
+    from apps.catalog.tests.factories import CourseFactory
     from apps.learning.models import Attempt, Certificate, Enrollment, Quiz
     from apps.notifications.tests.factories import NotificationFactory
     from apps.payments.models import Order, Payment
 
     other = LearnerFactory()
-    course = Course.objects.create(title="Gratuit", slug="gratuit", published=True, price=0)
+    course = CourseFactory()
     enrollment = Enrollment.objects.create(user=other, course=course)
     Certificate.objects.create(enrollment=enrollment, score=90)
     Attempt.objects.create(user=other, quiz=Quiz.objects.create(course=course, title="Q"))
@@ -225,7 +223,9 @@ def test_errors_use_the_single_format_in_french(user):
         {"code": "REQUIRED", "message": "Ce champ est obligatoire."}
     ]
 
-    not_found = APIClient().get("/api/courses/courses/inexistant/").json()
+    client = APIClient()
+    client.force_authenticate(user)
+    not_found = client.get("/api/payments/orders/999999/").json()
     assert not_found == {"code": "NOT_FOUND", "message": not_found["message"]}
     assert "trouvé" in not_found["message"].lower()
 

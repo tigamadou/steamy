@@ -65,3 +65,21 @@ def test_seed_demo_keeps_data_edited_by_hand_consistent():
     User.objects.filter(username="lea.adjovi").update(first_name="Autre")
     call_command("seed_demo")
     assert User.objects.get(username="lea.adjovi").first_name == "Léa"
+
+
+def test_catalog_has_published_courses_a_featured_one_a_draft_and_an_empty_category():
+    from apps.catalog.models import Category, Course, Mission
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    published = Course.objects.filter(status=Course.Status.PUBLISHED)
+    assert published.count() == 4
+    assert published.filter(featured=True).count() == 1
+    assert published.filter(is_free=False).exists() and published.filter(is_free=True).exists()
+    assert Course.objects.filter(status=Course.Status.DRAFT).exists()
+    assert all(
+        course.projects.filter(levels__missions__isnull=False).exists() for course in published
+    )
+    assert Category.objects.filter(courses__isnull=True).exists()
+    for mission in Mission.objects.all():
+        mission.full_clean()  # blocs valides
