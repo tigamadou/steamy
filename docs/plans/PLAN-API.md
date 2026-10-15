@@ -119,7 +119,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > réglable par catégorie, envoyé à l'adresse de contact (profil, ou email de connexion de l'enseignant) par Celery
   > après validation de la transaction. `notify(user, category, type, title, …)`. `url` contrainte à un chemin du
   > front. Restrictions propres aux mineurs (D6, D30) en API-L3a.6.
-- [x] **API-1.5** Référentiels (D3) · `feature/api-1-referentiels` · PR #__
+- [x] **API-1.5** Référentiels (D3) · `feature/api-1-referentiels` · PR #23
   - [x] App `referentials` : `Country`, `PaymentNetwork` (Celtiis inclus, D76), `SchoolGrade`, `Goal`, `Avatar`, `Disability`, `Relationship`, `RefusalReason`, `Locality`
   - [x] Données initiales par migration de données
   - [x] Endpoints `GET referentials/*` publics, `Cache-Control: public, max-age=3600`
