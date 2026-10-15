@@ -19,7 +19,7 @@ test("devis : offre choisie → formulaire présélectionné → envoi → confi
   await expect(page.getByRole("combobox", { name: "Offre" })).toHaveValue("ecole");
 
   await page.getByRole("button", { name: "Envoyer la demande" }).click();
-  await expect(page.getByRole("alert")).toContainText("Indiquez le nom de l'établissement.");
+  await expect(page.locator("form").getByRole("alert")).toContainText("Indiquez le nom de l'établissement.");
 
   await page.getByLabel(/Nom de l'établissement/).fill(school);
   await page.getByLabel(/Personne à contacter/).fill("Awa Houngbo");
@@ -45,7 +45,7 @@ test("contact : « Rejoindre l'équipe » → sujet « Candidature » → envoi 
   await page.getByLabel(/Email ou téléphone/).fill("marie.e2e@example.com");
   await page.getByLabel(/^Message/).fill("Bonjour");
   await page.getByRole("button", { name: "Envoyer" }).click();
-  await expect(page.getByRole("alert")).toContainText("au moins 20 caractères");
+  await expect(page.locator("form").getByRole("alert")).toContainText("au moins 20 caractères");
   await expect(page.getByLabel(/^Nom/)).toHaveValue("Marie Adjovi");
 
   await page.getByLabel(/^Message/).fill("Bonjour, je suis ingénieure et j'aimerais animer des ateliers Steamy.");
