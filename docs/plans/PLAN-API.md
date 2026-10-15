@@ -440,6 +440,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Seed enrichi, `make openapi` committé
 
 ### API-L5 · Enseignant et classes — 🟡 en cours
+> Reprise : PR empilées, à fusionner dans l'ordre #74 → #81 → #84 → #86 → #88. Restent
+> `GET classrooms/event-applications/` (API-L5.5, après API-L3b.6) et les badges du parcours sur WT05 (après
+> API-L3a.3), chacun dans une petite PR après la fusion de ces étapes dans `development`.
 - [x] **API-L5.1** Classes · `feature/api-l5-1-classes` · PR #74
   - [x] `Classroom`, `ClassroomMembership` ; offre de `School` (`offer`, `courses`) ; quotas (`CLASSROOM_QUOTA_EXCEEDED`, D61 ; `LEARNER_QUOTA_EXCEEDED` appliqué aux invitations en API-L5.2)
   - [x] `GET classrooms/school/`, `GET/POST classrooms/` (`COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`), `GET/PATCH classrooms/{id}/`
@@ -488,7 +491,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `PlatformSettings`, date d'adhésion avant toute activité, parcours terminé exclu). WT10 : `completedCount` par
   > mission, `passRate` par niveau et projet (« missions les plus échouées » : niveaux au plus faible taux),
   > `formativePassRate`, `summativePassRate`. Badges du parcours sur WT05 : avec API-L3a.3.
-- [x] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage`
+- [x] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage` · PR #88
   - [x] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
   > Décisions : tous les jours à 7 h (heure du Bénin) ; une notification à l'enseignant par élève et par période
   > d'inactivité (`ClassroomMembership.dropout_notified_at`), lien vers WT05 (`/enseignant/eleves/<id>?classe=<id>`).
