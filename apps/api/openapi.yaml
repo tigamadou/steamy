@@ -716,41 +716,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/analytics/dashboard/summary/:
-    get:
-      operationId: analytics_dashboard_summary_retrieve
-      description: |-
-        Exemple d'endpoint "dashboard" qui combine plusieurs métriques.
-        On cache la réponse brièvement pour soulager la DB.
-      tags:
-      - analytics
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DashboardSummary'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
   /api/analytics/events/:
     post:
       operationId: analytics_events_create
@@ -777,52 +742,6 @@ paths:
                 $ref: '#/components/schemas/TrackingEvent'
           description: ''
         '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/analytics/export/events/:
-    get:
-      operationId: analytics_export_events_retrieve
-      parameters:
-      - in: query
-        name: end
-        schema:
-          type: string
-          format: date
-        description: 'Par défaut : aujourd''hui'
-      - in: query
-        name: start
-        schema:
-          type: string
-          format: date
-        description: 'Par défaut : il y a 7 jours'
-      tags:
-      - analytics
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            text/csv:
-              schema:
-                type: string
-                format: binary
-          description: Export CSV des événements
-        '401':
           content:
             application/json:
               schema:
@@ -1419,6 +1338,308 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UsernameAvailabilityResponse'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/impact-reports/{period}/:
+    get:
+      operationId: backoffice_impact_reports_retrieve
+      description: 'WAD04 : lignes du rapport trimestriel (plages, réponses, statuts,
+        sources), figées une fois soumis.'
+      parameters:
+      - in: path
+        name: period
+        schema:
+          type: string
+        required: true
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactReport'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/impact-reports/{period}/submit/:
+    post:
+      operationId: backoffice_impact_reports_submit_create
+      description: 'WAD04 « Soumettre » (*submit_impact_report*) : verrouille et fige
+        le rapport ; idempotent (D74).'
+      parameters:
+      - in: path
+        name: period
+        schema:
+          type: string
+        required: true
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactReport'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/impact-reports/{period}/values/:
+    patch:
+      operationId: backoffice_impact_reports_values_partial_update
+      description: 'WAD05 : brouillon de la saisie manuelle (*enter_kpi_value*) ;
+        `REPORT_LOCKED` après soumission (D74).'
+      parameters:
+      - in: path
+        name: period
+        schema:
+          type: string
+        required: true
+      tags:
+      - backoffice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedValuesInputRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactReport'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/kpis/:
+    get:
+      operationId: backoffice_kpis_list
+      description: 'WAD02 : indicateurs par groupe pour la période en cours (Finance,
+        Super-admin).'
+      parameters:
+      - in: query
+        name: period
+        schema:
+          enum:
+          - month
+          - quarter
+          - year
+          type: string
+          default: month
+          minLength: 1
+        description: |-
+          Période de WAD02 : mois, trimestre ou année en cours
+
+          * `month` - month
+          * `quarter` - quarter
+          * `year` - year
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KpiDashboard'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/kpis/{code}/:
+    get:
+      operationId: backoffice_kpis_retrieve
+      description: 'WAD03 : statut, valeur, cible, historique, composition et définition
+        d''un indicateur.'
+      parameters:
+      - in: path
+        name: code
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: period
+        schema:
+          enum:
+          - month
+          - quarter
+          - year
+          type: string
+          default: month
+          minLength: 1
+        description: |-
+          Période de WAD02 : mois, trimestre ou année en cours
+
+          * `month` - month
+          * `quarter` - quarter
+          * `year` - year
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KpiDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/overview/:
+    get:
+      operationId: backoffice_overview_retrieve
+      description: 'WAD01 : tout membre du personnel ; « À traiter » limité aux groupes
+        de l''utilisateur.'
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Overview'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
         '429':
           content:
@@ -4955,6 +5176,25 @@ components:
       required:
       - id
       - text
+    CompositionPart:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        value:
+          oneOf:
+          - type: number
+          - type: boolean
+          - type: string
+          nullable: true
+          description: Nombre (unités count, fcfa, score), booléen (yes_no) ou texte
+            ; null si absente
+      required:
+      - code
+      - label
+      - value
     ConsentPreview:
       type: object
       description: 'Ce que montre le lien SMS avant toute connexion : le numéro masqué,
@@ -4974,7 +5214,7 @@ components:
           readOnly: true
         origin:
           allOf:
-          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/OriginEnum'
           readOnly: true
           title: Origine
         status:
@@ -5367,20 +5607,6 @@ components:
       - resume
       - secondsToday
       - streakDays
-    DashboardSummary:
-      type: object
-      properties:
-        totalUsers:
-          type: integer
-        eventsLast7Days:
-          type: integer
-        revenueLast30Days:
-          type: number
-          format: double
-      required:
-      - eventsLast7Days
-      - revenueLast30Days
-      - totalUsers
     DaySeconds:
       type: object
       properties:
@@ -5897,6 +6123,120 @@ components:
       description: |-
         * `ok` - ok
         * `degraded` - degraded
+    Highlight:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        value:
+          oneOf:
+          - type: number
+          - type: boolean
+          - type: string
+          nullable: true
+          description: Nombre (unités count, fcfa, score), booléen (yes_no) ou texte
+            ; null si absente
+        target:
+          type: number
+          format: double
+          nullable: true
+        status:
+          $ref: '#/components/schemas/KpiStatus'
+      required:
+      - code
+      - label
+      - status
+      - target
+      - value
+    HistoryPoint:
+      type: object
+      properties:
+        period:
+          type: string
+        label:
+          type: string
+        value:
+          oneOf:
+          - type: number
+          - type: boolean
+          - type: string
+          nullable: true
+          description: Nombre (unités count, fcfa, score), booléen (yes_no) ou texte
+            ; null si absente
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/KpiStatus'
+      required:
+      - end
+      - label
+      - period
+      - start
+      - status
+      - value
+    ImpactReport:
+      type: object
+      properties:
+        period:
+          type: string
+          description: 2026-t1
+        label:
+          type: string
+          description: T1 2026
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/ImpactReportStatusEnum'
+        submittedAt:
+          type: string
+          format: date-time
+          nullable: true
+        submittedBy:
+          type: string
+          nullable: true
+        entered:
+          type: integer
+          description: Indicateurs manuels renseignés
+        total:
+          type: integer
+          description: Indicateurs manuels
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportRow'
+      required:
+      - dueDate
+      - end
+      - entered
+      - label
+      - period
+      - rows
+      - start
+      - status
+      - submittedAt
+      - submittedBy
+      - total
+    ImpactReportStatusEnum:
+      enum:
+      - draft
+      - submitted
+      type: string
+      description: |-
+        * `draft` - Brouillon
+        * `submitted` - Soumis
     InvoiceSummary:
       type: object
       properties:
@@ -6047,6 +6387,228 @@ components:
       - name
       - price
       - slug
+    KpiDashboard:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/KpiGroup'
+      required:
+      - groups
+      - period
+    KpiDetail:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        group:
+          type: string
+        unit:
+          $ref: '#/components/schemas/KpiUnitEnum'
+        source:
+          $ref: '#/components/schemas/KpiSourceEnum'
+        target:
+          type: number
+          format: double
+          nullable: true
+        baseCode:
+          type: string
+          nullable: true
+        value:
+          oneOf:
+          - type: number
+          - type: boolean
+          - type: string
+          nullable: true
+          description: Nombre (unités count, fcfa, score), booléen (yes_no) ou texte
+            ; null si absente
+        status:
+          $ref: '#/components/schemas/KpiStatus'
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeriesPoint'
+        period:
+          $ref: '#/components/schemas/Period'
+        calculation:
+          type: string
+          description: 'Définition : mode de calcul'
+        periodicity:
+          $ref: '#/components/schemas/KpiPeriodicityEnum'
+        baseline:
+          type: number
+          format: double
+          nullable: true
+        attainment:
+          type: integer
+          nullable: true
+          description: Taux d'atteinte de la cible, en %
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryPoint'
+        composition:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompositionPart'
+      required:
+      - attainment
+      - baseCode
+      - baseline
+      - calculation
+      - code
+      - composition
+      - group
+      - history
+      - label
+      - period
+      - periodicity
+      - series
+      - source
+      - status
+      - target
+      - unit
+      - value
+    KpiGroup:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        kpis:
+          type: array
+          items:
+            $ref: '#/components/schemas/KpiSummary'
+      required:
+      - code
+      - kpis
+      - label
+    KpiPeriodicityEnum:
+      enum:
+      - month
+      - quarter
+      type: string
+      description: |-
+        * `month` - Mensuelle
+        * `quarter` - Trimestrielle
+    KpiSourceEnum:
+      enum:
+      - auto
+      - manual
+      - unavailable
+      type: string
+      description: |-
+        * `auto` - Auto
+        * `manual` - Manuel
+        * `unavailable` - Indisponible
+    KpiStatus:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/KpiStatusEnum'
+        tone:
+          $ref: '#/components/schemas/KpiToneEnum'
+        label:
+          type: string
+      required:
+      - label
+      - status
+      - tone
+    KpiStatusEnum:
+      enum:
+      - unavailable
+      - pending
+      - filled
+      - off_target
+      - below
+      - achieved
+      type: string
+      description: |-
+        * `unavailable` - unavailable
+        * `pending` - pending
+        * `filled` - filled
+        * `off_target` - off_target
+        * `below` - below
+        * `achieved` - achieved
+    KpiSummary:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        group:
+          type: string
+        unit:
+          $ref: '#/components/schemas/KpiUnitEnum'
+        source:
+          $ref: '#/components/schemas/KpiSourceEnum'
+        target:
+          type: number
+          format: double
+          nullable: true
+        baseCode:
+          type: string
+          nullable: true
+        value:
+          oneOf:
+          - type: number
+          - type: boolean
+          - type: string
+          nullable: true
+          description: Nombre (unités count, fcfa, score), booléen (yes_no) ou texte
+            ; null si absente
+        status:
+          $ref: '#/components/schemas/KpiStatus'
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeriesPoint'
+      required:
+      - baseCode
+      - code
+      - group
+      - label
+      - series
+      - source
+      - status
+      - target
+      - unit
+      - value
+    KpiToneEnum:
+      enum:
+      - neutral
+      - amber
+      - info
+      - error
+      - success
+      type: string
+      description: |-
+        * `neutral` - neutral
+        * `amber` - amber
+        * `info` - info
+        * `error` - error
+        * `success` - success
+    KpiUnitEnum:
+      enum:
+      - count
+      - fcfa
+      - score
+      - yes_no
+      - text
+      type: string
+      description: |-
+        * `count` - Nombre
+        * `fcfa` - Montant (FCFA)
+        * `score` - Note
+        * `yes_no` - Oui / non
+        * `text` - Texte
     LeadRequest:
       type: object
       properties:
@@ -7163,6 +7725,18 @@ components:
         * `paid` - Payée
         * `cancelled` - Annulée
         * `refunded` - Remboursée
+    OriginEnum:
+      enum:
+      - learner
+      - parent
+      - teacher
+      - support
+      type: string
+      description: |-
+        * `learner` - Apprenant
+        * `parent` - Parent
+        * `teacher` - Enseignant
+        * `support` - Support
     OtpChallenge:
       type: object
       description: 'Défi OTP en cours : sert au compte à rebours de WP02 / WL03.'
@@ -7208,6 +7782,53 @@ components:
       required:
       - challengeId
       - code
+    Overview:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        highlight:
+          $ref: '#/components/schemas/Highlight'
+        stats:
+          $ref: '#/components/schemas/OverviewStats'
+        report:
+          $ref: '#/components/schemas/ReportDeadline'
+        todo:
+          type: array
+          items:
+            $ref: '#/components/schemas/Todo'
+      required:
+      - highlight
+      - period
+      - report
+      - stats
+      - todo
+    OverviewStats:
+      type: object
+      properties:
+        users:
+          type: integer
+          description: Comptes actifs (apprenants, parents, enseignants)
+        activeLearners:
+          type: integer
+          description: Apprenants connectés dans les 30 jours
+        salesMonth:
+          oneOf:
+          - type: number
+          - type: boolean
+          - type: string
+          nullable: true
+          description: Nombre (unités count, fcfa, score), booléen (yes_no) ou texte
+            ; null si absente
+        completionRate:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - activeLearners
+      - completionRate
+      - salesMonth
+      - users
     PaginatedAttemptListItemList:
       type: object
       properties:
@@ -7698,6 +8319,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CategoryPreferenceRequest'
+    PatchedValuesInputRequest:
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValueEntryRequest'
     Payment:
       type: object
       description: État d'un paiement (WA04, WA05, WA07, WK09), interrogé jusqu'à
@@ -7951,6 +8579,27 @@ components:
         * `pending` - En préparation
         * `ready` - Prêt
         * `failed` - Échec
+    Period:
+      type: object
+      properties:
+        key:
+          type: string
+          description: 2026-01, 2026-t1 ou 2026
+        label:
+          type: string
+        start:
+          type: string
+          format: date
+          description: Premier jour (inclus)
+        end:
+          type: string
+          format: date
+          description: Dernier jour (inclus)
+      required:
+      - end
+      - key
+      - label
+      - start
     Preferences:
       type: object
       properties:
@@ -8487,6 +9136,75 @@ components:
       - concept
       - missionId
       - title
+    ReportDeadline:
+      type: object
+      properties:
+        period:
+          type: string
+        label:
+          type: string
+        dueDate:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/ImpactReportStatusEnum'
+        entered:
+          type: integer
+          description: Indicateurs manuels renseignés
+        total:
+          type: integer
+          description: Indicateurs manuels
+      required:
+      - dueDate
+      - entered
+      - label
+      - period
+      - status
+      - total
+    ReportRow:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        group:
+          type: string
+        unit:
+          $ref: '#/components/schemas/KpiUnitEnum'
+        source:
+          $ref: '#/components/schemas/KpiSourceEnum'
+        start:
+          type: string
+          format: date
+          description: Du (plage calculée par le serveur)
+        end:
+          type: string
+          format: date
+          description: Au
+        value:
+          oneOf:
+          - type: number
+          - type: boolean
+          - type: string
+          nullable: true
+          description: Nombre (unités count, fcfa, score), booléen (yes_no) ou texte
+            ; null si absente
+        status:
+          $ref: '#/components/schemas/KpiStatus'
+        note:
+          type: string
+      required:
+      - code
+      - end
+      - group
+      - label
+      - note
+      - source
+      - start
+      - status
+      - unit
+      - value
     RequiredKit:
       type: object
       description: 'Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`.'
@@ -8563,6 +9281,25 @@ components:
       - code
       - id
       - label
+    SeriesPoint:
+      type: object
+      properties:
+        period:
+          type: string
+        label:
+          type: string
+        value:
+          oneOf:
+          - type: number
+          - type: boolean
+          - type: string
+          nullable: true
+          description: Nombre (unités count, fcfa, score), booléen (yes_no) ou texte
+            ; null si absente
+      required:
+      - label
+      - period
+      - value
     ShippingStatusEnum:
       enum:
       - preparing
@@ -8823,6 +9560,24 @@ components:
       - expiresAt
       - firstName
       - lastName
+    Todo:
+      type: object
+      properties:
+        kind:
+          type: string
+          description: consents_pending (d'autres types suivront avec API-L3b)
+        label:
+          type: string
+        count:
+          type: integer
+        adminPath:
+          type: string
+          description: Chemin de la liste filtrée dans l'admin Django
+      required:
+      - adminPath
+      - count
+      - kind
+      - label
     TokenRequest:
       type: object
       properties:
@@ -9061,6 +9816,22 @@ components:
           type: boolean
       required:
       - available
+    ValueEntryRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+        value:
+          nullable: true
+          description: Nombre (count, fcfa, score), booléen (yes_no) ou texte ; null
+            efface la saisie
+        note:
+          type: string
+          maxLength: 500
+      required:
+      - code
+      - value
     WebhookAck:
       type: object
       properties:
