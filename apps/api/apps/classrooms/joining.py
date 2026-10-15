@@ -7,13 +7,15 @@ transaction, une fois la demande vérifiée (numéro du parent, demande ouverte)
 - **rattachement d'un enfant existant** (C11) : un enfant déjà lié à ce parent rejoint la classe, sans nouveau compte ;
 - **refus ou expiration** : la place est libérée (C19) et l'enseignant est prévenu (WT04, WT12).
 
-L'élève rejoint la classe dès l'acceptation : le parcours est couvert par l'offre de l'école (D62).
+L'élève rejoint la classe dès l'acceptation et il est inscrit au parcours de la classe (`source=classroom`), couvert
+par l'offre de l'école, sans paiement (D62). Une inscription antérieure au même parcours est gardée telle quelle.
 """
 
 from django.db.models.functions import Lower
 from django.utils import timezone
 
 from apps.accounts.models import ConsentRequest, LearnerProfile, ParentChildLink, User
+from apps.learning.models import Enrollment
 from apps.notifications.models import Category
 from apps.notifications.services import notify
 from libs.errors import ApiError
@@ -21,6 +23,13 @@ from libs.errors import ApiError
 from .models import ClassroomMembership
 
 Status = ClassroomMembership.Status
+
+
+def enroll(learner, course) -> Enrollment:
+    enrollment, _ = Enrollment.objects.get_or_create(
+        learner=learner, course=course, defaults={"source": Enrollment.Source.CLASSROOM}
+    )
+    return enrollment
 
 
 def classroom_url(membership: ClassroomMembership) -> str:
@@ -88,6 +97,7 @@ def join_classroom(consent: ConsentRequest, parent, data: dict) -> ClassroomMemb
     membership.joined_at = timezone.now()
     membership.save(update_fields=["learner", "status", "joined_at", "updated_at"])
     classroom = membership.classroom
+    enroll(learner, classroom.course)
     notify(
         classroom.teacher,
         Category.PROGRESS,
