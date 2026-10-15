@@ -443,11 +443,22 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > par SMS sur le numéro du compte, apprenant par notification (`/apprenant/boutique/<slug>`) ; réponse
   > `201 {ok: true}` identique si la demande existe déjà ; l'envoi part quand le stock repasse au-dessus de zéro
   > (signal `post_save` du kit, tâche `notify_restock_alerts`), une seule fois par demande.
-- [ ] **API-L3b.4** Kit Codes · `feature/api-l3b-4-kit-codes`
-  - [ ] Génération `STEAMY-XXXX-XXXX` (Crockford base32, `secrets`) à l'exécution post-paiement
-  - [ ] `POST payments/kit-codes/redeem/` : normalisation, `KIT_CODE_NOT_COMPATIBLE`, consommation atomique, throttle utilisateur et IP (D35)
-  - [ ] `Enrollment` `source=kit_code`
-  - [ ] Tests : deux rachats concurrents → un seul succès
+- [x] **API-L3b.4** Kit Codes · `feature/api-l3b-4-kit-codes`
+  - [x] Génération `STEAMY-XXXX-XXXX` (Crockford base32, `secrets`) à l'exécution post-paiement
+  - [x] `POST payments/kit-codes/redeem/` : normalisation, `KIT_CODE_NOT_COMPATIBLE`, consommation atomique, throttle utilisateur et IP (D35)
+  - [x] `Enrollment` `source=kit_code`
+  - [x] `kitCodes` dans la commande, visibles du payeur seul (reporté de L3b.1)
+  - [x] Tests : deux rachats concurrents → un seul succès
+  > Décisions : `KitCode` (`code`, `kit`, `orderItem`, `redeemedBy`, `redeemedCourse`, `redeemedAt`, `revokedAt`,
+  > permission `revoke_kitcode` de la matrice des groupes) ; un code par kit commandé, retiré au tirage en cas de
+  > collision. Saisie normalisée : casse, espaces et tirets indifférents, préfixe `STEAMY` facultatif, `O`→`0`,
+  > `I`/`L`→`1`. Rachat réservé à l'apprenant (`{code, courseSlug}`) : parcours inconnu → 404 `NOT_FOUND` ; code
+  > inconnu, mal formé ou révoqué → 400 `KIT_CODE_INVALID` ; parcours qui n'exige pas ce kit et n'est pas dans ses
+  > parcours compatibles → 400 `KIT_CODE_NOT_COMPATIBLE` ; déjà utilisé → 409 `KIT_CODE_ALREADY_USED` ; déjà inscrit →
+  > 200 sans consommer le code ; sinon 201 `{courseSlug, courseTitle, created}`. Code verrouillé
+  > (`select_for_update`) dans la transaction qui crée l'inscription. Throttles `kit-code` (10/h par apprenant) et
+  > `kit-code-ip` (30/h par IP). `kitCodes[{code, kitSlug, redeemed}]` dans la commande du payeur (parent ou
+  > invité), jamais dans celle du bénéficiaire.
 - [ ] **API-L3b.5** Demandes de paiement · `feature/api-l3b-5-demandes-paiement`
   - [ ] `PaymentRequest` ; `POST payments/payment-requests/` (montant recalculé), `…/{id}/resend/`, `GET`, `…/cancel/`, `…/decline/`
   - [ ] SMS au parent avec lien WPD15 ; tâche `expire_payment_requests` (7 j)

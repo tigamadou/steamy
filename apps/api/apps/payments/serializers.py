@@ -16,7 +16,7 @@ from libs.errors import message_for
 from libs.phone import mask_phone
 
 from . import pricing
-from .models import Order, OrderItem, Payment
+from .models import KitCode, Order, OrderItem, Payment
 
 #: Types de commande créables directement (l'événement passe par la candidature)
 ORDER_CREATE_KINDS = [Order.Kind.COURSE, Order.Kind.KIT]
@@ -223,14 +223,33 @@ class BeneficiaryOrderSerializer(serializers.ModelSerializer):
         return {"id": learner.pk, "first_name": learner.first_name} if learner else None
 
 
+class KitCodeSerializer(serializers.ModelSerializer):
+    kit_slug = serializers.SlugRelatedField(source="kit", slug_field="slug", read_only=True)
+    redeemed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = KitCode
+        fields = ("code", "kit_slug", "redeemed")
+        read_only_fields = fields
+
+    def get_redeemed(self, kit_code) -> bool:
+        return kit_code.redeemed_at is not None
+
+
 class OrderSerializer(BeneficiaryOrderSerializer):
-    """Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison."""
+    """Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison et les Kit Codes (C10)."""
 
     delivery_address = OrderDeliveryAddressSerializer(read_only=True, allow_null=True)
+    kit_codes = serializers.SerializerMethodField()
 
     class Meta(BeneficiaryOrderSerializer.Meta):
-        fields = (*BeneficiaryOrderSerializer.Meta.fields, "delivery_address")
+        fields = (*BeneficiaryOrderSerializer.Meta.fields, "delivery_address", "kit_codes")
         read_only_fields = fields
+
+    @extend_schema_field(KitCodeSerializer(many=True))
+    def get_kit_codes(self, order):
+        codes = KitCode.objects.filter(order_item__order=order, revoked_at__isnull=True)
+        return KitCodeSerializer(codes.select_related("kit"), many=True).data
 
 
 class OrderCreatedSerializer(OrderSerializer):
@@ -289,3 +308,21 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     def get_msisdn_masked(self, payment) -> str:
         return mask_phone(payment.msisdn)
+
+
+# --- Kit Codes ---------------------------------------------------------------------------------
+
+
+class KitCodeRedeemSerializer(serializers.Serializer):
+    code = serializers.CharField(
+        max_length=32, help_text="STEAMY-XXXX-XXXX, casse et tirets indifférents"
+    )
+    course_slug = serializers.SlugField(help_text="Parcours à débloquer")
+
+
+class KitCodeRedeemedSerializer(serializers.Serializer):
+    course_slug = serializers.CharField()
+    course_title = serializers.CharField()
+    created = serializers.BooleanField(
+        help_text="Faux si l'apprenant était déjà inscrit (code non consommé)"
+    )

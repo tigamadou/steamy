@@ -6,7 +6,7 @@ RBAC du back-office (API-L6.2).
 
 from django.contrib import admin
 
-from .models import Invoice, Order, OrderItem, Payment, Refund
+from .models import Invoice, KitCode, Order, OrderItem, Payment, Refund
 
 
 class ReadOnlyInline(admin.TabularInline):
@@ -85,3 +85,18 @@ class InvoiceAdmin(admin.ModelAdmin):
 class RefundAdmin(admin.ModelAdmin):
     list_display = ("payment", "amount", "processed", "created_at")
     list_filter = ("processed",)
+
+
+@admin.register(KitCode)
+class KitCodeAdmin(admin.ModelAdmin):
+    """Suivi des Kit Codes (Support, Finance) ; la révocation arrive avec les actions du back-office (L6.2)."""
+
+    list_display = ("code", "kit", "redeemed_by", "redeemed_course", "redeemed_at", "revoked_at")
+    list_filter = ("kit",)
+    search_fields = ("code", "order_item__order__reference")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

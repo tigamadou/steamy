@@ -434,7 +434,7 @@ def test_order_properties():
     assert str(item) == f"{item.title} × 1"
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, serialized_rollback=True)
 def test_last_kit_ordered_concurrently_only_one_succeeds():
     """Deux commandes simultanées du dernier kit : le verrou du kit n'en laisse passer qu'une."""
     import threading

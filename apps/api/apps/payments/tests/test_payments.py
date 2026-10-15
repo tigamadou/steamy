@@ -341,7 +341,7 @@ def test_paid_kits_leave_the_cart_and_confirm_the_stock(parent, commit):
 # --- Concurrence, doublons, paiement tardif --------------------------------------------------
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, serialized_rollback=True)
 def test_concurrent_webhooks_fulfil_the_order_once():
     """Deux notifications identiques simultanées : le verrou de la commande n'exécute la commande qu'une fois."""
     order = OrderFactory()
