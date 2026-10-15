@@ -99,7 +99,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > valeurs de `SourceTag` (`auto`, `manual`, `unavailable`) sont à aligner sur le contrat d'`API-L6.4`.
   > Le refus de `/backoffice/impact` est vérifié en e2e avec le compte Support (aussi hors Finance et Super-admin) :
   > Contenu reçoit des codes faux dans `admin-connexion.spec.ts`, ce qui déclenche la limitation de django-otp.
-- [x] **6.7** WAD01 Vue d'ensemble · `feature/lot6-vue-ensemble` · PR #PR67 (requiert 6.6, API-L6.4)
+- [x] **6.7** WAD01 Vue d'ensemble · `feature/lot6-vue-ensemble` · PR #93 (requiert 6.6, API-L6.4)
   - [x] WAD01 (Next.js) `/backoffice` : hero, 4 `StatCard`, carte échéance (`DeadlineTracker`), liste « À traiter »
   - [x] Branchement API : `GET backoffice/overview/` (entrées « À traiter » filtrées par groupe, `adminPath` fourni par le serveur)
   - [x] Tests Vitest : états vide, chargement, erreur
