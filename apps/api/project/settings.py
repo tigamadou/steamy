@@ -269,6 +269,7 @@ REST_FRAMEWORK = {
         "username-availability": os.getenv("THROTTLE_USERNAME_AVAILABILITY", "30/min"),
         "resume": os.getenv("THROTTLE_RESUME", "5/min"),
         "resume-username": os.getenv("THROTTLE_RESUME_USERNAME", "10/hour"),
+        "consent-preview": os.getenv("THROTTLE_CONSENT_PREVIEW", "20/min"),
         "password-reset": os.getenv("THROTTLE_PASSWORD_RESET", "5/hour"),
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
     },
@@ -293,7 +294,11 @@ SPECTACULAR_SETTINGS = {
     ],
     "SCHEMA_PATH_PREFIX": r"/api",
     # Codes du format d'erreur D4 : énumération nommée pour le client TypeScript
-    "ENUM_NAME_OVERRIDES": {"ErrorCodeEnum": "libs.errors.ERROR_CODES"},
+    # Rôle d'un compte et origine d'une demande de consentement ont les mêmes valeurs : un seul `RoleEnum`
+    "ENUM_NAME_OVERRIDES": {
+        "ErrorCodeEnum": "libs.errors.ERROR_CODES",
+        "RoleEnum": "apps.accounts.models.User.Role",
+    },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
 ADMIN_TITLE = "Admin"
@@ -443,6 +448,10 @@ CELERY_BEAT_SCHEDULE = {
     "purge-signup-sessions": {
         "task": "apps.accounts.tasks.purge_signup_sessions",
         "schedule": crontab(minute=15),
+    },
+    "purge-refused-requests": {
+        "task": "apps.accounts.tasks.purge_refused_requests",
+        "schedule": crontab(minute=30, hour=3),
     },
 }
 # optional default task time limits

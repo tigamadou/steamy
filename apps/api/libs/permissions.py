@@ -22,3 +22,11 @@ class IsAdminUserOrReadOnly(IsAdminUser):
     def has_permission(self, request, view):
         is_admin = super().has_permission(request, view)
         return request.method in SAFE_METHODS or is_admin
+
+
+class IsParent(permissions.IsAuthenticated):
+    """Parent connecté (anonyme : 401 ; autre rôle : 403)."""
+
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) and request.user.is_parent
+

@@ -35,6 +35,11 @@ SESSION_KEY = "learner_signup"
 RESUME_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
 RESUME_LENGTH = 8
 
+#: Après un refus, plus de nouvelle demande vers ce numéro pendant 30 jours (D22, C9).
+REFUSAL_COOLDOWN = timedelta(days=30)
+#: Clé de session de la dernière demande de l'inscription : W18 l'affiche même après la purge du compte refusé.
+CONSENT_SESSION_KEY = "learner_signup_consent"
+
 CONSENT_SMS = (
     "Steamy : votre enfant demande votre accord pour s'inscrire sur Steamy. "
     "Pour voir la demande et répondre : {url}"
@@ -156,6 +161,16 @@ def _same_child(subject: dict, learner: User) -> bool:
     )
 
 
+def check_cooldown(phone: str) -> None:
+    """Le délai de 30 jours après un refus s'applique au numéro du parent, quel que soit l'enfant (C9)."""
+    if ConsentRequest.objects.filter(
+        parent_phone=phone,
+        status=ConsentRequest.Status.REFUSED,
+        resolved_at__gt=timezone.now() - REFUSAL_COOLDOWN,
+    ).exists():
+        raise ApiError("CONSENT_COOLDOWN")
+
+
 def create_learner_consent_request(
     signup: SignupSession, phone, relationship, ip
 ) -> ConsentRequest:
@@ -167,6 +182,7 @@ def create_learner_consent_request(
     """
     learner = signup.learner
     now = timezone.now()
+    check_cooldown(phone)
     with transaction.atomic():
         pending = ConsentRequest.objects.select_for_update().filter(
             status=ConsentRequest.Status.PENDING, origin=ConsentRequest.Origin.LEARNER

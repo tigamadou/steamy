@@ -215,13 +215,14 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Âge 10-17 (D23)
   - [x] `POST accounts/consent-requests/` (origine `learner`, SMS au parent avec lien à jeton, annulation de la demande en attente C14), `…/{id}/resend/`
   - [x] Tests : jeton haché et remplacé à chaque renvoi (usage unique à la réclamation : API-L2.4), apprenant `pending` ne peut pas se connecter (son code de reprise sur W16 donne `ACCOUNT_PENDING_CONSENT`, C5)
-- [ ] **API-L2.4** Décision du parent · `feature/api-l2-4-decision-parent`
-  - [ ] `POST accounts/consent-requests/preview/` (public, throttlé, numéro masqué)
-  - [ ] `POST accounts/consent-requests/claim/` (`CONSENT_PHONE_MISMATCH`)
-  - [ ] `GET accounts/consent-requests/`, `GET …/{id}/` (D20)
-  - [ ] `…/accept/`, `…/refuse/` (motif obligatoire) ; création de `ParentChildLink`
-  - [ ] Refus : demande gardée 30 j (C9), `CONSENT_COOLDOWN`, compte purgé, identifiant libéré (D22)
-  - [ ] Tests : parent ne voit que les demandes de son numéro, double acceptation → `CONSENT_ALREADY_RESOLVED`, nouvelle demande avant 30 j refusée
+- [x] **API-L2.4** Décision du parent · `feature/api-l2-4-decision-parent`
+  - [x] `POST accounts/consent-requests/preview/` (public, throttlé, numéro masqué)
+  - [x] `POST accounts/consent-requests/claim/` (`CONSENT_PHONE_MISMATCH`)
+  - [x] `GET accounts/consent-requests/`, `GET …/{id}/` (D20)
+  - [x] `…/accept/`, `…/refuse/` (motif obligatoire) ; création de `ParentChildLink`
+  - [x] Refus : demande gardée 30 j (C9), `CONSENT_COOLDOWN`, compte purgé, identifiant libéré (D22)
+  - [x] Tests : parent ne voit que les demandes de son numéro, double acceptation → `CONSENT_ALREADY_RESOLVED`, nouvelle demande avant 30 j refusée
+  - [x] Jeton du lien SMS à usage unique (consommé par `claim`) ; état `refused` de `GET auth/learner-signup/` pour W18
 - [ ] **API-L2.5** Profils · `feature/api-l2-5-profils`
   - [ ] `profileStep` de `accounts/me/`
   - [ ] `PATCH accounts/me/`, `…/learner-profile/` (`BIRTHDATE_AGE_MISMATCH`, objectifs ≥ 2), `…/parent-profile/`
@@ -234,8 +235,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Invitation créée depuis l'admin Django (action « Envoyer »)
   - [ ] `GET auth/teacher-invitations/{token}/`, `POST …/accept/` (C6)
   - [ ] Tests : jeton expiré ou réutilisé refusé
-- [ ] **Tâches Celery d'API-L2**
-  - [ ] `send_sms`, `expire_consent_requests` (7 j), `purge_refused_requests` (30 j), `purge_signup_sessions`
+- [x] **Tâches Celery d'API-L2**
+  - [x] `send_sms`, `expire_consent_requests` (7 j), `purge_refused_requests` (30 j), `purge_signup_sessions`
+  - [x] Planifiées dans `CELERY_BEAT_SCHEDULE`, exécutables à la main (`manage.py <tâche>`)
 - [ ] **Critères de fin d'API-L2**
   - [ ] Parcours Playwright inscription apprenant → consentement → W11-W14 passant sur la stack Docker avec le faux SMS
   - [ ] Parcours Playwright inscription parent passant

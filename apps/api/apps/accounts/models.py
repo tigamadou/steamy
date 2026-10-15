@@ -429,3 +429,23 @@ class ConsentRequest(TimestampedModel):
 
     def __str__(self):
         return f"Demande {self.get_origin_display().lower()} du {self.created_at:%Y-%m-%d} ({self.status})"
+
+
+class ParentChildLink(TimestampedModel):
+    """Lien parent ↔ apprenant : **un parent par apprenant**, à tout âge (S3) ; changement par la modération (D22)."""
+
+    parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="children_links")
+    learner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="parent_link")
+    relationship = models.ForeignKey(
+        "referentials.Relationship", on_delete=models.PROTECT, related_name="+"
+    )
+    consent_request = models.ForeignKey(
+        ConsentRequest, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        verbose_name = _("lien parent-enfant")
+        verbose_name_plural = _("liens parent-enfant")
+
+    def __str__(self):
+        return f"{self.parent} → {self.learner}"

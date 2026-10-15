@@ -20,9 +20,9 @@ from rest_framework.views import APIView
 from apps.accounts import signup as service
 from apps.accounts.fields import AcceptedField, PasswordField, PhoneField
 from apps.accounts.models import ConsentRequest, User
-from apps.accounts.otp import client_ip
 from apps.accounts.validators import USERNAME_INVALID_MESSAGE, validate_username
 from apps.referentials.models import Relationship
+from apps.referentials.serializers import RefusalReasonSerializer
 from libs.errors import ApiError, message_for
 from libs.phone import mask_phone
 
@@ -83,6 +83,7 @@ class ConsentRequestStateSerializer(serializers.ModelSerializer):
     parent_phone_masked = serializers.SerializerMethodField()
     relationship = serializers.SlugRelatedField(slug_field="code", read_only=True)
     resend_in_sec = serializers.SerializerMethodField()
+    refusal_reason = RefusalReasonSerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = ConsentRequest
@@ -93,6 +94,7 @@ class ConsentRequestStateSerializer(serializers.ModelSerializer):
             "relationship",
             "expires_at",
             "resend_in_sec",
+            "refusal_reason",
         )
         read_only_fields = fields
 
@@ -107,10 +109,12 @@ class LearnerSignupStep:
     PARENT = "parent"  # W06 : saisir le numéro du parent
     WAITING = "waiting"  # W07 : demande envoyée, en attente
     PASSWORD = "password"  # W08 → W10 : accord donné, choisir le mot de passe
+    REFUSED = "refused"  # W18 : refus du parent, compte supprimé
     CHOICES = [
         (PARENT, "W06 · Parent"),
         (WAITING, "W07 · Attente"),
         (PASSWORD, "W10 · Mot de passe"),
+        (REFUSED, "W18 · Refus"),
     ]
 
 
@@ -122,6 +126,19 @@ class LearnerSignupStateSerializer(serializers.Serializer):
     username = serializers.CharField()
     expires_at = serializers.DateTimeField()
     consent_request = ConsentRequestStateSerializer(allow_null=True)
+
+    @staticmethod
+    def refused(consent):
+        """W18 : le compte refusé est supprimé ; l'onglet de l'enfant garde l'issue de sa demande."""
+        return LearnerSignupStateSerializer(
+            {
+                "step": LearnerSignupStep.REFUSED,
+                "first_name": consent.subject.get("first_name", ""),
+                "username": consent.subject.get("username", ""),
+                "expires_at": consent.expires_at,
+                "consent_request": consent,
+            }
+        ).data
 
     @staticmethod
     def build(signup):
@@ -231,7 +248,13 @@ class LearnerSignupView(PublicView):
 
     @extend_schema(responses=LearnerSignupStateSerializer, auth=[])
     def get(self, request):
-        """W06-W10 : étape réelle de l'inscription en cours (garde du layout du flux)."""
+        """W06-W10, W18 : étape réelle de l'inscription en cours (garde du layout du flux)."""
+        refused = ConsentRequest.objects.filter(
+            pk=request.session.get(service.CONSENT_SESSION_KEY),
+            status=ConsentRequest.Status.REFUSED,
+        ).first()
+        if refused is not None:
+            return Response(LearnerSignupStateSerializer.refused(refused))
         return Response(LearnerSignupStateSerializer.build(service.signup_from_session(request)))
 
 
@@ -273,43 +296,3 @@ class LearnerSignupPasswordView(PublicView):
         request.session.pop(service.SESSION_KEY, None)
         login(request, learner, backend="apps.accounts.backends.IdentifierBackend")
         return Response({"user": MeSerializer(learner).data, "csrf_token": get_token(request)})
-
-
-class LearnerConsentRequestView(PublicView):
-    """W06 : envoie la demande au parent (SMS avec lien à jeton). Réservé à l'inscription en cours."""
-
-    throttle_scope = "signup"
-
-    @extend_schema(
-        request=LearnerConsentRequestSerializer,
-        responses={201: ConsentRequestStateSerializer},
-        auth=[],
-    )
-    def post(self, request):
-        enforce_csrf(request)
-        signup = service.signup_from_session(request)
-        serializer = LearnerConsentRequestSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        consent = service.create_learner_consent_request(
-            signup,
-            serializer.validated_data["parent_phone"],
-            serializer.validated_data["relationship"],
-            client_ip(request),
-        )
-        return Response(ConsentRequestStateSerializer(consent).data, status=status.HTTP_201_CREATED)
-
-
-class LearnerConsentResendView(PublicView):
-    """W07 « Renvoyer le SMS » : nouveau lien (seul le dernier est valable), 60 s au moins entre deux envois."""
-
-    throttle_scope = "otp"
-
-    @extend_schema(request=None, responses=ConsentRequestStateSerializer, auth=[])
-    def post(self, request, pk):
-        enforce_csrf(request)
-        signup = service.signup_from_session(request)
-        consent = signup.learner.consent_requests.filter(pk=pk).first()
-        if consent is None:
-            raise ApiError("NOT_FOUND")
-        consent = service.resend_consent_request(consent, client_ip(request))
-        return Response(ConsentRequestStateSerializer(consent).data)
