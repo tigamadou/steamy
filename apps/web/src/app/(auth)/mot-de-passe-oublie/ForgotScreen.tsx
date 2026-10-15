@@ -12,6 +12,7 @@ import { Mascot } from "@/components/ds/Mascot";
 import { PhoneInput } from "@/components/ds/PhoneInput";
 import { WebShell } from "@/components/ds/WebShell";
 import { apiCall, errorMessage } from "@/lib/api-call";
+import { submitWith } from "@/lib/form";
 import { useReferential } from "@/lib/use-referential";
 
 import { useResetFlow } from "./ResetFlow";
@@ -71,7 +72,7 @@ export function ForgotScreen() {
         </>
       }
     >
-      <form action={action} noValidate className="flex flex-col gap-4">
+      <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-4">
         {flow.notice && (
           <p role="status" className="rounded-lg bg-info-50 p-4 text-sm font-bold text-info-700">
             {flow.notice}

@@ -13,6 +13,7 @@ import { homeForRole } from "@/lib/auth/home-for-role";
 import { errorMessage, type ApiFailure } from "@/lib/api-call";
 import { login } from "@/lib/auth/login";
 import { setResumeIdentifier } from "@/lib/auth/resume-handoff";
+import { submitWith } from "@/lib/form";
 import { useReferential } from "@/lib/use-referential";
 
 import { ForgotPasswordChoice } from "./ForgotPasswordChoice";
@@ -76,7 +77,7 @@ export function LoginForm({ next }: { next: string | null }) {
   };
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-4">
+    <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-4">
       <ErrorSummary title="Connexion impossible :" errors={errors} focusKey={state.attempt} />
       {code === "ACCOUNT_PENDING_CONSENT" && (
         <Button variant="outline" onClick={resume}>

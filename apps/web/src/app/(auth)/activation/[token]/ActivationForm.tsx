@@ -11,6 +11,7 @@ import { NewPasswordFields } from "@/components/ds/NewPasswordFields";
 import { isPasswordValid } from "@/components/ds/PwReq";
 import { WebShell } from "@/components/ds/WebShell";
 import { apiCall, errorMessage } from "@/lib/api-call";
+import { submitWith } from "@/lib/form";
 
 import { InvalidInvitation } from "../InvalidInvitation";
 
@@ -71,7 +72,7 @@ export function ActivationForm({ token, invitation }: { token: string; invitatio
       }
       brand={<Mascot pose="wave" size={220} hue="var(--surface)" />}
     >
-      <form action={action} noValidate className="flex flex-col gap-4">
+      <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-4">
         <ErrorSummary title="Activation impossible :" errors={errors} focusKey={state.attempt} />
         <NewPasswordFields
           label="Mot de passe"

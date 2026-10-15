@@ -10,6 +10,7 @@ import { NewPasswordFields } from "@/components/ds/NewPasswordFields";
 import { isPasswordValid } from "@/components/ds/PwReq";
 import { WebShell } from "@/components/ds/WebShell";
 import { apiCall, errorMessage } from "@/lib/api-call";
+import { submitWith } from "@/lib/form";
 
 import { RESTART_NOTICE, useResetFlow } from "../ResetFlow";
 import { useFlowGuard } from "../useFlowGuard";
@@ -63,7 +64,7 @@ export function NewPasswordScreen() {
       sub="Il remplacera l'ancien sur tous vos appareils."
       brand={<Mascot pose="idle" size={200} hue="var(--surface)" />}
     >
-      <form action={action} noValidate className="flex flex-col gap-4">
+      <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-4">
         <ErrorSummary title="Enregistrement impossible :" errors={errors} focusKey={state.attempt} />
         <NewPasswordFields
           label="Nouveau mot de passe"

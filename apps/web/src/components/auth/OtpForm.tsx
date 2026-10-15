@@ -7,6 +7,7 @@ import { Button } from "@/components/ds/Button";
 import { OTPInput } from "@/components/ds/OTPInput";
 import { ResendCountdown } from "@/components/ds/ResendCountdown";
 import { apiCall, errorMessage, type ApiFailure, type ApiResult } from "@/lib/api-call";
+import { submitWith } from "@/lib/form";
 
 export type OtpChallenge = Schemas["OtpChallenge"];
 
@@ -90,7 +91,7 @@ export function OtpForm({ challenge, channel, verify, onChallenge, submitLabel, 
   };
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-5">
+    <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-5">
       <OTPInput
         key={round}
         name="code"
