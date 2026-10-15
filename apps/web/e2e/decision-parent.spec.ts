@@ -17,7 +17,7 @@ test("lien SMS → WP01-WP03 → WP05 accepter → WP06 → profil", async ({ pa
   const phone = uniquePhone();
   const link = await sendConsentRequest(page, phone);
 
-  const parent = await browser.newPage();
+  const parent = await (await browser.newContext()).newPage();
   const landing = await parent.goto(link.pathname);
   expect(landing?.headers()["referrer-policy"]).toBe("no-referrer");
   // Jeton retiré de l'URL, aucun détail sur l'enfant avant authentification
@@ -54,7 +54,7 @@ test("parent déjà inscrit : lien → connexion → WP05 → WP11 refus confirm
   await createParent({ phone, password: "Parent2026x" });
   const link = await sendConsentRequest(page, phone);
 
-  const parent = await browser.newPage();
+  const parent = await (await browser.newContext()).newPage();
   await parent.goto(link.pathname);
   await parent.getByRole("link", { name: "J'ai déjà un compte" }).click();
   await expect(parent).toHaveURL(/\/connexion\?next=%2Fconsentement$/);
@@ -94,7 +94,7 @@ test("le lien d'un autre numéro est refusé sans détail sur l'enfant (CONSENT_
   await startLearnerSignup(page, "Ayo");
   const link = await sendConsentRequest(page, uniquePhone());
 
-  const other = await browser.newPage();
+  const other = await (await browser.newContext()).newPage();
   const { phone } = await createParent();
   await loginViaApi(other, phone);
   await other.goto(link.pathname);
