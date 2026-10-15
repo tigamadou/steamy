@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     "apps.notifications",
     "apps.referentials",
     "apps.classrooms",
+    "apps.impact",
     "apps.core",
 ]
 
@@ -324,6 +325,16 @@ SPECTACULAR_SETTINGS = {
         "AttemptStatusEnum": "apps.learning.models.QuizAttempt.Status",
         "QuizKindEnum": "apps.catalog.models.Quiz.Kind",
         "BadgeKindEnum": "apps.catalog.models.Badge.Kind",
+        # Impact Tracker : noms explicites, sans renommer `ToneEnum` (notifications)
+        "ToneEnum": "apps.notifications.models.Tone",
+        "PeriodKindEnum": "apps.impact.periods.KINDS",
+        "KpiStatusEnum": "apps.impact.status.STATUS_CODES",
+        "KpiToneEnum": "apps.impact.status.TONES",
+        # `source` des inscriptions garde son nom face à `KpiSourceEnum`
+        "SourceEnum": "apps.learning.models.Enrollment.Source",
+        "KpiSourceEnum": "apps.impact.models.KpiDefinition.Source",
+        "KpiUnitEnum": "apps.impact.models.KpiDefinition.Unit",
+        "KpiPeriodicityEnum": "apps.impact.models.KpiDefinition.Periodicity",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
@@ -495,6 +506,11 @@ CELERY_BEAT_SCHEDULE = {
     "retry-pending-certificates": {
         "task": "apps.learning.tasks.retry_pending_certificates",
         "schedule": crontab(minute="*/10"),
+    },
+    # Impact Tracker : agrégats quotidiens puis KPI `auto` (D75)
+    "aggregate-daily-stats": {
+        "task": "apps.impact.tasks.aggregate_daily_stats",
+        "schedule": crontab(minute=0, hour=2),
     },
 }
 # optional default task time limits
