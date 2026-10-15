@@ -36,6 +36,8 @@ async function ready(page: Page, path: string) {
 
 /** Tabule jusqu'à l'élément actif dont le nom accessible correspond, puis renvoie la page. */
 async function tabTo(page: Page, name: RegExp, max = 30) {
+  // La cible peut arriver après un chargement (garde d'étape sous Suspense)
+  await page.getByLabel(name).or(page.getByRole("button", { name })).or(page.getByText(name)).first().waitFor();
   for (let i = 0; i < max; i += 1) {
     await page.keyboard.press("Tab");
     const label = await page.evaluate(() => {
