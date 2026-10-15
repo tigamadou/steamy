@@ -328,13 +328,8 @@ SPECTACULAR_SETTINGS = {
         "PeriodKindEnum": "apps.impact.periods.KINDS",
         "KpiStatusEnum": "apps.impact.status.STATUS_CODES",
         "KpiToneEnum": "apps.impact.status.TONES",
-        # `source` de `EnrollmentSerializer` (libellés propres au serializer) : garde son nom face à `KpiSourceEnum`
-        "SourceEnum": [
-            ("free", "Gratuit"),
-            ("order", "Commande"),
-            ("kit_code", "Kit Code"),
-            ("classroom", "Classe"),
-        ],
+        # `source` des inscriptions garde son nom face à `KpiSourceEnum`
+        "SourceEnum": "apps.learning.models.Enrollment.Source",
         "KpiSourceEnum": "apps.impact.models.KpiDefinition.Source",
         "KpiUnitEnum": "apps.impact.models.KpiDefinition.Unit",
         "KpiPeriodicityEnum": "apps.impact.models.KpiDefinition.Periodicity",
