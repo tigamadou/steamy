@@ -66,7 +66,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 ### API-1 · Socle — 🟡 en cours
 - [x] **ADR Identité et connexion** (avant API-1.1) · `docs/adr-identite-connexion` · [ADR 0001](../adr/0001-identite-et-connexion.md) · PR #12
   - [x] `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé
-- [x] **API-1.1** Remise à zéro + `accounts.User` · `feature/api-1-identite` · PR #__
+- [x] **API-1.1** Remise à zéro + `accounts.User` · `feature/api-1-identite` · PR #15
   - [x] Supprimer tous les `apps/*/migrations/0*.py` (garder les `__init__.py`)
   - [x] `AUTH_USER_MODEL = "accounts.User"` ; retirer `apps.user`, `apps.messaging`, `rest_framework.authtoken`, `channels` d'`INSTALLED_APPS`
   - [x] App `accounts` : `User`, `LearnerProfile`, `ParentProfile`, `TeacherProfile` (champs §3.1 ; les champs vers les référentiels arrivent en API-1.5, l'école en API-L2.7)
