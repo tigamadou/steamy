@@ -108,7 +108,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > utilisateur connecté (et le CSRF). 409 est déclaré par l'opération qui le renvoie (`error_responses(409)`),
   > les autres statuts automatiquement (`libs/schema.py`). Codes ajoutés au catalogue : génériques DRF
   > (`PARSE_ERROR`, `METHOD_NOT_ALLOWED`…), `SERVER_ERROR`, `EMAIL_TAKEN`.
-- [x] **API-1.4** Notifications · `feature/api-1-notifications` · PR #__
+- [x] **API-1.4** Notifications · `feature/api-1-notifications` · PR #22
   - [x] App `notifications` : `Notification`, `NotificationPreference`
   - [x] Endpoints §7.7 : `notifications/`, `unread-count/`, `{id}/read/`, `read-all/`, `preferences/`
   - [x] Service `notify(user, type, …)` (base + email selon la préférence, C12)
