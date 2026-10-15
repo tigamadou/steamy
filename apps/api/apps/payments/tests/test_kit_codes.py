@@ -17,7 +17,7 @@ from apps.payments.utils import handle_payment_event
 from apps.shop.tests.factories import KitFactory
 from libs.errors import ApiError
 
-from .factories import OrderItemFactory, PaymentFactory, link_child
+from .factories import OrderItemFactory, PaymentFactory, link_child, load_referentials
 
 pytestmark = pytest.mark.django_db
 URL = "/api/payments/kit-codes/redeem/"
@@ -219,8 +219,9 @@ def test_generation_gives_up_after_repeated_collisions(kit, monkeypatch):
         generate_codes(OrderItemFactory(course=None, kit=kit))
 
 
-@pytest.mark.django_db(transaction=True, serialized_rollback=True)
+@pytest.mark.django_db(transaction=True)
 def test_concurrent_redemptions_only_one_succeeds():
+    load_referentials()
     kit = KitFactory()
     course = CourseFactory(paid=True, required_kit=kit)
     KitCode.objects.create(kit=kit, code="STEAMY-AB12-CD34")

@@ -13,7 +13,7 @@ from apps.catalog.tests.factories import CourseFactory
 from apps.payments.models import Order
 from apps.payments.orders import hash_token, order_for_guest, release_expired_orders
 from apps.payments.tasks import release_expired_reservations
-from apps.payments.tests.factories import OrderFactory, link_child
+from apps.payments.tests.factories import OrderFactory, link_child, load_referentials
 from apps.shop.models import StockReservation
 from apps.shop.tests.factories import DeliveryZoneFactory, KitFactory
 
@@ -434,9 +434,10 @@ def test_order_properties():
     assert str(item) == f"{item.title} × 1"
 
 
-@pytest.mark.django_db(transaction=True, serialized_rollback=True)
+@pytest.mark.django_db(transaction=True)
 def test_last_kit_ordered_concurrently_only_one_succeeds():
     """Deux commandes simultanées du dernier kit : le verrou du kit n'en laisse passer qu'une."""
+    load_referentials()
     import threading
 
     from django.db import connection
