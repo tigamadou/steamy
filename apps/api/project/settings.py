@@ -321,6 +321,8 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "ErrorCodeEnum": "libs.errors.ERROR_CODES",
         "RoleEnum": "apps.accounts.models.User.Role",
+        "ConsentStatusEnum": "apps.accounts.models.ConsentRequest.Status",
+        "MembershipStatusEnum": "apps.classrooms.models.ClassroomMembership.Status",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }

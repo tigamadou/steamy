@@ -404,12 +404,20 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] `Notification.url` pointe vers les routes front des plans
   - [ ] Seed enrichi, `make openapi` committé
 
-### API-L5 · Enseignant et classes — ⬜ à faire
-- [ ] **API-L5.1** Classes · `feature/api-l5-1-classes`
-  - [ ] `Classroom`, `ClassroomMembership` ; quotas `School` (`CLASSROOM_QUOTA_EXCEEDED`, `LEARNER_QUOTA_EXCEEDED`, D61)
-  - [ ] `GET classrooms/school/`, `GET/POST classrooms/` (`COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`), `GET/PATCH classrooms/{id}/`
-  - [ ] `…/members/`, `POST …/members/{memberId}/remove/`, `GET classrooms/courses/`, `…/{slug}/`
-  - [ ] Tests : enseignant A ne voit ni la classe ni les élèves de B, quota dépassé
+### API-L5 · Enseignant et classes — 🟡 en cours
+- [x] **API-L5.1** Classes · `feature/api-l5-1-classes`
+  - [x] `Classroom`, `ClassroomMembership` ; offre de `School` (`offer`, `courses`) ; quotas (`CLASSROOM_QUOTA_EXCEEDED`, D61 ; `LEARNER_QUOTA_EXCEEDED` appliqué aux invitations en API-L5.2)
+  - [x] `GET classrooms/school/`, `GET/POST classrooms/` (`COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`), `GET/PATCH classrooms/{id}/`
+  - [x] `…/members/`, `POST …/members/{memberId}/remove/`, `GET classrooms/courses/`, `…/{slug}/`
+  - [x] Tests : enseignant A ne voit ni la classe ni les élèves de B, quota dépassé
+  - [x] Seed D2 : offre de l'école de Koffi (3 parcours) et ses deux classes
+  > Décisions : la demande de consentement est reliée à la classe par `ClassroomMembership.consent_request`
+  > (pas de champ `classroom` sur `ConsentRequest`) ; une invitation est un membre `invited` sans compte
+  > apprenant. Quota d'élèves : élèves actifs distincts de l'école + invitations en attente non échues (C19).
+  > Parcours figé dès que la classe a eu un membre (`VALIDATION_ERROR` sur `courseSlug`). Retirer une invitation
+  > en attente annule la demande au parent. Progression, dernière activité et compteurs de missions terminées
+  > (WT04, WT10) arrivent avec API-L5.3, après API-L3a. Énumérations `ConsentStatusEnum` et
+  > `MembershipStatusEnum` nommées dans `ENUM_NAME_OVERRIDES`.
 - [ ] **API-L5.2** Invitations · `feature/api-l5-2-invitations`
   - [ ] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
   - [ ] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; `Enrollment` `source=classroom` (D62)

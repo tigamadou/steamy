@@ -139,3 +139,18 @@ def test_kits_include_one_out_of_stock_and_one_required_by_a_course():
     assert Kit.objects.filter(active=True).count() == 3
     assert Kit.objects.filter(stock_quantity=0).exists()
     assert Course.objects.filter(required_kit__isnull=False, is_free=False).exists()
+
+
+def test_seed_demo_gives_koffi_two_classrooms_within_the_offer():
+    from apps.classrooms.demo import OFFER_COURSES
+    from apps.classrooms.models import Classroom
+    from apps.core.demo import KOFFI_EMAIL
+
+    call_command("seed_demo")
+    call_command("seed_demo")  # idempotent
+    koffi = User.objects.get(email=KOFFI_EMAIL)
+    school = koffi.teacher_profile.school
+    assert sorted(school.courses.values_list("slug", flat=True)) == sorted(OFFER_COURSES)
+    classrooms = Classroom.objects.filter(teacher=koffi)
+    assert classrooms.count() == 2
+    assert all(c.course.slug in OFFER_COURSES and c.school == school for c in classrooms)
