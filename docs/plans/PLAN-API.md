@@ -147,9 +147,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] `make openapi` committé
 
 ### API-L2 · Inscriptions, consentement, OTP, connexion — ⬜ à faire
-- [ ] **API-L2.0a** Comparaison SMS (S10) · `feature/api-l2-0a-adr-sms` · doc
-  - [ ] Comparer coût par SMS et par pays, couverture MTN/Moov/Celtiis, délivrabilité, expéditeur « STEAMY », API et webhooks, sandbox, FCFA, support local
-  - [ ] Écrire l'**ADR-SMS** (critères éliminatoires : pas d'API serveur, pas de couverture Bénin)
+- [x] **API-L2.0a** Comparaison SMS (S10) · `feature/api-l2-0a-adr-sms` · doc
+  - [x] Comparer coût par SMS et par pays, couverture MTN/Moov/Celtiis, délivrabilité, expéditeur « STEAMY », API et webhooks, sandbox, FCFA, support local
+  - [x] Écrire l'**ADR-SMS** (critères éliminatoires : pas d'API serveur, pas de couverture Bénin)
 - [ ] **API-L2.0b** Interface SMS · `feature/api-l2-0b-sms`
   - [ ] `notifications/sms/` : `SmsProvider.send(phone, text) → message_id`
   - [ ] `FakeSmsProvider` : journalise et envoie le SMS comme email à Mailpit (`<e164>@sms.test`), jamais activable si `DEPLOYED`
@@ -369,12 +369,12 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 ### ADR et comparaisons de prestataires
 - [ ] **ADR à écrire** (`docs/adr/`)
   - [ ] Identité et connexion (avant API-1.1)
-  - [ ] SMS (avant API-L2.0b)
+  - [x] SMS (avant API-L2.0b)
   - [ ] Médias (Vimeo) (avant API-L3a.1)
   - [ ] Paiement (avant API-L3b.0b)
   - [ ] PDF et stockage privé (avant API-L3a.4)
 - [ ] **Comparaisons de prestataires**
-  - [ ] SMS (S10), avant API-L2 : voir API-L2.0a
+  - [x] SMS (S10), avant API-L2 : voir API-L2.0a
   - [ ] Paiement (S9), avant API-L3b : voir API-L3b.0a
 - [ ] **Points ouverts** (« Reste à décider »)
   - [ ] Valeurs du barème de points et des paliers de rang (C8), avant L3a.3
