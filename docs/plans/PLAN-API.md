@@ -335,7 +335,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Comparer KKiaPay et FedaPay : réseaux par pays (MTN, Moov, Celtiis), frais, initiation côté serveur, webhook signé, vérification de transaction, remboursements par API, sandbox, reversement, XOF
   - [x] Écrire l'**ADR-Paiement** (FedaPay seul prestataire intégré, remplaçable ; KKiaPay/CinetPay non intégrés en v1)
   - [ ] Faire valider le format de `Invoice` par la comptabilité
-- [x] **API-L3b.0b** Interface paiement · `feature/api-l3b-0b-paiement`
+- [x] **API-L3b.0b** Interface paiement · `feature/api-l3b-0b-paiement` · PR #73
   - [x] `payments/providers/` : `PaymentProvider` (`initiate`, `verify_webhook`, `parse_event`, `fetch_status`, `refund`)
   - [x] `FakePaymentProvider` pilotable (numéros `…01` succès, `…02` échec, `…03` en attente), webhook signé asynchrone
   - ~~Commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>`~~ : déplacées en
