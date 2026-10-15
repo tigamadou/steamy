@@ -81,7 +81,7 @@ Statut : 🟡 en cours · Prochaine tâche : 1.4 (WL21, WL23, WL07), puis 1.6 et
   - [x] Parcours Playwright « découverte » (accueil → ancre → catalogue → filtre → catégories → catalogue filtré) (`e2e/decouverte.spec.ts`)
   - [x] Recette : aucun chiffre ni catégorie en dur ; les 6 catégories du jeu D2 apparaissent
 
-- [x] **1.3** Fiche parcours publique `WL22` (requiert API-L1 et 1.2) · `feature/lot1-fiche-parcours` · PR #PR13
+- [x] **1.3** Fiche parcours publique `WL22` (requiert API-L1 et 1.2) · `feature/lot1-fiche-parcours` · PR #48
   - [x] Route `/parcours/[slug]` (`'use cache'` + `cacheTag('catalog')`, `notFound()` si non publié, 404 propre au parcours) ; rendue sous `<Suspense>` à la requête, le slug n'étant pas connu au build
   - [x] `generateMetadata`, JSON-LD `Course`, slugs ajoutés au sitemap (`sitemap.xml` servi à la requête, pages fixes gardées si l'API ne répond pas)
   - [x] CTA visiteur (`/inscription?next=…`, `/connexion?next=…`) et mention du kit (« Voir le kit » au lot 3)
