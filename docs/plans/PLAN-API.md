@@ -130,7 +130,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`country=BJ`) ; seuls les réseaux activés sont servis (réglage D76 dans l'admin) ; Bénin activé (MTN, Moov,
   > Celtiis), réseaux des pays voisins créés désactivés en attendant l'ADR paiement ; 20 communes du Bénin
   > qualifiées urbain / rural (D75), complétées dans l'admin. Listes non paginées.
-- [x] **API-1.6** Plateforme et personnel · `feature/api-1-plateforme` · PR #__
+- [x] **API-1.6** Plateforme et personnel · `feature/api-1-plateforme` · PR #24
   - [x] `core.PlatformSettings` (singleton, défauts D24, D32, D66 ; barème C8 vide)
   - [x] `core.AuditLog`
   - [x] 4 groupes Django par migration de données (Super-admin, Contenu, Support, Finance, D71)
