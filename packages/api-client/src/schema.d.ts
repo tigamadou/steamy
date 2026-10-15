@@ -646,13 +646,7 @@ export interface paths {
          */
         get: operations["payments_orders_list"];
         put?: never;
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        post: operations["payments_orders_create"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -673,30 +667,12 @@ export interface paths {
          *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
          */
         get: operations["payments_orders_retrieve"];
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        put: operations["payments_orders_update"];
+        put?: never;
         post?: never;
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        delete: operations["payments_orders_destroy"];
+        delete?: never;
         options?: never;
         head?: never;
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        patch: operations["payments_orders_partial_update"];
+        patch?: never;
         trace?: never;
     };
     "/api/payments/payments/": {
@@ -1086,39 +1062,23 @@ export interface components {
             readonly reference: string;
             readonly user: number;
             /** Format: decimal */
-            total?: string;
-            currency?: string;
+            readonly total: string;
+            readonly currency: string;
             readonly paid: boolean;
             /** Format: date-time */
             readonly createdAt: string;
-            items: components["schemas"]["OrderItem"][];
+            readonly items: components["schemas"]["OrderItem"][];
         };
         OrderItem: {
             readonly id: number;
-            title: string;
-            contentType?: string | null;
-            objectId?: string | null;
+            readonly title: string;
+            readonly contentType: string | null;
+            readonly objectId: string | null;
             /** Format: decimal */
-            unitPrice: string;
-            quantity?: number;
+            readonly unitPrice: string;
+            readonly quantity: number;
             /** Format: decimal */
-            total: string;
-        };
-        OrderItemRequest: {
-            title: string;
-            contentType?: string | null;
-            objectId?: string | null;
-            /** Format: decimal */
-            unitPrice: string;
-            quantity?: number;
-            /** Format: decimal */
-            total: string;
-        };
-        OrderRequest: {
-            /** Format: decimal */
-            total?: string;
-            currency?: string;
-            items: components["schemas"]["OrderItemRequest"][];
+            readonly total: string;
         };
         PaginatedAttemptList: {
             /** @example 123 */
@@ -1357,12 +1317,6 @@ export interface components {
         PatchedNotificationRequest: {
             read?: boolean;
         };
-        PatchedOrderRequest: {
-            /** Format: decimal */
-            total?: string;
-            currency?: string;
-            items?: components["schemas"]["OrderItemRequest"][];
-        };
         PatchedProgressRequest: {
             enrollment?: number;
             lesson?: number;
@@ -1372,16 +1326,15 @@ export interface components {
         };
         Payment: {
             readonly id: number;
-            order: number;
-            provider: components["schemas"]["ProviderEnum"];
-            providerTransactionId?: string | null;
+            readonly order: number;
+            readonly provider: components["schemas"]["ProviderEnum"];
+            readonly providerTransactionId: string | null;
             /** Format: decimal */
-            amount: string;
-            currency?: string;
-            success?: boolean;
+            readonly amount: string;
+            readonly currency: string;
+            readonly success: boolean;
             /** Format: date-time */
             readonly createdAt: string;
-            providerPayload?: unknown;
         };
         PresignUploadRequestRequest: {
             filename: string;
@@ -1487,6 +1440,9 @@ export interface components {
             readonly email: string;
         };
         WebhookAck: {
+            ok: boolean;
+        };
+        WebhookNack: {
             ok: boolean;
         };
     };
@@ -2505,29 +2461,6 @@ export interface operations {
             };
         };
     };
-    payments_orders_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OrderRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Order"];
-                };
-            };
-        };
-    };
     payments_orders_retrieve: {
         parameters: {
             query?: never;
@@ -2539,79 +2472,6 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Order"];
-                };
-            };
-        };
-    };
-    payments_orders_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this order. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OrderRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Order"];
-                };
-            };
-        };
-    };
-    payments_orders_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this order. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    payments_orders_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this order. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedOrderRequest"];
-            };
-        };
         responses: {
             200: {
                 headers: {
@@ -2696,6 +2556,14 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WebhookAck"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookNack"];
                 };
             };
         };
