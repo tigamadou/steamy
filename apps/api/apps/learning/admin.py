@@ -12,7 +12,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
 
 @admin.register(Progress)
 class ProgressAdmin(admin.ModelAdmin):
-    list_display = ("enrollment", "lesson", "completed", "score", "updated_at")
+    list_display = ("enrollment", "mission", "completed", "score", "updated_at")
 
 
 @admin.register(Certificate)

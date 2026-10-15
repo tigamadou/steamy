@@ -10,3 +10,8 @@ class SessionAuthentication(authentication.SessionAuthentication):
 
     def authenticate_header(self, request):
         return 'Session realm="api"'
+
+
+def enforce_csrf(request):
+    """Impose le CSRF sur une requête anonyme : DRF ne le vérifie que pour une session déjà ouverte."""
+    SessionAuthentication().enforce_csrf(request)
