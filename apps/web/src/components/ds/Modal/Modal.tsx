@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import { cx } from "@/lib/cx";
@@ -65,25 +65,39 @@ function ModalBox({
     };
   }, []);
 
-  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key === "Escape") {
-      event.stopPropagation();
-      onClose();
-      return;
+  // Clavier écouté sur le document : Échap et le piège de Tab restent actifs même si l'élément focalisé disparaît
+  // (contenu de la boîte remplacé), le focus retombant alors sur `body`.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+  useEffect(() => {
+    const box = boxRef.current as HTMLDivElement;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        onCloseRef.current();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = focusables(box);
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+      if (!box.contains(active)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && (active === first || active === box)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
-    if (event.key !== "Tab") return;
-    const items = focusables(event.currentTarget);
-    const first = items[0];
-    const last = items[items.length - 1];
-    const active = document.activeElement;
-    if (event.shiftKey && (active === first || active === event.currentTarget)) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && active === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div
@@ -99,7 +113,6 @@ function ModalBox({
         aria-labelledby={`${baseId}-titre`}
         aria-describedby={`${baseId}-corps`}
         tabIndex={-1}
-        onKeyDown={handleKeyDown}
         className={cx(
           "relative flex max-h-full w-full max-w-[400px] flex-col items-center overflow-y-auto rounded-2xl bg-surface p-7 text-center shadow-modal outline-none",
           className,

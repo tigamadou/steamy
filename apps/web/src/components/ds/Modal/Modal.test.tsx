@@ -90,6 +90,22 @@ describe("Modal", () => {
     expect(document.body.style.overflow).toBe("");
   });
 
+  it("garde Échap et le piège de Tab quand l'élément focalisé disparaît", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    await user.click(screen.getByRole("button", { name: "Ouvrir" }));
+    (document.activeElement as HTMLElement).blur();
+    expect(document.activeElement).toBe(document.body);
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Fermer" })).toHaveFocus();
+    (document.activeElement as HTMLElement).blur();
+    await user.tab({ shift: true });
+    expect(screen.getByRole("button", { name: "Je suis parent" })).toHaveFocus();
+    (document.activeElement as HTMLElement).blur();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   it("se ferme au clic sur le fond, pas sur la boîte", async () => {
     const user = userEvent.setup();
     render(<Harness />);
