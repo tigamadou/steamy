@@ -1,5 +1,6 @@
 # apps/payments/views.py
 import json
+import logging
 
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.types import OpenApiTypes
@@ -13,15 +14,15 @@ from libs.scoping import OwnedByRequestUserMixin
 from .models import Order, Payment
 from .serializers import OrderSerializer, PaymentSerializer
 
+logger = logging.getLogger(__name__)
 
-class OrderViewSet(OwnedByRequestUserMixin, viewsets.ModelViewSet):
+
+# Lecture seule (S5) : une commande ne se crée plus avec un prix fourni par le client. La
+# création, avec un prix calculé par le serveur, arrive en API-L3b.
+class OrderViewSet(OwnedByRequestUserMixin, viewsets.ReadOnlyModelViewSet):
     queryset = Order.objects.prefetch_related("items").all()
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
-
-    def perform_create(self, serializer):
-        # force user to the request user
-        serializer.save(user=self.request.user)
 
 
 class PaymentViewSet(OwnedByRequestUserMixin, viewsets.ReadOnlyModelViewSet):
@@ -38,7 +39,10 @@ class PaymentViewSet(OwnedByRequestUserMixin, viewsets.ReadOnlyModelViewSet):
         OpenApiParameter("provider_name", str, OpenApiParameter.PATH, enum=["kkiapay", "fedapay"])
     ],
     request=OpenApiTypes.OBJECT,
-    responses={200: inline_serializer("WebhookAck", {"ok": serializers.BooleanField()})},
+    responses={
+        200: inline_serializer("WebhookAck", {"ok": serializers.BooleanField()}),
+        400: inline_serializer("WebhookNack", {"ok": serializers.BooleanField()}),
+    },
     auth=[],
 )
 @csrf_exempt
@@ -50,23 +54,29 @@ def provider_webhook(request, provider_name: str):
     - provider_name: "kkiapay" or "fedapay"
     The request.body should be validated by provider-specific verification code.
     """
-    payload = request.body
-    try:
-        data = json.loads(payload)
-    except Exception:
-        data = {}
+    # Réponses volontairement neutres (S5) : aucun détail n'est renvoyé à l'appelant, la cause
+    # est journalisée côté serveur.
+    from .utils import WebhookRejected, handle_provider_event, verify_provider_webhook
 
-    # Basic structure: provider sends back transaction status & reference
-    # Implement provider-specific verification logic in utils.verify_provider_webhook
-    from .utils import handle_provider_event, verify_provider_webhook
-
+    rejected = Response({"ok": False}, status=status.HTTP_400_BAD_REQUEST)
     if not verify_provider_webhook(provider_name, request):
-        return Response({"detail": "invalid signature"}, status=status.HTTP_400_BAD_REQUEST)
+        logger.warning("Webhook %s : signature invalide", provider_name)
+        return rejected
+    try:
+        data = json.loads(request.body)
+    except (ValueError, UnicodeDecodeError):
+        logger.warning("Webhook %s : corps illisible", provider_name)
+        return rejected
+    if not isinstance(data, dict):
+        return rejected
 
-    # handle event (create/update Payment, mark order paid, etc.)
     try:
         handle_provider_event(provider_name, data)
-    except Exception as e:
-        return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except WebhookRejected as exc:
+        logger.warning("Webhook %s refusé : %s", provider_name, exc)
+        return rejected
+    except Exception:
+        logger.exception("Webhook %s : erreur de traitement", provider_name)
+        return rejected
 
     return Response({"ok": True})

@@ -74,6 +74,14 @@ class Payment(models.Model):
             models.Index(fields=["provider_transaction_id"]),
             models.Index(fields=["order"]),
         ]
+        constraints = [
+            # Idempotence du webhook (S5) : une transaction du prestataire n'est enregistrée qu'une fois.
+            models.UniqueConstraint(
+                fields=["provider", "provider_transaction_id"],
+                condition=models.Q(provider_transaction_id__isnull=False),
+                name="payment_unique_provider_transaction",
+            )
+        ]
 
     def __str__(self):
         return f"{self.provider} - {self.amount} ({'OK' if self.success else 'PENDING'})"

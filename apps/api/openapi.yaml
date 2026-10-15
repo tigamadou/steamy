@@ -1230,30 +1230,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedOrderList'
           description: ''
-    post:
-      operationId: payments_orders_create
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      tags:
-      - payments
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OrderRequest'
-        required: true
-      security:
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'
-          description: ''
   /api/payments/orders/{id}/:
     get:
       operationId: payments_orders_retrieve
@@ -1280,88 +1256,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Order'
           description: ''
-    put:
-      operationId: payments_orders_update
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this order.
-        required: true
-      tags:
-      - payments
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OrderRequest'
-        required: true
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'
-          description: ''
-    patch:
-      operationId: payments_orders_partial_update
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this order.
-        required: true
-      tags:
-      - payments
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedOrderRequest'
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'
-          description: ''
-    delete:
-      operationId: payments_orders_destroy
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this order.
-        required: true
-      tags:
-      - payments
-      security:
-      - cookieAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/payments/payments/:
     get:
       operationId: payments_payments_list
@@ -1464,6 +1358,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WebhookAck'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookNack'
           description: ''
   /api/public/user/csrf:
     get:
@@ -2130,9 +2030,10 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
         currency:
           type: string
-          maxLength: 8
+          readOnly: true
         paid:
           type: boolean
           readOnly: true
@@ -2144,12 +2045,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderItem'
+          readOnly: true
       required:
       - createdAt
+      - currency
       - id
       - items
       - paid
       - reference
+      - total
       - user
     OrderItem:
       type: object
@@ -2159,80 +2063,36 @@ components:
           readOnly: true
         title:
           type: string
-          maxLength: 255
+          readOnly: true
         contentType:
           type: string
+          readOnly: true
           nullable: true
-          maxLength: 64
         objectId:
           type: string
+          readOnly: true
           nullable: true
-          maxLength: 128
         unitPrice:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
         quantity:
           type: integer
-          maximum: 2147483647
-          minimum: 0
+          readOnly: true
         total:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
       required:
+      - contentType
       - id
+      - objectId
+      - quantity
       - title
       - total
       - unitPrice
-    OrderItemRequest:
-      type: object
-      properties:
-        title:
-          type: string
-          minLength: 1
-          maxLength: 255
-        contentType:
-          type: string
-          nullable: true
-          maxLength: 64
-        objectId:
-          type: string
-          nullable: true
-          maxLength: 128
-        unitPrice:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-        quantity:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-        total:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-      required:
-      - title
-      - total
-      - unitPrice
-    OrderRequest:
-      type: object
-      properties:
-        total:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-        currency:
-          type: string
-          minLength: 1
-          maxLength: 8
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/OrderItemRequest'
-      required:
-      - items
     PaginatedAttemptList:
       type: object
       properties:
@@ -2563,21 +2423,6 @@ components:
       properties:
         read:
           type: boolean
-    PatchedOrderRequest:
-      type: object
-      properties:
-        total:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-        currency:
-          type: string
-          minLength: 1
-          maxLength: 8
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/OrderItemRequest'
     PatchedProgressRequest:
       type: object
       properties:
@@ -2600,33 +2445,39 @@ components:
           readOnly: true
         order:
           type: integer
+          readOnly: true
         provider:
-          $ref: '#/components/schemas/ProviderEnum'
+          allOf:
+          - $ref: '#/components/schemas/ProviderEnum'
+          readOnly: true
         providerTransactionId:
           type: string
+          readOnly: true
           nullable: true
-          maxLength: 256
         amount:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
         currency:
           type: string
-          maxLength: 8
+          readOnly: true
         success:
           type: boolean
+          readOnly: true
         createdAt:
           type: string
           format: date-time
           readOnly: true
-        providerPayload:
-          nullable: true
       required:
       - amount
       - createdAt
+      - currency
       - id
       - order
       - provider
+      - providerTransactionId
+      - success
     PresignUploadRequestRequest:
       type: object
       properties:
@@ -2891,6 +2742,13 @@ components:
       - email
       - id
     WebhookAck:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required:
+      - ok
+    WebhookNack:
       type: object
       properties:
         ok:
