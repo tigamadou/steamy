@@ -26,7 +26,7 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 Statut : 🟡 en cours · Prochaine tâche : 2.1 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
 ### Socle — ✅ terminé
-- [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle`
+- [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
   - [x] Composants DS : `OTPInput`, `ResendCountdown`, `PasswordInput`, `PwReq`, `NewPasswordFields`
   - [x] Composants DS : `PhoneInput` complété (Bénin par défaut, `tel-national`, `maskPhone`), `IdentifierInput`, `NumberStepper`
   - [x] Composants DS : `Modal`, `UserTypeCard`, `ChoiceCard`, `GoalChip`, `AvatarPicker`, `ReferentialSelect`
