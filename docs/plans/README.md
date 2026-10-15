@@ -54,6 +54,70 @@ API-0 ──► API-1 ──► API-L1 ──► API-L2 ──► API-L3a ──
 - **Maquettes à concevoir** (C18) : WL22-WL24 (étape 1.2), WD23 (3.3a), WPD15 (4.0), WT13 (5.2) sont dessinées dans
   `design/`, dans un nouveau fichier `screens-<espace>-a-concevoir-web.jsx`, et validées avant leur développement.
 
+## Tableau de bord
+
+À mettre à jour dans chaque PR qui change le statut d'un plan. Le détail est dans la section « Avancement » de chaque
+plan.
+
+| Plan | Statut | Avancement | Prochaine tâche |
+| --- | --- | --- | --- |
+| [PLAN-API](PLAN-API.md) | 🟡 en cours | API-0 ✅ (PR #5 à #9) | API-1.1 |
+| [LOT-1-PUBLIC](LOT-1-PUBLIC.md) | ⬜ à faire | — | 1.0a (après API-1) |
+| [LOT-2-AUTH](LOT-2-AUTH.md) | ⬜ à faire | — | 2.0 (après API-1 ; API-L2 dès 2.1) |
+| [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | ⬜ à faire | — | 3.0 (après API-1 et API-L3a) |
+| [LOT-4-PARENT](LOT-4-PARENT.md) | ⬜ à faire | — | 4.0 conception de WPD15 (sans prérequis d'API) |
+| [LOT-5-ENSEIGNANT](LOT-5-ENSEIGNANT.md) | ⬜ à faire | — | 5.1 (après API-L5) |
+| [LOT-6-ADMIN](LOT-6-ADMIN.md) | ⬜ à faire | — | 6.1 (après API-1) |
+
+## Suivi d'exécution
+
+Chaque plan commence par une section **« Avancement »** : la liste à cocher de toutes ses étapes et sous-tâches. C'est
+**la source de vérité** de l'état d'exécution du plan. Le reste du document décrit le *comment*.
+
+### Format
+
+```markdown
+## Avancement
+
+Statut : 🟡 en cours · Prochaine tâche : API-1.2
+
+### API-1 · Socle — 🟡 en cours
+- [x] **API-1.1** Remise à zéro des migrations · `feature/api-1-migrations` · PR #12
+  - [x] Supprimer les migrations et recréer `0001_initial` par app
+  - [x] CI verte sur une base vide
+- [ ] **API-1.2** Nouveau modèle `User` · `feature/api-1-identite`
+  - [ ] Modèle et `IdentifierBackend` (C7)
+  - [ ] Tests d'unicité conditionnelle et de connexion par persona
+- [ ] **Critères de fin d'API-1**
+  - [ ] …
+```
+
+- **Une case par tâche vérifiable**, assez fine pour qu'une case non cochée dise précisément ce qui reste à faire :
+  écran, endpoint, migration, test, critère de recette.
+- **Une étape** = une branche + une PR. Sa ligne porte le nom de la branche et, une fois ouverte, le numéro de la PR.
+- **Statut d'un bloc** : ⬜ à faire · 🟡 en cours · ✅ terminé. Le statut du plan et la « prochaine tâche » sont tenus à
+  jour en tête de section.
+
+### Règles
+
+1. **Cocher dans la même PR que le travail** : la PR qui réalise une tâche coche sa case dans le plan, et met à jour
+   le tableau de bord si le statut ou la prochaine tâche du plan changent. Ainsi, une fois fusionnée dans
+   `development`, la liste reflète exactement ce qui est livré.
+2. **Ne cocher que ce qui est vérifié** (tests passants, CI verte). Une tâche abandonnée ou reportée n'est pas cochée :
+   elle est barrée (`~~…~~`) avec la raison et la décision correspondante.
+3. **Une tâche découverte en cours de route** est ajoutée à la liste à sa place, plutôt que faite « en passant ».
+4. **Une étape partiellement faite à la fin d'une session** : cocher les sous-tâches terminées, pousser la branche, et
+   noter sous l'étape `> Reprise : …` (ce qui est commencé, ce qui reste, les pièges rencontrés).
+
+### Reprendre l'exécution dans une nouvelle session
+
+1. Se placer sur `development` à jour (`git switch development && git pull`).
+2. Lire le **tableau de bord** ci-dessus, puis ouvrir le plan concerné et lire **Avancement** : la « prochaine tâche » et la première case non cochée indiquent où
+   reprendre. Lire la note `> Reprise :` si elle existe.
+3. Vérifier qu'aucune branche ni PR n'est déjà en cours pour cette tâche (`git branch -r`, `gh pr list`). Si c'est le
+   cas, repartir de cette branche.
+4. Relire la section détaillée de l'étape dans le plan, et les décisions qu'elle cite.
+
 ## Règles communes à tous les plans
 
 - **Gitflow.** Chaque étape d'un plan correspond à une branche `feature/<lot>-<sujet>` créée depuis `development`

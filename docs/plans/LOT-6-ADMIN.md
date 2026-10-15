@@ -12,6 +12,110 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 | [SPEC-ECRANS-3](../SPEC-ECRANS-3-parent-teacher-admin.md) | §5.14 WAD01-WAD15, `kpiStatus`, « À ne pas porter » |
 | Maquette | `design/screens-admin-web.jsx` (WAD), `design/ds-charts.jsx` (data-viz) |
 
+## Avancement
+
+Statut : ⬜ à faire · Prochaine tâche : 6.1 Socle staff · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+
+### Lot 6 · Back-office hybride — ⬜ à faire
+- [ ] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` (requiert API-0, API-1 ; réalise API-L6.1)
+  - [ ] WAD15 Connexion (admin Django) : gabarit `admin/login.html` (email, mot de passe, code TOTP à 6 chiffres), throttling par IP et par email, `next` limité à `WEB_URL/backoffice`
+  - [ ] Index de l'admin Django
+  - [ ] django-otp : `INSTALLED_APPS`, `OTPMiddleware`, `SteamyAdminSite(OTPAdminSite)` remplaçant `admin.site`
+  - [ ] Enrôlement TOTP avant toute page de l'admin (QR code affiché une fois, confirmation par un premier code)
+  - [ ] Migration de données idempotente `setup_staff_groups` (4 groupes, matrice de permissions)
+  - [ ] Permission DRF `IsStaffVerified` (API-L6.1)
+  - [ ] `make seed` : un compte par groupe, secret TOTP fixe de développement (jamais en staging/prod)
+  - [ ] Thème « Steamy monochrome » (fixture `admin_interface.Theme`, aucun magenta, bandeau d'environnement, `X_FRAME_OPTIONS = "SAMEORIGIN"`, lien « Pilotage »)
+  - [ ] Session staff de 8 h (`cached_db`), invalidée à la désactivation ou à la réinitialisation du TOTP
+  - [ ] `AuditedAdminMixin` (base de tous les `ModelAdmin`) et `AuditLogAdmin` en lecture seule (Super-admin) ; connexions et échecs OTP journalisés
+  - [ ] `GET accounts/me/` renvoie `isStaff`, `otpVerified`, `staffGroups`
+  - [ ] Nettoyage : modèles gelés désenregistrés, `TrackingEvent` en lecture seule, `django_celery_beat`/`results` pour le Super-admin seul
+  - [ ] Tests pytest : connexion sans code, code faux, code rejoué ; staff sans appareil confirmé ; non-staff ; `next` vers hôte tiers ; personnel refusé sur `POST auth/login/` (C7) ; staff non vérifié sur `/api/backoffice/overview/` = 403 `OTP_REQUIRED`
+  - [ ] Tests pytest : matrice des groupes figée ; chaque `ModelAdmin` hérite d'`AuditedAdminMixin` (introspection du registre)
+  - [ ] Recette : un membre de chaque groupe se connecte par WAD15 avec TOTP et ne voit que ses modèles ; admin en français, monochrome ; toute modification dans le journal
+- [ ] **6.2** Utilisateurs, consentements, équipe · `feature/lot6-comptes-consentements` (requiert 6.1, API-L2, API-L4, API-L5)
+  - [ ] WAD06 Utilisateurs (admin Django) : `UserAdmin` (colonnes, filtres, recherche, `role` en lecture seule après création)
+  - [ ] WAD06 action « Inviter un enseignant » (email + `School` vers `TeacherInvitation`) et désactiver / réactiver avec motif et audit
+  - [ ] WAD07 Fiche utilisateur (admin Django) : inlines lecture seule, genre et handicap soumis à *view_sensitive_profile*
+  - [ ] WAD07 actions : réinitialiser le mot de passe, « Voir le parent », changement de parent (D22 : lien remplacé à l'acceptation du nouveau parent seulement)
+  - [ ] WAD08 Consentements (admin Django) : `ConsentRequestAdmin` en suivi seul, actions *relancer le parent* (plafonds de W07) et *marquer en litige* (note obligatoire)
+  - [ ] WAD08 `PublicProfileReviewAdmin` : approuver / rejeter pseudonyme et avatar (D15)
+  - [ ] WAD13 Équipe (admin Django) : `StaffMemberAdmin`, « Inviter un membre » (lien d'activation + enrôlement TOTP), « Réinitialiser le TOTP », garde-fou sur le dernier Super-admin
+  - [ ] Groupes et permissions de ces modèles conformes à la matrice
+  - [ ] Tests : aucune action ne fait passer une `ConsentRequest` à `accepted` ou `refused` (D70) ; relance soumise aux plafonds
+  - [ ] Tests : Contenu et Finance sans accès aux consentements ni champs sensibles ; Support sans genre/handicap sans permission
+  - [ ] Tests : invitation enseignant crée une `TeacherInvitation` et aucun `User` actif ; dernier Super-admin non supprimable ; changement de parent sans acceptation = lien inchangé
+  - [ ] Recette sur le jeu D2 : retrouver Léa Adjovi, voir son parent et ses consentements, relancer une demande, inviter un enseignant rattaché à une école
+- [ ] **6.3** Contenu des parcours · `feature/lot6-contenu-parcours` (requiert 6.1, API-L1, API-L3a)
+  - [ ] WAD09 Contenu (admin Django) : `CourseAdmin` (colonnes, filtres, slug prérempli, couverture S3, `trailerVimeoId`)
+  - [ ] Hiérarchie par inlines chaînés : `Project` dans `Course`, `Level` dans `Project`, `Mission` dans `Level` (fil d'Ariane, ordre éditable)
+  - [ ] `QuizAdmin` + `Question`, `QuestionAdmin` + `Choice` ; contrainte « exactement un de `level` / `project` » en `clean()` et `CheckConstraint`, seuils 70 / 80
+  - [ ] Mission : `vimeoId` validé avec aperçu, blocs de contenu
+  - [ ] Action « Publier » (refus si arbre incomplet ou parcours payant sans prix ; confirmation pour dépublier avec inscrits)
+  - [ ] `CategoryAdmin` et `BadgeAdmin`
+  - [ ] Tests : groupe Contenu seul en écriture ; publication refusée sur arbre incomplet ; quiz sur les deux ou aucun = erreur
+  - [ ] Tests : `isCorrect` absent des réponses de l'API (S8) ; changement de prix sans effet sur les `OrderItem` existants
+  - [ ] Recette : créer un parcours complet (2 projets, niveaux, missions Vimeo, quiz), le publier, le voir dans `WL22` et `WC`
+- [ ] **6.4** Boutique, commandes, paiements · `feature/lot6-boutique-paiements` (requiert 6.1, API-L3b)
+  - [ ] WAD10 Kits (admin Django) : `KitAdmin` (stock avec badge à 3 seuils, parcours compatibles), `DeliveryZoneAdmin`, `RestockAlertAdmin` en lecture seule
+  - [ ] WAD10 Commandes (admin Django) : `OrderAdmin` (montants, statut, payeur en lecture seule), action *changer le statut de livraison* (`preparing → shipped → delivered`, notifie le payeur)
+  - [ ] WAD10 inlines `OrderItem` et `KitCode` en lecture seule, action *révoquer* sur un code non utilisé
+  - [ ] WAD11 Paiements (admin Django) : `PaymentAdmin` entièrement en lecture seule, filtres, `date_hierarchy`, agrégats en tête, `msisdn` masqué, `payload` réservé à Finance
+  - [ ] `RefundAdmin` (Finance : création depuis un paiement réussi, action *traiter* avec double confirmation) et `InvoiceAdmin` (lecture, téléchargement)
+  - [ ] Tests : aucune voie de l'admin ne passe une commande à `paid` ; transitions de livraison non monotones refusées ; révocation d'un code utilisé refusée
+  - [ ] Tests : Support sans `payload` ; Contenu sans accès aux paiements ; agrégats égaux à un calcul de référence sur D2
+- [ ] **6.5** Steamy Events et réglages · `feature/lot6-events-reglages` (requiert 6.1, API-L3b)
+  - [ ] WAD12 Événements (admin Django) : `SteamyEventAdmin` (Contenu)
+  - [ ] WAD12 Candidatures (admin Django) : `EventApplicationAdmin` avec statut en lecture seule et action unique *refus exceptionnel* (motif obligatoire, notifications, `Refund` si payée)
+  - [ ] WAD14 Réglages (admin Django) : `PlatformSettingsAdmin` singleton (bornes validées, cache invalidé)
+  - [ ] WAD14 `PaymentNetworkAdmin` (réseaux par pays, Celtiis, invalidation du cache de `referentials/payment-networks/`)
+  - [ ] WAD14 `AnnouncementAdmin` (action *diffuser* via Celery, D7) et référentiels
+  - [ ] Journal d'audit (`core/auditlog/`) en lecture seule
+  - [ ] Tests : aucune action ne fait passer une candidature à `accepted` (S3, C3) ; refus exceptionnel d'une candidature payée crée un `Refund`
+  - [ ] Tests : singleton non dupliquable ; réseau désactivé retiré de l'endpoint public ; seuil hors bornes refusé
+- [ ] **6.6** Socle Next.js du back-office · `feature/lot6-backoffice-shell` (requiert 6.1 ; outillage du lot 1, étape 1.0)
+  - [ ] Layout serveur `(backoffice)/backoffice/` : garde (`accounts/me/`, staff, `otpVerified`), redirection vers `<API_URL>/admin/login/?next=…`, métadonnées `noindex`
+  - [ ] Revérification du groupe par page et route `/backoffice/acces-refuse`
+  - [ ] `AdminShell` (groupes Pilotage / Plateforme / Système selon les groupes, déconnexion `POST auth/logout/`, menu repliable < 1024 px)
+  - [ ] Primitives `Sparkline`, `BarChart`, `DonutChart`, `StatCard`, `DataTable`, `SegmentedControl`, `SourceTag`, `KpiStatusBadge`, `DeadlineTracker`, `StatusBadge` (SVG accessibles, « Voir les données »)
+  - [ ] Garde-fous : ESLint `no-restricted-imports` et test interdisant `--primary-*`
+  - [ ] États `loading.tsx`, `error.tsx` (WX02), hors ligne (WX01)
+  - [ ] Tests Vitest sur chaque primitive (rendu, valeurs vides, accessibilité)
+  - [ ] Playwright : anonyme et parent redirigés vers WAD15 ; staff vérifié voit le shell ; Contenu sur `/backoffice/impact` = accès refusé
+- [ ] **6.7** WAD01 Vue d'ensemble · `feature/lot6-vue-ensemble` (requiert 6.6, API-L6.4)
+  - [ ] WAD01 (Next.js) `/backoffice` : hero, 4 `StatCard`, carte échéance (`DeadlineTracker`), liste « À traiter »
+  - [ ] Branchement API : `GET backoffice/overview/` (entrées « À traiter » filtrées par groupe, `adminPath` fourni par le serveur)
+  - [ ] Tests Vitest : états vide, chargement, erreur
+  - [ ] Test pytest (API-L6) : compteurs sur D2, entrées filtrées par groupe
+  - [ ] Playwright : Support clique « Consentements en attente » vers la liste Django filtrée
+- [ ] **6.8** Impact Tracker : tableau de bord et détail · `feature/lot6-impact-kpi` (requiert 6.6, API-L6.4)
+  - [ ] Vérifier les prérequis `API-L6` : 30 `KpiDefinition` en 8 groupes, calcul nocturne, statut D73, KPI d'inclusion, « Nouvelles institutions »
+  - [ ] WAD02 (Next.js) `/backoffice/impact?periode=` : boutons vers WAD05 et WAD04, légende des sources, `SegmentedControl` synchronisé avec l'URL, KPI principaux, cartes démographiques, groupes de KPI (`Sparkline`, `KpiStatusBadge`)
+  - [ ] WAD03 (Next.js) `/backoffice/impact/indicateurs/[code]` : statut, valeur, cible, taux d'atteinte, `BarChart` par période, historique, composition (`DonutChart`), définition serveur
+  - [ ] Branchement API : `backoffice/kpis/?period=` et `kpis/{code}/` ; pas de recalcul du statut côté front ni de tuiles « Activer / Configurer la collecte » (D75)
+  - [ ] Tests pytest (API-L6) : valeurs de référence de chaque KPI `auto` sur D2, table de vérité de `kpiStatus`, bornes de période
+  - [ ] Tests Vitest : rendu de chaque statut
+  - [ ] Playwright : Finance change de période et ouvre un indicateur
+- [ ] **6.9** Rapport trimestriel, saisie manuelle, exports · `feature/lot6-impact-rapport` (requiert 6.8, API-L6.4)
+  - [ ] WAD04 (Next.js) `/backoffice/impact/rapports/[periode]` : en-tête, `DataTable`, exports CSV / PDF, « Soumettre » avec modale de confirmation et verrouillage
+  - [ ] Redirection `/backoffice/impact/rapports` vers le trimestre courant
+  - [ ] WAD05 (Next.js) `…/[periode]/saisie` : groupes, champs typés selon `unit`, « Enregistrer le brouillon », « Valider la saisie », lecture seule si soumis (D74)
+  - [ ] Exports asynchrones : `POST …/exports/`, interrogation de `backoffice/exports/{id}/` jusqu'à `ready`, lien présigné, notification, PDF par WeasyPrint
+  - [ ] Gestion des erreurs `REPORT_LOCKED`, `VALIDATION_ERROR` par champ, `PERMISSION_DENIED`, `OTP_REQUIRED`
+  - [ ] Tests pytest (API-L6) : soumission idempotente, `REPORT_LOCKED`, export d'autrui refusé, CSV identique à WAD04
+  - [ ] Playwright (parcours critique) : Finance via WAD15 (TOTP de développement), brouillon WAD05, validation, export CSV WAD04, soumission, champs en lecture seule ; Support sur la même URL = accès refusé
+  - [ ] Confirmation produit du comportement de « Valider la saisie » (point ouvert)
+- [ ] **Critères de fin du lot 6**
+  - [ ] WAD01-WAD05 conformes à la spec et à la définition de « terminé », monochrome sans `--primary-*`, accessibles, responsive, sans donnée en dur
+  - [ ] WAD06-WAD14 couverts par l'admin Django (colonnes, filtres, recherches, actions, inlines de §5.14), sans élément de « À ne pas porter », thème monochrome, admin en français
+  - [ ] WAD15 : TOTP obligatoire pour tout membre ; `/api/backoffice/` refuse toute session non vérifiée (`OTP_REQUIRED`)
+  - [ ] Matrice des groupes figée par test ; chaque permission testée en accès autorisé et refusé
+  - [ ] Invariants D70, S3/C3, S9, D71, D74 testés côté admin Django et côté API
+  - [ ] Toute écriture du personnel tracée dans `AuditLog`
+  - [ ] KPI `auto` vérifiés contre des valeurs de référence ; `kpiStatus` conforme à D73/§4.5 ; exports CSV/PDF asynchrones ; rapport soumis verrouillé
+  - [ ] Parcours Playwright verts : garde d'accès (anonyme, parent, groupe insuffisant) et Impact Tracker de bout en bout
+  - [ ] `make openapi` à jour ; CI `ci-ok` verte sur chaque PR vers `development`
+
 ## Périmètre et principes
 
 - **Accès** : `is_staff` + 4 groupes Django (D71). Aucun rôle `admin` dans `User.role`. Le personnel est refusé sur
