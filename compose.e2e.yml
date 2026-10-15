@@ -51,6 +51,8 @@ services:
     environment:
       CI: ${CI:-}
       BASE_URL: http://web:3000
+      # Admin Django du back-office (WAD15), servi par l'API
+      API_URL: http://api:8000
       COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
     command: >
       sh -c "corepack enable

@@ -384,12 +384,12 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Seed enrichi, `make openapi` committé
 
 ### API-L6 · Back-office — ⬜ à faire
-- [ ] **API-L6.1** 2FA (D72) · `feature/api-l6-1-2fa` (réalisée via LOT-6-ADMIN 6.1 à 6.5)
-  - [ ] `django-otp` + `otp_totp`, `OTPMiddleware`, `OTPAdminSite` (WAD15)
-  - [ ] Enrôlement TOTP au premier login (QR code), réinitialisation par un Super-admin
-  - [ ] Session du personnel limitée à 8 h (C20) ; secret TOTP fixe de développement dans `seed_demo`
-  - [ ] `IsStaffVerified` sur toute route `backoffice/`, sinon `OTP_REQUIRED`
-  - [ ] Tests : staff sans OTP vérifié → `OTP_REQUIRED` et redirection admin, non-staff → 403
+- [x] **API-L6.1** 2FA (D72) · réalisée par LOT-6-ADMIN 6.1 (`feature/lot6-socle-staff`, PR #NN)
+  - [x] `django-otp` + `otp_totp`, `OTPMiddleware`, `OTPAdminSite` (WAD15)
+  - [x] Enrôlement TOTP au premier login (QR code), réinitialisation par un Super-admin
+  - [x] Session du personnel limitée à 8 h (C20) ; secret TOTP fixe de développement dans `seed_demo`
+  - [x] `IsStaffVerified` sur toute route `backoffice/`, sinon `OTP_REQUIRED`
+  - [x] Tests : staff sans OTP vérifié → `OTP_REQUIRED` et redirection admin, non-staff → 403
 - [ ] **API-L6.2** Admin thémé et RBAC · `feature/api-l6-2-admin-rbac`
   - [ ] Thème monochrome `--ink-*` dans `fixtures/admin.json`, titre « Steamy »
   - [ ] Enregistrement de tous les modèles avec permissions par groupe (D71)

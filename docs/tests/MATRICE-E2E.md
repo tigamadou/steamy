@@ -158,7 +158,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WAD12` | Steamy Events (modération) | 6 |  |  |
 | `WAD13` | Équipe & rôles (RBAC) | 6 |  |  |
 | `WAD14` | Paramètres généraux | 6 |  |  |
-| `WAD15` | Connexion admin (2FA) | 6 |  |  |
+| `WAD15` | Connexion admin (2FA) | 6 | Connexion du personnel par TOTP, code faux refusé, index de l'admin | `apps/web/e2e/admin-connexion.spec.ts` |
 | `WX01` | Hors ligne | 1 |  |  |
 | `WX02` | Erreur réseau | 1 |  |  |
 | `WX03` | Chargement | 1 |  |  |

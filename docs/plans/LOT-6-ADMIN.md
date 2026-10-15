@@ -14,25 +14,37 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 6.1 Socle staff · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API), 6.6 · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
-### Lot 6 · Back-office hybride — ⬜ à faire
-- [ ] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` (requiert API-0, API-1 ; réalise API-L6.1)
-  - [ ] WAD15 Connexion (admin Django) : gabarit `admin/login.html` (email, mot de passe, code TOTP à 6 chiffres), throttling par IP et par email, `next` limité à `WEB_URL/backoffice`
-  - [ ] Index de l'admin Django
-  - [ ] django-otp : `INSTALLED_APPS`, `OTPMiddleware`, `SteamyAdminSite(OTPAdminSite)` remplaçant `admin.site`
-  - [ ] Enrôlement TOTP avant toute page de l'admin (QR code affiché une fois, confirmation par un premier code)
-  - [ ] Migration de données idempotente `setup_staff_groups` (4 groupes, matrice de permissions)
-  - [ ] Permission DRF `IsStaffVerified` (API-L6.1)
-  - [ ] `make seed` : un compte par groupe, secret TOTP fixe de développement (jamais en staging/prod)
-  - [ ] Thème « Steamy monochrome » (fixture `admin_interface.Theme`, aucun magenta, bandeau d'environnement, `X_FRAME_OPTIONS = "SAMEORIGIN"`, lien « Pilotage »)
-  - [ ] Session staff de 8 h (`cached_db`), invalidée à la désactivation ou à la réinitialisation du TOTP
-  - [ ] `AuditedAdminMixin` (base de tous les `ModelAdmin`) et `AuditLogAdmin` en lecture seule (Super-admin) ; connexions et échecs OTP journalisés
-  - [ ] `GET accounts/me/` renvoie `isStaff`, `otpVerified`, `staffGroups`
-  - [ ] Nettoyage : modèles gelés désenregistrés, `TrackingEvent` en lecture seule, `django_celery_beat`/`results` pour le Super-admin seul
-  - [ ] Tests pytest : connexion sans code, code faux, code rejoué ; staff sans appareil confirmé ; non-staff ; `next` vers hôte tiers ; personnel refusé sur `POST auth/login/` (C7) ; staff non vérifié sur `/api/backoffice/overview/` = 403 `OTP_REQUIRED`
-  - [ ] Tests pytest : matrice des groupes figée ; chaque `ModelAdmin` hérite d'`AuditedAdminMixin` (introspection du registre)
-  - [ ] Recette : un membre de chaque groupe se connecte par WAD15 avec TOTP et ne voit que ses modèles ; admin en français, monochrome ; toute modification dans le journal
+### Lot 6 · Back-office hybride — 🟡 en cours
+- [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #NN (requiert API-0, API-1 ; réalise API-L6.1)
+  - [x] `WAD15` Connexion (admin Django) : gabarit `admin/login.html` (email, mot de passe, code TOTP à 6 chiffres), throttling par IP et par email, `next` limité à `WEB_URL/backoffice`
+  - [x] Index de l'admin Django
+  - [x] django-otp : `INSTALLED_APPS`, `OTPMiddleware`, `SteamyAdminSite(OTPAdminSite)` remplaçant `admin.site`
+  - [x] Enrôlement TOTP avant toute page de l'admin (QR code affiché une fois, confirmation par un premier code)
+  - [x] Migration de données idempotente `setup_staff_groups` (4 groupes, matrice de permissions)
+  - [x] Permission DRF `IsStaffVerified` (API-L6.1)
+  - [x] `make seed` : un compte par groupe, secret TOTP fixe de développement (jamais en staging/prod)
+  - [x] Thème « Steamy monochrome » (fixture `admin_interface.Theme`, aucun magenta, bandeau d'environnement, `X_FRAME_OPTIONS = "SAMEORIGIN"`, lien « Pilotage »)
+  - [x] Session staff de 8 h (`cached_db`), invalidée à la désactivation ou à la réinitialisation du TOTP
+  - [x] `AuditedAdminMixin` (base de tous les `ModelAdmin`) et `AuditLogAdmin` en lecture seule (Super-admin) ; connexions et échecs OTP journalisés
+  - [x] `GET accounts/me/` renvoie `isStaff`, `otpVerified`, `staffGroups`
+  - [x] Nettoyage : modèles gelés désenregistrés, `TrackingEvent` en lecture seule, `django_celery_beat`/`results` pour le Super-admin seul
+  - [x] Tests pytest : connexion sans code, code faux, code rejoué ; staff sans appareil confirmé ; non-staff ; `next` vers hôte tiers ; personnel refusé sur `POST auth/login/` (C7) ; staff non vérifié sur `/api/backoffice/overview/` = 403 `OTP_REQUIRED`
+  - [x] Tests pytest : matrice des groupes figée ; chaque `ModelAdmin` hérite d'`AuditedAdminMixin` (introspection du registre)
+  - [x] Recette : un membre de chaque groupe se connecte par WAD15 avec TOTP et ne voit que ses modèles ; admin en français, monochrome ; toute modification dans le journal
+  > Décisions : la matrice vit dans `apps/core/groups.py` et s'applique au `post_migrate` de `core` (plus la commande
+  > `setup_staff_groups`) plutôt que dans un `RunPython` : elle décrit déjà les modèles des lots suivants
+  > (`catalog`, `shop`, `events`, `classrooms`, `impact`), appliqués dès que leur migration passe ; les permissions
+  > personnalisées y portent leur codename (`invite_teacher`, `resend`, `publish_course`…), à déclarer dans le
+  > `Meta.permissions` du modèle. Super-admin reçoit exactement sa colonne de la matrice ; le compte de démonstration
+  > Super-admin n'est plus `is_superuser` (réservé au compte de secours, `docs/infra/exploitation.md`).
+  > `SteamyAdminSite.register` impose `AuditedAdminMixin` à tout `ModelAdmin`, apps tierces comprises. La session
+  > staff tombe à la réinitialisation du TOTP via l'empreinte de session (`User._get_session_auth_hash` inclut les
+  > secrets TOTP confirmés), sans migration. Le QR code est régénéré à chaque affichage de l'enrôlement et n'est plus
+  > visible une fois l'appareil confirmé (ni secret ni QR code dans l'admin des appareils). `/api/backoffice/overview/`
+  > n'existant pas encore (API-L6.4), le refus `OTP_REQUIRED` est testé sur une route factice protégée par
+  > `IsStaffVerified`. Ancien catalogue `courses` (dont `Path`) retiré de l'admin ; `messaging` était déjà supprimé.
 - [ ] **6.2** Utilisateurs, consentements, équipe · `feature/lot6-comptes-consentements` (requiert 6.1, API-L2, API-L4, API-L5)
   - [ ] WAD06 Utilisateurs (admin Django) : `UserAdmin` (colonnes, filtres, recherche, `role` en lecture seule après création)
   - [ ] WAD06 action « Inviter un enseignant » (email + `School` vers `TeacherInvitation`) et désactiver / réactiver avec motif et audit

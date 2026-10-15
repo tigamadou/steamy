@@ -1,0 +1,122 @@
+/*
+ * Thème « Steamy monochrome » de l'admin Django (LOT-6 6.1) : seule surcharge CSS, en complément de la fixture
+ * `admin_interface.Theme`. Couleurs `--ink-*` de design/ds-tokens.css, aucun magenta (`--primary-*`).
+ */
+:root {
+  --steamy-ink-900: #161325;
+  --steamy-ink-700: #3F3A5C;
+  --steamy-ink-600: #5B5479;
+  --steamy-ink-500: #7A7396;
+  --steamy-ink-200: #E1DEEC;
+  --steamy-ink-100: #EFEDF5;
+  --steamy-ink-50: #F7F6FB;
+}
+
+body.admin-interface {
+  font-family: "Nunito", system-ui, -apple-system, sans-serif;
+}
+
+/* Focus visible au clavier sur tous les contrôles */
+.admin-interface a:focus-visible,
+.admin-interface input:focus-visible,
+.admin-interface select:focus-visible,
+.admin-interface textarea:focus-visible,
+.admin-interface button:focus-visible {
+  outline: 3px solid var(--steamy-ink-900);
+  outline-offset: 2px;
+}
+
+/* WAD15 · connexion et enrôlement TOTP */
+body.steamy-login {
+  background: var(--steamy-ink-50);
+}
+
+body.steamy-login #container {
+  max-width: 420px;
+  width: calc(100% - 32px);
+  border-radius: 16px;
+  border: 1px solid var(--steamy-ink-200);
+}
+
+.steamy-login__card .form-row label {
+  display: block;
+  font-weight: 700;
+  color: var(--steamy-ink-900);
+  padding-bottom: 6px;
+}
+
+.steamy-login__card .form-row input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 16px;
+}
+
+.steamy-login__card #id_otp_token {
+  letter-spacing: 0.4em;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.steamy-login__card .help {
+  color: var(--steamy-ink-600);
+  padding: 6px 0 0;
+  margin: 0;
+}
+
+.steamy-login__eyebrow {
+  margin: 0 0 12px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--steamy-ink-500);
+}
+
+.steamy-login__title {
+  font-size: 18px;
+  color: var(--steamy-ink-900);
+  margin: 0 0 12px;
+}
+
+.steamy-login__note,
+.steamy-login__footer,
+.steamy-login__steps {
+  color: var(--steamy-ink-600);
+  font-size: 13px;
+}
+
+.steamy-login__footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+.steamy-login__card .submit-row input[type="submit"] {
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 12px;
+  font-weight: 800;
+  border-radius: 12px;
+}
+
+.steamy-login__qr {
+  margin: 12px 0;
+  text-align: center;
+}
+
+.steamy-login__qr svg {
+  width: 200px;
+  height: 200px;
+  background: #FFFFFF;
+}
+
+.steamy-login__secret {
+  display: block;
+  margin-top: 6px;
+  word-break: break-all;
+  color: var(--steamy-ink-900);
+}

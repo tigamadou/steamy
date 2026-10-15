@@ -1,0 +1,58 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% comment %}WAD15 · Connexion du personnel : email professionnel, mot de passe, code TOTP (D72).{% endcomment %}
+
+{% block title %}{% if form.errors %}Erreur : {% endif %}{{ block.super }}{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static "admin/css/login.css" %}">
+{{ form.media }}
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} login steamy-login{% endblock %}
+{% block usertools %}{% endblock %}
+{% block nav-global %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block content_title %}{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content-main" class="steamy-login__card">
+  <p class="steamy-login__eyebrow">Espace administration</p>
+
+  {% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}<p class="errornote" role="alert">{{ error }}</p>{% endfor %}
+  {% elif form.errors %}
+    <p class="errornote" role="alert">Corrigez les champs signalés ci-dessous.</p>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+  <p class="errornote">
+    Vous êtes connecté avec le compte {{ username }}, qui n'a pas accès à cette page. Connectez-vous avec un autre
+    compte.
+  </p>
+  {% endif %}
+
+  <form action="{{ app_path }}" method="post" id="login-form" novalidate>{% csrf_token %}
+    {% for field in form %}
+    <div class="form-row">
+      {{ field.errors }}
+      {{ field.label_tag }} {{ field }}
+      {% if field.help_text %}<div class="help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <p class="steamy-login__note">
+      Première connexion : laissez le code vide, vous configurerez ensuite votre application d'authentification.
+    </p>
+    <div class="submit-row">
+      <input type="submit" value="Connexion sécurisée">
+    </div>
+    <p class="steamy-login__footer">
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+      </svg>
+      Connexion chiffrée · journalisée
+    </p>
+  </form>
+</div>
+{% endblock %}

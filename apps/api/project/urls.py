@@ -14,12 +14,9 @@ try:
 except Exception:
     SwaggerView = SpectacularSwaggerView
 
-admin.site.site_title = settings.ADMIN_TITLE
-admin.site.site_header = settings.ADMIN_HEADER
-
 
 urlpatterns = [
-    # Admin
+    # Admin Django du back-office (`SteamyAdminSite` : TOTP, WAD15)
     path("admin/", admin.site.urls),
     # Apps
     path("api/auth/", include("apps.accounts.urls.auth")),

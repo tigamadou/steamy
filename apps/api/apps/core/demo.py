@@ -9,6 +9,7 @@ et le secret TOTP sont documentés dans `fixtures/README.md` ; ils ne servent ja
 
 import datetime
 
+from django.conf import settings
 from django.contrib.auth.models import Group
 
 from apps.accounts.models import LearnerProfile, ParentProfile, TeacherProfile, User
@@ -27,7 +28,8 @@ MARIE_PHONE = "+2290190000001"
 KOFFI_EMAIL = "koffi.adekambi@steamy.test"
 STAFF = [
     # email, prénom, nom, groupe, superutilisateur
-    ("superadmin@steamy.test", "Awa", "Dossou", SUPER_ADMIN, True),
+    # Super-admin est un groupe : `is_superuser` est réservé au compte de secours (LOT-6, D71)
+    ("superadmin@steamy.test", "Awa", "Dossou", SUPER_ADMIN, False),
     ("contenu@steamy.test", "Yao", "Kpodar", CONTENT, False),
     ("support@steamy.test", "Fifamè", "Hounkpatin", SUPPORT, False),
     ("finance@steamy.test", "Rachidi", "Bello", FINANCE, False),
@@ -102,7 +104,8 @@ def seed_accounts() -> dict[str, User]:
             status=User.Status.ACTIVE,
         )
         staff.groups.set([Group.objects.get(name=group)])
-        _totp_device(staff)
+        if not settings.DEPLOYED:  # secret fixe : jamais en staging ni en production
+            _totp_device(staff)
         accounts[group] = staff
     return accounts
 

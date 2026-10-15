@@ -177,6 +177,25 @@ class User(AbstractBaseUser, PermissionsMixin):
             kwargs["update_fields"] = {*update_fields, "is_active"}
         super().save(*args, **kwargs)
 
+    def _get_session_auth_hash(self, secret=None):
+        """
+        Empreinte qui valide les sessions ouvertes (`django.contrib.auth.get_user`). Pour le personnel, elle inclut
+        les secrets TOTP confirmés : réinitialiser le TOTP ferme toutes ses sessions (C20).
+        """
+        if not self.is_staff:
+            return super()._get_session_auth_hash(secret)
+        from django.utils.crypto import salted_hmac
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+
+        keys = TOTPDevice.objects.filter(user=self, confirmed=True).order_by("id")
+        material = "|".join([self.password, *keys.values_list("key", flat=True)])
+        return salted_hmac(
+            "apps.accounts.User.staff_session_auth_hash",
+            material,
+            secret=secret,
+            algorithm="sha256",
+        ).hexdigest()
+
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}".strip() or str(self)
 

@@ -53,7 +53,8 @@ def test_one_staff_member_per_group_with_a_fixed_totp_secret():
     call_command("seed_demo")
     staff = User.objects.filter(is_staff=True)
     assert sorted(staff.values_list("groups__name", flat=True)) == sorted(STAFF_GROUPS)
-    assert staff.get(groups__name="Super-admin").is_superuser
+    # Super-admin est un groupe ; `is_superuser` est réservé au compte de secours (D71)
+    assert not staff.filter(is_superuser=True).exists()
     for member in staff:
         device = TOTPDevice.objects.get(user=member)
         assert device.confirmed and device.key == DEMO_TOTP_KEY
@@ -65,3 +66,10 @@ def test_seed_demo_keeps_data_edited_by_hand_consistent():
     User.objects.filter(username="lea.adjovi").update(first_name="Autre")
     call_command("seed_demo")
     assert User.objects.get(username="lea.adjovi").first_name == "Léa"
+
+
+def test_the_fixed_totp_secret_never_reaches_staging(settings):
+    settings.ENV, settings.DEPLOYED = settings.STAGING, True
+    call_command("seed_demo")
+    assert User.objects.filter(is_staff=True).count() == 4
+    assert not TOTPDevice.objects.exists()  # enrôlement à la première connexion (WAD15)
