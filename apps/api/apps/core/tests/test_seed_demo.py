@@ -212,3 +212,72 @@ def test_seed_demo_e2e_shortens_the_summative_cooldown():
     assert PlatformSettings.load().summative_retry_cooldown_seconds == 600
     call_command("seed_demo", "--e2e")
     assert PlatformSettings.load().summative_retry_cooldown_seconds == E2E_SUMMATIVE_COOLDOWN
+
+
+def test_lea_has_points_badges_and_a_five_day_streak():
+    from apps.catalog.models import Badge, Course, Level, Project
+    from apps.learning.gamification import rank_for, streak_days
+    from apps.learning.models import LearnerBadge, PointsEntry
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    assert Badge.objects.filter(kind="level").count() == Level.objects.count()
+    assert Badge.objects.filter(kind="project").count() == Project.objects.count()
+    assert Badge.objects.filter(kind="course").count() == Course.objects.count()
+    lea = User.objects.get(username="lea.adjovi")
+    total = sum(PointsEntry.objects.filter(learner=lea).values_list("amount", flat=True))
+    assert total > 0 and lea.learner_profile.points == total
+    assert rank_for(total) is not None
+    assert LearnerBadge.objects.filter(learner=lea).count() > 0
+    assert streak_days(lea) == 5 and lea.learner_profile.streak_days == 5
+
+
+def test_seed_keeps_a_points_scale_set_by_hand():
+    from apps.core.models import PlatformSettings
+
+    settings_ = PlatformSettings.load()
+    settings_.points_scale = {"mission": 1}
+    settings_.save()
+    call_command("seed_demo")
+    assert PlatformSettings.load().points_scale == {"mission": 1}
+
+
+def test_lea_finished_course_is_certified_once_with_a_ticket():
+    from apps.events.models import EventTicket
+    from apps.learning.models import Certificate, Enrollment, PointsEntry
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    finished = Enrollment.objects.get(
+        learner__username="lea.adjovi", course__slug="initiation-scratch"
+    )
+    assert finished.status == "completed"
+    assert Certificate.objects.filter(enrollment=finished).count() == 1
+    assert EventTicket.objects.filter(enrollment=finished).count() == 1
+    assert PointsEntry.objects.filter(learner=finished.learner, source="course").count() == 1
+    assert Certificate.objects.count() == 1
+
+
+def test_lea_dashboard_resumes_a_course_and_recommends_from_her_goals():
+    from rest_framework.test import APIClient
+
+    call_command("seed_demo")
+    client = APIClient()
+    client.force_authenticate(User.objects.get(username="lea.adjovi"))
+    body = client.get("/api/learning/dashboard/").json()
+    assert body["resume"]["course"]["slug"] == "decouverte-robotique"
+    assert body["points"] > 0 and body["rank"]["label"] and body["streakDays"] == 5
+    assert body["counters"]["certificates"] == 1
+    recommended = client.get("/api/learning/recommendations/").json()
+    assert recommended and recommended[0]["matchesGoals"] is True
+
+
+def test_lea_has_two_courses_in_her_wishlist():
+    from apps.wishlist.models import WishlistItem
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    slugs = WishlistItem.objects.filter(learner__username="lea.adjovi").values_list(
+        "course__slug", flat=True
+    )
+    assert sorted(slugs) == ["capteurs-electroniques", "robot-bluetooth"]
