@@ -378,7 +378,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] `make openapi` committé
 
 ### API-L4 · Espace parent — 🟡 en cours
-- [ ] **API-L4.1** Enfants · `feature/api-l4-1-enfants`
+- [ ] **API-L4.1** Enfants · `feature/api-l4-1-enfants` · PR #75
   - [x] `GET/POST accounts/children/` (consentement origine `parent`, D51)
   - [x] `GET/PATCH accounts/children/{id}/` (`publicDisplayAllowed` D15)
   - [ ] Progression par parcours et tentatives récentes dans `GET accounts/children/{id}/` (attend API-L3a.1 et L3a.2)
