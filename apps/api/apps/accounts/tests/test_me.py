@@ -144,3 +144,52 @@ def test_learner_and_staff_cannot_change_email_here(factory):
     resp = client.post(EMAIL_URL, {"password": PASSWORD, "email": "x@ecole.bj"}, format="json")
     assert resp.status_code == 403
     assert resp.json()["code"] == "PERMISSION_DENIED"
+
+
+# --- Données du shell et étape de profil -------------------------------------------------------
+
+
+def test_me_exposes_the_shell_data_of_a_learner():
+    from apps.referentials.models import Avatar, Goal, Locality, SchoolGrade
+
+    learner = LearnerFactory()
+    profile = learner.learner_profile
+    client = client_for(learner)
+    assert client.get(ME).json()["profileStep"] == "learner-info"
+
+    profile.birth_date = "2012-03-14"
+    profile.locality = Locality.objects.get(city="Cotonou")
+    profile.save()
+    assert client.get(ME).json()["profileStep"] == "learner-school"
+
+    profile.school_grade = SchoolGrade.objects.get(code="4e")
+    profile.save()
+    profile.goals.add(Goal.objects.get(code="robots"))
+    assert client.get(ME).json()["profileStep"] == "learner-goals"  # au moins 2 objectifs
+
+    profile.goals.add(Goal.objects.get(code="coder"))
+    assert client.get(ME).json()["profileStep"] == "learner-avatar"
+
+    profile.avatar = Avatar.objects.get(code="hibou")
+    profile.save()
+    body = client.get(ME).json()
+    assert body["profileStep"] is None
+    assert body["avatar"]["emoji"] == "🦉"
+    assert body["schoolGrade"] == {"id": profile.school_grade_id, "code": "4e", "label": "4ᵉ"}
+    assert body["city"] == "Cotonou"
+
+
+def test_parent_profile_steps_skip_the_optional_screen():
+    from apps.referentials.models import Goal, Locality
+
+    parent = ParentFactory()
+    client = client_for(parent)
+    assert client.get(ME).json()["profileStep"] == "parent-location"
+    parent.parent_profile.locality = Locality.objects.get(city="Parakou")
+    parent.parent_profile.save()
+    # WP08 (à propos) est facultative : on passe directement aux enfants.
+    assert client.get(ME).json()["profileStep"] == "parent-children"
+    parent.parent_profile.goals_for_children.add(Goal.objects.get(code="coder"))
+    body = client.get(ME).json()
+    assert body["profileStep"] is None and body["city"] == "Parakou"
+    assert body["avatar"] is None and body["schoolGrade"] is None

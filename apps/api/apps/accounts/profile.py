@@ -19,14 +19,24 @@ class ProfileStep(models.TextChoices):
 
 def profile_step(user: User) -> str | None:
     """
-    Première étape de profil à compléter, ou None si le profil est complet. Les étapes qui dépendent des
-    référentiels (classe, objectifs, avatar, localité) sont prises en compte à partir d'API-1.5 ; le détail des
-    règles est livré avec les écrans de profil (API-L2.5).
+    Première étape de profil à compléter, ou None si le profil est complet. WP08 (genre, handicap, profession) est
+    entièrement facultative : elle ne bloque jamais. Les règles de saisie de chaque étape arrivent avec les écrans
+    de profil (API-L2.5).
     """
     if user.is_learner:
         profile = getattr(user, "learner_profile", None)
-        if profile is None or profile.birth_date is None:
+        if profile is None or profile.birth_date is None or profile.locality_id is None:
             return ProfileStep.LEARNER_INFO
-    elif user.is_parent and getattr(user, "parent_profile", None) is None:
-        return ProfileStep.PARENT_LOCATION
+        if profile.school_grade_id is None:
+            return ProfileStep.LEARNER_SCHOOL
+        if profile.goals.count() < 2:
+            return ProfileStep.LEARNER_GOALS
+        if profile.avatar_id is None:
+            return ProfileStep.LEARNER_AVATAR
+    elif user.is_parent:
+        profile = getattr(user, "parent_profile", None)
+        if profile is None or profile.locality_id is None:
+            return ProfileStep.PARENT_LOCATION
+        if not profile.goals_for_children.exists():
+            return ProfileStep.PARENT_CHILDREN
     return None

@@ -212,14 +212,34 @@ class TimestampedModel(models.Model):
 
 class LearnerProfile(TimestampedModel):
     """
-    Profil de l'apprenant. Pas de téléphone (D30). Genre et handicap facultatifs (D6). Les champs vers les
-    référentiels (localité, classe, objectifs, avatar, handicap) arrivent avec `referentials` (API-1.5).
+    Profil de l'apprenant. Pas de téléphone (D30). Genre et handicap facultatifs (D6).
     """
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="learner_profile")
     birth_date = models.DateField(_("date de naissance"), null=True, blank=True)
+    locality = models.ForeignKey(
+        "referentials.Locality", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    school_grade = models.ForeignKey(
+        "referentials.SchoolGrade",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    goals = models.ManyToManyField("referentials.Goal", blank=True, related_name="+")
+    avatar = models.ForeignKey(
+        "referentials.Avatar", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     gender = models.CharField(
         _("genre"), max_length=8, choices=Gender.choices, null=True, blank=True
+    )
+    disability = models.ForeignKey(
+        "referentials.Disability",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
     )
     email = models.EmailField(_("email de contact"), null=True, blank=True)
     points = models.PositiveIntegerField(default=0)
@@ -242,10 +262,21 @@ class ParentProfile(TimestampedModel):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="parent_profile")
     email = models.EmailField(_("email de contact"), null=True, blank=True)
+    locality = models.ForeignKey(
+        "referentials.Locality", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     profession = models.CharField(max_length=120, blank=True)
     gender = models.CharField(
         _("genre"), max_length=8, choices=Gender.choices, null=True, blank=True
     )
+    disability = models.ForeignKey(
+        "referentials.Disability",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    goals_for_children = models.ManyToManyField("referentials.Goal", blank=True, related_name="+")
 
     class Meta:
         verbose_name = _("profil parent")
