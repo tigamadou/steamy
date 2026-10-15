@@ -10,6 +10,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"], ["html", { open: "never" }]],
+  // Envois asynchrones (Celery) et image de production sur un poste chargé : assertions un peu plus patientes
+  expect: { timeout: 10_000 },
   use: {
     baseURL,
     locale: "fr-FR",
@@ -21,6 +23,8 @@ export default defineConfig({
     {
       // Plus petit écran visé par la définition de « terminé » (360 px)
       name: "mobile",
+      // Parcours qui consomment une donnée unique du jeu de démo (invitation) : joués une seule fois, sur « bureau »
+      grepInvert: /@donnees-uniques/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 360, height: 760 },

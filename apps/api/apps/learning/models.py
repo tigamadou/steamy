@@ -1,116 +1,76 @@
-# apps/learning/models.py
+"""
+Pédagogie de l'apprenant (SPEC-TECHNIQUE §3.2, §4.4) : inscriptions et progression séquentielle.
+
+Le contenu (parcours, projets, niveaux, missions) vit dans `catalog` ; `learning` ne garde que ce que fait
+l'apprenant. Une inscription n'est créée que par le serveur, selon sa source (§4.3) : gratuite ici (D27), par
+commande, Kit Code ou classe dans les étapes suivantes.
+"""
+
 from django.conf import settings
 from django.db import models
-
-User = settings.AUTH_USER_MODEL
+from django.utils.translation import gettext_lazy as _
 
 
 class Enrollment(models.Model):
-    STATUS_CHOICES = (
-        ("active", "Actif"),
-        ("completed", "Terminé"),
-        ("cancelled", "Annulé"),
-    )
+    class Source(models.TextChoices):
+        FREE = "free", _("Parcours gratuit")
+        ORDER = "order", _("Commande")
+        KIT_CODE = "kit_code", _("Kit Code")
+        CLASSROOM = "classroom", _("Classe")
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="enrollments")
-    course = models.ForeignKey(
-        "catalog.Course", on_delete=models.CASCADE, related_name="enrollments"
+    class Status(models.TextChoices):
+        ACTIVE = "active", _("En cours")
+        COMPLETED = "completed", _("Terminé")
+
+    learner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        models.CASCADE,
+        related_name="enrollments",
+        verbose_name=_("apprenant"),
     )
-    started_at = models.DateTimeField(auto_now_add=True)
-    completed = models.BooleanField(default=False)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
-    progress = models.DecimalField(
-        max_digits=5, decimal_places=2, default=0
-    )  # pourcentage 0.00 - 100.00
+    course = models.ForeignKey(
+        "catalog.Course", models.PROTECT, related_name="enrollments", verbose_name=_("parcours")
+    )
+    source = models.CharField(_("source"), max_length=12, choices=Source)
+    status = models.CharField(_("statut"), max_length=10, choices=Status, default=Status.ACTIVE)
+    #: Part des missions terminées (0-100), recalculée à chaque mission terminée
+    progress_pct = models.PositiveSmallIntegerField(_("progression (%)"), default=0)
+    last_activity_at = models.DateTimeField(_("dernière activité"), null=True, blank=True)
+    completed_at = models.DateTimeField(_("terminé le"), null=True, blank=True)
+    created_at = models.DateTimeField(_("inscrit le"), auto_now_add=True)
 
     class Meta:
-        unique_together = ("user", "course")
-        ordering = ("-started_at",)
+        ordering = ["-created_at", "-id"]
+        verbose_name = _("inscription")
+        verbose_name_plural = _("inscriptions")
+        constraints = [
+            models.UniqueConstraint(fields=["learner", "course"], name="enrollment_unique"),
+        ]
 
     def __str__(self):
-        return f"{self.user} → {self.course}"
+        return f"{self.learner} → {self.course}"
 
 
-class Progress(models.Model):
+class MissionProgress(models.Model):
+    """Mission terminée par l'apprenant (ex-`Progress`) : une ligne par mission, jamais de retour en arrière."""
+
     enrollment = models.ForeignKey(
-        Enrollment, on_delete=models.CASCADE, related_name="progress_items"
+        Enrollment, models.CASCADE, related_name="mission_progress", verbose_name=_("inscription")
     )
     mission = models.ForeignKey(
-        "catalog.Mission", on_delete=models.CASCADE, related_name="progress_entries"
+        "catalog.Mission", models.CASCADE, related_name="+", verbose_name=_("mission")
     )
-    completed = models.BooleanField(default=False)
-    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    completed_at = models.DateTimeField(_("terminée le"), auto_now_add=True)
 
     class Meta:
-        unique_together = ("enrollment", "mission")
+        ordering = ["completed_at", "id"]
+        verbose_name = _("mission terminée")
+        verbose_name_plural = _("missions terminées")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["enrollment", "mission"], name="mission_progress_unique"
+            ),
+        ]
 
     def __str__(self):
-        return f"{self.enrollment.user} - {self.mission} ({'ok' if self.completed else 'pending'})"
-
-
-class Certificate(models.Model):
-    enrollment = models.OneToOneField(
-        Enrollment, on_delete=models.CASCADE, related_name="certificate"
-    )
-    issued_at = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(upload_to="certificates/%Y/%m/%d/", null=True, blank=True)
-    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-
-    def __str__(self):
-        return f"Certificat {self.enrollment.user} - {self.enrollment.course}"
-
-
-# Quiz system
-class Quiz(models.Model):
-    course = models.ForeignKey("catalog.Course", on_delete=models.CASCADE, related_name="quizzes")
-    title = models.CharField(max_length=255)
-    pass_score = models.DecimalField(
-        max_digits=5, decimal_places=2, default=50.0
-    )  # seuil d'obtention
-
-    def __str__(self):
-        return f"{self.course} - {self.title}"
-
-
-class Question(models.Model):
-    KIND_CHOICES = (
-        ("mcq", "QCM"),
-        ("tf", "Vrai/Faux"),
-        ("free", "Libre"),
-    )
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
-    text = models.TextField()
-    kind = models.CharField(max_length=10, choices=KIND_CHOICES, default="mcq")
-    weight = models.DecimalField(max_digits=5, decimal_places=2, default=1.0)
-
-    def __str__(self):
-        return f"Q: {self.text[:50]}"
-
-
-class Choice(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="choices")
-    text = models.CharField(max_length=512)
-    is_correct = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Choice ({'✓' if self.is_correct else '✗'}) {self.text[:40]}"
-
-
-class Attempt(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quiz_attempts")
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
-    created_at = models.DateTimeField(auto_now_add=True)
-    # total score (0-100)
-    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    passed = models.BooleanField(default=False)
-    data = models.JSONField(
-        blank=True, null=True
-    )  # stocke les réponses {question_id: choice_id/answer}
-
-    class Meta:
-        ordering = ("-created_at",)
-        unique_together = ("user", "quiz", "created_at")
-
-    def __str__(self):
-        return f"{self.user} - {self.quiz} ({self.score})"
+        return f"{self.enrollment} · {self.mission}"
