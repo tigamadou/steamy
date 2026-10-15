@@ -63,9 +63,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `AllowAny` limité à `csrf`, `session-login`, `health`, webhook et lectures de catalogue
   - [x] Aucune route d'écriture client sur contenu, quiz, commandes ou paiements
 
-### API-1 · Socle — ⬜ à faire
-- [ ] **ADR Identité et connexion** (avant API-1.1) · `docs/adr/`
-  - [ ] `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé
+### API-1 · Socle — 🟡 en cours
+- [x] **ADR Identité et connexion** (avant API-1.1) · `docs/adr-identite-connexion` · [ADR 0001](../adr/0001-identite-et-connexion.md) · PR #12
+  - [x] `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé
 - [ ] **API-1.1** Remise à zéro + `accounts.User` · `feature/api-1-identite`
   - [ ] Supprimer tous les `apps/*/migrations/0*.py` (garder les `__init__.py`)
   - [ ] `AUTH_USER_MODEL = "accounts.User"` ; retirer `apps.user`, `apps.messaging`, `rest_framework.authtoken`, `channels` d'`INSTALLED_APPS`
@@ -368,7 +368,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 
 ### ADR et comparaisons de prestataires
 - [ ] **ADR à écrire** (`docs/adr/`)
-  - [ ] Identité et connexion (avant API-1.1)
+  - [x] Identité et connexion (avant API-1.1) : [ADR 0001](../adr/0001-identite-et-connexion.md)
   - [x] SMS (avant API-L2.0b)
   - [ ] Médias (Vimeo) (avant API-L3a.1)
   - [x] Paiement (avant API-L3b.0b)
