@@ -98,7 +98,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > l'enseignant et l'email de contact du parent (`ParentProfile.email`, S4) ; refusé à l'apprenant (WD17) et au
   > personnel. `django-otp` installé (`otpVerified`), exigé seulement en API-L6.1. `analytics/export/events.csv`
   > renommé `analytics/export/events/` (slash final, D5).
-- [x] **API-1.3** Erreurs et validation · `feature/api-1-erreurs` · PR #__
+- [x] **API-1.3** Erreurs et validation · `feature/api-1-erreurs` · PR #21
   - [x] Catalogue complet des codes §7.1 (`libs/errors.py`, message français par code)
   - [x] Composant `Error` déclaré dans le schéma OpenAPI (400/401/403/404/409/429)
   - [x] Validateur de mot de passe D25 (`PASSWORD_TOO_WEAK`) ; validateurs Django par défaut retirés
