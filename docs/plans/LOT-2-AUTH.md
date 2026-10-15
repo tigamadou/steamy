@@ -23,7 +23,7 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 2.7 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
+Statut : 🟡 en cours · Prochaine tâche : 2.8 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
 ### Socle — ✅ terminé
 - [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
@@ -98,7 +98,7 @@ Statut : 🟡 en cours · Prochaine tâche : 2.7 · Prérequis : API-1 (2.0 et 2
   - [x] Tests Vitest : `BIRTHDATE_AGE_MISMATCH`, champs facultatifs, sélection minimale des objectifs, aucun avatar présélectionné
   - [x] Recette : pas de « 1 parcours gratuit débloqué » ; règles W10 = D25 ; genre et handicap jamais obligatoires
 
-### Inscription et décision du parent — ⬜ à faire
+### Inscription et décision du parent — ✅ terminé
 - [x] **2.6** Inscription parent WP01-WP04, WP07-WP10 (requiert API-L2) · `feature/lot2-inscription-parent`
   - [x] WP01 `/inscription/parent` (préremplissage par `consent-requests/preview/`)
   - [x] WP02 `/inscription/parent/code` (`OTPInput`, `ResendCountdown`)
@@ -112,16 +112,16 @@ Statut : 🟡 en cours · Prochaine tâche : 2.7 · Prérequis : API-1 (2.0 et 2
   - [x] Tests Vitest : WP02 (collage, erreurs, renvoi à 60 s en timers simulés), WP04 (trois cas)
   - [x] Parcours Playwright : inscription parent seule → WP10 → `/parent`
   - [x] Recette : vouvoiement ; pas de code « 3214 » ni de « 4 règles » ; carte WP10 cohérente avec le jeu D2
-- [ ] **2.7** Décision du parent WP05, WP06, WP11, WP12 (requiert API-L2) · `feature/lot2-decision-parent`
-  - [ ] Atterrissage `/consentement/[token]` (jeton retiré de l'URL, claim, choix connecté / non connecté)
-  - [ ] Composant `ConsentRequestCard` (D20 strict)
-  - [ ] WP05 `/inscription/parent/demande/[id]`
-  - [ ] WP06 `/inscription/parent/demande/[id]/acceptee` (`Celebration`)
-  - [ ] WP11 `/inscription/parent/demande/[id]/refus` (motif, `Button danger`, `Modal` de confirmation)
-  - [ ] WP12 `/inscription/parent/demande/[id]/refusee`
-  - [ ] Sécurité : `Referrer-Policy: no-referrer` sur `/consentement/*`, `CONSENT_PHONE_MISMATCH`, aucun détail avant authentification
-  - [ ] Tests Vitest : `ConsentRequestCard` limité aux champs D20, motif obligatoire, états `expired` / `already_resolved`
-  - [ ] Recette : pas d'avatar 🦉 ni de bloc « Informations renseignées » ; pas de refus « définitif » ; WP12 « Aucune inscription n'a été créée »
+- [x] **2.7** Décision du parent WP05, WP06, WP11, WP12 (requiert API-L2) · `feature/lot2-decision-parent`
+  - [x] Atterrissage `/consentement/[token]` (jeton retiré de l'URL, claim, choix connecté / non connecté)
+  - [x] Composant `ConsentRequestCard` (D20 strict)
+  - [x] WP05 `/inscription/parent/demande/[id]`
+  - [x] WP06 `/inscription/parent/demande/[id]/acceptee` (`Celebration`)
+  - [x] WP11 `/inscription/parent/demande/[id]/refus` (motif, `Button danger`, `Modal` de confirmation)
+  - [x] WP12 `/inscription/parent/demande/[id]/refusee`
+  - [x] Sécurité : `Referrer-Policy: no-referrer` sur `/consentement/*`, `CONSENT_PHONE_MISMATCH`, aucun détail avant authentification
+  - [x] Tests Vitest : `ConsentRequestCard` limité aux champs D20, motif obligatoire, états `expired` / `already_resolved`
+  - [x] Recette : pas d'avatar 🦉 ni de bloc « Informations renseignées » ; pas de refus « définitif » ; WP12 « Aucune inscription n'a été créée »
 
 ### Recette du lot — ⬜ à faire
 - [ ] **2.8** Parcours bout en bout et recette du lot (requiert API-L2 et seed D2) · `feature/lot2-parcours-e2e`

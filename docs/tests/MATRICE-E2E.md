@@ -49,14 +49,14 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WP02` | OTP | 2 | Code SMS, essais épuisés, numéro déjà inscrit (C13) | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP03` | Mot de passe | 2 | Mot de passe du parent | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP04` | Invitation enfant ? | 2 | Demande reçue ? aucune demande, création directe | `apps/web/e2e/inscription-parent.spec.ts` |
-| `WP05` | Demande de l'enfant | 2 |  |  |
-| `WP06` | Demande acceptée | 2 |  |  |
+| `WP05` | Demande de l'enfant | 2 | Demande de l'enfant (D20) après le lien SMS, parent nouveau ou déjà inscrit | `apps/web/e2e/decision-parent.spec.ts` |
+| `WP06` | Demande acceptée | 2 | Demande acceptée puis profil | `apps/web/e2e/decision-parent.spec.ts` |
 | `WP07` | Profil 1 · localisation | 2 | Localisation | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP08` | Profil 2 · à propos | 2 | À propos, tout facultatif | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP09` | Profil 3 · enfants | 2 | Enfants et objectifs | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP10` | Bienvenue parent | 2 | Bienvenue, enfants rattachés puis espace parent | `apps/web/e2e/inscription-parent.spec.ts` |
-| `WP11` | Motifs de refus | 2 |  |  |
-| `WP12` | Refus envoyé (terminal) | 2 |  |  |
+| `WP11` | Motifs de refus | 2 | Motif obligatoire, confirmation du refus | `apps/web/e2e/decision-parent.spec.ts` |
+| `WP12` | Refus envoyé (terminal) | 2 | Refus envoyé, W18 côté enfant | `apps/web/e2e/decision-parent.spec.ts` |
 | `WD01` | Accueil | 3 |  |  |
 | `WD02` | Accueil nouvel utilisateur | 3 |  |  |
 | `WD03` | Chargement | 3 |  |  |
