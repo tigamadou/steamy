@@ -446,6 +446,10 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > reçues ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
   > ajout du **Mobile Money préféré** (`ParentProfile.mobileMoney` `{ country, network, phone }`, réseau activé du
   > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
+  > Reprise : PR en chaîne #75 → #77 → #78 → #79 → #80 (fusion dans cet ordre). Restent bloqués : tentatives
+  > récentes de `children/{id}/` et L4.4 (après API-L3a.2 et L3a.3), le reste de L4.2 (après API-L3b.1, L3b.5,
+  > L3b.6 : une source par type dans `pending_actions.SOURCES`). Partir de `development` à jour une fois ces étapes
+  > fusionnées.
 - [ ] **Critères de fin d'API-L4**
   - [ ] Un `childId` étranger → 404 partout
   - [ ] `Notification.url` pointe vers les routes front des plans
