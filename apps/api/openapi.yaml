@@ -5,10 +5,66 @@ info:
   description: API pour la plateforme de formation
 paths:
   /api/accounts/consent-requests/:
+    get:
+      operationId: accounts_consent_requests_list
+      description: 'WP04, WPD01 : demandes reçues, les plus récentes d''abord.'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - accepted
+          - cancelled
+          - expired
+          - pending
+          - refused
+        description: Filtre sur le statut
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedConsentRequestList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
     post:
       operationId: accounts_consent_requests_create
-      description: 'W06 : envoie la demande au parent (SMS avec lien à jeton). Réservé
-        à l''inscription en cours.'
+      description: 'W06 : l''enfant envoie la demande à son parent (SMS avec lien
+        à jeton). Réservé à l''inscription en cours.'
       tags:
       - accounts
       requestBody:
@@ -42,16 +98,177 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/accounts/consent-requests/{id}/:
+    get:
+      operationId: accounts_consent_requests_retrieve
+      description: |-
+        Demandes adressées au numéro vérifié du parent connecté. `create` et `resend` servent l'enfant pendant son
+        inscription (session « inscription en cours », sans compte connecté) ; `preview`, le lien SMS avant connexion.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequest'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/consent-requests/{id}/accept/:
+    post:
+      operationId: accounts_consent_requests_accept_create
+      description: 'WP05 « Accepter » → WP06 : l''enfant est rattaché au parent et
+        peut choisir son mot de passe (W10).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/consent-requests/{id}/refuse/:
+    post:
+      operationId: accounts_consent_requests_refuse_create
+      description: 'WP11 → WP12 : motif obligatoire. Le compte en attente de l''enfant
+        est supprimé (D22).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuseRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/consent-requests/{id}/resend/:
     post:
       operationId: accounts_consent_requests_resend_create
-      description: 'W07 « Renvoyer le SMS » : nouveau lien (seul le dernier est valable),
+      description: 'W07 « Renvoyer le SMS » : nouveau lien (seul le dernier vaut),
         60 s au moins entre deux envois.'
       parameters:
       - in: path
         name: id
         schema:
-          type: integer
+          type: string
+          pattern: ^\d+$
         required: true
       tags:
       - accounts
@@ -75,6 +292,90 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/consent-requests/claim/:
+    post:
+      operationId: accounts_consent_requests_claim_create
+      description: 'Lien SMS ouvert par le parent connecté : numéro concordant exigé
+        (`CONSENT_PHONE_MISMATCH`).'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/consent-requests/preview/:
+    post:
+      operationId: accounts_consent_requests_preview_create
+      description: 'WP01 depuis le lien SMS : numéro masqué pour guider le parent,
+        aucune donnée de l''enfant.'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentPreview'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
           content:
             application/json:
               schema:
@@ -349,8 +650,8 @@ paths:
   /api/auth/learner-signup/:
     get:
       operationId: auth_learner_signup_retrieve
-      description: 'W06-W10 : étape réelle de l''inscription en cours (garde du layout
-        du flux).'
+      description: 'W06-W10, W18 : étape réelle de l''inscription en cours (garde
+        du layout du flux).'
       tags:
       - auth
       responses:
@@ -3182,6 +3483,85 @@ components:
       - id
       - question
       - text
+    ConsentPreview:
+      type: object
+      description: 'Ce que montre le lien SMS avant toute connexion : le numéro masqué,
+        rien de l''enfant.'
+      properties:
+        parentPhoneMasked:
+          type: string
+      required:
+      - parentPhoneMasked
+    ConsentRequest:
+      type: object
+      description: 'Demande vue par le parent (WP04, WP05) : seulement ce qui existe
+        à ce stade (D20).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        origin:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+          title: Origine
+        status:
+          type: string
+          readOnly: true
+        firstName:
+          type: string
+          readOnly: true
+        lastName:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          nullable: true
+          readOnly: true
+        age:
+          type: integer
+          nullable: true
+          readOnly: true
+        relationship:
+          allOf:
+          - $ref: '#/components/schemas/Relationship'
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        expiresAt:
+          type: string
+          format: date-time
+          readOnly: true
+        resolvedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        refusalReason:
+          allOf:
+          - $ref: '#/components/schemas/RefusalReason'
+          readOnly: true
+          nullable: true
+        refusalNote:
+          type: string
+          readOnly: true
+          title: Précisions du refus
+      required:
+      - age
+      - createdAt
+      - expiresAt
+      - firstName
+      - id
+      - lastName
+      - origin
+      - refusalNote
+      - refusalReason
+      - relationship
+      - resolvedAt
+      - status
+      - username
     ConsentRequestState:
       type: object
       description: 'Demande vue par l''enfant (W07, W08, W18) : jamais le numéro du
@@ -3208,10 +3588,16 @@ components:
         resendInSec:
           type: integer
           readOnly: true
+        refusalReason:
+          allOf:
+          - $ref: '#/components/schemas/RefusalReason'
+          readOnly: true
+          nullable: true
       required:
       - expiresAt
       - id
       - parentPhoneMasked
+      - refusalReason
       - relationship
       - resendInSec
       - status
@@ -4423,6 +4809,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Choice'
+    PaginatedConsentRequestList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsentRequest'
     PaginatedCourseListList:
       type: object
       properties:
@@ -5028,6 +5434,19 @@ components:
       - code
       - id
       - label
+    RefuseRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          description: Motif obligatoire (référentiel `refusal-reasons`)
+        note:
+          type: string
+          default: ''
+          maxLength: 1000
+      required:
+      - reason
     Relationship:
       type: object
       properties:
@@ -5278,11 +5697,13 @@ components:
       - parent
       - waiting
       - password
+      - refused
       type: string
       description: |-
         * `parent` - W06 · Parent
         * `waiting` - W07 · Attente
         * `password` - W10 · Mot de passe
+        * `refused` - W18 · Refus
     SubjectEnum:
       enum:
       - question
@@ -5299,6 +5720,16 @@ components:
         * `changement-parent` - Changement de parent
         * `candidature` - Candidature
         * `autre` - Autre
+    TokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          description: Jeton du lien SMS /consentement/<jeton>
+          maxLength: 128
+      required:
+      - token
     ToneEnum:
       enum:
       - info

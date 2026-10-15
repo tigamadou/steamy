@@ -11,10 +11,65 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description WP04, WPD01 : demandes reçues, les plus récentes d'abord. */
+        get: operations["accounts_consent_requests_list"];
+        put?: never;
+        /** @description W06 : l'enfant envoie la demande à son parent (SMS avec lien à jeton). Réservé à l'inscription en cours. */
+        post: operations["accounts_consent_requests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Demandes adressées au numéro vérifié du parent connecté. `create` et `resend` servent l'enfant pendant son
+         *     inscription (session « inscription en cours », sans compte connecté) ; `preview`, le lien SMS avant connexion.
+         */
+        get: operations["accounts_consent_requests_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/{id}/accept/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
         get?: never;
         put?: never;
-        /** @description W06 : envoie la demande au parent (SMS avec lien à jeton). Réservé à l'inscription en cours. */
-        post: operations["accounts_consent_requests_create"];
+        /** @description WP05 « Accepter » → WP06 : l'enfant est rattaché au parent et peut choisir son mot de passe (W10). */
+        post: operations["accounts_consent_requests_accept_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/{id}/refuse/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WP11 → WP12 : motif obligatoire. Le compte en attente de l'enfant est supprimé (D22). */
+        post: operations["accounts_consent_requests_refuse_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -30,8 +85,42 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description W07 « Renvoyer le SMS » : nouveau lien (seul le dernier est valable), 60 s au moins entre deux envois. */
+        /** @description W07 « Renvoyer le SMS » : nouveau lien (seul le dernier vaut), 60 s au moins entre deux envois. */
         post: operations["accounts_consent_requests_resend_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/claim/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Lien SMS ouvert par le parent connecté : numéro concordant exigé (`CONSENT_PHONE_MISMATCH`). */
+        post: operations["accounts_consent_requests_claim_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/preview/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WP01 depuis le lien SMS : numéro masqué pour guider le parent, aucune donnée de l'enfant. */
+        post: operations["accounts_consent_requests_preview_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -172,7 +261,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description W06-W10 : étape réelle de l'inscription en cours (garde du layout du flux). */
+        /** @description W06-W10, W18 : étape réelle de l'inscription en cours (garde du layout du flux). */
         get: operations["auth_learner_signup_retrieve"];
         put?: never;
         /** @description W05 « Continuer » : crée le compte en attente et renvoie le code de reprise (une seule fois). */
@@ -1308,6 +1397,31 @@ export interface components {
             readonly question: number;
             readonly text: string;
         };
+        /** @description Ce que montre le lien SMS avant toute connexion : le numéro masqué, rien de l'enfant. */
+        ConsentPreview: {
+            parentPhoneMasked: string;
+        };
+        /** @description Demande vue par le parent (WP04, WP05) : seulement ce qui existe à ce stade (D20). */
+        ConsentRequest: {
+            readonly id: number;
+            /** Origine */
+            readonly origin: components["schemas"]["RoleEnum"];
+            readonly status: string;
+            readonly firstName: string;
+            readonly lastName: string;
+            readonly username: string | null;
+            readonly age: number | null;
+            readonly relationship: components["schemas"]["Relationship"];
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly expiresAt: string;
+            /** Format: date-time */
+            readonly resolvedAt: string | null;
+            readonly refusalReason: components["schemas"]["RefusalReason"] | null;
+            /** Précisions du refus */
+            readonly refusalNote: string;
+        };
         /** @description Demande vue par l'enfant (W07, W08, W18) : jamais le numéro du parent en clair. */
         ConsentRequestState: {
             readonly id: number;
@@ -1318,6 +1432,7 @@ export interface components {
             /** Format: date-time */
             readonly expiresAt: string;
             readonly resendInSec: number;
+            readonly refusalReason: components["schemas"]["RefusalReason"] | null;
         };
         /**
          * @description * `pending` - En attente
@@ -1840,6 +1955,21 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Choice"][];
         };
+        PaginatedConsentRequestList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["ConsentRequest"][];
+        };
         PaginatedCourseListList: {
             /** @example 123 */
             count?: number;
@@ -2150,6 +2280,12 @@ export interface components {
             /** Libellé */
             label: string;
         };
+        RefuseRequest: {
+            /** @description Motif obligatoire (référentiel `refusal-reasons`) */
+            reason: string;
+            /** @default  */
+            note: string;
+        };
         Relationship: {
             readonly id: number;
             code: string;
@@ -2277,9 +2413,10 @@ export interface components {
          * @description * `parent` - W06 · Parent
          *     * `waiting` - W07 · Attente
          *     * `password` - W10 · Mot de passe
+         *     * `refused` - W18 · Refus
          * @enum {string}
          */
-        StepEnum: "parent" | "waiting" | "password";
+        StepEnum: "parent" | "waiting" | "password" | "refused";
         /**
          * @description * `question` - Question
          *     * `paiement` - Paiement
@@ -2290,6 +2427,10 @@ export interface components {
          * @enum {string}
          */
         SubjectEnum: "question" | "paiement" | "livraison" | "changement-parent" | "candidature" | "autre";
+        TokenRequest: {
+            /** @description Jeton du lien SMS /consentement/<jeton> */
+            token: string;
+        };
         /**
          * @description * `info` - Information
          *     * `success` - Succès
@@ -2340,6 +2481,56 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    accounts_consent_requests_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /** @description Filtre sur le statut */
+                status?: "accepted" | "cancelled" | "expired" | "pending" | "refused";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedConsentRequestList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_consent_requests_create: {
         parameters: {
             query?: never;
@@ -2387,12 +2578,191 @@ export interface operations {
             };
         };
     };
+    accounts_consent_requests_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequest"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_accept_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_refuse_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefuseRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_consent_requests_resend_create: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                id: number;
+                id: string;
             };
             cookie?: never;
         };
@@ -2423,6 +2793,108 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_claim_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_preview_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentPreview"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
