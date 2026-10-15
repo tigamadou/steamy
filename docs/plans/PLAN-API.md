@@ -64,7 +64,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Aucune route d'écriture client sur contenu, quiz, commandes ou paiements
 
 ### API-1 · Socle — 🟡 en cours
-- [x] **ADR Identité et connexion** (avant API-1.1) · `docs/adr-identite-connexion` · [ADR 0001](../adr/0001-identite-et-connexion.md) · PR #__
+- [x] **ADR Identité et connexion** (avant API-1.1) · `docs/adr-identite-connexion` · [ADR 0001](../adr/0001-identite-et-connexion.md) · PR #12
   - [x] `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé
 - [ ] **API-1.1** Remise à zéro + `accounts.User` · `feature/api-1-identite`
   - [ ] Supprimer tous les `apps/*/migrations/0*.py` (garder les `__init__.py`)
