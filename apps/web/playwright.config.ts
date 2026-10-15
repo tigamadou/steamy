@@ -10,6 +10,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"], ["html", { open: "never" }]],
+  // Envois asynchrones (Celery) et image de production sur un poste chargé : assertions un peu plus patientes
+  expect: { timeout: 10_000 },
   use: {
     baseURL,
     locale: "fr-FR",

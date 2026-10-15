@@ -19,7 +19,7 @@ describe("InvalidInvitation", () => {
   });
 
   it("est affiché sur /activation sans jeton", () => {
-    expect(metadata.title).toBe("Activation du compte · Steamy");
+    expect(metadata.title).toBe("Activation du compte");
     render(<ActivationWithoutToken />);
     expect(screen.getByRole("heading", { name: "Lien expiré ou déjà utilisé" })).toBeInTheDocument();
   });

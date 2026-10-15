@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ds/Button";
 import { Celebration } from "@/components/ds/Celebration";
 
-export const metadata: Metadata = { title: "Mot de passe réinitialisé · Steamy" };
+export const metadata: Metadata = { title: "Mot de passe réinitialisé" };
 
 // WL05 · Mot de passe réinitialisé : retour à la connexion, aucune minuterie.
 export default function ResetDonePage() {

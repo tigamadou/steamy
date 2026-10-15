@@ -22,7 +22,7 @@ describe("Mot de passe oublié · layout et page WL02", () => {
   });
 
   it("affiche WL02 sous le layout et reste accessible", async () => {
-    expect(metadata.title).toBe("Mot de passe oublié · Steamy");
+    expect(metadata.title).toBe("Mot de passe oublié");
     const { container } = render(ResetLayout({ children: <ForgotPage /> } as LayoutProps<"/mot-de-passe-oublie">));
     expect(screen.getByRole("heading", { name: "Pas de panique !" })).toBeInTheDocument();
     expect(await axe(container)).toHaveNoViolations();

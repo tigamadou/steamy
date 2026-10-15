@@ -5,7 +5,7 @@ import { Loader } from "@/components/ds/Loader";
 
 import { InvitationGate } from "./InvitationGate";
 
-export const metadata: Metadata = { title: "Activation du compte · Steamy" };
+export const metadata: Metadata = { title: "Activation du compte" };
 
 // Lien de l'email d'invitation (C6) : `Referrer-Policy: no-referrer` posé par next.config.ts.
 export default function ActivationPage({ params }: PageProps<"/activation/[token]">) {

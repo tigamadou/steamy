@@ -45,8 +45,8 @@ test("WL02 → WL05 : un parent réinitialise par SMS, se reconnecte, et son anc
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Choisissez un nouveau mot de passe");
   await expect(page.getByText("Différent de l'ancien")).toHaveCount(0);
   await axe(page);
-  await page.getByLabel("Nouveau mot de passe", { exact: true }).fill("NouveauMdp2026");
-  await page.getByLabel("Confirmez le mot de passe", { exact: true }).fill("NouveauMdp2026");
+  await page.getByLabel(/^Nouveau mot de passe/).fill("NouveauMdp2026");
+  await page.getByLabel(/^Confirmez le mot de passe/).fill("NouveauMdp2026");
   await page.getByRole("button", { name: "Enregistrer le mot de passe" }).click();
 
   await expect(page).toHaveURL("/mot-de-passe-oublie/termine");

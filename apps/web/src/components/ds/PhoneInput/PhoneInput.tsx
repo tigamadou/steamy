@@ -12,6 +12,7 @@ import {
   digitsOnly,
   flagEmoji,
   formatNational,
+  initialCountry,
   isValidNational,
   toE164,
   type PhoneCountry,
@@ -60,9 +61,9 @@ export function PhoneInput({
   className,
 }: PhoneInputProps) {
   const { invalid: isInvalid, ...a11y } = useFieldControl({ id, invalid, required });
-  const [code, setCode] = useState(
-    () => countries.find((c) => c.code === defaultCountry)?.code ?? countries[0]?.code ?? "",
-  );
+  // Pays choisi par l'utilisateur, sinon celui par défaut : la liste peut arriver après le premier rendu
+  const [picked, setCode] = useState<string>();
+  const code = picked ?? initialCountry(countries, defaultCountry);
   const [national, setNational] = useState(() => digitsOnly(defaultValue));
   const country = countries.find((c) => c.code === code);
 

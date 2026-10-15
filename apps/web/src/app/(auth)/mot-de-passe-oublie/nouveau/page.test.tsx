@@ -10,7 +10,7 @@ const { ResetFlowProvider } = await import("../ResetFlow");
 
 describe("Page WL04", () => {
   it("affiche l'écran du nouveau mot de passe sous le parcours (renvoi à WL02 sans jeton)", () => {
-    expect(metadata.title).toBe("Nouveau mot de passe · Steamy");
+    expect(metadata.title).toBe("Nouveau mot de passe");
     render(
       <ResetFlowProvider>
         <NewPasswordPage />

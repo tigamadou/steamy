@@ -39,7 +39,7 @@ describe("InvitationGate", () => {
 
 describe("Page d'activation", () => {
   it("lit l'invitation sous Suspense avec un message d'attente", () => {
-    expect(metadata.title).toBe("Activation du compte · Steamy");
+    expect(metadata.title).toBe("Activation du compte");
     const tree = ActivationPage(params as PageProps<"/activation/[token]">);
     expect(tree.props.children.type).toBe(InvitationGate);
     expect(tree.props.children.props).toEqual(params);

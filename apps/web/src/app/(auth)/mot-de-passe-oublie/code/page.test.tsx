@@ -10,7 +10,7 @@ const { ResetFlowProvider } = await import("../ResetFlow");
 
 describe("Page WL03", () => {
   it("affiche l'écran du code sous le parcours (renvoi à WL02 sans défi)", () => {
-    expect(metadata.title).toBe("Code de vérification · Steamy");
+    expect(metadata.title).toBe("Code de vérification");
     render(
       <ResetFlowProvider>
         <CodePage />

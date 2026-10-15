@@ -25,8 +25,8 @@ test.describe("activation enseignante", { tag: "@donnees-uniques" }, () => {
     const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     expect(violations).toEqual([]);
 
-    await page.getByLabel("Mot de passe", { exact: true }).fill("NadiaActive2026");
-    await page.getByLabel("Confirmez le mot de passe", { exact: true }).fill("NadiaActive2026");
+    await page.getByLabel(/^Mot de passe/).fill("NadiaActive2026");
+    await page.getByLabel(/^Confirmez le mot de passe/).fill("NadiaActive2026");
     await page.getByRole("button", { name: "Activer mon compte" }).click();
     await expect(page).toHaveURL("/enseignant");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Nadia");
@@ -49,8 +49,8 @@ test.describe("activation enseignante", { tag: "@donnees-uniques" }, () => {
     const code = extractCode(await waitForMessage(INVITED, { since }));
     await page.getByLabel("Code à 6 chiffres reçu par email").fill(code);
     await page.getByRole("button", { name: "Vérifier le code" }).click();
-    await page.getByLabel("Nouveau mot de passe", { exact: true }).fill("NadiaReset2026");
-    await page.getByLabel("Confirmez le mot de passe", { exact: true }).fill("NadiaReset2026");
+    await page.getByLabel(/^Nouveau mot de passe/).fill("NadiaReset2026");
+    await page.getByLabel(/^Confirmez le mot de passe/).fill("NadiaReset2026");
     await page.getByRole("button", { name: "Enregistrer le mot de passe" }).click();
     await expect(page).toHaveURL("/mot-de-passe-oublie/termine");
 
