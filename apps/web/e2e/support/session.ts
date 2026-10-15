@@ -36,7 +36,12 @@ export function loginAs(page: Page, role: DemoRole): Promise<void> {
 /** Ouvre le tiroir de navigation du shell quand il est replié (écran de moins de 768 px). */
 export async function openShellMenu(page: Page): Promise<void> {
   const menu = page.getByRole("button", { name: "Ouvrir le menu" });
-  if (await menu.isVisible()) await menu.click();
+  if (!(await menu.isVisible())) return;
+  // Un clic arrivé avant l'hydratation est perdu : réessayé jusqu'à l'ouverture du tiroir
+  await expect(async () => {
+    await menu.click();
+    await expect(menu).toHaveAttribute("aria-expanded", "true", { timeout: 1_000 });
+  }).toPass();
 }
 
 /** Déconnexion depuis le shell applicatif : « Déconnexion » puis confirmation dans la modale WD16. */

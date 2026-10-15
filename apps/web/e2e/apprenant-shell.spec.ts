@@ -38,7 +38,7 @@ test("l'apprenant connecté retrouve son shell : 5 entrées, profil, cloche et r
 
 test("un parent qui ouvre l'espace apprenant est renvoyé vers le sien", async ({ page }) => {
   await loginAs(page, "parent");
-  await page.goto("/apprenant/parcours");
+  await page.goto("/apprenant");
   await expect(page).toHaveURL("/parent");
 });
 
@@ -77,7 +77,7 @@ test("à 360 px, la navigation est un tiroir qui se ferme par Échap", async ({ 
   const nav = page.getByRole("navigation", { name: "Navigation de ton espace" });
   await expect(nav).toBeHidden();
   const menu = page.getByRole("button", { name: "Ouvrir le menu" });
-  await menu.click();
+  await openShellMenu(page);
   await expect(nav).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(nav).toBeHidden();
