@@ -242,8 +242,8 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 
 ### API-L3b · Commerce, boutique, événements payants — ⬜ à faire
 - [ ] **API-L3b.0a** Comparaison paiement (S9) · `feature/api-l3b-0a-adr-paiement` · doc
-  - [ ] Comparer KKiaPay et FedaPay : réseaux par pays (MTN, Moov, Celtiis), frais, initiation côté serveur, webhook signé, vérification de transaction, remboursements par API, sandbox, reversement, XOF
-  - [ ] Écrire l'**ADR-Paiement** (un principal + un secours)
+  - [x] Comparer KKiaPay et FedaPay : réseaux par pays (MTN, Moov, Celtiis), frais, initiation côté serveur, webhook signé, vérification de transaction, remboursements par API, sandbox, reversement, XOF
+  - [x] Écrire l'**ADR-Paiement** (un principal + un secours)
   - [ ] Faire valider le format de `Invoice` par la comptabilité
 - [ ] **API-L3b.0b** Interface paiement · `feature/api-l3b-0b-paiement`
   - [ ] `payments/providers/` : `PaymentProvider` (`initiate`, `verify_webhook`, `parse_event`, `fetch_status`, `refund`)
@@ -371,11 +371,11 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Identité et connexion (avant API-1.1)
   - [x] SMS (avant API-L2.0b)
   - [ ] Médias (Vimeo) (avant API-L3a.1)
-  - [ ] Paiement (avant API-L3b.0b)
+  - [x] Paiement (avant API-L3b.0b)
   - [ ] PDF et stockage privé (avant API-L3a.4)
 - [ ] **Comparaisons de prestataires**
   - [x] SMS (S10), avant API-L2 : voir API-L2.0a
-  - [ ] Paiement (S9), avant API-L3b : voir API-L3b.0a
+  - [x] Paiement (S9), avant API-L3b : voir API-L3b.0a
 - [ ] **Points ouverts** (« Reste à décider »)
   - [ ] Valeurs du barème de points et des paliers de rang (C8), avant L3a.3
   - [ ] Format des factures validé par la comptabilité, avant L3b.2
