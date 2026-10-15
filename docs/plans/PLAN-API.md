@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L1.4
+Statut : 🟡 en cours · Prochaine tâche : API-L1.5
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -200,11 +200,17 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (« 12 – 15 ans », maquette WL23), `seatsReserved` ; contraintes fin > début, date limite ≤ début, places
   > attribuées ≤ capacité. `upcoming=true` : non terminés, du plus proche au plus lointain ; `false` : terminés, du
   > plus récent au plus ancien ; absent : tous, par date. Liste paginée, `Cache-Control: public, max-age=300`.
-- [ ] **API-L1.4** Formulaires publics · `feature/api-l1-4-formulaires`
-  - [ ] App `public` : `QuoteRequest` (D13), `Lead` (D14, attestation adulte C12), `ContactMessage` (D17)
-  - [ ] `POST public/*` anonymes : CSRF, throttle dédié, champ piège, erreurs `fields`
-  - [ ] Email à l'équipe par Celery
-  - [ ] Tests : formulaires throttlés
+- [x] **API-L1.4** Formulaires publics · `feature/api-l1-4-formulaires` · PR #41
+  - [x] App `public` : `QuoteRequest` (D13), `Lead` (D14, attestation adulte C12), `ContactMessage` (D17)
+  - [x] `POST public/*` anonymes : CSRF, throttle dédié, champ piège, erreurs `fields`
+  - [x] Email à l'équipe par Celery
+  - [x] Tests : formulaires throttlés, CSRF exigé, champ piège, erreurs par champ ; couverture 100 % du code modifié
+  > Décisions : réponse neutre `201 {ok: true}` dans tous les cas (enregistré, doublon de newsletter, robot). Champ
+  > piège `website`. Throttle `public-form` à `10/hour` par IP (`THROTTLE_PUBLIC_FORM`). Newsletter : `isAdult` et
+  > `newsletterConsent` obligatoirement vrais (code `REQUIRED`), une ligne par email (mis à jour sans le dire), pas
+  > d'email à l'équipe. Devis et contact : tâche `notify_team` (idempotente par `notifiedAt`) vers `TEAM_EMAIL`.
+  > Contact : `contact` = email ou téléphone (normalisé E.164), message ≥ 20 caractères (`MIN_LENGTH`). Téléphone
+  > du devis normalisé E.164 (`PHONE_INVALID`). `enforce_csrf` ajouté à `libs/authentication.py`.
 - [ ] **API-L1.5** Kits en lecture · `feature/api-l1-5-kits`
   - [ ] App `shop` : `Kit` (§3.3) + admin
   - [ ] `GET shop/kits/?category=`, `GET shop/kits/{slug}/` (disponibilité booléenne, jamais le stock exact)

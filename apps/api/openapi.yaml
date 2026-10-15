@@ -2125,6 +2125,118 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/public/contact-messages/:
+    post:
+      operationId: public_contact_messages_create
+      description: Formulaire de contact (WL24, D17).
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Received'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/public/leads/:
+    post:
+      operationId: public_leads_create
+      description: 'Inscription à la newsletter (WL20, D14), réservée aux adultes
+        (C12). Un email déjà inscrit : même réponse.'
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Received'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/public/quote-requests/:
+    post:
+      operationId: public_quote_requests_create
+      description: Demande de devis d'un établissement (WL11, D13).
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteRequestRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Received'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/referentials/avatars/:
     get:
       operationId: referentials_avatars_list
@@ -2603,6 +2715,36 @@ components:
       - id
       - question
       - text
+    ContactMessageRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nom
+          maxLength: 120
+        contact:
+          type: string
+          writeOnly: true
+          minLength: 1
+          description: Email ou numéro de téléphone
+          maxLength: 254
+        subject:
+          allOf:
+          - $ref: '#/components/schemas/SubjectEnum'
+          title: Sujet
+        message:
+          type: string
+          minLength: 1
+        website:
+          type: string
+          writeOnly: true
+          description: 'Champ piège : toujours vide'
+      required:
+      - contact
+      - message
+      - name
+      - subject
     Country:
       type: object
       properties:
@@ -3097,6 +3239,36 @@ components:
         * `mcq` - QCM
         * `tf` - Vrai/Faux
         * `free` - Libre
+    LeadRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        source:
+          type: string
+          title: Origine
+          description: guides, footer…
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        isAdult:
+          type: boolean
+          writeOnly: true
+          description: 'Attestation : j''ai 18 ans ou plus (C12)'
+        newsletterConsent:
+          type: boolean
+          writeOnly: true
+          description: Consentement explicite, case non cochée par défaut (D14)
+        website:
+          type: string
+          writeOnly: true
+          description: 'Champ piège : toujours vide'
+      required:
+      - email
+      - isAdult
+      - newsletterConsent
     LevelSummary:
       type: object
       properties:
@@ -3971,6 +4143,46 @@ components:
       - id
       - questions
       - title
+    QuoteRequestRequest:
+      type: object
+      properties:
+        schoolName:
+          type: string
+          minLength: 1
+          title: Établissement
+          maxLength: 160
+        contactName:
+          type: string
+          minLength: 1
+          title: Personne à contacter
+          maxLength: 120
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        phone:
+          type: string
+          minLength: 1
+          title: Téléphone (E.164)
+          description: Numéro national (Bénin par défaut) ou E.164
+          maxLength: 16
+        offer:
+          type: string
+          title: Offre
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        message:
+          type: string
+        website:
+          type: string
+          writeOnly: true
+          description: 'Champ piège : toujours vide'
+      required:
+      - contactName
+      - email
+      - phone
+      - schoolName
     ReadAll:
       type: object
       properties:
@@ -3979,6 +4191,15 @@ components:
           description: Nombre de notifications marquées comme lues
       required:
       - updated
+    Received:
+      type: object
+      description: Réponse neutre, identique qu'il y ait eu enregistrement, doublon
+        ou robot.
+      properties:
+        ok:
+          type: boolean
+      required:
+      - ok
     RefusalReason:
       type: object
       properties:
@@ -4216,6 +4437,22 @@ components:
       - slug
       - startsAt
       - title
+    SubjectEnum:
+      enum:
+      - question
+      - paiement
+      - livraison
+      - changement-parent
+      - candidature
+      - autre
+      type: string
+      description: |-
+        * `question` - Question
+        * `paiement` - Paiement
+        * `livraison` - Livraison
+        * `changement-parent` - Changement de parent
+        * `candidature` - Candidature
+        * `autre` - Autre
     ToneEnum:
       enum:
       - info

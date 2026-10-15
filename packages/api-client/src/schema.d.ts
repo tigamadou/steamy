@@ -787,6 +787,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/public/contact-messages/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Formulaire de contact (WL24, D17). */
+        post: operations["public_contact_messages_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/leads/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Inscription à la newsletter (WL20, D14), réservée aux adultes (C12). Un email déjà inscrit : même réponse. */
+        post: operations["public_leads_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/quote-requests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Demande de devis d'un établissement (WL11, D13). */
+        post: operations["public_quote_requests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/referentials/avatars/": {
         parameters: {
             query?: never;
@@ -1052,6 +1103,17 @@ export interface components {
             readonly question: number;
             readonly text: string;
         };
+        ContactMessageRequest: {
+            /** Nom */
+            name: string;
+            /** @description Email ou numéro de téléphone */
+            contact: string;
+            /** Sujet */
+            subject: components["schemas"]["SubjectEnum"];
+            message: string;
+            /** @description Champ piège : toujours vide */
+            website?: string;
+        };
         Country: {
             readonly id: number;
             /** Code ISO */
@@ -1281,6 +1343,21 @@ export interface components {
          * @enum {string}
          */
         KindEnum: "mcq" | "tf" | "free";
+        LeadRequest: {
+            /** Format: email */
+            email: string;
+            /**
+             * Origine
+             * @description guides, footer…
+             */
+            source?: string;
+            /** @description Attestation : j'ai 18 ans ou plus (C12) */
+            isAdult: boolean;
+            /** @description Consentement explicite, case non cochée par défaut (D14) */
+            newsletterConsent: boolean;
+            /** @description Champ piège : toujours vide */
+            website?: string;
+        };
         LevelSummary: {
             /** Ordre */
             order?: number;
@@ -1698,9 +1775,31 @@ export interface components {
             passScore?: string;
             readonly questions: components["schemas"]["Question"][];
         };
+        QuoteRequestRequest: {
+            /** Établissement */
+            schoolName: string;
+            /** Personne à contacter */
+            contactName: string;
+            /** Format: email */
+            email: string;
+            /**
+             * Téléphone (E.164)
+             * @description Numéro national (Bénin par défaut) ou E.164
+             */
+            phone: string;
+            /** Offre */
+            offer?: string;
+            message?: string;
+            /** @description Champ piège : toujours vide */
+            website?: string;
+        };
         ReadAll: {
             /** @description Nombre de notifications marquées comme lues */
             updated: number;
+        };
+        /** @description Réponse neutre, identique qu'il y ait eu enregistrement, doublon ou robot. */
+        Received: {
+            ok: boolean;
         };
         RefusalReason: {
             readonly id: number;
@@ -1822,6 +1921,16 @@ export interface components {
             readonly isPast: boolean;
             description: string;
         };
+        /**
+         * @description * `question` - Question
+         *     * `paiement` - Paiement
+         *     * `livraison` - Livraison
+         *     * `changement-parent` - Changement de parent
+         *     * `candidature` - Candidature
+         *     * `autre` - Autre
+         * @enum {string}
+         */
+        SubjectEnum: "question" | "paiement" | "livraison" | "changement-parent" | "candidature" | "autre";
         /**
          * @description * `info` - Information
          *     * `success` - Succès
@@ -4086,6 +4195,147 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_contact_messages_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactMessageRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Received"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_leads_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeadRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Received"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_quote_requests_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuoteRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Received"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
