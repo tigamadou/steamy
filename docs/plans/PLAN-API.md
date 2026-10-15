@@ -137,7 +137,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > Décisions : plafonds OTP quotidiens par défaut 5 par numéro et 20 par IP (D24 ne fixe pas de valeur ; réglables
   > dans l'admin). `audit(action, actor, target, data, request)` dans `apps/core/audit.py` ; journal en lecture
   > seule dans l'admin. Groupes créés sans permission : elles arrivent avec chaque domaine.
-- [x] **API-1.7** Données de démo (D2) · `feature/api-1-seed-demo` · PR #__
+- [x] **API-1.7** Données de démo (D2) · `feature/api-1-seed-demo` · PR #25
   - [x] Commande `seed_demo` idempotente, refusée si `DJANGO_ENV=production`
   - [x] `make seed` : `loaddata fixtures/admin.json fixtures/mail.json` puis `seed_demo`
   - [x] Comptes : Léa Adjovi, son parent, un enseignant, un membre du personnel par groupe avec secret TOTP fixe de développement
