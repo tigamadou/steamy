@@ -4,6 +4,7 @@ import sys
 from datetime import timedelta
 
 import dj_database_url
+from celery.schedules import crontab
 
 # ==================================================================================================
 # CHANGE FIELDS
@@ -76,6 +77,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "drf_spectacular_sidecar",
+    "adminsortable2",
     "storages",
     "django_otp",
     "django_otp.plugins.otp_totp",
@@ -83,12 +85,18 @@ INSTALLED_APPS = [
     "apps.file",
     "apps.mail",
     "apps.accounts",
+    # Coquille : ne garde que ses migrations (tables supprimées en 0002), voir apps/courses/__init__.py
     "apps.courses",
+    "apps.catalog",
+    "apps.events",
+    "apps.public",
+    "apps.shop",
     "apps.learning",
     "apps.payments",
     "apps.analytics",
     "apps.notifications",
     "apps.referentials",
+    "apps.classrooms",
     "apps.core",
 ]
 
@@ -263,9 +271,21 @@ REST_FRAMEWORK = {
         "user": os.getenv("THROTTLE_USER", "600/min"),
         "login": os.getenv("THROTTLE_LOGIN", "5/min"),
         "login-identifier": os.getenv("THROTTLE_LOGIN_IDENTIFIER", "10/hour"),
+        # Création d'un compte en attente (apprenant) ou d'un défi OTP (parent)
         "signup": os.getenv("THROTTLE_SIGNUP", "5/min"),
+        # Étapes suivantes (demande au parent, mot de passe) : compteur séparé, sinon un parent et son enfant
+        # derrière la même adresse IP (box familiale, salle de classe) s'épuisent mutuellement
+        "signup-step": os.getenv("THROTTLE_SIGNUP_STEP", "20/min"),
+        "otp": os.getenv("THROTTLE_OTP", "10/min"),
+        "username-availability": os.getenv("THROTTLE_USERNAME_AVAILABILITY", "30/min"),
+        "resume": os.getenv("THROTTLE_RESUME", "5/min"),
+        "resume-username": os.getenv("THROTTLE_RESUME_USERNAME", "10/hour"),
+        "consent-preview": os.getenv("THROTTLE_CONSENT_PREVIEW", "20/min"),
+        "invitation": os.getenv("THROTTLE_INVITATION", "20/min"),
         "password-reset": os.getenv("THROTTLE_PASSWORD_RESET", "5/hour"),
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
+        # Formulaires publics (devis, newsletter, contact) : par IP
+        "public-form": os.getenv("THROTTLE_PUBLIC_FORM", "10/hour"),
     },
 }
 # Réponses d'erreur (composant `Error`) déclarées sur chaque opération
@@ -288,7 +308,11 @@ SPECTACULAR_SETTINGS = {
     ],
     "SCHEMA_PATH_PREFIX": r"/api",
     # Codes du format d'erreur D4 : énumération nommée pour le client TypeScript
-    "ENUM_NAME_OVERRIDES": {"ErrorCodeEnum": "libs.errors.ERROR_CODES"},
+    # Rôle d'un compte et origine d'une demande de consentement ont les mêmes valeurs : un seul `RoleEnum`
+    "ENUM_NAME_OVERRIDES": {
+        "ErrorCodeEnum": "libs.errors.ERROR_CODES",
+        "RoleEnum": "apps.accounts.models.User.Role",
+    },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
 ADMIN_TITLE = "Admin"
@@ -305,6 +329,15 @@ CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", WEB_URL).sp
 # Payements
 PAYMENTS_KKIAPAY_SECRET = os.getenv("PAYMENTS_KKIAPAY_SECRET", "")
 PAYMENTS_FEDAPAY_SECRET = os.getenv("PAYMENTS_FEDAPAY_SECRET", "")
+
+# SMS (S10, ADR 0002) : faux fournisseur (lisible dans Mailpit) en local et en CI, Twilio en staging et production.
+# Le faux fournisseur refuse de fonctionner si DEPLOYED.
+SMS_PROVIDER = os.getenv("SMS_PROVIDER", "twilio" if DEPLOYED else "fake")
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+TWILIO_SENDER = os.getenv("TWILIO_SENDER", "STEAMY")
+# URL publique du webhook de statut (`/api/notifications/sms/status/`) ; vide : pas d'accusés de réception
+TWILIO_STATUS_CALLBACK_URL = os.getenv("TWILIO_STATUS_CALLBACK_URL", "")
 
 # # ==================================================================================================
 # # FILE SETTINGS
@@ -372,6 +405,8 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "1") == "1"
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@example.com")
+# Destinataire des formulaires publics (devis, contact)
+TEAM_EMAIL = os.getenv("TEAM_EMAIL", "contact@steamy.local")
 
 SEND_MAIL = True if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD else False
 
@@ -419,6 +454,22 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 # Tâches exécutées sur place pendant les tests (PLAN-API, règles propres à l'API)
 CELERY_TASK_ALWAYS_EAGER = TESTING
 
+# Tâches planifiées (versionnées ici, jamais saisies à la main dans l'admin) ; heure du Bénin (C16)
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    "expire-consent-requests": {
+        "task": "apps.accounts.tasks.expire_consent_requests",
+        "schedule": crontab(minute=5),
+    },
+    "purge-signup-sessions": {
+        "task": "apps.accounts.tasks.purge_signup_sessions",
+        "schedule": crontab(minute=15),
+    },
+    "purge-refused-requests": {
+        "task": "apps.accounts.tasks.purge_refused_requests",
+        "schedule": crontab(minute=30, hour=3),
+    },
+}
 # optional default task time limits
 CELERY_TASK_TIME_LIMIT = int(os.getenv("CELERY_TASK_TIME_LIMIT", 300))
 CELERY_TASK_SOFT_TIME_LIMIT = int(os.getenv("CELERY_TASK_SOFT_TIME_LIMIT", 180))
