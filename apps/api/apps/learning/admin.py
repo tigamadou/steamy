@@ -1,42 +1,55 @@
-# apps/learning/admin.py
 from django.contrib import admin
 
-from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
+from .models import Enrollment, MissionProgress, QuizAttempt
+
+
+class MissionProgressInline(admin.TabularInline):
+    model = MissionProgress
+    extra = 0
+    readonly_fields = ("mission", "completed_at")
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Enrollment)
 class EnrollmentAdmin(admin.ModelAdmin):
-    list_display = ("user", "course", "status", "progress", "started_at")
-    search_fields = ("user__email", "course__title")
+    """Inscriptions en lecture seule : elles ne sont créées que par le serveur (§4.3)."""
+
+    list_display = ("learner", "course", "source", "status", "progress_pct", "created_at")
+    list_filter = ("source", "status")
+    search_fields = ("learner__username", "course__title")
+    readonly_fields = (
+        "learner",
+        "course",
+        "source",
+        "status",
+        "progress_pct",
+        "last_activity_at",
+        "completed_at",
+        "created_at",
+    )
+    inlines = [MissionProgressInline]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
-@admin.register(Progress)
-class ProgressAdmin(admin.ModelAdmin):
-    list_display = ("enrollment", "mission", "completed", "score", "updated_at")
+@admin.register(QuizAttempt)
+class QuizAttemptAdmin(admin.ModelAdmin):
+    """Tentatives en lecture seule : corrigées par le serveur (§4.4)."""
 
+    list_display = ("learner", "quiz", "percentage", "status", "created_at")
+    list_filter = ("status", "quiz__kind")
+    search_fields = ("learner__username",)
+    readonly_fields = [field.name for field in QuizAttempt._meta.fields]
 
-@admin.register(Certificate)
-class CertificateAdmin(admin.ModelAdmin):
-    list_display = ("enrollment", "issued_at", "score")
-    readonly_fields = ("issued_at",)
+    def has_add_permission(self, request):
+        return False
 
-
-@admin.register(Quiz)
-class QuizAdmin(admin.ModelAdmin):
-    list_display = ("title", "course", "pass_score")
-
-
-class ChoiceInline(admin.TabularInline):
-    model = Choice
-    extra = 0
-
-
-@admin.register(Question)
-class QuestionAdmin(admin.ModelAdmin):
-    list_display = ("quiz", "text", "kind", "weight")
-    inlines = [ChoiceInline]
-
-
-@admin.register(Attempt)
-class AttemptAdmin(admin.ModelAdmin):
-    list_display = ("user", "quiz", "score", "passed", "created_at")
+    def has_change_permission(self, request, obj=None):
+        return False

@@ -497,3 +497,46 @@ def test_invitation_without_account_is_not_an_orphan_request(invited):
     """Une demande d'enseignant n'a pas de compte apprenant avant l'accord : elle reste ouverte."""
     _, client, consent = invited
     assert client.get(f"{CONSENT_URL}{consent.pk}/").json()["status"] == "pending"
+
+
+# --- Inscription au parcours de la classe (D62) ----------------------------------------------
+
+
+def test_joining_enrolls_the_child_in_the_classroom_course_without_payment(
+    api, school, teacher, sms
+):
+    from apps.catalog.tests.factories import CourseFactory, MissionFactory
+    from apps.learning.models import Enrollment
+
+    course = CourseFactory(paid=True)
+    mission = MissionFactory(level__project__course=course)
+    classroom = ClassroomFactory(school=school, teacher=teacher, course=course)
+    parent = ParentFactory(phone=PHONE)
+    child = LearnerFactory(first_name="Awa", last_name="Dossou")
+    ParentChildLink.objects.create(parent=parent, learner=child, relationship=_relationship())
+    child_api = client_for(child)
+    invite(api, classroom)
+
+    # Invitation non acceptée : aucun accès au parcours
+    response = child_api.get(f"/api/learning/missions/{mission.pk}/")
+    assert (response.status_code, response.json()["code"]) == (403, "NOT_ENROLLED")
+
+    parent_api = client_for(parent)
+    parent_api.post(f"{CONSENT_URL}claim/", {"token": token_from(sms)}, format="json")
+    consent = ConsentRequest.objects.get()
+    parent_api.post(f"{CONSENT_URL}{consent.pk}/accept/", {"learnerId": child.pk}, format="json")
+
+    enrollment = Enrollment.objects.get(learner=child)
+    assert (enrollment.course, enrollment.source) == (course, Enrollment.Source.CLASSROOM)
+    assert child_api.get(f"/api/learning/missions/{mission.pk}/").status_code == 200
+
+
+def test_an_earlier_enrollment_is_kept(invited, classroom):
+    from apps.learning.models import Enrollment
+
+    parent, client, consent = invited
+    child = LearnerFactory()
+    ParentChildLink.objects.create(parent=parent, learner=child, relationship=_relationship())
+    Enrollment.objects.create(learner=child, course=classroom.course, source=Enrollment.Source.FREE)
+    client.post(f"{CONSENT_URL}{consent.pk}/accept/", {"learnerId": child.pk}, format="json")
+    assert Enrollment.objects.get(learner=child).source == Enrollment.Source.FREE
