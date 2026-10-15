@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/api/accounts/consent-requests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description W06 : envoie la demande au parent (SMS avec lien à jeton). Réservé à l'inscription en cours. */
+        post: operations["accounts_consent_requests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/{id}/resend/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description W07 « Renvoyer le SMS » : nouveau lien (seul le dernier est valable), 60 s au moins entre deux envois. */
+        post: operations["accounts_consent_requests_resend_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/accounts/me/": {
         parameters: {
             query?: never;
@@ -131,6 +165,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/learner-signup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description W06-W10 : étape réelle de l'inscription en cours (garde du layout du flux). */
+        get: operations["auth_learner_signup_retrieve"];
+        put?: never;
+        /** @description W05 « Continuer » : crée le compte en attente et renvoie le code de reprise (une seule fois). */
+        post: operations["auth_learner_signup_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/learner-signup/password/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description W10 : après l'accord du parent, choisit le mot de passe ; le compte devient actif et la session s'ouvre. */
+        post: operations["auth_learner_signup_password_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/learner-signup/resume/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description W07 « Reprendre mon inscription » (C5) : identifiant + code de reprise. */
+        post: operations["auth_learner_signup_resume_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/login/": {
         parameters: {
             query?: never;
@@ -226,6 +312,23 @@ export interface paths {
         put?: never;
         /** @description WP02 : vérifie le code. Le numéro est alors prouvé : on peut dire s'il a déjà un compte (C13). */
         post: operations["auth_parent_signup_verify_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/username-availability/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description W04, W19 : identifiant libre ? Throttlé : c'est une énumération des identifiants. */
+        get: operations["auth_username_availability_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1158,6 +1261,26 @@ export interface components {
             readonly question: number;
             readonly text: string;
         };
+        /** @description Demande vue par l'enfant (W07, W08, W18) : jamais le numéro du parent en clair. */
+        ConsentRequestState: {
+            readonly id: number;
+            /** Statut */
+            readonly status: components["schemas"]["ConsentRequestStateStatusEnum"];
+            readonly parentPhoneMasked: string;
+            readonly relationship: string;
+            /** Format: date-time */
+            readonly expiresAt: string;
+            readonly resendInSec: number;
+        };
+        /**
+         * @description * `pending` - En attente
+         *     * `accepted` - Acceptée
+         *     * `refused` - Refusée
+         *     * `expired` - Expirée
+         *     * `cancelled` - Annulée
+         * @enum {string}
+         */
+        ConsentRequestStateStatusEnum: "pending" | "accepted" | "refused" | "expired" | "cancelled";
         Country: {
             readonly id: number;
             /** Code ISO */
@@ -1352,6 +1475,35 @@ export interface components {
          * @enum {string}
          */
         KindEnum: "mcq" | "tf" | "free";
+        LearnerConsentRequestRequest: {
+            parentPhone: string;
+            relationship: string;
+        };
+        LearnerPasswordRequest: {
+            password: string;
+        };
+        LearnerSignupCreated: {
+            /** @description Code de reprise, renvoyé **une seule fois** et jamais régénéré (C14) */
+            resumeCode: string;
+            signup: components["schemas"]["LearnerSignupState"];
+        };
+        LearnerSignupRequest: {
+            firstName: string;
+            lastName: string;
+            username: string;
+            /** @description Âge déclaré (W05), entre 10 et 17 ans (D23) */
+            age: number;
+            privacyAccepted: boolean;
+        };
+        /** @description État de l'inscription en cours : le serveur est la source de vérité de l'étape (W06-W10). */
+        LearnerSignupState: {
+            step: components["schemas"]["StepEnum"];
+            firstName: string;
+            username: string;
+            /** Format: date-time */
+            expiresAt: string;
+            consentRequest: components["schemas"]["ConsentRequestState"] | null;
+        };
         Lesson: {
             readonly id: number;
             readonly module: number;
@@ -1859,6 +2011,10 @@ export interface components {
          * @enum {string}
          */
         ResourceTypeEnum: "video" | "pdf" | "html" | "other";
+        ResumeRequest: {
+            username: string;
+            resumeCode: string;
+        };
         /**
          * @description * `learner` - Apprenant
          *     * `parent` - Parent
@@ -1872,6 +2028,13 @@ export interface components {
             /** Libellé */
             label: string;
         };
+        /**
+         * @description * `parent` - W06 · Parent
+         *     * `waiting` - W07 · Attente
+         *     * `password` - W10 · Mot de passe
+         * @enum {string}
+         */
+        StepEnum: "parent" | "waiting" | "password";
         /**
          * @description * `info` - Information
          *     * `success` - Succès
@@ -1904,6 +2067,9 @@ export interface components {
         UnreadCount: {
             count: number;
         };
+        UsernameAvailabilityResponse: {
+            available: boolean;
+        };
         WebhookAck: {
             ok: boolean;
         };
@@ -1919,6 +2085,106 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    accounts_consent_requests_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearnerConsentRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequestState"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_resend_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequestState"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_me_retrieve: {
         parameters: {
             query?: never;
@@ -2236,6 +2502,174 @@ export interface operations {
             };
         };
     };
+    auth_learner_signup_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnerSignupState"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_learner_signup_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearnerSignupRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnerSignupCreated"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_learner_signup_password_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearnerPasswordRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_learner_signup_resume_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResumeRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnerSignupState"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     auth_login_create: {
         parameters: {
             query?: never;
@@ -2501,6 +2935,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_username_availability_retrieve: {
+        parameters: {
+            query: {
+                username: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsernameAvailabilityResponse"];
                 };
             };
             429: {

@@ -1,5 +1,11 @@
 from django.urls import path
 
+from apps.accounts.views.learner_signup import (
+    LearnerSignupPasswordView,
+    LearnerSignupResumeView,
+    LearnerSignupView,
+    UsernameAvailabilityView,
+)
 from apps.accounts.views.otp import OtpResendView
 from apps.accounts.views.parent_signup import (
     ParentSignupPasswordView,
@@ -14,6 +20,22 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="auth-login"),
     path("logout/", LogoutView.as_view(), name="auth-logout"),
     path("otp/resend/", OtpResendView.as_view(), name="auth-otp-resend"),
+    path(
+        "username-availability/",
+        UsernameAvailabilityView.as_view(),
+        name="auth-username-availability",
+    ),
+    path("learner-signup/", LearnerSignupView.as_view(), name="auth-learner-signup"),
+    path(
+        "learner-signup/resume/",
+        LearnerSignupResumeView.as_view(),
+        name="auth-learner-signup-resume",
+    ),
+    path(
+        "learner-signup/password/",
+        LearnerSignupPasswordView.as_view(),
+        name="auth-learner-signup-password",
+    ),
     path("parent-signup/", ParentSignupView.as_view(), name="auth-parent-signup"),
     path(
         "parent-signup/verify/", ParentSignupVerifyView.as_view(), name="auth-parent-signup-verify"
