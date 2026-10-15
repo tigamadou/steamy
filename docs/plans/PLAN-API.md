@@ -459,7 +459,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`select_for_update`) dans la transaction qui crée l'inscription. Throttles `kit-code` (10/h par apprenant) et
   > `kit-code-ip` (30/h par IP). `kitCodes[{code, kitSlug, redeemed}]` dans la commande du payeur (parent ou
   > invité), jamais dans celle du bénéficiaire.
-- [x] **API-L3b.5** Demandes de paiement · `feature/api-l3b-5-demandes-paiement`
+- [x] **API-L3b.5** Demandes de paiement · `feature/api-l3b-5-demandes-paiement` · PR #87
   - [x] `PaymentRequest` ; `POST payments/payment-requests/` (montant recalculé), `…/{id}/resend/`, `GET`, `…/cancel/`, `…/decline/`
   - [x] SMS au parent avec lien WPD15 ; tâche `expire_payment_requests` (7 j)
   - [x] Commande `pay_payment_request <id>` (déplacée de L3b.0b) ; `Order.paymentRequest`, demande `paid` à l'exécution post-paiement
