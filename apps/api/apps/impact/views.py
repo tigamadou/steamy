@@ -11,14 +11,16 @@ from apps.core.groups import FINANCE
 from libs.errors import ApiError
 from libs.permissions import IsStaffVerified
 
-from . import overview
+from . import overview, reports
 from .models import KpiDefinition
 from .periods import Period
 from .serializers import (
+    ImpactReportSerializer,
     KpiDashboardSerializer,
     KpiDetailSerializer,
     OverviewSerializer,
     PeriodQuerySerializer,
+    ValuesInputSerializer,
 )
 from .services import ValueIndex
 
@@ -128,3 +130,48 @@ class KpiDetailView(APIView):
             ],
         }
         return Response(KpiDetailSerializer(data).data)
+
+
+def _require(request, codename: str) -> None:
+    """Permission personnalisée de la matrice D71 (Finance et Super-admin l'ont)."""
+    if not request.user.has_perm(f"impact.{codename}"):
+        raise ApiError("PERMISSION_DENIED")
+
+
+class ImpactReportView(APIView):
+    """WAD04 : lignes du rapport trimestriel (plages, réponses, statuts, sources), figées une fois soumis."""
+
+    permission_classes = [IsStaffVerified.of(FINANCE)]
+
+    @extend_schema(responses=ImpactReportSerializer)
+    def get(self, request, period):
+        quarter = reports.parse_quarter(period)
+        return Response(ImpactReportSerializer(reports.build(quarter)).data)
+
+
+class ImpactReportValuesView(APIView):
+    """WAD05 : brouillon de la saisie manuelle (*enter_kpi_value*) ; `REPORT_LOCKED` après soumission (D74)."""
+
+    permission_classes = [IsStaffVerified.of(FINANCE)]
+
+    @extend_schema(request=ValuesInputSerializer, responses=ImpactReportSerializer)
+    def patch(self, request, period):
+        quarter = reports.parse_quarter(period)
+        _require(request, "enter_kpi_value")
+        data = ValuesInputSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        reports.save_values(quarter, data.validated_data["values"], request.user, request)
+        return Response(ImpactReportSerializer(reports.build(quarter)).data)
+
+
+class ImpactReportSubmitView(APIView):
+    """WAD04 « Soumettre » (*submit_impact_report*) : verrouille et fige le rapport ; idempotent (D74)."""
+
+    permission_classes = [IsStaffVerified.of(FINANCE)]
+
+    @extend_schema(request=None, responses=ImpactReportSerializer)
+    def post(self, request, period):
+        quarter = reports.parse_quarter(period)
+        _require(request, "submit_impact_report")
+        reports.submit(quarter, request.user, request)
+        return Response(ImpactReportSerializer(reports.build(quarter)).data)

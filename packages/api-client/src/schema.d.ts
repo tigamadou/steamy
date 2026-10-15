@@ -508,6 +508,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/backoffice/impact-reports/{period}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WAD04 : lignes du rapport trimestriel (plages, réponses, statuts, sources), figées une fois soumis. */
+        get: operations["backoffice_impact_reports_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/impact-reports/{period}/submit/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WAD04 « Soumettre » (*submit_impact_report*) : verrouille et fige le rapport ; idempotent (D74). */
+        post: operations["backoffice_impact_reports_submit_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/impact-reports/{period}/values/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description WAD05 : brouillon de la saisie manuelle (*enter_kpi_value*) ; `REPORT_LOCKED` après soumission (D74). */
+        patch: operations["backoffice_impact_reports_values_partial_update"];
+        trace?: never;
+    };
     "/api/backoffice/kpis/": {
         parameters: {
             query?: never;
@@ -1842,6 +1893,33 @@ export interface components {
             end: string;
             status: components["schemas"]["KpiStatus"];
         };
+        ImpactReport: {
+            /** @description 2026-t1 */
+            period: string;
+            /** @description T1 2026 */
+            label: string;
+            /** Format: date */
+            start: string;
+            /** Format: date */
+            end: string;
+            /** Format: date */
+            dueDate: string;
+            status: components["schemas"]["ImpactReportStatusEnum"];
+            /** Format: date-time */
+            submittedAt: string | null;
+            submittedBy: string | null;
+            /** @description Indicateurs manuels renseignés */
+            entered: number;
+            /** @description Indicateurs manuels */
+            total: number;
+            rows: components["schemas"]["ReportRow"][];
+        };
+        /**
+         * @description * `draft` - Brouillon
+         *     * `submitted` - Soumis
+         * @enum {string}
+         */
+        ImpactReportStatusEnum: "draft" | "submitted";
         /**
          * @description * `mcq` - QCM
          *     * `tf` - Vrai/Faux
@@ -2485,6 +2563,9 @@ export interface components {
             /** Format: decimal */
             score?: string | null;
         };
+        PatchedValuesInputRequest: {
+            values?: components["schemas"]["ValueEntryRequest"][];
+        };
         Payment: {
             readonly id: number;
             readonly order: number;
@@ -2657,18 +2738,33 @@ export interface components {
             label: string;
             /** Format: date */
             dueDate: string;
-            status: components["schemas"]["ReportDeadlineStatusEnum"];
+            status: components["schemas"]["ImpactReportStatusEnum"];
             /** @description Indicateurs manuels renseignés */
             entered: number;
             /** @description Indicateurs manuels */
             total: number;
         };
-        /**
-         * @description * `draft` - draft
-         *     * `submitted` - submitted
-         * @enum {string}
-         */
-        ReportDeadlineStatusEnum: "draft" | "submitted";
+        ReportRow: {
+            code: string;
+            label: string;
+            group: string;
+            unit: components["schemas"]["UnitEnum"];
+            source: components["schemas"]["SourceEnum"];
+            /**
+             * Format: date
+             * @description Du (plage calculée par le serveur)
+             */
+            start: string;
+            /**
+             * Format: date
+             * @description Au
+             */
+            end: string;
+            /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
+            value: (number | boolean | string) | null;
+            status: components["schemas"]["KpiStatus"];
+            note: string;
+        };
         /** @description Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`. */
         RequiredKit: {
             slug: string;
@@ -2885,6 +2981,12 @@ export interface components {
         };
         UsernameAvailabilityResponse: {
             available: boolean;
+        };
+        ValueEntryRequest: {
+            code: string;
+            /** @description Nombre (count, fcfa, score), booléen (yes_no) ou texte ; null efface la saisie */
+            value: unknown;
+            note?: string;
         };
         WebhookAck: {
             ok: boolean;
@@ -4418,6 +4520,185 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UsernameAvailabilityResponse"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_impact_reports_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                period: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpactReport"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_impact_reports_submit_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                period: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpactReport"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_impact_reports_values_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                period: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedValuesInputRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpactReport"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             429: {

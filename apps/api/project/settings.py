@@ -327,6 +327,7 @@ SPECTACULAR_SETTINGS = {
         "PeriodKindEnum": "apps.impact.periods.KINDS",
         "KpiStatusEnum": "apps.impact.status.STATUS_CODES",
         "KpiToneEnum": "apps.impact.status.TONES",
+        "ImpactReportStatusEnum": "apps.impact.models.ImpactReport.Status",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
