@@ -28,6 +28,12 @@ for (const path of PUBLIC_SCREENS) {
   });
 }
 
+/** Attend que l'écran soit hydraté : une saisie faite avant serait perdue dans un champ contrôlé. */
+async function ready(page: Page, path: string) {
+  await expect(page).toHaveURL(path);
+  await page.waitForLoadState("networkidle");
+}
+
 /** Tabule jusqu'à l'élément actif dont le nom accessible correspond, puis renvoie la page. */
 async function tabTo(page: Page, name: RegExp, max = 30) {
   for (let i = 0; i < max; i += 1) {
@@ -48,11 +54,12 @@ async function tabTo(page: Page, name: RegExp, max = 30) {
 test("P7 : inscription de l'enfant jusqu'au SMS du parent, au clavier seul", async ({ page }) => {
   test.slow();
   await page.goto("/inscription/type");
+  await ready(page, "/inscription/type");
   await tabTo(page, /Un·e apprenant·e/);
   await page.keyboard.press("Space");
   await tabTo(page, /^Continuer/);
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL("/inscription/apprenant/identite");
+  await ready(page, "/inscription/apprenant/identite");
 
   await tabTo(page, /^Prénom/);
   await page.keyboard.type("Ada");
@@ -64,13 +71,13 @@ test("P7 : inscription de l'enfant jusqu'au SMS du parent, au clavier seul", asy
   await page.keyboard.press("Space");
   await tabTo(page, /^Continuer/);
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL("/inscription/apprenant/age");
+  await ready(page, "/inscription/apprenant/age");
 
   await tabTo(page, /Ton âge/);
   await page.keyboard.press("ArrowUp");
   await tabTo(page, /^Continuer/);
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL("/inscription/apprenant/parent");
+  await ready(page, "/inscription/apprenant/parent");
 
   const phone = uniquePhone();
   await tabTo(page, /Numéro de téléphone du parent/);
@@ -86,6 +93,7 @@ test("P7 : inscription de l'enfant jusqu'au SMS du parent, au clavier seul", asy
 
 test("P7 : connexion W16 au clavier seul", async ({ page }) => {
   await page.goto("/connexion");
+  await ready(page, "/connexion");
   await tabTo(page, /Identifiant ou numéro/);
   await page.keyboard.type(DEMO.learner.identifier);
   await tabTo(page, /^Mot de passe/);
