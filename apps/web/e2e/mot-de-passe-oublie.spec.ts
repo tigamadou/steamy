@@ -17,7 +17,7 @@ async function requestCode(page: Page, phone: string) {
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Pas de panique !");
   // Numéro national : le Bénin est présélectionné
   await page.getByRole("textbox", { name: /Numéro de téléphone/ }).fill(phone.slice(4));
-  await page.getByRole("button", { name: "Recevoir le code" }).click();
+  await page.getByRole("button", { name: "Recevoir le code", exact: true }).click();
   await expect(page).toHaveURL("/mot-de-passe-oublie/code");
 }
 

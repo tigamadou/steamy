@@ -21,9 +21,12 @@ export async function apiSession(): Promise<ApiSession> {
   const { apiUrl } = (await (await web.get("/runtime-config")).json()) as { apiUrl: string };
   await web.dispose();
   const api = await request.newContext({ baseURL: apiUrl });
-  const { csrfToken } = (await (await api.get("/api/auth/csrf/")).json()) as { csrfToken: string };
+  await api.get("/api/auth/csrf/");
+  // Django renouvelle le jeton CSRF à la connexion : il est relu dans le cookie avant chaque requête
+  const csrfToken = async () =>
+    (await api.storageState()).cookies.find((cookie) => cookie.name === "csrftoken")?.value ?? "";
   const send = async (method: "get" | "post" | "patch", path: string, data?: object) => {
-    const response = await api[method](path, { data, headers: { "X-CSRFToken": csrfToken } });
+    const response = await api[method](path, { data, headers: { "X-CSRFToken": await csrfToken() } });
     expect(response.ok(), `${method} ${path} → ${response.status()} ${await response.text()}`).toBe(true);
     return response.status() === 204 ? undefined : response.json();
   };

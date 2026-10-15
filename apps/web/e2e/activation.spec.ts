@@ -44,7 +44,7 @@ test.describe("activation enseignante", { tag: "@donnees-uniques" }, () => {
     await page.getByRole("button", { name: "Vous êtes enseignant ? Recevoir le code par email" }).click();
     const since = new Date();
     await page.getByRole("textbox", { name: /Adresse email/ }).fill(INVITED);
-    await page.getByRole("button", { name: "Recevoir le code" }).click();
+    await page.getByRole("button", { name: "Recevoir le code", exact: true }).click();
     await expect(page).toHaveURL("/mot-de-passe-oublie/code");
     const code = extractCode(await waitForMessage(INVITED, { since }));
     await page.getByLabel("Code à 6 chiffres reçu par email").fill(code);
