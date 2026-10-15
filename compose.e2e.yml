@@ -2,7 +2,9 @@
 #   docker compose -p steamy-e2e -f compose.yml -f compose.e2e.yml …
 # - le web est servi par l'image de production (`next dev` est trop lent et instable pour des parcours) ;
 # - aucun port publié : la stack e2e cohabite avec la stack de dev (`make up`) ;
-# - Playwright tourne dans l'image officielle, qui embarque les navigateurs (même version que @playwright/test).
+# - Playwright tourne dans l'image officielle, qui embarque les navigateurs (même version que @playwright/test) ;
+# - le navigateur joint le web et l'API sous un domaine parent commun (`web.steamy.test`, `api.steamy.test`), comme
+#   en production : le cookie de session posé par l'API (`COOKIE_DOMAIN`) est lu par le serveur Next.
 
 services:
   postgres:
@@ -16,6 +18,18 @@ services:
 
   api:
     ports: !reset []
+    environment:
+      ALLOWED_HOSTS: localhost,127.0.0.1,api,api.steamy.test
+      WEB_URL: http://web.steamy.test:3000
+      COOKIE_DOMAIN: steamy.test
+      # Les parcours reconnectent les mêmes comptes de démo depuis une seule IP : plafonds de connexion relevés
+      # (le throttling lui-même est couvert par les tests de l'API)
+      THROTTLE_ANON: 1000/min
+      THROTTLE_LOGIN: 1000/min
+      THROTTLE_LOGIN_IDENTIFIER: 1000/hour
+    networks:
+      default:
+        aliases: [api.steamy.test]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/')"]
       interval: 5s
@@ -31,8 +45,11 @@ services:
     working_dir: /app
     command: ["node", "apps/web/server.js"]
     environment:
-      # Le navigateur de Playwright joint l'API par le réseau de la stack
-      PUBLIC_API_URL: http://api:8000
+      # Le navigateur de Playwright joint l'API par le réseau de la stack, sous le domaine parent des cookies
+      PUBLIC_API_URL: http://api.steamy.test:8000
+    networks:
+      default:
+        aliases: [web.steamy.test]
     volumes: !reset []
     ports: !reset []
     healthcheck:
@@ -50,7 +67,11 @@ services:
     working_dir: /repo
     environment:
       CI: ${CI:-}
-      BASE_URL: http://web:3000
+      BASE_URL: http://web.steamy.test:3000
+      # Admin Django du back-office (WAD15), servi par l'API
+      API_URL: http://api.steamy.test:8000
+      # Emails et faux SMS (adressés à `<e164>@sms.test`) lus par les helpers de `e2e/support/`
+      MAILPIT_URL: http://mailpit:8025
       COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
     command: >
       sh -c "corepack enable
