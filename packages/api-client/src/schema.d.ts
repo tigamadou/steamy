@@ -181,6 +181,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/parent-signup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WP01 : envoie un code au numéro. Réponse identique que le numéro soit inscrit ou non (C13). */
+        post: operations["auth_parent_signup_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/parent-signup/password/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WP03 : crée le compte parent avec le numéro vérifié, puis ouvre la session. */
+        post: operations["auth_parent_signup_password_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/parent-signup/verify/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WP02 : vérifie le code. Le numéro est alors prouvé : on peut dire s'il a déjà un compte (C13). */
+        post: operations["auth_parent_signup_verify_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/catalog/categories/": {
         parameters: {
             query?: never;
@@ -1587,6 +1638,11 @@ export interface components {
             /** Format: uuid */
             challengeId: string;
         };
+        OtpVerifyRequest: {
+            /** Format: uuid */
+            challengeId: string;
+            code: string;
+        };
         PaginatedAttemptList: {
             /** @example 123 */
             count?: number;
@@ -1782,9 +1838,23 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["SteamyEvent"][];
         };
+        ParentSignupRequest: {
+            firstName: string;
+            lastName: string;
+            /** @description Numéro du parent, saisi librement ; normalisé en E.164 */
+            phone: string;
+            privacyAccepted: boolean;
+        };
+        ParentSignupVerifyResponse: {
+            /** @description Numéro déjà inscrit : aller à la connexion (W16) au lieu de créer un compte */
+            existingAccount: boolean;
+        };
         PasswordChangeRequest: {
             currentPassword: string;
             newPassword: string;
+        };
+        PasswordRequest: {
+            password: string;
         };
         PatchedPreferencesUpdateRequest: {
             categories?: components["schemas"]["CategoryPreferenceRequest"][];
@@ -2529,6 +2599,147 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OtpChallenge"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_parent_signup_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParentSignupRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OtpChallenge"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_parent_signup_password_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_parent_signup_verify_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpVerifyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParentSignupVerifyResponse"];
                 };
             };
             400: {

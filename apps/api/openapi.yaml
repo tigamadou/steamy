@@ -369,6 +369,120 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/auth/parent-signup/:
+    post:
+      operationId: auth_parent_signup_create
+      description: 'WP01 : envoie un code au numéro. Réponse identique que le numéro
+        soit inscrit ou non (C13).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParentSignupRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/parent-signup/password/:
+    post:
+      operationId: auth_parent_signup_password_create
+      description: 'WP03 : crée le compte parent avec le numéro vérifié, puis ouvre
+        la session.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/parent-signup/verify/:
+    post:
+      operationId: auth_parent_signup_verify_create
+      description: 'WP02 : vérifie le code. Le numéro est alors prouvé : on peut dire
+        s''il a déjà un compte (C13).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentSignupVerifyResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/catalog/categories/:
     get:
       operationId: catalog_categories_list
@@ -3864,6 +3978,19 @@ components:
           format: uuid
       required:
       - challengeId
+    OtpVerifyRequest:
+      type: object
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          minLength: 1
+          maxLength: 12
+      required:
+      - challengeId
+      - code
     PaginatedAttemptList:
       type: object
       properties:
@@ -4124,6 +4251,38 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SteamyEvent'
+    ParentSignupRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        phone:
+          type: string
+          minLength: 1
+          description: Numéro du parent, saisi librement ; normalisé en E.164
+          maxLength: 32
+        privacyAccepted:
+          type: boolean
+      required:
+      - firstName
+      - lastName
+      - phone
+      - privacyAccepted
+    ParentSignupVerifyResponse:
+      type: object
+      properties:
+        existingAccount:
+          type: boolean
+          description: 'Numéro déjà inscrit : aller à la connexion (W16) au lieu de
+            créer un compte'
+      required:
+      - existingAccount
     PasswordChangeRequest:
       type: object
       properties:
@@ -4136,6 +4295,15 @@ components:
       required:
       - currentPassword
       - newPassword
+    PasswordRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
     PatchedPreferencesUpdateRequest:
       type: object
       properties:
