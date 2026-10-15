@@ -6,7 +6,7 @@ from rest_framework import filters, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from libs.exceptions import PaymentRequired
+from libs.errors import ApiError
 
 from .models import Course, Lesson, Module, Resource
 from .serializers import (
@@ -47,7 +47,7 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
         """
         course = self.get_object()
         if course.price > 0:
-            raise PaymentRequired()
+            raise ApiError("PAYMENT_REQUIRED")
         from apps.learning.models import Enrollment
 
         _, created = Enrollment.objects.get_or_create(user=request.user, course=course)

@@ -141,19 +141,9 @@ else:
         },
     }
 
+# Politique de mot de passe D25 seule : les validateurs par défaut de Django sont retirés (messages hors `PwReq`).
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "apps.accounts.password_validation.PasswordPolicyValidator"},
 ]
 
 # Messages en français (D4) ; dates stockées en UTC, affichées et planifiées au fuseau du Bénin (C16).
@@ -250,7 +240,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": ("djangorestframework_camel_case.parser.CamelCaseJSONParser",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
         # Session Django + CSRF uniquement (S12) : pas de token DRF.
-        "rest_framework.authentication.SessionAuthentication",
+        "libs.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_PAGINATION_CLASS": "libs.pagination.PagePagination",
@@ -276,7 +266,8 @@ REST_FRAMEWORK = {
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
     },
 }
-REST_FRAMEWORK.setdefault("DEFAULT_SCHEMA_CLASS", "drf_spectacular.openapi.AutoSchema")
+# Réponses d'erreur (composant `Error`) déclarées sur chaque opération
+REST_FRAMEWORK["DEFAULT_SCHEMA_CLASS"] = "libs.schema.ApiAutoSchema"
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -294,6 +285,8 @@ SPECTACULAR_SETTINGS = {
         "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
     ],
     "SCHEMA_PATH_PREFIX": r"/api",
+    # Codes du format d'erreur D4 : énumération nommée pour le client TypeScript
+    "ENUM_NAME_OVERRIDES": {"ErrorCodeEnum": "libs.errors.ERROR_CODES"},
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
 ADMIN_TITLE = "Admin"

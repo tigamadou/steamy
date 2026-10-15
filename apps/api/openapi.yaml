@@ -18,6 +18,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/Me'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/me/email/:
     post:
       operationId: accounts_me_email_create
@@ -38,6 +56,30 @@ paths:
       responses:
         '204':
           description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/me/password/:
     post:
       operationId: accounts_me_password_create
@@ -56,6 +98,30 @@ paths:
       responses:
         '204':
           description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/analytics/dashboard/summary/:
     get:
       operationId: analytics_dashboard_summary_retrieve
@@ -72,6 +138,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DashboardSummary'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/analytics/events/:
     post:
@@ -97,6 +181,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TrackingEvent'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/analytics/export/events/:
     get:
@@ -126,6 +228,24 @@ paths:
                 type: string
                 format: binary
           description: Export CSV des événements
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/auth/csrf/:
     get:
       operationId: auth_csrf_retrieve
@@ -137,6 +257,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CsrfToken'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/auth/login/:
     post:
@@ -158,6 +284,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
           description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/auth/logout/:
     post:
       operationId: auth_logout_create
@@ -169,6 +313,24 @@ paths:
       responses:
         '204':
           description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/core/presign/:
     post:
       operationId: core_presign_create
@@ -191,6 +353,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PresignUploadResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/courses/courses/:
     get:
@@ -232,6 +418,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedCourseListList'
           description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/courses/courses/{slug}/:
     get:
       operationId: courses_courses_retrieve
@@ -252,6 +444,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CourseDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/courses/courses/{slug}/enroll/:
     post:
@@ -276,6 +480,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CourseDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/courses/lessons/:
     get:
@@ -316,6 +550,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedLessonList'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/courses/lessons/{id}/:
     get:
       operationId: courses_lessons_retrieve
@@ -336,6 +588,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Lesson'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/courses/modules/:
     get:
@@ -377,6 +653,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedModuleList'
           description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/courses/modules/{id}/:
     get:
       operationId: courses_modules_retrieve
@@ -398,6 +680,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Module'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/courses/resources/:
     get:
@@ -438,6 +732,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedResourceList'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/courses/resources/{id}/:
     get:
       operationId: courses_resources_retrieve
@@ -459,6 +771,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/Resource'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/health/:
     get:
       operationId: health_retrieve
@@ -479,6 +815,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Health'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/attempts/:
     get:
@@ -518,6 +860,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedAttemptList'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
     post:
       operationId: learning_attempts_create
       description: |-
@@ -541,6 +901,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttemptCreate'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/attempts/{id}/:
     get:
@@ -567,6 +951,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Attempt'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/certificates/:
     get:
@@ -612,6 +1020,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedCertificateList'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/certificates/{id}/:
     get:
       operationId: learning_certificates_retrieve
@@ -637,6 +1063,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Certificate'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/choices/:
     get:
@@ -677,6 +1127,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedChoiceList'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/choices/{id}/:
     get:
       operationId: learning_choices_retrieve
@@ -697,6 +1165,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Choice'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/enrollments/:
     get:
@@ -742,6 +1234,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedEnrollmentList'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
     post:
       operationId: learning_enrollments_create
       description: |-
@@ -765,6 +1275,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Enrollment'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/enrollments/{id}/:
     get:
@@ -791,6 +1325,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Enrollment'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/progress/:
     get:
@@ -836,6 +1394,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedProgressList'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
     post:
       operationId: learning_progress_create
       description: |-
@@ -859,6 +1435,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Progress'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/progress/{id}/:
     get:
@@ -885,6 +1485,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Progress'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
     patch:
       operationId: learning_progress_partial_update
@@ -915,6 +1539,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Progress'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/questions/:
     get:
@@ -955,6 +1609,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedQuestionList'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/questions/{id}/:
     get:
       operationId: learning_questions_retrieve
@@ -975,6 +1647,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Question'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/quizzes/:
     get:
@@ -1015,6 +1711,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedQuizList'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/quizzes/{id}/:
     get:
       operationId: learning_quizzes_retrieve
@@ -1035,6 +1749,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Quiz'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/payments/orders/:
     get:
@@ -1080,6 +1818,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedOrderList'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/payments/orders/{id}/:
     get:
       operationId: payments_orders_retrieve
@@ -1105,6 +1861,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Order'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/payments/payments/:
     get:
@@ -1150,6 +1930,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedPaymentList'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/payments/payments/{id}/:
     get:
       operationId: payments_payments_retrieve
@@ -1175,6 +1973,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Payment'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/payments/webhook/{provider_name}/:
     post:
@@ -1214,6 +2036,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WebhookNack'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
 components:
   schemas:
@@ -1506,6 +2346,166 @@ components:
         * `active` - Actif
         * `completed` - Terminé
         * `cancelled` - Annulé
+    Error:
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCodeEnum'
+        message:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldError'
+          description: Erreurs par champ (camelCase), présentes seulement si des champs
+            sont en cause
+      required:
+      - code
+      - message
+    ErrorCodeEnum:
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_PENDING_CONSENT
+      - ACCOUNT_SUSPENDED
+      - AGE_OUT_OF_RANGE
+      - ALREADY_APPLIED
+      - ALREADY_IN_CLASSROOM
+      - BIRTHDATE_AGE_MISMATCH
+      - CHILDREN_STILL_LINKED
+      - CLASSROOM_NAME_TAKEN
+      - CLASSROOM_QUOTA_EXCEEDED
+      - CONSENT_ALREADY_RESOLVED
+      - CONSENT_COOLDOWN
+      - CONSENT_PHONE_MISMATCH
+      - CONSENT_REQUEST_EXPIRED
+      - CONTENT_LOCKED
+      - COURSE_NOT_IN_OFFER
+      - DELIVERY_ZONE_UNAVAILABLE
+      - DUPLICATE_ROW
+      - EMAIL_TAKEN
+      - EVENT_ALREADY_PROPOSED
+      - EVENT_CLOSED
+      - EVENT_FULL
+      - IMPORT_TOO_LARGE
+      - INVALID_CREDENTIALS
+      - INVITATION_INVALID
+      - KIT_CODE_ALREADY_USED
+      - KIT_CODE_INVALID
+      - KIT_CODE_NOT_COMPATIBLE
+      - KIT_CODE_REQUIRED
+      - LEARNER_QUOTA_EXCEEDED
+      - MALFORMED_ROW
+      - METHOD_NOT_ALLOWED
+      - NETWORK_UNAVAILABLE
+      - NOT_ACCEPTABLE
+      - NOT_AUTHENTICATED
+      - NOT_ENROLLED
+      - NOT_FOUND
+      - ORDER_ALREADY_PAID
+      - ORDER_EXPIRED
+      - OTP_DAILY_LIMIT
+      - OTP_EXPIRED
+      - OTP_INVALID
+      - OTP_REQUIRED
+      - OTP_RESEND_TOO_EARLY
+      - OTP_TOO_MANY_ATTEMPTS
+      - OUT_OF_STOCK
+      - PARENT_APPROVAL_REQUIRED
+      - PARSE_ERROR
+      - PASSWORD_TOO_WEAK
+      - PAYMENT_FAILED
+      - PAYMENT_REQUIRED
+      - PERMISSION_DENIED
+      - PHONE_INVALID
+      - PHONE_TAKEN
+      - QUIZ_COOLDOWN
+      - REPORT_LOCKED
+      - RESUME_CODE_INVALID
+      - SERVER_ERROR
+      - SIGNUP_EXPIRED
+      - THROTTLED
+      - UNSUPPORTED_MEDIA_TYPE
+      - USERNAME_INVALID
+      - USERNAME_TAKEN
+      - VALIDATION_ERROR
+      type: string
+      description: |-
+        * `ACCOUNT_DEACTIVATED` - ACCOUNT_DEACTIVATED
+        * `ACCOUNT_PENDING_CONSENT` - ACCOUNT_PENDING_CONSENT
+        * `ACCOUNT_SUSPENDED` - ACCOUNT_SUSPENDED
+        * `AGE_OUT_OF_RANGE` - AGE_OUT_OF_RANGE
+        * `ALREADY_APPLIED` - ALREADY_APPLIED
+        * `ALREADY_IN_CLASSROOM` - ALREADY_IN_CLASSROOM
+        * `BIRTHDATE_AGE_MISMATCH` - BIRTHDATE_AGE_MISMATCH
+        * `CHILDREN_STILL_LINKED` - CHILDREN_STILL_LINKED
+        * `CLASSROOM_NAME_TAKEN` - CLASSROOM_NAME_TAKEN
+        * `CLASSROOM_QUOTA_EXCEEDED` - CLASSROOM_QUOTA_EXCEEDED
+        * `CONSENT_ALREADY_RESOLVED` - CONSENT_ALREADY_RESOLVED
+        * `CONSENT_COOLDOWN` - CONSENT_COOLDOWN
+        * `CONSENT_PHONE_MISMATCH` - CONSENT_PHONE_MISMATCH
+        * `CONSENT_REQUEST_EXPIRED` - CONSENT_REQUEST_EXPIRED
+        * `CONTENT_LOCKED` - CONTENT_LOCKED
+        * `COURSE_NOT_IN_OFFER` - COURSE_NOT_IN_OFFER
+        * `DELIVERY_ZONE_UNAVAILABLE` - DELIVERY_ZONE_UNAVAILABLE
+        * `DUPLICATE_ROW` - DUPLICATE_ROW
+        * `EMAIL_TAKEN` - EMAIL_TAKEN
+        * `EVENT_ALREADY_PROPOSED` - EVENT_ALREADY_PROPOSED
+        * `EVENT_CLOSED` - EVENT_CLOSED
+        * `EVENT_FULL` - EVENT_FULL
+        * `IMPORT_TOO_LARGE` - IMPORT_TOO_LARGE
+        * `INVALID_CREDENTIALS` - INVALID_CREDENTIALS
+        * `INVITATION_INVALID` - INVITATION_INVALID
+        * `KIT_CODE_ALREADY_USED` - KIT_CODE_ALREADY_USED
+        * `KIT_CODE_INVALID` - KIT_CODE_INVALID
+        * `KIT_CODE_NOT_COMPATIBLE` - KIT_CODE_NOT_COMPATIBLE
+        * `KIT_CODE_REQUIRED` - KIT_CODE_REQUIRED
+        * `LEARNER_QUOTA_EXCEEDED` - LEARNER_QUOTA_EXCEEDED
+        * `MALFORMED_ROW` - MALFORMED_ROW
+        * `METHOD_NOT_ALLOWED` - METHOD_NOT_ALLOWED
+        * `NETWORK_UNAVAILABLE` - NETWORK_UNAVAILABLE
+        * `NOT_ACCEPTABLE` - NOT_ACCEPTABLE
+        * `NOT_AUTHENTICATED` - NOT_AUTHENTICATED
+        * `NOT_ENROLLED` - NOT_ENROLLED
+        * `NOT_FOUND` - NOT_FOUND
+        * `ORDER_ALREADY_PAID` - ORDER_ALREADY_PAID
+        * `ORDER_EXPIRED` - ORDER_EXPIRED
+        * `OTP_DAILY_LIMIT` - OTP_DAILY_LIMIT
+        * `OTP_EXPIRED` - OTP_EXPIRED
+        * `OTP_INVALID` - OTP_INVALID
+        * `OTP_REQUIRED` - OTP_REQUIRED
+        * `OTP_RESEND_TOO_EARLY` - OTP_RESEND_TOO_EARLY
+        * `OTP_TOO_MANY_ATTEMPTS` - OTP_TOO_MANY_ATTEMPTS
+        * `OUT_OF_STOCK` - OUT_OF_STOCK
+        * `PARENT_APPROVAL_REQUIRED` - PARENT_APPROVAL_REQUIRED
+        * `PARSE_ERROR` - PARSE_ERROR
+        * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
+        * `PAYMENT_FAILED` - PAYMENT_FAILED
+        * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
+        * `PERMISSION_DENIED` - PERMISSION_DENIED
+        * `PHONE_INVALID` - PHONE_INVALID
+        * `PHONE_TAKEN` - PHONE_TAKEN
+        * `QUIZ_COOLDOWN` - QUIZ_COOLDOWN
+        * `REPORT_LOCKED` - REPORT_LOCKED
+        * `RESUME_CODE_INVALID` - RESUME_CODE_INVALID
+        * `SERVER_ERROR` - SERVER_ERROR
+        * `SIGNUP_EXPIRED` - SIGNUP_EXPIRED
+        * `THROTTLED` - THROTTLED
+        * `UNSUPPORTED_MEDIA_TYPE` - UNSUPPORTED_MEDIA_TYPE
+        * `USERNAME_INVALID` - USERNAME_INVALID
+        * `USERNAME_TAKEN` - USERNAME_TAKEN
+        * `VALIDATION_ERROR` - VALIDATION_ERROR
+    FieldError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
     Health:
       type: object
       properties:

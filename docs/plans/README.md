@@ -61,7 +61,7 @@ plan.
 
 | Plan | Statut | Avancement | Prochaine tâche |
 | --- | --- | --- | --- |
-| [PLAN-API](PLAN-API.md) | 🟡 en cours | API-0 ✅ (PR #5 à #9) · API-1 : ADR (PR #12), 1.1 (PR #15), 1.2 (PR #17) | API-1.3 |
+| [PLAN-API](PLAN-API.md) | 🟡 en cours | API-0 ✅ (PR #5 à #9) · API-1 : ADR (PR #12), 1.1 (PR #15), 1.2 (PR #17), 1.3 (PR #__) | API-1.4 |
 | [LOT-1-PUBLIC](LOT-1-PUBLIC.md) | ⬜ à faire | — | 1.0a (après API-1) |
 | [LOT-2-AUTH](LOT-2-AUTH.md) | ⬜ à faire | — | 2.0 (après API-1 ; API-L2 dès 2.1) |
 | [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | ⬜ à faire | — | 3.0 (après API-1 et API-L3a) |

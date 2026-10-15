@@ -2,7 +2,7 @@
 from rest_framework import serializers
 
 from apps.courses.models import Lesson
-from libs.exceptions import PaymentRequired
+from libs.errors import ApiError
 
 from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
 
@@ -23,7 +23,7 @@ class EnrollmentSerializer(serializers.ModelSerializer):
         if not course.published:
             raise serializers.ValidationError({"course": "Ce parcours n'est pas disponible."})
         if course.price > 0:
-            raise PaymentRequired()
+            raise ApiError("PAYMENT_REQUIRED")
         # avoid duplicate enrollment
         if Enrollment.objects.filter(user=user, course=course).exists():
             raise serializers.ValidationError(

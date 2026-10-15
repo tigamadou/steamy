@@ -155,7 +155,7 @@ def test_quiz_choices_never_expose_the_answer_key():
 
     client = APIClient()
     # Ni anonyme, ni connecté non inscrit : le quiz n'est pas visible.
-    assert client.get("/api/learning/quizzes/").status_code == 403
+    assert client.get("/api/learning/quizzes/").status_code == 401
     client.force_authenticate(user=student)
     assert client.get("/api/learning/quizzes/").json()["results"] == []
 
