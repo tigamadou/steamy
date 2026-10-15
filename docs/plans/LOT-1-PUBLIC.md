@@ -45,7 +45,7 @@ Statut : 🟡 en cours · Prochaine tâche : 1.5 (pages éditoriales, sans API),
   - [x] Tests : rendu, variantes, clavier et `vitest-axe` sur chaque composant ; `PhoneInput` (changement de pays, E.164, numéro invalide)
   - [x] Couverture : 100 % des lignes et des branches du design system (diff-cover à 100 % sur le code modifié)
   - [x] Recette : contrastes AA (aucun texte en `--ink-400` ; texte foncé sur vert et ambre, survol primaire en 600, `danger` en `--error-600`), focus visible, aucun `rgba` ni hex en dur hors `tokens.css`
-- [x] **1.0c** Shell public, enveloppes, SEO (requiert API-1) · `feature/lot1-socle-public` · PR #PR10C
+- [x] **1.0c** Shell public, enveloppes, SEO (requiert API-1) · `feature/lot1-socle-public` · PR #30
   - [x] Contrôler le chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts` (renommé par API-1.2, PR #17)
   - [x] `lib/routes.ts` (table unique des URL)
   - [x] `app/(public)/layout.tsx` : `PublicShell`, `<main id="contenu">`, lien d'évitement
