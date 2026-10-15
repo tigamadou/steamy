@@ -48,7 +48,8 @@ async function tabTo(page: Page, name: RegExp, max = 30) {
     await page.keyboard.press("Tab");
     const label = await page.evaluate(() => {
       const el = document.activeElement as HTMLElement | null;
-      if (!el) return "";
+      // Focus revenu sur la page : son texte entier contiendrait le libellé cherché
+      if (!el || el === document.body) return "";
       const labelled = el.getAttribute("aria-labelledby");
       const byId = labelled ? document.getElementById(labelled.split(" ")[0])?.textContent : null;
       const forLabel = el.id ? document.querySelector(`label[for="${el.id}"]`)?.textContent : null;
