@@ -459,10 +459,22 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`select_for_update`) dans la transaction qui crée l'inscription. Throttles `kit-code` (10/h par apprenant) et
   > `kit-code-ip` (30/h par IP). `kitCodes[{code, kitSlug, redeemed}]` dans la commande du payeur (parent ou
   > invité), jamais dans celle du bénéficiaire.
-- [ ] **API-L3b.5** Demandes de paiement · `feature/api-l3b-5-demandes-paiement`
-  - [ ] `PaymentRequest` ; `POST payments/payment-requests/` (montant recalculé), `…/{id}/resend/`, `GET`, `…/cancel/`, `…/decline/`
-  - [ ] SMS au parent avec lien WPD15 ; tâche `expire_payment_requests` (7 j)
-  - [ ] Tests : scoping enfant / parent
+- [x] **API-L3b.5** Demandes de paiement · `feature/api-l3b-5-demandes-paiement`
+  - [x] `PaymentRequest` ; `POST payments/payment-requests/` (montant recalculé), `…/{id}/resend/`, `GET`, `…/cancel/`, `…/decline/`
+  - [x] SMS au parent avec lien WPD15 ; tâche `expire_payment_requests` (7 j)
+  - [x] Commande `pay_payment_request <id>` (déplacée de L3b.0b) ; `Order.paymentRequest`, demande `paid` à l'exécution post-paiement
+  - [x] Tests : scoping enfant / parent
+  > Décisions : `POST` (apprenant) `{kind: course, courseSlug}` ou `{kind: kit, items[{kitSlug, quantity}]}` ;
+  > montant serveur hors livraison (le parent choisit l'adresse dans WPD15) ; kits figés dans `items` (`kitSlug`,
+  > `title`, `unitPrice`, `quantity`), stock non réservé (C10), kit en rupture → `OUT_OF_STOCK`. Codes de champ :
+  > `NOT_FOUND`, `COURSE_FREE`, `KIT_CODE_REQUIRED`, `ALREADY_ENROLLED`. Une demande en attente pour le même parcours
+  > est renvoyée (200, sans nouveau SMS). Parent prévenu par SMS (`/parent/demandes/<id>`) et notification. Renvoi
+  > (C4) : 3 envois au plus, espacés de 24 h, sinon 429 `THROTTLED` ; `nextResendAt` dit quand (ou `null`).
+  > Annulation (enfant) et refus (parent, enfant notifié sur `/apprenant/demandes/<id>`) : demande en attente
+  > seulement, sinon 409 `PAYMENT_REQUEST_CLOSED` (nouveau code). Lecture : l'enfant voit les siennes, le parent
+  > celles de ses enfants (404 sinon), avec `parentFirstName`, `learner`, `orderReference`. La demande est réglée
+  > par une commande qui la référence (`Order.paymentRequest`) ; le passage de `paymentRequestId` à
+  > `POST payments/orders/` reste à API-L4.2 (WPD15). Expiration horaire (`expire_payment_requests`, à la 45ᵉ minute).
 - [ ] **API-L3b.6** Candidatures · `feature/api-l3b-6-candidatures`
   - [ ] `EventApplication`, `EventTicket` consommé
   - [ ] `POST events/{slug}/applications/`, `GET events/applications/`, `GET events/tickets/`

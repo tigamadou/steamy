@@ -44,3 +44,11 @@ def reconcile_pending_payments() -> int:
     from .checkout import reconcile_pending_payments as reconcile
 
     return reconcile()
+
+
+@shared_task
+def expire_payment_requests() -> int:
+    """Toutes les heures : les demandes de paiement en attente depuis 7 jours expirent (C4)."""
+    from .requests import expire_requests
+
+    return expire_requests()

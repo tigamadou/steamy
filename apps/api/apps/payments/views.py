@@ -27,9 +27,10 @@ from libs.permissions import IsLearner
 from .checkout import initiate_payment
 from .fulfillment import guest_tracking_url
 from .kit_codes import redeem
-from .models import Order, Payment
+from .models import Order, Payment, PaymentRequest
 from .orders import GUEST_TOKEN_HEADER, create_order, order_for_guest
 from .providers import PROVIDERS, get_provider
+from .requests import close, create_request, resend
 from .serializers import (
     BeneficiaryOrderSerializer,
     KitCodeRedeemedSerializer,
@@ -38,6 +39,8 @@ from .serializers import (
     OrderCreateSerializer,
     OrderSerializer,
     PaymentCreateSerializer,
+    PaymentRequestCreateSerializer,
+    PaymentRequestSerializer,
     PaymentSerializer,
 )
 from .utils import WebhookRejected, handle_payment_event
@@ -348,3 +351,96 @@ class KitCodeRedeemView(APIView):
         _, created = redeem(request.user, data.validated_data["code"], course)
         body = {"course_slug": course.slug, "course_title": course.title, "created": created}
         return Response(body, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+
+# --- Demandes de paiement ------------------------------------------------------------------------
+
+
+class PaymentRequestStatusQuerySerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=PaymentRequest.Status.choices, required=False)
+
+
+class IsLearnerOrParent(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        user = request.user
+        return super().has_permission(request, view) and (user.is_learner or user.is_parent)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="Demandes de paiement : les siennes (apprenant), celles de ses enfants (parent)",
+        parameters=[PaymentRequestStatusQuerySerializer],
+    ),
+    retrieve=extend_schema(summary="Une demande de paiement"),
+    create=extend_schema(
+        summary="Demander à son parent de payer un parcours ou des kits (apprenant)",
+        request=PaymentRequestCreateSerializer,
+        responses={201: PaymentRequestSerializer, 200: PaymentRequestSerializer},
+    ),
+)
+class PaymentRequestViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """
+    Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+    refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+    """
+
+    serializer_class = PaymentRequestSerializer
+    permission_classes = [IsLearnerOrParent]
+    queryset = PaymentRequest.objects.select_related("course", "requested_by", "parent")
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        if getattr(self, "swagger_fake_view", False):
+            return queryset.none()
+        if user.is_learner:
+            return queryset.filter(requested_by=user)
+        return queryset.filter(parent=user)
+
+    def list(self, request, *args, **kwargs):
+        params = PaymentRequestStatusQuerySerializer(data=request.query_params)
+        params.is_valid(raise_exception=True)
+        queryset = self.get_queryset()
+        if "status" in params.validated_data:
+            queryset = queryset.filter(status=params.validated_data["status"])
+        page = self.paginate_queryset(queryset)
+        return self.get_paginated_response(self.get_serializer(page, many=True).data)
+
+    def create(self, request, *args, **kwargs):
+        if not request.user.is_learner:
+            raise ApiError("PERMISSION_DENIED")
+        data = PaymentRequestCreateSerializer(data=request.data, context={"learner": request.user})
+        data.is_valid(raise_exception=True)
+        payment_request, created = create_request(request.user, **data.validated_data)
+        return Response(
+            self.get_serializer(payment_request).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+    def owned(self, learner_only: bool):
+        user = self.request.user
+        if learner_only != user.is_learner:
+            raise ApiError("PERMISSION_DENIED")
+        return self.get_object()
+
+    @extend_schema(summary="Relancer son parent (3 envois au plus, espacés de 24 h)", request=None)
+    @action(detail=True, methods=["post"])
+    def resend(self, request, pk=None):
+        return Response(self.get_serializer(resend(self.owned(learner_only=True))).data)
+
+    @extend_schema(summary="Annuler sa demande (apprenant)", request=None)
+    @action(detail=True, methods=["post"])
+    def cancel(self, request, pk=None):
+        payment_request = close(self.owned(learner_only=True), PaymentRequest.Status.CANCELLED)
+        return Response(self.get_serializer(payment_request).data)
+
+    @extend_schema(summary="Refuser la demande de son enfant (parent)", request=None)
+    @action(detail=True, methods=["post"])
+    def decline(self, request, pk=None):
+        payment_request = close(self.owned(learner_only=False), PaymentRequest.Status.DECLINED)
+        return Response(self.get_serializer(payment_request).data)
