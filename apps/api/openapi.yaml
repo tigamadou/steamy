@@ -3453,6 +3453,165 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/wishlist/:
+    get:
+      operationId: wishlist_list
+      description: Mes souhaits (WW01), triés ; parcours publiés seulement.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: sort
+        schema:
+          enum:
+          - recent
+          - title
+          - price
+          type: string
+          default: recent
+          minLength: 1
+        description: |-
+          * `recent` - Ajoutés récemment
+          * `title` - Titre
+          * `price` - Prix croissant
+      tags:
+      - wishlist
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedWishlistItemList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/wishlist/{course_slug}/:
+    put:
+      operationId: wishlist_update
+      description: 'Ajoute un parcours publié (WC01-WC05) : 201, ou 200 s''il y était
+        déjà.'
+      parameters:
+      - in: path
+        name: course_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - wishlist
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistItem'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistItem'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: wishlist_destroy
+      description: 'Retire un parcours (WW01, annulable par un nouveau `PUT`) : 204,
+        qu''il y soit ou non.'
+      parameters:
+      - in: path
+        name: course_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - wishlist
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
 components:
   schemas:
     Activity:
@@ -4841,11 +5000,15 @@ components:
           type: integer
         badges:
           type: integer
+        wishlist:
+          type: integer
+          description: Parcours dans « Mes souhaits »
       required:
       - activeEnrollments
       - badges
       - certificates
       - completedEnrollments
+      - wishlist
     LearnerPasswordRequest:
       type: object
       properties:
@@ -5877,6 +6040,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SteamyEvent'
+    PaginatedWishlistItemList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WishlistItem'
     ParentProfile:
       type: object
       properties:
@@ -7279,6 +7462,17 @@ components:
           type: boolean
       required:
       - ok
+    WishlistItem:
+      type: object
+      properties:
+        course:
+          $ref: '#/components/schemas/CourseList'
+        addedAt:
+          type: string
+          format: date-time
+      required:
+      - addedAt
+      - course
   securitySchemes:
     cookieAuth:
       type: apiKey

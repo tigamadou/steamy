@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     "apps.public",
     "apps.shop",
     "apps.learning",
+    "apps.wishlist",
     "apps.payments",
     "apps.analytics",
     "apps.notifications",

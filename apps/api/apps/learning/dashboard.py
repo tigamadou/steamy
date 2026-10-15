@@ -11,6 +11,7 @@ from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.utils import timezone
 
 from apps.catalog.models import Category, Course
+from apps.wishlist.models import WishlistItem
 
 from .models import Certificate, Enrollment, LearnerBadge, LearningActivity
 from .progression import Progression
@@ -100,4 +101,7 @@ def counters(learner) -> dict:
         "completed_enrollments": enrollments["completed"],
         "certificates": Certificate.objects.filter(enrollment__learner=learner).count(),
         "badges": LearnerBadge.objects.filter(learner=learner).count(),
+        "wishlist": WishlistItem.objects.filter(
+            learner=learner, course__status=Course.Status.PUBLISHED
+        ).count(),
     }

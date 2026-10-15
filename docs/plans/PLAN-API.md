@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L3a.6
+Statut : 🟡 en cours · Prochaine tâche : API-L3b (API-L3a : reste le barème C8 à fixer)
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -395,19 +395,28 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > ajout au modèle (`Category.goals`, M2M vers `referentials.Goal`), faute de règle dans la spec.
   > `accounts/me/` gagne `counters {activeEnrollments, completedEnrollments, certificates, badges}` (apprenant ;
   > `null` sinon) ; `wishlist` s'y ajoute en L3a.6.
-- [ ] **API-L3a.6** Souhaits et préférences · `feature/api-l3a-6-wishlist`
-  - [ ] App `wishlist` : `GET wishlist/`, `PUT/DELETE wishlist/{courseSlug}/` idempotents
-  - [ ] Préférences de notification apprenant (pas de SMS ni marketing pour un mineur, D6, D30)
-- [ ] **Outillage de test d'API-L3a**
+- [x] **API-L3a.6** Souhaits et préférences · `feature/api-l3a-6-wishlist` · PR #71
+  - [x] App `wishlist` : `GET wishlist/`, `PUT/DELETE wishlist/{courseSlug}/` idempotents
+  - [x] Préférences de notification apprenant (pas de SMS ni marketing pour un mineur, D6, D30)
+  - [x] Seed : deux parcours dans les souhaits de Léa ; compteur `wishlist` dans `accounts/me/`
+  > Décisions : `PUT` → 201, ou 200 si déjà présent ; parcours publié seulement (404 sinon) ; `DELETE` → 204 dans
+  > tous les cas. `GET wishlist/?sort=recent|title|price`, paginé (`pageSize` jusqu'à 100 pour la fusion avec le
+  > catalogue côté front), `{course (carte du catalogue), addedAt}` ; un parcours dépublié disparaît de la liste
+  > sans être supprimé. Préférences : `notifications/preferences/` existait (API-1) et ne propose déjà à
+  > l'apprenant que ses catégories d'apprentissage (in-app et email) ; s'ajoute un garde-fou au modèle qui refuse
+  > toute préférence SMS ou d'une autre catégorie pour un apprenant.
+- [x] **Outillage de test d'API-L3a**
   - [x] `seed_demo --e2e` (cooldown sommatif raccourci, parcours court P1 du lot 3) · PR #66
     > Le parcours court (`premiers-pas-zeti`) est dans le jeu unique (LOT-3 §8.3) ; `--e2e` ne fait que ramener le
     > délai à 5 s. `make e2e` appelle `make seed SEED_ARGS=--e2e`.
   - [x] Worker Celery dans `compose.e2e.yml`
     > Déjà démarré par `make e2e` (`up … web worker`, lot 1) ; vérifié avec la génération réelle du PDF sur RustFS.
-- [ ] **Critères de fin d'API-L3a**
-  - [ ] Un apprenant ne lit ni les tentatives ni les certificats d'un autre
-  - [ ] Seed enrichi avec les données du domaine
-  - [ ] `make openapi` committé
+- [x] **Critères de fin d'API-L3a**
+  - [x] Un apprenant ne lit ni les tentatives ni les certificats d'un autre
+    > `test_another_learners_attempt_is_not_found`, `test_someone_elses_certificate_is_not_found` (404, listes
+    > vides), matrice `apps/learning/tests/test_access_matrix.py`.
+  - [x] Seed enrichi avec les données du domaine
+  - [x] `make openapi` committé
 
 ### API-L3b · Commerce, boutique, événements payants — ⬜ à faire
 - [ ] **API-L3b.0a** Comparaison paiement (S9) · `feature/api-l3b-0a-adr-paiement` · doc
