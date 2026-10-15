@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 from django.core.management import CommandError, call_command
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
-from apps.accounts.models import LearnerProfile, User
+from apps.accounts.models import LearnerProfile, PublicProfileReview, User
 from apps.accounts.profile import profile_step
 from apps.core.demo import DEMO_PASSWORD, DEMO_TOTP_KEY
 from apps.core.groups import STAFF_GROUPS
@@ -73,6 +73,13 @@ def test_the_fixed_totp_secret_never_reaches_staging(settings):
     call_command("seed_demo")
     assert User.objects.filter(is_staff=True).count() == 4
     assert not TOTPDevice.objects.exists()  # enrôlement à la première connexion (WAD15)
+
+
+def test_lea_pseudonym_waits_for_moderation():
+    call_command("seed_demo")
+    call_command("seed_demo")
+    review = PublicProfileReview.objects.get()
+    assert (review.learner.username, review.status) == ("lea.adjovi", "pending")
 
 
 def test_seed_demo_links_marie_to_lea_and_leaves_a_pending_teacher_invitation():

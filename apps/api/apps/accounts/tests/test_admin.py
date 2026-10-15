@@ -1,17 +1,17 @@
-"""Admin Django des comptes : seul le personnel s'y crée (S1, S5)."""
+"""Admin Django des comptes : seul le personnel s'y crée, par l'équipe (S1, S5, WAD13)."""
 
 import pytest
 from django.contrib.admin.sites import site
 from rest_framework.test import APIRequestFactory
 
-from apps.accounts.models import User
+from apps.accounts.models import StaffMember, User
 from apps.accounts.tests.factories import StaffFactory
 
 pytestmark = pytest.mark.django_db
 
 
 def test_a_user_created_in_the_admin_is_staff_without_role():
-    model_admin = site._registry[User]
+    model_admin = site._registry[StaffMember]
     request = APIRequestFactory().post("/")
     request.user = StaffFactory(is_superuser=True)
     user = User(email="nouveau@steamy.test", role="learner")
@@ -21,7 +21,7 @@ def test_a_user_created_in_the_admin_is_staff_without_role():
 
 
 def test_editing_keeps_the_role():
-    model_admin = site._registry[User]
+    model_admin = site._registry[StaffMember]
     request = APIRequestFactory().post("/")
     request.user = StaffFactory(is_superuser=True)
     staff = StaffFactory()

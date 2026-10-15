@@ -22,7 +22,8 @@ Mot de passe de tous les comptes : **`Steamy2026`**.
 | Personnel · Finance | admin Django | `finance@steamy.test` | |
 
 Marie est le parent de Léa (lien parent ↔ enfant, consentement donné). M. Adékambi est rattaché au
-« Collège Steamy de Cotonou ».
+« Collège Steamy de Cotonou ». Le pseudonyme public de Léa (« LéaBot ») attend la modération du support (WAD08,
+D15).
 
 ## Invitation enseignant en attente
 
