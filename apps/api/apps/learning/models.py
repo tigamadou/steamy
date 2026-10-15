@@ -74,3 +74,51 @@ class MissionProgress(models.Model):
 
     def __str__(self):
         return f"{self.enrollment} · {self.mission}"
+
+
+class QuizAttempt(models.Model):
+    """
+    Tentative corrigée par le serveur (§4.4). Statut (D31) : `ok` si le score atteint le seuil du quiz, `warn` de
+    50 % au seuil, `ko` sous 50 %. Les réponses gardées servent au corrigé ; le corrigé lui-même ne sort jamais.
+    """
+
+    class Status(models.TextChoices):
+        OK = "ok", _("Réussi")
+        WARN = "warn", _("À refaire")
+        KO = "ko", _("Échoué")
+
+    learner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        models.CASCADE,
+        related_name="quiz_attempts",
+        verbose_name=_("apprenant"),
+    )
+    enrollment = models.ForeignKey(
+        Enrollment, models.CASCADE, related_name="attempts", verbose_name=_("inscription")
+    )
+    quiz = models.ForeignKey(
+        "catalog.Quiz", models.CASCADE, related_name="attempts", verbose_name=_("quiz")
+    )
+    #: `{questionId: choiceId}` tels qu'envoyés (choix d'une autre question exclus à la validation)
+    answers = models.JSONField(_("réponses"), default=dict)
+    #: `[{questionId, correct}]` dans l'ordre des questions au moment de la tentative
+    results = models.JSONField(_("résultat par question"), default=list)
+    score = models.PositiveIntegerField(_("points obtenus"))
+    total = models.PositiveIntegerField(_("points possibles"))
+    percentage = models.PositiveSmallIntegerField(_("score (%)"))
+    threshold = models.PositiveSmallIntegerField(_("seuil appliqué (%)"))
+    status = models.CharField(_("statut"), max_length=4, choices=Status)
+    passed = models.BooleanField(_("réussi"), default=False)
+    duration_sec = models.PositiveIntegerField(_("durée (s)"), null=True, blank=True)
+    points_earned = models.PositiveIntegerField(_("points gagnés"), default=0)
+    failed_concepts = models.JSONField(_("notions à revoir"), default=list)
+    created_at = models.DateTimeField(_("passée le"), auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        verbose_name = _("tentative")
+        verbose_name_plural = _("tentatives")
+        indexes = [models.Index(fields=["learner", "quiz", "-created_at"])]
+
+    def __str__(self):
+        return f"{self.learner} · {self.quiz} · {self.percentage} %"

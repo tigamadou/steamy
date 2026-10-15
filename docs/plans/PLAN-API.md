@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L3a.2
+Statut : 🟡 en cours · Prochaine tâche : API-L3a.3
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -316,12 +316,28 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > Liste : `?status=active|completed`, paginée, par dernière activité ; chaque inscription donne
   > `currentProject`/`currentLevel` et `next`. Vidéos de démonstration : vidéo Vimeo publique `76979871` (ADR 0004,
   > V4), sans hachage.
-- [ ] **API-L3a.2** Quiz · `feature/api-l3a-2-quiz`
-  - [ ] `Quiz` (formative / sommative, contrainte « exactement un »), `Question`, `Choice`
-  - [ ] `GET learning/quizzes/{id}/` sans corrigé
-  - [ ] `POST …/attempts/` : correction serveur, `ok`/`warn`/`ko` (D31), cooldown sommatif `QUIZ_COOLDOWN` (D32), `failedConcepts`, `retryInSec`, `next`
-  - [ ] `GET learning/attempts/` (+ agrégats WD07)
-  - [ ] Tests : `isCorrect` absent de toute réponse, seuils 70/80 et bornes de `warn`, cooldown
+- [x] **API-L3a.2** Quiz · `feature/api-l3a-2-quiz`
+  - [x] `Quiz` (formative / sommative, contrainte « exactement un »), `Question`, `Choice`
+  - [x] `GET learning/quizzes/{id}/` sans corrigé
+  - [x] `POST …/attempts/` : correction serveur, `ok`/`warn`/`ko` (D31), cooldown sommatif `QUIZ_COOLDOWN` (D32), `failedConcepts`, `retryInSec`, `next`
+  - [x] `GET learning/attempts/` (+ agrégats WD07)
+  - [x] Tests : `isCorrect` absent de toute réponse, seuils 70/80 et bornes de `warn`, cooldown
+  - [x] Quiz intégrés à la séquence (formative après les missions du niveau, sommative après les niveaux du projet) ; `GET learning/attempts/{id}/`
+  - [x] Seed : une formative par niveau, une sommative par projet (2 questions) ; tentatives `ko`, `warn`, `ok` de Léa
+  > Décisions : `Quiz`, `Question`, `Choice` dans `catalog` (contenu saisi par le groupe Contenu, matrice des
+  > groupes) ; `QuizAttempt` dans `learning`. Questions à choix unique (une bonne réponse exactement, contrôlée dans
+  > l'admin), `weight` entier. Le délai d'une sommative ratée vient de `PlatformSettings` (D32, réglable et raccourci
+  > par `--e2e`), pas d'un champ par quiz (écart à §3.2 : `retryCooldownSec` non créé) ; `threshold` vide = 70 / 80.
+  > Statut calculé sans arrondi (`score × 100 ≥ seuil × total`), `percentage` arrondi à l'entier inférieur ; la
+  > tentative garde le seuil appliqué. Un quiz n'est accessible qu'une fois les étapes précédentes faites
+  > (`CONTENT_LOCKED`) ; un quiz réussi se repasse librement, sans délai. Envoi : `{answers: [{questionId,
+  > choiceId}], durationSec?}`, question sans réponse = fausse, question ou réponse étrangère au quiz → 400.
+  > `QUIZ_COOLDOWN` (429) porte l'en-tête `Retry-After` ; `retryInSec` est aussi donné par `GET quizzes/{id}/`. Le
+  > corrigé (« servi après soumission », WD08) se limite à `correct` par question, `chosenChoiceId`, notions et
+  > missions à revoir : la bonne réponse n'est jamais renvoyée. `next` (après une réussite) = étape suivante ;
+  > `next.type` gagne `quiz` (+ `quizKind`, `levelId` nul pour une sommative). `GET learning/attempts/`
+  > (`?status=ok|warn|ko&quiz=`) ajoute `summary {attemptCount, successRate, perfectCount, streakDays}` sur toutes
+  > les tentatives (filtres ignorés).
 - [ ] **API-L3a.3** Gamification · `feature/api-l3a-3-gamification`
   - [ ] `PointsEntry`, `Badge`, `LearnerBadge`, `LearningActivity`
   - [ ] `POST learning/activity/` (secondes plafonnées, anti-gonflage)
@@ -340,7 +356,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] App `wishlist` : `GET wishlist/`, `PUT/DELETE wishlist/{courseSlug}/` idempotents
   - [ ] Préférences de notification apprenant (pas de SMS ni marketing pour un mineur, D6, D30)
 - [ ] **Outillage de test d'API-L3a**
-  - [ ] `seed_demo --e2e` (cooldown sommatif raccourci, parcours court P1 du lot 3)
+  - [x] `seed_demo --e2e` (cooldown sommatif raccourci, parcours court P1 du lot 3) · PR d'API-L3a.2
+    > Le parcours court (`premiers-pas-zeti`) est dans le jeu unique (LOT-3 §8.3) ; `--e2e` ne fait que ramener le
+    > délai à 5 s. `make e2e` appelle `make seed SEED_ARGS=--e2e`.
   - [ ] Worker Celery dans `compose.e2e.yml`
 - [ ] **Critères de fin d'API-L3a**
   - [ ] Un apprenant ne lit ni les tentatives ni les certificats d'un autre
