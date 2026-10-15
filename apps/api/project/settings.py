@@ -270,6 +270,7 @@ REST_FRAMEWORK = {
         "login": os.getenv("THROTTLE_LOGIN", "5/min"),
         "login-identifier": os.getenv("THROTTLE_LOGIN_IDENTIFIER", "10/hour"),
         "signup": os.getenv("THROTTLE_SIGNUP", "5/min"),
+        "otp": os.getenv("THROTTLE_OTP", "10/min"),
         "password-reset": os.getenv("THROTTLE_PASSWORD_RESET", "5/hour"),
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
         # Formulaires publics (devis, newsletter, contact) : par IP
