@@ -17,6 +17,7 @@ from apps.accounts.models import (
     LearnerProfile,
     ParentChildLink,
     ParentProfile,
+    PublicProfileReview,
     TeacherProfile,
     User,
 )
@@ -627,6 +628,20 @@ def seed_kits() -> None:
         catalog.Course.objects.filter(slug__in=required_by).update(required_kit=kit)
 
 
+def seed_backoffice(accounts: dict[str, User]) -> None:
+    """WAD08 : le pseudonyme public de Léa attend la modération du support (D15)."""
+    PublicProfileReview.objects.update_or_create(
+        learner=accounts["lea"],
+        pseudonym="LéaBot",
+        defaults={
+            "avatar": Avatar.objects.get(code="hibou"),
+            "status": PublicProfileReview.Status.PENDING,
+            "reviewed_by": None,
+            "reviewed_at": None,
+        },
+    )
+
+
 #: Saisie manuelle du trimestre en cours (WAD05) : quelques indicateurs restent à renseigner.
 IMPACT_MANUAL = {
     "fin_montant": 1951472,
@@ -803,6 +818,7 @@ def seed_e2e() -> None:
 
 def seed_all() -> dict[str, User]:
     accounts = seed_accounts()
+    seed_backoffice(accounts)
     seed_classrooms(accounts)
     seed_notifications(accounts)
     seed_catalog()
