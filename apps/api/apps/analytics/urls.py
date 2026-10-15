@@ -2,13 +2,10 @@
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
-from .views import TrackingEventViewSet, dashboard_summary, export_events_csv
+from .views import TrackingEventViewSet
 
 router = SimpleRouter()
 router.register(r"events", TrackingEventViewSet, basename="event")
 
-urlpatterns = [
-    path("", include(router.urls)),
-    path("dashboard/summary/", dashboard_summary, name="analytics-summary"),
-    path("export/events/", export_events_csv, name="analytics-export-events"),
-]
+# `dashboard/summary/` et `export/events/` (personnel sans TOTP) sont remplacés par `/api/backoffice/` (§7.8, §7.9)
+urlpatterns = [path("", include(router.urls))]

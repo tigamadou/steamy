@@ -22,7 +22,8 @@ Mot de passe de tous les comptes : **`Steamy2026`**.
 | Personnel · Finance | admin Django | `finance@steamy.test` | |
 
 Marie est le parent de Léa (lien parent ↔ enfant, consentement donné). M. Adékambi est rattaché au
-« Collège Steamy de Cotonou ».
+« Collège Steamy de Cotonou ». Le pseudonyme public de Léa (« LéaBot ») attend la modération du support (WAD08,
+D15).
 
 ## Parcours de Léa (API-L3a)
 
@@ -76,3 +77,10 @@ connexion (QR code). Le secret :
 
 La connexion à l'admin (WAD15) demande l'email, le mot de passe `Steamy2026` et le code à 6 chiffres de
 l'application. Un même code ne sert qu'une fois par compte : attendre le suivant (30 s) pour se reconnecter.
+
+## Impact Tracker
+
+`seed_demo` calcule les KPI `auto` sur le jeu D2 (même calcul que la tâche nocturne `aggregate_daily_stats`, aussi
+lançable par `make manage c="aggregate_daily_stats"`) et saisit, pour le trimestre en cours, une partie des
+indicateurs manuels (financements, produit, satisfaction, emploi) au nom de Rachidi Bello (Finance). « Lesquels ? »
+reste à renseigner dans WAD05. Ventes et parcours complétés restent « En attente » jusqu'à API-L3a/L3b.
