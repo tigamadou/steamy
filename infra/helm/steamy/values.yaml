@@ -38,6 +38,11 @@ email:
   useTls: true
   from: no-reply@steamy.example
 
+# SMS (ADR 0002) : Twilio seul fournisseur réel. Identifiants dans les secrets TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN
+sms:
+  provider: twilio
+  sender: STEAMY              # identifiant alphanumérique enregistré chez Twilio, ou numéro Twilio
+
 api:
   replicas: 1
   gunicornWorkers: 2
