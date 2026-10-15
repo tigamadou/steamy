@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-1.5
+Statut : 🟡 en cours · Prochaine tâche : API-1.6
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -123,11 +123,18 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > réglable par catégorie, envoyé à l'adresse de contact (profil, ou email de connexion de l'enseignant) par Celery
   > après validation de la transaction. `notify(user, category, type, title, …)`. `url` contrainte à un chemin du
   > front. Restrictions propres aux mineurs (D6, D30) en API-L3a.6.
-- [ ] **API-1.5** Référentiels (D3) · `feature/api-1-referentiels`
-  - [ ] App `referentials` : `Country`, `PaymentNetwork` (Celtiis inclus, D76), `SchoolGrade`, `Goal`, `Avatar`, `Disability`, `Relationship`, `RefusalReason`, `Locality`
-  - [ ] Données initiales par migration de données
-  - [ ] Endpoints `GET referentials/*` publics, `Cache-Control: public, max-age=3600`
-  - [ ] Tests : référentiels lisibles anonymement
+- [x] **API-1.5** Référentiels (D3) · `feature/api-1-referentiels` · PR #23
+  - [x] App `referentials` : `Country`, `PaymentNetwork` (Celtiis inclus, D76), `SchoolGrade`, `Goal`, `Avatar`, `Disability`, `Relationship`, `RefusalReason`, `Locality`
+  - [x] Données initiales par migration de données
+  - [x] Endpoints `GET referentials/*` publics, `Cache-Control: public, max-age=3600`
+  - [x] Tests : référentiels lisibles anonymement
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  - [x] Profils reliés aux référentiels (localité, classe, objectifs, avatar, handicap) ; données du shell de
+    `accounts/me/` (`avatar`, `schoolGrade`, `city`) et `profileStep` complet (WP08 facultative, jamais bloquante)
+  > Décisions : identifiant public `code` (slug) pour chaque référentiel, `Country` désigné par son code ISO
+  > (`country=BJ`) ; seuls les réseaux activés sont servis (réglage D76 dans l'admin) ; Bénin activé (MTN, Moov,
+  > Celtiis), réseaux des pays voisins créés désactivés en attendant l'ADR paiement ; 20 communes du Bénin
+  > qualifiées urbain / rural (D75), complétées dans l'admin. Listes non paginées.
 - [ ] **API-1.6** Plateforme et personnel · `feature/api-1-plateforme`
   - [ ] `core.PlatformSettings` (singleton, défauts D24, D32, D66 ; barème C8 vide)
   - [ ] `core.AuditLog`

@@ -851,10 +851,161 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/referentials/avatars/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_avatars_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/countries/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_countries_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/disabilities/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_disabilities_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/goals/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_goals_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/localities/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_localities_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/payment-networks/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Réseaux Mobile Money activés (D76), lus par le formulaire de paiement. */
+        get: operations["referentials_payment_networks_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/refusal-reasons/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_refusal_reasons_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/relationships/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_relationships_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/school-grades/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_school_grades_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * @description * `urban` - Urbaine
+         *     * `rural` - Rurale
+         * @enum {string}
+         */
+        AreaTypeEnum: "urban" | "rural";
         Attempt: {
             readonly id: number;
             readonly user: number;
@@ -887,6 +1038,18 @@ export interface components {
         AttemptCreateRequest: {
             quiz: number;
             data?: unknown;
+        };
+        Avatar: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+            emoji: string;
+            /**
+             * Couleur
+             * @description Jeton du design system, ex. « primary-500 »
+             */
+            color: string;
         };
         /**
          * @description * `learning` - Apprentissage
@@ -927,6 +1090,30 @@ export interface components {
             readonly question: number;
             readonly text: string;
         };
+        Country: {
+            readonly id: number;
+            /** Code ISO */
+            code: string;
+            /** Libellé */
+            label: string;
+            /** Drapeau */
+            flag?: string;
+            /**
+             * Indicatif
+             * @description Sans « + » : 229
+             */
+            dialCode: string;
+            /**
+             * Format
+             * @description Gabarit d'affichage : « XX XX XX XX XX »
+             */
+            phoneFormat?: string;
+            /**
+             * Expression du numéro national
+             * @description Numéro sans indicatif, ex. ^01[0-9]{8}$
+             */
+            phoneRegex: string;
+        };
         CourseDetail: {
             readonly id: number;
             readonly title: string;
@@ -960,6 +1147,12 @@ export interface components {
             eventsLast7Days: number;
             /** Format: double */
             revenueLast30Days: number;
+        };
+        Disability: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
         };
         EmailChangeRequest: {
             password: string;
@@ -1066,6 +1259,13 @@ export interface components {
             code: string;
             message: string;
         };
+        Goal: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+            emoji?: string;
+        };
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
             database: boolean;
@@ -1101,6 +1301,17 @@ export interface components {
             readonly resourceType: components["schemas"]["ResourceTypeEnum"];
             readonly order: number;
         };
+        Locality: {
+            readonly id: number;
+            /** @description Code ISO du pays */
+            country: string;
+            /** Ville ou commune */
+            city: string;
+            /** Quartier ou arrondissement */
+            district?: string;
+            /** Zone */
+            areaType: components["schemas"]["AreaTypeEnum"];
+        };
         LoginRequest: {
             /** @description Identifiant, numéro de téléphone ou email (C7) */
             identifier: string;
@@ -1132,6 +1343,12 @@ export interface components {
             readonly lastName: string;
             /** @description Étape de profil restante (W11-W14, WP07-WP09), null si le profil est complet */
             readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
+            /** @description Avatar de l'apprenant (shell) */
+            readonly avatar: components["schemas"]["Avatar"] | null;
+            /** @description Classe de l'apprenant (shell) */
+            readonly schoolGrade: components["schemas"]["SchoolGrade"] | null;
+            /** @description Ville de l'apprenant ou du parent (shell) */
+            readonly city: string | null;
             readonly isStaff: boolean;
             /** @description Session du personnel validée par TOTP (D72) ; toujours faux pour un persona. */
             readonly otpVerified: boolean;
@@ -1430,6 +1647,14 @@ export interface components {
             /** Format: date-time */
             readonly createdAt: string;
         };
+        PaymentNetwork: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+            /** @description Code ISO du pays */
+            country: string;
+        };
         Preferences: {
             /**
              * Format: email
@@ -1499,6 +1724,20 @@ export interface components {
             /** @description Nombre de notifications marquées comme lues */
             updated: number;
         };
+        RefusalReason: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+        };
+        Relationship: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+            /** Libellé côté parent */
+            parentLabel?: string;
+        };
         Resource: {
             readonly id: number;
             readonly lesson: number;
@@ -1525,6 +1764,12 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "learner" | "parent" | "teacher";
+        SchoolGrade: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+        };
         /**
          * @description * `info` - Information
          *     * `success` - Succès
@@ -4022,6 +4267,255 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_avatars_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Avatar"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_countries_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Country"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_disabilities_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Disability"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_goals_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Goal"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_localities_list: {
+        parameters: {
+            query?: {
+                /** @description Code ISO du pays (ex. BJ) */
+                country?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Locality"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_payment_networks_list: {
+        parameters: {
+            query?: {
+                /** @description Code ISO du pays (ex. BJ) */
+                country?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentNetwork"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_refusal_reasons_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefusalReason"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_relationships_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Relationship"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_school_grades_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchoolGrade"][];
                 };
             };
             429: {

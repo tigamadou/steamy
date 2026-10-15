@@ -2314,8 +2314,227 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/referentials/avatars/:
+    get:
+      operationId: referentials_avatars_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Avatar'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/countries/:
+    get:
+      operationId: referentials_countries_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Country'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/disabilities/:
+    get:
+      operationId: referentials_disabilities_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Disability'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/goals/:
+    get:
+      operationId: referentials_goals_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Goal'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/localities/:
+    get:
+      operationId: referentials_localities_list
+      parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+        description: Code ISO du pays (ex. BJ)
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Locality'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/payment-networks/:
+    get:
+      operationId: referentials_payment_networks_list
+      description: Réseaux Mobile Money activés (D76), lus par le formulaire de paiement.
+      parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+        description: Code ISO du pays (ex. BJ)
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentNetwork'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/refusal-reasons/:
+    get:
+      operationId: referentials_refusal_reasons_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RefusalReason'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/relationships/:
+    get:
+      operationId: referentials_relationships_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Relationship'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/school-grades/:
+    get:
+      operationId: referentials_school_grades_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SchoolGrade'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
 components:
   schemas:
+    AreaTypeEnum:
+      enum:
+      - urban
+      - rural
+      type: string
+      description: |-
+        * `urban` - Urbaine
+        * `rural` - Rurale
     Attempt:
       type: object
       properties:
@@ -2396,6 +2615,34 @@ components:
           nullable: true
       required:
       - quiz
+    Avatar:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+        emoji:
+          type: string
+          maxLength: 8
+        color:
+          type: string
+          title: Couleur
+          description: Jeton du design system, ex. « primary-500 »
+          maxLength: 32
+      required:
+      - code
+      - color
+      - emoji
+      - id
+      - label
     CategoryEnum:
       enum:
       - learning
@@ -2488,6 +2735,45 @@ components:
       - id
       - question
       - text
+    Country:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          title: Code ISO
+          maxLength: 2
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+        flag:
+          type: string
+          title: Drapeau
+          maxLength: 8
+        dialCode:
+          type: string
+          title: Indicatif
+          description: 'Sans « + » : 229'
+          maxLength: 4
+        phoneFormat:
+          type: string
+          title: Format
+          description: 'Gabarit d''affichage : « XX XX XX XX XX »'
+          maxLength: 32
+        phoneRegex:
+          type: string
+          title: Expression du numéro national
+          description: Numéro sans indicatif, ex. ^01[0-9]{8}$
+          maxLength: 120
+      required:
+      - code
+      - dialCode
+      - id
+      - label
+      - phoneRegex
     CourseDetail:
       type: object
       properties:
@@ -2594,6 +2880,24 @@ components:
       - eventsLast7Days
       - revenueLast30Days
       - totalUsers
+    Disability:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+      required:
+      - code
+      - id
+      - label
     EmailChangeRequest:
       type: object
       properties:
@@ -2816,6 +3120,27 @@ components:
       required:
       - code
       - message
+    Goal:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+        emoji:
+          type: string
+          maxLength: 8
+      required:
+      - code
+      - id
+      - label
     Health:
       type: object
       properties:
@@ -2905,6 +3230,32 @@ components:
       - order
       - resourceType
       - title
+    Locality:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        country:
+          type: string
+          description: Code ISO du pays
+        city:
+          type: string
+          title: Ville ou commune
+          maxLength: 120
+        district:
+          type: string
+          title: Quartier ou arrondissement
+          maxLength: 120
+        areaType:
+          allOf:
+          - $ref: '#/components/schemas/AreaTypeEnum'
+          title: Zone
+      required:
+      - areaType
+      - city
+      - country
+      - id
     LoginRequest:
       type: object
       properties:
@@ -2981,6 +3332,23 @@ components:
           oneOf:
           - $ref: '#/components/schemas/ProfileStepEnum'
           - $ref: '#/components/schemas/NullEnum'
+        avatar:
+          allOf:
+          - $ref: '#/components/schemas/Avatar'
+          nullable: true
+          readOnly: true
+          description: Avatar de l'apprenant (shell)
+        schoolGrade:
+          allOf:
+          - $ref: '#/components/schemas/SchoolGrade'
+          nullable: true
+          readOnly: true
+          description: Classe de l'apprenant (shell)
+        city:
+          type: string
+          nullable: true
+          readOnly: true
+          description: Ville de l'apprenant ou du parent (shell)
         isStaff:
           type: boolean
           readOnly: true
@@ -2995,6 +3363,8 @@ components:
             type: string
           readOnly: true
       required:
+      - avatar
+      - city
       - email
       - firstName
       - id
@@ -3004,6 +3374,7 @@ components:
       - phone
       - profileStep
       - role
+      - schoolGrade
       - staffGroups
       - status
       - username
@@ -3534,6 +3905,28 @@ components:
       - provider
       - providerTransactionId
       - success
+    PaymentNetwork:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+        country:
+          type: string
+          description: Code ISO du pays
+      required:
+      - code
+      - country
+      - id
+      - label
     Preferences:
       type: object
       properties:
@@ -3704,6 +4097,46 @@ components:
           description: Nombre de notifications marquées comme lues
       required:
       - updated
+    RefusalReason:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+      required:
+      - code
+      - id
+      - label
+    Relationship:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+        parentLabel:
+          type: string
+          title: Libellé côté parent
+          maxLength: 120
+      required:
+      - code
+      - id
+      - label
     Resource:
       type: object
       properties:
@@ -3759,6 +4192,24 @@ components:
         * `learner` - Apprenant
         * `parent` - Parent
         * `teacher` - Enseignant
+    SchoolGrade:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+      required:
+      - code
+      - id
+      - label
     ToneEnum:
       enum:
       - info

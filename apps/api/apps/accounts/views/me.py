@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from apps.accounts.models import ParentProfile, User
 from apps.accounts.profile import ProfileStep, profile_step
+from apps.referentials.serializers import AvatarSerializer, SchoolGradeSerializer
 from libs.errors import message_for
 
 
@@ -20,6 +21,9 @@ class MeSerializer(serializers.ModelSerializer):
     profile_step = serializers.SerializerMethodField(
         help_text="Étape de profil restante (W11-W14, WP07-WP09), null si le profil est complet"
     )
+    avatar = serializers.SerializerMethodField(help_text="Avatar de l'apprenant (shell)")
+    school_grade = serializers.SerializerMethodField(help_text="Classe de l'apprenant (shell)")
+    city = serializers.SerializerMethodField(help_text="Ville de l'apprenant ou du parent (shell)")
     is_staff = serializers.BooleanField(read_only=True)
     otp_verified = serializers.SerializerMethodField()
     staff_groups = serializers.SerializerMethodField()
@@ -36,6 +40,9 @@ class MeSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "profile_step",
+            "avatar",
+            "school_grade",
+            "city",
             "is_staff",
             "otp_verified",
             "staff_groups",
@@ -45,6 +52,28 @@ class MeSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.ChoiceField(choices=ProfileStep.choices, allow_null=True))
     def get_profile_step(self, user) -> str | None:
         return profile_step(user)
+
+    @staticmethod
+    def _profile(user):
+        if user.is_learner:
+            return getattr(user, "learner_profile", None)
+        if user.is_parent:
+            return getattr(user, "parent_profile", None)
+        return None
+
+    @extend_schema_field(AvatarSerializer(allow_null=True))
+    def get_avatar(self, user):
+        avatar = getattr(self._profile(user), "avatar", None) if user.is_learner else None
+        return AvatarSerializer(avatar).data if avatar else None
+
+    @extend_schema_field(SchoolGradeSerializer(allow_null=True))
+    def get_school_grade(self, user):
+        grade = getattr(self._profile(user), "school_grade", None) if user.is_learner else None
+        return SchoolGradeSerializer(grade).data if grade else None
+
+    def get_city(self, user) -> str | None:
+        locality = getattr(self._profile(user), "locality", None)
+        return locality.city if locality else None
 
     def get_otp_verified(self, user) -> bool:
         """Session du personnel validée par TOTP (D72) ; toujours faux pour un persona."""
