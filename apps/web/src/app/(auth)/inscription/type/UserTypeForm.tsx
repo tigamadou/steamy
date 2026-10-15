@@ -35,13 +35,15 @@ export function UserTypeForm() {
   const [choice, setChoice] = useState<string>();
   const [error, setError] = useState<string>();
 
-  const onSubmit = (event: FormEvent) => {
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!choice) {
+    // Lu dans le formulaire : un choix fait avant l'hydratation (réseau lent) compte aussi
+    const value = String(new FormData(event.currentTarget).get("profil") ?? "");
+    if (!value) {
       setError("Choisis ton profil pour continuer.");
       return;
     }
-    router.push(NEXT_STEP[choice]);
+    router.push(NEXT_STEP[value]);
   };
 
   return (

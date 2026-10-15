@@ -51,4 +51,6 @@ export async function signUpParentThroughScreens(page: Page, phone: string, firs
   await page.getByRole("textbox", { name: /^Mot de passe/ }).fill("Parent2026x");
   await page.getByRole("textbox", { name: /^Confirmez votre mot de passe/ }).fill("Parent2026x");
   await page.getByRole("button", { name: "Valider mon mot de passe" }).click();
+  // Création du compte, ouverture de la session puis rendu serveur de l'étape suivante
+  await expect(page).not.toHaveURL("/inscription/parent/mot-de-passe", { timeout: 20_000 });
 }

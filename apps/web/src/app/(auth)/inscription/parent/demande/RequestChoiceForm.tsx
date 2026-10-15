@@ -42,13 +42,15 @@ export function RequestChoiceForm() {
   const [pending, setPending] = useState(false);
   const [requests, setRequests] = useState<Request[]>();
 
-  const onSubmit = async (event: FormEvent) => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!choice) {
+    // Lu dans le formulaire : un choix fait avant l'hydratation (réseau lent) compte aussi
+    const value = String(new FormData(event.currentTarget).get("demande") ?? "");
+    if (!value) {
       setError("Choisissez une réponse pour continuer.");
       return;
     }
-    if (choice === "espace") {
+    if (value === "espace") {
       router.push(PROFILE_START);
       return;
     }
