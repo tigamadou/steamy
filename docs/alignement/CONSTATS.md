@@ -11,6 +11,9 @@ seule ont été faites, une par lot (le lot 3 en deux parties) et une pour l'API
 
 Les décisions à prendre sont dans [ARBITRAGES.md](ARBITRAGES.md).
 
+> L'ancien dossier `docs/plan/` (PLAN-00 à PLAN-03), cité ci-dessous, a été supprimé depuis : il reste consultable dans
+> l'historique git. Les plans à jour sont dans [docs/plans/](../plans/README.md).
+
 ## Découpage retenu
 
 | Lot | Contenu | Écrans |

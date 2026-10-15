@@ -759,7 +759,7 @@ scène de WC02b et WD16 ; `title="Bientôt"` ; commentaire de travail `screens-a
 | --- | --- | --- |
 | Règle « moins de 16 ans » contradictoire avec §4.1 | WA02, WK08, WD11, WAD08, WAD12, WT06, WL09 | Supprimée partout (S3) |
 | Vocabulaire `Path`/`Course`/`Module`/`Lesson`, quiz au parcours, « Niveau » à trois sens | WC, WJ | S2 (§3.2) |
-| Documentation d'une autre architecture (MySQL, Prisma, server actions, « aucune API ») | ce document, `docs/plan` | §1 ; plans réécrits dans `docs/plans/` (§9) |
+| Documentation d'une autre architecture (MySQL, Prisma, server actions, « aucune API ») | ce document, ancien `docs/plan/` | §1 ; ancien `docs/plan/` supprimé, plans réécrits dans `docs/plans/` (§9) |
 | Pages et fiches manquantes | WL, WD, WPD, WT | Écrans à concevoir `WL22`-`WL24`, `WD23`, `WPD15`, `WT13` (CONVENTIONS) |
 | WP05 montre des données saisies après l'accord | WP05, WPD05 | D20 |
 | Enfant sans moyen de reprendre son inscription après W06 | W07 | D21 |
