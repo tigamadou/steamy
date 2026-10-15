@@ -161,7 +161,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Plus aucune route hors `/api/<domaine>/…/` (routeurs DRF passés en `SimpleRouter` : ni vue racine ni suffixe `.format`)
 
 ### API-L1 · Catalogue public, événements, formulaires, kits — 🟡 en cours
-- [x] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog` · PR #NUM
+- [x] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog` · PR #33
   - [x] Modèles `Category`, `Course`, `Project`, `Level`, `Mission` (`vimeoId`, `blocks` JSON validé)
   - [x] Suppression de `courses`
   - [x] Admin Django (groupe Contenu, ordre par glisser via `order`)
