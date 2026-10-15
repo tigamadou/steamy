@@ -9,13 +9,14 @@ from rest_framework import serializers
 from apps.accounts import consent as consent_service
 from apps.accounts.fields import PhoneField
 from apps.accounts.models import ConsentRequest
-from apps.catalog.models import Course, Level, Mission, Project
+from apps.catalog.models import Course, Level, Mission, Project, Quiz
 from apps.catalog.serializers import CategorySummarySerializer
+from apps.learning.models import QuizAttempt
 from apps.referentials.models import Relationship, SchoolGrade
 from apps.referentials.serializers import AvatarSerializer, SchoolGradeSerializer
 
-from . import quotas
-from .models import Classroom, ClassroomMembership, School, validate_color
+from . import follow_up, quotas
+from .models import Classroom, ClassroomMembership, School, TeacherComment, validate_color
 
 
 class CourseSummarySerializer(serializers.ModelSerializer):
@@ -80,6 +81,9 @@ class ClassroomSerializer(serializers.ModelSerializer):
     has_members = serializers.BooleanField(
         read_only=True, help_text="Parcours figé : la classe a déjà eu un membre"
     )
+    average_progress = serializers.IntegerField(
+        read_only=True, help_text="Progression moyenne des élèves actifs sur le parcours (%)"
+    )
 
     class Meta:
         model = Classroom
@@ -92,6 +96,7 @@ class ClassroomSerializer(serializers.ModelSerializer):
             "member_count",
             "pending_invitation_count",
             "has_members",
+            "average_progress",
             "created_at",
         )
         read_only_fields = fields
@@ -145,6 +150,13 @@ class MemberSerializer(serializers.ModelSerializer):
         help_text="État de la demande au parent (`invited` seulement) ; `refused` et `expired` sont à signaler"
     )
     invitation_expires_at = serializers.SerializerMethodField()
+    progress_pct = serializers.SerializerMethodField(
+        help_text="Élève actif : progression sur le parcours"
+    )
+    last_activity_at = serializers.SerializerMethodField(
+        help_text="Élève actif : dernière activité sur le parcours, ou date d'adhésion"
+    )
+    is_dropout = serializers.SerializerMethodField(help_text="Élève actif en décrochage (D66)")
 
     class Meta:
         model = ClassroomMembership
@@ -156,10 +168,43 @@ class MemberSerializer(serializers.ModelSerializer):
             "learner",
             "invitation_status",
             "invitation_expires_at",
+            "progress_pct",
+            "last_activity_at",
+            "is_dropout",
             "joined_at",
             "created_at",
         )
         read_only_fields = fields
+
+    def _follow(self, membership):
+        """`(inscription, dernière activité, décrocheur)` d'un élève actif ; `None` sinon ou hors contexte."""
+        follow = self.context.get("follow")
+        if membership.status != ClassroomMembership.Status.ACTIVE or follow is None:
+            return None
+        enrollments, limit = follow
+        enrollment = enrollments.get((membership.learner_id, membership.classroom.course_id))
+        return (
+            enrollment,
+            follow_up.last_activity(membership, enrollment),
+            follow_up.is_dropout(membership, enrollment, limit),
+        )
+
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
+    def get_progress_pct(self, membership):
+        follow = self._follow(membership)
+        if follow is None:
+            return None
+        return follow[0].progress_pct if follow[0] else 0
+
+    @extend_schema_field(serializers.DateTimeField(allow_null=True))
+    def get_last_activity_at(self, membership):
+        follow = self._follow(membership)
+        return serializers.DateTimeField().to_representation(follow[1]) if follow else None
+
+    @extend_schema_field(serializers.BooleanField())
+    def get_is_dropout(self, membership) -> bool:
+        follow = self._follow(membership)
+        return bool(follow and follow[2])
 
     @staticmethod
     def _subject(membership, key) -> str:
@@ -200,26 +245,54 @@ class MemberSerializer(serializers.ModelSerializer):
         return serializers.DateTimeField().to_representation(membership.consent_request.expires_at)
 
 
-class MissionNodeSerializer(serializers.ModelSerializer):
+class StatsMixin:
+    """Compteurs du parcours chez l'enseignant (WT10), calculés par la vue et passés en contexte."""
+
+    def _stat(self, name, key):
+        return self.context.get("stats", {}).get(name, {}).get(key)
+
+
+class MissionNodeSerializer(StatsMixin, serializers.ModelSerializer):
+    completed_count = serializers.SerializerMethodField(
+        help_text="Élèves actifs de l'enseignant ayant terminé la mission"
+    )
+
     class Meta:
         model = Mission
-        fields = ("id", "order", "title", "duration_min", "icon")
+        fields = ("id", "order", "title", "duration_min", "icon", "completed_count")
+
+    def get_completed_count(self, mission) -> int:
+        return self._stat("completed", mission.pk) or 0
 
 
-class LevelNodeSerializer(serializers.ModelSerializer):
+class LevelNodeSerializer(StatsMixin, serializers.ModelSerializer):
     missions = MissionNodeSerializer(many=True, read_only=True)
+    pass_rate = serializers.SerializerMethodField(
+        help_text="Part des tentatives réussies à la formative du niveau (%), null sans tentative"
+    )
 
     class Meta:
         model = Level
-        fields = ("id", "order", "title", "duration_min", "missions")
+        fields = ("id", "order", "title", "duration_min", "pass_rate", "missions")
+
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
+    def get_pass_rate(self, level):
+        return self._stat("level_pass_rate", level.pk)
 
 
-class ProjectNodeSerializer(serializers.ModelSerializer):
+class ProjectNodeSerializer(StatsMixin, serializers.ModelSerializer):
     levels = LevelNodeSerializer(many=True, read_only=True)
+    pass_rate = serializers.SerializerMethodField(
+        help_text="Part des tentatives réussies à la sommative du projet (%), null sans tentative"
+    )
 
     class Meta:
         model = Project
-        fields = ("id", "order", "title", "duration_hours", "levels")
+        fields = ("id", "order", "title", "duration_hours", "pass_rate", "levels")
+
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
+    def get_pass_rate(self, project):
+        return self._stat("project_pass_rate", project.pk)
 
 
 class SupervisedCourseSerializer(CourseSummarySerializer):
@@ -237,11 +310,28 @@ class SupervisedCourseDetailSerializer(SupervisedCourseSerializer):
     """WT10 : l'arbre Projet → Niveau → Mission, en lecture seule (S5)."""
 
     classrooms = serializers.SerializerMethodField()
+    formative_pass_rate = serializers.SerializerMethodField()
+    summative_pass_rate = serializers.SerializerMethodField()
     projects = ProjectNodeSerializer(many=True, read_only=True)
 
     class Meta(SupervisedCourseSerializer.Meta):
-        fields = (*SupervisedCourseSerializer.Meta.fields, "description", "classrooms", "projects")
+        fields = (
+            *SupervisedCourseSerializer.Meta.fields,
+            "description",
+            "classrooms",
+            "formative_pass_rate",
+            "summative_pass_rate",
+            "projects",
+        )
         read_only_fields = fields
+
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
+    def get_formative_pass_rate(self, course):
+        return self.context.get("stats", {}).get("kind_pass_rate", {}).get("formative")
+
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
+    def get_summative_pass_rate(self, course):
+        return self.context.get("stats", {}).get("kind_pass_rate", {}).get("summative")
 
     @extend_schema_field(ClassroomSerializer(many=True))
     def get_classrooms(self, course):
@@ -310,3 +400,179 @@ class ImportErrorSerializer(serializers.Serializer):
 class ImportResultSerializer(serializers.Serializer):
     created = MemberSerializer(many=True)
     errors = ImportErrorSerializer(many=True)
+
+
+# --- Suivi (API-L5.3) ----------------------------------------------------------------------------
+
+
+class ClassroomRefSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+
+
+class NodeRefSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+
+
+class QuizRefSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    kind = serializers.ChoiceField(choices=Quiz.Kind.choices)
+    title = serializers.CharField(source="display_title")
+    project_title = serializers.SerializerMethodField()
+    level_title = serializers.SerializerMethodField()
+
+    def get_project_title(self, quiz) -> str:
+        return (quiz.project or quiz.level.project).title
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_level_title(self, quiz):
+        return quiz.level.title if quiz.level_id else None
+
+
+class TeacherAttemptSerializer(serializers.Serializer):
+    """Tentative vue par l'enseignant (WT05, WT07) : statut serveur (D31), jamais les réponses ni le corrigé."""
+
+    id = serializers.IntegerField()
+    quiz = QuizRefSerializer()
+    percentage = serializers.IntegerField()
+    status = serializers.ChoiceField(choices=QuizAttempt.Status.choices)
+    passed = serializers.BooleanField()
+    created_at = serializers.DateTimeField()
+    commented = serializers.BooleanField(
+        help_text="L'enseignant l'a déjà commentée (sort de « À revoir »)"
+    )
+
+
+class ReviewSerializer(TeacherAttemptSerializer):
+    """Ligne de WT07 et de « À revoir » (WT01)."""
+
+    learner = MemberLearnerSerializer(source="learner_ref")
+    classroom = ClassroomRefSerializer(source="classroom_ref")
+
+
+class TeacherCommentSerializer(serializers.ModelSerializer):
+    attempt_id = serializers.IntegerField(allow_null=True, read_only=True)
+
+    class Meta:
+        model = TeacherComment
+        fields = ("id", "body", "attempt_id", "created_at")
+        read_only_fields = fields
+
+
+class CommentRequestSerializer(serializers.Serializer):
+    body = serializers.CharField(max_length=1000)
+    attempt_id = serializers.IntegerField(required=False, allow_null=True)
+    classroom_id = serializers.IntegerField(
+        required=False, help_text="Classe concernée si l'élève est dans plusieurs de vos classes"
+    )
+
+
+class LearnerQuerySerializer(serializers.Serializer):
+    # Paramètres d'URL : noms en camelCase, comme le reste de l'API (pas de conversion automatique ici)
+    classroomId = serializers.IntegerField(required=False)
+
+
+class LearnerFollowUpSerializer(serializers.Serializer):
+    """WT05 : l'élève sur le parcours de la classe seulement, sans donnée sensible (D64)."""
+
+    learner = MemberLearnerSerializer()
+    classroom = ClassroomSerializer()
+    joined_at = serializers.DateTimeField()
+    progress_pct = serializers.IntegerField()
+    last_activity_at = serializers.DateTimeField()
+    is_dropout = serializers.BooleanField()
+    average_percentage = serializers.IntegerField(
+        allow_null=True, help_text="Moyenne des tentatives du parcours (%)"
+    )
+    attempts = TeacherAttemptSerializer(many=True)
+    comments = TeacherCommentSerializer(many=True)
+
+
+class ReviewQuerySerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=[follow_up.TO_REVIEW, *QuizAttempt.Status.values],
+        required=False,
+        help_text="`to_review` : tentatives `ko` non commentées (D65)",
+    )
+    type = serializers.ChoiceField(choices=Quiz.Kind.values, required=False)
+    classroomId = serializers.IntegerField(required=False)
+
+
+class DropoutSerializer(serializers.Serializer):
+    learner = MemberLearnerSerializer()
+    classroom = ClassroomRefSerializer()
+    last_activity_at = serializers.DateTimeField()
+
+
+class DashboardSerializer(serializers.Serializer):
+    """WT01 : compteurs, cartes de classes, « À revoir » et « Décrochage » (5 premiers de chaque)."""
+
+    classroom_count = serializers.IntegerField()
+    learner_count = serializers.IntegerField(help_text="Élèves actifs, comptés une fois")
+    pending_invitation_count = serializers.IntegerField()
+    to_review_count = serializers.IntegerField()
+    dropout_count = serializers.IntegerField()
+    classrooms = ClassroomSerializer(many=True)
+    to_review = ReviewSerializer(many=True)
+    dropouts = DropoutSerializer(many=True)
+
+
+class MissionReadSerializer(serializers.ModelSerializer):
+    """Mission en lecture seule (WT10) : le contenu, sans progression ni quiz."""
+
+    level = NodeRefSerializer()
+    project = NodeRefSerializer(source="level.project")
+
+    class Meta:
+        model = Mission
+        fields = (
+            "id",
+            "order",
+            "title",
+            "duration_min",
+            "icon",
+            "vimeo_id",
+            "vimeo_hash",
+            "blocks",
+            "level",
+            "project",
+        )
+        read_only_fields = fields
+
+
+class LearnerCommentSerializer(serializers.ModelSerializer):
+    """Commentaire vu par l'apprenant (WD01) et son parent (WPD03) : lecture seule, pas de réponse (S11)."""
+
+    teacher_name = serializers.SerializerMethodField()
+    classroom_name = serializers.CharField(source="classroom.name")
+    learner_id = serializers.IntegerField()
+    attempt = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TeacherComment
+        fields = (
+            "id",
+            "body",
+            "created_at",
+            "teacher_name",
+            "classroom_name",
+            "learner_id",
+            "attempt",
+        )
+        read_only_fields = fields
+
+    def get_teacher_name(self, comment) -> str:
+        return f"{comment.teacher.first_name} {comment.teacher.last_name}".strip()
+
+    @extend_schema_field(TeacherAttemptSerializer(allow_null=True))
+    def get_attempt(self, comment):
+        attempt = comment.attempt
+        if attempt is None:
+            return None
+        attempt.commented = True
+        return TeacherAttemptSerializer(attempt).data
+
+
+class CommentQuerySerializer(serializers.Serializer):
+    learnerId = serializers.IntegerField(required=False, help_text="Parent : un de ses enfants")

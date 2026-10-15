@@ -346,6 +346,9 @@ def test_members_show_learners_and_invitations_without_sensitive_data(api, teach
         "learner",
         "invitationStatus",
         "invitationExpiresAt",
+        "progressPct",
+        "lastActivityAt",
+        "isDropout",
         "joinedAt",
         "createdAt",
     }
@@ -450,6 +453,7 @@ def test_supervised_course_detail_is_a_read_only_tree(api, teacher, school, cour
         "title": mission.title,
         "durationMin": mission.duration_min,
         "icon": "",
+        "completedCount": 0,
     }
     assert "vimeoId" not in str(body) and "blocks" not in str(body)
     assert api.patch(f"{URL}courses/{course.slug}/", {}, format="json").status_code == 405
