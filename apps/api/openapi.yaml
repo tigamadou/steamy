@@ -1450,6 +1450,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/accounts/pending-actions/:
+    get:
+      operationId: accounts_pending_actions_list
+      description: 'WPD01 « À valider » : toutes les demandes en attente, la plus
+        récente d''abord (liste non paginée).'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PendingAction'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/analytics/dashboard/summary/:
     get:
       operationId: analytics_dashboard_summary_retrieve
@@ -6475,6 +6511,49 @@ components:
       - country
       - id
       - label
+    PendingAction:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/PendingActionTypeEnum'
+        id:
+          type: string
+          description: Identifiant de la demande, dans son type
+        childId:
+          type: integer
+          nullable: true
+          description: Enfant rattaché ; null pour un consentement (pas encore de
+            lien)
+        childFirstName:
+          type: string
+        childLastName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        url:
+          type: string
+          description: Route du front où traiter la demande
+      required:
+      - childFirstName
+      - childId
+      - childLastName
+      - createdAt
+      - id
+      - type
+      - url
+    PendingActionTypeEnum:
+      enum:
+      - consent
+      - payment_request
+      - event_application
+      - deletion_request
+      type: string
+      description: |-
+        * `consent` - Consentement (WPD05)
+        * `payment_request` - Demande de paiement (WPD15)
+        * `event_application` - Candidature à un événement (WPD06)
+        * `deletion_request` - Demande de suppression (WPD09)
     PhoneChangeRequest:
       type: object
       properties:

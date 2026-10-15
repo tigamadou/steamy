@@ -435,6 +435,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/accounts/pending-actions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WPD01 « À valider » : toutes les demandes en attente, la plus récente d'abord (liste non paginée). */
+        get: operations["accounts_pending_actions_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/analytics/dashboard/summary/": {
         parameters: {
             query?: never;
@@ -2576,6 +2593,27 @@ export interface components {
             /** @description Code ISO du pays */
             country: string;
         };
+        PendingAction: {
+            type: components["schemas"]["PendingActionTypeEnum"];
+            /** @description Identifiant de la demande, dans son type */
+            id: string;
+            /** @description Enfant rattaché ; null pour un consentement (pas encore de lien) */
+            childId: number | null;
+            childFirstName: string;
+            childLastName: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description Route du front où traiter la demande */
+            url: string;
+        };
+        /**
+         * @description * `consent` - Consentement (WPD05)
+         *     * `payment_request` - Demande de paiement (WPD15)
+         *     * `event_application` - Candidature à un événement (WPD06)
+         *     * `deletion_request` - Demande de suppression (WPD09)
+         * @enum {string}
+         */
+        PendingActionTypeEnum: "consent" | "payment_request" | "event_application" | "deletion_request";
         PhoneChangeRequest: {
             /** @description Nouveau numéro, saisi librement ; normalisé en E.164 */
             phone: string;
@@ -4644,6 +4682,49 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_pending_actions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PendingAction"][];
                 };
             };
             401: {
