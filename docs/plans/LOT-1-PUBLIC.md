@@ -9,7 +9,7 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : ✅ terminé · Prochaine tâche : — (pastilles de thème de la FAQ de WL24, PR #PRFAQ) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : ✅ terminé · Prochaine tâche : — (pastilles de thème de la FAQ de WL24, PR #60) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
 ### Étape 1.0 · Socle front — ✅ terminé
 - [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
@@ -72,7 +72,7 @@ Statut : ✅ terminé · Prochaine tâche : — (pastilles de thème de la FAQ d
   - [x] Recette : validation par le porteur produit (C18) ; aucune donnée de mineur (D15). Validées le 2026-10-15 sur les pages développées, le porteur ayant délégué l'arbitrage des écarts :
     - WL22 : pas de bouton bande-annonce ni de lien « Voir le kit » avant le lot 3 ; « Créer mon compte » comme CTA principal d'un parcours à kit ; voile sombre sur la couleur de catégorie (AA)
     - WL23 : état « Candidatures closes » ajouté (date limite passée, places restantes) ; « Steamy Event » à la place d'une catégorie, absente de l'API ; variantes apprenant et parent aux lots 3 et 4
-    - WL24 : une pastille par thème de FAQ dans l'en-tête, comme la maquette (PR #PRFAQ) ; textes de la FAQ conservés comme contenu de départ
+    - WL24 : une pastille par thème de FAQ dans l'en-tête, comme la maquette (PR #60) ; textes de la FAQ conservés comme contenu de départ
 
 ### Écrans — ✅ terminé
 - [x] **1.1** Accueil, catalogue, catégories (requiert API-L1) · `feature/lot1-accueil-catalogue` · PR #47
