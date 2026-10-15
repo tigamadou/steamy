@@ -42,7 +42,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `W13` | Objectifs | 2 |  |  |
 | `W14` | Avatar | 2 |  |  |
 | `W15` | Bienvenue | 2 |  |  |
-| `W16` | Connexion existant | 2 |  |  |
+| `W16` | Connexion existant | 2 | Connexion des trois rôles, `next` sûr, personnel refusé, déconnexion | `apps/web/e2e/connexion.spec.ts` |
 | `W18` | Consentement refusé (terminal) | 2 |  |  |
 | `W19` | Identifiant déjà utilisé | 2 |  |  |
 | `WP01` | Créer un compte | 2 |  |  |
