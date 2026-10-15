@@ -17,7 +17,7 @@ export function SectionHead({ id, title, sub, right }: SectionHeadProps) {
         <h2 id={id} className="m-0 text-[15px] font-extrabold text-ink-900">
           {title}
         </h2>
-        {sub && <p className="m-0 mt-0.75 text-xs font-semibold text-ink-500">{sub}</p>}
+        {sub && <p className="m-0 mt-0.75 text-xs font-semibold text-ink-600">{sub}</p>}
       </div>
       {right}
     </div>

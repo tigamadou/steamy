@@ -83,7 +83,7 @@ export function DonutChart({
             dominantBaseline="central"
             fontSize={10}
             fontWeight={700}
-            fill="var(--ink-500)"
+            fill="var(--ink-600)"
           >
             {caption}
           </text>

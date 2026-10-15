@@ -35,7 +35,7 @@ describe("WAD01 · Vue d'ensemble", () => {
   it("affiche le chiffre clé, l'échéance et les chiffres du serveur", async () => {
     const { container } = render(<Overview overview={overview()} apiUrl={API} canOpenImpact />);
     expect(screen.getByText("Administration · Octobre 2026")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "220 nouveaux apprenants ce mois" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Nouveaux apprenants ce mois : 220" })).toBeInTheDocument();
     expect(screen.getByText("Atteinte")).toBeInTheDocument();
     expect(screen.getByText("Cible 200.")).toBeInTheDocument();
     expect(screen.getByText("Prochaine échéance : rapport T4 2026 à soumettre le 15 janv. 2027.")).toBeInTheDocument();
@@ -81,7 +81,7 @@ describe("WAD01 · Vue d'ensemble", () => {
         canOpenImpact={false}
       />,
     );
-    expect(screen.getByRole("heading", { level: 2, name: "Nouveaux apprenants : calcul en attente" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Nouveaux apprenants ce mois : calcul en attente" })).toBeInTheDocument();
     expect(screen.queryByText(/^Cible/)).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Voir l'Impact Tracker" })).not.toBeInTheDocument();
     expect(within(screen.getByRole("region", { name: "Ventes du mois" })).getByText("—")).toBeInTheDocument();

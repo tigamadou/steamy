@@ -38,7 +38,9 @@ test("6.6 renvoie un parent connecté vers WAD15", async ({ page }) => {
   await expectAdminLogin(page, "/backoffice");
 });
 
-test("6.6 et 6.7 ouvrent WAD01 au groupe Support, « À traiter » vers l'admin Django, Impact Tracker refusé", async ({ page }) => {
+test("6.6 et 6.7 ouvrent WAD01 au groupe Support, « À traiter » vers l'admin Django, Impact Tracker refusé", async ({
+  page,
+}) => {
   test.slow(); // attente possible de la fenêtre TOTP suivante (bureau et mobile partagent le compte)
   await page.goto("/backoffice");
   await expectAdminLogin(page, "/backoffice");
@@ -70,12 +72,13 @@ test("6.6 et 6.7 ouvrent WAD01 au groupe Support, « À traiter » vers l'admin 
   const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(violations).toEqual([]);
 
-  // « Consentements en attente » ouvre la liste Django filtrée, avec la même session vérifiée (D70 : suivi seul)
+  // « Consentements en attente » ouvre la liste Django filtrée, avec la même session vérifiée (D70 : suivi seul).
+  // Rechargement d'abord : sous 1024 px, le menu ouvert recouvre le contenu.
+  await page.reload();
   const todo = page.getByRole("region", { name: "À traiter" });
   await todo.getByRole("link", { name: /Consentements en attente/ }).click();
   await expect(page).toHaveURL(`${API_URL}/admin/accounts/consentrequest/?status__exact=pending`);
   await expect(page.getByRole("heading", { level: 1, name: /demande de consentement/i })).toBeVisible();
-  await page.goto("/backoffice");
 
   // Chaque page revérifie le groupe : l'URL directe ne suffit pas
   await page.goto("/backoffice/impact");

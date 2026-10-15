@@ -50,9 +50,7 @@ export function Overview({ overview, apiUrl, canOpenImpact }: OverviewProps) {
             Administration · {period.label}
           </p>
           <h2 id="overview-hero" className="m-0 mt-1.5 text-2xl font-black tracking-[-.01em]">
-            {highlight.value === null
-              ? `${highlight.label} : calcul en attente`
-              : `${formatKpiValue(highlight.value)} ${highlight.label.toLowerCase()} ce mois`}
+            {highlight.label} ce mois : {highlight.value === null ? "calcul en attente" : formatKpiValue(highlight.value)}
           </h2>
           <p className="m-0 mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-surface/80">
             <KpiStatusBadge status={highlight.status} />
@@ -158,7 +156,7 @@ function TodoCard({ todo, apiUrl }: { todo: OverviewData["todo"]; apiUrl: string
     <section aria-labelledby="overview-todo" className={CARD}>
       <SectionHead id="overview-todo" title="À traiter" sub="Files d'attente de vos groupes, dans l'admin Django" />
       {todo.length === 0 ? (
-        <p className="m-0 text-sm font-semibold text-ink-500">Rien à traiter pour vos groupes.</p>
+        <p className="m-0 text-sm font-semibold text-ink-600">Rien à traiter pour vos groupes.</p>
       ) : (
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {todo.map((item) => {
@@ -177,7 +175,7 @@ function TodoCard({ todo, apiUrl }: { todo: OverviewData["todo"]; apiUrl: string
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-[13px] font-extrabold">{item.label}</span>
-                    {kind && <span className="block text-xs font-semibold text-ink-500">{kind.text}</span>}
+                    {kind && <span className="block text-xs font-semibold text-ink-600">{kind.text}</span>}
                   </span>
                   <span className="text-xl font-black tabular-nums">
                     <span className="sr-only"> : </span>
