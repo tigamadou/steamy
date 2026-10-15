@@ -129,7 +129,7 @@ def test_detail_lists_contents_and_published_compatible_courses():
 
 def test_course_requiring_a_kit_shows_it_and_refuses_direct_enrollment():
     kit = KitFactory(slug="bot", name="Steamy Bot v1")
-    course = CourseFactory(slug="robot", paid=True, required_kit=kit)
+    CourseFactory(slug="robot", paid=True, required_kit=kit)
     card = APIClient().get("/api/catalog/courses/").json()["results"][0]
     assert card["requiredKit"] == {"slug": "bot", "name": "Steamy Bot v1"}
     assert APIClient().get("/api/catalog/courses/robot/").json()["requiredKit"]["slug"] == "bot"
@@ -137,7 +137,7 @@ def test_course_requiring_a_kit_shows_it_and_refuses_direct_enrollment():
     learner = LearnerFactory()
     client = APIClient()
     client.force_authenticate(learner)
-    resp = client.post("/api/learning/enrollments/", {"course": course.id}, format="json")
+    resp = client.post("/api/learning/enrollments/", {"courseSlug": "robot"}, format="json")
     assert resp.status_code == 402 and resp.json()["code"] == "KIT_CODE_REQUIRED"
     assert not Enrollment.objects.exists()
 
