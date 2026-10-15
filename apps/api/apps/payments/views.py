@@ -3,10 +3,12 @@ import json
 import logging
 
 from django.core.exceptions import ImproperlyConfigured
+from django.http import FileResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiParameter,
+    OpenApiResponse,
     extend_schema,
     extend_schema_view,
     inline_serializer,
@@ -23,11 +25,13 @@ from apps.notifications.sms import queue_sms
 from libs.authentication import enforce_csrf
 from libs.errors import ApiError
 from libs.permissions import IsLearner
+from libs.schema import ErrorSerializer
 
 from .checkout import initiate_payment
 from .fulfillment import guest_tracking_url
+from .invoices import filename as invoice_filename
 from .kit_codes import redeem
-from .models import Order, Payment, PaymentRequest
+from .models import Invoice, Order, Payment, PaymentRequest
 from .orders import GUEST_TOKEN_HEADER, create_order, order_for_guest
 from .providers import PROVIDERS, get_provider
 from .requests import close, create_request, resend
@@ -202,6 +206,40 @@ class OrderViewSet(
         data.is_valid(raise_exception=True)
         payment = initiate_payment(order, **data.validated_data)
         return Response(PaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="Télécharger la facture (payeur seulement, ou invité avec X-Guest-Token)",
+        parameters=[GUEST_TOKEN_PARAMETER],
+        responses={
+            (302, "*/*"): OpenApiResponse(description="Redirection vers l'URL présignée (5 min)"),
+            (200, "application/pdf"): OpenApiResponse(description="Fichier PDF"),
+            409: ErrorSerializer,
+        },
+    )
+    @action(detail=True, methods=["get"], url_path="invoice", permission_classes=[AllowAny])
+    def invoice(self, request, reference=None):
+        """
+        Réservée au payeur (C12) : l'apprenant bénéficiaire n'y a pas accès (404). PDF pas prêt → 409
+        `PDF_NOT_READY` ; sinon redirection vers une URL présignée de 5 minutes (ADR 0005 §6).
+        """
+        if request.user.is_authenticated and not request.user.is_parent:
+            raise ApiError("NOT_FOUND")
+        order = payable_order(request, reference)
+        invoice = Invoice.objects.filter(order=order).first()
+        if invoice is None:
+            raise ApiError("NOT_FOUND")
+        if invoice.pdf_status != Invoice.PdfStatus.READY or not invoice.pdf:
+            raise ApiError("PDF_NOT_READY")
+        name = invoice_filename(invoice)
+        url = invoice.pdf.storage.signed_url(invoice.pdf.name, name)
+        if url:
+            return HttpResponseRedirect(url)
+        return FileResponse(
+            invoice.pdf.open("rb"),
+            as_attachment=True,
+            filename=name,
+            content_type="application/pdf",
+        )
 
 
 def payable_order(request, reference) -> Order:

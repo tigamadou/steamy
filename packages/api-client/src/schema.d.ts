@@ -1146,6 +1146,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/payments/orders/{reference}/invoice/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Télécharger la facture (payeur seulement, ou invité avec X-Guest-Token)
+         * @description Réservée au payeur (C12) : l'apprenant bénéficiaire n'y a pas accès (404). PDF pas prêt → 409
+         *     `PDF_NOT_READY` ; sinon redirection vers une URL présignée de 5 minutes (ADR 0005 §6).
+         */
+        get: operations["payments_orders_invoice_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/payments/orders/{reference}/payments/": {
         parameters: {
             query?: never;
@@ -2292,6 +2313,10 @@ export interface components {
          * @enum {string}
          */
         HealthStatusEnum: "ok" | "degraded";
+        InvoiceSummary: {
+            number: string;
+            pdfStatus: components["schemas"]["PdfStatusEnum"];
+        };
         Kit: {
             slug: string;
             /** Nom */
@@ -2632,7 +2657,10 @@ export interface components {
         };
         /** @enum {unknown} */
         NullEnum: null;
-        /** @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison et les Kit Codes (C10). */
+        /**
+         * @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison, les Kit Codes (C10) et la facture
+         *     (C12, `GET …/invoice/` quand `pdfStatus` vaut `ready`).
+         */
         Order: {
             /** Référence */
             readonly reference: string;
@@ -2670,6 +2698,7 @@ export interface components {
             readonly createdAt: string;
             readonly deliveryAddress: components["schemas"]["OrderDeliveryAddress"] | null;
             readonly kitCodes: components["schemas"]["KitCode"][];
+            readonly invoice: components["schemas"]["InvoiceSummary"] | null;
         };
         /**
          * @description * `course` - course
@@ -2691,7 +2720,10 @@ export interface components {
             guest?: components["schemas"]["GuestInputRequest"];
             deliveryAddress?: components["schemas"]["DeliveryAddressInputRequest"];
         };
-        /** @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison et les Kit Codes (C10). */
+        /**
+         * @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison, les Kit Codes (C10) et la facture
+         *     (C12, `GET …/invoice/` quand `pdfStatus` vaut `ready`).
+         */
         OrderCreated: {
             /** Référence */
             readonly reference: string;
@@ -2729,6 +2761,7 @@ export interface components {
             readonly createdAt: string;
             readonly deliveryAddress: components["schemas"]["OrderDeliveryAddress"] | null;
             readonly kitCodes: components["schemas"]["KitCode"][];
+            readonly invoice: components["schemas"]["InvoiceSummary"] | null;
             /** @description Invité seulement, remis une seule fois : à renvoyer dans l'en-tête X-Guest-Token */
             readonly guestToken: string | null;
         };
@@ -7151,6 +7184,60 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_orders_invoice_retrieve: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Jeton d'une commande invitée, remis à sa création (C10) */
+                "X-Guest-Token"?: string;
+            };
+            path: {
+                reference: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Fichier PDF */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Redirection vers l'URL présignée (5 min) */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -7,12 +7,15 @@ Montants en entiers FCFA (XOF), jamais en décimaux. Le paiement est initié par
 """
 
 import secrets
+import uuid
 
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from apps.core.storage import private_storage
 
 User = settings.AUTH_USER_MODEL
 
@@ -280,18 +283,43 @@ class Payment(models.Model):
         return f"{self.provider} {self.amount} FCFA ({self.status})"
 
 
+def invoice_path(invoice, filename) -> str:
+    return f"invoices/{invoice.issued_at:%Y}/{invoice.uuid}.pdf"
+
+
 class Invoice(models.Model):
+    """
+    Facture (ou reçu) d'une commande payée (ADR 0005) : émise une fois, dans la transaction d'exécution post-paiement ;
+    numéro `FAC-AAAA-NNNNNN` sans trou (`DocumentSequence`) ; PDF généré par Celery dans le stockage privé ;
+    `snapshot` fige vendeur, acheteur, lignes, montants et paiement. Conservée après la suppression du compte (D40).
+    """
+
+    class PdfStatus(models.TextChoices):
+        PENDING = "pending", _("En préparation")
+        READY = "ready", _("Prêt")
+        FAILED = "failed", _("Échec")
+
     order = models.OneToOneField(Order, models.PROTECT, related_name="invoice")
-    issued_at = models.DateTimeField(auto_now_add=True)
-    pdf = models.FileField(upload_to="invoices/%Y/%m/%d/", null=True, blank=True)
-    number = models.CharField(max_length=32, unique=True)
+    number = models.CharField(_("numéro"), max_length=20, unique=True)
+    uuid = models.UUIDField(
+        _("identifiant du fichier"), default=uuid.uuid4, unique=True, editable=False
+    )
+    pdf = models.FileField(
+        _("PDF"), storage=private_storage, upload_to=invoice_path, blank=True, max_length=200
+    )
+    pdf_status = models.CharField(
+        _("état du PDF"), max_length=8, choices=PdfStatus, default=PdfStatus.PENDING
+    )
+    snapshot = models.JSONField(_("contenu figé"), default=dict)
+    issued_at = models.DateTimeField(_("émise le"), default=timezone.now)
 
     class Meta:
+        ordering = ["-issued_at", "-id"]
         verbose_name = _("facture")
         verbose_name_plural = _("factures")
 
     def __str__(self):
-        return f"Facture {self.number} · {self.order.reference}"
+        return self.number
 
 
 class Refund(models.Model):

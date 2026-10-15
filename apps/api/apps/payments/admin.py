@@ -5,6 +5,7 @@ RBAC du back-office (API-L6.2).
 """
 
 from django.contrib import admin
+from django.db import transaction
 
 from .models import Invoice, KitCode, Order, OrderItem, Payment, PaymentRequest, Refund
 
@@ -78,7 +79,30 @@ class PaymentAdmin(admin.ModelAdmin):
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ("number", "order", "issued_at")
+    """Factures en lecture seule (Finance) ; un PDF en échec se relance par l'action « Régénérer » (ADR 0005 §8)."""
+
+    list_display = ("number", "order", "pdf_status", "issued_at")
+    list_filter = ("pdf_status",)
+    search_fields = ("number", "order__reference")
+    readonly_fields = ("order", "number", "uuid", "pdf_status", "snapshot", "issued_at")
+    exclude = ("pdf",)
+    actions = ["regenerate"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    @admin.action(description="Régénérer le PDF")
+    def regenerate(self, request, queryset):
+        from .tasks import generate_invoice_pdf
+
+        ids = list(queryset.values_list("id", flat=True))
+        queryset.update(pdf_status=Invoice.PdfStatus.PENDING)
+        for invoice_id in ids:
+            transaction.on_commit(lambda pk=invoice_id: generate_invoice_pdf.delay(pk))
+        self.message_user(request, f"{len(ids)} PDF relancé(s).")
 
 
 @admin.register(Refund)

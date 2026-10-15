@@ -492,13 +492,25 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `AuditLog` `payment.refunded`. Invité : SMS de suivi à la création, lien `/boutique/commandes/<ref>#jeton=<jeton>`
   > (jeton dans le fragment, jamais envoyé à un serveur). Réconciliation : paiements sans issue depuis 10 min ;
   > sans transaction → `failed` (`INITIATION_LOST`).
-- [ ] **API-L3b.2b** Facture · `feature/api-l3b-2b-facture`
-  - [ ] `Invoice` (`pdfStatus`, instantané), module `core/pdf.py` partagé avec les certificats (API-L3a.4, PR #69)
-  - [ ] Tâche `generate_invoice_pdf` lancée par l'exécution post-paiement ; `GET payments/orders/{reference}/invoice/` (payeur seulement, invité par jeton, P7)
-  - [ ] Mentions et TVA **paramétrables** (réglages), sans valeur légale inventée, en attendant P1 (MECeF) et P2 (TVA) de l'ADR 0005
-  - [ ] Tests : facture refusée à l'apprenant bénéficiaire, numérotation sans trou
-  > Séparée de L3b.2 (tâche découverte) : elle dépend de `core/pdf.py`, du stockage privé et de `DocumentSequence`
-  > livrés par API-L3a.4 (PR #69, non fusionnée), et de la décision comptable P1/P2.
+- [x] **API-L3b.2b** Facture · `feature/api-l3b-2b-facture`
+  - [x] `Invoice` (`pdfStatus`, instantané), module `core/pdf.py` partagé avec les certificats (API-L3a.4, PR #69)
+  - [x] Tâche `generate_invoice_pdf` lancée par l'exécution post-paiement ; `GET payments/orders/{reference}/invoice/` (payeur seulement, invité par jeton, P7)
+  - [x] Mentions et TVA **paramétrables** (réglages), sans valeur légale inventée, en attendant P1 (MECeF) et P2 (TVA) de l'ADR 0005
+  - [x] Tests : facture refusée à l'apprenant bénéficiaire, numérotation sans trou
+  - [ ] **Écart** : format légal non validé (P1, P2). Tant que la comptabilité n'a pas répondu, le document reste un
+    « Reçu de paiement » non fiscal (`INVOICE_PROVISIONAL=true`) ; ne pas passer à `false` en production avant la
+    décision, ni livrer une facture normalisée sans l'interface `FiscalInvoiceProvider` prévue par l'ADR 0005
+  > Séparée de L3b.2 (tâche découverte) : elle dépendait de `core/pdf.py`, du stockage privé et de
+  > `DocumentSequence` (API-L3a.4). Décisions : facture émise une fois dans la transaction d'exécution post-paiement
+  > (y compris paiement tardif honoré), numéro `FAC-AAAA-NNNNNN` par `DocumentSequence("invoice", année)` (P3),
+  > fichier `invoices/<année>/<uuid>.pdf` dans le stockage privé, `snapshot` figé (vendeur, acheteur, lignes,
+  > sous-total, livraison, total, TVA, réseau et transaction, dates). Réglages : `INVOICE_PROVISIONAL` (vrai : titre
+  > « Reçu de paiement » et mention « document non fiscal »), `INVOICE_SELLER` (JSON ; seuls les champs renseignés
+  > sont imprimés, `{"name": "Steamy"}` par défaut), `INVOICE_VAT_RATE` (vide : aucune ventilation),
+  > `INVOICE_PRICES_INCLUDE_VAT`, `INVOICE_MENTIONS`. Téléchargement : parent payeur ou invité (jeton) ; apprenant,
+  > autre parent, enseignant → 404 ; PDF pas prêt → 409 `PDF_NOT_READY` ; 302 vers l'URL présignée de 5 min, ou le
+  > fichier sans stockage objet (CI). La commande du payeur expose `invoice{number, pdfStatus}`. Filet
+  > `retry_pending_invoices` (10 min) et action d'admin « Régénérer le PDF ». Avoir sur remboursement : P1.
 - [x] **API-L3b.3** Boutique · `feature/api-l3b-3-boutique` · PR #82
   - [x] `Cart`/`CartItem`, `DeliveryAddress`, `RestockAlert` (`StockReservation` et `DeliveryZone` : L3b.1)
   - [x] `shop/cart/*`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`

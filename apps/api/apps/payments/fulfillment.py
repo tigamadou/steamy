@@ -1,8 +1,8 @@
 """
 Exécution post-paiement (§4.3, D36, D37, C3, C17) : **une seule fois**, dans la transaction du webhook qui verrouille
 la commande. Elle marque la commande payée, confirme le stock, inscrit le bénéficiaire, génère les Kit Codes des
-kits, règle la demande de l'enfant, vide le panier et prévient le payeur et le bénéficiaire. Les candidatures
-(L3b.6) et la facture (L3b.2b) s'y ajoutent.
+kits, règle la demande de l'enfant, émet la facture (PDF asynchrone), vide le panier et prévient le payeur et le
+bénéficiaire. Les candidatures (L3b.6) s'y ajoutent.
 
 Paiement reçu sur une commande expirée (C17) : honoré si le stock est encore disponible, sinon remboursé. Un second
 paiement réussi sur une commande déjà payée est remboursé.
@@ -18,6 +18,7 @@ from apps.core.audit import audit
 from apps.learning.models import Enrollment
 from apps.shop.models import CartItem, Kit, StockReservation
 
+from .invoices import issue_invoice
 from .kit_codes import generate_codes
 from .models import Order, Payment, Refund
 from .providers import PaymentProviderError, RefundOutcome, get_provider
@@ -29,9 +30,9 @@ log = logging.getLogger(__name__)
 def settle(order: Order, payment: Payment) -> None:
     """Paiement réussi et vérifié : honore la commande, ou rembourse si elle ne peut plus l'être."""
     if order.status == Order.Status.PENDING:
-        fulfill(order)
+        fulfill(order, payment)
     elif order.status == Order.Status.CANCELLED and reacquire_stock(order):
-        fulfill(order)
+        fulfill(order, payment)
         audit("payment.late_honored", target=order, data={"payment": payment.pk})
     elif order.status == Order.Status.CANCELLED:
         refund(payment, "Commande expirée et kit plus disponible (C17).")
@@ -48,11 +49,12 @@ def settle(order: Order, payment: Payment) -> None:
         refund(payment, "Paiement reçu sur une commande déjà réglée.")
 
 
-def fulfill(order: Order) -> None:
+def fulfill(order: Order, payment: Payment) -> None:
     now = timezone.now()
     order.status = Order.Status.PAID
     order.paid_at = now
     order.save(update_fields=["status", "paid_at", "updated_at"])
+    issue_invoice(order, payment)
     StockReservation.objects.filter(
         order_item__order=order, confirmed_at__isnull=True, released_at__isnull=True
     ).update(confirmed_at=now)

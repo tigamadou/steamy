@@ -17,7 +17,7 @@ from libs.errors import message_for
 from libs.phone import mask_phone
 
 from . import pricing
-from .models import KitCode, Order, OrderItem, Payment, PaymentRequest
+from .models import Invoice, KitCode, Order, OrderItem, Payment, PaymentRequest
 from .requests import next_resend_at
 
 #: Types de commande créables directement (l'événement passe par la candidature)
@@ -238,15 +238,34 @@ class KitCodeSerializer(serializers.ModelSerializer):
         return kit_code.redeemed_at is not None
 
 
+class InvoiceSummarySerializer(serializers.Serializer):
+    number = serializers.CharField()
+    pdf_status = serializers.ChoiceField(choices=Invoice.PdfStatus.choices)
+
+
 class OrderSerializer(BeneficiaryOrderSerializer):
-    """Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison et les Kit Codes (C10)."""
+    """
+    Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison, les Kit Codes (C10) et la facture
+    (C12, `GET …/invoice/` quand `pdfStatus` vaut `ready`).
+    """
 
     delivery_address = OrderDeliveryAddressSerializer(read_only=True, allow_null=True)
     kit_codes = serializers.SerializerMethodField()
+    invoice = serializers.SerializerMethodField()
 
     class Meta(BeneficiaryOrderSerializer.Meta):
-        fields = (*BeneficiaryOrderSerializer.Meta.fields, "delivery_address", "kit_codes")
+        fields = (
+            *BeneficiaryOrderSerializer.Meta.fields,
+            "delivery_address",
+            "kit_codes",
+            "invoice",
+        )
         read_only_fields = fields
+
+    @extend_schema_field(InvoiceSummarySerializer(allow_null=True))
+    def get_invoice(self, order):
+        invoice = Invoice.objects.filter(order=order).first()
+        return {"number": invoice.number, "pdf_status": invoice.pdf_status} if invoice else None
 
     @extend_schema_field(KitCodeSerializer(many=True))
     def get_kit_codes(self, order):
