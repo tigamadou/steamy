@@ -30,6 +30,8 @@ test.describe("navigation publique au clavier (bureau)", () => {
 
   test("lien d'évitement, onglets, mega-menu « Ressources » à ↓, flèches et Échap", async ({ page }) => {
     await page.goto("/");
+    // Après l'hydratation, le premier Tab part du haut du document
+    await page.waitForLoadState("networkidle");
     await page.keyboard.press("Tab");
     const skip = page.getByRole("link", { name: "Aller au contenu" });
     await expect(skip).toBeFocused();
