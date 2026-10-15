@@ -1,5 +1,6 @@
 import { createApiClient, CSRF_COOKIE, csrfMiddleware, SESSION_COOKIE } from "@steamy/api-client";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 /**
  * Client de l'API Django, côté serveur uniquement (Server Components, Server Functions).
@@ -10,8 +11,11 @@ import { cookies } from "next/headers";
  *   connecté. `cookies()` rend aussi le rendu dynamique (évalué à chaque requête).
  * - Les cookies que l'API renverrait (Set-Cookie) ne remontent PAS au navigateur :
  *   connexion et déconnexion passent par le client navigateur (`getBrowserApi`).
+ * - `connection()` d'abord : l'appel est toujours fait à la requête, jamais au prérendu (cacheComponents refuse
+ *   sinon les valeurs instables du client, comme son `Math.random()`).
  */
 export async function getServerApi() {
+  await connection();
   const cookieStore = await cookies();
   const baseUrl = process.env.API_URL;
   if (!baseUrl) {
