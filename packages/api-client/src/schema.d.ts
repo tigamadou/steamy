@@ -1635,7 +1635,7 @@ export interface components {
         ConsentRequest: {
             readonly id: number;
             /** Origine */
-            readonly origin: components["schemas"]["RoleEnum"];
+            readonly origin: components["schemas"]["OriginEnum"];
             readonly status: string;
             readonly firstName: string;
             readonly lastName: string;
@@ -2295,6 +2295,14 @@ export interface components {
             /** Format: decimal */
             readonly total: string;
         };
+        /**
+         * @description * `learner` - Apprenant
+         *     * `parent` - Parent
+         *     * `teacher` - Enseignant
+         *     * `support` - Support
+         * @enum {string}
+         */
+        OriginEnum: "learner" | "parent" | "teacher" | "support";
         /** @description Défi OTP en cours : sert au compte à rebours de WP02 / WL03. */
         OtpChallenge: {
             /** Format: uuid */
