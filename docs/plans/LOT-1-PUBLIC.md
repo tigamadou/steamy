@@ -72,7 +72,7 @@ Statut : 🟡 en cours · Prochaine tâche : 1.3 (WL22), puis 1.4, 1.6 et l'enca
   - [ ] Recette : validation par le porteur produit (C18) ; aucune donnée de mineur (D15)
 
 ### Écrans — 🟡 en cours
-- [x] **1.1** Accueil, catalogue, catégories (requiert API-L1) · `feature/lot1-accueil-catalogue` · PR #PR11
+- [x] **1.1** Accueil, catalogue, catégories (requiert API-L1) · `feature/lot1-accueil-catalogue` · PR #47
   - [x] `WL01` `/` (sections, ancre `#comment-ca-marche`, 3 `CourseCard` mis en avant, complétés par les plus populaires si moins de 3 sont mis en avant, CTA, chiffres depuis `content/site.ts`)
   - [x] `WL06` `/parcours` (filtres `Tag`, état dans l'URL, pagination, états skeleton, vide, erreur)
   - [x] `WL16` `/categories` (`CategoryCard`)
