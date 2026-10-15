@@ -355,7 +355,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`FEDAPAY_MODES`, Celtiis supposé `sbin`) et devises (`FEDAPAY_CURRENCY_IDS`) en réglages, **à confirmer
   > dans le bac à sable** (inconnues 1, 5 et 6 de l'ADR 0003). Statuts FedaPay : `approved`/`transferred` →
   > `succeeded`, `declined`/`canceled`/`expired`/`refunded` → `failed`.
-- [x] **API-L3b.1** Commandes · `feature/api-l3b-1-commandes`
+- [x] **API-L3b.1** Commandes · `feature/api-l3b-1-commandes` · PR #76
   - [x] `Order`, `OrderItem` refondus (§3.3) ; service `pricing` unique
   - [x] `POST payments/orders/` (identifiants et quantités seulement)
   - [x] `GET payments/orders/`, `…/{reference}/` (jeton invité haché, `X-Guest-Token`) ; ~~`kitCodes` visibles
