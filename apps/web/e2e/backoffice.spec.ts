@@ -4,7 +4,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { loginAs } from "./support/session";
 import { API_URL, STAFF, staffLogin } from "./support/staff";
 
-// LOT-6 · 6.6 socle Next.js du back-office : garde (personnel vérifié par TOTP), renvoi vers WAD15, shell,
+// LOT-6 · 6.6 socle Next.js du back-office et 6.7 WAD01 (vue d'ensemble) : garde (personnel vérifié par TOTP), renvoi vers WAD15, shell,
 // contrôle du groupe par page. Comptes Support et Super-admin : ceux que admin-connexion.spec.ts connecte avec succès
 // (Contenu et Finance y reçoivent des codes faux, qui déclenchent la limitation de django-otp). Un code ne sert qu'une
 // fois par compte : `staffLogin` attend alors la fenêtre TOTP suivante.
@@ -38,7 +38,7 @@ test("6.6 renvoie un parent connecté vers WAD15", async ({ page }) => {
   await expectAdminLogin(page, "/backoffice");
 });
 
-test("6.6 ouvre le shell au personnel vérifié et refuse l'Impact Tracker au groupe Support", async ({ page }) => {
+test("6.6 et 6.7 ouvrent WAD01 au groupe Support, « À traiter » vers l'admin Django, Impact Tracker refusé", async ({ page }) => {
   test.slow(); // attente possible de la fenêtre TOTP suivante (bureau et mobile partagent le compte)
   await page.goto("/backoffice");
   await expectAdminLogin(page, "/backoffice");
@@ -60,8 +60,22 @@ test("6.6 ouvre le shell au personnel vérifié et refuse l'Impact Tracker au gr
     page.getByRole("complementary", { name: "Back-office" }).getByText("Support", { exact: true }),
   ).toBeVisible();
 
+  // 6.7 · WAD01 : chiffres du serveur, échéance du rapport, « À traiter » limité aux groupes de l'utilisateur
+  await expect(page.getByText(/^Administration · /)).toBeVisible();
+  await expect(page.getByRole("region", { name: "Utilisateurs" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Rapport d'impact · prochaine échéance" })).toBeVisible();
+  await expect(page.getByRole("progressbar", { name: "Complétude du rapport" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Voir l'Impact Tracker" })).toHaveCount(0);
+
   const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(violations).toEqual([]);
+
+  // « Consentements en attente » ouvre la liste Django filtrée, avec la même session vérifiée (D70 : suivi seul)
+  const todo = page.getByRole("region", { name: "À traiter" });
+  await todo.getByRole("link", { name: /Consentements en attente/ }).click();
+  await expect(page).toHaveURL(`${API_URL}/admin/accounts/consentrequest/?status__exact=pending`);
+  await expect(page.getByRole("heading", { level: 1, name: /demande de consentement/i })).toBeVisible();
+  await page.goto("/backoffice");
 
   // Chaque page revérifie le groupe : l'URL directe ne suffit pas
   await page.goto("/backoffice/impact");
