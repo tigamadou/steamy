@@ -23,7 +23,8 @@ class UserChangeEmailTests(APITestCase):
         response = self.client.post(
             self.url, {"password": "onepass", "new_email": self.new_email}, format="json"
         )
-        self.assertEqual(response.status_code, 401)
+        # Session seule (S12) : un anonyme reçoit 403, sans en-tête WWW-Authenticate
+        self.assertEqual(response.status_code, 403)
 
     def test_user_change_email_incorrect_password(self):
         self.client.force_authenticate(user=self.user)

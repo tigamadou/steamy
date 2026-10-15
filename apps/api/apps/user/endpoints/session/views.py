@@ -20,8 +20,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.user.endpoints.public.login.serializers import CustomAuthTokenSerializer
-
+from .login_serializer import CustomAuthTokenSerializer
 from .serializers import CsrfTokenSerializer, SessionLoginResponseSerializer
 
 
