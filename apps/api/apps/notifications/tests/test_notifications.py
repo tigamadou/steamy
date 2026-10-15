@@ -221,3 +221,23 @@ def test_account_category_cannot_be_disabled(django_capture_on_commit_callbacks)
 def test_notify_refuses_a_category_outside_the_role():
     with pytest.raises(ValueError):
         notify(LearnerFactory(), "reviews", "attempt_to_review", "x")
+
+
+def test_email_delivery_without_address_or_notification_sends_nothing():
+    from apps.notifications.services import deliver_email
+    from apps.notifications.tasks import send_notification_email
+
+    assert deliver_email(NotificationFactory()) is False  # apprenant sans email de contact
+    assert send_notification_email(123456) is False  # notification supprimée entre-temps
+    assert mail.outbox == []
+
+
+def test_labels():
+    notification = NotificationFactory(user=LearnerFactory(username="lea"), type="badge_awarded")
+    assert str(notification) == "badge_awarded → lea"
+    preference = NotificationPreference(
+        user=notification.user, category="events", channel="email", enabled=False
+    )
+    assert str(preference) == "lea · events · email : non"
+    preference.enabled = True
+    assert str(preference).endswith(": oui")

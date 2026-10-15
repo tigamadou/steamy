@@ -86,3 +86,25 @@ def test_unknown_identifier_still_hashes_a_password(mocker):
     spy = mocker.patch("apps.accounts.backends.User.set_password")
     authenticate(identifier="personne", password="x")
     spy.assert_called_once_with("x")
+
+
+def test_empty_identifier_is_refused():
+    assert authenticate(identifier="   ", password=PASSWORD) is None
+
+
+def test_staff_backend_refuses_a_wrong_password_and_missing_credentials():
+    from apps.accounts.backends import StaffBackend
+
+    StaffFactory(email="admin@steamy.test")
+    assert authenticate(username="admin@steamy.test", password="mauvais") is None
+    assert StaffBackend().authenticate(None, username=None, password=PASSWORD) is None
+
+
+def test_each_backend_restores_only_its_own_users():
+    from apps.accounts.backends import IdentifierBackend, StaffBackend
+
+    staff, learner = StaffFactory(), LearnerFactory()
+    assert StaffBackend().get_user(staff.pk) == staff
+    assert StaffBackend().get_user(learner.pk) is None
+    assert IdentifierBackend().get_user(learner.pk) == learner
+    assert IdentifierBackend().get_user(staff.pk) is None
