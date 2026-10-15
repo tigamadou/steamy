@@ -778,6 +778,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/learning/dashboard/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Accueil de l'apprenant (WD01 ; WD02 si rien à reprendre). */
+        get: operations["learning_dashboard_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/learning/enrollments/": {
         parameters: {
             query?: never;
@@ -864,6 +881,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/learning/progress/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Ma progression (WD21) : temps, points, badges, histogramme des 7 jours, maîtrise par catégorie. */
+        get: operations["learning_progress_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/learning/projects/{id}/": {
         parameters: {
             query?: never;
@@ -909,6 +943,23 @@ export interface paths {
         put?: never;
         /** @description Envoi groupé des réponses (WJ04, WJ10) : correction serveur, statut D31, délai D32. */
         post: operations["learning_quizzes_attempts_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/learning/recommendations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Parcours recommandés (WD21, WJ07) : publiés, non suivis, liés aux objectifs d'abord. */
+        get: operations["learning_recommendations_list"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1684,11 +1735,29 @@ export interface components {
         CsrfToken: {
             csrfToken: string;
         };
+        /** @description Accueil (WD01) ; `resume` absent → WD02. `points` et `rank` à null tant que le barème n'est pas fixé (C8). */
+        Dashboard: {
+            firstName: string;
+            points: number | null;
+            rank: components["schemas"]["Rank"] | null;
+            streakDays: number;
+            secondsToday: number;
+            /** @description Parcours à reprendre */
+            resume: components["schemas"]["Enrollment"] | null;
+            counters: components["schemas"]["LearnerCounters"];
+            /** @description 3 parcours recommandés */
+            recommendations: components["schemas"]["Recommendation"][];
+        };
         DashboardSummary: {
             totalUsers: number;
             eventsLast7Days: number;
             /** Format: double */
             revenueLast30Days: number;
+        };
+        DaySeconds: {
+            /** Format: date */
+            date: string;
+            seconds: number;
         };
         /**
          * @description * `beginner` - Débutant
@@ -1914,6 +1983,12 @@ export interface components {
             parentPhone: string;
             relationship: string;
         };
+        LearnerCounters: {
+            activeEnrollments: number;
+            completedEnrollments: number;
+            certificates: number;
+            badges: number;
+        };
         LearnerPasswordRequest: {
             password: string;
         };
@@ -2017,6 +2092,12 @@ export interface components {
             user: components["schemas"]["Me"];
             csrfToken: string;
         };
+        Mastery: {
+            category: components["schemas"]["CategorySummary"];
+            missionsDone: number;
+            missionCount: number;
+            pct: number;
+        };
         /** @description Identité et rôle du compte connecté : sert aux shells, à la redirection après W16 et aux gardes (§7.3). */
         Me: {
             readonly id: number;
@@ -2049,6 +2130,8 @@ export interface components {
             /** @description Session du personnel validée par TOTP (D72) ; toujours faux pour un persona. */
             readonly otpVerified: boolean;
             readonly staffGroups: string[];
+            /** @description Compteurs du shell de l'apprenant (parcours, certificats, badges), null pour les autres rôles */
+            readonly counters: components["schemas"]["LearnerCounters"] | null;
         };
         /**
          * @description * `pending` - En attente de consentement
@@ -2506,6 +2589,19 @@ export interface components {
         };
         /** @enum {string} */
         ProfileStepEnum: "learner-info" | "learner-school" | "learner-goals" | "learner-avatar" | "parent-location" | "parent-about" | "parent-children";
+        /** @description Ma progression (WD21). */
+        Progress: {
+            /** @description Du lundi à aujourd'hui */
+            weekSeconds: number;
+            /** @description 7 derniers jours, du plus ancien à aujourd'hui */
+            lastDays: components["schemas"]["DaySeconds"][];
+            points: number | null;
+            rank: components["schemas"]["Rank"] | null;
+            streakDays: number;
+            counters: components["schemas"]["LearnerCounters"];
+            /** @description Par catégorie des parcours suivis */
+            mastery: components["schemas"]["Mastery"][];
+        };
         /** @description Projet (WJ01). */
         ProjectDetail: {
             id: number;
@@ -2623,6 +2719,13 @@ export interface components {
             /** @description Champ piège : toujours vide */
             website?: string;
         };
+        Rank: {
+            label: string;
+            minPoints: number;
+            nextLabel: string | null;
+            /** @description Points du palier suivant */
+            nextAt: number | null;
+        };
         ReadAll: {
             /** @description Nombre de notifications marquées comme lues */
             updated: number;
@@ -2630,6 +2733,28 @@ export interface components {
         /** @description Réponse neutre, identique qu'il y ait eu enregistrement, doublon ou robot. */
         Received: {
             ok: boolean;
+        };
+        Recommendation: {
+            slug: string;
+            /** Titre */
+            title: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** Gratuit */
+            isFree?: boolean;
+            /** Prix (FCFA) */
+            price?: number;
+            /** @description Visuel des cartes */
+            emoji?: string;
+            readonly requiredKit: components["schemas"]["RequiredKit"] | null;
+            readonly coverImage: string | null;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** Mis en avant */
+            featured?: boolean;
+            /** @description Catégorie liée aux objectifs de l'apprenant */
+            readonly matchesGoals: boolean;
         };
         /** @description Projet ou niveau cité (fil d'Ariane, position). */
         Ref: {
@@ -5159,6 +5284,49 @@ export interface operations {
             };
         };
     };
+    learning_dashboard_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     learning_enrollments_list: {
         parameters: {
             query?: {
@@ -5495,6 +5663,49 @@ export interface operations {
             };
         };
     };
+    learning_progress_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Progress"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     learning_projects_retrieve: {
         parameters: {
             query?: never;
@@ -5649,6 +5860,51 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_recommendations_list: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Recommendation"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -30,6 +30,7 @@ from .models import (
 class CategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
     list_display = ("label", "slug", "icon", "color", "course_count")
     prepopulated_fields = {"slug": ("label",)}
+    filter_horizontal = ("goals",)
 
     def get_queryset(self, request):
         return (

@@ -33,4 +33,9 @@ urlpatterns = [
         views.CertificateDownloadView.as_view(),
         name="learning-certificate-download",
     ),
+    path("dashboard/", views.DashboardView.as_view(), name="learning-dashboard"),
+    path("progress/", views.ProgressView.as_view(), name="learning-progress"),
+    path(
+        "recommendations/", views.RecommendationListView.as_view(), name="learning-recommendations"
+    ),
 ]

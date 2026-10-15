@@ -1958,6 +1958,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/learning/dashboard/:
+    get:
+      operationId: learning_dashboard_retrieve
+      description: Accueil de l'apprenant (WD01 ; WD02 si rien à reprendre).
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/enrollments/:
     get:
       operationId: learning_enrollments_list
@@ -2256,6 +2289,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/learning/progress/:
+    get:
+      operationId: learning_progress_retrieve
+      description: 'Ma progression (WD21) : temps, points, badges, histogramme des
+        7 jours, maîtrise par catégorie.'
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Progress'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/projects/{id}/:
     get:
       operationId: learning_projects_retrieve
@@ -2400,6 +2467,50 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/recommendations/:
+    get:
+      operationId: learning_recommendations_list
+      description: 'Parcours recommandés (WD21, WJ07) : publiés, non suivis, liés
+        aux objectifs d''abord.'
+      parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          maximum: 12
+          minimum: 1
+          default: 6
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recommendation'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
           content:
             application/json:
               schema:
@@ -4153,6 +4264,45 @@ components:
           type: string
       required:
       - csrfToken
+    Dashboard:
+      type: object
+      description: Accueil (WD01) ; `resume` absent → WD02. `points` et `rank` à null
+        tant que le barème n'est pas fixé (C8).
+      properties:
+        firstName:
+          type: string
+        points:
+          type: integer
+          nullable: true
+        rank:
+          allOf:
+          - $ref: '#/components/schemas/Rank'
+          nullable: true
+        streakDays:
+          type: integer
+        secondsToday:
+          type: integer
+        resume:
+          allOf:
+          - $ref: '#/components/schemas/Enrollment'
+          nullable: true
+          description: Parcours à reprendre
+        counters:
+          $ref: '#/components/schemas/LearnerCounters'
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommendation'
+          description: 3 parcours recommandés
+      required:
+      - counters
+      - firstName
+      - points
+      - rank
+      - recommendations
+      - resume
+      - secondsToday
+      - streakDays
     DashboardSummary:
       type: object
       properties:
@@ -4167,6 +4317,17 @@ components:
       - eventsLast7Days
       - revenueLast30Days
       - totalUsers
+    DaySeconds:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        seconds:
+          type: integer
+      required:
+      - date
+      - seconds
     DifficultyEnum:
       enum:
       - beginner
@@ -4669,6 +4830,22 @@ components:
       required:
       - parentPhone
       - relationship
+    LearnerCounters:
+      type: object
+      properties:
+        activeEnrollments:
+          type: integer
+        completedEnrollments:
+          type: integer
+        certificates:
+          type: integer
+        badges:
+          type: integer
+      required:
+      - activeEnrollments
+      - badges
+      - certificates
+      - completedEnrollments
     LearnerPasswordRequest:
       type: object
       properties:
@@ -4959,6 +5136,22 @@ components:
       required:
       - csrfToken
       - user
+    Mastery:
+      type: object
+      properties:
+        category:
+          $ref: '#/components/schemas/CategorySummary'
+        missionsDone:
+          type: integer
+        missionCount:
+          type: integer
+        pct:
+          type: integer
+      required:
+      - category
+      - missionCount
+      - missionsDone
+      - pct
     Me:
       type: object
       description: 'Identité et rôle du compte connecté : sert aux shells, à la redirection
@@ -5041,9 +5234,17 @@ components:
           items:
             type: string
           readOnly: true
+        counters:
+          allOf:
+          - $ref: '#/components/schemas/LearnerCounters'
+          nullable: true
+          readOnly: true
+          description: Compteurs du shell de l'apprenant (parcours, certificats, badges),
+            null pour les autres rôles
       required:
       - avatar
       - city
+      - counters
       - email
       - firstName
       - id
@@ -6031,6 +6232,42 @@ components:
       - parent-about
       - parent-children
       type: string
+    Progress:
+      type: object
+      description: Ma progression (WD21).
+      properties:
+        weekSeconds:
+          type: integer
+          description: Du lundi à aujourd'hui
+        lastDays:
+          type: array
+          items:
+            $ref: '#/components/schemas/DaySeconds'
+          description: 7 derniers jours, du plus ancien à aujourd'hui
+        points:
+          type: integer
+          nullable: true
+        rank:
+          allOf:
+          - $ref: '#/components/schemas/Rank'
+          nullable: true
+        streakDays:
+          type: integer
+        counters:
+          $ref: '#/components/schemas/LearnerCounters'
+        mastery:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mastery'
+          description: Par catégorie des parcours suivis
+      required:
+      - counters
+      - lastDays
+      - mastery
+      - points
+      - rank
+      - streakDays
+      - weekSeconds
     ProjectDetail:
       type: object
       description: Projet (WJ01).
@@ -6302,6 +6539,25 @@ components:
       - email
       - phone
       - schoolName
+    Rank:
+      type: object
+      properties:
+        label:
+          type: string
+        minPoints:
+          type: integer
+        nextLabel:
+          type: string
+          nullable: true
+        nextAt:
+          type: integer
+          nullable: true
+          description: Points du palier suivant
+      required:
+      - label
+      - minPoints
+      - nextAt
+      - nextLabel
     ReadAll:
       type: object
       properties:
@@ -6319,6 +6575,66 @@ components:
           type: boolean
       required:
       - ok
+    Recommendation:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        isFree:
+          type: boolean
+          title: Gratuit
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        requiredKit:
+          allOf:
+          - $ref: '#/components/schemas/RequiredKit'
+          readOnly: true
+          nullable: true
+        coverImage:
+          type: string
+          nullable: true
+          readOnly: true
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        featured:
+          type: boolean
+          title: Mis en avant
+        matchesGoals:
+          type: boolean
+          readOnly: true
+          description: Catégorie liée aux objectifs de l'apprenant
+      required:
+      - category
+      - coverImage
+      - difficulty
+      - matchesGoals
+      - requiredKit
+      - slug
+      - title
     Ref:
       type: object
       description: Projet ou niveau cité (fil d'Ariane, position).

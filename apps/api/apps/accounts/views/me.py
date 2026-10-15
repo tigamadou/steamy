@@ -15,6 +15,13 @@ from apps.referentials.serializers import AvatarSerializer, SchoolGradeSerialize
 from libs.errors import message_for
 
 
+class LearnerCountersSerializer(serializers.Serializer):
+    active_enrollments = serializers.IntegerField()
+    completed_enrollments = serializers.IntegerField()
+    certificates = serializers.IntegerField()
+    badges = serializers.IntegerField()
+
+
 class MeSerializer(serializers.ModelSerializer):
     """Identité et rôle du compte connecté : sert aux shells, à la redirection après W16 et aux gardes (§7.3)."""
 
@@ -27,6 +34,9 @@ class MeSerializer(serializers.ModelSerializer):
     is_staff = serializers.BooleanField(read_only=True)
     otp_verified = serializers.SerializerMethodField()
     staff_groups = serializers.SerializerMethodField()
+    counters = serializers.SerializerMethodField(
+        help_text="Compteurs du shell de l'apprenant (parcours, certificats, badges), null pour les autres rôles"
+    )
 
     class Meta:
         model = User
@@ -46,6 +56,7 @@ class MeSerializer(serializers.ModelSerializer):
             "is_staff",
             "otp_verified",
             "staff_groups",
+            "counters",
         )
         read_only_fields = fields
 
@@ -78,6 +89,14 @@ class MeSerializer(serializers.ModelSerializer):
     def get_otp_verified(self, user) -> bool:
         """Session du personnel validée par TOTP (D72) ; toujours faux pour un persona."""
         return bool(user.is_staff and getattr(user, "is_verified", lambda: False)())
+
+    @extend_schema_field(LearnerCountersSerializer(allow_null=True))
+    def get_counters(self, user):
+        if not user.is_learner:
+            return None
+        from apps.learning.dashboard import counters
+
+        return LearnerCountersSerializer(counters(user)).data
 
     def get_staff_groups(self, user) -> list[str]:
         if not user.is_staff:

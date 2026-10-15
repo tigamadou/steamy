@@ -242,3 +242,17 @@ def test_lea_finished_course_is_certified_once_with_a_ticket():
     assert EventTicket.objects.filter(enrollment=finished).count() == 1
     assert PointsEntry.objects.filter(learner=finished.learner, source="course").count() == 1
     assert Certificate.objects.count() == 1
+
+
+def test_lea_dashboard_resumes_a_course_and_recommends_from_her_goals():
+    from rest_framework.test import APIClient
+
+    call_command("seed_demo")
+    client = APIClient()
+    client.force_authenticate(User.objects.get(username="lea.adjovi"))
+    body = client.get("/api/learning/dashboard/").json()
+    assert body["resume"]["course"]["slug"] == "decouverte-robotique"
+    assert body["points"] > 0 and body["rank"]["label"] and body["streakDays"] == 5
+    assert body["counters"]["certificates"] == 1
+    recommended = client.get("/api/learning/recommendations/").json()
+    assert recommended and recommended[0]["matchesGoals"] is True

@@ -24,9 +24,18 @@ from libs.pagination import PagePagination
 from libs.permissions import IsLearner
 from libs.schema import ErrorSerializer
 
+from . import dashboard
 from . import serializers as s
 from .certification import d33_status
-from .gamification import badge_of, record_activity, seconds_on, streak_days
+from .gamification import (
+    badge_of,
+    points_enabled,
+    points_of,
+    rank_for,
+    record_activity,
+    seconds_on,
+    streak_days,
+)
 from .models import Certificate, Enrollment, LearnerBadge, QuizAttempt
 from .progression import Container, Progression, Step, load_course, quiz_of
 from .services import (
@@ -723,3 +732,64 @@ class CertificateDownloadView(LearnerView):
             filename=filename,
             content_type="application/pdf",
         )
+
+
+# --- Tableau de bord, progression, recommandations (WD01, WD02, WD21) -----------------------------
+
+
+def points_and_rank(learner) -> dict:
+    """Points et rang, à `null` tant que le barème ou les paliers ne sont pas fixés (C8, D34)."""
+    points = points_of(learner) if points_enabled() else None
+    return {"points": points, "rank": rank_for(points) if points is not None else None}
+
+
+class DashboardView(LearnerView):
+    """Accueil de l'apprenant (WD01 ; WD02 si rien à reprendre)."""
+
+    @extend_schema(responses=s.DashboardSerializer)
+    def get(self, request):
+        learner = request.user
+        enrollment = dashboard.resume_enrollment(learner)
+        payload = {
+            "first_name": learner.first_name,
+            **points_and_rank(learner),
+            "streak_days": streak_days(learner),
+            "seconds_today": seconds_on(learner, timezone.localdate()),
+            "resume": enrollment_payload(enrollment, Progression(enrollment))
+            if enrollment
+            else None,
+            "counters": dashboard.counters(learner),
+            "recommendations": dashboard.recommendations(learner, 3),
+        }
+        return Response(s.DashboardSerializer(payload).data)
+
+
+class ProgressView(LearnerView):
+    """Ma progression (WD21) : temps, points, badges, histogramme des 7 jours, maîtrise par catégorie."""
+
+    @extend_schema(responses=s.ProgressSerializer)
+    def get(self, request):
+        learner = request.user
+        payload = {
+            "week_seconds": dashboard.week_seconds(learner),
+            "last_days": dashboard.last_days(learner),
+            **points_and_rank(learner),
+            "streak_days": streak_days(learner),
+            "counters": dashboard.counters(learner),
+            "mastery": dashboard.mastery_by_category(learner),
+        }
+        return Response(s.ProgressSerializer(payload).data)
+
+
+class RecommendationListView(LearnerView):
+    """Parcours recommandés (WD21, WJ07) : publiés, non suivis, liés aux objectifs d'abord."""
+
+    @extend_schema(
+        parameters=[s.RecommendationQuerySerializer],
+        responses=s.RecommendationSerializer(many=True),
+    )
+    def get(self, request):
+        params = s.RecommendationQuerySerializer(data=request.query_params)
+        params.is_valid(raise_exception=True)
+        courses = dashboard.recommendations(request.user, params.validated_data["limit"])
+        return Response(s.RecommendationSerializer(courses, many=True).data)
