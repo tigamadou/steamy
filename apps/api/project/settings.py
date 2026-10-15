@@ -320,6 +320,8 @@ SPECTACULAR_SETTINGS = {
         "ErrorCodeEnum": "libs.errors.ERROR_CODES",
         "RoleEnum": "apps.accounts.models.User.Role",
         "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
+        "AttemptStatusEnum": "apps.learning.models.QuizAttempt.Status",
+        "QuizKindEnum": "apps.catalog.models.Quiz.Kind",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }

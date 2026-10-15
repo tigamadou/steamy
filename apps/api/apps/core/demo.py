@@ -227,6 +227,8 @@ CATEGORIES = [
 
 #: Parcours court du parcours Playwright P1 (lot 3) : Léa y est inscrite sans progression, remise à zéro à chaque seed.
 SHORT_COURSE = "premiers-pas-zeti"
+#: Délai entre deux essais d'une sommative ratée dans la stack e2e (au lieu de 10 min).
+E2E_SUMMATIVE_COOLDOWN = 5
 #: Vidéo Vimeo de démonstration (publique, ADR 0004 point V4 : jamais une vidéo de production).
 DEMO_VIMEO_ID = "76979871"
 
@@ -431,6 +433,40 @@ def seed_catalog() -> None:
                             ],
                         },
                     )
+                seed_quiz(catalog.Quiz.Kind.FORMATIVE, level=level)
+            seed_quiz(catalog.Quiz.Kind.SUMMATIVE, project=project)
+
+
+def seed_quiz(kind: str, level=None, project=None) -> None:
+    """
+    Quiz de deux questions à deux réponses (la première est la bonne) : formative de chaque niveau, sommative de
+    chaque projet (S2). Chaque question renvoie vers une mission à revoir (D32).
+    """
+    target = level or project
+    quiz, _ = catalog.Quiz.objects.update_or_create(
+        level=level, project=project, defaults={"kind": kind}
+    )
+    missions = list(
+        catalog.Mission.objects.filter(
+            **({"level": level} if level else {"level__project": project})
+        ).order_by("level__order", "order")
+    )
+    for order, mission in enumerate([missions[0], missions[-1]]):
+        question, _ = catalog.Question.objects.update_or_create(
+            quiz=quiz,
+            order=order,
+            defaults={
+                "text": f"{target.title} : qu'as-tu retenu de « {mission.title} » ?",
+                "concept": mission.title,
+                "remediation_mission": mission,
+            },
+        )
+        for c_order, (text, correct) in enumerate(
+            [("L'idée vue dans la mission", True), ("Une idée qui n'y figure pas", False)]
+        ):
+            catalog.Choice.objects.update_or_create(
+                question=question, order=c_order, defaults={"text": text, "is_correct": correct}
+            )
 
 
 #: Événements : slug, titre, emoji, couleur, décalage en jours depuis aujourd'hui, ville, lieu, public, prix, places,
@@ -593,8 +629,9 @@ def seed_backoffice(accounts: dict[str, User]) -> None:
     )
 
 
-#: Inscriptions de Léa : parcours, nombre de missions faites (None : toutes). Le parcours court de P1 repart de
-#: zéro à chaque seed, pour rejouer le parcours Playwright.
+#: Inscriptions de Léa : parcours, nombre de missions faites (None : toutes). Les quiz suivant des missions faites
+#: sont réussis ; « Découverte de la robotique » montre en plus une tentative `ko` puis `warn` avant la réussite
+#: (WD07). Le parcours court de P1 repart de zéro à chaque seed, pour rejouer le parcours Playwright.
 LEA_ENROLLMENTS = [
     ("decouverte-robotique", 3),  # en cours : niveau 1.1 fait, niveau 1.2 commencé
     ("initiation-scratch", None),  # terminé
@@ -623,9 +660,58 @@ def seed_learning(accounts: dict[str, User]) -> None:
         ).delete()
         for mission in done_missions:
             MissionProgress.objects.get_or_create(enrollment=enrollment, mission=mission)
+        enrollment.attempts.all().delete()
+        progression = Progression(enrollment)
+        for step in progression.steps:
+            if step.type == "quiz" and _quiz_reached(progression, step):
+                quiz = catalog.Quiz.objects.get(pk=step.id)
+                if slug == "decouverte-robotique":
+                    _attempt(enrollment, quiz, right=0)
+                    _attempt(enrollment, quiz, right=1)
+                _attempt(enrollment, quiz, right=2)
+                progression = Progression(enrollment)
         enrollment.progress_pct = Progression(enrollment).progress_pct
         enrollment.last_activity_at = timezone.now() if done_missions else None
         enrollment.save()
+
+
+def _quiz_reached(progression, step) -> bool:
+    """Quiz dont toutes les étapes précédentes sont faites (ses missions comprises)."""
+    index = progression.steps.index(step)
+    return all(progression.is_done(s) for s in progression.steps[:index])
+
+
+def _attempt(enrollment, quiz, right: int) -> None:
+    from apps.learning.models import QuizAttempt
+    from apps.learning.services import attempt_status
+
+    status = attempt_status(right, 2, quiz.pass_threshold)
+    QuizAttempt.objects.create(
+        learner=enrollment.learner,
+        enrollment=enrollment,
+        quiz=quiz,
+        results=[
+            {"question_id": q.id, "correct": i < right}
+            for i, q in enumerate(quiz.questions.order_by("order"))
+        ],
+        score=right,
+        total=2,
+        percentage=right * 50,
+        threshold=quiz.pass_threshold,
+        status=status,
+        passed=status == QuizAttempt.Status.OK,
+        duration_sec=60,
+        failed_concepts=[q.concept for q in quiz.questions.order_by("order")[right:]],
+    )
+
+
+def seed_e2e() -> None:
+    """Réglages des parcours Playwright (`seed_demo --e2e`) : délai d'une sommative ratée de 5 s (P1, D32)."""
+    from apps.core.models import PlatformSettings
+
+    settings_ = PlatformSettings.load()
+    settings_.summative_retry_cooldown_seconds = E2E_SUMMATIVE_COOLDOWN
+    settings_.save()
 
 
 def seed_all() -> dict[str, User]:

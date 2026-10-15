@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Enrollment, MissionProgress
+from .models import Enrollment, MissionProgress, QuizAttempt
 
 
 class MissionProgressInline(admin.TabularInline):
@@ -31,6 +31,22 @@ class EnrollmentAdmin(admin.ModelAdmin):
         "created_at",
     )
     inlines = [MissionProgressInline]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(QuizAttempt)
+class QuizAttemptAdmin(admin.ModelAdmin):
+    """Tentatives en lecture seule : corrigées par le serveur (§4.4)."""
+
+    list_display = ("learner", "quiz", "percentage", "status", "created_at")
+    list_filter = ("status", "quiz__kind")
+    search_fields = ("learner__username",)
+    readonly_fields = [field.name for field in QuizAttempt._meta.fields]
 
     def has_add_permission(self, request):
         return False

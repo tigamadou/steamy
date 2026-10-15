@@ -58,7 +58,7 @@ makemigrations: ## Génère les migrations
 	$(API) python manage.py makemigrations
 
 seed: ## Charge les fixtures et le jeu de démonstration (comptes : apps/api/fixtures/README.md)
-	$(API) sh -c "python manage.py loaddata fixtures/admin.json fixtures/mail.json && python manage.py seed_demo"
+	$(API) sh -c "python manage.py loaddata fixtures/admin.json fixtures/mail.json && python manage.py seed_demo $(SEED_ARGS)"
 
 test-api: ## Lance les tests de l'API
 	$(API) pytest
@@ -96,9 +96,9 @@ coverage-web: ## Tests du front + couverture 100 % exigée sur le code modifié 
 	  "git config --global --add safe.directory /repo && pip install -q --root-user-action=ignore diff-cover==10.6.0 \
 	   && diff-cover apps/web/coverage/cobertura-coverage.xml --compare-branch=origin/development --fail-under=100"
 
-e2e: ## Parcours Playwright sur la stack Docker (web en image prod, worker pour les emails, données rechargées)
+e2e: ## Parcours Playwright sur la stack Docker (web en image prod, worker pour les emails et PDF, données rechargées avec seed_demo --e2e)
 	$(E2E) up -d --build --wait web worker
-	$(MAKE) migrate seed COMPOSE="$(E2E)"
+	$(MAKE) migrate seed COMPOSE="$(E2E)" SEED_ARGS=--e2e
 	@# Tous les parcours partent d'une même IP : plafonds quotidiens d'OTP relevés (D24, testés côté API)
 	$(E2E) run --rm api python manage.py shell -c "from apps.core.models import PlatformSettings as P; \
 	  P.objects.filter(pk=P.load().pk).update(otp_daily_limit_per_phone=50, otp_daily_limit_per_ip=5000)"
