@@ -1,5 +1,6 @@
 import path from "node:path";
 
+import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -21,4 +22,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Contenu éditorial en MDX (D10, src/content/) : importé par les pages, jamais routé directement.
+const withMDX = createMDX();
+
+export default withMDX(nextConfig);

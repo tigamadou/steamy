@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L1.1
+Statut : 🟡 en cours · Prochaine tâche : API-L2.0b
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -160,84 +160,132 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Front compilé contre le nouveau client
   - [x] Plus aucune route hors `/api/<domaine>/…/` (routeurs DRF passés en `SimpleRouter` : ni vue racine ni suffixe `.format`)
 
-### API-L1 · Catalogue public, événements, formulaires, kits — ⬜ à faire
-- [ ] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog`
-  - [ ] Modèles `Category`, `Course`, `Project`, `Level`, `Mission` (`vimeoId`, `blocks` JSON validé)
-  - [ ] Suppression de `courses`
-  - [ ] Admin Django (groupe Contenu, ordre par glisser via `order`)
-- [ ] **API-L1.2** Endpoints catalogue · `feature/api-l1-2-catalogue-api`
-  - [ ] `GET catalog/categories/` (avec `courseCount`)
-  - [ ] `GET catalog/courses/` (filtres `category`, `difficulty`, `price`, `featured`, `q`, `sort`)
-  - [ ] `GET catalog/courses/{slug}/` sans `blocks` ni `vimeoId` de mission (D11), publiés uniquement
-  - [ ] Tests : brouillon invisible (liste et détail 404), détail sans contenu de mission, aucune écriture possible
-- [ ] **API-L1.3** Événements en lecture · `feature/api-l1-3-events`
-  - [ ] App `events` : `SteamyEvent` (§3.4) + admin
-  - [ ] `GET events/?upcoming=`, `GET events/{slug}/` (`seatsLeft` calculé)
-  - [ ] Tests : brouillon invisible, aucune écriture publique
-- [ ] **API-L1.4** Formulaires publics · `feature/api-l1-4-formulaires`
-  - [ ] App `public` : `QuoteRequest` (D13), `Lead` (D14, attestation adulte C12), `ContactMessage` (D17)
-  - [ ] `POST public/*` anonymes : CSRF, throttle dédié, champ piège, erreurs `fields`
-  - [ ] Email à l'équipe par Celery
-  - [ ] Tests : formulaires throttlés
-- [ ] **API-L1.5** Kits en lecture · `feature/api-l1-5-kits`
-  - [ ] App `shop` : `Kit` (§3.3) + admin
-  - [ ] `GET shop/kits/?category=`, `GET shop/kits/{slug}/` (disponibilité booléenne, jamais le stock exact)
-  - [ ] Tests : stock exact absent, aucune écriture publique
-- [ ] **Critères de fin d'API-L1**
-  - [ ] Réponses publiques sans donnée de mineur, indépendantes de la session, sans `rating`
-  - [ ] Seed : 3-4 parcours publiés complets dont un mis en avant, une catégorie vide, 4 événements (gratuit, payant, complet, passé), 3 kits
-  - [ ] `make openapi` committé
+### API-L1 · Catalogue public, événements, formulaires, kits — ✅ terminé
+- [x] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog` · PR #33
+  - [x] Modèles `Category`, `Course`, `Project`, `Level`, `Mission` (`vimeoId`, `blocks` JSON validé)
+  - [x] Suppression de `courses`
+  - [x] Admin Django (groupe Contenu, ordre par glisser via `order`)
+  - [x] `learning` rattaché au catalogue (`Enrollment.course`, `Quiz.course`, `Progress.mission`)
+  - [x] Seed : 6 catégories (dont une vide), 4 parcours publiés complets dont un mis en avant, un brouillon
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : `requiredKit` arrive avec `shop.Kit` en API-L1.5 (le modèle n'existe pas encore) ; le `badge` des
+  > projets et niveaux arrive avec `Badge` en API-L3a. Ajouts à §3.2 : `Course.emoji` (visuel des cartes de la
+  > maquette), `trailerVimeoHash` (ADR 0004, point V2), contrainte « gratuit ⇔ prix nul ». `blocks` : liste de
+  > `{type: text|tip, text}` ou `{type: media, src, alt, caption?}` (`src` en https ou chemin du stockage).
+  > `courses` n'a plus ni modèle ni route : il ne garde que ses migrations (`0002` supprime ses tables), pour ne pas
+  > réécrire `learning.0001` déjà fusionnée ; l'app disparaîtra à la refonte des migrations de `learning`
+  > (API-L3a). Les droits du groupe Contenu viennent de la matrice des groupes du lot 6.1 (`setup_staff_groups`) ;
+  > `Course` déclare la permission `publish_course`. Ordre par glisser-déposer : `django-admin-sortable2`.
+- [x] **API-L1.2** Endpoints catalogue · `feature/api-l1-2-catalogue-api` · PR #37
+  - [x] `GET catalog/categories/` (avec `courseCount`)
+  - [x] `GET catalog/courses/` (filtres `category`, `difficulty`, `price`, `featured`, `q`, `sort`)
+  - [x] `GET catalog/courses/{slug}/` sans `blocks` ni `vimeoId` de mission (D11), publiés uniquement
+  - [x] Tests : brouillon invisible (liste et détail 404), détail sans contenu de mission, aucune écriture possible
+  - [x] Matrice d'accès du domaine (`apps/catalog/tests/test_access_matrix.py`) ; couverture 100 % du code modifié
+  > Décisions : réponses sans session (`authentication_classes = []`, ni `Vary: Cookie` ni cookie posé) et
+  > `Cache-Control: public, max-age=300`. `price` ∈ `free|paid` ; `sort` ∈ `popular` (défaut : nombre
+  > d'inscriptions, puis mis en avant, puis récents) `|recent|price-asc|price-desc|title` ; valeur inconnue → 400
+  > `VALIDATION_ERROR` sur le champ. Paramètres validés par un serializer : `ChoiceFilter` de django-filter 22.1 est
+  > incompatible avec Django 5. Catégories non paginées. Le détail expose la bande-annonce (`trailerVimeoId/Hash`,
+  > ADR 0004) et le plan : projets (objectifs, prérequis, matériel), niveaux (`introSummary`), missions (titre,
+  > durée, icône), `missionCount`.
+- [x] **API-L1.3** Événements en lecture · `feature/api-l1-3-events` · PR #40
+  - [x] App `events` : `SteamyEvent` (§3.4) + admin
+  - [x] `GET events/?upcoming=`, `GET events/{slug}/` (`seatsLeft` calculé)
+  - [x] Tests : brouillon invisible, aucune écriture publique (matrice d'accès)
+  - [x] Seed : 4 événements (gratuit, payant, complet, passé) ; couverture 100 % du code modifié
+  > Décisions : `seatsLeft` = `capacity` − `seatsReserved` (places attribuées hors candidature, saisies dans l'admin) ;
+  > les candidatures acceptées s'y ajouteront en API-L3b.6. Champs dérivés `isFree`, `isPast`, `applicationsOpen`
+  > (places restantes et date limite non passée) pour les CTA de WL23. Ajouts à §3.4 : `online`, `audience`
+  > (« 12 – 15 ans », maquette WL23), `seatsReserved` ; contraintes fin > début, date limite ≤ début, places
+  > attribuées ≤ capacité. `upcoming=true` : non terminés, du plus proche au plus lointain ; `false` : terminés, du
+  > plus récent au plus ancien ; absent : tous, par date. Liste paginée, `Cache-Control: public, max-age=300`.
+- [x] **API-L1.4** Formulaires publics · `feature/api-l1-4-formulaires` · PR #41
+  - [x] App `public` : `QuoteRequest` (D13), `Lead` (D14, attestation adulte C12), `ContactMessage` (D17)
+  - [x] `POST public/*` anonymes : CSRF, throttle dédié, champ piège, erreurs `fields`
+  - [x] Email à l'équipe par Celery
+  - [x] Tests : formulaires throttlés, CSRF exigé, champ piège, erreurs par champ ; couverture 100 % du code modifié
+  > Décisions : réponse neutre `201 {ok: true}` dans tous les cas (enregistré, doublon de newsletter, robot). Champ
+  > piège `website`. Throttle `public-form` à `10/hour` par IP (`THROTTLE_PUBLIC_FORM`). Newsletter : `isAdult` et
+  > `newsletterConsent` obligatoirement vrais (code `REQUIRED`), une ligne par email (mis à jour sans le dire), pas
+  > d'email à l'équipe. Devis et contact : tâche `notify_team` (idempotente par `notifiedAt`) vers `TEAM_EMAIL`.
+  > Contact : `contact` = email ou téléphone (normalisé E.164), message ≥ 20 caractères (`MIN_LENGTH`). Téléphone
+  > du devis normalisé E.164 (`PHONE_INVALID`). `enforce_csrf` ajouté à `libs/authentication.py`.
+- [x] **API-L1.5** Kits en lecture · `feature/api-l1-5-kits` · PR #43
+  - [x] App `shop` : `Kit` (§3.3) + admin
+  - [x] `GET shop/kits/?category=`, `GET shop/kits/{slug}/` (disponibilité booléenne, jamais le stock exact)
+  - [x] Tests : stock exact absent, aucune écriture publique (matrice d'accès)
+  - [x] `Course.requiredKit` (reporté d'API-L1.1) : exposé au catalogue, `POST learning/enrollments/` → 402 `KIT_CODE_REQUIRED`
+  - [x] Seed : 3 kits dont un en rupture, Steamy Bot v1 requis par « Construis ton robot Bluetooth » ; couverture 100 %
+  > Décisions : `available` = stock > 0 ; un kit retiré de la vente (`active=False`) répond 404. Ajouts à §3.3 :
+  > `emoji` (cartes de la maquette) ; `images` = liste d'URL https ou de chemins du stockage. Le détail liste les
+  > parcours compatibles **publiés** (`{slug, title}`). Catalogue : `requiredKit` = `{slug, name}` ou `null`.
+- [x] **Critères de fin d'API-L1**
+  - [x] Réponses publiques sans donnée de mineur, indépendantes de la session, sans `rating`
+  - [x] Seed : 3-4 parcours publiés complets dont un mis en avant, une catégorie vide, 4 événements (gratuit, payant, complet, passé), 3 kits
+  - [x] `make openapi` committé
 
-### API-L2 · Inscriptions, consentement, OTP, connexion — ⬜ à faire
+### API-L2 · Inscriptions, consentement, OTP, connexion — 🟡 en cours
 - [x] **API-L2.0a** Comparaison SMS (S10) · `feature/api-l2-0a-adr-sms` · doc
   - [x] Comparer coût par SMS et par pays, couverture MTN/Moov/Celtiis, délivrabilité, expéditeur « STEAMY », API et webhooks, sandbox, FCFA, support local
   - [x] Écrire l'**ADR-SMS** (critères éliminatoires : pas d'API serveur, pas de couverture Bénin)
-- [ ] **API-L2.0b** Interface SMS · `feature/api-l2-0b-sms`
-  - [ ] `notifications/sms/` : `SmsProvider.send(phone, text) → message_id`
-  - [ ] `FakeSmsProvider` : journalise et envoie le SMS comme email à Mailpit (`<e164>@sms.test`), jamais activable si `DEPLOYED`
-  - [ ] Tâche `send_sms` avec réessais exponentiels
-  - [ ] `TwilioProvider` (fournisseur réel, ADR 0002) branché, sélection par `SMS_PROVIDER`
-  - [ ] Tests : faux SMS lisible dans Mailpit, refus du faux fournisseur si `DEPLOYED`
-- [ ] **API-L2.1** OTP · `feature/api-l2-1-otp`
-  - [ ] `OtpChallenge` : code haché, 6 chiffres, 5 min, 3 essais, renvoi après 60 s
-  - [ ] Plafond quotidien par numéro **et** par IP (`PlatformSettings`, D24)
-  - [ ] `POST auth/otp/resend/`, codes `OTP_*`
-  - [ ] Tests : expiré, 4ᵉ essai, renvoi trop tôt, plafond IP
-- [ ] **API-L2.2** Inscription parent · `feature/api-l2-2-parent-signup`
-  - [ ] `POST auth/parent-signup/`, `…/verify/` (`existingAccount`), `…/password/`
-  - [ ] Réponse neutre si numéro déjà inscrit (C13) ; compte créé seulement après OTP valide
-  - [ ] Tests : numéro déjà inscrit → même réponse qu'un numéro libre, aucun flux n'accepte `role`
-- [ ] **API-L2.3** Inscription apprenant · `feature/api-l2-3-learner-signup`
-  - [ ] `GET auth/username-availability/` (throttlé)
-  - [ ] `POST/GET auth/learner-signup/`, `…/resume/` (C5), `…/password/` ; `SignupSession` + code de reprise haché (D21, C14)
-  - [ ] Âge 10-17 (D23)
-  - [ ] `POST accounts/consent-requests/` (origine `learner`, SMS au parent avec lien à jeton, annulation de la demande en attente C14), `…/{id}/resend/`
-  - [ ] Tests : jeton à usage unique et haché, apprenant `pending` ne peut pas se connecter
-- [ ] **API-L2.4** Décision du parent · `feature/api-l2-4-decision-parent`
-  - [ ] `POST accounts/consent-requests/preview/` (public, throttlé, numéro masqué)
-  - [ ] `POST accounts/consent-requests/claim/` (`CONSENT_PHONE_MISMATCH`)
-  - [ ] `GET accounts/consent-requests/`, `GET …/{id}/` (D20)
-  - [ ] `…/accept/`, `…/refuse/` (motif obligatoire) ; création de `ParentChildLink`
-  - [ ] Refus : demande gardée 30 j (C9), `CONSENT_COOLDOWN`, compte purgé, identifiant libéré (D22)
-  - [ ] Tests : parent ne voit que les demandes de son numéro, double acceptation → `CONSENT_ALREADY_RESOLVED`, nouvelle demande avant 30 j refusée
-- [ ] **API-L2.5** Profils · `feature/api-l2-5-profils`
-  - [ ] `profileStep` de `accounts/me/`
-  - [ ] `PATCH accounts/me/`, `…/learner-profile/` (`BIRTHDATE_AGE_MISMATCH`, objectifs ≥ 2), `…/parent-profile/`
-  - [ ] Tests : cohérence date de naissance / âge
-- [ ] **API-L2.6** Mot de passe oublié · `feature/api-l2-6-reset-password`
-  - [ ] `POST auth/password-reset/` (parent OTP SMS, enseignant code email, apprenant refus D26), `…/verify/`, `…/confirm/`
-  - [ ] Tests : pas d'énumération (même réponse, même durée)
-- [ ] **API-L2.7** Activation enseignant · `feature/api-l2-7-activation-enseignant`
-  - [ ] App `classrooms` amorcée : `School` minimale, `TeacherInvitation`
-  - [ ] Invitation créée depuis l'admin Django (action « Envoyer »)
-  - [ ] `GET auth/teacher-invitations/{token}/`, `POST …/accept/` (C6)
-  - [ ] Tests : jeton expiré ou réutilisé refusé
-- [ ] **Tâches Celery d'API-L2**
-  - [ ] `send_sms`, `expire_consent_requests` (7 j), `purge_refused_requests` (30 j), `purge_signup_sessions`
+- [x] **API-L2.0b** Interface SMS · `feature/api-l2-0b-sms`
+  - [x] `notifications/sms/` : `SmsProvider.send(phone, text) → message_id`
+  - [x] `FakeSmsProvider` : journalise et envoie le SMS comme email à Mailpit (`<e164>@sms.test`), jamais activable si `DEPLOYED`
+  - [x] Tâche `send_sms` avec réessais exponentiels
+  - [x] `TwilioProvider` (fournisseur réel, ADR 0002) branché, sélection par `SMS_PROVIDER`
+  - [x] Webhook de statut Twilio signé (`notifications/sms/status/`) et trace `SmsMessage` sans numéro en clair (ADR 0002)
+  - [x] Variables `SMS_PROVIDER`, `TWILIO_*` : chart, secrets GitHub, `docs/infra/`
+  - [x] Tests : faux SMS lisible dans Mailpit, refus du faux fournisseur si `DEPLOYED`
+- [x] **API-L2.1** OTP · `feature/api-l2-1-otp`
+  - [x] `OtpChallenge` : code haché, 6 chiffres, 5 min, 3 essais, renvoi après 60 s
+  - [x] Plafond quotidien par numéro **et** par IP (`PlatformSettings`, D24)
+  - [x] `POST auth/otp/resend/`, codes `OTP_*`
+  - [x] Tests : expiré, 4ᵉ essai, renvoi trop tôt, plafond IP
+- [x] **API-L2.2** Inscription parent · `feature/api-l2-2-parent-signup`
+  - [x] `POST auth/parent-signup/`, `…/verify/` (`existingAccount`), `…/password/`
+  - [x] Réponse neutre si numéro déjà inscrit (C13) ; compte créé seulement après OTP valide
+  - [x] Tests : numéro déjà inscrit → même réponse qu'un numéro libre, aucun flux n'accepte `role`
+- [x] **API-L2.3** Inscription apprenant · `feature/api-l2-3-learner-signup`
+  - [x] `GET auth/username-availability/` (throttlé)
+  - [x] `POST/GET auth/learner-signup/`, `…/resume/` (C5), `…/password/` ; `SignupSession` + code de reprise haché (D21, C14)
+  - [x] Âge 10-17 (D23)
+  - [x] `POST accounts/consent-requests/` (origine `learner`, SMS au parent avec lien à jeton, annulation de la demande en attente C14), `…/{id}/resend/`
+  - [x] Tests : jeton haché et remplacé à chaque renvoi (usage unique à la réclamation : API-L2.4), apprenant `pending` ne peut pas se connecter (son code de reprise sur W16 donne `ACCOUNT_PENDING_CONSENT`, C5)
+- [x] **API-L2.4** Décision du parent · `feature/api-l2-4-decision-parent`
+  - [x] `POST accounts/consent-requests/preview/` (public, throttlé, numéro masqué)
+  - [x] `POST accounts/consent-requests/claim/` (`CONSENT_PHONE_MISMATCH`)
+  - [x] `GET accounts/consent-requests/`, `GET …/{id}/` (D20)
+  - [x] `…/accept/`, `…/refuse/` (motif obligatoire) ; création de `ParentChildLink`
+  - [x] Refus : demande gardée 30 j (C9), `CONSENT_COOLDOWN`, compte purgé, identifiant libéré (D22)
+  - [x] Tests : parent ne voit que les demandes de son numéro, double acceptation → `CONSENT_ALREADY_RESOLVED`, nouvelle demande avant 30 j refusée
+  - [x] Jeton du lien SMS à usage unique (consommé par `claim`) ; état `refused` de `GET auth/learner-signup/` pour W18
+- [x] **API-L2.5** Profils · `feature/api-l2-5-profils`
+  - [x] `profileStep` de `accounts/me/`
+  - [x] `PATCH accounts/me/`, `…/learner-profile/` (`BIRTHDATE_AGE_MISMATCH`, objectifs ≥ 2), `…/parent-profile/`
+  - [x] Tests : cohérence date de naissance / âge
+  - [x] `ParentProfile.children_to_enroll` (WP09 « Nombre d'enfants à inscrire »), exigé par `profileStep`
+- [x] **API-L2.6** Mot de passe oublié · `feature/api-l2-6-reset-password`
+  - [x] `POST auth/password-reset/` (parent OTP SMS, enseignant code email, apprenant refus D26), `…/verify/`, `…/confirm/`
+  - [x] Tests : pas d'énumération (même réponse, même travail dans la requête : défi créé et tâche d'envoi programmée dans tous les cas)
+- [x] **API-L2.7** Activation enseignant · `feature/api-l2-7-activation-enseignant`
+  - [x] App `classrooms` amorcée : `School` minimale, `TeacherInvitation`
+  - [x] Invitation créée depuis l'admin Django (action « Envoyer »)
+  - [x] `GET auth/teacher-invitations/{token}/`, `POST …/accept/` (C6)
+  - [x] Tests : jeton expiré ou réutilisé refusé
+  - [x] Plafonds d'inscription séparés : création (`signup`) et étapes suivantes (`signup-step`), testé par le parcours d'une famille depuis une même IP
+- [x] **Tâches Celery d'API-L2**
+  - [x] `send_sms`, `expire_consent_requests` (7 j), `purge_refused_requests` (30 j), `purge_signup_sessions`
+  - [x] Planifiées dans `CELERY_BEAT_SCHEDULE`, exécutables à la main (`manage.py <tâche>`)
 - [ ] **Critères de fin d'API-L2**
   - [ ] Parcours Playwright inscription apprenant → consentement → W11-W14 passant sur la stack Docker avec le faux SMS
   - [ ] Parcours Playwright inscription parent passant
-  - [ ] `make seed` contient une invitation enseignant en attente
+  - [x] `make seed` contient une invitation enseignant en attente
+  > Reprise : toutes les PR d'API-L2 sont ouvertes (L2.0b à L2.7). Les deux parcours Playwright exigent les écrans
+  > du lot 2 (LOT-2-AUTH, P1 à P6) : à cocher par la PR du lot 2 qui les fait passer. Le même enchaînement a été
+  > vérifié côté API sur PostgreSQL et Mailpit (inscription apprenant → demande → inscription parent → accord →
+  > mot de passe → W11-W14, mot de passe oublié, activation de l'invitation du seed) et figé par
+  > `test_signup_journey.py`.
 
 ### API-L3a · Pédagogie — ⬜ à faire
 - [ ] **Préalables**

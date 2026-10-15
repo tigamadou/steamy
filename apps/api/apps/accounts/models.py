@@ -5,6 +5,8 @@ Un seul modèle `User` pour les trois personas et le personnel. Les identifiants
 nullables : l'unicité et la présence de l'identifiant propre à chaque rôle sont tenues par la base.
 """
 
+import uuid
+
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.db.models import Q
@@ -242,6 +244,8 @@ class LearnerProfile(TimestampedModel):
         related_name="+",
     )
     email = models.EmailField(_("email de contact"), null=True, blank=True)
+    #: Âge déclaré à l'inscription (W05), contrôlé avec la date de naissance de W11 (D23).
+    declared_age = models.PositiveSmallIntegerField(_("âge déclaré"), null=True, blank=True)
     points = models.PositiveIntegerField(default=0)
     streak_days = models.PositiveIntegerField(default=0)
     rank = models.CharField(_("rang"), max_length=32, blank=True)
@@ -277,6 +281,10 @@ class ParentProfile(TimestampedModel):
         related_name="+",
     )
     goals_for_children = models.ManyToManyField("referentials.Goal", blank=True, related_name="+")
+    #: WP09 « Nombre d'enfants à inscrire ».
+    children_to_enroll = models.PositiveSmallIntegerField(
+        _("enfants à inscrire"), null=True, blank=True
+    )
 
     class Meta:
         verbose_name = _("profil parent")
@@ -287,9 +295,16 @@ class ParentProfile(TimestampedModel):
 
 
 class TeacherProfile(TimestampedModel):
-    """Profil de l'enseignant, créé sur invitation (S5). L'école arrive avec `classrooms` (API-L2.7)."""
+    """Profil de l'enseignant, créé sur invitation (S5), rattaché à une école (C6)."""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher_profile")
+    school = models.ForeignKey(
+        "classrooms.School",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="teachers",
+    )
     phone = models.CharField(_("téléphone de contact"), max_length=16, null=True, blank=True)
     specialty = models.CharField(_("spécialité"), max_length=120, blank=True)
     bio = models.TextField(blank=True)
@@ -301,3 +316,168 @@ class TeacherProfile(TimestampedModel):
 
     def __str__(self):
         return f"Profil enseignant de {self.user}"
+
+
+class OtpChallenge(TimestampedModel):
+    """
+    Code à usage unique envoyé par SMS (D24) : 6 chiffres, 5 min, 3 essais, renvoi après 60 s. Les valeurs viennent
+    de `PlatformSettings` ; le code n'est jamais stocké en clair. `id` (UUID) est le `challengeId` donné au front.
+    `data` garde ce que le flux ne crée qu'après un code valide (ex. prénom et nom du parent, C13).
+    """
+
+    class Purpose(models.TextChoices):
+        PARENT_SIGNUP = "parent_signup", "Inscription parent"
+        PASSWORD_RESET = "password_reset", "Mot de passe oublié"
+        PHONE_CHANGE = "phone_change", "Changement de numéro"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    phone = models.CharField(_("téléphone"), max_length=16, blank=True)
+    #: Code envoyé par email plutôt que par SMS (mot de passe oublié de l'enseignant, C6).
+    email = models.EmailField(_("email"), blank=True)
+    #: Compte concerné (mot de passe oublié) ; nul si la saisie ne désigne aucun compte.
+    user = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, null=True, blank=True, related_name="+"
+    )
+    purpose = models.CharField(_("objet"), max_length=16, choices=Purpose.choices)
+    code_hash = models.CharField(max_length=128)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+    last_sent_at = models.DateTimeField()
+    verified_at = models.DateTimeField(null=True, blank=True)
+    data = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        verbose_name = _("code OTP")
+        verbose_name_plural = _("codes OTP")
+        indexes = [models.Index(fields=["phone", "purpose"])]
+
+    def __str__(self):
+        return f"OTP {self.get_purpose_display()} ({self.created_at:%Y-%m-%d %H:%M})"
+
+
+class SignupSession(TimestampedModel):
+    """
+    Inscription d'un apprenant en cours (D21) : compte `pending` sans mot de passe, plus un **code de reprise** haché,
+    affiché une seule fois et non régénérable (C14). Supprimée à l'activation ; à l'expiration, le compte en attente
+    est purgé et l'identifiant libéré (`purge_signup_sessions`).
+    """
+
+    learner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="signup_session")
+    resume_code_hash = models.CharField(max_length=128)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        verbose_name = _("inscription en cours")
+        verbose_name_plural = _("inscriptions en cours")
+
+    def __str__(self):
+        return f"Inscription en cours de {self.learner}"
+
+
+class ConsentRequest(TimestampedModel):
+    """
+    Demande de consentement parental (§3.1, §4.2). `subject` fige ce que le parent voit (D20) : prénom, nom,
+    identifiant, âge, lien de parenté. Le jeton du lien SMS n'est stocké que haché.
+    """
+
+    class Origin(models.TextChoices):
+        LEARNER = "learner", "Apprenant"
+        PARENT = "parent", "Parent"
+        TEACHER = "teacher", "Enseignant"
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        ACCEPTED = "accepted", "Acceptée"
+        REFUSED = "refused", "Refusée"
+        EXPIRED = "expired", "Expirée"
+        CANCELLED = "cancelled", "Annulée"
+
+    origin = models.CharField(_("origine"), max_length=8, choices=Origin.choices)
+    subject = models.JSONField(_("enfant (instantané)"), default=dict)
+    learner = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="consent_requests",
+    )
+    requested_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    parent_phone = models.CharField(_("téléphone du parent"), max_length=16)
+    parent = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="received_consent_requests",
+    )
+    relationship = models.ForeignKey(
+        "referentials.Relationship", on_delete=models.PROTECT, related_name="+"
+    )
+    status = models.CharField(
+        _("statut"), max_length=10, choices=Status.choices, default=Status.PENDING
+    )
+    token_hash = models.CharField(max_length=64, blank=True, db_index=True)
+    expires_at = models.DateTimeField()
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+    refusal_reason = models.ForeignKey(
+        "referentials.RefusalReason",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    refusal_note = models.TextField(_("précisions du refus"), blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("demande de consentement")
+        verbose_name_plural = _("demandes de consentement")
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["parent_phone", "status"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["learner"],
+                condition=Q(status="pending"),
+                name="accounts_consent_one_pending_per_learner",
+            ),
+        ]
+
+    def __str__(self):
+        return f"Demande {self.get_origin_display().lower()} du {self.created_at:%Y-%m-%d} ({self.status})"
+
+
+class ParentChildLink(TimestampedModel):
+    """Lien parent ↔ apprenant : **un parent par apprenant**, à tout âge (S3) ; changement par la modération (D22)."""
+
+    parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="children_links")
+    learner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="parent_link")
+    relationship = models.ForeignKey(
+        "referentials.Relationship", on_delete=models.PROTECT, related_name="+"
+    )
+    consent_request = models.ForeignKey(
+        ConsentRequest, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        verbose_name = _("lien parent-enfant")
+        verbose_name_plural = _("liens parent-enfant")
+
+    def __str__(self):
+        return f"{self.parent} → {self.learner}"
+
+
+class PasswordResetToken(TimestampedModel):
+    """Jeton remis après un code valide (WL03), échangé contre un nouveau mot de passe (WL04). Stocké haché."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    token_hash = models.CharField(max_length=64, unique=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        verbose_name = _("jeton de réinitialisation")
+        verbose_name_plural = _("jetons de réinitialisation")
+
+    def __str__(self):
+        return f"Réinitialisation de {self.user}"

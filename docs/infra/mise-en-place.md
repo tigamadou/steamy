@@ -117,6 +117,7 @@ Dans **Settings → Environments**, créer `staging` et `production`. Sur `produ
 | `GHCR_PULL_TOKEN` | Token GitHub (classic) avec le seul scope `read:packages` |
 | `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | SMTP (optionnel) |
 | `PAYMENTS_KKIAPAY_SECRET` / `PAYMENTS_FEDAPAY_SECRET` | Paiements, en sandbox pour staging (optionnel) |
+| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | SMS ([ADR 0002](../adr/0002-fournisseur-sms.md)) : console Twilio → *Account Info*. Staging : identifiants **de test** (aucun SMS réel). Production : compte avec plafond de dépense et alerte de solde. Sans eux, l'OTP et les liens de consentement ne partent pas |
 
 > ⚠️ Changer `RUSTFS_*` après le premier déploiement redémarre RustFS avec les nouveaux identifiants
 > d'administration. Ce cas n'a pas été testé : le faire d'abord en staging et vérifier que les médias restent lisibles.

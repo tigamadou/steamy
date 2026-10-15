@@ -3,6 +3,7 @@ export * from "./Accordion";
 export * from "./Avatar";
 export * from "./AvatarPicker";
 export * from "./Badge";
+export * from "./Breadcrumb";
 export * from "./Button";
 export * from "./Celebration";
 export * from "./Checkbox";

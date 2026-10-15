@@ -3,14 +3,21 @@
 import pytest
 from rest_framework.test import APIClient
 
-from apps.courses.models import Course
+from apps.accounts.tests.factories import LearnerFactory
+from apps.notifications.tests.factories import NotificationFactory
+
+
+def client_with_notifications(count):
+    user = LearnerFactory()
+    NotificationFactory.create_batch(count, user=user)
+    client = APIClient()
+    client.force_authenticate(user)
+    return client
 
 
 @pytest.mark.django_db
 def test_lists_are_paginated_with_page_and_page_size():
-    for n in range(3):
-        Course.objects.create(title=f"Parcours {n}", slug=f"parcours-{n}", published=True)
-    body = APIClient().get("/api/courses/courses/?page=2&pageSize=2").json()
+    body = client_with_notifications(3).get("/api/notifications/?page=2&pageSize=2").json()
     assert body["count"] == 3
     assert len(body["results"]) == 1
     assert body["previous"] and body["next"] is None
@@ -18,5 +25,4 @@ def test_lists_are_paginated_with_page_and_page_size():
 
 @pytest.mark.django_db
 def test_page_size_is_capped():
-    Course.objects.create(title="P", slug="p", published=True)
-    assert APIClient().get("/api/courses/courses/?pageSize=1000").status_code == 200
+    assert client_with_notifications(1).get("/api/notifications/?pageSize=1000").status_code == 200

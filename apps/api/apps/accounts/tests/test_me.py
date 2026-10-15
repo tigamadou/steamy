@@ -56,9 +56,13 @@ def test_me_exposes_staff_fields():
     assert body["profileStep"] is None
 
 
-def test_me_is_read_only():
-    client = client_for(LearnerFactory())
-    assert client.patch(ME, {"role": "teacher"}, format="json").status_code == 405
+def test_me_never_changes_the_role():
+    """`PATCH accounts/me/` (API-L2.5) ne modifie que le prénom et le nom."""
+    learner = LearnerFactory()
+    client = client_for(learner)
+    assert client.patch(ME, {"role": "teacher"}, format="json").json()["role"] == "learner"
+    learner.refresh_from_db()
+    assert learner.role == "learner"
 
 
 # --- Mot de passe -----------------------------------------------------------------------------
@@ -190,6 +194,10 @@ def test_parent_profile_steps_skip_the_optional_screen():
     # WP08 (à propos) est facultative : on passe directement aux enfants.
     assert client.get(ME).json()["profileStep"] == "parent-children"
     parent.parent_profile.goals_for_children.add(Goal.objects.get(code="coder"))
+    # WP09 demande aussi le nombre d'enfants à inscrire (API-L2.5)
+    assert client.get(ME).json()["profileStep"] == "parent-children"
+    parent.parent_profile.children_to_enroll = 1
+    parent.parent_profile.save()
     body = client.get(ME).json()
     assert body["profileStep"] is None and body["city"] == "Parakou"
     assert body["avatar"] is None and body["schoolGrade"] is None

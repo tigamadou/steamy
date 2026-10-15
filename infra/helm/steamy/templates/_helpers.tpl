@@ -79,7 +79,13 @@ securityContext:
   value: {{ ternary "1" "0" $v.email.useTls | quote }}
 - name: DEFAULT_FROM_EMAIL
   value: {{ $v.email.from | quote }}
-{{- range $key, $optional := dict "SECRET_KEY" false "AWS_ACCESS_KEY_ID" false "AWS_SECRET_ACCESS_KEY" false "EMAIL_HOST_USER" true "EMAIL_HOST_PASSWORD" true "PAYMENTS_KKIAPAY_SECRET" true "PAYMENTS_FEDAPAY_SECRET" true }}
+- name: SMS_PROVIDER
+  value: {{ $v.sms.provider | quote }}
+- name: TWILIO_SENDER
+  value: {{ $v.sms.sender | quote }}
+- name: TWILIO_STATUS_CALLBACK_URL
+  value: {{ printf "https://%s/api/notifications/sms/status/" $v.hosts.api | quote }}
+{{- range $key, $optional := dict "SECRET_KEY" false "AWS_ACCESS_KEY_ID" false "AWS_SECRET_ACCESS_KEY" false "EMAIL_HOST_USER" true "EMAIL_HOST_PASSWORD" true "PAYMENTS_KKIAPAY_SECRET" true "PAYMENTS_FEDAPAY_SECRET" true "TWILIO_ACCOUNT_SID" true "TWILIO_AUTH_TOKEN" true }}
 - name: {{ $key }}
   valueFrom:
     secretKeyRef:

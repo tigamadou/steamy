@@ -168,13 +168,16 @@ jobs:
           EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
           PAYMENTS_KKIAPAY_SECRET: ${{ secrets.PAYMENTS_KKIAPAY_SECRET }}
           PAYMENTS_FEDAPAY_SECRET: ${{ secrets.PAYMENTS_FEDAPAY_SECRET }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
           GHCR_PULL_USER: ${{ vars.GHCR_PULL_USER }}
           GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
         run: |
           umask 077
           for key in SECRET_KEY AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY WASABI_ACCESS_KEY_ID \
                      WASABI_SECRET_ACCESS_KEY EMAIL_HOST_USER EMAIL_HOST_PASSWORD \
-                     PAYMENTS_KKIAPAY_SECRET PAYMENTS_FEDAPAY_SECRET GHCR_PULL_USER GHCR_PULL_TOKEN; do
+                     PAYMENTS_KKIAPAY_SECRET PAYMENTS_FEDAPAY_SECRET TWILIO_ACCOUNT_SID TWILIO_AUTH_TOKEN \
+                     GHCR_PULL_USER GHCR_PULL_TOKEN; do
             value="${!key}"
             [[ -z "$value" ]] && continue
             if [[ "$value" == *$'\n'* ]]; then echo "::error::$key contient un retour à la ligne"; exit 1; fi

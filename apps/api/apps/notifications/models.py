@@ -108,3 +108,32 @@ class NotificationPreference(models.Model):
     def __str__(self):
         state = "oui" if self.enabled else "non"
         return f"{self.user} · {self.category} · {self.channel} : {state}"
+
+
+class SmsMessage(models.Model):
+    """
+    Trace d'un SMS envoyé (S10, ADR 0002) : coût, délivrabilité, accusés de réception. Aucun numéro ni texte en
+    clair (données personnelles) : seulement le numéro masqué et l'objet de l'envoi.
+    """
+
+    provider = models.CharField(_("fournisseur"), max_length=16)
+    message_id = models.CharField(_("identifiant chez le fournisseur"), max_length=64)
+    recipient = models.CharField(_("destinataire (masqué)"), max_length=32)
+    purpose = models.CharField(_("objet"), max_length=32, blank=True)
+    status = models.CharField(_("statut"), max_length=16, default="sent")
+    error_code = models.CharField(_("code d'erreur"), max_length=16, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("SMS envoyé")
+        verbose_name_plural = _("SMS envoyés")
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["provider", "message_id"], name="notifications_sms_message_unique"
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.provider} {self.message_id} : {self.status}"
