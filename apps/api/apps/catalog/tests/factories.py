@@ -2,7 +2,16 @@
 
 import factory
 
-from apps.catalog.models import Category, Course, Level, Mission, Project
+from apps.catalog.models import (
+    Category,
+    Choice,
+    Course,
+    Level,
+    Mission,
+    Project,
+    Question,
+    Quiz,
+)
 
 
 class CategoryFactory(factory.django.DjangoModelFactory):
@@ -65,3 +74,50 @@ class MissionFactory(factory.django.DjangoModelFactory):
     vimeo_id = "76979871"
     vimeo_hash = "8272103f6e"
     blocks = factory.LazyFunction(lambda: [{"type": "text", "text": "Contenu de la mission."}])
+
+
+class QuizFactory(factory.django.DjangoModelFactory):
+    """Formative d'un niveau par défaut ; `QuizFactory(summative=True, project=…)` pour une sommative."""
+
+    class Meta:
+        model = Quiz
+
+    kind = Quiz.Kind.FORMATIVE
+    level = factory.SubFactory(LevelFactory)
+    project = None
+
+    class Params:
+        summative = factory.Trait(
+            kind=Quiz.Kind.SUMMATIVE, level=None, project=factory.SubFactory(ProjectFactory)
+        )
+
+
+class QuestionFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Question
+
+    quiz = factory.SubFactory(QuizFactory)
+    order = factory.Sequence(int)
+    text = factory.Sequence(lambda n: f"Question {n} ?")
+    concept = factory.Sequence(lambda n: f"Notion {n}")
+
+
+class ChoiceFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Choice
+
+    question = factory.SubFactory(QuestionFactory)
+    order = factory.Sequence(int)
+    text = factory.Sequence(lambda n: f"Réponse {n}")
+    is_correct = False
+
+
+def add_questions(quiz: Quiz, count: int = 2, weights: list[int] | None = None) -> list[Question]:
+    """`count` questions à deux réponses (la première est la bonne)."""
+    questions = []
+    for index in range(count):
+        question = QuestionFactory(quiz=quiz, order=index, weight=(weights or [1] * count)[index])
+        ChoiceFactory(question=question, order=0, text="Bonne réponse", is_correct=True)
+        ChoiceFactory(question=question, order=1, text="Mauvaise réponse")
+        questions.append(question)
+    return questions

@@ -109,6 +109,15 @@ class NotificationPreference(models.Model):
         state = "oui" if self.enabled else "non"
         return f"{self.user} · {self.category} · {self.channel} : {state}"
 
+    def save(self, *args, **kwargs):
+        # Un apprenant (mineur) n'a pas de téléphone ni de canal SMS (D30), et ne reçoit rien de marketing (D6) :
+        # ses catégories sont celles de `CATEGORIES_BY_ROLE["learner"]`, toutes liées à son apprentissage.
+        if self.user.is_learner and (
+            self.channel == Channel.SMS or self.category not in CATEGORIES_BY_ROLE["learner"]
+        ):
+            raise ValueError("Préférence interdite pour un apprenant (D6, D30).")
+        super().save(*args, **kwargs)
+
 
 class SmsMessage(models.Model):
     """

@@ -24,6 +24,24 @@ Mot de passe de tous les comptes : **`Steamy2026`**.
 Marie est le parent de Léa (lien parent ↔ enfant, consentement donné). M. Adékambi est rattaché au
 « Collège Steamy de Cotonou ».
 
+## Parcours de Léa (API-L3a)
+
+Chaque niveau a une formative et chaque projet une sommative, de deux questions (la première réponse est la bonne).
+Léa est inscrite à :
+
+| Parcours | État |
+| --- | --- |
+| Découverte de la robotique | En cours (30 %) : niveau 1.1 fait, formative réussie au 3ᵉ essai (tentatives `ko`, `warn`, `ok`) |
+| Initiation à Scratch | Toutes les missions et tous les quiz réussis |
+| Premiers pas avec Zeti (`premiers-pas-zeti`) | Parcours court du parcours Playwright P1 (1 projet, 1 niveau, 2 missions, formative et sommative) : remis à zéro à chaque seed |
+
+Léa a aussi : un certificat (« Initiation à Scratch ») avec son ticket Steamy Events, des badges, des points (barème
+et paliers **de démonstration**, saisis s'ils sont vides), un streak de 5 jours, deux parcours dans « Mes souhaits »
+(« Construis ton robot Bluetooth », « Capteurs électroniques »).
+
+`make e2e` lance `seed_demo --e2e`, qui ramène le délai entre deux essais d'une sommative ratée à 5 secondes (10 min
+sinon, D32).
+
 ## Invitation enseignant en attente
 
 `seed_demo` crée une invitation pour **Nadia Houngbo** (`nadia.houngbo@steamy.test`, même école) et l'envoie :

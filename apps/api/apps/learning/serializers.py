@@ -8,7 +8,11 @@ schéma OpenAPI).
 
 from rest_framework import serializers
 
-from apps.catalog.serializers import CourseListSerializer
+from apps.accounts.views.me import LearnerCountersSerializer
+from apps.catalog.models import Badge, Quiz
+from apps.catalog.serializers import CategorySummarySerializer, CourseListSerializer
+
+from .models import Certificate, Enrollment, QuizAttempt
 
 STATES = (("done", "Faite"), ("available", "Disponible"), ("locked", "Verrouillée"))
 
@@ -18,22 +22,23 @@ class EnrollRequestSerializer(serializers.Serializer):
 
 
 class EnrollmentQuerySerializer(serializers.Serializer):
-    status = serializers.ChoiceField(
-        choices=(("active", "En cours"), ("completed", "Terminés")), required=False
-    )
+    status = serializers.ChoiceField(choices=Enrollment.Status.choices, required=False)
 
 
 class NextStepSerializer(serializers.Serializer):
-    """Étape suivante : mission à faire, ou certification quand tout le parcours est fait."""
+    """Étape suivante : mission ou quiz à faire, ou certification quand tout le parcours est fait."""
 
     type = serializers.ChoiceField(
-        choices=(("mission", "Mission"), ("certification", "Certification"))
+        choices=(("mission", "Mission"), ("quiz", "Quiz"), ("certification", "Certification"))
     )
-    id = serializers.IntegerField(allow_null=True, help_text="Mission ; null pour la certification")
+    id = serializers.IntegerField(
+        allow_null=True, help_text="Mission ou quiz ; null pour la certification"
+    )
     title = serializers.CharField(allow_null=True)
     course_slug = serializers.SlugField()
     project_id = serializers.IntegerField(allow_null=True)
-    level_id = serializers.IntegerField(allow_null=True)
+    level_id = serializers.IntegerField(allow_null=True, help_text="null pour une sommative")
+    quiz_kind = serializers.ChoiceField(choices=Quiz.Kind.choices, allow_null=True)
 
 
 class RefSerializer(serializers.Serializer):
@@ -52,15 +57,8 @@ class CourseRefSerializer(serializers.Serializer):
 class EnrollmentSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     course = CourseListSerializer()
-    source = serializers.ChoiceField(
-        choices=(
-            ("free", "Gratuit"),
-            ("order", "Commande"),
-            ("kit_code", "Kit Code"),
-            ("classroom", "Classe"),
-        )
-    )
-    status = serializers.ChoiceField(choices=(("active", "En cours"), ("completed", "Terminé")))
+    source = serializers.ChoiceField(choices=Enrollment.Source.choices)
+    status = serializers.ChoiceField(choices=Enrollment.Status.choices)
     progress_pct = serializers.IntegerField()
     mission_count = serializers.IntegerField()
     missions_done = serializers.IntegerField()
@@ -81,6 +79,20 @@ class MissionItemSerializer(serializers.Serializer):
     state = serializers.ChoiceField(choices=STATES)
 
 
+QUIZ_KINDS = Quiz.Kind.choices
+ATTEMPT_STATUSES = QuizAttempt.Status.choices
+
+
+class QuizItemSerializer(serializers.Serializer):
+    """Quiz d'un niveau (formative) ou d'un projet (sommative), dans l'arbre."""
+
+    id = serializers.IntegerField()
+    kind = serializers.ChoiceField(choices=QUIZ_KINDS)
+    title = serializers.CharField()
+    threshold = serializers.IntegerField()
+    state = serializers.ChoiceField(choices=STATES, help_text="`done` : réussi")
+
+
 class LevelItemSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     order = serializers.IntegerField()
@@ -90,6 +102,7 @@ class LevelItemSerializer(serializers.Serializer):
     state = serializers.ChoiceField(choices=STATES)
     mission_count = serializers.IntegerField()
     missions_done = serializers.IntegerField()
+    quiz = QuizItemSerializer(allow_null=True, help_text="Formative du niveau")
 
 
 class TreeLevelSerializer(LevelItemSerializer):
@@ -104,12 +117,40 @@ class TreeProjectSerializer(serializers.Serializer):
     state = serializers.ChoiceField(choices=STATES)
     mission_count = serializers.IntegerField()
     missions_done = serializers.IntegerField()
+    quiz = QuizItemSerializer(allow_null=True, help_text="Sommative du projet")
     levels = TreeLevelSerializer(many=True)
 
 
-class TreeSerializer(EnrollmentSerializer):
-    """Arbre du parcours (WC06a, WC06b, WJ09) : titres, durées et états, sans contenu."""
+class CertificateSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    number = serializers.CharField(help_text="CERT-AAAA-NNNNNN")
+    course = CourseRefSerializer()
+    issued_at = serializers.DateTimeField()
+    pdf_status = serializers.ChoiceField(
+        choices=Certificate.PdfStatus.choices,
+        help_text="`pending` : « Préparation… », interroger de nouveau ; `failed` : échec signalé au Support",
+    )
 
+
+class CertificationSerializer(serializers.Serializer):
+    """Conditions D33 (100 % des missions, toutes les sommatives réussies), certificat et ticket (WJ07, WJ09)."""
+
+    eligible = serializers.BooleanField()
+    missions_done = serializers.IntegerField()
+    mission_count = serializers.IntegerField()
+    summatives_passed = serializers.IntegerField()
+    summative_count = serializers.IntegerField()
+    certificate_enabled = serializers.BooleanField()
+    certificate = CertificateSerializer(allow_null=True)
+    event_ticket = serializers.BooleanField(
+        help_text="Ticket Steamy Events offert à la certification"
+    )
+
+
+class TreeSerializer(EnrollmentSerializer):
+    """Arbre du parcours (WC06a, WC06b, WJ07, WJ09) : titres, durées et états, sans contenu."""
+
+    certification = CertificationSerializer()
     projects = TreeProjectSerializer(many=True)
 
 
@@ -127,6 +168,7 @@ class ProjectDetailSerializer(serializers.Serializer):
     mission_count = serializers.IntegerField()
     missions_done = serializers.IntegerField()
     course = CourseRefSerializer()
+    quiz = QuizItemSerializer(allow_null=True, help_text="Sommative du projet")
     levels = LevelItemSerializer(many=True)
 
 
@@ -177,6 +219,252 @@ class MissionDetailSerializer(serializers.Serializer):
 class MissionCompleteSerializer(serializers.Serializer):
     mission_id = serializers.IntegerField()
     progress_pct = serializers.IntegerField()
+    points_earned = serializers.IntegerField(help_text="0 si déjà terminée ou sans barème (C8)")
     next = NextStepSerializer(
         help_text="Mission suivante, ou certification si le parcours est fait"
     )
+
+
+# --- Quiz et tentatives (D31, D32) ---------------------------------------------------------------
+
+
+class ChoiceSerializer(serializers.Serializer):
+    """Réponse proposée, sans le corrigé."""
+
+    id = serializers.IntegerField()
+    text = serializers.CharField()
+
+
+class QuestionSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    order = serializers.IntegerField()
+    text = serializers.CharField()
+    choices = ChoiceSerializer(many=True)
+
+
+class QuizDetailSerializer(serializers.Serializer):
+    """Quiz à passer (WJ04, WJ10) : questions et réponses proposées, jamais le corrigé (§4.4)."""
+
+    id = serializers.IntegerField()
+    kind = serializers.ChoiceField(choices=QUIZ_KINDS)
+    title = serializers.CharField()
+    threshold = serializers.IntegerField(help_text="Score minimal pour réussir (%)")
+    time_limit_sec = serializers.IntegerField(allow_null=True)
+    question_count = serializers.IntegerField()
+    state = serializers.ChoiceField(choices=STATES, help_text="`done` : déjà réussi")
+    retry_in_sec = serializers.IntegerField(
+        help_text="Secondes avant de pouvoir le repasser (sommative ratée, D32), 0 sinon"
+    )
+    course = CourseRefSerializer()
+    project = RefSerializer()
+    level = RefSerializer(allow_null=True, help_text="null pour une sommative")
+    questions = QuestionSerializer(many=True)
+
+
+class AnswerSerializer(serializers.Serializer):
+    question_id = serializers.IntegerField()
+    choice_id = serializers.IntegerField()
+
+
+class AttemptRequestSerializer(serializers.Serializer):
+    """Envoi groupé de toutes les réponses ; une question sans réponse compte comme fausse."""
+
+    answers = AnswerSerializer(many=True)
+    duration_sec = serializers.IntegerField(min_value=0, required=False, allow_null=True)
+
+    def validate_answers(self, answers):
+        questions = self.context["questions"]  # {questionId: {choiceId…}}
+        seen = set()
+        for answer in answers:
+            question, choice = answer["question_id"], answer["choice_id"]
+            if question not in questions:
+                raise serializers.ValidationError(
+                    f"La question {question} n'appartient pas à ce quiz."
+                )
+            if question in seen:
+                raise serializers.ValidationError(f"Une seule réponse par question ({question}).")
+            if choice not in questions[question]:
+                raise serializers.ValidationError(
+                    f"La réponse {choice} ne correspond pas à la question {question}."
+                )
+            seen.add(question)
+        return {answer["question_id"]: answer["choice_id"] for answer in answers}
+
+
+class AttemptQuizSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    kind = serializers.ChoiceField(choices=QUIZ_KINDS)
+    title = serializers.CharField()
+    course_slug = serializers.SlugField()
+    project_id = serializers.IntegerField()
+    level_id = serializers.IntegerField(allow_null=True)
+
+
+class RemediationSerializer(serializers.Serializer):
+    """Mission à revoir (WJ08) : lien vers WJ03."""
+
+    mission_id = serializers.IntegerField()
+    title = serializers.CharField()
+    concept = serializers.CharField()
+
+
+class QuestionReviewSerializer(serializers.Serializer):
+    """Résultat d'une question : juste ou non, sans dévoiler la bonne réponse."""
+
+    question_id = serializers.IntegerField()
+    text = serializers.CharField()
+    concept = serializers.CharField()
+    correct = serializers.BooleanField()
+    chosen_choice_id = serializers.IntegerField(allow_null=True)
+    remediation_mission_id = serializers.IntegerField(allow_null=True)
+
+
+class AttemptListItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    quiz = AttemptQuizSerializer()
+    score = serializers.IntegerField()
+    total = serializers.IntegerField()
+    percentage = serializers.IntegerField()
+    threshold = serializers.IntegerField(help_text="Seuil appliqué à cette tentative (%)")
+    status = serializers.ChoiceField(choices=ATTEMPT_STATUSES)
+    passed = serializers.BooleanField()
+    duration_sec = serializers.IntegerField(allow_null=True)
+    points_earned = serializers.IntegerField()
+    created_at = serializers.DateTimeField()
+
+
+class BadgeSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    kind = serializers.ChoiceField(choices=Badge.Kind.choices)
+    label = serializers.CharField()
+    icon = serializers.CharField()
+    description = serializers.CharField()
+
+
+class AttemptDetailSerializer(AttemptListItemSerializer):
+    """Résultat d'une tentative (WJ05, WJ08, WD08)."""
+
+    badge = BadgeSerializer(
+        allow_null=True,
+        help_text="Badge du niveau ou du projet, si la tentative est réussie (WJ06, WJ11)",
+    )
+
+    failed_concepts = serializers.ListField(child=serializers.CharField())
+    remediation = RemediationSerializer(many=True)
+    questions = QuestionReviewSerializer(many=True)
+    retry_in_sec = serializers.IntegerField(
+        help_text="Secondes avant de pouvoir repasser le quiz (sommative ratée, D32)"
+    )
+    next = NextStepSerializer(
+        allow_null=True,
+        help_text="Après une réussite : étape suivante (après le badge) ; sinon null",
+    )
+
+
+class AttemptQuerySerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=ATTEMPT_STATUSES, required=False)
+    quiz = serializers.IntegerField(required=False)
+
+
+class AttemptSummarySerializer(serializers.Serializer):
+    """Bandeau de WD07, sur toutes les tentatives de l'apprenant (filtres ignorés)."""
+
+    attempt_count = serializers.IntegerField()
+    success_rate = serializers.IntegerField(help_text="Part des tentatives réussies (%)")
+    perfect_count = serializers.IntegerField(help_text="Tentatives à 100 %")
+    streak_days = serializers.IntegerField()
+
+
+# --- Activité et badges (D34) --------------------------------------------------------------------
+
+
+class ActivityRequestSerializer(serializers.Serializer):
+    mission_id = serializers.IntegerField()
+    seconds = serializers.IntegerField(
+        min_value=1, max_value=3600, help_text="Secondes réellement lues"
+    )
+
+
+class ActivitySerializer(serializers.Serializer):
+    seconds_counted = serializers.IntegerField(help_text="Secondes retenues après plafonnement")
+    seconds_today = serializers.IntegerField()
+    streak_days = serializers.IntegerField()
+
+
+class BadgeQuerySerializer(serializers.Serializer):
+    course = serializers.SlugField(required=False, help_text="Slug du parcours")
+
+
+class LearnerBadgeSerializer(BadgeSerializer):
+    awarded_at = serializers.DateTimeField()
+    course = CourseRefSerializer()
+    project_id = serializers.IntegerField(allow_null=True)
+    level_id = serializers.IntegerField(allow_null=True)
+
+
+# --- Tableau de bord, progression, recommandations (WD01, WD02, WD21) -----------------------------
+
+
+class RankSerializer(serializers.Serializer):
+    label = serializers.CharField()
+    min_points = serializers.IntegerField()
+    next_label = serializers.CharField(allow_null=True)
+    next_at = serializers.IntegerField(allow_null=True, help_text="Points du palier suivant")
+
+
+class RecommendationSerializer(CourseListSerializer):
+    matches_goals = serializers.SerializerMethodField(
+        help_text="Catégorie liée aux objectifs de l'apprenant"
+    )
+
+    class Meta(CourseListSerializer.Meta):
+        fields = (*CourseListSerializer.Meta.fields, "matches_goals")
+
+    def get_matches_goals(self, course) -> bool:
+        return bool(course.matches_goals)
+
+
+class RecommendationQuerySerializer(serializers.Serializer):
+    limit = serializers.IntegerField(min_value=1, max_value=12, default=6)
+
+
+CountersSerializer = LearnerCountersSerializer
+
+
+class DashboardSerializer(serializers.Serializer):
+    """Accueil (WD01) ; `resume` absent → WD02. `points` et `rank` à null tant que le barème n'est pas fixé (C8)."""
+
+    first_name = serializers.CharField()
+    points = serializers.IntegerField(allow_null=True)
+    rank = RankSerializer(allow_null=True)
+    streak_days = serializers.IntegerField()
+    seconds_today = serializers.IntegerField()
+    resume = EnrollmentSerializer(allow_null=True, help_text="Parcours à reprendre")
+    counters = CountersSerializer()
+    recommendations = RecommendationSerializer(many=True, help_text="3 parcours recommandés")
+
+
+class DaySecondsSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    seconds = serializers.IntegerField()
+
+
+class MasterySerializer(serializers.Serializer):
+    category = CategorySummarySerializer()
+    missions_done = serializers.IntegerField()
+    mission_count = serializers.IntegerField()
+    pct = serializers.IntegerField()
+
+
+class ProgressSerializer(serializers.Serializer):
+    """Ma progression (WD21)."""
+
+    week_seconds = serializers.IntegerField(help_text="Du lundi à aujourd'hui")
+    last_days = DaySecondsSerializer(
+        many=True, help_text="7 derniers jours, du plus ancien à aujourd'hui"
+    )
+    points = serializers.IntegerField(allow_null=True)
+    rank = RankSerializer(allow_null=True)
+    streak_days = serializers.IntegerField()
+    counters = CountersSerializer()
+    mastery = MasterySerializer(many=True, help_text="Par catégorie des parcours suivis")
