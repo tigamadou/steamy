@@ -3088,19 +3088,18 @@ paths:
     post:
       operationId: payments_webhook_create
       description: |-
-        Generic webhook entrypoint for external providers.
-        - provider_name: "kkiapay" or "fedapay"
-        The request.body should be validated by provider-specific verification code.
-      summary: Webhook des prestataires de paiement (appelé par KKiaPay / FedaPay,
-        pas par le front)
+        Point d'entrée des notifications des prestataires (S9, ADR 0003). La signature est vérifiée **avant** toute
+        lecture du contenu ; le prestataire normalise ensuite la notification (`parse_event`).
+      summary: Webhook des prestataires de paiement (appelé par le prestataire, pas
+        par le front)
       parameters:
       - in: path
         name: provider_name
         schema:
           type: string
           enum:
+          - fake
           - fedapay
-          - kkiapay
         required: true
       tags:
       - payments
@@ -5864,11 +5863,11 @@ components:
       - title
     ProviderEnum:
       enum:
-      - kkiapay
+      - fake
       - fedapay
       type: string
       description: |-
-        * `kkiapay` - Kkiapay
+        * `fake` - Faux prestataire
         * `fedapay` - FedaPay
     Question:
       type: object

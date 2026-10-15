@@ -1155,10 +1155,9 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Webhook des prestataires de paiement (appelé par KKiaPay / FedaPay, pas par le front)
-         * @description Generic webhook entrypoint for external providers.
-         *     - provider_name: "kkiapay" or "fedapay"
-         *     The request.body should be validated by provider-specific verification code.
+         * Webhook des prestataires de paiement (appelé par le prestataire, pas par le front)
+         * @description Point d'entrée des notifications des prestataires (S9, ADR 0003). La signature est vérifiée **avant** toute
+         *     lecture du contenu ; le prestataire normalise ensuite la notification (`parse_event`).
          */
         post: operations["payments_webhook_create"];
         delete?: never;
@@ -2440,11 +2439,11 @@ export interface components {
             readonly levels: components["schemas"]["LevelSummary"][];
         };
         /**
-         * @description * `kkiapay` - Kkiapay
+         * @description * `fake` - Faux prestataire
          *     * `fedapay` - FedaPay
          * @enum {string}
          */
-        ProviderEnum: "kkiapay" | "fedapay";
+        ProviderEnum: "fake" | "fedapay";
         Question: {
             readonly id: number;
             quiz: number;
@@ -6105,7 +6104,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                provider_name: "fedapay" | "kkiapay";
+                provider_name: "fake" | "fedapay";
             };
             cookie?: never;
         };

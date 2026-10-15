@@ -330,16 +330,31 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Seed enrichi avec les données du domaine
   - [ ] `make openapi` committé
 
-### API-L3b · Commerce, boutique, événements payants — ⬜ à faire
+### API-L3b · Commerce, boutique, événements payants — 🟡 en cours
 - [ ] **API-L3b.0a** Comparaison paiement (S9) · `feature/api-l3b-0a-adr-paiement` · doc
   - [x] Comparer KKiaPay et FedaPay : réseaux par pays (MTN, Moov, Celtiis), frais, initiation côté serveur, webhook signé, vérification de transaction, remboursements par API, sandbox, reversement, XOF
   - [x] Écrire l'**ADR-Paiement** (FedaPay seul prestataire intégré, remplaçable ; KKiaPay/CinetPay non intégrés en v1)
   - [ ] Faire valider le format de `Invoice` par la comptabilité
-- [ ] **API-L3b.0b** Interface paiement · `feature/api-l3b-0b-paiement`
-  - [ ] `payments/providers/` : `PaymentProvider` (`initiate`, `verify_webhook`, `parse_event`, `fetch_status`, `refund`)
-  - [ ] `FakePaymentProvider` pilotable (numéros `…01` succès, `…02` échec, `…03` en attente), webhook signé asynchrone
-  - [ ] Commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>`
-  - [ ] `FedaPayProvider` (seule implémentation réelle ; clé sandbox puis live)
+- [x] **API-L3b.0b** Interface paiement · `feature/api-l3b-0b-paiement`
+  - [x] `payments/providers/` : `PaymentProvider` (`initiate`, `verify_webhook`, `parse_event`, `fetch_status`, `refund`)
+  - [x] `FakePaymentProvider` pilotable (numéros `…01` succès, `…02` échec, `…03` en attente), webhook signé asynchrone
+  - ~~Commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>`~~ : déplacées en
+    L3b.2 et L3b.5, qui créent les modèles `Payment` et `PaymentRequest` qu'elles manipulent
+  - [x] `FedaPayProvider` (seule implémentation réelle ; clé sandbox puis live)
+  - [x] Webhook `payments/webhook/{provider}/` branché sur l'interface (signature, puis `parse_event`) ; KKiaPay retiré
+  - [x] Variables `PAYMENT_PROVIDER`, `FEDAPAY_*` : chart, secrets GitHub, `docs/infra/`
+  > Décisions : `initiate(Charge)` reçoit une demande de débit construite par le serveur (référence, montant XOF
+  > entier, pays, réseau, numéro E.164, nom du payeur) plutôt qu'une `Order`, pour rester indépendant du modèle
+  > refondu en L3b.1 ; il renvoie `InitiateResult(provider_tx_id, status, redirect_url=None)`. `refund` renvoie
+  > `done | pending_manual | unsupported` (FedaPay : `pending_manual`, pas d'API publique). Le faux prestataire
+  > garde ses transactions dans le cache et poste son webhook signé (`X-Fake-Signature`) par la tâche
+  > `deliver_fake_webhook`, après la validation de la transaction et `FAKE_PAYMENT_DELAY` secondes ; la vue du
+  > webhook est appelée sur place (aucun appel réseau), donc avec la même vérification. Autres numéros que
+  > `…01/02/03` : succès. FedaPay : transaction (`merchant_reference` = référence de la commande), jeton, débit
+  > direct `POST /{mode}` ; signature `t=…,s=HMAC-SHA256("t.corps")` tolérée 5 min ; modes par `PAYS:réseau`
+  > (`FEDAPAY_MODES`, Celtiis supposé `sbin`) et devises (`FEDAPAY_CURRENCY_IDS`) en réglages, **à confirmer
+  > dans le bac à sable** (inconnues 1, 5 et 6 de l'ADR 0003). Statuts FedaPay : `approved`/`transferred` →
+  > `succeeded`, `declined`/`canceled`/`expired`/`refunded` → `failed`.
 - [ ] **API-L3b.1** Commandes · `feature/api-l3b-1-commandes`
   - [ ] `Order`, `OrderItem` refondus (§3.3) ; service `pricing` unique
   - [ ] `POST payments/orders/` (identifiants et quantités seulement)

@@ -25,7 +25,11 @@ En staging et en prod, le chart les injecte dans api, worker, beat et migrate.
 | `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_USE_TLS` | non | Mailpit | values `email.*` | SMTP |
 | `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | non | factices | secrets du même nom | Identifiants SMTP |
 | `DEFAULT_FROM_EMAIL` | non | `no-reply@steamy.local` | values `email.from` | Expéditeur |
-| `PAYMENTS_KKIAPAY_SECRET` / `PAYMENTS_FEDAPAY_SECRET` | non | — | secrets du même nom | Vérification des webhooks de paiement |
+| `PAYMENT_PROVIDER` | non | `fake` | `fedapay` (values `payments.provider`) | Prestataire de paiement ([ADR 0003](../adr/0003-prestataire-paiement.md)). `fake` est pilotable par le numéro saisi (`…01` succès, `…02` échec, `…03` en attente), poste lui-même un webhook signé et **refuse de fonctionner** en staging et en prod |
+| `FEDAPAY_SECRET_KEY` / `FEDAPAY_WEBHOOK_SECRET` | oui si `fedapay` | — | secrets du même nom | Clé secrète de l'API FedaPay (`sk_…`) et secret de signature du webhook (`wh_…`). **Jamais dans le dépôt ni en CI**. Staging : clés du bac à sable |
+| `FEDAPAY_ENVIRONMENT` | non | `sandbox` | values `payments.fedapayEnvironment` | `sandbox` ou `live` |
+| `FEDAPAY_MODES` / `FEDAPAY_CURRENCY_IDS` | non | voir `settings.py` | — | JSON : mode de débit direct par `PAYS:réseau`, identifiants de devise. À confirmer dans le bac à sable (ADR 0003) |
+| `FAKE_PAYMENT_DELAY` | non | `3` | — | Secondes avant le webhook du faux prestataire |
 | `SMS_PROVIDER` | non | `fake` | `twilio` (values `sms.provider`) | Fournisseur SMS ([ADR 0002](../adr/0002-fournisseur-sms.md)). `fake` envoie chaque SMS comme e-mail à `<e164>@sms.test` (Mailpit) et **refuse de fonctionner** en staging et en prod. Défaut : `fake` en local et CI, `twilio` en déployé |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | oui si `twilio` | — | secrets du même nom | Identifiants de l'API Twilio. **Jamais dans le dépôt**. En staging : identifiants de test Twilio (aucun SMS réel, numéros magiques) ou sous-compte plafonné |
 | `TWILIO_SENDER` | non | — | values `sms.sender` (`STEAMY`) | Expéditeur : identifiant alphanumérique enregistré chez Twilio, ou numéro Twilio |
@@ -58,7 +62,7 @@ que reçoit le serveur :
 | `RUSTFS_ACCESS_KEY` / `RUSTFS_SECRET_KEY` | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | API, RustFS, sauvegarde des médias |
 | `WASABI_ACCESS_KEY_ID` / `WASABI_SECRET_ACCESS_KEY` | idem | Sauvegardes PostgreSQL et médias |
 | `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | idem | API (optionnel) |
-| `PAYMENTS_*` | idem | API (optionnel) |
+| `FEDAPAY_SECRET_KEY` / `FEDAPAY_WEBHOOK_SECRET` | idem | API : paiements Mobile Money. Sans eux, aucun paiement ne peut être initié |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | idem | API : envoi des SMS (OTP, liens de consentement et de paiement). Sans eux, aucun SMS ne part |
 | `GHCR_PULL_USER` (variable) / `GHCR_PULL_TOKEN` | idem | Serveur : téléchargement des images et charts. **Non transmis à l'application** |
 | `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `DEPLOY_HOST` | — | CI uniquement (connexion SSH) |
