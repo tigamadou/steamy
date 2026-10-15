@@ -77,6 +77,8 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "storages",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
     # Local
     "apps.file",
     "apps.mail",
@@ -96,6 +98,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # `request.user.is_verified()` (TOTP du personnel, D72) ; exigé sur le back-office en API-L6.1
+    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -249,8 +253,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 25,
+    "DEFAULT_PAGINATION_CLASS": "libs.pagination.PagePagination",
     "DEFAULT_FILTER_BACKENDS": (
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.OrderingFilter",
@@ -267,6 +270,7 @@ REST_FRAMEWORK = {
         "anon": os.getenv("THROTTLE_ANON", "120/min"),
         "user": os.getenv("THROTTLE_USER", "600/min"),
         "login": os.getenv("THROTTLE_LOGIN", "5/min"),
+        "login-identifier": os.getenv("THROTTLE_LOGIN_IDENTIFIER", "10/hour"),
         "signup": os.getenv("THROTTLE_SIGNUP", "5/min"),
         "password-reset": os.getenv("THROTTLE_PASSWORD_RESET", "5/hour"),
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),

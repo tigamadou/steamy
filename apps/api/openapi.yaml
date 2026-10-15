@@ -4,6 +4,58 @@ info:
   version: 1.0.0
   description: API pour la plateforme de formation
 paths:
+  /api/accounts/me/:
+    get:
+      operationId: accounts_me_retrieve
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+  /api/accounts/me/email/:
+    post:
+      operationId: accounts_me_email_create
+      description: |-
+        Changement d'email (WPD08, WT08). Pour l'enseignant, c'est son identifiant de connexion ; pour le parent, une
+        adresse de contact (rapport hebdomadaire, D55), qui ne sert pas à se connecter (S4). L'apprenant renseigne la
+        sienne dans son profil (WD17).
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailChangeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/accounts/me/password/:
+    post:
+      operationId: accounts_me_password_create
+      description: Changement de mot de passe (WD18, WPD08, WT08). La session en cours
+        reste ouverte.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/analytics/dashboard/summary/:
     get:
       operationId: analytics_dashboard_summary_retrieve
@@ -46,9 +98,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/TrackingEvent'
           description: ''
-  /api/analytics/export/events.csv:
+  /api/analytics/export/events/:
     get:
-      operationId: analytics_export_events.csv_retrieve
+      operationId: analytics_export_events_retrieve
       parameters:
       - in: query
         name: end
@@ -74,6 +126,49 @@ paths:
                 type: string
                 format: binary
           description: Export CSV des événements
+  /api/auth/csrf/:
+    get:
+      operationId: auth_csrf_retrieve
+      tags:
+      - auth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfToken'
+          description: ''
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: Connexion des apprenants, parents et enseignants (W16). Le personnel
+        passe par l'admin (WAD15).
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
   /api/core/presign/:
     post:
       operationId: core_presign_create
@@ -101,24 +196,24 @@ paths:
     get:
       operationId: courses_courses_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -186,24 +281,24 @@ paths:
     get:
       operationId: courses_lessons_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -246,24 +341,24 @@ paths:
     get:
       operationId: courses_modules_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -308,24 +403,24 @@ paths:
     get:
       operationId: courses_resources_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -394,24 +489,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       tags:
       - learning
       security:
@@ -482,24 +577,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -547,24 +642,24 @@ paths:
     get:
       operationId: learning_choices_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -612,24 +707,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -706,24 +801,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -825,24 +920,24 @@ paths:
     get:
       operationId: learning_questions_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -885,24 +980,24 @@ paths:
     get:
       operationId: learning_quizzes_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -950,24 +1045,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -1020,24 +1115,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -1120,61 +1215,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/WebhookNack'
           description: ''
-  /api/public/user/csrf:
-    get:
-      operationId: public_user_csrf_retrieve
-      tags:
-      - public
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CsrfToken'
-          description: ''
-  /api/public/user/session-login:
-    post:
-      operationId: public_user_session_login_create
-      tags:
-      - public
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginRequest'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LoginResponse'
-          description: ''
-  /api/user/my-profile:
-    get:
-      operationId: user_my_profile_retrieve
-      tags:
-      - user
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Me'
-          description: ''
-  /api/user/session-logout:
-    post:
-      operationId: user_session_logout_create
-      tags:
-      - user
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
 components:
   schemas:
     Attempt:
@@ -1404,6 +1444,20 @@ components:
       - eventsLast7Days
       - revenueLast30Days
       - totalUsers
+    EmailChangeRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 255
+      required:
+      - email
+      - password
     Enrollment:
       type: object
       properties:
@@ -1558,15 +1612,17 @@ components:
     LoginResponse:
       type: object
       properties:
-        userId:
-          type: integer
+        user:
+          $ref: '#/components/schemas/Me'
         csrfToken:
           type: string
       required:
       - csrfToken
-      - userId
+      - user
     Me:
       type: object
+      description: 'Identité et rôle du compte connecté : sert aux shells, à la redirection
+        après W16 et aux gardes (§7.3).'
       properties:
         id:
           type: integer
@@ -1607,13 +1663,38 @@ components:
           type: string
           readOnly: true
           title: Nom
+        profileStep:
+          description: Étape de profil restante (W11-W14, WP07-WP09), null si le profil
+            est complet
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ProfileStepEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        isStaff:
+          type: boolean
+          readOnly: true
+        otpVerified:
+          type: boolean
+          description: Session du personnel validée par TOTP (D72) ; toujours faux
+            pour un persona.
+          readOnly: true
+        staffGroups:
+          type: array
+          items:
+            type: string
+          readOnly: true
       required:
       - email
       - firstName
       - id
+      - isStaff
       - lastName
+      - otpVerified
       - phone
+      - profileStep
       - role
+      - staffGroups
       - status
       - username
     MeStatusEnum:
@@ -1749,12 +1830,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1769,12 +1850,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1789,12 +1870,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1809,12 +1890,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1829,12 +1910,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1849,12 +1930,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1869,12 +1950,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1889,12 +1970,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1909,12 +1990,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1929,12 +2010,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1949,12 +2030,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1969,12 +2050,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1989,16 +2070,28 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
             $ref: '#/components/schemas/Resource'
+    PasswordChangeRequest:
+      type: object
+      properties:
+        currentPassword:
+          type: string
+          minLength: 1
+        newPassword:
+          type: string
+          minLength: 1
+      required:
+      - currentPassword
+      - newPassword
     PatchedProgressRequest:
       type: object
       properties:
@@ -2088,6 +2181,16 @@ components:
       required:
       - fields
       - url
+    ProfileStepEnum:
+      enum:
+      - learner-info
+      - learner-school
+      - learner-goals
+      - learner-avatar
+      - parent-location
+      - parent-about
+      - parent-children
+      type: string
     Progress:
       type: object
       properties:

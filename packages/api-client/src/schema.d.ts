@@ -4,6 +4,60 @@
  */
 
 export interface paths {
+    "/api/accounts/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["accounts_me_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/me/email/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Changement d'email (WPD08, WT08). Pour l'enseignant, c'est son identifiant de connexion ; pour le parent, une
+         *     adresse de contact (rapport hebdomadaire, D55), qui ne sert pas à se connecter (S4). L'apprenant renseigne la
+         *     sienne dans son profil (WD17).
+         */
+        post: operations["accounts_me_email_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/me/password/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Changement de mot de passe (WD18, WPD08, WT08). La session en cours reste ouverte. */
+        post: operations["accounts_me_password_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/analytics/dashboard/summary/": {
         parameters: {
             query?: never;
@@ -45,16 +99,65 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/analytics/export/events.csv": {
+    "/api/analytics/export/events/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["analytics_export_events.csv_retrieve"];
+        get: operations["analytics_export_events_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/csrf/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["auth_csrf_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/login/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Connexion des apprenants, parents et enseignants (W16). Le personnel passe par l'admin (WAD15). */
+        post: operations["auth_login_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/logout/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_logout_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -656,70 +759,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/public/user/csrf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["public_user_csrf_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/public/user/session-login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["public_user_session_login_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/user/my-profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["user_my_profile_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/user/session-logout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["user_session_logout_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -806,6 +845,11 @@ export interface components {
             /** Format: double */
             revenueLast30Days: number;
         };
+        EmailChangeRequest: {
+            password: string;
+            /** Format: email */
+            email: string;
+        };
         Enrollment: {
             readonly id: number;
             course: number;
@@ -867,9 +911,10 @@ export interface components {
             password: string;
         };
         LoginResponse: {
-            userId: number;
+            user: components["schemas"]["Me"];
             csrfToken: string;
         };
+        /** @description Identité et rôle du compte connecté : sert aux shells, à la redirection après W16 et aux gardes (§7.3). */
         Me: {
             readonly id: number;
             /** Rôle */
@@ -889,6 +934,12 @@ export interface components {
             readonly firstName: string;
             /** Nom */
             readonly lastName: string;
+            /** @description Étape de profil restante (W11-W14, WP07-WP09), null si le profil est complet */
+            readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
+            readonly isStaff: boolean;
+            /** @description Session du personnel validée par TOTP (D72) ; toujours faux pour un persona. */
+            readonly otpVerified: boolean;
+            readonly staffGroups: string[];
         };
         /**
          * @description * `pending` - En attente de consentement
@@ -937,12 +988,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Attempt"][];
@@ -952,12 +1003,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Certificate"][];
@@ -967,12 +1018,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Choice"][];
@@ -982,12 +1033,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["CourseList"][];
@@ -997,12 +1048,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Enrollment"][];
@@ -1012,12 +1063,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Lesson"][];
@@ -1027,12 +1078,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Module"][];
@@ -1042,12 +1093,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Order"][];
@@ -1057,12 +1108,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Payment"][];
@@ -1072,12 +1123,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Progress"][];
@@ -1087,12 +1138,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Question"][];
@@ -1102,12 +1153,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Quiz"][];
@@ -1117,15 +1168,19 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Resource"][];
+        };
+        PasswordChangeRequest: {
+            currentPassword: string;
+            newPassword: string;
         };
         PatchedProgressRequest: {
             enrollment?: number;
@@ -1161,6 +1216,8 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /** @enum {string} */
+        ProfileStepEnum: "learner-info" | "learner-school" | "learner-goals" | "learner-avatar" | "parent-location" | "parent-about" | "parent-children";
         Progress: {
             readonly id: number;
             enrollment: number;
@@ -1262,6 +1319,69 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    accounts_me_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    accounts_me_email_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    accounts_me_password_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     analytics_dashboard_summary_retrieve: {
         parameters: {
             query?: never;
@@ -1304,7 +1424,7 @@ export interface operations {
             };
         };
     };
-    "analytics_export_events.csv_retrieve": {
+    analytics_export_events_retrieve: {
         parameters: {
             query?: {
                 /** @description Par défaut : aujourd'hui */
@@ -1326,6 +1446,66 @@ export interface operations {
                 content: {
                     "text/csv": string;
                 };
+            };
+        };
+    };
+    auth_csrf_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsrfToken"];
+                };
+            };
+        };
+    };
+    auth_login_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+        };
+    };
+    auth_logout_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1355,12 +1535,12 @@ export interface operations {
     courses_courses_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1425,12 +1605,12 @@ export interface operations {
     courses_lessons_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1475,12 +1655,12 @@ export interface operations {
     courses_modules_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1525,12 +1705,12 @@ export interface operations {
     courses_resources_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1602,12 +1782,12 @@ export interface operations {
     learning_attempts_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
             };
             header?: never;
             path?: never;
@@ -1673,12 +1853,12 @@ export interface operations {
     learning_certificates_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1723,12 +1903,12 @@ export interface operations {
     learning_choices_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1773,12 +1953,12 @@ export interface operations {
     learning_enrollments_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1846,12 +2026,12 @@ export interface operations {
     learning_progress_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1945,12 +2125,12 @@ export interface operations {
     learning_questions_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1995,12 +2175,12 @@ export interface operations {
     learning_quizzes_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -2045,12 +2225,12 @@ export interface operations {
     payments_orders_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -2095,12 +2275,12 @@ export interface operations {
     payments_payments_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -2174,85 +2354,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["WebhookNack"];
                 };
-            };
-        };
-    };
-    public_user_csrf_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CsrfToken"];
-                };
-            };
-        };
-    };
-    public_user_session_login_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LoginResponse"];
-                };
-            };
-        };
-    };
-    user_my_profile_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Me"];
-                };
-            };
-        };
-    };
-    user_session_logout_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
