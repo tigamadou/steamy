@@ -28,7 +28,7 @@ async function ApiStatus() {
 async function fetchCurrentIdentifier(): Promise<string | undefined> {
   try {
     const api = await getServerApi();
-    const { data } = await api.GET("/api/user/my-profile");
+    const { data } = await api.GET("/api/accounts/me/");
     // Identifiant propre au persona : apprenant, parent ou enseignant (ADR 0001)
     return data?.username ?? data?.phone ?? data?.email ?? undefined;
   } catch {

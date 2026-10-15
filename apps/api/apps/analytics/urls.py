@@ -10,5 +10,5 @@ router.register(r"events", TrackingEventViewSet, basename="event")
 urlpatterns = [
     path("", include(router.urls)),
     path("dashboard/summary/", dashboard_summary, name="analytics-summary"),
-    path("export/events.csv", export_events_csv, name="analytics-export-events"),
+    path("export/events/", export_events_csv, name="analytics-export-events"),
 ]

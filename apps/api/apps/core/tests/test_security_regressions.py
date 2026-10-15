@@ -60,7 +60,7 @@ def test_s12_token_login_is_gone(user):
 def test_s12_token_header_does_not_authenticate(user):
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION="Token 0123456789abcdef")
-    assert client.get("/api/user/my-profile").status_code == 403
+    assert client.get("/api/accounts/me/").status_code == 403
 
 
 # --- Surfaces inutilisées : API navigable, messagerie, fichiers, Path -------------------
@@ -182,13 +182,13 @@ def test_s9_login_is_throttled_after_five_attempts(user, settings):
     client = APIClient()  # le client de test désactive le CSRF par défaut
     for _ in range(5):
         resp = client.post(
-            "/api/public/user/session-login",
+            "/api/auth/login/",
             {"identifier": user.username, "password": "mauvais"},
             format="json",
         )
         assert resp.status_code == 400
     resp = client.post(
-        "/api/public/user/session-login",
+        "/api/auth/login/",
         {"identifier": user.username, "password": "mauvais"},
         format="json",
     )
@@ -199,7 +199,7 @@ def test_s9_login_is_throttled_after_five_attempts(user, settings):
 @pytest.mark.django_db
 def test_errors_use_the_single_format_in_french(user):
     resp = APIClient().post(
-        "/api/public/user/session-login",
+        "/api/auth/login/",
         {"identifier": user.username, "password": "mauvais"},
         format="json",
     )
@@ -209,7 +209,7 @@ def test_errors_use_the_single_format_in_french(user):
         "message": "Identifiant ou mot de passe incorrect.",
     }
 
-    invalid = APIClient().post("/api/public/user/session-login", {}, format="json").json()
+    invalid = APIClient().post("/api/auth/login/", {}, format="json").json()
     assert set(invalid) == {"code", "message", "fields"}
     assert invalid["code"] == "VALIDATION_ERROR"
     assert invalid["fields"]["identifier"] == ["Ce champ est obligatoire."]
@@ -262,7 +262,7 @@ def test_s3_tracking_events_are_write_only_and_not_attributable(user):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "url", ["/api/analytics/dashboard/summary/", "/api/analytics/export/events.csv"]
+    "url", ["/api/analytics/dashboard/summary/", "/api/analytics/export/events/"]
 )
 def test_s3_dashboard_and_export_are_staff_only(user, url):
     client = APIClient()

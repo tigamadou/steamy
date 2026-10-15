@@ -1,4 +1,4 @@
-"""Session Django + CSRF (S12, ADR 0001) sur les chemins hérités, renommés en API-1.2."""
+"""Domaine `auth` : session Django + CSRF (S12, ADR 0001), throttling de la connexion (S9)."""
 
 import pytest
 from django.conf import settings
@@ -7,10 +7,10 @@ from rest_framework.test import APIClient
 from apps.accounts.tests.factories import PASSWORD, LearnerFactory, StaffFactory
 
 FRONT = "http://localhost:3000"
-CSRF_URL = "/api/public/user/csrf"
-LOGIN_URL = "/api/public/user/session-login"
-LOGOUT_URL = "/api/user/session-logout"
-ME_URL = "/api/user/my-profile"
+CSRF_URL = "/api/auth/csrf/"
+LOGIN_URL = "/api/auth/login/"
+LOGOUT_URL = "/api/auth/logout/"
+ME_URL = "/api/accounts/me/"
 
 pytestmark = pytest.mark.django_db
 
@@ -87,7 +87,8 @@ def test_session_key_rotates_on_login(client, user):
 def test_session_login_then_authenticated_calls_then_logout(client, user):
     resp = login(client, csrf(client))
     assert resp.status_code == 200
-    assert resp.json()["userId"] == user.id
+    assert resp.json()["user"]["id"] == user.id
+    assert resp.json()["user"]["role"] == "learner"
     assert client.cookies["sessionid"]["httponly"]
     new_token = resp.json()["csrfToken"]
 
@@ -119,3 +120,58 @@ def test_untrusted_origin_is_refused(client, user):
         HTTP_ORIGIN="https://evil.test",
     )
     assert resp.status_code == 403
+
+
+def test_logout_requires_csrf_even_without_session(client):
+    csrf(client)
+    assert client.post(LOGOUT_URL).status_code == 403
+
+
+@pytest.mark.parametrize(
+    "old_path",
+    [
+        "/api/public/user/csrf",
+        "/api/public/user/session-login",
+        "/api/user/session-logout",
+        "/api/user/my-profile",
+        "/api/user/change-password",
+        "/api/user/change-email",
+        "/api/public/user/forgot-password-step-1",
+    ],
+)
+def test_legacy_paths_are_gone(old_path):
+    assert APIClient().get(old_path).status_code == 404
+
+
+# --- Throttling de la connexion : par IP et par identifiant (S9) -----------------------------
+
+
+def attempt(identifier, ip):
+    return APIClient().post(
+        LOGIN_URL, {"identifier": identifier, "password": "mauvais"}, format="json", REMOTE_ADDR=ip
+    )
+
+
+def test_login_is_throttled_per_ip(user):
+    for n in range(5):
+        assert attempt(f"inconnu{n}", "10.0.0.1").status_code == 400
+    assert attempt("encore-un-autre", "10.0.0.1").status_code == 429
+
+
+def test_login_is_throttled_per_identifier_across_ips(user):
+    # Variantes d'un même identifiant (casse, espaces) depuis des IP différentes : un seul compteur.
+    variants = ["lea", "LEA", " Lea "]
+    for n in range(10):
+        assert attempt(variants[n % 3], f"10.0.1.{n}").status_code == 400
+    resp = attempt("lea", "10.0.1.200")
+    assert resp.status_code == 429
+    assert resp.json()["code"] == "THROTTLED"
+    # Un autre identifiant n'est pas bloqué.
+    assert attempt("autre", "10.0.1.201").status_code == 400
+
+
+def test_phone_variants_share_the_identifier_counter():
+    for n in range(10):
+        number = ["0197000099", "+2290197000099", "01 97 00 00 99"][n % 3]
+        assert attempt(number, f"10.0.2.{n}").status_code == 400
+    assert attempt("00229 0197000099", "10.0.2.200").status_code == 429

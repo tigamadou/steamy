@@ -18,14 +18,14 @@ ou si une vue Django n'est pas correctement décrite dans le schéma.
 
 ```ts
 const api = await getServerApi();
-const { data, error } = await api.GET("/api/user/my-profile");
+const { data, error } = await api.GET("/api/accounts/me/");
 ```
 
 Session Django (cookie HttpOnly sur le domaine parent partagé) :
 
-1. `GET /api/public/user/csrf` : pose le cookie `csrftoken` ;
-2. `POST /api/public/user/session-login` : pose le cookie `sessionid` ;
-3. `POST /api/user/session-logout`.
+1. `GET /api/auth/csrf/` : pose le cookie `csrftoken` ;
+2. `POST /api/auth/login/` `{ identifier, password }` : pose le cookie `sessionid` ;
+3. `POST /api/auth/logout/`.
 
 Toute requête qui modifie des données porte l'en-tête `X-CSRFToken` : `csrfMiddleware`
 l'ajoute automatiquement dans les deux clients.

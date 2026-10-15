@@ -28,7 +28,7 @@ async function loadClient(): Promise<ApiClient> {
       if (fromCookie) {
         return fromCookie;
       }
-      const { data } = await api.GET("/api/public/user/csrf");
+      const { data } = await api.GET("/api/auth/csrf/");
       return data?.csrfToken;
     }),
   );

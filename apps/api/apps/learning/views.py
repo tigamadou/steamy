@@ -29,7 +29,7 @@ class EnrollmentViewSet(OwnedByRequestUserMixin, viewsets.ModelViewSet):
 
 
 class ProgressViewSet(OwnedByRequestUserMixin, viewsets.ModelViewSet):
-    queryset = Progress.objects.select_related("lesson", "enrollment")
+    queryset = Progress.objects.select_related("lesson", "enrollment").order_by("id")
     serializer_class = ProgressSerializer
     permission_classes = [permissions.IsAuthenticated]
     owner_field = "enrollment__user"
@@ -37,7 +37,7 @@ class ProgressViewSet(OwnedByRequestUserMixin, viewsets.ModelViewSet):
 
 
 class CertificateViewSet(OwnedByRequestUserMixin, viewsets.ReadOnlyModelViewSet):
-    queryset = Certificate.objects.select_related("enrollment", "enrollment__user")
+    queryset = Certificate.objects.select_related("enrollment", "enrollment__user").order_by("-id")
     serializer_class = CertificateSerializer
     permission_classes = [permissions.IsAuthenticated]
     owner_field = "enrollment__user"
@@ -53,7 +53,12 @@ class QuizViewSet(viewsets.ReadOnlyModelViewSet):
         if getattr(self, "swagger_fake_view", False):  # génération du schéma OpenAPI
             return Quiz.objects.none()
         filters_ = enrolled_course_filter(self.request.user, "course__")
-        return Quiz.objects.filter(**filters_).prefetch_related("questions__choices").distinct()
+        return (
+            Quiz.objects.filter(**filters_)
+            .prefetch_related("questions__choices")
+            .distinct()
+            .order_by("id")
+        )
 
 
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
