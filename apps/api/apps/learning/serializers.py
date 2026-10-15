@@ -22,6 +22,8 @@ class EnrollmentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"course": "course is required."})
         if course.status != Course.Status.PUBLISHED:
             raise serializers.ValidationError({"course": "Ce parcours n'est pas disponible."})
+        if course.required_kit_id:
+            raise ApiError("KIT_CODE_REQUIRED")
         if not course.is_free:
             raise ApiError("PAYMENT_REQUIRED")
         # avoid duplicate enrollment

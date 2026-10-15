@@ -2448,6 +2448,80 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/shop/kits/:
+    get:
+      operationId: shop_kits_list
+      description: Kits en vente, paginés.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        description: Slug de la catégorie
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - shop
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedKitList'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/shop/kits/{slug}/:
+    get:
+      operationId: shop_kits_retrieve
+      description: Fiche kit (WK02) ; un kit retiré de la vente répond 404.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KitDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
 components:
   schemas:
     AreaTypeEnum:
@@ -2815,6 +2889,11 @@ components:
           type: string
           description: Visuel des cartes
           maxLength: 16
+        requiredKit:
+          allOf:
+          - $ref: '#/components/schemas/RequiredKit'
+          readOnly: true
+          nullable: true
         coverImage:
           type: string
           nullable: true
@@ -2865,6 +2944,7 @@ components:
       - difficulty
       - missionCount
       - projects
+      - requiredKit
       - slug
       - title
     CourseList:
@@ -2898,6 +2978,11 @@ components:
           type: string
           description: Visuel des cartes
           maxLength: 16
+        requiredKit:
+          allOf:
+          - $ref: '#/components/schemas/RequiredKit'
+          readOnly: true
+          nullable: true
         coverImage:
           type: string
           nullable: true
@@ -2914,6 +2999,7 @@ components:
       - category
       - coverImage
       - difficulty
+      - requiredKit
       - slug
       - title
     CsrfToken:
@@ -3239,6 +3325,100 @@ components:
         * `mcq` - QCM
         * `tf` - Vrai/Faux
         * `free` - Libre
+    Kit:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          title: Nom
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        images:
+          description: URL https ou chemins du stockage, la première sert de couverture
+        available:
+          type: boolean
+          readOnly: true
+          description: En stock (le stock exact reste interne)
+      required:
+      - available
+      - category
+      - difficulty
+      - name
+      - price
+      - slug
+    KitDetail:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          title: Nom
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        images:
+          description: URL https ou chemins du stockage, la première sert de couverture
+        available:
+          type: boolean
+          readOnly: true
+          description: En stock (le stock exact reste interne)
+        description:
+          type: string
+        contents:
+          title: Contenu de la boîte
+        compatibleCourses:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+      required:
+      - available
+      - category
+      - compatibleCourses
+      - description
+      - difficulty
+      - name
+      - price
+      - slug
     LeadRequest:
       type: object
       properties:
@@ -3714,6 +3894,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Enrollment'
+    PaginatedKitList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Kit'
     PaginatedNotificationList:
       type: object
       properties:
@@ -4240,6 +4440,18 @@ components:
       - code
       - id
       - label
+    RequiredKit:
+      type: object
+      description: 'Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`.'
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+      required:
+      - name
+      - slug
     RoleEnum:
       enum:
       - learner
