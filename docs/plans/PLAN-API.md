@@ -223,10 +223,11 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Refus : demande gardée 30 j (C9), `CONSENT_COOLDOWN`, compte purgé, identifiant libéré (D22)
   - [x] Tests : parent ne voit que les demandes de son numéro, double acceptation → `CONSENT_ALREADY_RESOLVED`, nouvelle demande avant 30 j refusée
   - [x] Jeton du lien SMS à usage unique (consommé par `claim`) ; état `refused` de `GET auth/learner-signup/` pour W18
-- [ ] **API-L2.5** Profils · `feature/api-l2-5-profils`
-  - [ ] `profileStep` de `accounts/me/`
-  - [ ] `PATCH accounts/me/`, `…/learner-profile/` (`BIRTHDATE_AGE_MISMATCH`, objectifs ≥ 2), `…/parent-profile/`
-  - [ ] Tests : cohérence date de naissance / âge
+- [x] **API-L2.5** Profils · `feature/api-l2-5-profils`
+  - [x] `profileStep` de `accounts/me/`
+  - [x] `PATCH accounts/me/`, `…/learner-profile/` (`BIRTHDATE_AGE_MISMATCH`, objectifs ≥ 2), `…/parent-profile/`
+  - [x] Tests : cohérence date de naissance / âge
+  - [x] `ParentProfile.children_to_enroll` (WP09 « Nombre d'enfants à inscrire »), exigé par `profileStep`
 - [ ] **API-L2.6** Mot de passe oublié · `feature/api-l2-6-reset-password`
   - [ ] `POST auth/password-reset/` (parent OTP SMS, enseignant code email, apprenant refus D26), `…/verify/`, `…/confirm/`
   - [ ] Tests : pas d'énumération (même réponse, même durée)

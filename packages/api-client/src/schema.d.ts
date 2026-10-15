@@ -140,7 +140,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** @description WD17, WPD08, WT08 : prénom et nom. Identifiants, rôle et statut ne se modifient pas ici (C12, S1). */
+        patch: operations["accounts_me_partial_update"];
         trace?: never;
     };
     "/api/accounts/me/email/": {
@@ -162,6 +163,40 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/me/learner-profile/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description W11-W14 (une étape par appel) et WD17. */
+        patch: operations["accounts_me_learner_profile_partial_update"];
+        trace?: never;
+    };
+    "/api/accounts/me/parent-profile/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description WP07-WP09 (une étape par appel) et WPD08. */
+        patch: operations["accounts_me_parent_profile_partial_update"];
         trace?: never;
     };
     "/api/accounts/me/password/": {
@@ -1565,6 +1600,13 @@ export interface components {
             code: string;
             message: string;
         };
+        /**
+         * @description * `female` - Femme
+         *     * `male` - Homme
+         *     * `other` - Autre
+         * @enum {string}
+         */
+        GenderEnum: "female" | "male" | "other";
         Goal: {
             readonly id: number;
             code: string;
@@ -1596,6 +1638,27 @@ export interface components {
         };
         LearnerPasswordRequest: {
             password: string;
+        };
+        LearnerProfile: {
+            /**
+             * Date de naissance
+             * Format: date
+             */
+            readonly birthDate: string | null;
+            readonly locality: components["schemas"]["Locality"] | null;
+            /**
+             * Email de contact
+             * Format: email
+             */
+            readonly email: string | null;
+            readonly schoolGrade: components["schemas"]["SchoolGrade"] | null;
+            /** Genre */
+            readonly gender: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            readonly disability: components["schemas"]["Disability"] | null;
+            readonly goals: components["schemas"]["Goal"][];
+            readonly avatar: components["schemas"]["Avatar"] | null;
+            /** @description Étape de profil restante, null si le profil est complet */
+            readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
         };
         LearnerSignupCreated: {
             /** @description Code de reprise, renvoyé **une seule fois** et jamais régénéré (C14) */
@@ -1991,6 +2054,23 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Resource"][];
         };
+        ParentProfile: {
+            readonly locality: components["schemas"]["Locality"] | null;
+            /**
+             * Email de contact
+             * Format: email
+             */
+            readonly email: string | null;
+            /** Genre */
+            readonly gender: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            readonly disability: components["schemas"]["Disability"] | null;
+            readonly profession: string;
+            /** Enfants à inscrire */
+            readonly childrenToEnroll: number | null;
+            readonly goalsForChildren: components["schemas"]["Goal"][];
+            /** @description Étape de profil restante, null si le profil est complet */
+            readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
+        };
         ParentSignupRequest: {
             firstName: string;
             lastName: string;
@@ -2008,6 +2088,45 @@ export interface components {
         };
         PasswordRequest: {
             password: string;
+        };
+        PatchedLearnerProfileUpdateRequest: {
+            /**
+             * Date de naissance
+             * Format: date
+             */
+            birthDate?: string | null;
+            /** @description `id` de la localité */
+            locality?: number;
+            /**
+             * Email de contact
+             * Format: email
+             */
+            email?: string | null;
+            schoolGrade?: string;
+            gender?: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            disability?: string | null;
+            /** @description Au moins 2 objectifs (W13) */
+            goals?: string[];
+            avatar?: string;
+        };
+        PatchedMeUpdateRequest: {
+            firstName?: string;
+            lastName?: string;
+        };
+        PatchedParentProfileUpdateRequest: {
+            /** @description `id` de la localité */
+            locality?: number;
+            /**
+             * Email de contact
+             * Format: email
+             */
+            email?: string | null;
+            gender?: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            disability?: string | null;
+            profession?: string;
+            childrenToEnroll?: number;
+            /** @description Au moins un objectif (WP09) */
+            goalsForChildren?: string[];
         };
         PatchedPreferencesUpdateRequest: {
             categories?: components["schemas"]["CategoryPreferenceRequest"][];
@@ -2700,6 +2819,61 @@ export interface operations {
             };
         };
     };
+    accounts_me_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedMeUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_me_email_create: {
         parameters: {
             query?: never;
@@ -2719,6 +2893,116 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_learner_profile_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedLearnerProfileUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnerProfile"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_parent_profile_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedParentProfileUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParentProfile"];
+                };
             };
             400: {
                 headers: {

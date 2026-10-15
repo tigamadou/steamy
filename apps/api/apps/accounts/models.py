@@ -281,6 +281,10 @@ class ParentProfile(TimestampedModel):
         related_name="+",
     )
     goals_for_children = models.ManyToManyField("referentials.Goal", blank=True, related_name="+")
+    #: WP09 « Nombre d'enfants à inscrire ».
+    children_to_enroll = models.PositiveSmallIntegerField(
+        _("enfants à inscrire"), null=True, blank=True
+    )
 
     class Meta:
         verbose_name = _("profil parent")

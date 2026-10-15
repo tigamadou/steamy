@@ -85,12 +85,27 @@ class MeSerializer(serializers.ModelSerializer):
         return sorted(user.groups.values_list("name", flat=True))
 
 
+class MeUpdateSerializer(serializers.Serializer):
+    first_name = serializers.CharField(max_length=150, required=False)
+    last_name = serializers.CharField(max_length=150, required=False)
+
+
 class MeView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = MeSerializer
 
     def get_object(self):
         return self.request.user
+
+    @extend_schema(request=MeUpdateSerializer, responses=MeSerializer)
+    def patch(self, request):
+        """WD17, WPD08, WT08 : prénom et nom. Identifiants, rôle et statut ne se modifient pas ici (C12, S1)."""
+        serializer = MeUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        for name, value in serializer.validated_data.items():
+            setattr(request.user, name, value)
+        request.user.save()
+        return Response(MeSerializer(request.user).data)
 
 
 class PasswordChangeSerializer(serializers.Serializer):

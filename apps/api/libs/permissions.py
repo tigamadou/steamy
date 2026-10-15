@@ -30,3 +30,9 @@ class IsParent(permissions.IsAuthenticated):
     def has_permission(self, request, view):
         return super().has_permission(request, view) and request.user.is_parent
 
+
+class IsLearner(permissions.IsAuthenticated):
+    """Apprenant connecté (anonyme : 401 ; autre rôle : 403)."""
+
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) and request.user.is_learner

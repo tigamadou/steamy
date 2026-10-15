@@ -20,8 +20,7 @@ class ProfileStep(models.TextChoices):
 def profile_step(user: User) -> str | None:
     """
     Première étape de profil à compléter, ou None si le profil est complet. WP08 (genre, handicap, profession) est
-    entièrement facultative : elle ne bloque jamais. Les règles de saisie de chaque étape arrivent avec les écrans
-    de profil (API-L2.5).
+    entièrement facultative : elle ne bloque jamais. Les règles de saisie sont dans `views/profiles.py`.
     """
     if user.is_learner:
         profile = getattr(user, "learner_profile", None)
@@ -37,6 +36,6 @@ def profile_step(user: User) -> str | None:
         profile = getattr(user, "parent_profile", None)
         if profile is None or profile.locality_id is None:
             return ProfileStep.PARENT_LOCATION
-        if not profile.goals_for_children.exists():
+        if profile.children_to_enroll is None or not profile.goals_for_children.exists():
             return ProfileStep.PARENT_CHILDREN
     return None

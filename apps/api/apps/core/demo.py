@@ -75,7 +75,12 @@ def seed_accounts() -> dict[str, User]:
     )
     parent_profile, _ = ParentProfile.objects.update_or_create(
         user=marie,
-        defaults={"email": "marie.adjovi@steamy.test", "locality": cotonou, "gender": "female"},
+        defaults={
+            "email": "marie.adjovi@steamy.test",
+            "locality": cotonou,
+            "gender": "female",
+            "children_to_enroll": 1,
+        },
     )
     parent_profile.goals_for_children.set(Goal.objects.filter(code__in=["robots", "coder"]))
 
