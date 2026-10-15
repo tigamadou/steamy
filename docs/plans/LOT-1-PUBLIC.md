@@ -9,7 +9,7 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 1.0b · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c ; renommage CSRF en 1.0a) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : 🟡 en cours · Prochaine tâche : 1.0b · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
 ### Étape 1.0 · Socle front — 🟡 en cours
 - [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
@@ -353,8 +353,8 @@ src/lib/{api-public,api-errors,routes}.ts · e2e/
 
 | Étape du lot | Requiert | Endpoints (SPEC-TECHNIQUE §7) |
 | --- | --- | --- |
-| 1.0a, 1.0b | — (1.0a : renommage CSRF après API-1) | `GET auth/csrf/` |
-| 1.0c | API-1 (client régénéré, `make seed` D2) | — |
+| 1.0a, 1.0b | — | — |
+| 1.0c | API-1 (client régénéré, `make seed` D2) ; renommage CSRF reporté de 1.0a | `GET auth/csrf/` |
 | 1.1 | API-L1 | `catalog/categories/`, `catalog/courses/` |
 | 1.2 | — | — |
 | 1.3 | API-L1 + 1.2 | `catalog/courses/{slug}/` |
