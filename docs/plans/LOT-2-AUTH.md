@@ -40,7 +40,7 @@ Statut : 🟡 en cours · Prochaine tâche : 2.2 (après API-L2) · Prérequis :
   - [x] Recette : composants conformes à la maquette, clavier seul, contrastes AA, aucun référentiel en dur
 
 ### Connexion et mot de passe — 🟡 en cours
-- [x] **2.1** Connexion W16 et redirection (requiert API-1, puis API-L2 pour la résolution C7 complète) · `feature/lot2-connexion`
+- [x] **2.1** Connexion W16 et redirection (requiert API-1, puis API-L2 pour la résolution C7 complète) · `feature/lot2-connexion` · PR #35
   - [x] W16 `/connexion` (`IdentifierInput`, `PasswordInput`, erreurs par code)
   - [x] Choix « Mot de passe oublié ? » (`Modal`), liens vers reprise et inscription
   - [x] Redirection après succès (`safeNext` sinon `homeForRole`), redirection d'un utilisateur déjà connecté, session expirée → `/connexion?next=` (pour `/inscription`, la même redirection est posée avec W02 en 2.3)

@@ -63,7 +63,7 @@ plan.
 | --- | --- | --- | --- |
 | [PLAN-API](PLAN-API.md) | 🟡 en cours | API-0 ✅ (PR #5 à #9) · API-1 ✅ (PR #12, #15, #17, #21 à #25) | API-L1.1 |
 | [LOT-1-PUBLIC](LOT-1-PUBLIC.md) | 🟡 en cours | 1.0a, 1.0b (PR #18, #19) | 1.0c (après API-1) |
-| [LOT-2-AUTH](LOT-2-AUTH.md) | 🟡 en cours | 2.0 (PR #31) · 2.1 | 2.2 (après API-L2) |
+| [LOT-2-AUTH](LOT-2-AUTH.md) | 🟡 en cours | 2.0 (PR #31) · 2.1 (PR #35) | 2.2 (après API-L2) |
 | [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | ⬜ à faire | — | 3.0 (après API-1 et API-L3a) |
 | [LOT-4-PARENT](LOT-4-PARENT.md) | ⬜ à faire | — | 4.0 conception de WPD15 (sans prérequis d'API) |
 | [LOT-5-ENSEIGNANT](LOT-5-ENSEIGNANT.md) | ⬜ à faire | — | 5.1 (après API-L5) |
