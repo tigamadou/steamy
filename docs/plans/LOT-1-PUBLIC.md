@@ -9,7 +9,7 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : encart newsletter de 1.5 (WL20) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 1 (après fusion des PR #47 à #51) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
 ### Étape 1.0 · Socle front — ✅ terminé
 - [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
@@ -71,7 +71,7 @@ Statut : 🟡 en cours · Prochaine tâche : encart newsletter de 1.5 (WL20) · 
   - [x] Fichier `design/screens-public-a-concevoir-web.jsx` ajouté à `App.html` (vue « Public »)
   - [ ] Recette : validation par le porteur produit (C18) ; aucune donnée de mineur (D15)
 
-### Écrans — 🟡 en cours
+### Écrans — ✅ terminé
 - [x] **1.1** Accueil, catalogue, catégories (requiert API-L1) · `feature/lot1-accueil-catalogue` · PR #47
   - [x] `WL01` `/` (sections, ancre `#comment-ca-marche`, 3 `CourseCard` mis en avant, complétés par les plus populaires si moins de 3 sont mis en avant, CTA, chiffres depuis `content/site.ts`)
   - [x] `WL06` `/parcours` (filtres `Tag`, état dans l'URL, pagination, états skeleton, vide, erreur)
@@ -95,21 +95,18 @@ Statut : 🟡 en cours · Prochaine tâche : encart newsletter de 1.5 (WL20) · 
   - [x] `WL07` `/boutique` (grille `WKKitCard` en mode vitrine, filtres par catégorie dans l'URL, pagination, état vide)
   - [x] Appels `events/`, `events/{slug}/`, `shop/kits/` (`lib/events.ts`, `lib/shop.ts`, `'use cache'`, tags `events` et `shop`)
   - [x] Parcours Playwright « événements » (WL21 → WL23 → CTA visiteur ; événement complet → CTA désactivé ; passé) et boutique (`e2e/evenements-boutique.spec.ts`)
-- [ ] **1.5** Pages éditoriales (WL20 requiert API-L1 pour `public/leads/`, le reste sans API) · `feature/lot1-editorial` · PR #36
+- [x] **1.5** Pages éditoriales (WL20 requiert API-L1 pour `public/leads/`, le reste sans API) · `feature/lot1-editorial` · PR #36 ; newsletter `feature/lot1-newsletter` · PR #PRNL
   - [x] `WL09` `/legal/[doc]` (`Tabs`, `#consentement-parental`, corrections S3, D6, D15, D23, D40)
   - [x] `WL10` `/a-propos`
   - [x] `WL17` `/blog` et `WL18` `/blog/[slug]` (MDX, fil d'Ariane, partage, JSON-LD `Article`, slugs au sitemap)
   - [x] Pagination statique du blog : `BLOG_PAGE_SIZE` (9) ; les pages `/blog/page/<n>` s'ajoutent quand le blog dépasse une page (Cache Components refuse un `generateStaticParams` vide)
   - [x] `WL20` `/guides` (PDF dans `public/guides/`, `GuideCard`, téléchargement libre D14), sans l'encart newsletter
-  - [ ] Encart newsletter de WL20 (`POST public/leads/`, consentement non coché) : **attend API-L1.4**
+  - [x] Encart newsletter de WL20 (`POST public/leads/`, cases « 18 ans ou plus » et consentement non cochées, vouvoiement, origine `guides`)
   - [x] Contenus `src/content/{legal,blog,guides,faq}` et `site.ts` (`@next/mdx`, `mdx-components.tsx`)
-  - [ ] Tests Vitest : formulaire newsletter (consentement obligatoire, `VALIDATION_ERROR`) : **attend API-L1.4**
+  - [x] Tests Vitest : formulaire newsletter (consentement obligatoire, `VALIDATION_ERROR`, `THROTTLED`)
   - [x] Parcours Playwright : footer → CGU#consentement-parental, onglets légaux par URL, blog → article, téléchargement d'un guide (`e2e/editorial.spec.ts`)
-  - [ ] Parcours Playwright : newsletter acceptée : **attend API-L1.4**
+  - [x] Parcours Playwright : newsletter acceptée (`e2e/editorial.spec.ts`)
   - [x] Recette : aucune mention « moins de 16 ans » ni « numéro » de l'apprenant (test Vitest `src/content/content.test.ts`, exécuté en CI)
-  > Reprise : pages éditoriales livrées. Reste l'encart newsletter de WL20 (composant client `getBrowserApi()`,
-  > `POST public/leads/`, erreurs `fields` mappées, consentement non coché, vouvoiement) dès qu'API-L1.4 est fusionnée,
-  > son test Vitest et son parcours Playwright.
 - [x] **1.6** Formulaires B2B et aide (requiert API-1, API-L1 et 1.2) · `feature/lot1-formulaires` · PR #50
   - [x] `WL11` `/ecoles` (3 offres de `content/site.ts`, CTA « Choisir » vers `/ecoles?offre=<offre>#devis`, formulaire au vouvoiement, confirmation en place)
   - [x] `WL24` `/aide` (FAQ `content/faq/` avec recherche, formulaire de contact, `?sujet=`, ancres `#faq` et `#contact`, message conservé en cas de coupure)
@@ -129,9 +126,9 @@ Statut : 🟡 en cours · Prochaine tâche : encart newsletter de 1.5 (WL20) · 
   - [ ] Étapes 1.0a-1.6 fusionnées dans `development`, CI verte (`ci-ok` incluant `e2e`)
   - [ ] Chaque écran v1 et à concevoir respecte la définition de « terminé » du README (360 px → bureau, registres, AA, états, aucune donnée en dur, tests)
   - [ ] Parcours Playwright verts : découverte, événements, devis, contact, newsletter, navigation clavier, hors ligne ; axe sans violation sérieuse sur toutes les routes publiques
-  - [ ] `next build` : toutes les routes de `(public)` prérendues ; `getServerApi` absent de `(public)`
-  - [ ] Aucun lien vers WL08, WL12-WL15, WL19 ; aucun violet `rgba(91,63,224)` ni JetBrains Mono
-  - [ ] WX01-WX03 et `getPublicApi` documentés dans `apps/web/README.md`
+  - [x] `next build` : toutes les routes de `(public)` prérendues (statique ou partiel) ; `getServerApi` absent de `(public)` (règle ESLint)
+  - [x] Aucun lien vers WL08, WL12-WL15, WL19 ; aucun violet `rgba(91,63,224)` ni JetBrains Mono
+  - [x] WX01-WX03 et `getPublicApi` documentés dans `apps/web/README.md`
 
 ## Périmètre
 
