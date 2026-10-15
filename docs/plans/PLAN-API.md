@@ -176,7 +176,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > réécrire `learning.0001` déjà fusionnée ; l'app disparaîtra à la refonte des migrations de `learning`
   > (API-L3a). Les droits du groupe Contenu viennent de la matrice des groupes du lot 6.1 (`setup_staff_groups`) ;
   > `Course` déclare la permission `publish_course`. Ordre par glisser-déposer : `django-admin-sortable2`.
-- [x] **API-L1.2** Endpoints catalogue · `feature/api-l1-2-catalogue-api` · PR #NUM
+- [x] **API-L1.2** Endpoints catalogue · `feature/api-l1-2-catalogue-api` · PR #37
   - [x] `GET catalog/categories/` (avec `courseCount`)
   - [x] `GET catalog/courses/` (filtres `category`, `difficulty`, `price`, `featured`, `q`, `sort`)
   - [x] `GET catalog/courses/{slug}/` sans `blocks` ni `vimeoId` de mission (D11), publiés uniquement
