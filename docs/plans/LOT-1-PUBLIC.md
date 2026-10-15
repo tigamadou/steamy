@@ -64,10 +64,10 @@ Statut : 🟡 en cours · Prochaine tâche : 1.0c (après API-1) · Prérequis :
 
 ### Étape 1.2 · Conception des maquettes — ⬜ à faire
 - [ ] **1.2** Conception de WL22, WL23, WL24 · `feature/lot1-conception-wl22-24`
-  - [ ] Maquette WL22 fiche parcours (d'après WC04 dans `PublicShell`, états chargement et 404)
-  - [ ] Maquette WL23 fiche événement (CTA selon visiteur / apprenant / parent / complet / passé)
-  - [ ] Maquette WL24 aide & contact (FAQ par thème, formulaire au vouvoiement, confirmation, erreur)
-  - [ ] Fichier `design/screens-public-a-concevoir-web.jsx` ajouté à `App.html` (vue « Public »)
+  - [x] Maquette WL22 fiche parcours (d'après WC04 dans `PublicShell`, états chargement et 404)
+  - [x] Maquette WL23 fiche événement (CTA selon visiteur / apprenant / parent / complet / passé)
+  - [x] Maquette WL24 aide & contact (FAQ par thème, formulaire au vouvoiement, confirmation, erreur)
+  - [x] Fichier `design/screens-public-a-concevoir-web.jsx` ajouté à `App.html` (vue « Public »)
   - [ ] Recette : validation par le porteur produit (C18) ; aucune donnée de mineur (D15)
 
 ### Écrans — ⬜ à faire
