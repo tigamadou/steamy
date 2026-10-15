@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Steamy{% endblock %}</title>
+  <meta name="author" content="Steamy">
+  <style>
+    {% block page %}@page { size: A4 portrait; margin: 18mm; }{% endblock %}
+    body { font-family: "Nunito", "DejaVu Sans", sans-serif; color: #1F1B3A; margin: 0; }
+    .brand { color: #5B3FE0; font-weight: 800; letter-spacing: 0.04em; }
+    footer { position: fixed; bottom: 0; left: 0; right: 0; font-size: 9pt; color: #6B6890; text-align: center; }
+    {% block style %}{% endblock %}
+  </style>
+</head>
+<body>
+  {% block content %}{% endblock %}
+  <footer>Steamy · apprendre en construisant · {% block footer %}{% endblock %}</footer>
+</body>
+</html>
