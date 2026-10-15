@@ -26,8 +26,16 @@ class CategorySummarySerializer(serializers.ModelSerializer):
         fields = ("slug", "label", "color", "icon")
 
 
+class RequiredKitSerializer(serializers.Serializer):
+    """Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`."""
+
+    slug = serializers.SlugField()
+    name = serializers.CharField()
+
+
 class CourseListSerializer(serializers.ModelSerializer):
     category = CategorySummarySerializer(read_only=True)
+    required_kit = RequiredKitSerializer(read_only=True, allow_null=True)
     cover_image = serializers.SerializerMethodField()
 
     class Meta:
@@ -40,6 +48,7 @@ class CourseListSerializer(serializers.ModelSerializer):
             "is_free",
             "price",
             "emoji",
+            "required_kit",
             "cover_image",
             "duration_hours",
             "featured",

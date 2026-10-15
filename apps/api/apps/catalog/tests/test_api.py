@@ -112,6 +112,7 @@ def test_list_card_fields():
         "isFree",
         "price",
         "emoji",
+        "requiredKit",
         "coverImage",
         "durationHours",
         "featured",
@@ -119,6 +120,7 @@ def test_list_card_fields():
     assert card["isFree"] is False and card["price"] == 15000 and card["emoji"] == "⚡"
     assert card["coverImage"].endswith(".png")
     assert card["category"]["slug"] == course.category.slug
+    assert card["requiredKit"] is None
 
 
 def test_list_filters():

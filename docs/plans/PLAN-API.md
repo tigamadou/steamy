@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L1.5
+Statut : 🟡 en cours · Prochaine tâche : API-L2.0b
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -160,7 +160,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Front compilé contre le nouveau client
   - [x] Plus aucune route hors `/api/<domaine>/…/` (routeurs DRF passés en `SimpleRouter` : ni vue racine ni suffixe `.format`)
 
-### API-L1 · Catalogue public, événements, formulaires, kits — 🟡 en cours
+### API-L1 · Catalogue public, événements, formulaires, kits — ✅ terminé
 - [x] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog` · PR #33
   - [x] Modèles `Category`, `Course`, `Project`, `Level`, `Mission` (`vimeoId`, `blocks` JSON validé)
   - [x] Suppression de `courses`
@@ -211,14 +211,19 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > d'email à l'équipe. Devis et contact : tâche `notify_team` (idempotente par `notifiedAt`) vers `TEAM_EMAIL`.
   > Contact : `contact` = email ou téléphone (normalisé E.164), message ≥ 20 caractères (`MIN_LENGTH`). Téléphone
   > du devis normalisé E.164 (`PHONE_INVALID`). `enforce_csrf` ajouté à `libs/authentication.py`.
-- [ ] **API-L1.5** Kits en lecture · `feature/api-l1-5-kits`
-  - [ ] App `shop` : `Kit` (§3.3) + admin
-  - [ ] `GET shop/kits/?category=`, `GET shop/kits/{slug}/` (disponibilité booléenne, jamais le stock exact)
-  - [ ] Tests : stock exact absent, aucune écriture publique
-- [ ] **Critères de fin d'API-L1**
-  - [ ] Réponses publiques sans donnée de mineur, indépendantes de la session, sans `rating`
-  - [ ] Seed : 3-4 parcours publiés complets dont un mis en avant, une catégorie vide, 4 événements (gratuit, payant, complet, passé), 3 kits
-  - [ ] `make openapi` committé
+- [x] **API-L1.5** Kits en lecture · `feature/api-l1-5-kits` · PR #NUM
+  - [x] App `shop` : `Kit` (§3.3) + admin
+  - [x] `GET shop/kits/?category=`, `GET shop/kits/{slug}/` (disponibilité booléenne, jamais le stock exact)
+  - [x] Tests : stock exact absent, aucune écriture publique (matrice d'accès)
+  - [x] `Course.requiredKit` (reporté d'API-L1.1) : exposé au catalogue, `POST learning/enrollments/` → 402 `KIT_CODE_REQUIRED`
+  - [x] Seed : 3 kits dont un en rupture, Steamy Bot v1 requis par « Construis ton robot Bluetooth » ; couverture 100 %
+  > Décisions : `available` = stock > 0 ; un kit retiré de la vente (`active=False`) répond 404. Ajouts à §3.3 :
+  > `emoji` (cartes de la maquette) ; `images` = liste d'URL https ou de chemins du stockage. Le détail liste les
+  > parcours compatibles **publiés** (`{slug, title}`). Catalogue : `requiredKit` = `{slug, name}` ou `null`.
+- [x] **Critères de fin d'API-L1**
+  - [x] Réponses publiques sans donnée de mineur, indépendantes de la session, sans `rating`
+  - [x] Seed : 3-4 parcours publiés complets dont un mis en avant, une catégorie vide, 4 événements (gratuit, payant, complet, passé), 3 kits
+  - [x] `make openapi` committé
 
 ### API-L2 · Inscriptions, consentement, OTP, connexion — ⬜ à faire
 - [x] **API-L2.0a** Comparaison SMS (S10) · `feature/api-l2-0a-adr-sms` · doc

@@ -48,7 +48,7 @@ class CourseListView(PublicReadMixin, generics.ListAPIView):
         params.is_valid(raise_exception=True)
         queryset = (
             Course.objects.filter(PUBLISHED)
-            .select_related("category")
+            .select_related("category", "required_kit")
             .annotate(popularity=Count("enrollments"))
         )
         return filter_courses(queryset, params.validated_data)
@@ -66,7 +66,7 @@ class CourseDetailView(PublicReadMixin, generics.RetrieveAPIView):
         projects = Project.objects.prefetch_related(Prefetch("levels", queryset=levels))
         return (
             Course.objects.filter(PUBLISHED)
-            .select_related("category")
+            .select_related("category", "required_kit")
             .annotate(mission_count=Count("projects__levels__missions"))
             .prefetch_related(Prefetch("projects", queryset=projects))
         )

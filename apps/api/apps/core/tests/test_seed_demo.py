@@ -96,3 +96,14 @@ def test_events_cover_free_paid_full_and_past():
     assert any(e.price > 0 and e.applications_open for e in events)
     assert any(e.seats_left == 0 and not e.is_past for e in events)
     assert any(e.is_past for e in events)
+
+
+def test_kits_include_one_out_of_stock_and_one_required_by_a_course():
+    from apps.catalog.models import Course
+    from apps.shop.models import Kit
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    assert Kit.objects.filter(active=True).count() == 3
+    assert Kit.objects.filter(stock_quantity=0).exists()
+    assert Course.objects.filter(required_kit__isnull=False, is_free=False).exists()

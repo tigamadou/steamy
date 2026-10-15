@@ -60,6 +60,15 @@ class Course(models.Model):
     is_free = models.BooleanField(_("gratuit"), default=False)
     price = models.PositiveIntegerField(_("prix (FCFA)"), default=0)
     emoji = models.CharField(_("emoji"), max_length=16, blank=True, help_text="Visuel des cartes")
+    required_kit = models.ForeignKey(
+        "shop.Kit",
+        models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="required_by",
+        verbose_name=_("kit requis"),
+        help_text="Accès uniquement par le Kit Code livré avec ce kit (D36)",
+    )
     cover_image = models.ImageField(
         _("image de couverture"), upload_to="catalog/covers/", blank=True
     )

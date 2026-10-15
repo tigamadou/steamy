@@ -983,6 +983,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/shop/kits/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Kits en vente, paginés. */
+        get: operations["shop_kits_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shop/kits/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Fiche kit (WK02) ; un kit retiré de la vente répond 404. */
+        get: operations["shop_kits_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1151,6 +1185,7 @@ export interface components {
             price?: number;
             /** @description Visuel des cartes */
             emoji?: string;
+            readonly requiredKit: components["schemas"]["RequiredKit"] | null;
             readonly coverImage: string | null;
             /** Durée (heures) */
             durationHours?: number;
@@ -1185,6 +1220,7 @@ export interface components {
             price?: number;
             /** @description Visuel des cartes */
             emoji?: string;
+            readonly requiredKit: components["schemas"]["RequiredKit"] | null;
             readonly coverImage: string | null;
             /** Durée (heures) */
             durationHours?: number;
@@ -1343,6 +1379,44 @@ export interface components {
          * @enum {string}
          */
         KindEnum: "mcq" | "tf" | "free";
+        Kit: {
+            slug: string;
+            /** Nom */
+            name: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Prix (FCFA) */
+            price: number;
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** @description Visuel des cartes */
+            emoji?: string;
+            /** @description URL https ou chemins du stockage, la première sert de couverture */
+            images?: unknown;
+            /** @description En stock (le stock exact reste interne) */
+            readonly available: boolean;
+        };
+        KitDetail: {
+            slug: string;
+            /** Nom */
+            name: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Prix (FCFA) */
+            price: number;
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** @description Visuel des cartes */
+            emoji?: string;
+            /** @description URL https ou chemins du stockage, la première sert de couverture */
+            images?: unknown;
+            /** @description En stock (le stock exact reste interne) */
+            readonly available: boolean;
+            description: string;
+            /** Contenu de la boîte */
+            contents?: unknown;
+            readonly compatibleCourses: {
+                [key: string]: unknown;
+            }[];
+        };
         LeadRequest: {
             /** Format: email */
             email: string;
@@ -1555,6 +1629,21 @@ export interface components {
              */
             previous?: string | null;
             results?: components["schemas"]["Enrollment"][];
+        };
+        PaginatedKitList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["Kit"][];
         };
         PaginatedNotificationList: {
             /** @example 123 */
@@ -1814,6 +1903,11 @@ export interface components {
             label: string;
             /** Libellé côté parent */
             parentLabel?: string;
+        };
+        /** @description Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`. */
+        RequiredKit: {
+            slug: string;
+            name: string;
         };
         /**
          * @description * `learner` - Apprenant
@@ -4590,6 +4684,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SchoolGrade"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_kits_list: {
+        parameters: {
+            query?: {
+                /** @description Slug de la catégorie */
+                category?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedKitList"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_kits_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KitDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             429: {

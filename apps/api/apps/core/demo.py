@@ -18,6 +18,7 @@ from apps.core.groups import CONTENT, FINANCE, SUPER_ADMIN, SUPPORT
 from apps.events.models import SteamyEvent
 from apps.notifications.models import Category, Notification, Tone
 from apps.referentials.models import Avatar, Goal, Locality, SchoolGrade
+from apps.shop.models import Kit
 
 #: Mot de passe de tous les comptes de démonstration (D25 : 8 caractères, une lettre et un chiffre).
 DEMO_PASSWORD = "Steamy2026"
@@ -435,9 +436,72 @@ def seed_events() -> None:
         )
 
 
+#: Kits : slug, nom, catégorie, prix, difficulté, emoji, stock, parcours compatibles, parcours qui l'exigent.
+KITS = [
+    (
+        "steamy-bot-v1",
+        "Steamy Bot v1",
+        "robotique",
+        35000,
+        "beginner",
+        "🤖",
+        12,
+        ["decouverte-robotique", "robot-bluetooth"],
+        ["robot-bluetooth"],
+    ),
+    (
+        "pack-electronique",
+        "Pack Électronique",
+        "electronique",
+        22000,
+        "beginner",
+        "⚡",
+        30,
+        ["capteurs-electroniques"],
+        [],
+    ),
+    (
+        "kit-energie-solaire",
+        "Kit Énergie Solaire",
+        "energie",
+        19000,
+        "beginner",
+        "🔆",
+        0,
+        [],
+        [],
+    ),  # rupture
+]
+
+
+def seed_kits() -> None:
+    for slug, name, category, price, difficulty, emoji, stock, compatible, required_by in KITS:
+        kit, _ = Kit.objects.update_or_create(
+            slug=slug,
+            defaults={
+                "name": name,
+                "category": catalog.Category.objects.get(slug=category),
+                "price": price,
+                "difficulty": difficulty,
+                "emoji": emoji,
+                "stock_quantity": stock,
+                "active": True,
+                "description": f"{name} : tout le matériel pour construire à la maison, notice et Kit Code inclus.",
+                "contents": [
+                    "Notice illustrée",
+                    "Kit Code d'accès au parcours",
+                    "Composants et câbles",
+                ],
+            },
+        )
+        kit.compatible_courses.set(catalog.Course.objects.filter(slug__in=compatible))
+        catalog.Course.objects.filter(slug__in=required_by).update(required_kit=kit)
+
+
 def seed_all() -> dict[str, User]:
     accounts = seed_accounts()
     seed_notifications(accounts)
     seed_catalog()
     seed_events()
+    seed_kits()
     return accounts
