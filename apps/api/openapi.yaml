@@ -331,6 +331,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/auth/otp/resend/:
+    post:
+      operationId: auth_otp_resend_create
+      description: Nouveau code pour un défi en cours (60 s après le précédent, plafonds
+        quotidiens D24).
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpResendRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/core/presign/:
     post:
       operationId: core_presign_create
@@ -3551,6 +3589,38 @@ components:
       - title
       - total
       - unitPrice
+    OtpChallenge:
+      type: object
+      description: 'Défi OTP en cours : sert au compte à rebours de WP02 / WL03.'
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+        destinationMasked:
+          type: string
+          readOnly: true
+          description: Destinataire du code (numéro ou email), masqué
+        expiresInSec:
+          type: integer
+          readOnly: true
+          description: Validité du code (s)
+        resendInSec:
+          type: integer
+          readOnly: true
+          description: Délai avant un renvoi possible (s)
+      required:
+      - challengeId
+      - destinationMasked
+      - expiresInSec
+      - resendInSec
+    OtpResendRequest:
+      type: object
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+      required:
+      - challengeId
     PaginatedAttemptList:
       type: object
       properties:

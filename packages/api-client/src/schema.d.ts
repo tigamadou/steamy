@@ -164,6 +164,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/otp/resend/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Nouveau code pour un défi en cours (60 s après le précédent, plafonds quotidiens D24). */
+        post: operations["auth_otp_resend_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/core/presign/": {
         parameters: {
             query?: never;
@@ -1411,6 +1428,21 @@ export interface components {
             /** Format: decimal */
             readonly total: string;
         };
+        /** @description Défi OTP en cours : sert au compte à rebours de WP02 / WL03. */
+        OtpChallenge: {
+            /** Format: uuid */
+            challengeId: string;
+            /** @description Destinataire du code (numéro ou email), masqué */
+            readonly destinationMasked: string;
+            /** @description Validité du code (s) */
+            readonly expiresInSec: number;
+            /** @description Délai avant un renvoi possible (s) */
+            readonly resendInSec: number;
+        };
+        OtpResendRequest: {
+            /** Format: uuid */
+            challengeId: string;
+        };
         PaginatedAttemptList: {
             /** @example 123 */
             count?: number;
@@ -2196,6 +2228,53 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_otp_resend_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpResendRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OtpChallenge"];
+                };
             };
             400: {
                 headers: {

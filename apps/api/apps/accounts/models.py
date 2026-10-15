@@ -5,6 +5,8 @@ Un seul modèle `User` pour les trois personas et le personnel. Les identifiants
 nullables : l'unicité et la présence de l'identifiant propre à chaque rôle sont tenues par la base.
 """
 
+import uuid
+
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.db.models import Q
@@ -301,3 +303,34 @@ class TeacherProfile(TimestampedModel):
 
     def __str__(self):
         return f"Profil enseignant de {self.user}"
+
+
+class OtpChallenge(TimestampedModel):
+    """
+    Code à usage unique envoyé par SMS (D24) : 6 chiffres, 5 min, 3 essais, renvoi après 60 s. Les valeurs viennent
+    de `PlatformSettings` ; le code n'est jamais stocké en clair. `id` (UUID) est le `challengeId` donné au front.
+    `data` garde ce que le flux ne crée qu'après un code valide (ex. prénom et nom du parent, C13).
+    """
+
+    class Purpose(models.TextChoices):
+        PARENT_SIGNUP = "parent_signup", "Inscription parent"
+        PASSWORD_RESET = "password_reset", "Mot de passe oublié"
+        PHONE_CHANGE = "phone_change", "Changement de numéro"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    phone = models.CharField(_("téléphone"), max_length=16)
+    purpose = models.CharField(_("objet"), max_length=16, choices=Purpose.choices)
+    code_hash = models.CharField(max_length=128)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+    last_sent_at = models.DateTimeField()
+    verified_at = models.DateTimeField(null=True, blank=True)
+    data = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        verbose_name = _("code OTP")
+        verbose_name_plural = _("codes OTP")
+        indexes = [models.Index(fields=["phone", "purpose"])]
+
+    def __str__(self):
+        return f"OTP {self.get_purpose_display()} ({self.created_at:%Y-%m-%d %H:%M})"

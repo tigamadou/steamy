@@ -200,11 +200,11 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Webhook de statut Twilio signé (`notifications/sms/status/`) et trace `SmsMessage` sans numéro en clair (ADR 0002)
   - [x] Variables `SMS_PROVIDER`, `TWILIO_*` : chart, secrets GitHub, `docs/infra/`
   - [x] Tests : faux SMS lisible dans Mailpit, refus du faux fournisseur si `DEPLOYED`
-- [ ] **API-L2.1** OTP · `feature/api-l2-1-otp`
-  - [ ] `OtpChallenge` : code haché, 6 chiffres, 5 min, 3 essais, renvoi après 60 s
-  - [ ] Plafond quotidien par numéro **et** par IP (`PlatformSettings`, D24)
-  - [ ] `POST auth/otp/resend/`, codes `OTP_*`
-  - [ ] Tests : expiré, 4ᵉ essai, renvoi trop tôt, plafond IP
+- [x] **API-L2.1** OTP · `feature/api-l2-1-otp`
+  - [x] `OtpChallenge` : code haché, 6 chiffres, 5 min, 3 essais, renvoi après 60 s
+  - [x] Plafond quotidien par numéro **et** par IP (`PlatformSettings`, D24)
+  - [x] `POST auth/otp/resend/`, codes `OTP_*`
+  - [x] Tests : expiré, 4ᵉ essai, renvoi trop tôt, plafond IP
 - [ ] **API-L2.2** Inscription parent · `feature/api-l2-2-parent-signup`
   - [ ] `POST auth/parent-signup/`, `…/verify/` (`existingAccount`), `…/password/`
   - [ ] Réponse neutre si numéro déjà inscrit (C13) ; compte créé seulement après OTP valide
