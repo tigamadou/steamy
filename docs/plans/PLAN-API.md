@@ -578,7 +578,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > que l'enfant n'a pas recandidaté, sinon remboursé. `GET events/tickets/` (apprenant, non paginé) :
   > `{id, courseSlug, courseTitle, createdAt, used, usedFor}`. Accepter / refuser une candidature de l'enfant :
   > API-L4.2.
-- [x] **Critères de fin d'API-L3b** · `feature/api-l3b-criteres-fin`
+- [x] **Critères de fin d'API-L3b** · `feature/api-l3b-criteres-fin` · PR #91
   - [x] Tests prioritaires de la section « Points délicats » passants
   - [x] Seed enrichi (commandes, kits en rupture…)
   - [x] `make openapi` committé
