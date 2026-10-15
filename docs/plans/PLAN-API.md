@@ -316,7 +316,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > Liste : `?status=active|completed`, paginée, par dernière activité ; chaque inscription donne
   > `currentProject`/`currentLevel` et `next`. Vidéos de démonstration : vidéo Vimeo publique `76979871` (ADR 0004,
   > V4), sans hachage.
-- [x] **API-L3a.2** Quiz · `feature/api-l3a-2-quiz`
+- [x] **API-L3a.2** Quiz · `feature/api-l3a-2-quiz` · PR #66
   - [x] `Quiz` (formative / sommative, contrainte « exactement un »), `Question`, `Choice`
   - [x] `GET learning/quizzes/{id}/` sans corrigé
   - [x] `POST …/attempts/` : correction serveur, `ok`/`warn`/`ko` (D31), cooldown sommatif `QUIZ_COOLDOWN` (D32), `failedConcepts`, `retryInSec`, `next`
@@ -356,7 +356,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] App `wishlist` : `GET wishlist/`, `PUT/DELETE wishlist/{courseSlug}/` idempotents
   - [ ] Préférences de notification apprenant (pas de SMS ni marketing pour un mineur, D6, D30)
 - [ ] **Outillage de test d'API-L3a**
-  - [x] `seed_demo --e2e` (cooldown sommatif raccourci, parcours court P1 du lot 3) · PR d'API-L3a.2
+  - [x] `seed_demo --e2e` (cooldown sommatif raccourci, parcours court P1 du lot 3) · PR #66
     > Le parcours court (`premiers-pas-zeti`) est dans le jeu unique (LOT-3 §8.3) ; `--e2e` ne fait que ramener le
     > délai à 5 s. `make e2e` appelle `make seed SEED_ARGS=--e2e`.
   - [ ] Worker Celery dans `compose.e2e.yml`
