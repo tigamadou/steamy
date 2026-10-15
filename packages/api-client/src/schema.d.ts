@@ -816,6 +816,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/events/{slug}/proposals/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description WT09 « Proposer à une classe » : notifie les élèves actifs et leurs parents (notification seulement, S8).
+         *     `EVENT_ALREADY_PROPOSED` si la classe l'a déjà reçu, `EVENT_CLOSED` après la fin des candidatures.
+         */
+        post: operations["events_proposals_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health/": {
         parameters: {
             query?: never;
@@ -2841,6 +2861,19 @@ export interface components {
             /** Matériel */
             materials?: unknown;
             readonly levels: components["schemas"]["LevelSummary"][];
+        };
+        Proposal: {
+            id: number;
+            event: string;
+            classroomId: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description Élèves actifs et parents notifiés */
+            notifiedCount: number;
+        };
+        ProposalRequestRequest: {
+            /** @description Une classe de l'enseignant connecté */
+            classroomId: number;
         };
         /**
          * @description * `kkiapay` - Kkiapay
@@ -5641,6 +5674,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SteamyEventDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    events_proposals_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProposalRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Proposal"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             404: {

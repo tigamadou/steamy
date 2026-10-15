@@ -13,6 +13,7 @@ from apps.accounts.models import (
     User,
 )
 from apps.catalog.models import Course
+from apps.events.models import EventProposal, SteamyEvent
 from apps.referentials.models import Avatar, Relationship, SchoolGrade
 
 from .learner_invitations import Invitee, invite
@@ -107,3 +108,12 @@ def seed_members(classrooms: list[Classroom], teacher, lea: User, password: str)
             ConsentRequest.objects.filter(pk=membership.consent_request_id).update(
                 status=status, resolved_at=now, token_hash=""
             )
+
+
+#: Événement déjà proposé à la classe « 4e B » (WT09) : une seconde proposition répond `EVENT_ALREADY_PROPOSED`.
+PROPOSED_EVENT = "defi-robots-cotonou"
+
+
+def seed_proposals(classroom: Classroom, teacher) -> None:
+    event = SteamyEvent.objects.get(slug=PROPOSED_EVENT)
+    EventProposal.objects.get_or_create(event=event, classroom=classroom, teacher=teacher)

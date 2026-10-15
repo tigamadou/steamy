@@ -2191,6 +2191,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/events/{slug}/proposals/:
+    post:
+      operationId: events_proposals_create
+      description: |-
+        WT09 « Proposer à une classe » : notifie les élèves actifs et leurs parents (notification seulement, S8).
+        `EVENT_ALREADY_PROPOSED` si la classe l'a déjà reçu, `EVENT_CLOSED` après la fin des candidatures.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposalRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proposal'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/health/:
     get:
       operationId: health_retrieve
@@ -6964,6 +7023,36 @@ components:
       required:
       - levels
       - title
+    Proposal:
+      type: object
+      properties:
+        id:
+          type: integer
+        event:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        classroomId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        notifiedCount:
+          type: integer
+          description: Élèves actifs et parents notifiés
+      required:
+      - classroomId
+      - createdAt
+      - event
+      - id
+      - notifiedCount
+    ProposalRequestRequest:
+      type: object
+      properties:
+        classroomId:
+          type: integer
+          description: Une classe de l'enseignant connecté
+      required:
+      - classroomId
     ProviderEnum:
       enum:
       - kkiapay

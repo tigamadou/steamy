@@ -447,8 +447,15 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 - [ ] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage`
   - [ ] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
 - [ ] **API-L5.5** Événements de classe · `feature/api-l5-5-evenements-classe`
-  - [ ] `EventProposal` ; `POST events/{slug}/proposals/` (`EVENT_ALREADY_PROPOSED`)
-  - [ ] `GET classrooms/event-applications/` (lecture seule)
+  - [x] `EventProposal` ; `POST events/{slug}/proposals/` (`EVENT_ALREADY_PROPOSED`)
+  - [x] Seed D2 : « Défi robots » déjà proposé à la classe « 4e B »
+  - [ ] `GET classrooms/event-applications/` (lecture seule) : attend `EventApplication` (API-L3b.6)
+  > Décisions : `{ classroomId }` d'une classe active de l'enseignant (sinon 404, `fields.classroomId`) ; événement
+  > publié, candidatures ouvertes (sinon `EVENT_CLOSED`) ; réponse `{ id, event, classroomId, createdAt,
+  > notifiedCount }`. Notifiés : élèves actifs (tutoiement, `/apprenant/evenements/<slug>`) et leurs parents
+  > (`/parent/evenements`), catégorie Steamy Events.
+  > Reprise : après la fusion d'API-L3b.6, `GET classrooms/event-applications/` (candidatures des élèves actifs des
+  > classes de l'enseignant, lecture seule, sans donnée sensible).
 - [ ] **Critères de fin d'API-L5**
   - [ ] Un enseignant ne peut pas créer de contenu (S5)
   - [ ] Seed enrichi, `make openapi` committé
