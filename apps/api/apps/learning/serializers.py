@@ -1,173 +1,182 @@
-# apps/learning/serializers.py
+"""
+Réponses de la pédagogie (§7.4). Le contenu d'une mission (`blocks`) et les vidéos (`vimeoId` + `vimeoHash`,
+`introVimeoId` + `introVimeoHash`) ne sortent que pour un inscrit, sur une étape déverrouillée (ADR 0004).
+
+Les vues construisent des dictionnaires à partir de `Progression` ; ces serializers en fixent la forme (et le
+schéma OpenAPI).
+"""
+
 from rest_framework import serializers
 
-from apps.catalog.models import Course, Mission
-from libs.errors import ApiError
+from apps.catalog.serializers import CourseListSerializer
 
-from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
-
-
-class EnrollmentSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
-    class Meta:
-        model = Enrollment
-        fields = ["id", "user", "course", "started_at", "completed", "status", "progress"]
-        read_only_fields = ["started_at", "completed", "status", "progress"]
-
-    def validate(self, attrs):
-        user = self.context["request"].user
-        course = attrs.get("course")
-        if course is None:
-            raise serializers.ValidationError({"course": "course is required."})
-        if course.status != Course.Status.PUBLISHED:
-            raise serializers.ValidationError({"course": "Ce parcours n'est pas disponible."})
-        if course.required_kit_id:
-            raise ApiError("KIT_CODE_REQUIRED")
-        if not course.is_free:
-            raise ApiError("PAYMENT_REQUIRED")
-        # avoid duplicate enrollment
-        if Enrollment.objects.filter(user=user, course=course).exists():
-            raise serializers.ValidationError(
-                {"non_field_errors": "User is already enrolled in this course."}
-            )
-        return attrs
+STATES = (("done", "Faite"), ("available", "Disponible"), ("locked", "Verrouillée"))
 
 
-class ProgressSerializer(serializers.ModelSerializer):
-    enrollment = serializers.PrimaryKeyRelatedField(queryset=Enrollment.objects.all())
-    mission = serializers.PrimaryKeyRelatedField(queryset=Mission.objects.all())
-
-    class Meta:
-        model = Progress
-        fields = ["id", "enrollment", "mission", "completed", "score", "updated_at"]
-        read_only_fields = ["id", "updated_at"]
-
-    def validate_enrollment(self, enrollment):
-        # On ne déclare de progression que sur sa propre inscription (S4).
-        if enrollment.user_id != self.context["request"].user.id:
-            raise serializers.ValidationError("Inscription introuvable.")
-        return enrollment
-
-    def validate(self, attrs):
-        # La mission doit appartenir au parcours de l'inscription.
-        enrollment = attrs.get("enrollment")
-        mission = attrs.get("mission")
-        if enrollment and mission:
-            if enrollment.course_id != mission.level.project.course_id:
-                raise serializers.ValidationError(
-                    {"mission": "Cette mission n'appartient pas au parcours de l'inscription."}
-                )
-        return attrs
+class EnrollRequestSerializer(serializers.Serializer):
+    course_slug = serializers.SlugField()
 
 
-class CertificateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Certificate
-        fields = ["id", "enrollment", "issued_at", "file", "score"]
-        read_only_fields = ["issued_at"]
+class EnrollmentQuerySerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=(("active", "En cours"), ("completed", "Terminés")), required=False
+    )
 
 
-# Quiz & assessment
-class ChoiceSerializer(serializers.ModelSerializer):
-    # Jamais `is_correct` : le corrigé ne sort pas du serveur (S8).
-    class Meta:
-        model = Choice
-        fields = ["id", "question", "text"]
-        read_only_fields = fields
+class NextStepSerializer(serializers.Serializer):
+    """Étape suivante : mission à faire, ou certification quand tout le parcours est fait."""
+
+    type = serializers.ChoiceField(
+        choices=(("mission", "Mission"), ("certification", "Certification"))
+    )
+    id = serializers.IntegerField(allow_null=True, help_text="Mission ; null pour la certification")
+    title = serializers.CharField(allow_null=True)
+    course_slug = serializers.SlugField()
+    project_id = serializers.IntegerField(allow_null=True)
+    level_id = serializers.IntegerField(allow_null=True)
 
 
-class QuestionSerializer(serializers.ModelSerializer):
-    choices = ChoiceSerializer(many=True, read_only=True)
+class RefSerializer(serializers.Serializer):
+    """Projet ou niveau cité (fil d'Ariane, position)."""
 
-    class Meta:
-        model = Question
-        fields = ["id", "quiz", "text", "kind", "weight", "choices"]
-
-
-class QuizSerializer(serializers.ModelSerializer):
-    questions = QuestionSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Quiz
-        fields = ["id", "course", "title", "pass_score", "questions"]
+    id = serializers.IntegerField()
+    order = serializers.IntegerField()
+    title = serializers.CharField()
 
 
-class AttemptCreateSerializer(serializers.ModelSerializer):
-    """
-    Atttempt: client envoie `data` : {question_id: choice_id} pour MCQ/TF
-    On calcule le score côté serveur à la sauvegarde via create()
-    """
-
-    class Meta:
-        model = Attempt
-        fields = ["id", "quiz", "created_at", "score", "passed", "data"]
-        read_only_fields = ["id", "created_at", "score", "passed"]
-
-    def validate_quiz(self, quiz):
-        # Un quiz ne se passe que dans un parcours où l'on est inscrit.
-        user = self.context["request"].user
-        if (
-            not user.is_staff
-            and not Enrollment.objects.filter(user=user, course=quiz.course).exists()
-        ):
-            raise serializers.ValidationError("Vous devez être inscrit au parcours de ce quiz.")
-        return quiz
-
-    def create(self, validated_data):
-        user = validated_data.get("user")
-        quiz = validated_data.get("quiz")
-        data = validated_data.get("data") or {}
-
-        attempt = Attempt.objects.create(user=user, quiz=quiz, data=data)
-
-        # simple auto-grading: calcul pondéré
-        total_weight = 0
-        earned = 0
-        for q in quiz.questions.all():
-            total_weight += float(q.weight)
-            qid = str(q.id)
-            ans = data.get(qid)
-            if q.kind in ("mcq", "tf"):
-                # ans should be choice id or list of ids
-                if ans is None:
-                    continue
-                # support single or list
-                if isinstance(ans, list):
-                    selected = Choice.objects.filter(id__in=ans, question=q)
-                    correct = selected.filter(is_correct=True).count()
-                    # naive: points if all selected are correct and number matches
-                    correct_total = q.choices.filter(is_correct=True).count()
-                    if (
-                        correct_total
-                        and correct == correct_total
-                        and selected.count() == correct_total
-                    ):
-                        earned += float(q.weight)
-                else:
-                    try:
-                        c = Choice.objects.get(id=ans, question=q)
-                        if c.is_correct:
-                            earned += float(q.weight)
-                    except Choice.DoesNotExist:
-                        pass
-            elif q.kind == "free":
-                # free responses must be graded manually (skip auto)
-                pass
-
-        score_pct = 0.0
-        if total_weight > 0:
-            score_pct = (earned / total_weight) * 100.0
-
-        attempt.score = round(score_pct, 2)
-        attempt.passed = attempt.score >= float(quiz.pass_score)
-        attempt.save()
-
-        return attempt
+class CourseRefSerializer(serializers.Serializer):
+    slug = serializers.SlugField()
+    title = serializers.CharField()
 
 
-class AttemptSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Attempt
-        fields = ["id", "user", "quiz", "created_at", "score", "passed", "data"]
-        read_only_fields = fields
+class EnrollmentSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    course = CourseListSerializer()
+    source = serializers.ChoiceField(
+        choices=(
+            ("free", "Gratuit"),
+            ("order", "Commande"),
+            ("kit_code", "Kit Code"),
+            ("classroom", "Classe"),
+        )
+    )
+    status = serializers.ChoiceField(choices=(("active", "En cours"), ("completed", "Terminé")))
+    progress_pct = serializers.IntegerField()
+    mission_count = serializers.IntegerField()
+    missions_done = serializers.IntegerField()
+    created_at = serializers.DateTimeField()
+    last_activity_at = serializers.DateTimeField(allow_null=True)
+    completed_at = serializers.DateTimeField(allow_null=True)
+    current_project = RefSerializer(allow_null=True, help_text="Projet de la prochaine étape")
+    current_level = RefSerializer(allow_null=True, help_text="Niveau de la prochaine étape")
+    next = NextStepSerializer()
+
+
+class MissionItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    order = serializers.IntegerField()
+    title = serializers.CharField()
+    duration_min = serializers.IntegerField()
+    icon = serializers.CharField()
+    state = serializers.ChoiceField(choices=STATES)
+
+
+class LevelItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    order = serializers.IntegerField()
+    title = serializers.CharField()
+    duration_min = serializers.IntegerField()
+    intro_summary = serializers.CharField()
+    state = serializers.ChoiceField(choices=STATES)
+    mission_count = serializers.IntegerField()
+    missions_done = serializers.IntegerField()
+
+
+class TreeLevelSerializer(LevelItemSerializer):
+    missions = MissionItemSerializer(many=True)
+
+
+class TreeProjectSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    order = serializers.IntegerField()
+    title = serializers.CharField()
+    duration_hours = serializers.IntegerField()
+    state = serializers.ChoiceField(choices=STATES)
+    mission_count = serializers.IntegerField()
+    missions_done = serializers.IntegerField()
+    levels = TreeLevelSerializer(many=True)
+
+
+class TreeSerializer(EnrollmentSerializer):
+    """Arbre du parcours (WC06a, WC06b, WJ09) : titres, durées et états, sans contenu."""
+
+    projects = TreeProjectSerializer(many=True)
+
+
+class ProjectDetailSerializer(serializers.Serializer):
+    """Projet (WJ01)."""
+
+    id = serializers.IntegerField()
+    order = serializers.IntegerField()
+    title = serializers.CharField()
+    duration_hours = serializers.IntegerField()
+    objectives = serializers.ListField(child=serializers.CharField())
+    prerequisites = serializers.ListField(child=serializers.CharField())
+    materials = serializers.ListField(child=serializers.CharField())
+    state = serializers.ChoiceField(choices=STATES)
+    mission_count = serializers.IntegerField()
+    missions_done = serializers.IntegerField()
+    course = CourseRefSerializer()
+    levels = LevelItemSerializer(many=True)
+
+
+class LevelDetailSerializer(serializers.Serializer):
+    """Niveau (WJ02) : introduction vidéo (identifiant et hachage, ADR 0004) et missions."""
+
+    id = serializers.IntegerField()
+    order = serializers.IntegerField()
+    title = serializers.CharField()
+    duration_min = serializers.IntegerField()
+    intro_summary = serializers.CharField()
+    intro_vimeo_id = serializers.CharField(allow_null=True)
+    intro_vimeo_hash = serializers.CharField(allow_null=True)
+    state = serializers.ChoiceField(choices=STATES)
+    course = CourseRefSerializer()
+    project = RefSerializer()
+    missions = MissionItemSerializer(many=True)
+
+
+class MissionBlockSerializer(serializers.Serializer):
+    type = serializers.ChoiceField(
+        choices=(("text", "Texte"), ("tip", "Astuce"), ("media", "Média"))
+    )
+    text = serializers.CharField(required=False)
+    src = serializers.CharField(required=False)
+    alt = serializers.CharField(required=False)
+    caption = serializers.CharField(required=False)
+
+
+class MissionDetailSerializer(serializers.Serializer):
+    """Mission (WJ03) : vidéo (identifiant et hachage, ADR 0004) et blocs de contenu."""
+
+    id = serializers.IntegerField()
+    order = serializers.IntegerField()
+    title = serializers.CharField()
+    duration_min = serializers.IntegerField()
+    icon = serializers.CharField()
+    vimeo_id = serializers.CharField(allow_null=True)
+    vimeo_hash = serializers.CharField(allow_null=True)
+    blocks = MissionBlockSerializer(many=True)
+    state = serializers.ChoiceField(choices=STATES)
+    course = CourseRefSerializer()
+    project = RefSerializer()
+    level = RefSerializer()
+    next = NextStepSerializer(help_text="Étape à proposer après cette mission")
+
+
+class MissionCompleteSerializer(serializers.Serializer):
+    mission_id = serializers.IntegerField()
+    progress_pct = serializers.IntegerField()
+    next = NextStepSerializer(
+        help_text="Mission suivante, ou certification si le parcours est fait"
+    )

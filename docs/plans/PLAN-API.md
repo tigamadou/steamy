@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L2.0b
+Statut : 🟡 en cours · Prochaine tâche : API-L3a.2
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -287,18 +287,35 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > mot de passe → W11-W14, mot de passe oublié, activation de l'invitation du seed) et figé par
   > `test_signup_journey.py`.
 
-### API-L3a · Pédagogie — ⬜ à faire
+### API-L3a · Pédagogie — 🟡 en cours
 - [ ] **Préalables**
   - [ ] Barème de points et paliers de rang saisis dans `PlatformSettings` (C8)
   - [x] **ADR-Médias (Vimeo)** : vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de hors ligne (D16)
-- [ ] **API-L3a.1** Inscriptions et arbre · `feature/api-l3a-1-inscriptions`
-  - [ ] `Enrollment` (`source`), `MissionProgress`
-  - [ ] `POST learning/enrollments/` (gratuit seulement, `PAYMENT_REQUIRED` / `KIT_CODE_REQUIRED`)
-  - [ ] `GET learning/enrollments/`, `…/{courseSlug}/tree/`
-  - [ ] `GET learning/projects|levels|missions/{id}/` (`NOT_ENROLLED` / `CONTENT_LOCKED`)
-  - [ ] `POST learning/missions/{id}/complete/` séquentiel avec `next`
-  - [ ] `vimeoHash` / `introVimeoHash`
-  - [ ] Tests : mission verrouillée → 403 `CONTENT_LOCKED` en appel direct, non inscrit → `NOT_ENROLLED`, parcours payant ou à kit non inscriptible directement
+- [x] **API-L3a.1** Inscriptions et arbre · `feature/api-l3a-1-inscriptions` · PR #64
+  - [x] `Enrollment` (`source`), `MissionProgress`
+  - [x] `POST learning/enrollments/` (gratuit seulement, `PAYMENT_REQUIRED` / `KIT_CODE_REQUIRED`)
+  - [x] `GET learning/enrollments/`, `…/{courseSlug}/tree/`
+  - [x] `GET learning/projects|levels|missions/{id}/` (`NOT_ENROLLED` / `CONTENT_LOCKED`)
+  - [x] `POST learning/missions/{id}/complete/` séquentiel avec `next`
+  - [x] `vimeoHash` / `introVimeoHash`
+  - [x] Tests : mission verrouillée → 403 `CONTENT_LOCKED` en appel direct, non inscrit → `NOT_ENROLLED`, parcours payant ou à kit non inscriptible directement
+  - [x] Refonte des migrations de `learning` (`0001_pedagogie`) et suppression de l'app `courses`
+  - [x] Seed : parcours court de P1 (`premiers-pas-zeti`), Léa inscrite à trois parcours (en cours, fini, court remis à zéro)
+  > Décisions : `learning` est refondu par une migration `0001_pedagogie` qui supprime d'abord les anciennes tables
+  > (`DROP TABLE IF EXISTS`, sans effet sur une base neuve, S1) ; les anciennes migrations et l'app `courses` sont
+  > supprimées. Les anciennes routes (`progress`, `quizzes`, `questions`, `choices`, `attempts`, `certificates`)
+  > disparaissent et reviennent sous leur forme cible en L3a.2 et L3a.4. Ajouts à §3.2 : `Enrollment.lastActivityAt`
+  > (WD23 « dernière activité », tri de la liste), `MissionProgress.completedAt` ; `Enrollment.course` en `PROTECT`.
+  > `order`, `kitCode`, `classroom` d'`Enrollment` arrivent avec leurs modèles (L3b, L5). Toutes les routes
+  > `learning/` sont réservées à l'apprenant (`IsLearner`) et répondent `Cache-Control: private, no-store`.
+  > Contrôles du contenu : inconnu ou parcours non publié → 404, puis `NOT_ENROLLED`, puis `CONTENT_LOCKED`. États
+  > `done` / `available` / `locked` : seule la première étape non faite est disponible ; une étape faite reste
+  > lisible. `POST learning/enrollments/` `{courseSlug}` : 201, ou 200 avec l'inscription existante (idempotent, y
+  > compris pour un parcours obtenu autrement). `next` = `{type: mission|certification, id, title, courseSlug,
+  > projectId, levelId}` (`quiz` s'y ajoute en L3a.2). `progressPct` = part des missions terminées (entier).
+  > Liste : `?status=active|completed`, paginée, par dernière activité ; chaque inscription donne
+  > `currentProject`/`currentLevel` et `next`. Vidéos de démonstration : vidéo Vimeo publique `76979871` (ADR 0004,
+  > V4), sans hachage.
 - [ ] **API-L3a.2** Quiz · `feature/api-l3a-2-quiz`
   - [ ] `Quiz` (formative / sommative, contrainte « exactement un »), `Question`, `Choice`
   - [ ] `GET learning/quizzes/{id}/` sans corrigé
