@@ -146,6 +146,7 @@ def test_s7_paid_course_cannot_be_enrolled_for_free(paid_course, user):
 def test_s4_lists_only_return_the_callers_objects(user):
     from apps.courses.models import Course
     from apps.learning.models import Attempt, Certificate, Enrollment, Quiz
+    from apps.notifications.tests.factories import NotificationFactory
     from apps.payments.models import Order, Payment
 
     other = LearnerFactory()
@@ -155,6 +156,7 @@ def test_s4_lists_only_return_the_callers_objects(user):
     Attempt.objects.create(user=other, quiz=Quiz.objects.create(course=course, title="Q"))
     order = Order.objects.create(user=other, reference="REF-AUTRE", total=1000)
     Payment.objects.create(order=order, provider="kkiapay", amount=1000)
+    NotificationFactory(user=other, title="Privée")
 
     client = APIClient()
     client.force_authenticate(user)
@@ -165,6 +167,7 @@ def test_s4_lists_only_return_the_callers_objects(user):
         "/api/learning/certificates/",
         "/api/payments/orders/",
         "/api/payments/payments/",
+        "/api/notifications/",
     ]:
         resp = client.get(url)
         assert resp.status_code == 200, url

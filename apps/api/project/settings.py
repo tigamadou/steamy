@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     "apps.learning",
     "apps.payments",
     "apps.analytics",
+    "apps.notifications",
     "apps.core",
 ]
 
@@ -414,6 +415,8 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+# Tâches exécutées sur place pendant les tests (PLAN-API, règles propres à l'API)
+CELERY_TASK_ALWAYS_EAGER = TESTING
 
 # optional default task time limits
 CELERY_TASK_TIME_LIMIT = int(os.getenv("CELERY_TASK_TIME_LIMIT", 300))

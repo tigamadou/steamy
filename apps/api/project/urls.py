@@ -28,6 +28,7 @@ urlpatterns = [
     path("api/learning/", include("apps.learning.urls")),
     path("api/payments/", include("apps.payments.urls")),
     path("api/analytics/", include("apps.analytics.urls")),
+    path("api/notifications/", include("apps.notifications.urls")),
     # path("api/core/presign/", include("apps.core.views.presign_upload")),
     path("api/core/presign/", presign_upload, name="presign-upload"),
     path("api/health/", health, name="health"),
