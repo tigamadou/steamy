@@ -32,3 +32,16 @@ export async function loginViaApi(page: Page, identifier: string, password: stri
 export function loginAs(page: Page, role: DemoRole): Promise<void> {
   return loginViaApi(page, DEMO[role].identifier);
 }
+
+/** Ouvre le tiroir de navigation du shell quand il est replié (écran de moins de 768 px). */
+export async function openShellMenu(page: Page): Promise<void> {
+  const menu = page.getByRole("button", { name: "Ouvrir le menu" });
+  if (await menu.isVisible()) await menu.click();
+}
+
+/** Déconnexion depuis le shell applicatif : « Déconnexion » puis confirmation dans la modale WD16. */
+export async function logoutFromShell(page: Page): Promise<void> {
+  await openShellMenu(page);
+  await page.getByRole("button", { name: "Déconnexion" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Se déconnecter" }).click();
+}

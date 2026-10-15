@@ -15,20 +15,20 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 3.0 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
+Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
 
-### Valeur pédagogique (API-L3a) — ⬜ à faire
-- [ ] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell`
-  - [ ] `AppShell` (props de §5.5, sidebar repliable en tiroir sous 768 px)
-  - [ ] `NavItem`, `NotificationBell`, `HeaderSearch`
-  - [ ] WD16 `LogoutModal`
-  - [ ] Config `learnerNav` et table unique `active` dérivée de l'URL
-  - [ ] Promotions au DS : `SectionHeader`, `StatPill`, `ProgressBar`, `QuickActionTile`, `SettingsRow`, `Toggle`
-  - [ ] Layout `apprenant/layout.tsx` (garde de rôle `learner`) et layout `(shell)`, drapeaux `src/lib/features.ts`
-  - [ ] Données du shell : `accounts/me/`, `notifications/unread-count/` (rafraîchi toutes les 60 s onglet visible)
-  - [ ] Tests unitaires : nav à 5 entrées visibles, `active` dérivé de l'URL, compteur, modale au clavier
-  - [ ] Parcours Playwright : apprenant → shell ; parent sur `/apprenant` → redirection ; non connecté → `/connexion?next=` puis retour
-  - [ ] Recette : aucune donnée en dur, aucun `title="Bientôt"`, rendu 360 px, squelette du shell pendant le chargement
+### Valeur pédagogique (API-L3a) — 🟡 en cours
+- [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #—
+  - [x] `AppShell` (props de §5.5, sidebar repliable en tiroir sous 768 px)
+  - [x] `NavItem`, `NotificationBell`, `HeaderSearch`
+  - [x] WD16 `LogoutModal`
+  - [x] Config `learnerNav` et table unique `active` dérivée de l'URL
+  - [x] Promotions au DS : `SectionHeader`, `StatPill`, `ProgressBar`, `QuickActionTile`, `SettingsRow`, `Toggle`
+  - [x] Layout `apprenant/layout.tsx` (garde de rôle `learner`) et layout `(shell)`, drapeaux `src/lib/features.ts`
+  - [x] Données du shell : `accounts/me/`, `notifications/unread-count/` (rafraîchi toutes les 60 s onglet visible)
+  - [x] Tests unitaires : nav à 5 entrées visibles, `active` dérivé de l'URL, compteur, modale au clavier
+  - [x] Parcours Playwright : apprenant → shell ; parent sur `/apprenant` → redirection ; non connecté → `/connexion?next=` puis retour
+  - [x] Recette : aucune donnée en dur, aucun `title="Bientôt"`, rendu 360 px, squelette du shell pendant le chargement
 - [ ] **3.1** Accueil, notifications et aide (requiert API-L3a) · `feature/lot3-accueil-notifications`
   - [ ] WD01 tableau de bord avec reprise (`StatPill` Streak, Points, Rang masqués si `null`)
   - [ ] WD02 tableau de bord sans reprise (catalogue `prix=gratuit`)
