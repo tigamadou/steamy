@@ -395,7 +395,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] `POST events/applications/{id}/accept/` (payant → `PaymentRequest`/commande, D53), `…/refuse/`
   - [ ] `POST payments/orders/` avec `paymentRequestId` (WPD15)
   - [ ] Tests : l'apprenant ne peut pas accepter sa propre candidature
-- [x] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions`
+- [x] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions` · PR #77
   - [x] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
   - [x] `CHILDREN_STILL_LINKED` (D54)
   - [x] Tâche `anonymize_due_accounts` (J+30, factures conservées, D40)
