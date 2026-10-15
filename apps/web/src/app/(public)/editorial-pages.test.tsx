@@ -117,11 +117,11 @@ describe("WL18 · /blog/[slug]", () => {
 });
 
 describe("WL20 · /guides", () => {
-  it("liste les guides en téléchargement libre", () => {
+  it("liste les guides en téléchargement libre, encart newsletter facultatif", () => {
     render(guides.default());
     expect(screen.getByRole("heading", { level: 1, name: "Guides gratuits" })).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /^Télécharger/ })).toHaveLength(3);
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Recevez nos nouveaux guides" })).toHaveTextContent("Facultatif");
   });
 });
 

@@ -77,6 +77,19 @@ describe("enveloppes par registre", () => {
     expect(screen.getByRole("link", { name: "Retour à l'accueil" })).toHaveAttribute("href", "/");
   });
 
+  it("404 aux textes et à l'action propres à un écran", () => {
+    render(
+      <NotFoundState
+        title="Parcours introuvable"
+        body="Il n'est plus publié."
+        action={{ label: "Voir", href: "/parcours" }}
+      />,
+    );
+    expect(screen.getByRole("heading", { name: "Parcours introuvable" })).toBeInTheDocument();
+    expect(screen.getByText("Il n'est plus publié.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Voir" })).toHaveAttribute("href", "/parcours");
+  });
+
   it("tutoie par défaut, vouvoie le parent et l'enseignant, reste neutre pour le personnel", () => {
     render(<ErrorState onRetry={() => {}} />);
     expect(screen.getByText(/Réessaie dans un instant/)).toBeInTheDocument();

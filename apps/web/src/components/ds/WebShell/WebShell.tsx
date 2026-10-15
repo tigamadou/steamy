@@ -111,7 +111,7 @@ export function WebShell({
               {kicker && (
                 <p className="text-xs font-extrabold tracking-[0.06em] text-primary-600 uppercase">{kicker}</p>
               )}
-              <h1 className="mt-2 text-[28px] leading-[1.1] font-black tracking-[-0.02em] md:text-4xl">{title}</h1>
+              <h1 className="mt-2 text-[28px] leading-[1.1] font-black tracking-[-0.02em] text-balance md:text-4xl">{title}</h1>
               {sub && <p className="mt-3 text-base leading-normal font-semibold text-ink-600">{sub}</p>}
             </div>
             {children && <div className="flex flex-col gap-4">{children}</div>}

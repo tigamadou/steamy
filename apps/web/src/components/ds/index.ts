@@ -8,6 +8,7 @@ export * from "./Button";
 export * from "./Celebration";
 export * from "./Checkbox";
 export * from "./ChoiceCard";
+export * from "./ConsentRequestCard";
 export * from "./CourseCard";
 export * from "./ErrorSummary";
 export * from "./FaqAccordion";
