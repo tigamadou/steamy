@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L2.0b
+Statut : 🟡 en cours · Prochaine tâche : API-L3a.3
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -287,24 +287,57 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > mot de passe → W11-W14, mot de passe oublié, activation de l'invitation du seed) et figé par
   > `test_signup_journey.py`.
 
-### API-L3a · Pédagogie — ⬜ à faire
+### API-L3a · Pédagogie — 🟡 en cours
 - [ ] **Préalables**
   - [ ] Barème de points et paliers de rang saisis dans `PlatformSettings` (C8)
   - [x] **ADR-Médias (Vimeo)** : vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de hors ligne (D16)
-- [ ] **API-L3a.1** Inscriptions et arbre · `feature/api-l3a-1-inscriptions`
-  - [ ] `Enrollment` (`source`), `MissionProgress`
-  - [ ] `POST learning/enrollments/` (gratuit seulement, `PAYMENT_REQUIRED` / `KIT_CODE_REQUIRED`)
-  - [ ] `GET learning/enrollments/`, `…/{courseSlug}/tree/`
-  - [ ] `GET learning/projects|levels|missions/{id}/` (`NOT_ENROLLED` / `CONTENT_LOCKED`)
-  - [ ] `POST learning/missions/{id}/complete/` séquentiel avec `next`
-  - [ ] `vimeoHash` / `introVimeoHash`
-  - [ ] Tests : mission verrouillée → 403 `CONTENT_LOCKED` en appel direct, non inscrit → `NOT_ENROLLED`, parcours payant ou à kit non inscriptible directement
-- [ ] **API-L3a.2** Quiz · `feature/api-l3a-2-quiz`
-  - [ ] `Quiz` (formative / sommative, contrainte « exactement un »), `Question`, `Choice`
-  - [ ] `GET learning/quizzes/{id}/` sans corrigé
-  - [ ] `POST …/attempts/` : correction serveur, `ok`/`warn`/`ko` (D31), cooldown sommatif `QUIZ_COOLDOWN` (D32), `failedConcepts`, `retryInSec`, `next`
-  - [ ] `GET learning/attempts/` (+ agrégats WD07)
-  - [ ] Tests : `isCorrect` absent de toute réponse, seuils 70/80 et bornes de `warn`, cooldown
+- [x] **API-L3a.1** Inscriptions et arbre · `feature/api-l3a-1-inscriptions` · PR #64
+  - [x] `Enrollment` (`source`), `MissionProgress`
+  - [x] `POST learning/enrollments/` (gratuit seulement, `PAYMENT_REQUIRED` / `KIT_CODE_REQUIRED`)
+  - [x] `GET learning/enrollments/`, `…/{courseSlug}/tree/`
+  - [x] `GET learning/projects|levels|missions/{id}/` (`NOT_ENROLLED` / `CONTENT_LOCKED`)
+  - [x] `POST learning/missions/{id}/complete/` séquentiel avec `next`
+  - [x] `vimeoHash` / `introVimeoHash`
+  - [x] Tests : mission verrouillée → 403 `CONTENT_LOCKED` en appel direct, non inscrit → `NOT_ENROLLED`, parcours payant ou à kit non inscriptible directement
+  - [x] Refonte des migrations de `learning` (`0001_pedagogie`) et suppression de l'app `courses`
+  - [x] Seed : parcours court de P1 (`premiers-pas-zeti`), Léa inscrite à trois parcours (en cours, fini, court remis à zéro)
+  > Décisions : `learning` est refondu par une migration `0001_pedagogie` qui supprime d'abord les anciennes tables
+  > (`DROP TABLE IF EXISTS`, sans effet sur une base neuve, S1) ; les anciennes migrations et l'app `courses` sont
+  > supprimées. Les anciennes routes (`progress`, `quizzes`, `questions`, `choices`, `attempts`, `certificates`)
+  > disparaissent et reviennent sous leur forme cible en L3a.2 et L3a.4. Ajouts à §3.2 : `Enrollment.lastActivityAt`
+  > (WD23 « dernière activité », tri de la liste), `MissionProgress.completedAt` ; `Enrollment.course` en `PROTECT`.
+  > `order`, `kitCode`, `classroom` d'`Enrollment` arrivent avec leurs modèles (L3b, L5). Toutes les routes
+  > `learning/` sont réservées à l'apprenant (`IsLearner`) et répondent `Cache-Control: private, no-store`.
+  > Contrôles du contenu : inconnu ou parcours non publié → 404, puis `NOT_ENROLLED`, puis `CONTENT_LOCKED`. États
+  > `done` / `available` / `locked` : seule la première étape non faite est disponible ; une étape faite reste
+  > lisible. `POST learning/enrollments/` `{courseSlug}` : 201, ou 200 avec l'inscription existante (idempotent, y
+  > compris pour un parcours obtenu autrement). `next` = `{type: mission|certification, id, title, courseSlug,
+  > projectId, levelId}` (`quiz` s'y ajoute en L3a.2). `progressPct` = part des missions terminées (entier).
+  > Liste : `?status=active|completed`, paginée, par dernière activité ; chaque inscription donne
+  > `currentProject`/`currentLevel` et `next`. Vidéos de démonstration : vidéo Vimeo publique `76979871` (ADR 0004,
+  > V4), sans hachage.
+- [x] **API-L3a.2** Quiz · `feature/api-l3a-2-quiz` · PR #66
+  - [x] `Quiz` (formative / sommative, contrainte « exactement un »), `Question`, `Choice`
+  - [x] `GET learning/quizzes/{id}/` sans corrigé
+  - [x] `POST …/attempts/` : correction serveur, `ok`/`warn`/`ko` (D31), cooldown sommatif `QUIZ_COOLDOWN` (D32), `failedConcepts`, `retryInSec`, `next`
+  - [x] `GET learning/attempts/` (+ agrégats WD07)
+  - [x] Tests : `isCorrect` absent de toute réponse, seuils 70/80 et bornes de `warn`, cooldown
+  - [x] Quiz intégrés à la séquence (formative après les missions du niveau, sommative après les niveaux du projet) ; `GET learning/attempts/{id}/`
+  - [x] Seed : une formative par niveau, une sommative par projet (2 questions) ; tentatives `ko`, `warn`, `ok` de Léa
+  > Décisions : `Quiz`, `Question`, `Choice` dans `catalog` (contenu saisi par le groupe Contenu, matrice des
+  > groupes) ; `QuizAttempt` dans `learning`. Questions à choix unique (une bonne réponse exactement, contrôlée dans
+  > l'admin), `weight` entier. Le délai d'une sommative ratée vient de `PlatformSettings` (D32, réglable et raccourci
+  > par `--e2e`), pas d'un champ par quiz (écart à §3.2 : `retryCooldownSec` non créé) ; `threshold` vide = 70 / 80.
+  > Statut calculé sans arrondi (`score × 100 ≥ seuil × total`), `percentage` arrondi à l'entier inférieur ; la
+  > tentative garde le seuil appliqué. Un quiz n'est accessible qu'une fois les étapes précédentes faites
+  > (`CONTENT_LOCKED`) ; un quiz réussi se repasse librement, sans délai. Envoi : `{answers: [{questionId,
+  > choiceId}], durationSec?}`, question sans réponse = fausse, question ou réponse étrangère au quiz → 400.
+  > `QUIZ_COOLDOWN` (429) porte l'en-tête `Retry-After` ; `retryInSec` est aussi donné par `GET quizzes/{id}/`. Le
+  > corrigé (« servi après soumission », WD08) se limite à `correct` par question, `chosenChoiceId`, notions et
+  > missions à revoir : la bonne réponse n'est jamais renvoyée. `next` (après une réussite) = étape suivante ;
+  > `next.type` gagne `quiz` (+ `quizKind`, `levelId` nul pour une sommative). `GET learning/attempts/`
+  > (`?status=ok|warn|ko&quiz=`) ajoute `summary {attemptCount, successRate, perfectCount, streakDays}` sur toutes
+  > les tentatives (filtres ignorés).
 - [ ] **API-L3a.3** Gamification · `feature/api-l3a-3-gamification`
   - [ ] `PointsEntry`, `Badge`, `LearnerBadge`, `LearningActivity`
   - [ ] `POST learning/activity/` (secondes plafonnées, anti-gonflage)
@@ -323,7 +356,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] App `wishlist` : `GET wishlist/`, `PUT/DELETE wishlist/{courseSlug}/` idempotents
   - [ ] Préférences de notification apprenant (pas de SMS ni marketing pour un mineur, D6, D30)
 - [ ] **Outillage de test d'API-L3a**
-  - [ ] `seed_demo --e2e` (cooldown sommatif raccourci, parcours court P1 du lot 3)
+  - [x] `seed_demo --e2e` (cooldown sommatif raccourci, parcours court P1 du lot 3) · PR #66
+    > Le parcours court (`premiers-pas-zeti`) est dans le jeu unique (LOT-3 §8.3) ; `--e2e` ne fait que ramener le
+    > délai à 5 s. `make e2e` appelle `make seed SEED_ARGS=--e2e`.
   - [ ] Worker Celery dans `compose.e2e.yml`
 - [ ] **Critères de fin d'API-L3a**
   - [ ] Un apprenant ne lit ni les tentatives ni les certificats d'un autre
@@ -418,15 +453,15 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > en attente annule la demande au parent. Progression, dernière activité et compteurs de missions terminées
   > (WT04, WT10) arrivent avec API-L5.3, après API-L3a. Énumérations `ConsentStatusEnum` et
   > `MembershipStatusEnum` nommées dans `ENUM_NAME_OVERRIDES`.
-- [ ] **API-L5.2** Invitations · `feature/api-l5-2-invitations` · PR #81
+- [x] **API-L5.2** Invitations · `feature/api-l5-2-invitations` · PR #81
   - [x] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
   - [x] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; l'élève devient membre actif, l'enseignant est notifié
-  - [ ] `Enrollment` `source=classroom` à l'adhésion (D62) : attend la fusion d'API-L3a.1 (PR #64, nouveau modèle `Enrollment`)
+  - [x] `Enrollment` `source=classroom` à l'adhésion (D62), sans paiement ; une inscription antérieure au même parcours est gardée
   - [x] `POST …/invitations/import/` (C19 : CSV/Excel, 200 lignes, 1 Mo, import partiel, codes d'erreur par ligne)
   - [x] SMS par Celery, plafond par enseignant et par jour
   - [x] Refus et expiration : place libérée, enseignant notifié (WT04, WT12)
   - [x] Seed D2 : élèves actifs (Léa, Yao, Sèna) et invitations en attente, refusée et expirée
-  - [ ] Tests : invitation non acceptée → aucun accès au parcours (avec l'`Enrollment`, après API-L3a.1)
+  - [x] Tests : invitation non acceptée → aucun accès au parcours
   > Décisions : import en fichier (`multipart`, champ `file`) **ou** en lignes JSON (`rows`, liste collée et lignes
   > corrigées, `line` facultatif pour garder le numéro d'origine) ; réponse `{created[], errors[{line, code, message,
   > data}]}`. Codes par ligne en plus de C19 : `CONSENT_COOLDOWN` (refus de ce parent depuis moins de 30 jours, C9)
@@ -435,9 +470,8 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > attente ou élève actif (`ALREADY_IN_CLASSROOM`). Le compte créé par le parent est actif ; l'enfant complète son
   > profil à la première connexion (comme D51). `GET accounts/consent-requests/{id}/` expose `classroom` (classe,
   > enseignant, école, parcours) pour WPD05. Pas de plafond OTP par IP pour ces SMS : le plafond par enseignant le
-  > remplace.
-  > Reprise : après la fusion d'API-L3a.1 dans `development`, créer l'`Enrollment` `source=classroom` dans
-  > `apps/classrooms/joining.py` (`join_classroom`) et ajouter le test « invitation non acceptée → aucun accès ».
+  > remplace. Pas de champ `classroom` sur `Enrollment` (pas de migration `learning`) : la classe se retrouve par
+  > `ClassroomMembership` ; l'inscription reste après un retrait de la classe (progression conservée).
 - [ ] **API-L5.3** Suivi · `feature/api-l5-3-suivi`
   - [ ] `GET classrooms/dashboard/`
   - [ ] `GET classrooms/learners/{id}/?classroomId=` (serializer sans handicap, localité, date de naissance, téléphone, D64)
