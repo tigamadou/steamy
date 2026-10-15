@@ -36,12 +36,12 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `W06` | Numéro du parent | 2 | Numéro du parent, SMS de consentement | `apps/web/e2e/inscription-apprenant.spec.ts` |
 | `W07` | Attente consentement | 2 | Attente du consentement : polling, code de reprise, reprise dans un autre navigateur | `apps/web/e2e/consentement-apprenant.spec.ts` |
 | `W08` | Accord reçu | 2 | Accord du parent détecté par polling | `apps/web/e2e/consentement-apprenant.spec.ts` |
-| `W10` | Mot de passe | 2 |  |  |
-| `W11` | Profil 1 · infos | 2 |  |  |
-| `W12` | Profil 2 · école | 2 |  |  |
-| `W13` | Objectifs | 2 |  |  |
-| `W14` | Avatar | 2 |  |  |
-| `W15` | Bienvenue | 2 |  |  |
+| `W10` | Mot de passe | 2 | Mot de passe après l'accord (D25) | `apps/web/e2e/profil-apprenant.spec.ts` |
+| `W11` | Profil 1 · infos | 2 | Date de naissance cohérente avec l'âge, localité | `apps/web/e2e/profil-apprenant.spec.ts` |
+| `W12` | Profil 2 · école | 2 | Classe, genre et handicap facultatifs | `apps/web/e2e/profil-apprenant.spec.ts` |
+| `W13` | Objectifs | 2 | Au moins 2 objectifs | `apps/web/e2e/profil-apprenant.spec.ts` |
+| `W14` | Avatar | 2 | Avatar, aucun présélectionné | `apps/web/e2e/profil-apprenant.spec.ts` |
+| `W15` | Bienvenue | 2 | Bienvenue puis tableau de bord et reconnexion | `apps/web/e2e/profil-apprenant.spec.ts` |
 | `W16` | Connexion existant | 2 | Connexion des trois rôles, `next` sûr, personnel refusé, déconnexion | `apps/web/e2e/connexion.spec.ts` |
 | `W18` | Consentement refusé (terminal) | 2 | Refus avec motif, identifiant libéré, délai de 30 jours | `apps/web/e2e/consentement-apprenant.spec.ts` |
 | `W19` | Identifiant déjà utilisé | 2 | Identifiant déjà pris au blur | `apps/web/e2e/inscription-apprenant.spec.ts` |

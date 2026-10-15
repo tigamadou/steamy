@@ -23,7 +23,7 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 2.5 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
+Statut : 🟡 en cours · Prochaine tâche : 2.6 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
 ### Socle — ✅ terminé
 - [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
@@ -61,7 +61,7 @@ Statut : 🟡 en cours · Prochaine tâche : 2.5 · Prérequis : API-1 (2.0 et 2
   - [x] Parcours Playwright : reset parent par SMS puis connexion et ancienne session invalidée ; reset enseignant par email ; numéro inconnu → même réponse ; 3 codes faux → `OTP_TOO_MANY_ATTEMPTS` ; activation par Mailpit puis lien réutilisé → `INVITATION_INVALID`
   - [x] Recette : vouvoiement partout ; aucune règle « Différent de l'ancien » ; aucun compte à rebours figé
 
-### Inscription apprenant — ⬜ à faire
+### Inscription apprenant — ✅ terminé
 - [x] **2.3** Inscription apprenant W01-W06, W19 (requiert API-L2) · `feature/lot2-inscription-apprenant`
   - [x] W01 splash d'entrée de `/inscription`
   - [x] W02 `/inscription`
@@ -87,16 +87,16 @@ Statut : 🟡 en cours · Prochaine tâche : 2.5 · Prérequis : API-1 (2.0 et 2
   - [x] Tests Vitest : transitions de W07, throttling du renvoi
   - [x] Parcours Playwright : reprise dans un nouveau contexte, `RESUME_CODE_INVALID`, connexion W16 d'un compte en attente → reprise préremplie
   - [x] Recette : W18 sans « Changer de parent » ni « Réessayer plus tard » ; identifiant de nouveau disponible après W18 (D22)
-- [ ] **2.5** Mot de passe et profil apprenant W10-W15 (requiert API-L2) · `feature/lot2-profil-apprenant`
-  - [ ] W10 `/inscription/apprenant/mot-de-passe` (`NewPasswordFields`)
-  - [ ] W11 `/inscription/apprenant/profil/infos`
-  - [ ] W12 `/inscription/apprenant/profil/ecole` (classe, genre, handicap, mention de finalité D6)
-  - [ ] W13 `/inscription/apprenant/profil/objectifs` (`GoalChip`, minimum 2)
-  - [ ] W14 `/inscription/apprenant/profil/avatar` (`AvatarPicker` plein écran)
-  - [ ] W15 `/inscription/apprenant/bienvenue` (`Celebration`)
-  - [ ] Un `PATCH accounts/me/learner-profile/` par étape ; reprise via `profileStep` et `homeForRole`
-  - [ ] Tests Vitest : `BIRTHDATE_AGE_MISMATCH`, champs facultatifs, sélection minimale des objectifs, aucun avatar présélectionné
-  - [ ] Recette : pas de « 1 parcours gratuit débloqué » ; règles W10 = D25 ; genre et handicap jamais obligatoires
+- [x] **2.5** Mot de passe et profil apprenant W10-W15 (requiert API-L2) · `feature/lot2-profil-apprenant`
+  - [x] W10 `/inscription/apprenant/mot-de-passe` (`NewPasswordFields`)
+  - [x] W11 `/inscription/apprenant/profil/infos`
+  - [x] W12 `/inscription/apprenant/profil/ecole` (classe, genre, handicap, mention de finalité D6)
+  - [x] W13 `/inscription/apprenant/profil/objectifs` (`GoalChip`, minimum 2)
+  - [x] W14 `/inscription/apprenant/profil/avatar` (`AvatarPicker` plein écran)
+  - [x] W15 `/inscription/apprenant/bienvenue` (`Celebration`)
+  - [x] Un `PATCH accounts/me/learner-profile/` par étape ; reprise via `profileStep` et `homeForRole`
+  - [x] Tests Vitest : `BIRTHDATE_AGE_MISMATCH`, champs facultatifs, sélection minimale des objectifs, aucun avatar présélectionné
+  - [x] Recette : pas de « 1 parcours gratuit débloqué » ; règles W10 = D25 ; genre et handicap jamais obligatoires
 
 ### Inscription et décision du parent — ⬜ à faire
 - [ ] **2.6** Inscription parent WP01-WP04, WP07-WP10 (requiert API-L2) · `feature/lot2-inscription-parent`
