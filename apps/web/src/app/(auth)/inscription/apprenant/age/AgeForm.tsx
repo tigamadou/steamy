@@ -7,6 +7,7 @@ import { Button } from "@/components/ds/Button";
 import { ErrorSummary } from "@/components/ds/ErrorSummary";
 import { NumberStepper } from "@/components/ds/NumberStepper";
 import { apiCall, errorMessage } from "@/lib/api-call";
+import { submitWith } from "@/lib/form";
 
 import { RESUME_CODE_KEY, useSignupDraft } from "../SignupDraft";
 
@@ -66,7 +67,7 @@ export function AgeForm() {
   if (missing) return null;
 
   return (
-    <form action={action} noValidate className="flex flex-col items-center gap-6">
+    <form onSubmit={submitWith(action)} noValidate className="flex flex-col items-center gap-6">
       <ErrorSummary errors={state.error ? [{ message: state.error }] : []} focusKey={state.attempt} />
       <NumberStepper min={MIN_AGE} max={MAX_AGE} value={age} onChange={setAge} label="Ton âge" unit="ans" />
       <p className="flex max-w-[340px] items-start gap-2.5 rounded-lg bg-amber-100 p-3.5 text-sm font-bold text-amber-700">

@@ -9,6 +9,7 @@ import { Field } from "@/components/ds/Field";
 import { PhoneInput } from "@/components/ds/PhoneInput";
 import { ReferentialSelect } from "@/components/ds/ReferentialSelect";
 import { apiCall, errorMessage } from "@/lib/api-call";
+import { submitWith } from "@/lib/form";
 import { useReferential } from "@/lib/use-referential";
 
 type State = { attempt: number; phone?: string; relationship?: string; error?: string };
@@ -59,7 +60,7 @@ export function ParentForm() {
   ].filter((item) => !!item);
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-4">
+    <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-4">
       <ErrorSummary errors={summary} focusKey={state.attempt} />
       <Field
         label="Numéro de téléphone du parent"
