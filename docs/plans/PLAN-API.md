@@ -492,7 +492,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `AuditLog` `payment.refunded`. Invité : SMS de suivi à la création, lien `/boutique/commandes/<ref>#jeton=<jeton>`
   > (jeton dans le fragment, jamais envoyé à un serveur). Réconciliation : paiements sans issue depuis 10 min ;
   > sans transaction → `failed` (`INITIATION_LOST`).
-- [x] **API-L3b.2b** Facture · `feature/api-l3b-2b-facture`
+- [x] **API-L3b.2b** Facture · `feature/api-l3b-2b-facture` · PR #89
   - [x] `Invoice` (`pdfStatus`, instantané), module `core/pdf.py` partagé avec les certificats (API-L3a.4, PR #69)
   - [x] Tâche `generate_invoice_pdf` lancée par l'exécution post-paiement ; `GET payments/orders/{reference}/invoice/` (payeur seulement, invité par jeton, P7)
   - [x] Mentions et TVA **paramétrables** (réglages), sans valeur légale inventée, en attendant P1 (MECeF) et P2 (TVA) de l'ADR 0005
