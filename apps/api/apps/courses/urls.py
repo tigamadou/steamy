@@ -1,5 +1,5 @@
 # apps/courses/urls.py
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 
 from .views import (
     CourseViewSet,
@@ -8,7 +8,7 @@ from .views import (
     ResourceViewSet,
 )
 
-router = DefaultRouter()
+router = SimpleRouter()
 router.register(r"courses", CourseViewSet, basename="course")
 router.register(r"modules", ModuleViewSet, basename="module")
 router.register(r"lessons", LessonViewSet, basename="lesson")

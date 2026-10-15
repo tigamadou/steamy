@@ -54,8 +54,8 @@ migrate: ## Applique les migrations
 makemigrations: ## Génère les migrations
 	$(API) python manage.py makemigrations
 
-seed: ## Charge les fixtures (compte admin, gabarits d'e-mails)
-	$(API) python manage.py loaddata fixtures/admin.json fixtures/mail.json
+seed: ## Charge les fixtures et le jeu de démonstration (comptes : apps/api/fixtures/README.md)
+	$(API) sh -c "python manage.py loaddata fixtures/admin.json fixtures/mail.json && python manage.py seed_demo"
 
 test-api: ## Lance les tests de l'API
 	$(API) pytest

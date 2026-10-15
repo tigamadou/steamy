@@ -78,6 +78,12 @@ def test_s12_token_header_does_not_authenticate(user):
         "/api/files",
         "/api/user/files/create-signed-file",
         "/api/courses/paths/",
+        # Vues racines et suffixes de format des routeurs DRF (D5 : /api/<domaine>/…/ uniquement)
+        "/api/courses/",
+        "/api/learning/",
+        "/api/payments/",
+        "/api/analytics/",
+        "/api/courses/courses.json",
     ],
 )
 @pytest.mark.django_db
