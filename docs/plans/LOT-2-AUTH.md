@@ -23,7 +23,7 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 2.3 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
+Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot (CI des PR #51-#57, correctifs API) · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
 ### Socle — ✅ terminé
 - [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
@@ -49,7 +49,7 @@ Statut : 🟡 en cours · Prochaine tâche : 2.3 · Prérequis : API-1 (2.0 et 2
   - [x] Parcours Playwright : connexion des trois rôles du jeu de démo, `next` externe ignoré, apprenant sur `/parent` redirigé, déconnexion
   - [x] Recette : trois rôles dans leur espace ; personnel refusé sans indice ; tutoiement côté apprenant
   > La résolution C7 (numéro national, `+`, email) et le refus du personnel sont déjà servis par API-1 (`IdentifierBackend`) : vérifiés en E2E. `ACCOUNT_PENDING_CONSENT` propose « Reprendre mon inscription » (identifiant transmis en mémoire), écran livré en 2.4.
-- [x] **2.2** Mot de passe oublié et activation enseignant (requiert API-L2) · `feature/lot2-mot-de-passe`
+- [x] **2.2** Mot de passe oublié et activation enseignant (requiert API-L2) · `feature/lot2-mot-de-passe` · PR #51
   - [x] WL02 `/mot-de-passe-oublie` (`PhoneInput`, bascule email enseignant, réponse neutre)
   - [x] WL03 `/mot-de-passe-oublie/code` (`OTPInput`, `ResendCountdown`, canal masqué)
   - [x] WL04 `/mot-de-passe-oublie/nouveau` (`NewPasswordFields`)
@@ -58,88 +58,94 @@ Statut : 🟡 en cours · Prochaine tâche : 2.3 · Prérequis : API-1 (2.0 et 2
   - [x] État du flux en mémoire (`challengeId`, `resetToken`), retour à WL02 au rechargement de WL04
   - [x] Sécurité : `Referrer-Policy: no-referrer` sur `/activation/*`, jeton retiré de l'historique, sessions fermées après réinitialisation
   - [x] Tests Vitest : bascule SMS/email, erreurs OTP, concordance
-  - [x] Parcours Playwright : reset parent par SMS puis connexion et ancienne session invalidée ; reset enseignant par email ; numéro inconnu → même réponse ; 3 codes faux → `OTP_TOO_MANY_ATTEMPTS` ; activation par Mailpit puis lien réutilisé → `INVITATION_INVALID`
+  - [x] Parcours Playwright : reset parent par SMS puis connexion et ancienne session invalidée ; reset enseignant par email ; numéro inconnu → même réponse ; 3 codes faux → `OTP_TOO_MANY_ATTEMPTS` ; activation par Mailpit puis lien réutilisé → `INVITATION_INVALID` (plafond de WL03 en `test.fixme` tant que l'API annule le compteur, vérifié sur WP02 en 2.6)
   - [x] Recette : vouvoiement partout ; aucune règle « Différent de l'ancien » ; aucun compte à rebours figé
 
-### Inscription apprenant — ⬜ à faire
-- [ ] **2.3** Inscription apprenant W01-W06, W19 (requiert API-L2) · `feature/lot2-inscription-apprenant`
-  - [ ] W01 splash d'entrée de `/inscription`
-  - [ ] W02 `/inscription`
-  - [ ] W03 `/inscription/type` (2 `UserTypeCard`)
-  - [ ] W04 `/inscription/apprenant/identite` (`username-availability`, CGU non cochée)
-  - [ ] W19 état d'erreur `USERNAME_TAKEN` de W04
-  - [ ] W05 `/inscription/apprenant/age` (`NumberStepper` 10-17)
-  - [ ] W06 `/inscription/apprenant/parent` (`PhoneInput`, lien de parenté, `CONSENT_COOLDOWN`)
-  - [ ] `SignupDraftProvider` en mémoire et garde d'étape lisant `GET auth/learner-signup/` (layout `apprenant/`)
-  - [ ] `POST auth/learner-signup/` à la fin de W05
-  - [ ] Aucun traceur tiers (D6), pas de newsletter (C12)
-  - [ ] Tests Vitest : W04 (C7, CGU obligatoire, `USERNAME_TAKEN` → W19), W05 (bornes), W06 (`CONSENT_COOLDOWN`)
-  - [ ] Parcours Playwright : W02 → W06 jusqu'au SMS de consentement lu dans le faux fournisseur
-  - [ ] Recette : kickers et barres conformes à SPEC-ECRANS §2.4 ; aucune mention « moins de 16 ans » ; aucun élément « Ne pas porter » de §2.5
-- [ ] **2.4** Attente, reprise et issue W07, W08, W18 (requiert API-L2) · `feature/lot2-consentement-apprenant`
-  - [ ] Composants `ResumeCodeCard` et `PendingPill`
-  - [ ] W07 `/inscription/apprenant/attente` (`FullScreenStage`, `Mascot sleep`, renvoi de la demande)
-  - [ ] Reprise `/inscription/reprendre` (C5)
-  - [ ] W08 `/inscription/apprenant/accord`
-  - [ ] W18 `/inscription/apprenant/refus`
-  - [ ] Polling `GET auth/learner-signup/` (15 s, suspendu onglet caché, arrêt sur état terminal, recul réseau)
-  - [ ] Code de reprise : affichage unique, « J'ai noté mon code », copie `sessionStorage` effacée à W08 ou W18
-  - [ ] Tests Vitest : transitions de W07, throttling du renvoi
-  - [ ] Parcours Playwright : reprise dans un nouveau contexte, `RESUME_CODE_INVALID`, connexion W16 d'un compte en attente → reprise préremplie
-  - [ ] Recette : W18 sans « Changer de parent » ni « Réessayer plus tard » ; identifiant de nouveau disponible après W18 (D22)
-- [ ] **2.5** Mot de passe et profil apprenant W10-W15 (requiert API-L2) · `feature/lot2-profil-apprenant`
-  - [ ] W10 `/inscription/apprenant/mot-de-passe` (`NewPasswordFields`)
-  - [ ] W11 `/inscription/apprenant/profil/infos`
-  - [ ] W12 `/inscription/apprenant/profil/ecole` (classe, genre, handicap, mention de finalité D6)
-  - [ ] W13 `/inscription/apprenant/profil/objectifs` (`GoalChip`, minimum 2)
-  - [ ] W14 `/inscription/apprenant/profil/avatar` (`AvatarPicker` plein écran)
-  - [ ] W15 `/inscription/apprenant/bienvenue` (`Celebration`)
-  - [ ] Un `PATCH accounts/me/learner-profile/` par étape ; reprise via `profileStep` et `homeForRole`
-  - [ ] Tests Vitest : `BIRTHDATE_AGE_MISMATCH`, champs facultatifs, sélection minimale des objectifs, aucun avatar présélectionné
-  - [ ] Recette : pas de « 1 parcours gratuit débloqué » ; règles W10 = D25 ; genre et handicap jamais obligatoires
+### Inscription apprenant — ✅ terminé
+- [x] **2.3** Inscription apprenant W01-W06, W19 (requiert API-L2) · `feature/lot2-inscription-apprenant` · PR #52
+  - [x] W01 splash d'entrée de `/inscription`
+  - [x] W02 `/inscription`
+  - [x] W03 `/inscription/type` (2 `UserTypeCard`)
+  - [x] W04 `/inscription/apprenant/identite` (`username-availability`, CGU non cochée)
+  - [x] W19 état d'erreur `USERNAME_TAKEN` de W04
+  - [x] W05 `/inscription/apprenant/age` (`NumberStepper` 10-17)
+  - [x] W06 `/inscription/apprenant/parent` (`PhoneInput`, lien de parenté, `CONSENT_COOLDOWN`)
+  - [x] `SignupDraftProvider` en mémoire et garde d'étape lisant `GET auth/learner-signup/` (layout `apprenant/`)
+  - [x] `POST auth/learner-signup/` à la fin de W05
+  - [x] Aucun traceur tiers (D6), pas de newsletter (C12)
+  - [x] Tests Vitest : W04 (C7, CGU obligatoire, `USERNAME_TAKEN` → W19), W05 (bornes), W06 (`CONSENT_COOLDOWN`)
+  - [x] Parcours Playwright : W02 → W06 jusqu'au SMS de consentement lu dans le faux fournisseur
+  - [x] Recette : kickers et barres conformes à SPEC-ECRANS §2.4 ; aucune mention « moins de 16 ans » ; aucun élément « Ne pas porter » de §2.5
+- [x] **2.4** Attente, reprise et issue W07, W08, W18 (requiert API-L2) · `feature/lot2-consentement-apprenant` · PR #53
+  - [x] Composants `ResumeCodeCard` et `PendingPill`
+  - [x] W07 `/inscription/apprenant/attente` (`FullScreenStage`, `Mascot sleep`, renvoi de la demande)
+  - [x] Reprise `/inscription/reprendre` (C5)
+  - [x] W08 `/inscription/apprenant/accord`
+  - [x] W18 `/inscription/apprenant/refus`
+  - [x] Polling `GET auth/learner-signup/` (15 s, suspendu onglet caché, arrêt sur état terminal, recul réseau)
+  - [x] Code de reprise : affichage unique, « J'ai noté mon code », copie `sessionStorage` effacée à W08 ou W18
+  - [x] Tests Vitest : transitions de W07, throttling du renvoi
+  - [x] Parcours Playwright : reprise dans un nouveau contexte, `RESUME_CODE_INVALID`, connexion W16 d'un compte en attente → reprise préremplie
+  - [x] Recette : W18 sans « Changer de parent » ni « Réessayer plus tard » ; identifiant de nouveau disponible après W18 (D22)
+- [x] **2.5** Mot de passe et profil apprenant W10-W15 (requiert API-L2) · `feature/lot2-profil-apprenant` · PR #54
+  - [x] W10 `/inscription/apprenant/mot-de-passe` (`NewPasswordFields`)
+  - [x] W11 `/inscription/apprenant/profil/infos`
+  - [x] W12 `/inscription/apprenant/profil/ecole` (classe, genre, handicap, mention de finalité D6)
+  - [x] W13 `/inscription/apprenant/profil/objectifs` (`GoalChip`, minimum 2)
+  - [x] W14 `/inscription/apprenant/profil/avatar` (`AvatarPicker` plein écran)
+  - [x] W15 `/inscription/apprenant/bienvenue` (`Celebration`)
+  - [x] Un `PATCH accounts/me/learner-profile/` par étape ; reprise via `profileStep` et `homeForRole`
+  - [x] Tests Vitest : `BIRTHDATE_AGE_MISMATCH`, champs facultatifs, sélection minimale des objectifs, aucun avatar présélectionné
+  - [x] Recette : pas de « 1 parcours gratuit débloqué » ; règles W10 = D25 ; genre et handicap jamais obligatoires
 
-### Inscription et décision du parent — ⬜ à faire
-- [ ] **2.6** Inscription parent WP01-WP04, WP07-WP10 (requiert API-L2) · `feature/lot2-inscription-parent`
-  - [ ] WP01 `/inscription/parent` (préremplissage par `consent-requests/preview/`)
-  - [ ] WP02 `/inscription/parent/code` (`OTPInput`, `ResendCountdown`)
-  - [ ] WP03 `/inscription/parent/mot-de-passe`
-  - [ ] WP04 `/inscription/parent/demande` (trois cas : une demande, plusieurs, aucune)
-  - [ ] WP07 `/inscription/parent/profil/localisation`
-  - [ ] WP08 `/inscription/parent/profil/a-propos` (tout facultatif)
-  - [ ] WP09 `/inscription/parent/profil/enfants`
-  - [ ] WP10 `/inscription/parent/bienvenue` (`Celebration`, enfants rattachés)
-  - [ ] `challengeId` en `sessionStorage`, effacé à WP03 ; numéro déjà inscrit : réponse neutre, `existingAccount` → W16 (C13)
-  - [ ] Tests Vitest : WP02 (collage, erreurs, renvoi à 60 s en timers simulés), WP04 (trois cas)
-  - [ ] Parcours Playwright : inscription parent seule → WP10 → `/parent`
-  - [ ] Recette : vouvoiement ; pas de code « 3214 » ni de « 4 règles » ; carte WP10 cohérente avec le jeu D2
-- [ ] **2.7** Décision du parent WP05, WP06, WP11, WP12 (requiert API-L2) · `feature/lot2-decision-parent`
-  - [ ] Atterrissage `/consentement/[token]` (jeton retiré de l'URL, claim, choix connecté / non connecté)
-  - [ ] Composant `ConsentRequestCard` (D20 strict)
-  - [ ] WP05 `/inscription/parent/demande/[id]`
-  - [ ] WP06 `/inscription/parent/demande/[id]/acceptee` (`Celebration`)
-  - [ ] WP11 `/inscription/parent/demande/[id]/refus` (motif, `Button danger`, `Modal` de confirmation)
-  - [ ] WP12 `/inscription/parent/demande/[id]/refusee`
-  - [ ] Sécurité : `Referrer-Policy: no-referrer` sur `/consentement/*`, `CONSENT_PHONE_MISMATCH`, aucun détail avant authentification
-  - [ ] Tests Vitest : `ConsentRequestCard` limité aux champs D20, motif obligatoire, états `expired` / `already_resolved`
-  - [ ] Recette : pas d'avatar 🦉 ni de bloc « Informations renseignées » ; pas de refus « définitif » ; WP12 « Aucune inscription n'a été créée »
+### Inscription et décision du parent — ✅ terminé
+- [x] **2.6** Inscription parent WP01-WP04, WP07-WP10 (requiert API-L2) · `feature/lot2-inscription-parent` · PR #55
+  - [x] WP01 `/inscription/parent` (préremplissage par `consent-requests/preview/`)
+  - [x] WP02 `/inscription/parent/code` (`OTPInput`, `ResendCountdown`)
+  - [x] WP03 `/inscription/parent/mot-de-passe`
+  - [x] WP04 `/inscription/parent/demande` (trois cas : une demande, plusieurs, aucune)
+  - [x] WP07 `/inscription/parent/profil/localisation`
+  - [x] WP08 `/inscription/parent/profil/a-propos` (tout facultatif)
+  - [x] WP09 `/inscription/parent/profil/enfants`
+  - [x] WP10 `/inscription/parent/bienvenue` (`Celebration`, enfants rattachés)
+  - [x] `challengeId` en `sessionStorage`, effacé à WP03 ; numéro déjà inscrit : réponse neutre, `existingAccount` → W16 (C13)
+  - [x] Tests Vitest : WP02 (collage, erreurs, renvoi à 60 s en timers simulés), WP04 (trois cas)
+  - [x] Parcours Playwright : inscription parent seule → WP10 → `/parent`
+  - [x] Recette : vouvoiement ; pas de code « 3214 » ni de « 4 règles » ; carte WP10 cohérente avec le jeu D2
+- [x] **2.7** Décision du parent WP05, WP06, WP11, WP12 (requiert API-L2) · `feature/lot2-decision-parent` · PR #56
+  - [x] Atterrissage `/consentement/[token]` (jeton retiré de l'URL, claim, choix connecté / non connecté)
+  - [x] Composant `ConsentRequestCard` (D20 strict)
+  - [x] WP05 `/inscription/parent/demande/[id]`
+  - [x] WP06 `/inscription/parent/demande/[id]/acceptee` (`Celebration`)
+  - [x] WP11 `/inscription/parent/demande/[id]/refus` (motif, `Button danger`, `Modal` de confirmation)
+  - [x] WP12 `/inscription/parent/demande/[id]/refusee`
+  - [x] Sécurité : `Referrer-Policy: no-referrer` sur `/consentement/*`, `CONSENT_PHONE_MISMATCH`, aucun détail avant authentification
+  - [x] Tests Vitest : `ConsentRequestCard` limité aux champs D20, motif obligatoire, états `expired` / `already_resolved`
+  - [x] Recette : pas d'avatar 🦉 ni de bloc « Informations renseignées » ; pas de refus « définitif » ; WP12 « Aucune inscription n'a été créée »
 
-### Recette du lot — ⬜ à faire
-- [ ] **2.8** Parcours bout en bout et recette du lot (requiert API-L2 et seed D2) · `feature/lot2-parcours-e2e`
-  - [ ] P1 Inscription et accord
-  - [ ] P2 Refus
-  - [ ] P3 Reprise
-  - [ ] P4 Parent existant
-  - [ ] P5 Mot de passe oublié (parent par SMS, enseignant par email)
-  - [ ] P6 Activation enseignant
-  - [ ] P7 Accessibilité (axe sur chaque écran, P1 au clavier seul, viewport 360 px)
+### Recette du lot — 🟡 en cours
+- [x] **2.8** Parcours bout en bout et recette du lot (requiert API-L2 et seed D2) · `feature/lot2-parcours-e2e` · PR #57
+  - [x] P1 Inscription et accord
+  - [x] P2 Refus
+  - [x] P3 Reprise
+  - [x] P4 Parent existant
+  - [x] P5 Mot de passe oublié (parent par SMS, enseignant par email) : `mot-de-passe-oublie.spec.ts` et `activation.spec.ts` (étape 2.2)
+  - [x] P6 Activation enseignant : `activation.spec.ts` (étape 2.2, projet « bureau », invitation du jeu de démo à usage unique)
+  - [x] P7 Accessibilité (axe sur chaque écran, P1 au clavier seul, viewport 360 px)
 
 - [ ] **Critères de fin du lot 2**
   - [ ] Les 34 écrans respectent la définition de « terminé » du README et SPEC-ECRANS §2, sans élément « Ne pas porter »
   - [ ] Parcours P1 à P7 verts en CI sur la stack Docker avec le faux fournisseur SMS ; tests Vitest des composants verts
-  - [ ] Aucune Server Action ni appel hors client généré pour l'authentification ; CSRF effectif sur toutes les écritures
-  - [ ] Aucune donnée personnelle, code ou jeton d'API dans les URL, `localStorage` ou journaux du front
-  - [ ] Les trois rôles redirigés vers leur espace, personnel refusé sur W16, `next` sûr
-  - [ ] Composants DS du lot documentés et réutilisables par les lots 3, 4 et 5
+  - [x] Aucune Server Action ni appel hors client généré pour l'authentification ; CSRF effectif sur toutes les écritures
+  - [x] Aucune donnée personnelle, code ou jeton d'API dans les URL, `localStorage` ou journaux du front
+  - [x] Les trois rôles redirigés vers leur espace, personnel refusé sur W16, `next` sûr
+  - [x] Composants DS du lot documentés et réutilisables par les lots 3, 4 et 5
+  > Reprise :
+  > - Les deux critères restants attendent la CI verte des PR #51 à #57 (P1 à P7 sur la stack Docker) et la recette produit.
+  > - Deux défauts de l'API sont à corriger côté API-L2 :
+  >   - `issue_token` annule le compteur d'essais de WL03 : test `test.fixme` dans `mot-de-passe-oublie.spec.ts` ;
+  >   - `POST auth/learner-signup/` garde en session le refus précédent, ce qui laisse W18 affiché dans le même navigateur.
+  > - Défaut mineur de l'API : un identifiant pris en concurrence donne une 500 (`IntegrityError`) au lieu de `USERNAME_TAKEN`.
 
 ---
 

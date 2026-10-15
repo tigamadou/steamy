@@ -36,6 +36,8 @@ services:
       THROTTLE_CONSENT_PREVIEW: 1000/min
       THROTTLE_INVITATION: 1000/min
       THROTTLE_PASSWORD_RESET: 1000/hour
+      # Formulaires publics (devis, contact, newsletter) : 10/heure par IP en production, épuisé par les reprises
+      THROTTLE_PUBLIC_FORM: 1000/hour
     networks:
       default:
         aliases: [api.steamy.test]
@@ -77,6 +79,8 @@ services:
     environment:
       CI: ${CI:-}
       BASE_URL: http://web.steamy.test:3000
+      # Admin Django du back-office (WAD15), servi par l'API
+      API_URL: http://api.steamy.test:8000
       # Emails et faux SMS (adressés à `<e164>@sms.test`) lus par les helpers de `e2e/support/`
       MAILPIT_URL: http://mailpit:8025
       COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
