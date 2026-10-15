@@ -331,6 +331,160 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/catalog/categories/:
+    get:
+      operationId: catalog_categories_list
+      description: Catégories avec le nombre de parcours publiés (WL06, WL16) ; liste
+        courte, non paginée.
+      tags:
+      - catalog
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/catalog/courses/:
+    get:
+      operationId: catalog_courses_list
+      description: Parcours publiés, filtrés et triés (WL01, WL06, WC01-WC03), paginés.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        description: Slug de la catégorie
+      - in: query
+        name: difficulty
+        schema:
+          enum:
+          - beginner
+          - intermediate
+          - advanced
+          type: string
+          minLength: 1
+        description: |-
+          * `beginner` - Débutant
+          * `intermediate` - Intermédiaire
+          * `advanced` - Avancé
+      - in: query
+        name: featured
+        schema:
+          type: boolean
+          nullable: true
+        description: Parcours mis en avant (WL01)
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: price
+        schema:
+          enum:
+          - free
+          - paid
+          type: string
+          minLength: 1
+        description: |-
+          * `free` - Gratuit
+          * `paid` - Payant
+      - in: query
+        name: q
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description: Recherche dans le titre et la description
+      - in: query
+        name: sort
+        schema:
+          enum:
+          - popular
+          - recent
+          - price-asc
+          - price-desc
+          - title
+          type: string
+          default: popular
+          minLength: 1
+        description: |-
+          * `popular` - popular
+          * `recent` - recent
+          * `price-asc` - price-asc
+          * `price-desc` - price-desc
+          * `title` - title
+      tags:
+      - catalog
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCourseListList'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/catalog/courses/{slug}/:
+    get:
+      operationId: catalog_courses_retrieve
+      description: 'Fiche publique (WL22, WC04) : plan du parcours sans contenu de
+        mission (D11).'
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - catalog
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/core/presign/:
     post:
       operationId: core_presign_create
@@ -2226,6 +2380,37 @@ components:
       - emoji
       - id
       - label
+    Category:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 60
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 80
+        color:
+          type: string
+          title: Couleur
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        icon:
+          type: string
+          title: Icône
+          description: Emoji affiché sur les cartes
+          maxLength: 16
+        courseCount:
+          type: integer
+          readOnly: true
+          description: Parcours publiés
+      required:
+      - color
+      - courseCount
+      - icon
+      - label
+      - slug
     CategoryEnum:
       enum:
       - learning
@@ -2277,6 +2462,32 @@ components:
       required:
       - category
       - email
+    CategorySummary:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 60
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 80
+        color:
+          type: string
+          title: Couleur
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        icon:
+          type: string
+          title: Icône
+          description: Emoji affiché sur les cartes
+          maxLength: 16
+      required:
+      - color
+      - icon
+      - label
+      - slug
     Certificate:
       type: object
       properties:
@@ -2357,6 +2568,138 @@ components:
       - id
       - label
       - phoneRegex
+    CourseDetail:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        isFree:
+          type: boolean
+          title: Gratuit
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        coverImage:
+          type: string
+          nullable: true
+          readOnly: true
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        featured:
+          type: boolean
+          title: Mis en avant
+        description:
+          type: string
+        outcomes:
+          title: Ce que tu vas apprendre
+        audience:
+          type: string
+          title: Public
+          maxLength: 200
+        prerequisites:
+          title: Prérequis
+        trailerVimeoId:
+          type: string
+          title: 'Bande-annonce : identifiant Vimeo'
+          pattern: ^\d+$
+          maxLength: 20
+        trailerVimeoHash:
+          type: string
+          title: 'Bande-annonce : hachage Vimeo'
+          pattern: ^[0-9A-Za-z]+$
+          maxLength: 40
+        certificateEnabled:
+          type: boolean
+          title: Certificat
+        missionCount:
+          type: integer
+          readOnly: true
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectSummary'
+          readOnly: true
+      required:
+      - category
+      - coverImage
+      - description
+      - difficulty
+      - missionCount
+      - projects
+      - slug
+      - title
+    CourseList:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        isFree:
+          type: boolean
+          title: Gratuit
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        coverImage:
+          type: string
+          nullable: true
+          readOnly: true
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        featured:
+          type: boolean
+          title: Mis en avant
+      required:
+      - category
+      - coverImage
+      - difficulty
+      - slug
+      - title
     CsrfToken:
       type: object
       properties:
@@ -2378,6 +2721,16 @@ components:
       - eventsLast7Days
       - revenueLast30Days
       - totalUsers
+    DifficultyEnum:
+      enum:
+      - beginner
+      - intermediate
+      - advanced
+      type: string
+      description: |-
+        * `beginner` - Débutant
+        * `intermediate` - Intermédiaire
+        * `advanced` - Avancé
     Disability:
       type: object
       properties:
@@ -2670,6 +3023,34 @@ components:
         * `mcq` - QCM
         * `tf` - Vrai/Faux
         * `free` - Libre
+    LevelSummary:
+      type: object
+      properties:
+        order:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationMin:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (minutes)
+        introSummary:
+          type: string
+          title: Résumé de l'introduction
+        missions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissionSummary'
+          readOnly: true
+      required:
+      - missions
+      - title
     Locality:
       type: object
       properties:
@@ -2832,6 +3213,29 @@ components:
         * `suspended` - Suspendu
         * `deactivated` - Désactivé
         * `anonymized` - Anonymisé
+    MissionSummary:
+      type: object
+      properties:
+        order:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationMin:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (minutes)
+        icon:
+          type: string
+          title: Icône
+          maxLength: 16
+      required:
+      - title
     Notification:
       type: object
       properties:
@@ -3024,6 +3428,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Choice'
+    PaginatedCourseListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseList'
     PaginatedEnrollmentList:
       type: object
       properties:
@@ -3363,6 +3787,37 @@ components:
       required:
       - enrollment
       - mission
+    ProjectSummary:
+      type: object
+      properties:
+        order:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        objectives:
+          title: Objectifs
+        prerequisites:
+          title: Prérequis
+        materials:
+          title: Matériel
+        levels:
+          type: array
+          items:
+            $ref: '#/components/schemas/LevelSummary'
+          readOnly: true
+      required:
+      - levels
+      - title
     ProviderEnum:
       enum:
       - kkiapay

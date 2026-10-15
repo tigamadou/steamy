@@ -164,6 +164,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/catalog/categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Catégories avec le nombre de parcours publiés (WL06, WL16) ; liste courte, non paginée. */
+        get: operations["catalog_categories_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/catalog/courses/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Parcours publiés, filtrés et triés (WL01, WL06, WC01-WC03), paginés. */
+        get: operations["catalog_courses_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/catalog/courses/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Fiche publique (WL22, WC04) : plan du parcours sans contenu de mission (D11). */
+        get: operations["catalog_courses_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/core/presign/": {
         parameters: {
             query?: never;
@@ -902,6 +953,20 @@ export interface components {
              */
             color: string;
         };
+        Category: {
+            slug: string;
+            /** Libellé */
+            label: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Icône
+             * @description Emoji affiché sur les cartes
+             */
+            icon: string;
+            /** @description Parcours publiés */
+            readonly courseCount: number;
+        };
         /**
          * @description * `learning` - Apprentissage
          *     * `rewards` - Récompenses
@@ -925,6 +990,18 @@ export interface components {
         CategoryPreferenceRequest: {
             category: components["schemas"]["CategoryEnum"];
             email: boolean;
+        };
+        CategorySummary: {
+            slug: string;
+            /** Libellé */
+            label: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Icône
+             * @description Emoji affiché sur les cartes
+             */
+            icon: string;
         };
         Certificate: {
             readonly id: number;
@@ -965,6 +1042,59 @@ export interface components {
              */
             phoneRegex: string;
         };
+        CourseDetail: {
+            slug: string;
+            /** Titre */
+            title: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** Gratuit */
+            isFree?: boolean;
+            /** Prix (FCFA) */
+            price?: number;
+            /** @description Visuel des cartes */
+            emoji?: string;
+            readonly coverImage: string | null;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** Mis en avant */
+            featured?: boolean;
+            description: string;
+            /** Ce que tu vas apprendre */
+            outcomes?: unknown;
+            /** Public */
+            audience?: string;
+            /** Prérequis */
+            prerequisites?: unknown;
+            /** Bande-annonce : identifiant Vimeo */
+            trailerVimeoId?: string;
+            /** Bande-annonce : hachage Vimeo */
+            trailerVimeoHash?: string;
+            /** Certificat */
+            certificateEnabled?: boolean;
+            readonly missionCount: number;
+            readonly projects: components["schemas"]["ProjectSummary"][];
+        };
+        CourseList: {
+            slug: string;
+            /** Titre */
+            title: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** Gratuit */
+            isFree?: boolean;
+            /** Prix (FCFA) */
+            price?: number;
+            /** @description Visuel des cartes */
+            emoji?: string;
+            readonly coverImage: string | null;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** Mis en avant */
+            featured?: boolean;
+        };
         CsrfToken: {
             csrfToken: string;
         };
@@ -974,6 +1104,13 @@ export interface components {
             /** Format: double */
             revenueLast30Days: number;
         };
+        /**
+         * @description * `beginner` - Débutant
+         *     * `intermediate` - Intermédiaire
+         *     * `advanced` - Avancé
+         * @enum {string}
+         */
+        DifficultyEnum: "beginner" | "intermediate" | "advanced";
         Disability: {
             readonly id: number;
             code: string;
@@ -1110,6 +1247,17 @@ export interface components {
          * @enum {string}
          */
         KindEnum: "mcq" | "tf" | "free";
+        LevelSummary: {
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (minutes) */
+            durationMin?: number;
+            /** Résumé de l'introduction */
+            introSummary?: string;
+            readonly missions: components["schemas"]["MissionSummary"][];
+        };
         Locality: {
             readonly id: number;
             /** @description Code ISO du pays */
@@ -1172,6 +1320,16 @@ export interface components {
          * @enum {string}
          */
         MeStatusEnum: "pending" | "active" | "suspended" | "deactivated" | "anonymized";
+        MissionSummary: {
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (minutes) */
+            durationMin?: number;
+            /** Icône */
+            icon?: string;
+        };
         Notification: {
             readonly id: number;
             readonly type: string;
@@ -1256,6 +1414,21 @@ export interface components {
              */
             previous?: string | null;
             results?: components["schemas"]["Choice"][];
+        };
+        PaginatedCourseListList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["CourseList"][];
         };
         PaginatedEnrollmentList: {
             /** @example 123 */
@@ -1437,6 +1610,21 @@ export interface components {
             completed?: boolean;
             /** Format: decimal */
             score?: string | null;
+        };
+        ProjectSummary: {
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** Objectifs */
+            objectives?: unknown;
+            /** Prérequis */
+            prerequisites?: unknown;
+            /** Matériel */
+            materials?: unknown;
+            readonly levels: components["schemas"]["LevelSummary"][];
         };
         /**
          * @description * `kkiapay` - Kkiapay
@@ -1928,6 +2116,127 @@ export interface operations {
                 };
             };
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    catalog_categories_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    catalog_courses_list: {
+        parameters: {
+            query?: {
+                /** @description Slug de la catégorie */
+                category?: string;
+                /**
+                 * @description * `beginner` - Débutant
+                 *     * `intermediate` - Intermédiaire
+                 *     * `advanced` - Avancé
+                 */
+                difficulty?: "beginner" | "intermediate" | "advanced";
+                /** @description Parcours mis en avant (WL01) */
+                featured?: boolean | null;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /**
+                 * @description * `free` - Gratuit
+                 *     * `paid` - Payant
+                 */
+                price?: "free" | "paid";
+                /** @description Recherche dans le titre et la description */
+                q?: string;
+                /**
+                 * @description * `popular` - popular
+                 *     * `recent` - recent
+                 *     * `price-asc` - price-asc
+                 *     * `price-desc` - price-desc
+                 *     * `title` - title
+                 */
+                sort?: "popular" | "recent" | "price-asc" | "price-desc" | "title";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCourseListList"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    catalog_courses_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseDetail"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
