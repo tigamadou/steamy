@@ -306,6 +306,15 @@ CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", WEB_URL).sp
 PAYMENTS_KKIAPAY_SECRET = os.getenv("PAYMENTS_KKIAPAY_SECRET", "")
 PAYMENTS_FEDAPAY_SECRET = os.getenv("PAYMENTS_FEDAPAY_SECRET", "")
 
+# SMS (S10, ADR 0002) : faux fournisseur (lisible dans Mailpit) en local et en CI, Twilio en staging et production.
+# Le faux fournisseur refuse de fonctionner si DEPLOYED.
+SMS_PROVIDER = os.getenv("SMS_PROVIDER", "twilio" if DEPLOYED else "fake")
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+TWILIO_SENDER = os.getenv("TWILIO_SENDER", "STEAMY")
+# URL publique du webhook de statut (`/api/notifications/sms/status/`) ; vide : pas d'accusés de réception
+TWILIO_STATUS_CALLBACK_URL = os.getenv("TWILIO_STATUS_CALLBACK_URL", "")
+
 # # ==================================================================================================
 # # FILE SETTINGS
 # # ==================================================================================================

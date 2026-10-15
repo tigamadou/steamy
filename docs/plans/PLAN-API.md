@@ -188,16 +188,18 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Seed : 3-4 parcours publiés complets dont un mis en avant, une catégorie vide, 4 événements (gratuit, payant, complet, passé), 3 kits
   - [ ] `make openapi` committé
 
-### API-L2 · Inscriptions, consentement, OTP, connexion — ⬜ à faire
+### API-L2 · Inscriptions, consentement, OTP, connexion — 🟡 en cours
 - [x] **API-L2.0a** Comparaison SMS (S10) · `feature/api-l2-0a-adr-sms` · doc
   - [x] Comparer coût par SMS et par pays, couverture MTN/Moov/Celtiis, délivrabilité, expéditeur « STEAMY », API et webhooks, sandbox, FCFA, support local
   - [x] Écrire l'**ADR-SMS** (critères éliminatoires : pas d'API serveur, pas de couverture Bénin)
-- [ ] **API-L2.0b** Interface SMS · `feature/api-l2-0b-sms`
-  - [ ] `notifications/sms/` : `SmsProvider.send(phone, text) → message_id`
-  - [ ] `FakeSmsProvider` : journalise et envoie le SMS comme email à Mailpit (`<e164>@sms.test`), jamais activable si `DEPLOYED`
-  - [ ] Tâche `send_sms` avec réessais exponentiels
-  - [ ] `TwilioProvider` (fournisseur réel, ADR 0002) branché, sélection par `SMS_PROVIDER`
-  - [ ] Tests : faux SMS lisible dans Mailpit, refus du faux fournisseur si `DEPLOYED`
+- [x] **API-L2.0b** Interface SMS · `feature/api-l2-0b-sms`
+  - [x] `notifications/sms/` : `SmsProvider.send(phone, text) → message_id`
+  - [x] `FakeSmsProvider` : journalise et envoie le SMS comme email à Mailpit (`<e164>@sms.test`), jamais activable si `DEPLOYED`
+  - [x] Tâche `send_sms` avec réessais exponentiels
+  - [x] `TwilioProvider` (fournisseur réel, ADR 0002) branché, sélection par `SMS_PROVIDER`
+  - [x] Webhook de statut Twilio signé (`notifications/sms/status/`) et trace `SmsMessage` sans numéro en clair (ADR 0002)
+  - [x] Variables `SMS_PROVIDER`, `TWILIO_*` : chart, secrets GitHub, `docs/infra/`
+  - [x] Tests : faux SMS lisible dans Mailpit, refus du faux fournisseur si `DEPLOYED`
 - [ ] **API-L2.1** OTP · `feature/api-l2-1-otp`
   - [ ] `OtpChallenge` : code haché, 6 chiffres, 5 min, 3 essais, renvoi après 60 s
   - [ ] Plafond quotidien par numéro **et** par IP (`PlatformSettings`, D24)
