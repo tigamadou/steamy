@@ -340,7 +340,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `next.type` gagne `quiz` (+ `quizKind`, `levelId` nul pour une sommative). `GET learning/attempts/`
   > (`?status=ok|warn|ko&quiz=`) ajoute `summary {attemptCount, successRate, perfectCount, streakDays}` sur toutes
   > les tentatives (filtres ignorés).
-- [x] **API-L3a.3** Gamification · `feature/api-l3a-3-gamification`
+- [x] **API-L3a.3** Gamification · `feature/api-l3a-3-gamification` · PR #68
   - [x] `PointsEntry`, `Badge`, `LearnerBadge`, `LearningActivity`
   - [x] `POST learning/activity/` (secondes plafonnées, anti-gonflage)
   - [x] Streak (fuseau `TIME_ZONE`), rang dérivé, `GET learning/badges/`
