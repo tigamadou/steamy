@@ -94,7 +94,7 @@ Statut : 🟡 en cours · Prochaine tâche : 1.1 (après API-L1), puis l'encart 
   - [ ] WL07 `/boutique` (grille `WKKitCard` en mode vitrine, filtres)
   - [ ] Appels `events/`, `events/{slug}/`, `shop/kits/`
   - [ ] Parcours Playwright « événements » (WL21 → WL23 → CTA visiteur ; événement complet → CTA désactivé)
-- [ ] **1.5** Pages éditoriales (WL20 requiert API-L1 pour `public/leads/`, le reste sans API) · `feature/lot1-editorial` · PR #PR15
+- [ ] **1.5** Pages éditoriales (WL20 requiert API-L1 pour `public/leads/`, le reste sans API) · `feature/lot1-editorial` · PR #36
   - [x] `WL09` `/legal/[doc]` (`Tabs`, `#consentement-parental`, corrections S3, D6, D15, D23, D40)
   - [x] `WL10` `/a-propos`
   - [x] `WL17` `/blog` et `WL18` `/blog/[slug]` (MDX, fil d'Ariane, partage, JSON-LD `Article`, slugs au sitemap)
