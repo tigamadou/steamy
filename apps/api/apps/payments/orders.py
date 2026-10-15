@@ -18,6 +18,7 @@ from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
 
+from apps.events.applications import release as release_application
 from apps.shop.models import Kit, StockReservation
 from libs.errors import ApiError
 
@@ -74,6 +75,7 @@ def create_order(
             course=line.course,
             kit=line.kit,
             event=line.event,
+            event_application=line.event_application,
             title=line.title,
             unit_price=line.unit_price,
             quantity=line.quantity,
@@ -123,6 +125,8 @@ def release_expired_orders() -> int:
             if not order.is_expired:  # payée entre-temps
                 continue
             release_stock(order)
+            for item in order.items.filter(event_application__isnull=False):
+                release_application(item.event_application)
             order.status = Order.Status.CANCELLED
             order.save(update_fields=["status", "updated_at"])
             count += 1

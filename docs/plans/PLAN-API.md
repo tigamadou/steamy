@@ -558,10 +558,26 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > celles de ses enfants (404 sinon), avec `parentFirstName`, `learner`, `orderReference`. La demande est réglée
   > par une commande qui la référence (`Order.paymentRequest`) ; le passage de `paymentRequestId` à
   > `POST payments/orders/` reste à API-L4.2 (WPD15). Expiration horaire (`expire_payment_requests`, à la 45ᵉ minute).
-- [ ] **API-L3b.6** Candidatures · `feature/api-l3b-6-candidatures`
-  - [ ] `EventApplication`, `EventTicket` consommé
-  - [ ] `POST events/{slug}/applications/`, `GET events/applications/`, `GET events/tickets/`
-  - [ ] Codes `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED`
+- [x] **API-L3b.6** Candidatures · `feature/api-l3b-6-candidatures`
+  - [x] `EventApplication`, `EventTicket` consommé
+  - [x] `POST events/{slug}/applications/`, `GET events/applications/`, `GET events/tickets/`
+  - [x] Codes `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED`
+  - [x] Commande d'événement (WPD12) : place réservée à l'accord, confirmée au paiement, rendue à l'expiration ; paiement tardif (C17)
+  > Décisions : `EventApplication` (`event`, `learner`, `appliedBy`, `motivation`, `selfLevel` ∈ difficultés du
+  > catalogue, `status`, `ticket` (le ticket utilisé, `EventTicket.used_by` en sens inverse : « usedBy » de §3.4),
+  > `parentDecidedAt`, `refusalReason`) ; une seule candidature en cours par apprenant et par événement (contrainte).
+  > `seatsLeft` = capacité − places attribuées − candidatures `pending_payment` ou `accepted` (C3 : l'accord réserve,
+  > `pending_parent` ne réserve pas). Apprenant : `{motivation, selfLevel}` → `pending_parent`, parent notifié
+  > (`/parent/evenements`). Parent : `{childId, motivation?}` = accord (WPD12) → `accepted` si gratuit ou couvert par un
+  > ticket de l'enfant (le plus ancien libre), sinon `pending_payment` + commande `kind=event` (payée par
+  > `POST payments/orders/{reference}/payments/`, `orderReference` dans la candidature). Ticket réservé dès la
+  > candidature d'un événement payant (libre à nouveau si elle est refusée : à faire en API-L4.2). Événement non
+  > publié → 404 ; candidatures closes ou événement passé → 409 `EVENT_CLOSED` ; plus de place → 409 `EVENT_FULL`.
+  > Exécution post-paiement : candidature `accepted`, apprenant notifié (`/apprenant/evenements`). Commande expirée :
+  > candidature `cancelled` (« Paiement non abouti. »), place rendue ; paiement tardif honoré si une place reste et
+  > que l'enfant n'a pas recandidaté, sinon remboursé. `GET events/tickets/` (apprenant, non paginé) :
+  > `{id, courseSlug, courseTitle, createdAt, used, usedFor}`. Accepter / refuser une candidature de l'enfant :
+  > API-L4.2.
 - [ ] **Critères de fin d'API-L3b**
   - [ ] Tests prioritaires de la section « Points délicats » passants
   - [ ] Seed enrichi (commandes, kits en rupture…)

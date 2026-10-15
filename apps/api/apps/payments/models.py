@@ -213,6 +213,14 @@ class OrderItem(models.Model):
     event = models.ForeignKey(
         "events.SteamyEvent", models.PROTECT, null=True, blank=True, related_name="+"
     )
+    #: Candidature que la ligne d'événement règle (C3, D53)
+    event_application = models.ForeignKey(
+        "events.EventApplication",
+        models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="order_items",
+    )
     title = models.CharField(_("libellé"), max_length=255)
     unit_price = models.PositiveIntegerField(_("prix unitaire (FCFA)"))
     quantity = models.PositiveIntegerField(_("quantité"), default=1)
