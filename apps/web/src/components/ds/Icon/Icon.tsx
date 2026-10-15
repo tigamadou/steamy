@@ -128,6 +128,13 @@ const PATHS = {
     </>
   ),
   menu: <path d="M4 6h16M4 12h16M4 18h16" />,
+  minus: <path d="M5 12h14" />,
+  copy: (
+    <>
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15V6a2 2 0 0 1 2-2h9" />
+    </>
+  ),
   alert: (
     <>
       <circle cx="12" cy="12" r="9" />

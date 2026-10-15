@@ -6,13 +6,14 @@ import { axe } from "@/test/axe";
 
 import { Field } from "../Field";
 import { PhoneInput } from "./PhoneInput";
-import { flagEmoji, formatNational, isValidNational, toE164, type PhoneCountry } from "./phone";
+import { flagEmoji, formatNational, isValidNational, maskPhone, toE164, type PhoneCountry } from "./phone";
 
 // Données de test au format de `referentials/countries/` (jamais codées en dur dans le composant)
 const COUNTRIES: PhoneCountry[] = [
-  { code: "BJ", name: "Bénin", dialCode: "+229", format: "XX XX XX XX XX", pattern: "01\\d{8}" },
-  { code: "TG", name: "Togo", dialCode: "228", format: "XX XX XX XX", pattern: "[279]\\d{7}" },
+  { code: "TG", label: "Togo", dialCode: "228", phoneFormat: "XX XX XX XX", phoneRegex: "^[279][0-9]{7}$" },
+  { code: "BJ", label: "Bénin", flag: "🇧🇯", dialCode: "229", phoneFormat: "XX XX XX XX XX", phoneRegex: "^01[0-9]{8}$" },
 ];
+const [TOGO, BENIN] = COUNTRIES;
 
 describe("utilitaires de téléphone", () => {
   it("dérive le drapeau du code ISO", () => {
@@ -25,20 +26,26 @@ describe("utilitaires de téléphone", () => {
   });
 
   it("produit l'E.164 seulement pour un numéro valide", () => {
-    expect(toE164("0190123456", COUNTRIES[0])).toBe("+2290190123456");
-    expect(toE164("90123456", COUNTRIES[0])).toBeNull();
-    expect(toE164("90123456", COUNTRIES[1])).toBe("+22890123456");
+    expect(toE164("0190123456", BENIN)).toBe("+2290190123456");
+    expect(toE164("90123456", BENIN)).toBeNull();
+    expect(toE164("90123456", TOGO)).toBe("+22890123456");
   });
 
   it("valide par la longueur du gabarit, ou au minimum 4 chiffres, sans expression régulière", () => {
-    const byFormat: PhoneCountry = { code: "NE", name: "Niger", dialCode: "227", format: "XX XX XX XX" };
+    const byFormat: PhoneCountry = { code: "NE", label: "Niger", dialCode: "227", phoneFormat: "XX XX XX XX" };
     expect(isValidNational("90123456", byFormat)).toBe(true);
     expect(isValidNational("9012345", byFormat)).toBe(false);
-    const bare: PhoneCountry = { code: "ML", name: "Mali", dialCode: "223" };
+    const bare: PhoneCountry = { code: "ML", label: "Mali", dialCode: "223" };
     expect(isValidNational("1234", bare)).toBe(true);
     expect(isValidNational("123", bare)).toBe(false);
     expect(isValidNational("", bare)).toBe(false);
-    expect(isValidNational("1", { ...bare, format: "-" })).toBe(false);
+    expect(isValidNational("1", { ...bare, phoneFormat: "-" })).toBe(false);
+  });
+
+  it("masque un numéro en gardant l'indicatif et les deux premiers et derniers chiffres", () => {
+    expect(maskPhone("+2290190123456", COUNTRIES)).toBe("+229 01 •• •• •• 56");
+    expect(maskPhone("+22890123456", COUNTRIES)).toBe("+228 90 •• •• 56");
+    expect(maskPhone("+33612345678")).toBe("+33•••••••78");
   });
 });
 
@@ -61,6 +68,13 @@ describe("PhoneInput", () => {
       valid: true,
     });
     expect(document.querySelector<HTMLInputElement>('input[name="phone"]')?.value).toBe("+2290190123456");
+  });
+
+  it("présélectionne le Bénin et affiche le drapeau servi par l'API", () => {
+    render(<PhoneInput countries={COUNTRIES} />);
+    expect(screen.getByRole("combobox", { name: "Pays" })).toHaveValue("BJ");
+    expect(screen.getByText("🇧🇯")).toBeInTheDocument();
+    expect(screen.getByRole("textbox")).toHaveAttribute("autocomplete", "tel-national");
   });
 
   it("revalide le numéro au changement de pays", async () => {
@@ -103,7 +117,7 @@ describe("PhoneInput", () => {
     expect(onChange).toHaveBeenLastCalledWith({ country: "", national: "12", e164: null, valid: false });
     unmount();
     render(<PhoneInput countries={COUNTRIES} defaultCountry="ZZ" />);
-    expect(screen.getByRole("combobox", { name: "Pays" })).toHaveValue("BJ");
+    expect(screen.getByRole("combobox", { name: "Pays" })).toHaveValue("TG");
   });
 
   it("ne présente aucune violation d'accessibilité", async () => {
