@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-1.6
+Statut : 🟡 en cours · Prochaine tâche : API-1.7
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -135,10 +135,14 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`country=BJ`) ; seuls les réseaux activés sont servis (réglage D76 dans l'admin) ; Bénin activé (MTN, Moov,
   > Celtiis), réseaux des pays voisins créés désactivés en attendant l'ADR paiement ; 20 communes du Bénin
   > qualifiées urbain / rural (D75), complétées dans l'admin. Listes non paginées.
-- [ ] **API-1.6** Plateforme et personnel · `feature/api-1-plateforme`
-  - [ ] `core.PlatformSettings` (singleton, défauts D24, D32, D66 ; barème C8 vide)
-  - [ ] `core.AuditLog`
-  - [ ] 4 groupes Django par migration de données (Super-admin, Contenu, Support, Finance, D71)
+- [x] **API-1.6** Plateforme et personnel · `feature/api-1-plateforme` · PR #24
+  - [x] `core.PlatformSettings` (singleton, défauts D24, D32, D66 ; barème C8 vide)
+  - [x] `core.AuditLog`
+  - [x] 4 groupes Django par migration de données (Super-admin, Contenu, Support, Finance, D71)
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : plafonds OTP quotidiens par défaut 5 par numéro et 20 par IP (D24 ne fixe pas de valeur ; réglables
+  > dans l'admin). `audit(action, actor, target, data, request)` dans `apps/core/audit.py` ; journal en lecture
+  > seule dans l'admin. Groupes créés sans permission : elles arrivent avec chaque domaine.
 - [ ] **API-1.7** Données de démo (D2) · `feature/api-1-seed-demo`
   - [ ] Commande `seed_demo` idempotente, refusée si `DJANGO_ENV=production`
   - [ ] `make seed` : `loaddata fixtures/admin.json fixtures/mail.json` puis `seed_demo`

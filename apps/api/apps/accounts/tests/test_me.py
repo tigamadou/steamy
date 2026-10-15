@@ -46,7 +46,7 @@ def test_me_returns_the_learner_identity_without_secrets():
 
 def test_me_exposes_staff_fields():
     staff = StaffFactory()
-    staff.groups.add(Group.objects.create(name="Support"), Group.objects.create(name="Contenu"))
+    staff.groups.add(*Group.objects.filter(name__in=["Support", "Contenu"]))
     client = APIClient()
     client.force_authenticate(staff)
     body = client.get(ME).json()
