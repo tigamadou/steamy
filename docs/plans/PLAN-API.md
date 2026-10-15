@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L3a.4
+Statut : 🟡 en cours · Prochaine tâche : API-L3a.5
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -357,13 +357,30 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > jour (verrou sur le profil) ; mission terminée et quiz passé comptent aussi (ligne à 0 s). Streak calculé à la
   > lecture (jours consécutifs jusqu'à aujourd'hui ou hier), `LearnerProfile.streakDays` gardé en cache.
   > `GET learning/badges/?course=` : badges obtenus, paginés.
-- [ ] **API-L3a.4** Certificats · `feature/api-l3a-4-certificats`
+- [x] **API-L3a.4** Certificats · `feature/api-l3a-4-certificats` · PR #69
   - [x] **ADR PDF et stockage privé** (WeasyPrint, Celery, RustFS privé, URL présignées courtes)
-  - [ ] Conditions D33 en transaction ; `Certificate.number` séquentiel
-  - [ ] Tâche `generate_certificate_pdf` ; stockage RustFS privé
-  - [ ] `GET learning/certificates/` (`pdfStatus`), `…/{id}/download/` → URL présignée 5 min
-  - [ ] `EventTicket` créé une seule fois (unique par `enrollment`)
-  - [ ] Tests : certificat à 100 % + sommatives, une seule fois en appels concurrents, ticket unique, certificats d'autrui illisibles
+  - [x] Conditions D33 en transaction ; `Certificate.number` séquentiel
+  - [x] Tâche `generate_certificate_pdf` ; stockage RustFS privé
+  - [x] `GET learning/certificates/` (`pdfStatus`), `…/{id}/download/` → URL présignée 5 min
+  - [x] `EventTicket` créé une seule fois (unique par `enrollment`)
+  - [x] Tests : certificat à 100 % + sommatives, une seule fois en appels concurrents, ticket unique, certificats d'autrui illisibles
+  - [x] WeasyPrint 70.0 (ADR 0005 P6 ; `tinycss2` 1.5.1, `fonttools` 4.67.0), `core/pdf.py` sans aucune ressource chargée
+  - [x] Filet de sécurité `retry_pending_certificates` (toutes les 10 min, `manage.py retry_pending_certificates`), action « Régénérer le PDF » dans l'admin
+  - [x] Seed : « Initiation à Scratch » de Léa terminé, certifié, avec ticket
+  > Décisions : `Certificate` (`number` `CERT-AAAA-NNNNNN` par `core.DocumentSequence` sous verrou, `uuid` du
+  > fichier, `pdfStatus` `pending|ready|failed` (P4), `snapshot` figé) ; `events.EventTicket` (`learner`,
+  > `enrollment` unique ; `usedBy` en L3b). La fin du parcours (100 % des missions et toutes les sommatives,
+  > vérifiée l'inscription verrouillée) passe l'inscription à `completed`, crédite les points `course` et le badge
+  > du parcours, puis, si `certificateEnabled`, émet le certificat, le ticket et une notification (« Récompenses »)
+  > et lance le PDF après validation. `GET learning/enrollments/{slug}/tree/` gagne `certification` (`eligible`,
+  > compteurs, `certificate`, `eventTicket`) pour WJ07 / WJ09. Téléchargement : 302 vers l'URL présignée (5 min,
+  > `Content-Disposition: attachment; filename="certificat-<parcours>.pdf"`, `Cache-Control: no-store`) ; sans
+  > stockage objet (CI), le fichier est servi directement ; PDF pas prêt ou en échec → 409 `PDF_NOT_READY` (code
+  > ajouté au catalogue). Stockage `STORAGES["private"]` (préfixe `private/`, 403 sans signature, vérifié sur
+  > RustFS) ; signature pour `AWS_S3_PUBLIC_ENDPOINT_URL` si défini (P5, sous-domaine `media.` à créer côté
+  > infra). Polices : DejaVu de l'image en attendant Nunito (ADR 0005, « Suites »). Reportés : lecture du
+  > certificat par le parent lié (endpoints parent, API-L4) ; droits du Support sur `learning.certificate` dans la
+  > matrice des groupes (lot 6).
 - [ ] **API-L3a.5** Tableau de bord · `feature/api-l3a-5-dashboard`
   - [ ] `GET learning/dashboard/`, `learning/progress/`, `learning/recommendations/`
   - [ ] Compteurs du shell dans `accounts/me/`
@@ -374,7 +391,8 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `seed_demo --e2e` (cooldown sommatif raccourci, parcours court P1 du lot 3) · PR #66
     > Le parcours court (`premiers-pas-zeti`) est dans le jeu unique (LOT-3 §8.3) ; `--e2e` ne fait que ramener le
     > délai à 5 s. `make e2e` appelle `make seed SEED_ARGS=--e2e`.
-  - [ ] Worker Celery dans `compose.e2e.yml`
+  - [x] Worker Celery dans `compose.e2e.yml`
+    > Déjà démarré par `make e2e` (`up … web worker`, lot 1) ; vérifié avec la génération réelle du PDF sur RustFS.
 - [ ] **Critères de fin d'API-L3a**
   - [ ] Un apprenant ne lit ni les tentatives ni les certificats d'un autre
   - [ ] Seed enrichi avec les données du domaine

@@ -12,6 +12,7 @@ from apps.catalog.models import Course, Quiz
 from apps.core.models import PlatformSettings
 from libs.errors import ApiError
 
+from .certification import complete_if_done
 from .gamification import award_badge, award_points, badge_of, record_activity
 from .models import Enrollment, MissionProgress, PointsEntry, QuizAttempt
 from .progression import LOCKED, Progression
@@ -80,6 +81,8 @@ def complete_mission(enrollment: Enrollment, mission_id: int) -> tuple[Progressi
                 f"Mission terminée : {progress.mission.title}",
             )
             record_activity(enrollment.learner, mission_id)
+            complete_if_done(enrollment)
+            enrollment.refresh_from_db()
     return progression, points
 
 
@@ -173,4 +176,6 @@ def submit_attempt(
             award_badge(enrollment.learner, badge_of(quiz.level or quiz.project))
         record_activity(enrollment.learner)
         touch(enrollment, Progression(enrollment))
+        if attempt.passed:
+            complete_if_done(enrollment)
     return attempt

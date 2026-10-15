@@ -1860,6 +1860,104 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/learning/certificates/:
+    get:
+      operationId: learning_certificates_list
+      description: Mes certificats (WJ07, WD21), avec l'état de leur PDF.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCertificateList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/certificates/{id}/download/:
+    get:
+      operationId: learning_certificates_download_retrieve
+      description: |-
+        Téléchargement (ADR 0005 §6) : redirection 302 vers une URL présignée de 5 minutes, jamais stockée ; sans
+        stockage objet (CI), le fichier est servi directement. PDF pas prêt : 409 `PDF_NOT_READY`. Le certificat d'un
+        autre apprenant n'existe pas (404).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '302':
+          description: Redirection vers l'URL présignée
+        '200':
+          description: Fichier PDF
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/enrollments/:
     get:
       operationId: learning_enrollments_list
@@ -3620,6 +3718,67 @@ components:
       - icon
       - label
       - slug
+    Certificate:
+      type: object
+      properties:
+        id:
+          type: integer
+        number:
+          type: string
+          description: CERT-AAAA-NNNNNN
+        course:
+          $ref: '#/components/schemas/CourseRef'
+        issuedAt:
+          type: string
+          format: date-time
+        pdfStatus:
+          allOf:
+          - $ref: '#/components/schemas/PdfStatusEnum'
+          description: |-
+            `pending` : « Préparation… », interroger de nouveau ; `failed` : échec signalé au Support
+
+            * `pending` - En préparation
+            * `ready` - Prêt
+            * `failed` - Échec
+      required:
+      - course
+      - id
+      - issuedAt
+      - number
+      - pdfStatus
+    Certification:
+      type: object
+      description: Conditions D33 (100 % des missions, toutes les sommatives réussies),
+        certificat et ticket (WJ07, WJ09).
+      properties:
+        eligible:
+          type: boolean
+        missionsDone:
+          type: integer
+        missionCount:
+          type: integer
+        summativesPassed:
+          type: integer
+        summativeCount:
+          type: integer
+        certificateEnabled:
+          type: boolean
+        certificate:
+          allOf:
+          - $ref: '#/components/schemas/Certificate'
+          nullable: true
+        eventTicket:
+          type: boolean
+          description: Ticket Steamy Events offert à la certification
+      required:
+      - certificate
+      - certificateEnabled
+      - eligible
+      - eventTicket
+      - missionCount
+      - missionsDone
+      - summativeCount
+      - summativesPassed
     Choice:
       type: object
       description: Réponse proposée, sans le corrigé.
@@ -4193,6 +4352,7 @@ components:
       - PASSWORD_TOO_WEAK
       - PAYMENT_FAILED
       - PAYMENT_REQUIRED
+      - PDF_NOT_READY
       - PERMISSION_DENIED
       - PHONE_INVALID
       - PHONE_TAKEN
@@ -4261,6 +4421,7 @@ components:
         * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
         * `PAYMENT_FAILED` - PAYMENT_FAILED
         * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
+        * `PDF_NOT_READY` - PDF_NOT_READY
         * `PERMISSION_DENIED` - PERMISSION_DENIED
         * `PHONE_INVALID` - PHONE_INVALID
         * `PHONE_TAKEN` - PHONE_TAKEN
@@ -5315,6 +5476,26 @@ components:
           - streakDays
       required:
       - summary
+    PaginatedCertificateList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Certificate'
     PaginatedConsentRequestList:
       type: object
       properties:
@@ -5780,6 +5961,16 @@ components:
       - country
       - id
       - label
+    PdfStatusEnum:
+      enum:
+      - pending
+      - ready
+      - failed
+      type: string
+      description: |-
+        * `pending` - En préparation
+        * `ready` - Prêt
+        * `failed` - Échec
     Preferences:
       type: object
       properties:
@@ -6607,8 +6798,8 @@ components:
       - eventType
     Tree:
       type: object
-      description: 'Arbre du parcours (WC06a, WC06b, WJ09) : titres, durées et états,
-        sans contenu.'
+      description: 'Arbre du parcours (WC06a, WC06b, WJ07, WJ09) : titres, durées
+        et états, sans contenu.'
       properties:
         id:
           type: integer
@@ -6647,11 +6838,14 @@ components:
           description: Niveau de la prochaine étape
         next:
           $ref: '#/components/schemas/NextStep'
+        certification:
+          $ref: '#/components/schemas/Certification'
         projects:
           type: array
           items:
             $ref: '#/components/schemas/TreeProject'
       required:
+      - certification
       - completedAt
       - course
       - createdAt
