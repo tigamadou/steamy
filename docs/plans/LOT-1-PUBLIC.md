@@ -9,7 +9,7 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 1 (après fusion des PR #47 à #50 et #58) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : 🟡 en cours · Prochaine tâche : décision sur les parcours e2e de WX02 et WX03 (scénario « API arrêtée » ou couverture Vitest seule) ; validation des maquettes WL22-WL24 par le porteur produit (C18) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
 ### Étape 1.0 · Socle front — ✅ terminé
 - [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
@@ -26,7 +26,7 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 1 (après f
   - [x] Couverture unitaire 100 % du code ajouté ou modifié : `@vitest/coverage-v8` (rapport `apps/web/coverage/cobertura-coverage.xml`), `diff-cover --fail-under=100` dans le job `web` (`fetch-depth: 0`, même base de comparaison que le job `api`), cible `make coverage-web`
   - [x] E2E 100 % des écrans : l'outillage Playwright permet d'écrire le test de chaque écran cité dans la matrice écran → test (job `e2e-matrice`) ; 1.0a et 1.0b ne livrent aucun écran
   - [x] Recette : `make test-web` et `make e2e` passent en local ; aucune occurrence de `91, 63, 224` ni de `jetbrains` dans `apps/web/src`
-  - [ ] Recette après fusion : `e2e` exécuté en CI sur une PR qui ne touche que `apps/api/`
+  - [x] Recette après fusion : `e2e` exécuté en CI sur les PR d'API (#32 à #46 : `apps/api/`, client généré et plan seulement ; aucune PR strictement limitée à `apps/api/` depuis)
 - [x] **1.0b** Design system de base · `feature/lot1-design-system` · PR #19
   - [x] `Icon`
   - [x] `Logo`, `Mascot` (6 poses, décoratif) ; `Logo` sur les PNG officiels (le tagline du SVG dépend d'une police non embarquée)
@@ -122,10 +122,10 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 1 (après f
   - [x] Aucun lien vers WL12 ni WL14 (shell en 1.0c, articles et pages éditoriales en 1.5)
   - [x] Test Playwright : aucun `href` vers `/defis`, `/communaute`, `/tutoriels`, `/classements`, `/ateliers` (`e2e/socle-public.spec.ts`)
 
-- [ ] **Critères de fin du lot 1**
-  - [ ] Étapes 1.0a-1.6 fusionnées dans `development`, CI verte (`ci-ok` incluant `e2e`)
-  - [ ] Chaque écran v1 et à concevoir respecte la définition de « terminé » du README (360 px → bureau, registres, AA, états, aucune donnée en dur, tests)
-  - [ ] Parcours Playwright verts : découverte, événements, devis, contact, newsletter, navigation clavier, hors ligne ; axe sans violation sérieuse sur toutes les routes publiques
+- [ ] **Critères de fin du lot 1** (tous vérifiés sauf la décision sur les parcours e2e de WX02 et WX03, étape 1.0c)
+  - [x] Étapes 1.0a-1.6 fusionnées dans `development`, CI verte (`ci-ok` incluant `e2e`, exécution du push de #58, `7e1ddda`)
+  - [x] Chaque écran v1 et à concevoir respecte la définition de « terminé » du README (360 px → bureau, registres, AA, états, aucune donnée en dur, tests) : contrôle visuel à 1280 et 360 px, Vitest et Playwright par écran
+  - [x] Parcours Playwright verts : découverte, événements, devis, contact, newsletter, navigation clavier, hors ligne ; axe sans violation sérieuse sur toutes les routes publiques (suite complète 128/128, bureau et 360 px)
   - [x] `next build` : toutes les routes de `(public)` prérendues (statique ou partiel) ; `getServerApi` absent de `(public)` (règle ESLint)
   - [x] Aucun lien vers WL08, WL12-WL15, WL19 ; aucun violet `rgba(91,63,224)` ni JetBrains Mono
   - [x] WX01-WX03 et `getPublicApi` documentés dans `apps/web/README.md`
