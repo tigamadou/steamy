@@ -142,6 +142,36 @@ class AuditLog(models.Model):
         return f"{self.created_at:%Y-%m-%d %H:%M} · {self.action}"
 
 
+class DocumentSequence(models.Model):
+    """
+    Compteur des numéros de documents, par type et par année (ADR 0005 §9) : incrémenté sous verrou dans la
+    transaction d'émission, donc sans trou ni doublon (pas de séquence PostgreSQL, qu'un `ROLLBACK` troue).
+    """
+
+    kind = models.CharField(_("type"), max_length=16)
+    year = models.PositiveSmallIntegerField(_("année"))
+    last = models.PositiveIntegerField(_("dernier numéro"), default=0)
+
+    class Meta:
+        verbose_name = _("compteur de documents")
+        verbose_name_plural = _("compteurs de documents")
+        constraints = [
+            models.UniqueConstraint(fields=["kind", "year"], name="document_sequence_unique")
+        ]
+
+    def __str__(self):
+        return f"{self.kind} {self.year} : {self.last}"
+
+    @classmethod
+    def next(cls, kind: str, year: int) -> int:
+        """Numéro suivant ; dans une transaction (verrou jusqu'à la validation, refusé hors transaction)."""
+        cls.objects.get_or_create(kind=kind, year=year)
+        sequence = cls.objects.select_for_update().get(kind=kind, year=year)
+        sequence.last += 1
+        sequence.save(update_fields=["last"])
+        return sequence.last
+
+
 class Announcement(models.Model):
     """
     Annonce de la plateforme (WAD14), diffusée en notification dans l'application (D7) par une tâche Celery. Jamais

@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     "apps.public",
     "apps.shop",
     "apps.learning",
+    "apps.wishlist",
     "apps.payments",
     "apps.analytics",
     "apps.notifications",
@@ -322,6 +323,7 @@ SPECTACULAR_SETTINGS = {
         "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
         "AttemptStatusEnum": "apps.learning.models.QuizAttempt.Status",
         "QuizKindEnum": "apps.catalog.models.Quiz.Kind",
+        "BadgeKindEnum": "apps.catalog.models.Badge.Kind",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
@@ -382,8 +384,20 @@ STORAGES = {
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
+    # Documents générés (certificats, factures) : jamais publics (ADR 0005)
+    "private": {
+        "BACKEND": os.getenv(
+            "PRIVATE_FILE_STORAGE",
+            "apps.core.storage.PrivateFileSystemStorage"
+            if os.getenv("DEFAULT_FILE_STORAGE", "").endswith("FileSystemStorage")
+            else "apps.core.storage.PrivateMediaStorage",
+        ),
+    },
 }
 AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "http://rustfs:9000")
+# Point d'accès joignable du navigateur, pour signer les URL de téléchargement des documents privés (ADR 0005, P5) ;
+# vide : signature pour `AWS_S3_ENDPOINT_URL`
+AWS_S3_PUBLIC_ENDPOINT_URL = os.getenv("AWS_S3_PUBLIC_ENDPOINT_URL", "")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
@@ -476,6 +490,11 @@ CELERY_BEAT_SCHEDULE = {
     "purge-refused-requests": {
         "task": "apps.accounts.tasks.purge_refused_requests",
         "schedule": crontab(minute=30, hour=3),
+    },
+    # Filet de sécurité des PDF de certificats (ADR 0005 §3)
+    "retry-pending-certificates": {
+        "task": "apps.learning.tasks.retry_pending_certificates",
+        "schedule": crontab(minute="*/10"),
     },
 }
 # optional default task time limits
