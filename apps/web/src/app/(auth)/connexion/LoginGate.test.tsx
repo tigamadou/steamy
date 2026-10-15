@@ -29,6 +29,12 @@ describe("LoginGate", () => {
     expect(getCurrentUser).not.toHaveBeenCalled();
   });
 
+  it("annonce un compte existant quand WP02 y renvoie (C13)", async () => {
+    hasCookie.mockReturnValue(false);
+    const tree = await LoginGate({ searchParams: Promise.resolve({ compte: "existant" }) });
+    expect(tree.props).toEqual({ next: null, notice: "Vous avez déjà un compte avec ce numéro : connectez-vous." });
+  });
+
   it("ignore un `next` externe ou multiple", async () => {
     hasCookie.mockReturnValue(false);
     expect((await LoginGate({ searchParams: params("https://evil.example") })).props).toEqual({ next: null });
