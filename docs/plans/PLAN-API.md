@@ -395,7 +395,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > ajout au modèle (`Category.goals`, M2M vers `referentials.Goal`), faute de règle dans la spec.
   > `accounts/me/` gagne `counters {activeEnrollments, completedEnrollments, certificates, badges}` (apprenant ;
   > `null` sinon) ; `wishlist` s'y ajoute en L3a.6.
-- [x] **API-L3a.6** Souhaits et préférences · `feature/api-l3a-6-wishlist`
+- [x] **API-L3a.6** Souhaits et préférences · `feature/api-l3a-6-wishlist` · PR #71
   - [x] App `wishlist` : `GET wishlist/`, `PUT/DELETE wishlist/{courseSlug}/` idempotents
   - [x] Préférences de notification apprenant (pas de SMS ni marketing pour un mineur, D6, D30)
   - [x] Seed : deux parcours dans les souhaits de Léa ; compteur `wishlist` dans `accounts/me/`
