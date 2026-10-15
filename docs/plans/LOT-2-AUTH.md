@@ -23,7 +23,7 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 2.1 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
+Statut : 🟡 en cours · Prochaine tâche : 2.2 (après API-L2) · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
 ### Socle — ✅ terminé
 - [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
@@ -39,15 +39,16 @@ Statut : 🟡 en cours · Prochaine tâche : 2.1 · Prérequis : API-1 (2.0 et 2
   - [x] Tests Vitest : composants (clavier, collage OTP, bornes du stepper, E.164 par pays, `PwReq` en phase avec D25), `safeNext`, `homeForRole`, `identifier` (table C7)
   - [x] Recette : composants conformes à la maquette, clavier seul, contrastes AA, aucun référentiel en dur
 
-### Connexion et mot de passe — ⬜ à faire
-- [ ] **2.1** Connexion W16 et redirection (requiert API-1, puis API-L2 pour la résolution C7 complète) · `feature/lot2-connexion`
-  - [ ] W16 `/connexion` (`IdentifierInput`, `PasswordInput`, erreurs par code)
-  - [ ] Choix « Mot de passe oublié ? » (`Modal`), liens vers reprise et inscription
-  - [ ] Redirection après succès (`safeNext` sinon `homeForRole`), redirection d'un utilisateur déjà connecté, session expirée → `/connexion?next=`
-  - [ ] Sécurité : message générique unique, aucune donnée avant authentification, `next` validé, `autocomplete`
-  - [ ] Tests Vitest : erreurs par code, choix « mot de passe oublié »
-  - [ ] Parcours Playwright : connexion des trois rôles du jeu de démo, `next` externe ignoré, apprenant sur `/parent` redirigé, déconnexion
-  - [ ] Recette : trois rôles dans leur espace ; personnel refusé sans indice ; tutoiement côté apprenant
+### Connexion et mot de passe — 🟡 en cours
+- [x] **2.1** Connexion W16 et redirection (requiert API-1, puis API-L2 pour la résolution C7 complète) · `feature/lot2-connexion`
+  - [x] W16 `/connexion` (`IdentifierInput`, `PasswordInput`, erreurs par code)
+  - [x] Choix « Mot de passe oublié ? » (`Modal`), liens vers reprise et inscription
+  - [x] Redirection après succès (`safeNext` sinon `homeForRole`), redirection d'un utilisateur déjà connecté, session expirée → `/connexion?next=` (pour `/inscription`, la même redirection est posée avec W02 en 2.3)
+  - [x] Sécurité : message générique unique, aucune donnée avant authentification, `next` validé, `autocomplete`
+  - [x] Tests Vitest : erreurs par code, choix « mot de passe oublié »
+  - [x] Parcours Playwright : connexion des trois rôles du jeu de démo, `next` externe ignoré, apprenant sur `/parent` redirigé, déconnexion
+  - [x] Recette : trois rôles dans leur espace ; personnel refusé sans indice ; tutoiement côté apprenant
+  > La résolution C7 (numéro national, `+`, email) et le refus du personnel sont déjà servis par API-1 (`IdentifierBackend`) : vérifiés en E2E. `ACCOUNT_PENDING_CONSENT` propose « Reprendre mon inscription » (identifiant transmis en mémoire), écran livré en 2.4.
 - [ ] **2.2** Mot de passe oublié et activation enseignant (requiert API-L2) · `feature/lot2-mot-de-passe`
   - [ ] WL02 `/mot-de-passe-oublie` (`PhoneInput`, bascule email enseignant, réponse neutre)
   - [ ] WL03 `/mot-de-passe-oublie/code` (`OTPInput`, `ResendCountdown`, canal masqué)
