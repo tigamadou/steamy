@@ -443,7 +443,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > par SMS sur le numéro du compte, apprenant par notification (`/apprenant/boutique/<slug>`) ; réponse
   > `201 {ok: true}` identique si la demande existe déjà ; l'envoi part quand le stock repasse au-dessus de zéro
   > (signal `post_save` du kit, tâche `notify_restock_alerts`), une seule fois par demande.
-- [x] **API-L3b.4** Kit Codes · `feature/api-l3b-4-kit-codes`
+- [x] **API-L3b.4** Kit Codes · `feature/api-l3b-4-kit-codes` · PR #85
   - [x] Génération `STEAMY-XXXX-XXXX` (Crockford base32, `secrets`) à l'exécution post-paiement
   - [x] `POST payments/kit-codes/redeem/` : normalisation, `KIT_CODE_NOT_COMPATIBLE`, consommation atomique, throttle utilisateur et IP (D35)
   - [x] `Enrollment` `source=kit_code`
