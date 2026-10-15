@@ -33,7 +33,7 @@ from apps.payments.utils import handle_payment_event
 from apps.shop.models import Cart, CartItem, StockReservation
 from apps.shop.tests.factories import DeliveryZoneFactory, KitFactory
 
-from .factories import OrderFactory, PaymentFactory, link_child
+from .factories import OrderFactory, PaymentFactory, link_child, load_referentials
 
 pytestmark = pytest.mark.django_db
 
@@ -344,6 +344,7 @@ def test_paid_kits_leave_the_cart_and_confirm_the_stock(parent, commit):
 @pytest.mark.django_db(transaction=True, serialized_rollback=True)
 def test_concurrent_webhooks_fulfil_the_order_once():
     """Deux notifications identiques simultanées : le verrou de la commande n'exécute la commande qu'une fois."""
+    load_referentials()
     order = OrderFactory()
     payment = PaymentFactory(order=order, provider_transaction_id="TX-1")
     event = PaymentEvent(order.reference, "TX-1", order.total, "XOF", PaymentStatus.SUCCEEDED)
