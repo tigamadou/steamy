@@ -132,7 +132,7 @@ def test_s7_paid_course_cannot_be_enrolled_for_free(paid_course, user):
     )
 
     assert via_course.status_code == 402 and via_learning.status_code == 402
-    assert via_course.json()["detail"]
+    assert via_course.json()["code"] == via_learning.json()["code"] == "PAYMENT_REQUIRED"
     assert not Enrollment.objects.filter(user=user).exists()
 
 
@@ -172,3 +172,97 @@ def test_s4_lists_only_return_the_callers_objects(user):
 
     # Et l'objet d'autrui n'existe pas pour l'appelant.
     assert client.get(f"/api/payments/orders/{order.id}/").status_code == 404
+
+
+# --- S9 · Throttling, et format d'erreur unique en français (D4) ----------------------------
+
+
+@pytest.mark.django_db
+def test_s9_login_is_throttled_after_five_attempts(user, settings):
+    client = APIClient()  # le client de test désactive le CSRF par défaut
+    for _ in range(5):
+        resp = client.post(
+            "/api/public/user/session-login",
+            {"email": user.email, "password": "mauvais"},
+            format="json",
+        )
+        assert resp.status_code == 400
+    resp = client.post(
+        "/api/public/user/session-login",
+        {"email": user.email, "password": "mauvais"},
+        format="json",
+    )
+    assert resp.status_code == 429
+    assert resp.json()["code"] == "THROTTLED"
+
+
+@pytest.mark.django_db
+def test_errors_use_the_single_format_in_french(user):
+    resp = APIClient().post(
+        "/api/public/user/session-login",
+        {"email": user.email, "password": "mauvais"},
+        format="json",
+    )
+    body = resp.json()
+    assert set(body) == {"code", "message", "fields"}
+    assert body["code"] == "VALIDATION_ERROR"
+    assert body["fields"]["nonFieldErrors"] == ["Identifiant ou mot de passe incorrect."]
+
+    not_found = APIClient().get("/api/courses/courses/inexistant/").json()
+    assert not_found == {"code": "NOT_FOUND", "message": not_found["message"]}
+    assert "trouvé" in not_found["message"].lower()
+
+
+def test_api_docs_are_closed_unless_allowed(settings):
+    # En staging et en prod, ALLOW_API_DOCS n'est pas défini : la documentation n'est pas montée.
+    from django.urls import NoReverseMatch, clear_url_caches, reverse
+
+    import project.urls
+
+    settings.ALLOW_API_DOCS = False
+    clear_url_caches()
+    import importlib
+
+    importlib.reload(project.urls)
+    try:
+        with pytest.raises(NoReverseMatch):
+            reverse("schema")
+    finally:
+        settings.ALLOW_API_DOCS = True
+        importlib.reload(project.urls)
+        clear_url_caches()
+
+
+# --- S3 · Télémétrie ouverte ----------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_s3_tracking_events_are_write_only_and_not_attributable(user):
+    from apps.analytics.models import Event
+
+    other = User.objects.create_user(email="autre@example.com", password="secret123")
+    anonymous = APIClient()
+    resp = anonymous.post(
+        "/api/analytics/events/", {"eventType": "view", "user": other.id}, format="json"
+    )
+    assert resp.status_code == 201
+    assert Event.objects.get().user is None  # l'utilisateur fourni par le client est ignoré
+
+    event_id = Event.objects.get().id
+    assert anonymous.get("/api/analytics/events/").status_code == 405
+    assert anonymous.delete(f"/api/analytics/events/{event_id}/").status_code in (404, 405)
+    assert Event.objects.filter(id=event_id).exists()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "url", ["/api/analytics/dashboard/summary/", "/api/analytics/export/events.csv"]
+)
+def test_s3_dashboard_and_export_are_staff_only(user, url):
+    client = APIClient()
+    client.force_authenticate(user)
+    assert client.get(url).status_code == 403
+    client.force_authenticate(
+        User.objects.create_user(email="staff@example.com", password="x", is_staff=True)
+    )
+    assert client.get(url).status_code == 200

@@ -31,53 +31,18 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * @description Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-         *     Clients (frontend/mobile/backend) envoient les events ici.
-         */
-        get: operations["analytics_events_list"];
+        get?: never;
         put?: never;
         /**
-         * @description Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-         *     Clients (frontend/mobile/backend) envoient les events ici.
+         * @description Ingestion des événements de télémétrie, en ÉCRITURE SEULE (S3) : personne ne lit, ne
+         *     modifie ni ne supprime les événements par l'API. L'utilisateur est celui de la session,
+         *     jamais une valeur fournie par le client. Plafonné par le throttling global (S9).
          */
         post: operations["analytics_events_create"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
-        trace?: never;
-    };
-    "/api/analytics/events/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-         *     Clients (frontend/mobile/backend) envoient les events ici.
-         */
-        get: operations["analytics_events_retrieve"];
-        /**
-         * @description Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-         *     Clients (frontend/mobile/backend) envoient les events ici.
-         */
-        put: operations["analytics_events_update"];
-        post?: never;
-        /**
-         * @description Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-         *     Clients (frontend/mobile/backend) envoient les events ici.
-         */
-        delete: operations["analytics_events_destroy"];
-        options?: never;
-        head?: never;
-        /**
-         * @description Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-         *     Clients (frontend/mobile/backend) envoient les events ici.
-         */
-        patch: operations["analytics_events_partial_update"];
         trace?: never;
     };
     "/api/analytics/export/events.csv": {
@@ -954,7 +919,9 @@ export interface components {
          *     to accept email field instead of username
          */
         CustomAuthTokenRequest: {
+            /** Courriel */
             email: string;
+            /** Mot de passe */
             password: string;
         };
         DashboardSummary: {
@@ -985,7 +952,7 @@ export interface components {
         EnrollmentStatusEnum: "active" | "completed" | "cancelled";
         Event: {
             readonly id: number;
-            user?: number | null;
+            readonly user: number | null;
             eventType: string;
             entityType?: string | null;
             entityId?: string | null;
@@ -996,7 +963,6 @@ export interface components {
             readonly createdAt: string;
         };
         EventRequest: {
-            user?: number | null;
             eventType: string;
             entityType?: string | null;
             entityId?: string | null;
@@ -1155,21 +1121,6 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Enrollment"][];
         };
-        PaginatedEventList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Event"][];
-        };
         PaginatedLessonList: {
             /** @example 123 */
             count?: number;
@@ -1305,15 +1256,6 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Resource"][];
         };
-        PatchedEventRequest: {
-            user?: number | null;
-            eventType?: string;
-            entityType?: string | null;
-            entityId?: string | null;
-            /** Format: decimal */
-            value?: string | null;
-            metadata?: unknown;
-        };
         PatchedNotificationRequest: {
             read?: boolean;
         };
@@ -1424,17 +1366,19 @@ export interface components {
             csrfToken: string;
         };
         UserChangeEmailRequest: {
+            /** Mot de passe */
             password: string;
             newEmail: string;
         };
         UserChangePasswordRequest: {
+            /** Mot de passe */
             password: string;
             newPassword: string;
         };
         UserMyProfile: {
             readonly id: number;
             /**
-             * Email address
+             * Adresse électronique
              * Format: email
              */
             readonly email: string;
@@ -1473,34 +1417,6 @@ export interface operations {
             };
         };
     };
-    analytics_events_list: {
-        parameters: {
-            query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedEventList"];
-                };
-            };
-        };
-    };
     analytics_events_create: {
         parameters: {
             query?: never;
@@ -1515,101 +1431,6 @@ export interface operations {
         };
         responses: {
             201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Event"];
-                };
-            };
-        };
-    };
-    analytics_events_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this event. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Event"];
-                };
-            };
-        };
-    };
-    analytics_events_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this event. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EventRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Event"];
-                };
-            };
-        };
-    };
-    analytics_events_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this event. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    analytics_events_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this event. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedEventRequest"];
-            };
-        };
-        responses: {
-            200: {
                 headers: {
                     [name: string]: unknown;
                 };

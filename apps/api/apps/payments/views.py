@@ -6,8 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from rest_framework import permissions, serializers, status, viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 
 from libs.scoping import OwnedByRequestUserMixin
 
@@ -33,6 +34,10 @@ class PaymentViewSet(OwnedByRequestUserMixin, viewsets.ReadOnlyModelViewSet):
 
 
 # Webhook endpoint for providers (unprotected CSRF exempt; verify signature inside)
+class WebhookRateThrottle(AnonRateThrottle):
+    scope = "webhook"  # S9
+
+
 @extend_schema(
     summary="Webhook des prestataires de paiement (appelé par KKiaPay / FedaPay, pas par le front)",
     parameters=[
@@ -48,6 +53,7 @@ class PaymentViewSet(OwnedByRequestUserMixin, viewsets.ReadOnlyModelViewSet):
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([WebhookRateThrottle])
 def provider_webhook(request, provider_name: str):
     """
     Generic webhook entrypoint for external providers.

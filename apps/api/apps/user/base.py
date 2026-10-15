@@ -1,7 +1,10 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import gettext as _
+
+# gettext_lazy : traduit à l'affichage, sinon les libellés dépendent de la langue au démarrage et
+# Django génère des migrations parasites.
+from django.utils.translation import gettext_lazy as _
 
 
 class UserManager(BaseUserManager):

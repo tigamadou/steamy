@@ -149,8 +149,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+# Messages en français (D4) ; dates stockées en UTC, affichées et planifiées au fuseau du Bénin (C16).
+LANGUAGE_CODE = "fr"
+TIME_ZONE = "Africa/Porto-Novo"
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -253,6 +254,20 @@ REST_FRAMEWORK = {
         "rest_framework.filters.SearchFilter",
     ),
     "EXCEPTION_HANDLER": "libs.exception_handler.exception_handler",
+    # Throttling (S9) : plafonds globaux + portées sur les points sensibles (cache Redis).
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    ),
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": os.getenv("THROTTLE_ANON", "120/min"),
+        "user": os.getenv("THROTTLE_USER", "600/min"),
+        "login": os.getenv("THROTTLE_LOGIN", "5/min"),
+        "signup": os.getenv("THROTTLE_SIGNUP", "5/min"),
+        "password-reset": os.getenv("THROTTLE_PASSWORD_RESET", "5/hour"),
+        "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
+    },
 }
 REST_FRAMEWORK.setdefault("DEFAULT_SCHEMA_CLASS", "drf_spectacular.openapi.AutoSchema")
 SIMPLE_JWT = {
@@ -261,7 +276,7 @@ SIMPLE_JWT = {
     # autres options...
 }
 SPECTACULAR_SETTINGS = {
-    "TITLE": "API - MyLearningPlatform",
+    "TITLE": "API Steamy",
     "DESCRIPTION": "API pour la plateforme de formation",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,

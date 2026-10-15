@@ -27,10 +27,10 @@ class CustomAuthTokenSerializer(serializers.Serializer):
             # users. (Assuming the default ModelBackend authentication
             # backend.)
             if not user:
-                msg = _("Unable to log in with provided credentials.")
+                msg = _("Identifiant ou mot de passe incorrect.")
                 raise serializers.ValidationError(msg, code="authorization")
         else:
-            msg = _('Must include "email" and "password".')
+            msg = _("L'email et le mot de passe sont obligatoires.")
             raise serializers.ValidationError(msg, code="authorization")
 
         attrs["user"] = user

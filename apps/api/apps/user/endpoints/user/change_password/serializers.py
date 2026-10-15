@@ -17,12 +17,14 @@ class UserChangePasswordSerializer(serializers.ModelSerializer):
     def validate_password(self, value):
         user = self.context["request"].user
         if not user.check_password(value):
-            raise ValidationError("Invalid current password.")
+            raise ValidationError("Mot de passe actuel incorrect.")
         return value
 
     def validate(self, data):
         if data["password"] == data["new_password"]:
-            raise ValidationError("New password should be different from the current password.")
+            raise ValidationError(
+                "Le nouveau mot de passe doit être différent du mot de passe actuel."
+            )
         django_validate_password(data["new_password"], self.context["request"].user)
         return data
 

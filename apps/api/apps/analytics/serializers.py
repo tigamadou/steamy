@@ -17,7 +17,7 @@ class EventSerializer(serializers.ModelSerializer):
             "metadata",
             "created_at",
         ]
-        read_only_fields = ["id", "created_at"]
+        read_only_fields = ["id", "user", "created_at"]
 
 
 class DailyAggregatedStatSerializer(serializers.ModelSerializer):

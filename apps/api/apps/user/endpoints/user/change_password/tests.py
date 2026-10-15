@@ -36,7 +36,7 @@ class UserChangePasswordTests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data["password"][0], "Invalid current password.")
+        self.assertEqual(response.data["fields"]["password"][0], "Mot de passe actuel incorrect.")
 
     def test_user_change_password_same(self):
         self.client.force_authenticate(user=self.user)
@@ -44,10 +44,9 @@ class UserChangePasswordTests(APITestCase):
             self.url, {"password": "oldpassword", "new_password": "oldpassword"}, format="json"
         )
         self.assertEqual(response.status_code, 400)
-        error_detail = response.data.get("non_field_errors")
-        error_message = error_detail[0]
+        error_message = response.data["fields"]["nonFieldErrors"][0]
         self.assertEqual(
-            error_message, "New password should be different from the current password."
+            error_message, "Le nouveau mot de passe doit être différent du mot de passe actuel."
         )
 
     def test_user_change_password_too_common(self):
@@ -56,6 +55,6 @@ class UserChangePasswordTests(APITestCase):
             self.url, {"password": "oldpassword", "new_password": "newpassword"}, format="json"
         )
         self.assertEqual(response.status_code, 400)
-        error_detail = response.data.get("non_field_errors")
-        error_message = error_detail[0]
-        self.assertEqual(error_message, "This password is too common.")
+        # Message du validateur Django, traduit par la locale « fr » (D4)
+        error_message = response.data["fields"]["nonFieldErrors"][0]
+        self.assertEqual(error_message, "Ce mot de passe est trop courant.")

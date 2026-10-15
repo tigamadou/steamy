@@ -31,10 +31,12 @@ urlpatterns = [
     # path("api/core/presign/", include("apps.core.views.presign_upload")),
     path("api/core/presign/", presign_upload, name="presign-upload"),
     path("api/health/", health, name="health"),
-    # Swagger API
-    # Schema OpenAPI (JSON/YAML)
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-    # ReDoc
-    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
+
+# Documentation de l'API : seulement si ALLOW_API_DOCS (activée en local, fermée en staging/prod).
+if settings.ALLOW_API_DOCS:
+    urlpatterns += [
+        path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+        path("api/docs/", SwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+        path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    ]
