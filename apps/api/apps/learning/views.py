@@ -1,7 +1,7 @@
 # apps/learning/views.py
-from rest_framework import filters, permissions, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.response import Response
+from rest_framework import filters, mixins, permissions, viewsets
+
+from apps.courses.views import enrolled_course_filter
 
 from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
 from .serializers import (
@@ -32,6 +32,8 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
     queryset = Enrollment.objects.select_related("user", "course")
     serializer_class = EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
+    # Ni modification ni suppression par le client : statut et progression sont calculés.
+    http_method_names = ["get", "post", "head", "options"]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -49,25 +51,49 @@ class CertificateViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
 
 
-class QuizViewSet(viewsets.ModelViewSet):
-    queryset = Quiz.objects.select_related("course")
+# Quiz, questions et choix : lecture seule, réservée aux inscrits du parcours (S8).
+# La création de contenu pédagogique passe par le back-office.
+class QuizViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = QuizSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):  # génération du schéma OpenAPI
+            return Quiz.objects.none()
+        filters_ = enrolled_course_filter(self.request.user, "course__")
+        return Quiz.objects.filter(**filters_).prefetch_related("questions__choices").distinct()
 
 
-class QuestionViewSet(viewsets.ModelViewSet):
-    queryset = Question.objects.select_related("quiz")
+class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = QuestionSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):  # génération du schéma OpenAPI
+            return Question.objects.none()
+        filters_ = enrolled_course_filter(self.request.user, "quiz__course__")
+        return Question.objects.filter(**filters_).prefetch_related("choices").distinct()
 
 
-class ChoiceViewSet(viewsets.ModelViewSet):
-    queryset = Choice.objects.select_related("question")
+class ChoiceViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ChoiceSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):  # génération du schéma OpenAPI
+            return Choice.objects.none()
+        filters_ = enrolled_course_filter(self.request.user, "question__quiz__course__")
+        return Choice.objects.filter(**filters_).distinct()
 
 
-class AttemptViewSet(viewsets.ModelViewSet):
+# Tentatives : création et lecture seulement. Le score est toujours calculé par le serveur
+# (S8) ; il n'y a plus de correction manuelle.
+class AttemptViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Attempt.objects.select_related("quiz", "user")
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.OrderingFilter]
@@ -79,18 +105,4 @@ class AttemptViewSet(viewsets.ModelViewSet):
         return AttemptSerializer
 
     def perform_create(self, serializer):
-        # ensure user is set to request.user
-        serializer.validated_data["user"] = self.request.user
-        return super().perform_create(serializer)
-
-    @action(detail=True, methods=["post"])
-    def manual_grade(self, request, pk=None):
-        # endpoint pour corriger manuellement une tentative
-        attempt = self.get_object()
-        score = request.data.get("score")
-        if score is None:
-            return Response({"detail": "score missing"}, status=status.HTTP_400_BAD_REQUEST)
-        attempt.score = float(score)
-        attempt.passed = attempt.score >= float(attempt.quiz.pass_score)
-        attempt.save()
-        return Response({"score": attempt.score, "passed": attempt.passed})
+        serializer.save(user=self.request.user)

@@ -117,47 +117,57 @@ def test_certificate_access_owner_and_admin_only():
 
 
 @pytest.mark.django_db
-def test_attempt_manual_grade_updates_score_and_passed_flag():
+def test_attempt_is_graded_by_server_and_cannot_be_regraded():
+    """S8 : le score vient du serveur, et il n'y a plus de correction manuelle."""
     client = APIClient()
     teacher = User.objects.create_user(email="tq@example.com", password="pw", role="teacher")
     student = User.objects.create_user(email="sq@example.com", password="pw", role="student")
-    admin = User.objects.create_user(
-        email="admin2@example.com", password="pw", role="admin", is_staff=True
-    )
 
     course = Course.objects.create(title="Cquiz", slug="cquiz", author=teacher, published=True)
+    Enrollment.objects.create(user=student, course=course)
     quiz = Quiz.objects.create(course=course, title="Final Quiz", pass_score="50.0")
     q1 = Question.objects.create(quiz=quiz, text="Q1", kind="mcq", weight="1.0")
     Choice.objects.create(question=q1, text="Good", is_correct=True)
-    c2 = Choice.objects.create(question=q1, text="Bad", is_correct=False)
+    wrong = Choice.objects.create(question=q1, text="Bad", is_correct=False)
 
-    # create attempt (via ORM for simplicity)
-    attempt = Attempt.objects.create(user=student, quiz=quiz, data={str(q1.id): c2.id})
-    assert attempt.score is None
-
-    # admin can manual grade
-    client.force_authenticate(user=admin)
-    url = reverse("attempt-manual-grade", args=[attempt.id])
-    resp = client.post(url, {"score": "80.0"}, format="json")
-    assert resp.status_code == 200, (
-        f"manual_grade expected 200, got {resp.status_code}: {resp.content}"
-    )
-    attempt.refresh_from_db()
-    assert float(attempt.score) == pytest.approx(80.0)
-    assert attempt.passed is True
-
-    # non-admin authenticated user can also call manual_grade in current implementation
-    # ensure behavior is permitted or adapt if you expect restriction
     client.force_authenticate(user=student)
-    url2 = reverse("attempt-manual-grade", args=[attempt.id])
-    resp_student = client.post(url2, {"score": "40.0"}, format="json")
-    # accept either success (200) or forbidden (403) depending on your business rules
-    assert resp_student.status_code in (200, 403), (
-        f"unexpected status for student manual_grade: {resp_student.status_code}: {resp_student.content}"
+    # Un score et un « passed » envoyés par le client sont ignorés.
+    resp = client.post(
+        "/api/learning/attempts/",
+        {"quiz": quiz.id, "data": {str(q1.id): wrong.id}, "score": 100, "passed": True},
+        format="json",
+    )
+    assert resp.status_code == 201, resp.content
+    attempt = Attempt.objects.get(pk=resp.json()["id"])
+    assert float(attempt.score) == 0 and attempt.passed is False
+
+    assert (
+        client.post(f"/api/learning/attempts/{attempt.id}/manual_grade/", {"score": 90}).status_code
+        == 404
+    )
+    assert (
+        client.patch(
+            f"/api/learning/attempts/{attempt.id}/", {"score": 90}, format="json"
+        ).status_code
+        == 405
     )
 
-    # refresh and check fields if student succeeded
-    attempt.refresh_from_db()
-    if resp_student.status_code == 200:
-        assert float(attempt.score) == pytest.approx(40.0)
-        assert attempt.passed is False
+
+@pytest.mark.django_db
+def test_quiz_choices_never_expose_the_answer_key():
+    teacher = User.objects.create_user(email="t9@example.com", password="pw", role="teacher")
+    student = User.objects.create_user(email="s9@example.com", password="pw", role="student")
+    course = Course.objects.create(title="Cq", slug="cq", author=teacher, published=True)
+    quiz = Quiz.objects.create(course=course, title="Q")
+    q1 = Question.objects.create(quiz=quiz, text="Q1", kind="mcq", weight="1.0")
+    Choice.objects.create(question=q1, text="Good", is_correct=True)
+
+    client = APIClient()
+    # Ni anonyme, ni connecté non inscrit : le quiz n'est pas visible.
+    assert client.get("/api/learning/quizzes/").status_code == 403
+    client.force_authenticate(user=student)
+    assert client.get("/api/learning/quizzes/").json()["results"] == []
+
+    Enrollment.objects.create(user=student, course=course)
+    body = client.get("/api/learning/quizzes/").content.decode()
+    assert "Good" in body and "isCorrect" not in body and "is_correct" not in body

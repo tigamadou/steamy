@@ -2,6 +2,7 @@
 from rest_framework import serializers
 
 from apps.courses.models import Lesson
+from libs.exceptions import PaymentRequired
 
 from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
 
@@ -12,13 +13,17 @@ class EnrollmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Enrollment
         fields = ["id", "user", "course", "started_at", "completed", "status", "progress"]
-        read_only_fields = ["started_at", "completed", "progress"]
+        read_only_fields = ["started_at", "completed", "status", "progress"]
 
     def validate(self, attrs):
         user = self.context["request"].user
         course = attrs.get("course")
         if course is None:
             raise serializers.ValidationError({"course": "course is required."})
+        if not course.published:
+            raise serializers.ValidationError({"course": "Ce parcours n'est pas disponible."})
+        if course.price > 0:
+            raise PaymentRequired()
         # avoid duplicate enrollment
         if Enrollment.objects.filter(user=user, course=course).exists():
             raise serializers.ValidationError(
@@ -58,9 +63,11 @@ class CertificateSerializer(serializers.ModelSerializer):
 
 # Quiz & assessment
 class ChoiceSerializer(serializers.ModelSerializer):
+    # Jamais `is_correct` : le corrigé ne sort pas du serveur (S8).
     class Meta:
         model = Choice
-        fields = ["id", "question", "text", "is_correct"]
+        fields = ["id", "question", "text"]
+        read_only_fields = fields
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -87,8 +94,18 @@ class AttemptCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Attempt
-        fields = ["id", "user", "quiz", "created_at", "score", "passed", "data"]
-        read_only_fields = ["created_at", "score", "passed"]
+        fields = ["id", "quiz", "created_at", "score", "passed", "data"]
+        read_only_fields = ["id", "created_at", "score", "passed"]
+
+    def validate_quiz(self, quiz):
+        # Un quiz ne se passe que dans un parcours où l'on est inscrit.
+        user = self.context["request"].user
+        if (
+            not user.is_staff
+            and not Enrollment.objects.filter(user=user, course=quiz.course).exists()
+        ):
+            raise serializers.ValidationError("Vous devez être inscrit au parcours de ce quiz.")
+        return quiz
 
     def create(self, validated_data):
         user = validated_data.get("user")
@@ -146,4 +163,4 @@ class AttemptSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attempt
         fields = ["id", "user", "quiz", "created_at", "score", "passed", "data"]
-        read_only_fields = ["created_at", "score", "passed"]
+        read_only_fields = fields

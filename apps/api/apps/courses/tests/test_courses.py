@@ -3,135 +3,10 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.courses.models import Course, Lesson, Module, Path
+from apps.courses.models import Course, Lesson, Module
+from apps.learning.models import Enrollment
 
 User = get_user_model()
-
-
-@pytest.mark.django_db
-def test_student_cannot_create_course():
-    client = APIClient()
-    student = User.objects.create_user(email="student1@example.com", password="pw", role="student")
-    client.force_authenticate(user=student)
-
-    url = reverse("course-list")
-    payload = {
-        "title": "Should not be created by student",
-        "description": "Forbidden",
-        "slug": "forbidden-by-student",
-        "price": "0.00",
-    }
-    resp = client.post(url, payload, format="json")
-    # intentionnellement strict : on veut 403 si la permission IsTeacherOrAdmin est en place
-    assert resp.status_code == 403, (
-        f"expected 403 for student create, got {resp.status_code}: {resp.content}"
-    )
-
-
-@pytest.mark.django_db
-def test_teacher_can_create_course_and_becomes_author():
-    client = APIClient()
-    teacher = User.objects.create_user(email="teacher1@example.com", password="pw", role="teacher")
-    client.force_authenticate(user=teacher)
-
-    path = Path.objects.create(title="Dev", slug="dev")
-
-    url = reverse("course-list")
-    payload = {
-        "title": "Teacher Course",
-        "description": "Created by teacher",
-        "slug": "teacher-course",
-        "path": path.id,
-        "price": "19.99",
-    }
-    resp = client.post(url, payload, format="json")
-    assert resp.status_code == 201, (
-        f"teacher should be able to create course, got {resp.status_code}: {resp.content}"
-    )
-
-    course = Course.objects.get(slug="teacher-course")
-    assert course.author_id == teacher.id
-
-
-@pytest.mark.django_db
-def test_author_and_admin_can_update_course_but_student_cannot():
-    client = APIClient()
-    author = User.objects.create_user(email="author@example.com", password="pw", role="teacher")
-    student = User.objects.create_user(email="student2@example.com", password="pw", role="student")
-    admin = User.objects.create_user(
-        email="admin@example.com", password="pw", role="admin", is_staff=True
-    )
-
-    course = Course.objects.create(title="Updatable", slug="updatable", author=author)
-
-    # author can update
-    client.force_authenticate(user=author)
-    url = reverse("course-detail", args=[course.slug])
-    resp = client.patch(url, {"title": "Updated by author"}, format="json")
-    assert resp.status_code in (200, 202)
-    course.refresh_from_db()
-    assert course.title == "Updated by author"
-
-    # student cannot update
-    client.force_authenticate(user=student)
-    resp = client.patch(url, {"title": "Bad update"}, format="json")
-    assert resp.status_code in (403, 400), (
-        f"student should be blocked, got {resp.status_code}: {resp.content}"
-    )
-
-    # admin can update
-    client.force_authenticate(user=admin)
-    resp = client.patch(url, {"title": "Updated by admin"}, format="json")
-    assert resp.status_code in (200, 202)
-    course.refresh_from_db()
-    assert course.title == "Updated by admin"
-
-
-@pytest.mark.django_db
-def test_module_and_lesson_creation_permissions():
-    client = APIClient()
-    teacher = User.objects.create_user(email="teacher2@example.com", password="pw", role="teacher")
-    student = User.objects.create_user(email="student3@example.com", password="pw", role="student")
-
-    # teacher creates course
-    client.force_authenticate(user=teacher)
-    course = Course.objects.create(title="Course X", slug="course-x", author=teacher)
-
-    # teacher creates module
-    client.force_authenticate(user=teacher)
-    url_mod = reverse("module-list")
-    resp = client.post(
-        url_mod, {"course": course.id, "title": "Module 1", "order": 0}, format="json"
-    )
-    assert resp.status_code == 201, (
-        f"teacher should create module, got {resp.status_code}: {resp.content}"
-    )
-    mod_id = resp.json().get("id")
-    mod = Module.objects.get(id=mod_id)
-    assert mod.course_id == course.id
-
-    # student cannot create module for that course
-    client.force_authenticate(user=student)
-    resp = client.post(
-        url_mod, {"course": course.id, "title": "Malicious Module", "order": 1}, format="json"
-    )
-    assert resp.status_code in (403, 400), (
-        f"student should not create module, got {resp.status_code}: {resp.content}"
-    )
-
-    # teacher creates lesson in module
-    client.force_authenticate(user=teacher)
-    url_lesson = reverse("lesson-list")
-    resp = client.post(
-        url_lesson,
-        {"module": mod.id, "title": "Lesson A", "content": "abc", "order": 0},
-        format="json",
-    )
-    assert resp.status_code == 201, (
-        f"teacher should create lesson, got {resp.status_code}: {resp.content}"
-    )
-    lesson = Lesson.objects.get(id=resp.json().get("id"))
-    assert lesson.module_id == mod.id
 
 
 @pytest.mark.django_db
@@ -170,32 +45,61 @@ def test_student_enroll_and_access_lessons():
     assert resp.status_code == 200
 
 
+# S2 · Le contenu pédagogique est en lecture seule pour tous les rôles : il se crée au
+# back-office (S5, S6). Ces tests remplacent ceux qui figeaient l'écriture par un enseignant.
+WRITE_CASES = [
+    ("post", "/api/courses/courses/", {"title": "X", "slug": "x"}),
+    ("patch", "/api/courses/courses/{course}/", {"title": "Modifié"}),
+    ("delete", "/api/courses/courses/{course}/", None),
+    ("post", "/api/courses/modules/", {"title": "M", "course": "{course_id}"}),
+    ("post", "/api/courses/lessons/", {"title": "L", "module": "{module_id}"}),
+    ("post", "/api/courses/resources/", {"title": "R", "lesson": "{lesson_id}"}),
+]
+
+
 @pytest.mark.django_db
-def test_teacher_can_add_resource_to_lesson_but_student_cannot():
-    client = APIClient()
-    teacher = User.objects.create_user(email="teacher4@example.com", password="pw", role="teacher")
-    student = User.objects.create_user(email="student5@example.com", password="pw", role="student")
-
-    course = Course.objects.create(title="WithRes", slug="withres", author=teacher)
-    module = Module.objects.create(course=course, title="M", order=0)
-    lesson = Lesson.objects.create(module=module, title="L", order=0)
-
-    # teacher adds resource (file upload may require multipart; here we test metadata create with external_url)
-    client.force_authenticate(user=teacher)
-    url_res = reverse("resource-list")
-    payload = {
-        "lesson": lesson.id,
-        "title": "Slides",
-        "external_url": "http://example.com/slides.pdf",
+@pytest.mark.parametrize("role", ["student", "teacher", "staff"])
+@pytest.mark.parametrize("method,url,payload", WRITE_CASES)
+def test_course_content_is_read_only_for_every_role(role, method, url, payload):
+    teacher = User.objects.create_user(email="auteur@example.com", password="pw", role="teacher")
+    course = Course.objects.create(title="C", slug="c", author=teacher, published=True)
+    module = Module.objects.create(course=course, title="M1", order=0)
+    lesson = Lesson.objects.create(module=module, title="L1", order=0)
+    ids = {
+        "course": course.slug,
+        "course_id": course.id,
+        "module_id": module.id,
+        "lesson_id": lesson.id,
     }
-    resp = client.post(url_res, payload, format="json")
-    assert resp.status_code == 201, (
-        f"teacher should create resource, got {resp.status_code}: {resp.content}"
+
+    if role == "staff":
+        actor = User.objects.create_user(email="staff@example.com", password="pw", is_staff=True)
+    elif role == "teacher":
+        actor = teacher  # même l'auteur du cours ne peut plus écrire par l'API
+    else:
+        actor = User.objects.create_user(email="eleve@example.com", password="pw", role="student")
+    Enrollment.objects.create(user=actor, course=course)
+    client = APIClient()
+    client.force_authenticate(user=actor)
+
+    data = {k: (v.format(**ids) if isinstance(v, str) else v) for k, v in (payload or {}).items()}
+    resp = getattr(client, method)(url.format(**ids), data, format="json")
+
+    assert resp.status_code == 405, resp.content
+    assert (
+        Course.objects.count() == 1 and Module.objects.count() == 1 and Lesson.objects.count() == 1
     )
 
-    # student cannot create
-    client.force_authenticate(user=student)
-    resp = client.post(url_res, payload, format="json")
-    assert resp.status_code in (403, 400), (
-        f"student should not create resource, got {resp.status_code}: {resp.content}"
-    )
+
+@pytest.mark.django_db
+def test_unpublished_course_and_author_email_are_hidden():
+    teacher = User.objects.create_user(email="auteur@example.com", password="pw", role="teacher")
+    Course.objects.create(title="Publié", slug="publie", author=teacher, published=True)
+    Course.objects.create(title="Brouillon", slug="brouillon", author=teacher, published=False)
+
+    resp = APIClient().get("/api/courses/courses/")
+    assert resp.status_code == 200
+    slugs = [c["slug"] for c in resp.json()["results"]]
+    assert slugs == ["publie"]
+    assert "auteur@example.com" not in resp.content.decode()
+    assert APIClient().get("/api/courses/courses/brouillon/").status_code == 404
