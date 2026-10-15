@@ -57,6 +57,12 @@ test("contact : « Rejoindre l'équipe » → sujet « Candidature » → envoi 
 test("aide : FAQ par thème et recherche, ancres #faq et #contact", async ({ page }) => {
   await page.goto("/aide#faq");
   await expect(page.getByRole("heading", { name: "Questions fréquentes" })).toBeInViewport();
+  await page
+    .getByRole("navigation", { name: "Dans cette page" })
+    .getByRole("link", { name: "Kits et livraison" })
+    .click();
+  await expect(page).toHaveURL("/aide#faq-kits");
+  await expect(page.getByRole("heading", { level: 3, name: "Kits et livraison" })).toBeInViewport();
   await page.getByRole("searchbox", { name: "Rechercher une question" }).fill("kit code");
   await expect(page.getByText("À quoi sert le Kit Code ?")).toBeVisible();
   await expect(page.getByText("Quels moyens de paiement acceptez-vous ?")).toHaveCount(0);

@@ -40,7 +40,10 @@ describe("WL24 · /aide", () => {
   it("FAQ par thème (#faq), formulaire (#contact) et conseils avant d'écrire", () => {
     const { container } = render(help.default());
     expect(screen.getByRole("heading", { level: 1, name: "Aide & contact" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Questions fréquentes/ })).toHaveAttribute("href", "/aide#faq");
+    expect(screen.getByRole("link", { name: "Paiement Mobile Money" })).toHaveAttribute("href", "/aide#faq-paiement");
+    expect(container.querySelector("#faq-paiement")).toContainElement(
+      screen.getByRole("heading", { name: "Paiement Mobile Money" }),
+    );
     expect(screen.getByRole("link", { name: /Nous contacter/ })).toHaveAttribute("href", "/aide#contact");
     const faq = within(container.querySelector<HTMLElement>("#faq")!);
     expect(faq.getByRole("heading", { name: "Compte et consentement" })).toBeInTheDocument();

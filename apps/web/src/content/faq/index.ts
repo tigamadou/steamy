@@ -2,8 +2,13 @@ import type { FaqTheme } from "@/components/ds";
 
 // FAQ statique du centre d'aide WL24 (D10, D41), au vouvoiement (parents, enseignants) ; réutilisée par WD12,
 // WPD13 et WT11. Le mot de passe oublié distingue l'apprenant (son parent) et le parent (WL02).
-export const FAQ: FaqTheme[] = [
+/** Thème de la FAQ : ancre (`#faq-…`) et pictogramme des pastilles de l'en-tête de WL24. */
+export type HelpTheme = FaqTheme & { id: string; icon: string };
+
+export const FAQ: HelpTheme[] = [
   {
+    id: "faq-compte",
+    icon: "👨‍👩‍👧",
     title: "Compte et consentement",
     items: [
       {
@@ -29,6 +34,8 @@ export const FAQ: FaqTheme[] = [
     ],
   },
   {
+    id: "faq-paiement",
+    icon: "📱",
     title: "Paiement Mobile Money",
     items: [
       {
@@ -43,6 +50,8 @@ export const FAQ: FaqTheme[] = [
     ],
   },
   {
+    id: "faq-kits",
+    icon: "📦",
     title: "Kits et livraison",
     items: [
       {
@@ -57,6 +66,8 @@ export const FAQ: FaqTheme[] = [
     ],
   },
   {
+    id: "faq-evenements",
+    icon: "📅",
     title: "Événements",
     items: [
       {
@@ -67,6 +78,8 @@ export const FAQ: FaqTheme[] = [
     ],
   },
   {
+    id: "faq-mot-de-passe",
+    icon: "🔑",
     title: "Mot de passe oublié",
     items: [
       {
