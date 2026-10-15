@@ -1,7 +1,8 @@
 # Matrice écran → test e2e
 
 Règle (`docs/plans/README.md`, « Tests ») : **100 % des écrans v1 ont un test de bout en bout** (Playwright). Un écran
-est **livré** quand sa case est cochée dans la section « Avancement » de son plan ; à partir de là, sa ligne doit citer
+est **livré** quand une case de réalisation qui le cite est cochée dans la section « Avancement » de son plan (les cases
+de conception de maquette ne comptent pas) ; à partir de là, sa ligne doit citer
 au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matrix.py --check`.
 
 - Une ligne par écran à implémenter (statuts « v1 », « v1 · admin Django », « À concevoir » de l'inventaire). Ne pas
