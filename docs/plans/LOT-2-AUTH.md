@@ -23,7 +23,7 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 2.2 (après API-L2) · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
+Statut : 🟡 en cours · Prochaine tâche : 2.3 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
 ### Socle — ✅ terminé
 - [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
@@ -39,7 +39,7 @@ Statut : 🟡 en cours · Prochaine tâche : 2.2 (après API-L2) · Prérequis :
   - [x] Tests Vitest : composants (clavier, collage OTP, bornes du stepper, E.164 par pays, `PwReq` en phase avec D25), `safeNext`, `homeForRole`, `identifier` (table C7)
   - [x] Recette : composants conformes à la maquette, clavier seul, contrastes AA, aucun référentiel en dur
 
-### Connexion et mot de passe — 🟡 en cours
+### Connexion et mot de passe — ✅ terminé
 - [x] **2.1** Connexion W16 et redirection (requiert API-1, puis API-L2 pour la résolution C7 complète) · `feature/lot2-connexion` · PR #35
   - [x] W16 `/connexion` (`IdentifierInput`, `PasswordInput`, erreurs par code)
   - [x] Choix « Mot de passe oublié ? » (`Modal`), liens vers reprise et inscription
@@ -49,17 +49,17 @@ Statut : 🟡 en cours · Prochaine tâche : 2.2 (après API-L2) · Prérequis :
   - [x] Parcours Playwright : connexion des trois rôles du jeu de démo, `next` externe ignoré, apprenant sur `/parent` redirigé, déconnexion
   - [x] Recette : trois rôles dans leur espace ; personnel refusé sans indice ; tutoiement côté apprenant
   > La résolution C7 (numéro national, `+`, email) et le refus du personnel sont déjà servis par API-1 (`IdentifierBackend`) : vérifiés en E2E. `ACCOUNT_PENDING_CONSENT` propose « Reprendre mon inscription » (identifiant transmis en mémoire), écran livré en 2.4.
-- [ ] **2.2** Mot de passe oublié et activation enseignant (requiert API-L2) · `feature/lot2-mot-de-passe`
-  - [ ] WL02 `/mot-de-passe-oublie` (`PhoneInput`, bascule email enseignant, réponse neutre)
-  - [ ] WL03 `/mot-de-passe-oublie/code` (`OTPInput`, `ResendCountdown`, canal masqué)
-  - [ ] WL04 `/mot-de-passe-oublie/nouveau` (`NewPasswordFields`)
-  - [ ] WL05 `/mot-de-passe-oublie/termine` (`Celebration`)
-  - [ ] Activation enseignant `/activation/[token]` (variante de WL04, `NewPasswordFields`)
-  - [ ] État du flux en mémoire (`challengeId`, `resetToken`), retour à WL02 au rechargement de WL04
-  - [ ] Sécurité : `Referrer-Policy: no-referrer` sur `/activation/*`, jeton retiré de l'historique, sessions fermées après réinitialisation
-  - [ ] Tests Vitest : bascule SMS/email, erreurs OTP, concordance
-  - [ ] Parcours Playwright : reset parent par SMS puis connexion et ancienne session invalidée ; reset enseignant par email ; numéro inconnu → même réponse ; 3 codes faux → `OTP_TOO_MANY_ATTEMPTS` ; activation par Mailpit puis lien réutilisé → `INVITATION_INVALID`
-  - [ ] Recette : vouvoiement partout ; aucune règle « Différent de l'ancien » ; aucun compte à rebours figé
+- [x] **2.2** Mot de passe oublié et activation enseignant (requiert API-L2) · `feature/lot2-mot-de-passe`
+  - [x] WL02 `/mot-de-passe-oublie` (`PhoneInput`, bascule email enseignant, réponse neutre)
+  - [x] WL03 `/mot-de-passe-oublie/code` (`OTPInput`, `ResendCountdown`, canal masqué)
+  - [x] WL04 `/mot-de-passe-oublie/nouveau` (`NewPasswordFields`)
+  - [x] WL05 `/mot-de-passe-oublie/termine` (`Celebration`)
+  - [x] Activation enseignant `/activation/[token]` (variante de WL04, `NewPasswordFields`)
+  - [x] État du flux en mémoire (`challengeId`, `resetToken`), retour à WL02 au rechargement de WL04
+  - [x] Sécurité : `Referrer-Policy: no-referrer` sur `/activation/*`, jeton retiré de l'historique, sessions fermées après réinitialisation
+  - [x] Tests Vitest : bascule SMS/email, erreurs OTP, concordance
+  - [x] Parcours Playwright : reset parent par SMS puis connexion et ancienne session invalidée ; reset enseignant par email ; numéro inconnu → même réponse ; 3 codes faux → `OTP_TOO_MANY_ATTEMPTS` ; activation par Mailpit puis lien réutilisé → `INVITATION_INVALID`
+  - [x] Recette : vouvoiement partout ; aucune règle « Différent de l'ancien » ; aucun compte à rebours figé
 
 ### Inscription apprenant — ⬜ à faire
 - [ ] **2.3** Inscription apprenant W01-W06, W19 (requiert API-L2) · `feature/lot2-inscription-apprenant`

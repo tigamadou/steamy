@@ -13,10 +13,10 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | Écran | Nom | Lot | Parcours | Test e2e |
 | --- | --- | --- | --- | --- |
 | `WL01` | Accueil | 1 |  |  |
-| `WL02` | Mot de passe oublié | 2 |  |  |
-| `WL03` | Code OTP | 2 |  |  |
-| `WL04` | Nouveau mot de passe | 2 |  |  |
-| `WL05` | Réinitialisé ✓ | 2 |  |  |
+| `WL02` | Mot de passe oublié | 2 | Mot de passe oublié parent (SMS) et enseignant (email), réponse neutre | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
+| `WL03` | Code OTP | 2 | Code par SMS et par email, essais épuisés | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
+| `WL04` | Nouveau mot de passe | 2 | Nouveau mot de passe, rechargement → WL02, sessions fermées | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
+| `WL05` | Réinitialisé ✓ | 2 | Réinitialisé puis connexion | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL06` | Projets & Parcours | 1 |  |  |
 | `WL07` | Boutique de kits | 1 |  |  |
 | `WL08` | Ateliers | 1 |  |  |

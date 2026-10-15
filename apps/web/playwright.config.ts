@@ -21,6 +21,8 @@ export default defineConfig({
     {
       // Plus petit écran visé par la définition de « terminé » (360 px)
       name: "mobile",
+      // Parcours qui consomment une donnée unique du jeu de démo (invitation) : joués une seule fois, sur « bureau »
+      grepInvert: /@donnees-uniques/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 360, height: 760 },
