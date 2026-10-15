@@ -1,8 +1,14 @@
 from django.apps import apps
-from django.contrib import admin
+from django.conf import settings
+from django.contrib import admin, messages
+from django.db import transaction
+from django.shortcuts import redirect
+from django.utils import timezone
+from django.utils.translation import ngettext
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
-from .models import AuditLog, PlatformSettings
+from .models import Announcement, AuditLog, PlatformSettings
+from .tasks import broadcast_announcement
 
 #: Modèles gelés ou remplacés par la refonte, retirés de l'admin (LOT-6 6.1) : l'ancien catalogue `courses`
 #: (dont `Path`), remplacé par `catalog` (API-L1).
@@ -30,7 +36,10 @@ unregister_frozen(admin.site, FROZEN_MODELS)
 
 @admin.register(PlatformSettings)
 class PlatformSettingsAdmin(admin.ModelAdmin):
-    """Singleton (WAD14) : une seule ligne, ni ajout ni suppression."""
+    """
+    Singleton (WAD14) : une seule ligne, ni ajout ni suppression ; la liste ouvre la fiche. Bornes et formats validés
+    par le modèle. Les réglages sont relus à chaque usage (`PlatformSettings.load()`) : aucun cache à invalider.
+    """
 
     fieldsets = (
         (
@@ -51,13 +60,81 @@ class PlatformSettingsAdmin(admin.ModelAdmin):
             {"fields": ("summative_retry_cooldown_seconds", "dropout_threshold_days")},
         ),
         ("Gamification (C8)", {"fields": ("points_scale", "rank_thresholds")}),
+        ("Messagerie (S10)", {"fields": ("sms_provider",)}),
     )
+    readonly_fields = ("sms_provider",)
+
+    @admin.display(description="Fournisseur SMS actif")
+    def sms_provider(self, obj):
+        """Choisi par l'environnement (`SMS_PROVIDER`, ADR 0002), pas depuis l'admin."""
+        return settings.SMS_PROVIDER
+
+    def changelist_view(self, request, extra_context=None):
+        if not self.has_view_or_change_permission(request):
+            return super().changelist_view(request, extra_context)
+        return redirect("admin:core_platformsettings_change", PlatformSettings.load().pk)
 
     def has_add_permission(self, request):
         return not PlatformSettings.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(Announcement)
+class AnnouncementAdmin(admin.ModelAdmin):
+    """Annonces (WAD14) : diffusées une fois, en notification (D7), puis figées."""
+
+    list_display = ("title", "audience", "starts_at", "ends_at", "broadcast_at", "recipients")
+    list_filter = ("audience",)
+    search_fields = ("title", "body")
+    fields = ("title", "body", "audience", "url", "starts_at", "ends_at")
+    readonly_fields = ("created_by", "broadcast_at", "recipients")
+    actions = ["broadcast"]
+
+    def get_fields(self, request, obj=None):
+        return self.fields + self.readonly_fields if obj else self.fields
+
+    def has_change_permission(self, request, obj=None):
+        if obj is not None and obj.broadcast_at is not None:
+            return False
+        return super().has_change_permission(request, obj)
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+    @admin.action(description="Diffuser en notification", permissions=["change"])
+    def broadcast(self, request, queryset):
+        now = timezone.now()
+        ready = [
+            a for a in queryset if a.broadcast_at is None and (a.ends_at is None or a.ends_at > now)
+        ]
+        for announcement in ready:
+            transaction.on_commit(lambda pk=announcement.pk: broadcast_announcement.delay(pk))
+        self.message_user(
+            request,
+            ngettext(
+                "%d annonce en cours de diffusion.",
+                "%d annonces en cours de diffusion.",
+                len(ready),
+            )
+            % len(ready),
+            messages.SUCCESS,
+        )
+        skipped = len(queryset) - len(ready)
+        if skipped:
+            self.message_user(
+                request,
+                ngettext(
+                    "%d annonce ignorée (déjà diffusée ou terminée).",
+                    "%d annonces ignorées (déjà diffusées ou terminées).",
+                    skipped,
+                )
+                % skipped,
+                messages.WARNING,
+            )
 
 
 @admin.register(AuditLog)
