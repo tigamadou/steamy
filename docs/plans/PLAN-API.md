@@ -381,7 +381,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > infra). Polices : DejaVu de l'image en attendant Nunito (ADR 0005, « Suites »). Reportés : lecture du
   > certificat par le parent lié (endpoints parent, API-L4) ; droits du Support sur `learning.certificate` dans la
   > matrice des groupes (lot 6).
-- [x] **API-L3a.5** Tableau de bord · `feature/api-l3a-5-dashboard`
+- [x] **API-L3a.5** Tableau de bord · `feature/api-l3a-5-dashboard` · PR #70
   - [x] `GET learning/dashboard/`, `learning/progress/`, `learning/recommendations/`
   - [x] Compteurs du shell dans `accounts/me/`
   - [x] `Category.goals` (objectifs liés, saisis dans l'admin) pour la règle de recommandation ; seed des liens
