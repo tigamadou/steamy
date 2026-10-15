@@ -105,6 +105,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Composant `Error` déclaré dans le schéma OpenAPI (400/401/403/404/409/429)
   - [x] Validateur de mot de passe D25 (`PASSWORD_TOO_WEAK`) ; validateurs Django par défaut retirés
   - [x] Tests : erreurs en français avec `code`
+  - [x] Couverture 100 % (lignes et branches) du code modifié
   > Décisions : `fields` suit §7.1 (`{champ: [{code, message}]}`) au lieu de listes de chaînes ; un appel anonyme sur
   > une route protégée renvoie **401** `NOT_AUTHENTICATED` (`libs/authentication.py`), 403 restant le refus d'un
   > utilisateur connecté (et le CSRF). 409 est déclaré par l'opération qui le renvoie (`error_responses(409)`),

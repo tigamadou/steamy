@@ -70,8 +70,9 @@ def exception_handler(exc, context):
         if isinstance(detail, dict):
             body["fields"] = camelize(_field_errors(detail))
         else:
-            # Erreur sans champ : son propre message, et son code s'il est au catalogue.
-            items = detail if isinstance(detail, list) else [detail]
+            # Erreur sans champ (DRF la range toujours en liste) : son propre message, et son code s'il est au
+            # catalogue.
+            items = detail
             body["message"] = " ".join(str(item) for item in items)
             codes = {_error_code(item) for item in items}
             if len(codes) == 1 and (code := codes.pop()) in CATALOG:
