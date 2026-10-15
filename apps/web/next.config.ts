@@ -13,10 +13,15 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   // Liens à jeton (SMS de consentement, email d'invitation) : le jeton ne fuit pas vers un site tiers par le Referer
   async headers() {
-    return ["/consentement/:path*", "/activation/:path*"].map((source) => ({
-      source,
-      headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
-    }));
+    return [
+      ...["/consentement/:path*", "/activation/:path*"].map((source) => ({
+        source,
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      })),
+      // Seules iframes admises : le lecteur Vimeo (ADR 0004, point 5). Les pages qui l'intègrent gardent la
+      // politique de référent par défaut, dont dépend la restriction de domaine de Vimeo.
+      { source: "/:path*", headers: [{ key: "Content-Security-Policy", value: "frame-src https://player.vimeo.com" }] },
+    ];
   },
   partialPrefetching: true,
   turbopack: {
