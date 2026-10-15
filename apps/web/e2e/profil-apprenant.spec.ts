@@ -32,8 +32,8 @@ test("W10 → W15 : l'apprenant choisit son mot de passe, complète son profil e
   await expect(page.getByText("Inscription · étape 4/4")).toBeVisible();
   await expect(page.getByText(/majuscule|pas trop évident/i)).toHaveCount(0);
   await axe(page);
-  await page.getByLabel(/^Mot de passe/).fill("Robot2026x");
-  await page.getByLabel(/^Confirme ton mot de passe/).fill("Robot2026x");
+  await page.getByRole("textbox", { name: /^Mot de passe/ }).fill("Robot2026x");
+  await page.getByRole("textbox", { name: /^Confirme ton mot de passe/ }).fill("Robot2026x");
   await page.getByRole("button", { name: "Valider mon mot de passe" }).click();
 
   await expect(page).toHaveURL("/inscription/apprenant/profil/infos");
@@ -88,7 +88,7 @@ test("W10 → W15 : l'apprenant choisit son mot de passe, complète son profil e
   await page.getByRole("button", { name: "Se déconnecter" }).click();
   await expect(page).toHaveURL("/connexion");
   await page.getByRole("textbox", { name: /Identifiant ou numéro/ }).fill(username);
-  await page.getByLabel(/^Mot de passe/).fill("Robot2026x");
+  await page.getByRole("textbox", { name: /^Mot de passe/ }).fill("Robot2026x");
   await page.getByRole("button", { name: "Se connecter" }).click();
   await expect(page).toHaveURL("/apprenant");
 });
