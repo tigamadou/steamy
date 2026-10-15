@@ -112,7 +112,7 @@ class ConsentRequestViewSet(
     filter_backends = []
     lookup_value_regex = r"\d+"
     #: Actions ouvertes sans connexion, et leur plafond (S9).
-    PUBLIC_THROTTLES = {"create": "signup", "resend": "otp", "preview": "consent-preview"}
+    PUBLIC_THROTTLES = {"create": "signup-step", "resend": "otp", "preview": "consent-preview"}
 
     def get_permissions(self):
         if self.action in self.PUBLIC_THROTTLES:

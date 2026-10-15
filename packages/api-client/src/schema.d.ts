@@ -493,6 +493,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/teacher-invitations/{token}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Lien `/activation/<jeton>` : invitation valable, sinon `INVITATION_INVALID`. */
+        get: operations["auth_teacher_invitations_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/teacher-invitations/{token}/accept/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Crée le compte enseignant (email de l'invitation, rattaché à l'école) et ouvre la session. */
+        post: operations["auth_teacher_invitations_accept_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/username-availability/": {
         parameters: {
             query?: never;
@@ -2610,6 +2644,18 @@ export interface components {
          * @enum {string}
          */
         SubjectEnum: "question" | "paiement" | "livraison" | "changement-parent" | "candidature" | "autre";
+        TeacherActivationRequest: {
+            password: string;
+        };
+        /** @description En-tête de l'écran d'activation : école et email masqué. */
+        TeacherInvitation: {
+            readonly emailMasked: string;
+            firstName: string;
+            lastName: string;
+            schoolName?: string | null;
+            /** Format: date-time */
+            expiresAt: string;
+        };
         TokenRequest: {
             /** @description Jeton du lien SMS /consentement/<jeton> */
             token: string;
@@ -4145,6 +4191,100 @@ export interface operations {
                 };
             };
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_teacher_invitations_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherInvitation"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_teacher_invitations_accept_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeacherActivationRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

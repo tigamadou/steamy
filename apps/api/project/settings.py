@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     "apps.analytics",
     "apps.notifications",
     "apps.referentials",
+    "apps.classrooms",
     "apps.core",
 ]
 
@@ -270,12 +271,17 @@ REST_FRAMEWORK = {
         "user": os.getenv("THROTTLE_USER", "600/min"),
         "login": os.getenv("THROTTLE_LOGIN", "5/min"),
         "login-identifier": os.getenv("THROTTLE_LOGIN_IDENTIFIER", "10/hour"),
+        # Création d'un compte en attente (apprenant) ou d'un défi OTP (parent)
         "signup": os.getenv("THROTTLE_SIGNUP", "5/min"),
+        # Étapes suivantes (demande au parent, mot de passe) : compteur séparé, sinon un parent et son enfant
+        # derrière la même adresse IP (box familiale, salle de classe) s'épuisent mutuellement
+        "signup-step": os.getenv("THROTTLE_SIGNUP_STEP", "20/min"),
         "otp": os.getenv("THROTTLE_OTP", "10/min"),
         "username-availability": os.getenv("THROTTLE_USERNAME_AVAILABILITY", "30/min"),
         "resume": os.getenv("THROTTLE_RESUME", "5/min"),
         "resume-username": os.getenv("THROTTLE_RESUME_USERNAME", "10/hour"),
         "consent-preview": os.getenv("THROTTLE_CONSENT_PREVIEW", "20/min"),
+        "invitation": os.getenv("THROTTLE_INVITATION", "20/min"),
         "password-reset": os.getenv("THROTTLE_PASSWORD_RESET", "5/hour"),
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
         # Formulaires publics (devis, newsletter, contact) : par IP

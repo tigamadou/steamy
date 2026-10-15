@@ -1240,6 +1240,87 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/auth/teacher-invitations/{token}/:
+    get:
+      operationId: auth_teacher_invitations_retrieve
+      description: 'Lien `/activation/<jeton>` : invitation valable, sinon `INVITATION_INVALID`.'
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherInvitation'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/teacher-invitations/{token}/accept/:
+    post:
+      operationId: auth_teacher_invitations_accept_create
+      description: Crée le compte enseignant (email de l'invitation, rattaché à l'école)
+        et ouvre la session.
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeacherActivationRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/auth/username-availability/:
     get:
       operationId: auth_username_availability_retrieve
@@ -6208,6 +6289,37 @@ components:
         * `changement-parent` - Changement de parent
         * `candidature` - Candidature
         * `autre` - Autre
+    TeacherActivationRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+    TeacherInvitation:
+      type: object
+      description: 'En-tête de l''écran d''activation : école et email masqué.'
+      properties:
+        emailMasked:
+          type: string
+          readOnly: true
+        firstName:
+          type: string
+        lastName:
+          type: string
+        schoolName:
+          type: string
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+      - emailMasked
+      - expiresAt
+      - firstName
+      - lastName
     TokenRequest:
       type: object
       properties:

@@ -67,6 +67,30 @@ def test_seed_demo_keeps_data_edited_by_hand_consistent():
     assert User.objects.get(username="lea.adjovi").first_name == "Léa"
 
 
+def test_seed_demo_links_marie_to_lea_and_leaves_a_pending_teacher_invitation():
+    from django.core import mail
+
+    from apps.accounts.models import ParentChildLink
+    from apps.classrooms.models import TeacherInvitation
+    from apps.core.demo import INVITED_TEACHER_EMAIL, KOFFI_EMAIL, LEA_USERNAME, MARIE_PHONE
+
+    call_command("seed_demo")
+    link = ParentChildLink.objects.get(learner__username=LEA_USERNAME)
+    assert (link.parent.phone, link.relationship.code) == (MARIE_PHONE, "mere")
+    koffi = User.objects.get(email=KOFFI_EMAIL)
+    assert koffi.teacher_profile.school.name == "Collège Steamy de Cotonou"
+    invitation = TeacherInvitation.objects.get(email=INVITED_TEACHER_EMAIL)
+    assert invitation.accepted_at is None and invitation.token_hash
+    assert mail.outbox[-1].to == [INVITED_TEACHER_EMAIL]
+    # Activée lors d'un parcours, elle redevient en attente au seed suivant
+    User.objects.create_teacher(INVITED_TEACHER_EMAIL, DEMO_PASSWORD)
+    TeacherInvitation.objects.update(accepted_at=invitation.sent_at)
+    call_command("seed_demo")
+    invitation.refresh_from_db()
+    assert invitation.accepted_at is None
+    assert not User.objects.filter(email=INVITED_TEACHER_EMAIL).exists()
+
+
 def test_catalog_has_published_courses_a_featured_one_a_draft_and_an_empty_category():
     from apps.catalog.models import Category, Course, Mission
 
