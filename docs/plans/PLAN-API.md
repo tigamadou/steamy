@@ -149,6 +149,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Comptes : Léa Adjovi, son parent, un enseignant, un membre du personnel par groupe avec secret TOTP fixe de développement
   - [x] Mots de passe de démo documentés dans `fixtures/README.md`
   - [x] Tests : `seed_demo` deux fois de suite sans doublon
+  - [x] Couverture 100 % (lignes et branches) du code modifié
   > Décisions : jeu dans `apps/core/demo.py` (une fonction `seed_<domaine>` par étape, appelée par `seed_all`) ;
   > comptes Léa Adjovi (`lea.adjovi`), Marie Adjovi (parent, `+229 01 90 00 00 01`), M. Koffi Adékambi (enseignant,
   > d'après les maquettes) et un membre du personnel par groupe (Super-admin superutilisateur) ; mot de passe unique
