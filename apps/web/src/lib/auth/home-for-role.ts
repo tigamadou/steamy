@@ -22,6 +22,12 @@ export const PROFILE_STEP_PATH: Record<ProfileStep, string> = {
   "parent-children": "/inscription/parent/profil/enfants",
 };
 
+/** Écran de bienvenue qui clôt le profil (W15, WP10). */
+export const WELCOME_PATH: Partial<Record<Role, string>> = {
+  learner: "/inscription/apprenant/bienvenue",
+  parent: "/inscription/parent/bienvenue",
+};
+
 /**
  * Où envoyer un utilisateur connecté : l'étape de profil restante s'il en a une (même parcours pour l'enfant créé
  * par son parent, D51), sinon l'espace de son rôle. Sans rôle de persona (personnel), retour à l'accueil.

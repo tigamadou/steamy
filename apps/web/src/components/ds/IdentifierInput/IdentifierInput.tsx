@@ -8,7 +8,7 @@ import { cx } from "@/lib/cx";
 import { controlBoxClasses, useFieldControl } from "../Field";
 import { controlTextClasses } from "../Field/control";
 import { Icon, type IconName } from "../Icon";
-import { DEFAULT_COUNTRY, digitsOnly, flagEmoji, type PhoneCountry } from "../PhoneInput/phone";
+import { DEFAULT_COUNTRY, digitsOnly, flagEmoji, initialCountry, type PhoneCountry } from "../PhoneInput/phone";
 
 export type IdentifierChange = {
   /** Saisie brute. */
@@ -57,9 +57,9 @@ export function IdentifierInput({
 }: IdentifierInputProps) {
   const { invalid: isInvalid, ...a11y } = useFieldControl({ id, invalid, required });
   const [raw, setRaw] = useState(defaultValue);
-  const [code, setCode] = useState(
-    () => countries.find((c) => c.code === defaultCountry)?.code ?? countries[0]?.code ?? "",
-  );
+  // Pays choisi par l'utilisateur, sinon celui par défaut : la liste peut arriver après le premier rendu
+  const [picked, setCode] = useState<string>();
+  const code = picked ?? initialCountry(countries, defaultCountry);
   const kind = identifierKind(raw);
   const country = countries.find((c) => c.code === code);
   // Le pays ne sert qu'à un numéro national : avec « + » ou « 00 », l'indicatif est déjà saisi.

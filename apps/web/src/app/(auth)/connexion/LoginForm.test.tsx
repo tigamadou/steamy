@@ -44,7 +44,7 @@ describe("LoginForm (W16)", () => {
   });
 
   it("connecte avec le numéro normalisé et va vers l'espace du rôle", async () => {
-    login.mockResolvedValue({ ok: true, user: { role: "parent", profileStep: null } });
+    login.mockResolvedValue({ ok: true, data: { role: "parent", profileStep: null } });
     render(<LoginForm next={null} />);
     await submit("0190000001", "Steamy2026");
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/parent"));
@@ -53,7 +53,7 @@ describe("LoginForm (W16)", () => {
   });
 
   it("revient à la page demandée (`next` déjà validé)", async () => {
-    login.mockResolvedValue({ ok: true, user: { role: "learner", profileStep: null } });
+    login.mockResolvedValue({ ok: true, data: { role: "learner", profileStep: null } });
     render(<LoginForm next="/apprenant/catalogue" />);
     await submit("lea.adjovi", "Steamy2026");
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/apprenant/catalogue"));
@@ -65,9 +65,10 @@ describe("LoginForm (W16)", () => {
     ["ACCOUNT_DEACTIVATED", undefined, "Ce compte est désactivé."],
     ["THROTTLED", 30, "Trop de tentatives. Réessaie dans 30 secondes."],
     ["THROTTLED", undefined, "Trop de tentatives. Réessaie dans quelques instants."],
-    ["NETWORK_UNAVAILABLE", undefined, "Message de l'API."],
+    ["NETWORK_UNAVAILABLE", undefined, "Le serveur est injoignable. Vérifie ta connexion internet puis réessaie."],
+    ["PHONE_INVALID", undefined, "Message de l'API."],
   ])("affiche l'erreur %s au tutoiement", async (code, retryAfter, text) => {
-    login.mockResolvedValue({ ok: false, code, message: "Message de l'API.", retryAfter });
+    login.mockResolvedValue({ ok: false, code, message: "Message de l'API.", fields: {}, retryAfter });
     render(<LoginForm next={null} />);
     await submit("lea.adjovi", "mauvais1");
     expect(await screen.findByText(text)).toBeInTheDocument();
@@ -92,6 +93,11 @@ describe("LoginForm (W16)", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Reprendre mon inscription" }));
     expect(setResumeIdentifier).toHaveBeenCalledWith("lea.adjovi");
     expect(router.push).toHaveBeenCalledWith("/inscription/reprendre");
+  });
+
+  it("affiche le message transmis par la page", () => {
+    render(<LoginForm next={null} notice="Vous avez déjà un compte avec ce numéro : connectez-vous." />);
+    expect(screen.getByRole("status")).toHaveTextContent("Vous avez déjà un compte avec ce numéro");
   });
 
   it("propose l'inscription et la reprise, et reste accessible", async () => {

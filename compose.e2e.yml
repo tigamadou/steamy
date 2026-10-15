@@ -22,7 +22,7 @@ services:
       ALLOWED_HOSTS: localhost,127.0.0.1,api,api.steamy.test
       WEB_URL: http://web.steamy.test:3000
       COOKIE_DOMAIN: steamy.test
-      # Les parcours reconnectent les mêmes comptes de démo depuis une seule IP : plafonds de connexion relevés
+      # Tous les parcours partent d'une seule IP et reconnectent les mêmes comptes de démo : plafonds relevés
       # (le throttling lui-même est couvert par les tests de l'API)
       THROTTLE_ANON: 1000/min
       THROTTLE_LOGIN: 1000/min
@@ -30,6 +30,15 @@ services:
       # Connexion du personnel (WAD15) : mêmes comptes reconnectés par plusieurs specs
       THROTTLE_STAFF_LOGIN: 1000/min
       THROTTLE_STAFF_LOGIN_EMAIL: 1000/hour
+      THROTTLE_SIGNUP: 1000/min
+      THROTTLE_SIGNUP_STEP: 1000/min
+      THROTTLE_OTP: 1000/min
+      THROTTLE_USERNAME_AVAILABILITY: 1000/min
+      THROTTLE_RESUME: 1000/min
+      THROTTLE_RESUME_USERNAME: 1000/hour
+      THROTTLE_CONSENT_PREVIEW: 1000/min
+      THROTTLE_INVITATION: 1000/min
+      THROTTLE_PASSWORD_RESET: 1000/hour
       # Formulaires publics (devis, contact, newsletter) : 10/heure par IP en production, épuisé par les reprises
       THROTTLE_PUBLIC_FORM: 1000/hour
     networks:
