@@ -9,7 +9,7 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 1 (après fusion des PR #47 à #51) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 1 (après fusion des PR #47 à #50 et #58) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
 ### Étape 1.0 · Socle front — ✅ terminé
 - [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
@@ -95,7 +95,7 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 1 (après f
   - [x] `WL07` `/boutique` (grille `WKKitCard` en mode vitrine, filtres par catégorie dans l'URL, pagination, état vide)
   - [x] Appels `events/`, `events/{slug}/`, `shop/kits/` (`lib/events.ts`, `lib/shop.ts`, `'use cache'`, tags `events` et `shop`)
   - [x] Parcours Playwright « événements » (WL21 → WL23 → CTA visiteur ; événement complet → CTA désactivé ; passé) et boutique (`e2e/evenements-boutique.spec.ts`)
-- [x] **1.5** Pages éditoriales (WL20 requiert API-L1 pour `public/leads/`, le reste sans API) · `feature/lot1-editorial` · PR #36 ; newsletter `feature/lot1-newsletter` · PR #PRNL
+- [x] **1.5** Pages éditoriales (WL20 requiert API-L1 pour `public/leads/`, le reste sans API) · `feature/lot1-editorial` · PR #36 ; newsletter `feature/lot1-newsletter` · PR #58
   - [x] `WL09` `/legal/[doc]` (`Tabs`, `#consentement-parental`, corrections S3, D6, D15, D23, D40)
   - [x] `WL10` `/a-propos`
   - [x] `WL17` `/blog` et `WL18` `/blog/[slug]` (MDX, fil d'Ariane, partage, JSON-LD `Article`, slugs au sitemap)
