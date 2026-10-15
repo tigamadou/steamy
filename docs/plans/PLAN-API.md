@@ -405,7 +405,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Seed enrichi, `make openapi` committé
 
 ### API-L5 · Enseignant et classes — 🟡 en cours
-- [x] **API-L5.1** Classes · `feature/api-l5-1-classes`
+- [x] **API-L5.1** Classes · `feature/api-l5-1-classes` · PR #74
   - [x] `Classroom`, `ClassroomMembership` ; offre de `School` (`offer`, `courses`) ; quotas (`CLASSROOM_QUOTA_EXCEEDED`, D61 ; `LEARNER_QUOTA_EXCEEDED` appliqué aux invitations en API-L5.2)
   - [x] `GET classrooms/school/`, `GET/POST classrooms/` (`COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`), `GET/PATCH classrooms/{id}/`
   - [x] `…/members/`, `POST …/members/{memberId}/remove/`, `GET classrooms/courses/`, `…/{slug}/`
