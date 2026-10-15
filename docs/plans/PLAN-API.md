@@ -94,6 +94,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Front : `apps/web/src/lib/api-browser.ts` et `apps/web/src/app/page.tsx` mis à jour, `packages/api-client` régénéré
   - [x] Retirer le commentaire d'en-tête de `session/views.py` (login par token)
   - [x] Tests : CSRF exigé sur login et logout, throttle de login par IP **et** par identifiant
+  - [x] Couverture 100 % (lignes et branches) du code modifié
   > Décisions : `auth/login/` renvoie `{user, csrfToken}` ; plafond par identifiant `10/hour` (variable
   > `THROTTLE_LOGIN_IDENTIFIER`), en plus de `5/min` par IP. `accounts/me/email/` change l'identifiant de connexion de
   > l'enseignant et l'email de contact du parent (`ParentProfile.email`, S4) ; refusé à l'apprenant (WD17) et au

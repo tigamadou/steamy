@@ -140,3 +140,18 @@ def test_learner_and_staff_cannot_change_email_here(factory):
     resp = client.post(EMAIL_URL, {"password": PASSWORD, "email": "x@ecole.bj"}, format="json")
     assert resp.status_code == 403
     assert resp.json()["code"] == "PERMISSION_DENIED"
+
+
+def test_password_change_applies_the_password_policy():
+    client = client_for(LearnerFactory())
+    resp = client.post(
+        PASSWORD_URL, {"currentPassword": PASSWORD, "newPassword": "abc"}, format="json"
+    )
+    assert resp.status_code == 400 and "newPassword" in resp.json()["fields"]
+
+
+def test_profile_step_of_a_parent_without_profile_and_of_a_teacher():
+    assert client_for(ParentFactory(parent_profile=None)).get(ME).json()["profileStep"] == (
+        "parent-location"
+    )
+    assert client_for(TeacherFactory()).get(ME).json()["profileStep"] is None
