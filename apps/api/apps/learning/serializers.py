@@ -1,7 +1,7 @@
 # apps/learning/serializers.py
 from rest_framework import serializers
 
-from apps.courses.models import Lesson
+from apps.catalog.models import Course, Mission
 from libs.errors import ApiError
 
 from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
@@ -20,9 +20,11 @@ class EnrollmentSerializer(serializers.ModelSerializer):
         course = attrs.get("course")
         if course is None:
             raise serializers.ValidationError({"course": "course is required."})
-        if not course.published:
+        if course.status != Course.Status.PUBLISHED:
             raise serializers.ValidationError({"course": "Ce parcours n'est pas disponible."})
-        if course.price > 0:
+        if course.required_kit_id:
+            raise ApiError("KIT_CODE_REQUIRED")
+        if not course.is_free:
             raise ApiError("PAYMENT_REQUIRED")
         # avoid duplicate enrollment
         if Enrollment.objects.filter(user=user, course=course).exists():
@@ -34,11 +36,11 @@ class EnrollmentSerializer(serializers.ModelSerializer):
 
 class ProgressSerializer(serializers.ModelSerializer):
     enrollment = serializers.PrimaryKeyRelatedField(queryset=Enrollment.objects.all())
-    lesson = serializers.PrimaryKeyRelatedField(queryset=Lesson.objects.all())
+    mission = serializers.PrimaryKeyRelatedField(queryset=Mission.objects.all())
 
     class Meta:
         model = Progress
-        fields = ["id", "enrollment", "lesson", "completed", "score", "updated_at"]
+        fields = ["id", "enrollment", "mission", "completed", "score", "updated_at"]
         read_only_fields = ["id", "updated_at"]
 
     def validate_enrollment(self, enrollment):
@@ -48,14 +50,13 @@ class ProgressSerializer(serializers.ModelSerializer):
         return enrollment
 
     def validate(self, attrs):
-        # sanity: ensure lesson belongs to same course as enrollment
+        # La mission doit appartenir au parcours de l'inscription.
         enrollment = attrs.get("enrollment")
-        lesson = attrs.get("lesson")
-        if enrollment and lesson:
-            lesson_course = lesson.module.course
-            if enrollment.course_id != lesson_course.id:
+        mission = attrs.get("mission")
+        if enrollment and mission:
+            if enrollment.course_id != mission.level.project.course_id:
                 raise serializers.ValidationError(
-                    {"lesson": "This lesson does not belong to the enrollment's course."}
+                    {"mission": "Cette mission n'appartient pas au parcours de l'inscription."}
                 )
         return attrs
 

@@ -1,0 +1,160 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+3 0 obj
+<< /Length 417 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(Le guide du jeune roboticien) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(Steamy - Nous formons les inventeurs de demain.) '
+() '
+(Ce guide t'accompagne dans tes premiers pas en robotique : pas besoin d'un) '
+(laboratoire, seulement de curiosité et d'un peu de matériel.) '
+() '
+(Sommaire : 1. Qu'est-ce qu'un robot ? 2. Les trois briques d'un robot. 3. Ton) '
+(premier projet. 4. Bien travailler.) '
+() '
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Contents 3 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+5 0 obj
+<< /Length 387 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(1. Qu'est-ce qu'un robot ?) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(Un robot est une machine qui perçoit son environnement, prend une décision et) '
+(agit.) '
+() '
+(Un aspirateur automatique, un bras qui trie des colis ou une voiture qui suit) '
+(une ligne sont des robots.) '
+() '
+(Le tien commencera petit : un moteur, une carte et quelques lignes de programme.) '
+() '
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Contents 5 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+7 0 obj
+<< /Length 342 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(2. Les trois briques d'un robot) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(Les capteurs : ils mesurent la lumière, la distance, la température.) '
+() '
+(Le cerveau : une carte programmable qui lit les capteurs et décide.) '
+() '
+(Les actionneurs : moteurs, LED, haut-parleurs. Ils transforment la décision en) '
+(action.) '
+() '
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Contents 7 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+9 0 obj
+<< /Length 455 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(3. Ton premier projet) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(Objectif : un robot qui avance tout droit et s'arrête devant un obstacle.) '
+() '
+(Étape 1 : branche les deux moteurs et fais-les tourner dans le même sens.) '
+() '
+(Étape 2 : ajoute un capteur de distance à l'avant.) '
+() '
+(Étape 3 : programme l'arrêt quand la distance passe sous 10 cm.) '
+() '
+(Teste, observe, corrige : c'est ainsi que travaillent les ingénieurs.) '
+() '
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Contents 9 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+11 0 obj
+<< /Length 374 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(4. Bien travailler) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(Débranche toujours l'alimentation avant de modifier un circuit.) '
+() '
+(Note ce que tu changes : tu retrouveras plus vite ce qui a marché.) '
+() '
+(Demande de l'aide à un adulte pour les outils coupants ou chauds.) '
+() '
+(Envie d'aller plus loin ? Découvre les parcours guidés sur Steamy.) '
+() '
+ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Contents 11 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+13 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R 12 0 R] /Count 5 >>
+endobj
+14 0 obj
+<< /Title (Le guide du jeune roboticien) /Author (Steamy) >>
+endobj
+15 0 obj
+<< /Type /Catalog /Pages 13 0 R >>
+endobj
+xref
+0 16
+0000000000 65535 f 
+0000000009 00000 n 
+0000000106 00000 n 
+0000000208 00000 n 
+0000000676 00000 n 
+0000000813 00000 n 
+0000001251 00000 n 
+0000001388 00000 n 
+0000001781 00000 n 
+0000001918 00000 n 
+0000002424 00000 n 
+0000002562 00000 n 
+0000002988 00000 n 
+0000003127 00000 n 
+0000003211 00000 n 
+0000003288 00000 n 
+trailer
+<< /Size 16 /Root 15 0 R /Info 14 0 R >>
+startxref
+3339
+%%EOF

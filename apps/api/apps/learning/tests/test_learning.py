@@ -3,8 +3,8 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.accounts.tests.factories import LearnerFactory, StaffFactory, TeacherFactory
-from apps.courses.models import Course, Lesson, Module
+from apps.accounts.tests.factories import LearnerFactory, StaffFactory
+from apps.catalog.tests.factories import CourseFactory, MissionFactory
 from apps.learning.models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
 
 User = get_user_model()
@@ -13,10 +13,9 @@ User = get_user_model()
 @pytest.mark.django_db
 def test_enrollment_create_sets_user_and_prevents_duplicates():
     client = APIClient()
-    teacher = TeacherFactory(email="t@example.com")
     student = LearnerFactory()
 
-    course = Course.objects.create(title="C1", slug="c1", author=teacher, published=True)
+    course = CourseFactory(slug="c1")
 
     client.force_authenticate(user=student)
     url = reverse("enrollment-list")
@@ -37,20 +36,18 @@ def test_enrollment_create_sets_user_and_prevents_duplicates():
 @pytest.mark.django_db
 def test_progress_create_and_owner_permission():
     client = APIClient()
-    teacher = TeacherFactory(email="t2@example.com")
     student = LearnerFactory()
     other = LearnerFactory()
 
-    course = Course.objects.create(title="CourseP", slug="course-p", author=teacher, published=True)
-    module = Module.objects.create(course=course, title="M1", order=0)
-    lesson = Lesson.objects.create(module=module, title="L1", order=0)
+    mission = MissionFactory()
+    course = mission.level.project.course
     enrollment = Enrollment.objects.create(user=student, course=course)
 
     client.force_authenticate(user=student)
     url = reverse("progress-list")
     payload = {
         "enrollment": enrollment.id,
-        "lesson": lesson.id,
+        "mission": mission.id,
         "completed": True,
         "score": "85.00",
     }
@@ -59,7 +56,7 @@ def test_progress_create_and_owner_permission():
         f"expected 201 creating progress, got {resp.status_code}: {resp.content}"
     )
     progress_id = resp.json().get("id")
-    assert Progress.objects.filter(id=progress_id, enrollment=enrollment, lesson=lesson).exists()
+    assert Progress.objects.filter(id=progress_id, enrollment=enrollment, mission=mission).exists()
 
     # Another user (not owner, not admin) should not be able to patch this progress
     client.force_authenticate(user=other)
@@ -82,12 +79,11 @@ def test_progress_create_and_owner_permission():
 @pytest.mark.django_db
 def test_certificate_is_visible_to_its_owner_only():
     client = APIClient()
-    teacher = TeacherFactory(email="t3@example.com")
     student = LearnerFactory()
     other = LearnerFactory()
     admin = StaffFactory(email="admin@example.com")
 
-    course = Course.objects.create(title="Ccert", slug="ccert", author=teacher, published=True)
+    course = CourseFactory(slug="ccert")
     enrollment = Enrollment.objects.create(user=student, course=course)
     cert = Certificate.objects.create(enrollment=enrollment, score="90.00")
 
@@ -111,10 +107,9 @@ def test_certificate_is_visible_to_its_owner_only():
 def test_attempt_is_graded_by_server_and_cannot_be_regraded():
     """S8 : le score vient du serveur, et il n'y a plus de correction manuelle."""
     client = APIClient()
-    teacher = TeacherFactory(email="tq@example.com")
     student = LearnerFactory()
 
-    course = Course.objects.create(title="Cquiz", slug="cquiz", author=teacher, published=True)
+    course = CourseFactory(slug="cquiz")
     Enrollment.objects.create(user=student, course=course)
     quiz = Quiz.objects.create(course=course, title="Final Quiz", pass_score="50.0")
     q1 = Question.objects.create(quiz=quiz, text="Q1", kind="mcq", weight="1.0")
@@ -146,9 +141,8 @@ def test_attempt_is_graded_by_server_and_cannot_be_regraded():
 
 @pytest.mark.django_db
 def test_quiz_choices_never_expose_the_answer_key():
-    teacher = TeacherFactory(email="t9@example.com")
     student = LearnerFactory()
-    course = Course.objects.create(title="Cq", slug="cq", author=teacher, published=True)
+    course = CourseFactory(slug="cq")
     quiz = Quiz.objects.create(course=course, title="Q")
     q1 = Question.objects.create(quiz=quiz, text="Q1", kind="mcq", weight="1.0")
     Choice.objects.create(question=q1, text="Good", is_correct=True)
@@ -162,3 +156,37 @@ def test_quiz_choices_never_expose_the_answer_key():
     Enrollment.objects.create(user=student, course=course)
     body = client.get("/api/learning/quizzes/").content.decode()
     assert "Good" in body and "isCorrect" not in body and "is_correct" not in body
+
+
+@pytest.mark.django_db
+def test_enrollment_is_refused_on_a_draft_course_and_progress_on_a_foreign_mission():
+    student = LearnerFactory()
+    client = APIClient()
+    client.force_authenticate(user=student)
+
+    draft = CourseFactory(draft=True)
+    resp = client.post(reverse("enrollment-list"), {"course": draft.id}, format="json")
+    assert resp.status_code == 400 and not Enrollment.objects.exists()
+
+    enrollment = Enrollment.objects.create(user=student, course=CourseFactory())
+    resp = client.post(
+        reverse("progress-list"),
+        {"enrollment": enrollment.id, "mission": MissionFactory().id, "completed": True},
+        format="json",
+    )
+    assert resp.status_code == 400 and "mission" in resp.json()["fields"]
+
+
+@pytest.mark.django_db
+def test_progress_is_named_and_staff_reads_every_quiz():
+    mission = MissionFactory(title="Brancher un moteur")
+    enrollment = Enrollment.objects.create(
+        user=LearnerFactory(), course=mission.level.project.course
+    )
+    progress = Progress.objects.create(enrollment=enrollment, mission=mission)
+    assert str(progress).endswith("Brancher un moteur (pending)")
+
+    Quiz.objects.create(course=enrollment.course, title="Q")
+    client = APIClient()
+    client.force_authenticate(user=StaffFactory())
+    assert client.get("/api/learning/quizzes/").json()["count"] == 1

@@ -1,0 +1,108 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+3 0 obj
+<< /Length 252 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(Scratch : 10 mini-projets) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(Scratch est un langage de programmation par blocs, gratuit, pour apprendre à) '
+(coder en t'amusant.) '
+() '
+(Chaque mini-projet se réalise en moins d'une heure.) '
+() '
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595 842] /Contents 3 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+5 0 obj
+<< /Length 358 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(Projets 1 à 5) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(1. Le chat qui danse : boucles et costumes.) '
+() '
+(2. Le labyrinthe : déplacements aux flèches et détection des murs.) '
+() '
+(3. L'histoire animée : messages entre personnages.) '
+() '
+(4. Le quiz : variables et conditions.) '
+() '
+(5. Le piano : un son par touche du clavier.) '
+() '
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595 842] /Contents 5 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+7 0 obj
+<< /Length 322 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(Projets 6 à 10) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(6. L'attrape-fruits : clones et score.) '
+() '
+(7. Le chronomètre : capteur de temps.) '
+() '
+(8. Le dessin automatique : le stylo de Scratch.) '
+() '
+(9. Le jeu de mémoire : listes.) '
+() '
+(10. Ton propre jeu : combine ce que tu as appris !) '
+() '
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595 842] /Contents 7 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+9 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R] /Count 3 >>
+endobj
+10 0 obj
+<< /Title (Scratch : 10 mini-projets) /Author (Steamy) >>
+endobj
+11 0 obj
+<< /Type /Catalog /Pages 9 0 R >>
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000009 00000 n 
+0000000106 00000 n 
+0000000208 00000 n 
+0000000511 00000 n 
+0000000647 00000 n 
+0000001056 00000 n 
+0000001192 00000 n 
+0000001565 00000 n 
+0000001701 00000 n 
+0000001770 00000 n 
+0000001844 00000 n 
+trailer
+<< /Size 12 /Root 11 0 R /Info 10 0 R >>
+startxref
+1894
+%%EOF
