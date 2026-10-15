@@ -15,9 +15,10 @@ from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 
 from apps.accounts import children as service
+from apps.accounts import deletion as deletion_service
 from apps.accounts import signup as signup_service
 from apps.accounts.fields import PasswordField
-from apps.accounts.models import Gender, ParentChildLink, User
+from apps.accounts.models import DeletionRequest, Gender, ParentChildLink, User
 from apps.accounts.profile import ProfileStep, profile_step
 from apps.referentials.models import Disability, Relationship, SchoolGrade
 from apps.referentials.serializers import (
@@ -31,10 +32,20 @@ from apps.referentials.serializers import (
 from libs.errors import ApiError, message_for
 from libs.permissions import IsLearner, IsParent
 
+from .deletion import ChildDeletionSerializer
 from .learner_signup import UsernameField
 from .profiles import age_on, check_birth_date, code_field, locality_field
 
 # --- Lecture ------------------------------------------------------------------------------------
+
+
+class ChildDeletionStateSerializer(serializers.ModelSerializer):
+    """Suppression en cours : à examiner (`pending_parent`) ou programmée (« Supprimé le … », annulable, D54)."""
+
+    class Meta:
+        model = DeletionRequest
+        fields = ("id", "status", "scheduled_for")
+        read_only_fields = fields
 
 
 class ChildSerializer(serializers.ModelSerializer):
@@ -53,6 +64,7 @@ class ChildSerializer(serializers.ModelSerializer):
         help_text="Étape de profil que l'enfant doit encore compléter (W11-W14), null si complet"
     )
     created_at = serializers.DateTimeField(source="date_joined", read_only=True)
+    deletion = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -71,6 +83,7 @@ class ChildSerializer(serializers.ModelSerializer):
             "rank",
             "profile_step",
             "created_at",
+            "deletion",
         )
         read_only_fields = fields
 
@@ -83,6 +96,11 @@ class ChildSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.ChoiceField(choices=ProfileStep.choices, allow_null=True))
     def get_profile_step(self, child) -> str | None:
         return profile_step(child)
+
+    @extend_schema_field(ChildDeletionStateSerializer(allow_null=True))
+    def get_deletion(self, child):
+        deletion = next(iter(child.open_deletions), None)
+        return ChildDeletionStateSerializer(deletion).data if deletion else None
 
 
 class ChildDetailSerializer(ChildSerializer):
@@ -185,7 +203,7 @@ class ChildViewSet(
     """Enfants rattachés au parent connecté."""
 
     permission_classes = [IsParent]
-    http_method_names = ["get", "post", "patch", "head", "options"]
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     filter_backends = []
     lookup_value_regex = r"\d+"
 
@@ -234,6 +252,27 @@ class ChildViewSet(
             request.user, child, serializer.validated_data["password"], request=request
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        methods=["post"], request=ChildDeletionSerializer, responses=ChildDetailSerializer
+    )
+    @extend_schema(methods=["delete"], request=None, responses=ChildDetailSerializer)
+    @action(detail=True, methods=["post", "delete"])
+    def deletion(self, request, pk=None):
+        """
+        WPD09 (`POST`) : compte désactivé aussitôt, anonymisé à J+30 ; valide aussi la demande de l'enfant (WD15).
+        WPD02 (`DELETE`) : « Annuler la suppression », l'enfant peut de nouveau se connecter.
+        """
+        child = self.get_object()
+        if request.method == "DELETE":
+            deletion_service.cancel_child(request.user, child, request=request)
+        else:
+            serializer = ChildDeletionSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            deletion_service.delete_child(
+                request.user, child, **serializer.validated_data, request=request
+            )
+        return Response(ChildDetailSerializer(self.get_queryset().get(pk=child.pk)).data)
 
 
 # --- WD22 · Mon parent --------------------------------------------------------------------------

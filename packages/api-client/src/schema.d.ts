@@ -40,6 +40,30 @@ export interface paths {
         patch: operations["accounts_children_partial_update"];
         trace?: never;
     };
+    "/api/accounts/children/{id}/deletion/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description WPD09 (`POST`) : compte désactivé aussitôt, anonymisé à J+30 ; valide aussi la demande de l'enfant (WD15).
+         *     WPD02 (`DELETE`) : « Annuler la suppression », l'enfant peut de nouveau se connecter.
+         */
+        post: operations["accounts_children_deletion_create"];
+        /**
+         * @description WPD09 (`POST`) : compte désactivé aussitôt, anonymisé à J+30 ; valide aussi la demande de l'enfant (WD15).
+         *     WPD02 (`DELETE`) : « Annuler la suppression », l'enfant peut de nouveau se connecter.
+         */
+        delete: operations["accounts_children_deletion_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/accounts/children/{id}/password-reset/": {
         parameters: {
             query?: never;
@@ -180,6 +204,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/accounts/deletion-requests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Demandes de suppression des enfants du parent connecté (WPD01, WPD09 `?demande=<id>`). */
+        get: operations["accounts_deletion_requests_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/deletion-requests/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Demandes de suppression des enfants du parent connecté (WPD01, WPD09 `?demande=<id>`). */
+        get: operations["accounts_deletion_requests_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/deletion-requests/{id}/approve/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WPD09 : la demande de l'enfant est validée, son compte désactivé puis anonymisé à J+30. */
+        post: operations["accounts_deletion_requests_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/deletion-requests/{id}/refuse/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WPD01 : refus, notifié à l'enfant. */
+        post: operations["accounts_deletion_requests_refuse_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/accounts/me/": {
         parameters: {
             query?: never;
@@ -195,6 +287,29 @@ export interface paths {
         head?: never;
         /** @description WD17, WPD08, WT08 : prénom et nom. Identifiants, rôle et statut ne se modifient pas ici (C12, S1). */
         patch: operations["accounts_me_partial_update"];
+        trace?: never;
+    };
+    "/api/accounts/me/deletion-request/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WD15 : demande en cours (« Demande envoyée à ton parent »), 404 sans demande. */
+        get: operations["accounts_me_deletion_request_retrieve"];
+        put?: never;
+        /**
+         * @description Suppression du compte connecté. Apprenant (WD15) : demande envoyée au parent, retirable tant qu'elle attend.
+         *     Parent (WPD08) : sans enfant rattaché seulement (`CHILDREN_STILL_LINKED`) ; le compte est désactivé et la
+         *     session fermée aussitôt.
+         */
+        post: operations["accounts_me_deletion_request_create"];
+        /** @description WD15 : l'apprenant retire sa demande tant que son parent ne l'a pas validée. */
+        delete: operations["accounts_me_deletion_request_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/accounts/me/email/": {
@@ -1319,6 +1434,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/referentials/deletion-reasons/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_deletion_reasons_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/referentials/disabilities/": {
         parameters: {
             query?: never;
@@ -1603,6 +1734,7 @@ export interface components {
             readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
             /** Format: date-time */
             readonly createdAt: string;
+            readonly deletion: components["schemas"]["ChildDeletionState"] | null;
         };
         /** @description WPD04 : le parent crée le compte et choisit le mot de passe initial. */
         ChildCreateRequest: {
@@ -1617,6 +1749,24 @@ export interface components {
             relationship: string;
             username: string;
             password: string;
+        };
+        /** @description WPD09 : motif obligatoire. */
+        ChildDeletionRequest: {
+            /** @description Motif (référentiel `deletion-reasons`) ; facultatif pour l'apprenant (WD15) */
+            reason: string;
+            /** @default  */
+            note: string;
+        };
+        /** @description Suppression en cours : à examiner (`pending_parent`) ou programmée (« Supprimé le … », annulable, D54). */
+        ChildDeletionState: {
+            readonly id: number;
+            /** Statut */
+            readonly status: components["schemas"]["DeletionRequestStatusEnum"];
+            /**
+             * Anonymisation prévue le
+             * Format: date-time
+             */
+            readonly scheduledFor: string | null;
         };
         /** @description Détail (WPD03, WPD10) : seul écran, avec la modification, où paraissent genre, handicap et localité (D6). */
         ChildDetail: {
@@ -1640,6 +1790,7 @@ export interface components {
             readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
             /** Format: date-time */
             readonly createdAt: string;
+            readonly deletion: components["schemas"]["ChildDeletionState"] | null;
             /** Format: date */
             readonly birthDate: string;
             readonly gender: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
@@ -1803,6 +1954,49 @@ export interface components {
             /** Format: double */
             revenueLast30Days: number;
         };
+        DeletionReason: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+        };
+        /** @description Demande de suppression ; `accountId` : le compte concerné (l'enfant, pour le parent). */
+        DeletionRequest: {
+            readonly id: number;
+            readonly accountId: number;
+            readonly firstName: string;
+            /** Statut */
+            readonly status: components["schemas"]["DeletionRequestStatusEnum"];
+            readonly reason: components["schemas"]["DeletionReason"] | null;
+            /** Précisions */
+            readonly note: string;
+            /** @description Demande faite par l'apprenant lui-même (WD15), à valider par le parent */
+            readonly requestedByLearner: boolean;
+            /**
+             * Anonymisation prévue le
+             * Format: date-time
+             */
+            readonly scheduledFor: string | null;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly resolvedAt: string | null;
+        };
+        DeletionRequestCreateRequest: {
+            /** @description Motif (référentiel `deletion-reasons`) ; facultatif pour l'apprenant (WD15) */
+            reason?: string | null;
+            /** @default  */
+            note: string;
+        };
+        /**
+         * @description * `pending_parent` - En attente du parent
+         *     * `scheduled` - Programmée
+         *     * `refused` - Refusée par le parent
+         *     * `cancelled` - Annulée
+         *     * `done` - Effectuée
+         * @enum {string}
+         */
+        DeletionRequestStatusEnum: "pending_parent" | "scheduled" | "refused" | "cancelled" | "done";
         /**
          * @description * `beginner` - Débutant
          *     * `intermediate` - Intermédiaire
@@ -1866,6 +2060,7 @@ export interface components {
          *     * `CONSENT_REQUEST_EXPIRED` - CONSENT_REQUEST_EXPIRED
          *     * `CONTENT_LOCKED` - CONTENT_LOCKED
          *     * `COURSE_NOT_IN_OFFER` - COURSE_NOT_IN_OFFER
+         *     * `DELETION_ALREADY_RESOLVED` - DELETION_ALREADY_RESOLVED
          *     * `DELIVERY_ZONE_UNAVAILABLE` - DELIVERY_ZONE_UNAVAILABLE
          *     * `DUPLICATE_ROW` - DUPLICATE_ROW
          *     * `EMAIL_TAKEN` - EMAIL_TAKEN
@@ -1918,7 +2113,7 @@ export interface components {
          *     * `VALIDATION_ERROR` - VALIDATION_ERROR
          * @enum {string}
          */
-        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUIRED" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELETION_ALREADY_RESOLVED" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUIRED" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
         FieldError: {
             code: string;
             message: string;
@@ -2289,6 +2484,21 @@ export interface components {
              */
             previous?: string | null;
             results?: components["schemas"]["CourseList"][];
+        };
+        PaginatedDeletionRequestList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["DeletionRequest"][];
         };
         PaginatedEnrollmentList: {
             /** @example 123 */
@@ -3111,6 +3321,123 @@ export interface operations {
             };
         };
     };
+    accounts_children_deletion_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChildDeletionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChildDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_deletion_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_children_password_reset_create: {
         parameters: {
             query?: never;
@@ -3606,6 +3933,229 @@ export interface operations {
             };
         };
     };
+    accounts_deletion_requests_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedDeletionRequestList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_deletion_requests_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionRequest"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_deletion_requests_approve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_deletion_requests_refuse_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_me_retrieve: {
         parameters: {
             query?: never;
@@ -3677,6 +4227,146 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Error"];
                 };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_deletion_request_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionRequest"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_deletion_request_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DeletionRequestCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_deletion_request_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             401: {
                 headers: {
@@ -6850,6 +7540,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Country"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_deletion_reasons_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionReason"][];
                 };
             };
             429: {

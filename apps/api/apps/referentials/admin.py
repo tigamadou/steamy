@@ -30,6 +30,7 @@ for model in (
     models.Disability,
     models.Relationship,
     models.RefusalReason,
+    models.DeletionReason,
 ):
     admin.site.register(
         model,

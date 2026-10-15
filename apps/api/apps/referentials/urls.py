@@ -19,5 +19,10 @@ urlpatterns = [
         views.RefusalReasonListView.as_view(),
         name="referentials-refusal-reasons",
     ),
+    path(
+        "deletion-reasons/",
+        views.DeletionReasonListView.as_view(),
+        name="referentials-deletion-reasons",
+    ),
     path("localities/", views.LocalityListView.as_view(), name="referentials-localities"),
 ]
