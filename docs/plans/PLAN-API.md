@@ -189,7 +189,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > incompatible avec Django 5. Catégories non paginées. Le détail expose la bande-annonce (`trailerVimeoId/Hash`,
   > ADR 0004) et le plan : projets (objectifs, prérequis, matériel), niveaux (`introSummary`), missions (titre,
   > durée, icône), `missionCount`.
-- [x] **API-L1.3** Événements en lecture · `feature/api-l1-3-events` · PR #NUM
+- [x] **API-L1.3** Événements en lecture · `feature/api-l1-3-events` · PR #40
   - [x] App `events` : `SteamyEvent` (§3.4) + admin
   - [x] `GET events/?upcoming=`, `GET events/{slug}/` (`seatsLeft` calculé)
   - [x] Tests : brouillon invisible, aucune écriture publique (matrice d'accès)
