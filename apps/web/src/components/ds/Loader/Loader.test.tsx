@@ -11,6 +11,11 @@ describe("Loader", () => {
     expect(screen.getByRole("status")).toHaveTextContent("On prépare ton parcours…");
   });
 
+  it("empile l'animation au-dessus d'un message mis en avant", () => {
+    render(<Loader stacked label="On prépare ton contenu…" />);
+    expect(screen.getByRole("status")).toHaveClass("flex-col");
+  });
+
   it("ne présente aucune violation d'accessibilité", async () => {
     const { container } = render(<Loader label="Chargement…" />);
     expect(await axe(container)).toHaveNoViolations();
