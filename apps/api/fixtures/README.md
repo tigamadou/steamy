@@ -36,6 +36,10 @@ Léa est inscrite à :
 | Initiation à Scratch | Toutes les missions et tous les quiz réussis |
 | Premiers pas avec Zeti (`premiers-pas-zeti`) | Parcours court du parcours Playwright P1 (1 projet, 1 niveau, 2 missions, formative et sommative) : remis à zéro à chaque seed |
 
+Léa a aussi : un certificat (« Initiation à Scratch ») avec son ticket Steamy Events, des badges, des points (barème
+et paliers **de démonstration**, saisis s'ils sont vides), un streak de 5 jours, deux parcours dans « Mes souhaits »
+(« Construis ton robot Bluetooth », « Capteurs électroniques »).
+
 `make e2e` lance `seed_demo --e2e`, qui ramène le délai entre deux essais d'une sommative ratée à 5 secondes (10 min
 sinon, D32).
 
