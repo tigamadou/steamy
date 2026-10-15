@@ -403,7 +403,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Paiement tardif : honoré si stock disponible, sinon remboursement automatique (C17)
   - [ ] Module `core/pdf.py`, tâche `generate_invoice_pdf`, `GET …/invoice/` (payeur seulement)
   - [ ] Tests : webhook non signé, rejoué, à montant ou devise faux ; double exécution impossible (webhooks concurrents) ; facture refusée à l'apprenant bénéficiaire ; apprenant ne peut pas initier de paiement
-- [x] **API-L3b.3** Boutique · `feature/api-l3b-3-boutique`
+- [x] **API-L3b.3** Boutique · `feature/api-l3b-3-boutique` · PR #82
   - [x] `Cart`/`CartItem`, `DeliveryAddress`, `RestockAlert` (`StockReservation` et `DeliveryZone` : L3b.1)
   - [x] `shop/cart/*`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`
   - [x] Tests : panier par utilisateur, alerte de réassort unique
