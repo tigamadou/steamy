@@ -357,6 +357,21 @@ Réutilisables partout. **Ne pas les traiter comme une zone**, mais comme des é
 | `WX02` | Erreur réseau |
 | `WX03` | Chargement |
 
+### Écrans à concevoir (C18) · en attente de validation · 6 écrans
+
+Écrans absents de la maquette d'origine, dessinés d'après les specs alignées (`docs/SPEC-ECRANS-*.md`) dans des fichiers `screens-<espace>-a-concevoir-web.jsx`. Ils apparaissent en tête de la vue de leur espace dans `App.html`, dans des sections « À valider (C18) », avec leurs états (artboards suffixés : `WD23-vide`, `WPD15-echec`…). **Ne pas les développer avant validation par le produit.** Ils ne sont pas comptés dans les 172 écrans ci-dessus.
+
+| ID | Écran | Fichier | Vue `App.html` |
+| --- | --- | --- | --- |
+| `WL22` | Fiche parcours publique | `screens-public-a-concevoir-web.jsx` | Steamy site |
+| `WL23` | Fiche événement | `screens-public-a-concevoir-web.jsx` | Steamy site |
+| `WL24` | Aide & contact | `screens-public-a-concevoir-web.jsx` | Steamy site |
+| `WD23` | Mes parcours | `screens-apprenant-a-concevoir-web.jsx` | Dashboard |
+| `WPD15` | Demande de paiement (+ états manquants de WPD03, WPD05, WPD06) | `screens-parent-a-concevoir-web.jsx` | Dashboard parent |
+| `WT13` | Créer une classe | `screens-enseignant-a-concevoir-web.jsx` | Dashboard formateur |
+
+Chaque fichier expose une fonction `XxxACSections()` (sur `window`) que le `XxxFlowWeb` de l'espace appelle en tête de son `<DesignCanvas>`. `screens-apprenant-a-concevoir-web.jsx` définit aussi `WDACShell`, l'AppShell apprenant avec la navigation cible de D39 (« Mes parcours » ajouté, « Badges » masqué).
+
 ---
 
 ## 5. Règles métier à porter dans le code

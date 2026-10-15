@@ -2857,6 +2857,8 @@ const dashWebStyle = {
 function DashboardFlowWeb() {
   return (
     <DesignCanvas>
+      {/* Écrans à concevoir (C18) : screens-*-a-concevoir-web.jsx */}
+      {window.LearnerACSections && window.LearnerACSections()}
       <DCSection
         id="dash"
         title="Dashboard apprenant"

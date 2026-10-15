@@ -3609,6 +3609,8 @@ const publicWebStyle = {
 function PublicFlowWeb() {
   return (
     <DesignCanvas>
+      {/* Écrans à concevoir (C18) : screens-*-a-concevoir-web.jsx */}
+      {window.PublicACSections && window.PublicACSections()}
       <DCSection
         id="site-home"
         title="Steamy site · Accueil & présentation"

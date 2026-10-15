@@ -125,8 +125,8 @@
     /* ─── Ombres "candy" (Duolingo-style - élévation marquée bas) ── */
     --shadow-pop-sm: 0 2px 0 rgba(15, 13, 38, 0.08);
     --shadow-pop-md: 0 4px 0 rgba(15, 13, 38, 0.10);
-    --shadow-card: 0 1px 0 rgba(15, 13, 38, 0.04), 0 4px 16px rgba(91, 63, 224, 0.06);
-    --shadow-card-hover: 0 1px 0 rgba(15, 13, 38, 0.06), 0 12px 28px rgba(91, 63, 224, 0.14);
+    --shadow-card: 0 1px 0 rgba(15, 13, 38, 0.04), 0 4px 16px color-mix(in srgb, var(--primary-500) 6%, transparent);
+    --shadow-card-hover: 0 1px 0 rgba(15, 13, 38, 0.06), 0 12px 28px color-mix(in srgb, var(--primary-500) 14%, transparent);
     --shadow-modal: 0 24px 64px rgba(15, 13, 38, 0.24);
     /* ─── Animation ───────────────────────────────────────────────── */
     --ease-out: cubic-bezier(.22, 1, .36, 1);
