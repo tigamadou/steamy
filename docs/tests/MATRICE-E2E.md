@@ -45,16 +45,16 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `W16` | Connexion existant | 2 | Connexion des trois rôles, `next` sûr, personnel refusé, déconnexion | `apps/web/e2e/connexion.spec.ts` |
 | `W18` | Consentement refusé (terminal) | 2 | Refus avec motif, identifiant libéré, délai de 30 jours | `apps/web/e2e/consentement-apprenant.spec.ts` |
 | `W19` | Identifiant déjà utilisé | 2 | Identifiant déjà pris au blur | `apps/web/e2e/inscription-apprenant.spec.ts` |
-| `WP01` | Créer un compte | 2 |  |  |
-| `WP02` | OTP | 2 |  |  |
-| `WP03` | Mot de passe | 2 |  |  |
-| `WP04` | Invitation enfant ? | 2 |  |  |
+| `WP01` | Créer un compte | 2 | Création du compte parent, préremplissage par le lien SMS | `apps/web/e2e/inscription-parent.spec.ts`, `apps/web/e2e/decision-parent.spec.ts` |
+| `WP02` | OTP | 2 | Code SMS, essais épuisés, numéro déjà inscrit (C13) | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP03` | Mot de passe | 2 | Mot de passe du parent | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP04` | Invitation enfant ? | 2 | Demande reçue ? aucune demande, création directe | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP05` | Demande de l'enfant | 2 |  |  |
 | `WP06` | Demande acceptée | 2 |  |  |
-| `WP07` | Profil 1 · localisation | 2 |  |  |
-| `WP08` | Profil 2 · à propos | 2 |  |  |
-| `WP09` | Profil 3 · enfants | 2 |  |  |
-| `WP10` | Bienvenue parent | 2 |  |  |
+| `WP07` | Profil 1 · localisation | 2 | Localisation | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP08` | Profil 2 · à propos | 2 | À propos, tout facultatif | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP09` | Profil 3 · enfants | 2 | Enfants et objectifs | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP10` | Bienvenue parent | 2 | Bienvenue, enfants rattachés puis espace parent | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP11` | Motifs de refus | 2 |  |  |
 | `WP12` | Refus envoyé (terminal) | 2 |  |  |
 | `WD01` | Accueil | 3 |  |  |

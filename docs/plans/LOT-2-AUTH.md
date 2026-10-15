@@ -23,7 +23,7 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 2.6 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
+Statut : 🟡 en cours · Prochaine tâche : 2.7 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
 ### Socle — ✅ terminé
 - [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
@@ -99,19 +99,19 @@ Statut : 🟡 en cours · Prochaine tâche : 2.6 · Prérequis : API-1 (2.0 et 2
   - [x] Recette : pas de « 1 parcours gratuit débloqué » ; règles W10 = D25 ; genre et handicap jamais obligatoires
 
 ### Inscription et décision du parent — ⬜ à faire
-- [ ] **2.6** Inscription parent WP01-WP04, WP07-WP10 (requiert API-L2) · `feature/lot2-inscription-parent`
-  - [ ] WP01 `/inscription/parent` (préremplissage par `consent-requests/preview/`)
-  - [ ] WP02 `/inscription/parent/code` (`OTPInput`, `ResendCountdown`)
-  - [ ] WP03 `/inscription/parent/mot-de-passe`
-  - [ ] WP04 `/inscription/parent/demande` (trois cas : une demande, plusieurs, aucune)
-  - [ ] WP07 `/inscription/parent/profil/localisation`
-  - [ ] WP08 `/inscription/parent/profil/a-propos` (tout facultatif)
-  - [ ] WP09 `/inscription/parent/profil/enfants`
-  - [ ] WP10 `/inscription/parent/bienvenue` (`Celebration`, enfants rattachés)
-  - [ ] `challengeId` en `sessionStorage`, effacé à WP03 ; numéro déjà inscrit : réponse neutre, `existingAccount` → W16 (C13)
-  - [ ] Tests Vitest : WP02 (collage, erreurs, renvoi à 60 s en timers simulés), WP04 (trois cas)
-  - [ ] Parcours Playwright : inscription parent seule → WP10 → `/parent`
-  - [ ] Recette : vouvoiement ; pas de code « 3214 » ni de « 4 règles » ; carte WP10 cohérente avec le jeu D2
+- [x] **2.6** Inscription parent WP01-WP04, WP07-WP10 (requiert API-L2) · `feature/lot2-inscription-parent`
+  - [x] WP01 `/inscription/parent` (préremplissage par `consent-requests/preview/`)
+  - [x] WP02 `/inscription/parent/code` (`OTPInput`, `ResendCountdown`)
+  - [x] WP03 `/inscription/parent/mot-de-passe`
+  - [x] WP04 `/inscription/parent/demande` (trois cas : une demande, plusieurs, aucune)
+  - [x] WP07 `/inscription/parent/profil/localisation`
+  - [x] WP08 `/inscription/parent/profil/a-propos` (tout facultatif)
+  - [x] WP09 `/inscription/parent/profil/enfants`
+  - [x] WP10 `/inscription/parent/bienvenue` (`Celebration`, enfants rattachés)
+  - [x] `challengeId` en `sessionStorage`, effacé à WP03 ; numéro déjà inscrit : réponse neutre, `existingAccount` → W16 (C13)
+  - [x] Tests Vitest : WP02 (collage, erreurs, renvoi à 60 s en timers simulés), WP04 (trois cas)
+  - [x] Parcours Playwright : inscription parent seule → WP10 → `/parent`
+  - [x] Recette : vouvoiement ; pas de code « 3214 » ni de « 4 règles » ; carte WP10 cohérente avec le jeu D2
 - [ ] **2.7** Décision du parent WP05, WP06, WP11, WP12 (requiert API-L2) · `feature/lot2-decision-parent`
   - [ ] Atterrissage `/consentement/[token]` (jeton retiré de l'URL, claim, choix connecté / non connecté)
   - [ ] Composant `ConsentRequestCard` (D20 strict)

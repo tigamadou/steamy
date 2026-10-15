@@ -1,7 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 
 import { uniqueSuffix } from "./api";
-import { extractLink, waitForSms } from "./mailpit";
+import { extractCode, extractLink, waitForSms } from "./mailpit";
 
 // Étapes de l'inscription de l'apprenant rejouées par plusieurs parcours (2.3 à 2.8)
 
@@ -32,4 +32,23 @@ export async function sendConsentRequest(page: Page, phone: string): Promise<URL
   await page.getByRole("button", { name: "Envoyer la demande au parent" }).click();
   await expect(page).toHaveURL("/inscription/apprenant/attente");
   return extractLink(await waitForSms(phone, { since }), "/consentement/");
+}
+
+/** WP01 → WP03 par les écrans : compte parent créé au numéro donné, code lu dans le faux fournisseur SMS. */
+export async function signUpParentThroughScreens(page: Page, phone: string, firstName = "Mariam"): Promise<void> {
+  await expect(page).toHaveURL("/inscription/parent");
+  await page.getByRole("textbox", { name: /^Prénom/ }).fill(firstName);
+  await page.getByRole("textbox", { name: /^Nom/ }).fill("Test");
+  await page.getByRole("textbox", { name: /^Numéro de téléphone/ }).fill(phone.slice(4));
+  await page.getByRole("checkbox", { name: /J'accepte les conditions/ }).check();
+  const since = new Date();
+  await page.getByRole("button", { name: "Recevoir mon code par SMS" }).click();
+  await expect(page).toHaveURL("/inscription/parent/code");
+  const code = extractCode(await waitForSms(phone, { since }));
+  await page.getByLabel("Code à 6 chiffres reçu par SMS").fill(code);
+  await page.getByRole("button", { name: "Vérifier le code" }).click();
+  await expect(page).toHaveURL("/inscription/parent/mot-de-passe");
+  await page.getByRole("textbox", { name: /^Mot de passe/ }).fill("Parent2026x");
+  await page.getByRole("textbox", { name: /^Confirmez votre mot de passe/ }).fill("Parent2026x");
+  await page.getByRole("button", { name: "Valider mon mot de passe" }).click();
 }
