@@ -109,3 +109,76 @@ def test_password_policy_refuses_with_the_pwreq_labels(password, messages):
 def test_django_default_validators_are_removed():
     # « password » serait refusé par CommonPasswordValidator : D25 ne connaît que ses deux règles.
     validate_password("password1")
+
+
+# --- Gestionnaire appelé directement : cas que les vues actuelles ne produisent pas encore ------
+
+
+def handle(exc):
+    from libs.exception_handler import exception_handler
+
+    return exception_handler(exc, {"view": None}).data
+
+
+def test_nested_and_scalar_field_errors_are_formatted():
+    from rest_framework.exceptions import ValidationError as DRFValidationError
+
+    body = handle(
+        DRFValidationError({"items": [{"quantity": ["Trop grand."]}], "kit_slug": "Inconnu."})
+    )
+    assert body["fields"]["items"] == [
+        {"quantity": [{"code": "INVALID", "message": "Trop grand."}]}
+    ]
+    assert body["fields"]["kitSlug"] == [{"code": "INVALID", "message": "Inconnu."}]
+
+
+def test_non_field_error_keeps_its_catalog_code_and_message():
+    from rest_framework.exceptions import ValidationError as DRFValidationError
+
+    body = handle(DRFValidationError("Code incorrect.", code="OTP_INVALID"))
+    assert body == {"code": "OTP_INVALID", "message": "Code incorrect."}
+    generic = handle(DRFValidationError("Autre problème."))
+    assert generic == {"code": "VALIDATION_ERROR", "message": "Autre problème."}
+
+
+def test_django_validation_error_becomes_a_field_error():
+    body = handle(ValidationError({"email": ValidationError("Déjà pris.", code="EMAIL_TAKEN")}))
+    assert body["fields"]["email"] == [{"code": "EMAIL_TAKEN", "message": "Déjà pris."}]
+
+
+def test_api_error_can_point_at_fields():
+    body = handle(ApiError("USERNAME_TAKEN", fields={"user_name": "USERNAME_TAKEN"}))
+    assert body["code"] == "USERNAME_TAKEN"
+    assert body["fields"] == {
+        "userName": [
+            {
+                "code": "USERNAME_TAKEN",
+                "message": "Cet identifiant est déjà associé à un compte Steamy.",
+            }
+        ]
+    }
+
+
+def test_password_policy_help_text_lists_the_pwreq_rules():
+    from apps.accounts.password_validation import PasswordPolicyValidator
+
+    assert PasswordPolicyValidator().get_help_text() == (
+        "Au moins 8 caractères · Au moins une lettre et un chiffre"
+    )
+
+
+def test_error_responses_helper_declares_the_error_component():
+    from libs.schema import ErrorSerializer, error_responses
+
+    assert error_responses(409, 410) == {409: ErrorSerializer, 410: ErrorSerializer}
+
+
+def test_django_permission_denied_and_unexpected_errors():
+    from django.core.exceptions import PermissionDenied
+
+    assert handle(PermissionDenied())["code"] == "PERMISSION_DENIED"
+    body = handle(RuntimeError("détail technique à ne jamais renvoyer"))
+    assert body == {
+        "code": "SERVER_ERROR",
+        "message": "Une erreur est survenue. Réessayez dans quelques instants.",
+    }

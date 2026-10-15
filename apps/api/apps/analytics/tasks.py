@@ -1,5 +1,5 @@
 # apps/analytics/tasks.py
-from datetime import timedelta
+from datetime import UTC, date, datetime, time, timedelta
 
 from celery import shared_task
 from django.db.models import Count, Sum
@@ -20,8 +20,11 @@ def aggregate_daily_stats(day=None):
     """
     if day is None:
         day = (timezone.now() - timedelta(days=1)).date()
-    start = timezone.datetime.combine(day, timezone.datetime.min.time(), tzinfo=timezone.utc)
-    end = timezone.datetime.combine(day, timezone.datetime.max.time(), tzinfo=timezone.utc)
+    elif isinstance(day, str):  # appel planifié : date sérialisée par Celery
+        day = date.fromisoformat(day)
+    # `django.utils.timezone.utc` n'existe plus depuis Django 5 : fuseau UTC de la bibliothèque standard.
+    start = datetime.combine(day, time.min, tzinfo=UTC)
+    end = datetime.combine(day, time.max, tzinfo=UTC)
 
     # 1) views per course (event_type == 'course_view' and entity_type == 'course')
     qs = TrackingEvent.objects.filter(
