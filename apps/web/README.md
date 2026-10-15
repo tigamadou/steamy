@@ -22,7 +22,10 @@ Front Next.js 16 de Steamy (App Router, Cache Components, TypeScript, Tailwind 4
   tests ; retour après connexion par le seul paramètre `?next=`.
 - Site public : `PublicShell` (`src/components/public/`), servi par `app/(public)/layout.tsx` : lien d'évitement,
   `PublicNav` (mega-menu « Ressources », tiroir mobile, emplacement `NavAccount`), `<main id="contenu">`,
-  `PublicFooter`. Contenu éditorial dans `src/content/` (D10).
+  `PublicFooter`.
+- Contenu éditorial (D10) dans `src/content/` : MDX (`@next/mdx`, typographie dans `components/public/mdx.tsx`)
+  exportant `metadata`, recensé par un `index.ts` par dossier (`blog`, `legal`) ; guides PDF dans `public/guides/` ;
+  FAQ et textes de marque en TS. `src/content/content.test.ts` refuse « moins de 16 ans » et tout numéro d'apprenant.
 
 ## États transversaux (WX01-WX03)
 

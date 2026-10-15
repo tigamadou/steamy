@@ -20,4 +20,45 @@ export const site = {
   ],
 } as const;
 
+/** Chiffres vitrine (WL01, WL10) : contenu éditorial, à mettre à jour par le porteur produit (D2, D10). */
+export const stats = [
+  { value: "2024", label: "Création" },
+  { value: "1 000+", label: "Apprenants" },
+  { value: "12", label: "Villes" },
+  { value: "350", label: "Missions" },
+] as const;
+
+/** Page « À propos » (WL10). Équipe : adultes uniquement (D15). */
+export const about = {
+  kicker: "Notre mission",
+  title: "Former les inventeurs de demain",
+  lead: "Steamy rend la robotique, le code et l'IA accessibles à chaque jeune d'Afrique francophone, par la pratique, avec des kits et des Steamy Events.",
+  values: [
+    {
+      emoji: "🛠",
+      title: "Apprendre en faisant",
+      description: "On construit pour de vrai : robots, circuits, programmes.",
+      color: "var(--cat-robotique)",
+    },
+    {
+      emoji: "🌍",
+      title: "Accessible à tous",
+      description: "Paiement Mobile Money, pages légères pour les réseaux lents, prix adaptés au contexte local.",
+      color: "var(--cat-ia)",
+    },
+    {
+      emoji: "🤝",
+      title: "Ensemble",
+      description: "Ateliers Steamy Events et parents impliqués : on apprend mieux ensemble.",
+      color: "var(--amber-500)",
+    },
+  ],
+  team: [
+    { name: "Koffi Adékambi", role: "Fondateur", emoji: "🦉", color: "var(--primary-500)" },
+    { name: "Marie Dossou", role: "Pédagogie", emoji: "🦊", color: "var(--cat-ia)" },
+    { name: "Yann Sossa", role: "Robotique", emoji: "🐯", color: "var(--amber-500)" },
+    { name: "Inès Kpadonou", role: "Événements", emoji: "🐼", color: "var(--cat-code)" },
+  ],
+} as const;
+
 export type SocialNetwork = (typeof site.social)[number]["network"];

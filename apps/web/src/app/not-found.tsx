@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Page introuvable",
 };
 
-/** 404 : URL inconnue (dont les écrans reportés, sans route) ou contenu non publié, dans le shell public. */
+/** 404 d'une URL sans route (dont les écrans reportés), dans le shell public ; `(public)/not-found.tsx` sert `notFound()`. */
 export default function NotFound() {
   return (
     <PublicShell>
