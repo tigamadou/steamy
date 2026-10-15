@@ -38,6 +38,12 @@ async function ready(page: Page, path: string) {
 async function tabTo(page: Page, name: RegExp, max = 30) {
   // La cible peut arriver après un chargement (garde d'étape sous Suspense)
   await page.getByLabel(name).or(page.getByRole("button", { name })).or(page.getByText(name)).first().waitFor();
+  // … et le formulaire hydraté : avant, une frappe dans un champ contrôlé serait perdue
+  await page.waitForFunction(() =>
+    Array.from(document.querySelectorAll("main form")).every((form) =>
+      Object.keys(form).some((key) => key.startsWith("__reactFiber")),
+    ),
+  );
   for (let i = 0; i < max; i += 1) {
     await page.keyboard.press("Tab");
     const label = await page.evaluate(() => {
