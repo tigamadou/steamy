@@ -480,7 +480,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Tests : aucun champ sensible dans les réponses enseignant (clés JSON)
 - [ ] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage`
   - [ ] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
-- [ ] **API-L5.5** Événements de classe · `feature/api-l5-5-evenements-classe`
+- [ ] **API-L5.5** Événements de classe · `feature/api-l5-5-evenements-classe` · PR #84
   - [x] `EventProposal` ; `POST events/{slug}/proposals/` (`EVENT_ALREADY_PROPOSED`)
   - [x] Seed D2 : « Défi robots » déjà proposé à la classe « 4e B »
   - [ ] `GET classrooms/event-applications/` (lecture seule) : attend `EventApplication` (API-L3b.6)
