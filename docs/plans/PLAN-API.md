@@ -85,7 +85,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > y prend déjà `{identifier, password}`. `user/change-password`, `user/change-email` et
   > `public/user/forgot-password-step-*` sont supprimés dès API-1.1 (aucun consommateur) : les deux premiers
   > reviennent en API-1.2 sous `accounts/me/`. `messaging/notifications/` disparaît jusqu'à API-1.4.
-- [x] **API-1.2** Domaine `auth` + `accounts/me/` · `feature/api-1-auth-me` · PR #__
+- [x] **API-1.2** Domaine `auth` + `accounts/me/` · `feature/api-1-auth-me` · PR #17
   - [x] `GET auth/csrf/`, `POST auth/login/` (C7), `POST auth/logout/`
   - [x] `GET accounts/me/` (identité, rôle, statut, `profileStep`, champs personnel ; données du shell avec les référentiels en API-1.5)
   - [x] `POST accounts/me/password/`, `POST accounts/me/email/`
