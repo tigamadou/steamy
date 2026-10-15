@@ -1,0 +1,25 @@
+{% extends "pdf/base.html" %}
+{% block title %}Certificat {{ number }} · {{ course_title }}{% endblock %}
+{% block page %}@page { size: A4 landscape; margin: 16mm; }{% endblock %}
+{% block style %}
+  .frame { border: 3px solid #5B3FE0; border-radius: 12px; padding: 18mm 20mm; height: 150mm; text-align: center; }
+  .brand { font-size: 20pt; }
+  h1 { font-size: 30pt; margin: 10mm 0 4mm; }
+  .learner { font-size: 26pt; font-weight: 800; color: #5B3FE0; margin: 6mm 0; }
+  .course { font-size: 18pt; font-weight: 700; }
+  .badges { margin-top: 8mm; font-size: 11pt; color: #4A4670; }
+  .meta { margin-top: 10mm; font-size: 10pt; color: #6B6890; }
+{% endblock %}
+{% block content %}
+<div class="frame">
+  <div class="brand">STEAMY</div>
+  <h1>Certificat de réussite</h1>
+  <p>Ce certificat est délivré à</p>
+  <p class="learner">{{ learner_name }}</p>
+  <p>pour avoir terminé toutes les missions et réussi toutes les évaluations du parcours</p>
+  <p class="course">{{ course_title }}</p>
+  {% if project_badges %}<p class="badges">Projets validés : {{ project_badges|join:" · " }}</p>{% endif %}
+  <p class="meta">Délivré le {{ issued_on }} · N° {{ number }}</p>
+</div>
+{% endblock %}
+{% block footer %}{{ number }}{% endblock %}

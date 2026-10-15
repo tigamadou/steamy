@@ -30,6 +30,13 @@ class Category(models.Model):
     color = models.CharField(_("couleur"), max_length=7, validators=[validate_color])
     icon = models.CharField(_("icône"), max_length=16, help_text="Emoji affiché sur les cartes")
     order = models.PositiveSmallIntegerField(_("ordre"), default=0, db_index=True)
+    goals = models.ManyToManyField(
+        "referentials.Goal",
+        blank=True,
+        related_name="categories",
+        verbose_name=_("objectifs liés"),
+        help_text="Objectifs d'apprenant (W13) qui font recommander les parcours de cette catégorie",
+    )
 
     class Meta:
         ordering = ["order"]
@@ -344,3 +351,54 @@ class Choice(models.Model):
 
     def __str__(self):
         return self.text[:60]
+
+
+class Badge(models.Model):
+    """Badge attribué par le serveur à la réussite d'un niveau, d'un projet ou d'un parcours (§3.2, D34)."""
+
+    class Kind(models.TextChoices):
+        LEVEL = "level", _("Niveau")
+        PROJECT = "project", _("Projet")
+        COURSE = "course", _("Parcours")
+
+    kind = models.CharField(_("type"), max_length=8, choices=Kind)
+    level = models.OneToOneField(
+        Level, models.CASCADE, null=True, blank=True, related_name="badge", verbose_name=_("niveau")
+    )
+    project = models.OneToOneField(
+        Project,
+        models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="badge",
+        verbose_name=_("projet"),
+    )
+    course = models.OneToOneField(
+        Course,
+        models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="badge",
+        verbose_name=_("parcours"),
+    )
+    label = models.CharField(_("nom"), max_length=80)
+    icon = models.CharField(_("icône"), max_length=16, help_text="Emoji de la médaille")
+    description = models.CharField(_("description"), max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = _("badge")
+        verbose_name_plural = _("badges")
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(
+                    kind="level", level__isnull=False, project__isnull=True, course__isnull=True
+                )
+                | Q(kind="project", project__isnull=False, level__isnull=True, course__isnull=True)
+                | Q(kind="course", course__isnull=False, level__isnull=True, project__isnull=True),
+                name="badge_kind_matches_target",
+                violation_error_message="Le badge se rattache à la cible de son type, et à elle seule.",
+            ),
+        ]
+
+    def __str__(self):
+        return self.label

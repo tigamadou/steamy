@@ -14,6 +14,7 @@ from django.utils import timezone
 from apps.core.audit import audit
 from libs.errors import ApiError
 
+from .backoffice import replace_link
 from .models import ConsentRequest, ParentChildLink, User
 from .signup import hash_token
 
@@ -82,6 +83,8 @@ def accept(consent_id, parent: User, request=None, data=None) -> ConsentRequest:
             from apps.classrooms.joining import join_classroom
 
             join_classroom(consent, parent, data or {})
+        elif consent.replaces_link_id:  # changement de parent (D22) : le lien n'est remplacé qu'ici
+            replace_link(consent, parent)
         else:
             ParentChildLink.objects.create(
                 parent=parent,

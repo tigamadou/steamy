@@ -10,12 +10,12 @@ classes **actives** de l'enseignant, et au parcours de la classe : rien d'un aut
 
 from datetime import timedelta
 
-from django.db.models import Exists, OuterRef, Subquery
+from django.db.models import Exists, OuterRef, Q, Subquery
 from django.utils import timezone
 
 from apps.core.audit import audit
 from apps.core.models import PlatformSettings
-from apps.learning.models import Enrollment, QuizAttempt
+from apps.learning.models import Enrollment, LearnerBadge, QuizAttempt
 from apps.notifications.models import Category
 from apps.notifications.services import notify
 from libs.errors import ApiError
@@ -125,6 +125,31 @@ def filter_attempts(queryset, *, status=None, kind=None, classroom_id=None):
 
 def to_review(teacher):
     return filter_attempts(attempts_of(teacher), status=TO_REVIEW)
+
+
+def course_badges(learner, course) -> list[dict]:
+    """Badges obtenus par l'élève sur ce parcours seulement (niveaux, projets, parcours) ; WT05."""
+    awards = (
+        LearnerBadge.objects.filter(learner=learner)
+        .filter(
+            Q(badge__level__project__course=course)
+            | Q(badge__project__course=course)
+            | Q(badge__course=course)
+        )
+        .select_related("badge")
+        .order_by("awarded_at", "id")
+    )
+    return [
+        {
+            "id": award.badge.pk,
+            "kind": award.badge.kind,
+            "label": award.badge.label,
+            "icon": award.badge.icon,
+            "description": award.badge.description,
+            "awarded_at": award.awarded_at,
+        }
+        for award in awards
+    ]
 
 
 def comment(teacher, seat, body: str, attempt_id=None, request=None) -> TeacherComment:
