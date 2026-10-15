@@ -62,6 +62,15 @@ def test_frozen_models_are_not_in_the_admin():
         assert not admin.site.is_registered(model)
 
 
+def test_unregister_frozen_removes_a_registered_model():
+    from apps.core.models import PlatformSettings
+
+    site = SteamyAdminSite(name="essai")
+    site.register(PlatformSettings)
+    unregister_frozen(site, ["core.PlatformSettings"])
+    assert site._registry == {}
+
+
 def test_unregister_frozen_ignores_deleted_or_unregistered_models():
     site = SteamyAdminSite(name="essai")
     unregister_frozen(site, ["courses.Path", "messaging.Message"])
