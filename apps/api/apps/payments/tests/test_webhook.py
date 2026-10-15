@@ -5,17 +5,16 @@ import json
 import pytest
 from rest_framework.test import APIClient
 
-from apps.accounts.tests.factories import ParentFactory
 from apps.payments.models import Order, Payment
 from apps.payments.providers.fake import SIGNATURE_HEADER, sign
+from apps.payments.tests.factories import OrderFactory
 
 URL = "/api/payments/webhook/fake/"
 
 
 @pytest.fixture
 def order(db):
-    user = ParentFactory()
-    return Order.objects.create(user=user, reference="CM-0001", total=5000, currency="XOF")
+    return OrderFactory(reference="CM-0001", subtotal=5000)
 
 
 def notify(payload, signature=None, raw=None, url=URL):
@@ -39,15 +38,15 @@ def test_valid_notification_marks_order_paid(order):
     resp = notify(valid_payload())
     assert resp.status_code == 200 and resp.json() == {"ok": True}
     order.refresh_from_db()
-    assert order.paid is True
-    assert Payment.objects.get(order=order).success is True
+    assert order.status == Order.Status.PAID
+    assert Payment.objects.get(order=order).status == Payment.Status.SUCCEEDED
 
 
 def test_failed_notification_is_recorded_without_paying(order):
     assert notify(valid_payload(status="failed")).status_code == 200
     order.refresh_from_db()
-    assert order.paid is False
-    assert Payment.objects.get(order=order).success is False
+    assert order.status == Order.Status.PENDING
+    assert Payment.objects.get(order=order).status == Payment.Status.FAILED
 
 
 @pytest.mark.parametrize(
@@ -57,7 +56,7 @@ def test_falsified_amount_or_currency_does_not_pay(order, overrides):
     resp = notify(valid_payload(**overrides))
     assert resp.status_code == 400 and resp.json() == {"ok": False}
     order.refresh_from_db()
-    assert order.paid is False
+    assert order.status == Order.Status.PENDING
     assert not Payment.objects.exists()
 
 
@@ -68,11 +67,11 @@ def test_replayed_notification_is_processed_once(order):
 
 
 def test_transaction_cannot_be_reused_for_another_order(order):
-    other = Order.objects.create(user=order.user, reference="CM-0002", total=5000, currency="XOF")
+    other = OrderFactory(reference="CM-0002", subtotal=5000)
     assert notify(valid_payload()).status_code == 200
     assert notify(valid_payload(reference="CM-0002")).status_code == 400
     other.refresh_from_db()
-    assert other.paid is False
+    assert other.status == Order.Status.PENDING
 
 
 def test_unknown_order_is_rejected(order):
@@ -83,7 +82,7 @@ def test_invalid_signature_is_rejected_without_detail(order):
     resp = notify(valid_payload(), signature="mauvaise-signature")
     assert resp.status_code == 400 and resp.json() == {"ok": False}
     order.refresh_from_db()
-    assert order.paid is False
+    assert order.status == Order.Status.PENDING
 
 
 @pytest.mark.parametrize("raw", [b"pas du json", b"[1, 2]", b"\xff\xfe"])
@@ -114,7 +113,7 @@ def test_fake_provider_webhook_is_closed_when_deployed(order, settings):
     settings.DEPLOYED = True
     assert notify(valid_payload()).status_code == 400
     order.refresh_from_db()
-    assert order.paid is False
+    assert order.status == Order.Status.PENDING
 
 
 def test_events_unrelated_to_a_payment_are_acknowledged(order, monkeypatch):
@@ -135,18 +134,6 @@ def test_internal_error_is_not_leaked(order, monkeypatch):
     assert "confidentiel" not in resp.content.decode()
 
 
-def test_orders_are_read_only_for_clients(order):
-    client = APIClient()
-    client.force_authenticate(order.user)
-    resp = client.post(
-        "/api/payments/orders/",
-        {"items": [{"title": "Parcours", "unit_price": "1", "quantity": 1}]},
-        format="json",
-    )
-    assert resp.status_code == 405
-    assert "providerPayload" not in client.get("/api/payments/payments/").content.decode()
-
-
 def test_concurrent_notification_reuses_the_recorded_transaction(order, monkeypatch):
     """L'autre notification a créé la transaction entre la lecture et l'écriture : on la relit."""
     from django.db import IntegrityError
@@ -161,4 +148,4 @@ def test_concurrent_notification_reuses_the_recorded_transaction(order, monkeypa
     monkeypatch.setattr(Payment.objects, "get_or_create", collide)
     assert notify(valid_payload()).status_code == 200
     order.refresh_from_db()
-    assert order.paid is True
+    assert order.status == Order.Status.PAID

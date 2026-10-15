@@ -28,3 +28,11 @@ def deliver_fake_webhook(provider_tx_id: str, status: str) -> int:
     response = provider_webhook(request, provider_name=FakePaymentProvider.name)
     log.info("Faux webhook %s (%s) : HTTP %s", provider_tx_id, status, response.status_code)
     return response.status_code
+
+
+@shared_task
+def release_expired_reservations() -> int:
+    """Toutes les 5 min : annule les commandes non payées à l'échéance et rend leur stock (D38)."""
+    from .orders import release_expired_orders
+
+    return release_expired_orders()

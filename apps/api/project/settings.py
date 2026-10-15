@@ -294,6 +294,8 @@ REST_FRAMEWORK = {
         "invitation": os.getenv("THROTTLE_INVITATION", "20/min"),
         "password-reset": os.getenv("THROTTLE_PASSWORD_RESET", "5/hour"),
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
+        # Création de commande (réserve du stock) : par utilisateur, ou par IP pour un invité
+        "orders": os.getenv("THROTTLE_ORDERS", "30/hour"),
         # Formulaires publics (devis, newsletter, contact) : par IP
         "public-form": os.getenv("THROTTLE_PUBLIC_FORM", "10/hour"),
     },
@@ -322,6 +324,9 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "ErrorCodeEnum": "libs.errors.ERROR_CODES",
         "RoleEnum": "apps.accounts.models.User.Role",
+        "OrderKindEnum": "apps.payments.models.Order.Kind",
+        "OrderCreateKindEnum": "apps.payments.serializers.ORDER_CREATE_KINDS",
+        "OrderStatusEnum": "apps.payments.models.Order.Status",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
@@ -337,6 +342,8 @@ CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", WEB_URL).sp
 # Paiement Mobile Money (S9, ADR 0003) : faux prestataire pilotable en local, en CI et dans les e2e, FedaPay en
 # staging (bac à sable) et en production. Le faux prestataire refuse de fonctionner si DEPLOYED.
 PAYMENT_PROVIDER = os.getenv("PAYMENT_PROVIDER", "fedapay" if DEPLOYED else "fake")
+# Durée de vie d'une commande non payée, et de son stock réservé (D38)
+ORDER_TTL_MINUTES = int(os.getenv("ORDER_TTL_MINUTES", "30"))
 # Délai (secondes) avant que le faux prestataire poste son webhook : le temps de voir l'écran d'attente (WA04)
 FAKE_PAYMENT_DELAY = int(os.getenv("FAKE_PAYMENT_DELAY", "3"))
 FEDAPAY_SECRET_KEY = os.getenv("FEDAPAY_SECRET_KEY", "")
@@ -494,6 +501,10 @@ CELERY_BEAT_SCHEDULE = {
     "purge-refused-requests": {
         "task": "apps.accounts.tasks.purge_refused_requests",
         "schedule": crontab(minute=30, hour=3),
+    },
+    "release-expired-reservations": {
+        "task": "apps.payments.tasks.release_expired_reservations",
+        "schedule": crontab(minute="*/5"),
     },
 }
 # optional default task time limits

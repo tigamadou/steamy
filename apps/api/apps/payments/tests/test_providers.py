@@ -11,7 +11,6 @@ import requests
 from django.core.exceptions import ImproperlyConfigured
 from django.test import RequestFactory
 
-from apps.accounts.tests.factories import ParentFactory
 from apps.payments.models import Order, Payment
 from apps.payments.providers import (
     Charge,
@@ -25,6 +24,7 @@ from apps.payments.providers import (
 from apps.payments.providers.fake import FakePaymentProvider, outcome_for
 from apps.payments.providers.fedapay import FedaPayProvider, national_number
 from apps.payments.tasks import deliver_fake_webhook
+from apps.payments.tests.factories import OrderFactory
 
 
 def charge(msisdn="+2290197000001", **overrides):
@@ -55,9 +55,7 @@ def initiate(django_capture_on_commit_callbacks):
 
 @pytest.fixture
 def order(db):
-    return Order.objects.create(
-        user=ParentFactory(), reference="CM-0001", total=5000, currency="XOF"
-    )
+    return OrderFactory(reference="CM-0001", subtotal=5000)
 
 
 # --- Sélection ---------------------------------------------------------------------------------
@@ -116,7 +114,7 @@ def test_fake_success_posts_a_signed_webhook_after_commit(order, initiate):
     result = initiate()
     assert result.status == PaymentStatus.PENDING and result.redirect_url is None
     order.refresh_from_db()
-    assert order.paid is True
+    assert order.status == Order.Status.PAID
     payment = Payment.objects.get(order=order)
     assert payment.provider == "fake" and payment.provider_transaction_id == result.provider_tx_id
     assert FakePaymentProvider().fetch_status(result.provider_tx_id) == PaymentStatus.SUCCEEDED
@@ -125,8 +123,8 @@ def test_fake_success_posts_a_signed_webhook_after_commit(order, initiate):
 def test_fake_failure_is_notified_with_a_reason(order, initiate):
     result = initiate("+2290197000002")
     order.refresh_from_db()
-    assert order.paid is False
-    assert Payment.objects.get(order=order).success is False
+    assert order.status == Order.Status.PENDING
+    assert Payment.objects.get(order=order).status == Payment.Status.FAILED
     assert FakePaymentProvider().fetch_status(result.provider_tx_id) == PaymentStatus.FAILED
     payload = FakePaymentProvider().settle(result.provider_tx_id, PaymentStatus.FAILED)
     assert payload["failureReason"]
@@ -147,7 +145,7 @@ def test_fake_webhook_can_be_delivered_later_by_hand(order):
     result = FakePaymentProvider().initiate(charge("+2290197000003"))
     assert deliver_fake_webhook(result.provider_tx_id, "succeeded") == 200
     order.refresh_from_db()
-    assert order.paid is True
+    assert order.status == Order.Status.PAID
 
 
 def test_fake_unknown_transaction(db):

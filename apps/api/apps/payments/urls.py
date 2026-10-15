@@ -2,11 +2,10 @@
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
-from .views import OrderViewSet, PaymentViewSet, provider_webhook
+from .views import OrderViewSet, provider_webhook
 
 router = SimpleRouter()
 router.register(r"orders", OrderViewSet)
-router.register(r"payments", PaymentViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),

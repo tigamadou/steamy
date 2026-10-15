@@ -355,12 +355,29 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`FEDAPAY_MODES`, Celtiis supposé `sbin`) et devises (`FEDAPAY_CURRENCY_IDS`) en réglages, **à confirmer
   > dans le bac à sable** (inconnues 1, 5 et 6 de l'ADR 0003). Statuts FedaPay : `approved`/`transferred` →
   > `succeeded`, `declined`/`canceled`/`expired`/`refunded` → `failed`.
-- [ ] **API-L3b.1** Commandes · `feature/api-l3b-1-commandes`
-  - [ ] `Order`, `OrderItem` refondus (§3.3) ; service `pricing` unique
-  - [ ] `POST payments/orders/` (identifiants et quantités seulement)
-  - [ ] `GET payments/orders/`, `…/{reference}/` (jeton invité haché, `X-Guest-Token`, `kitCodes` visibles du payeur seul)
-  - [ ] L'apprenant ne crée pas de commande (`PARENT_APPROVAL_REQUIRED`)
-  - [ ] Tests : prix envoyé par le client ignoré, jeton invité d'une autre commande refusé
+- [x] **API-L3b.1** Commandes · `feature/api-l3b-1-commandes`
+  - [x] `Order`, `OrderItem` refondus (§3.3) ; service `pricing` unique
+  - [x] `POST payments/orders/` (identifiants et quantités seulement)
+  - [x] `GET payments/orders/`, `…/{reference}/` (jeton invité haché, `X-Guest-Token`) ; ~~`kitCodes` visibles
+    du payeur seul~~ : avec `KitCode` en L3b.4 (le serializer du bénéficiaire, distinct, ne les aura pas)
+  - [x] L'apprenant ne crée pas de commande (`PARENT_APPROVAL_REQUIRED`)
+  - [x] `DeliveryZone`, `StockReservation` et `GET shop/delivery-zones/` (avancés de L3b.3 : le prix et la
+    réservation se font à la commande) ; tâche `release_expired_reservations` (5 min) et commande du même nom
+  - [x] Tests : prix envoyé par le client ignoré, jeton invité d'une autre commande refusé, dernier kit commandé
+    deux fois → un seul succès, stock rendu à l'expiration
+  > Décisions : refonte destructive de `payments` (migrations 0003 à 0005 : anciens modèles supprimés puis
+  > recréés, `Payment` à 4 états et montants entiers compris ; autorisé avant le lancement). Référence
+  > `CMD-XXXXXXXX` (Crockford base32, `secrets`). `POST payments/orders/` : `kind` ∈ `course|kit` (les commandes
+  > d'événement naissent de la candidature, L3b.6), `items[{courseSlug|kitSlug, quantity}]`, `beneficiaryId`
+  > (enfant lié au parent, sinon `NOT_FOUND` sur le champ), `guest{firstName, lastName, phone}` (anonyme, kits
+  > seulement ; ignoré pour un parent), `deliveryAddress{zoneId, recipientName, phone?, city, district?,
+  > addressLine}` figée dans la commande. Codes de champ : `COURSE_FREE` (inscription directe), `KIT_CODE_REQUIRED`,
+  > `ALREADY_PURCHASED` (commande payée pour le même enfant), `DELIVERY_ZONE_UNAVAILABLE`, `OUT_OF_STOCK` (409).
+  > Anonyme sur un parcours → 401 ; enseignant ou personnel → 403. Le jeton invité (`guestToken`, 43 caractères)
+  > n'est rendu qu'à la création ; seule son empreinte SHA-256 est gardée. Stock décrémenté sous verrou des kits
+  > (ordre des identifiants) et rendu à l'expiration (30 min, `ORDER_TTL_MINUTES`), commande `cancelled`.
+  > Throttle `orders` (30/h). Lecture : le payeur voit `deliveryAddress`, le bénéficiaire non. Les URL passent de
+  > `{id}` à `{reference}` ; `GET payments/payments/` disparaît, remplacé par `…/payments/{id}/` en L3b.2.
 - [ ] **API-L3b.2** Paiement et webhook · `feature/api-l3b-2-paiement-webhook`
   - [ ] `Payment` à 4 états ; `POST payments/orders/{reference}/payments/` (`NETWORK_UNAVAILABLE`) ; `GET payments/payments/{id}/`
   - [ ] `POST payments/webhook/{provider}/` durci (signature avant traitement, montant/devise/référence, idempotence)
@@ -370,10 +387,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Module `core/pdf.py`, tâche `generate_invoice_pdf`, `GET …/invoice/` (payeur seulement)
   - [ ] Tests : webhook non signé, rejoué, à montant ou devise faux ; double exécution impossible (webhooks concurrents) ; facture refusée à l'apprenant bénéficiaire ; apprenant ne peut pas initier de paiement
 - [ ] **API-L3b.3** Boutique · `feature/api-l3b-3-boutique`
-  - [ ] `StockReservation`, `Cart`/`CartItem`, `DeliveryZone`, `DeliveryAddress`, `RestockAlert`
-  - [ ] `shop/cart/*`, `GET shop/delivery-zones/`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`
-  - [ ] Tâche `release_expired_reservations` (30 min)
-  - [ ] Tests : dernier kit commandé simultanément → un seul succès, `OUT_OF_STOCK`
+  - [ ] `Cart`/`CartItem`, `DeliveryAddress`, `RestockAlert` (`StockReservation` et `DeliveryZone` : L3b.1)
+  - [ ] `shop/cart/*`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`
+  - [ ] Tests : panier par utilisateur, alerte de réassort unique
 - [ ] **API-L3b.4** Kit Codes · `feature/api-l3b-4-kit-codes`
   - [ ] Génération `STEAMY-XXXX-XXXX` (Crockford base32, `secrets`) à l'exécution post-paiement
   - [ ] `POST payments/kit-codes/redeem/` : normalisation, `KIT_CODE_NOT_COMPATIBLE`, consommation atomique, throttle utilisateur et IP (D35)

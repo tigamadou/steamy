@@ -5,7 +5,7 @@ from rest_framework import serializers
 from apps.catalog.models import Course
 from apps.catalog.serializers import CategorySummarySerializer
 
-from .models import Kit
+from .models import DeliveryZone, Kit
 
 LIST_FIELDS = ("slug", "name", "category", "price", "difficulty", "emoji", "images", "available")
 
@@ -36,3 +36,12 @@ class KitDetailSerializer(KitSerializer):
     def get_compatible_courses(self, kit) -> list[dict]:
         courses = [c for c in kit.compatible_courses.all() if c.status == Course.Status.PUBLISHED]
         return CompatibleCourseSerializer(courses, many=True).data
+
+
+class DeliveryZoneSerializer(serializers.ModelSerializer):
+    country = serializers.CharField(source="country_id", read_only=True)
+
+    class Meta:
+        model = DeliveryZone
+        fields = ("id", "country", "name", "fee", "delay_label")
+        read_only_fields = fields
