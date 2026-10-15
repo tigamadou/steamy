@@ -12,6 +12,7 @@ from apps.accounts.models import ConsentRequest
 from apps.catalog.models import Course, Level, Mission, Project, Quiz
 from apps.catalog.serializers import CategorySummarySerializer
 from apps.learning.models import QuizAttempt
+from apps.learning.serializers import BadgeSerializer
 from apps.referentials.models import Relationship, SchoolGrade
 from apps.referentials.serializers import AvatarSerializer, SchoolGradeSerializer
 
@@ -473,6 +474,10 @@ class LearnerQuerySerializer(serializers.Serializer):
     classroomId = serializers.IntegerField(required=False)
 
 
+class EarnedBadgeSerializer(BadgeSerializer):
+    awarded_at = serializers.DateTimeField()
+
+
 class LearnerFollowUpSerializer(serializers.Serializer):
     """WT05 : l'élève sur le parcours de la classe seulement, sans donnée sensible (D64)."""
 
@@ -485,6 +490,7 @@ class LearnerFollowUpSerializer(serializers.Serializer):
     average_percentage = serializers.IntegerField(
         allow_null=True, help_text="Moyenne des tentatives du parcours (%)"
     )
+    badges = EarnedBadgeSerializer(many=True, help_text="Badges du parcours de la classe")
     attempts = TeacherAttemptSerializer(many=True)
     comments = TeacherCommentSerializer(many=True)
 
@@ -505,7 +511,7 @@ class DropoutSerializer(serializers.Serializer):
     last_activity_at = serializers.DateTimeField()
 
 
-class DashboardSerializer(serializers.Serializer):
+class TeacherDashboardSerializer(serializers.Serializer):
     """WT01 : compteurs, cartes de classes, « À revoir » et « Décrochage » (5 premiers de chaque)."""
 
     classroom_count = serializers.IntegerField()

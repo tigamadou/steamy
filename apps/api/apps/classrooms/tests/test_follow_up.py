@@ -443,3 +443,27 @@ def test_comment_string(world):
         teacher=world["teacher"], learner=world["awa"], classroom=world["classroom"], body="x"
     )
     assert str(note).startswith(f"Commentaire à {world['awa']}")
+
+
+def test_learner_profile_shows_only_the_badges_of_the_classroom_course(world):
+    from apps.catalog.models import Badge
+    from apps.learning.models import LearnerBadge
+
+    w = world
+    level = w["course"].projects.get().levels.order_by("order").first()
+    project = level.project
+    other_course = build_course(projects=1, levels=1, missions=1)
+    badges = [
+        Badge.objects.create(kind="level", level=level, label="Moteurs", icon="⚙️"),
+        Badge.objects.create(kind="project", project=project, label="Robot", icon="🤖"),
+        Badge.objects.create(kind="course", course=w["course"], label="Diplômé", icon="🎓"),
+    ]
+    elsewhere = Badge.objects.create(kind="course", course=other_course, label="Ailleurs", icon="x")
+    for badge in [*badges, elsewhere]:
+        LearnerBadge.objects.create(learner=w["awa"], badge=badge)
+    LearnerBadge.objects.create(learner=w["bio"], badge=badges[0])
+
+    body = w["api"].get(f"{URL}learners/{w['awa'].pk}/").json()
+
+    assert [b["label"] for b in body["badges"]] == ["Moteurs", "Robot", "Diplômé"]
+    assert set(body["badges"][0]) == {"id", "kind", "label", "icon", "description", "awardedAt"}
