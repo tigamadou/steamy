@@ -200,7 +200,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (« 12 – 15 ans », maquette WL23), `seatsReserved` ; contraintes fin > début, date limite ≤ début, places
   > attribuées ≤ capacité. `upcoming=true` : non terminés, du plus proche au plus lointain ; `false` : terminés, du
   > plus récent au plus ancien ; absent : tous, par date. Liste paginée, `Cache-Control: public, max-age=300`.
-- [x] **API-L1.4** Formulaires publics · `feature/api-l1-4-formulaires` · PR #NUM
+- [x] **API-L1.4** Formulaires publics · `feature/api-l1-4-formulaires` · PR #41
   - [x] App `public` : `QuoteRequest` (D13), `Lead` (D14, attestation adulte C12), `ContactMessage` (D17)
   - [x] `POST public/*` anonymes : CSRF, throttle dédié, champ piège, erreurs `fields`
   - [x] Email à l'équipe par Celery
