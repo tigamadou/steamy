@@ -49,6 +49,10 @@ L'école a l'offre « Offre Classe Robotique 2026 » (3 parcours, 120 élèves, 
 | 4ᵉ B · Robotique | Découverte de la robotique | Léa, Yao | Kémi Ahouandjinou en attente (SMS au `+229 01 90 00 00 03` dans Mailpit), Ola Gbaguidi refusée, Tobi Zinsou expirée |
 | 3ᵉ A · Code | Initiation à Scratch | Sèna | — |
 
+Suivi (WT01, WT05, WT07) : la tentative `ko` de Yao et celle de Léa sont « À revoir » ; Koffi a commenté la tentative
+`warn` de Léa (visible par Léa et Marie) ; Sèna n'a rien fait depuis 10 jours et apparaît en décrochage. Le Steamy
+Event « Défi robots à Cotonou » est déjà proposé à la 4ᵉ B.
+
 ## Invitation enseignant en attente
 
 `seed_demo` crée une invitation pour **Nadia Houngbo** (`nadia.houngbo@steamy.test`, même école) et l'envoie :
