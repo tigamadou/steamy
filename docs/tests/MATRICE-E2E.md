@@ -42,7 +42,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `W13` | Objectifs | 2 |  |  |
 | `W14` | Avatar | 2 |  |  |
 | `W15` | Bienvenue | 2 |  |  |
-| `W16` | Connexion existant | 2 |  |  |
+| `W16` | Connexion existant | 2 | Connexion des trois rôles, `next` sûr, personnel refusé, déconnexion | `apps/web/e2e/connexion.spec.ts` |
 | `W18` | Consentement refusé (terminal) | 2 |  |  |
 | `W19` | Identifiant déjà utilisé | 2 |  |  |
 | `WP01` | Créer un compte | 2 |  |  |
@@ -158,7 +158,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WAD12` | Steamy Events (modération) | 6 |  |  |
 | `WAD13` | Équipe & rôles (RBAC) | 6 |  |  |
 | `WAD14` | Paramètres généraux | 6 |  |  |
-| `WAD15` | Connexion admin (2FA) | 6 |  |  |
+| `WAD15` | Connexion admin (2FA) | 6 | Connexion du personnel par TOTP, code faux refusé, index de l'admin | `apps/web/e2e/admin-connexion.spec.ts` |
 | `WX01` | Hors ligne | 1 | Hors ligne → page recouverte, « Réessayer » sans réseau, retour du réseau → rétablie | `apps/web/e2e/socle-public.spec.ts` |
 | `WX02` | Erreur réseau | 1 |  |  |
 | `WX03` | Chargement | 1 |  |  |
