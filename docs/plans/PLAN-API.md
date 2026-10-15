@@ -488,8 +488,11 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `PlatformSettings`, date d'adhésion avant toute activité, parcours terminé exclu). WT10 : `completedCount` par
   > mission, `passRate` par niveau et projet (« missions les plus échouées » : niveaux au plus faible taux),
   > `formativePassRate`, `summativePassRate`. Badges du parcours sur WT05 : avec API-L3a.3.
-- [ ] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage`
-  - [ ] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
+- [x] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage`
+  - [x] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
+  > Décisions : tous les jours à 7 h (heure du Bénin) ; une notification à l'enseignant par élève et par période
+  > d'inactivité (`ClassroomMembership.dropout_notified_at`), lien vers WT05 (`/enseignant/eleves/<id>?classe=<id>`).
+  > Même règle que l'affichage (`follow_up.dropouts`, API-L5.3). Sur le seed, la tâche signale Sèna.
 - [ ] **API-L5.5** Événements de classe · `feature/api-l5-5-evenements-classe` · PR #84
   - [x] `EventProposal` ; `POST events/{slug}/proposals/` (`EVENT_ALREADY_PROPOSED`)
   - [x] Seed D2 : « Défi robots » déjà proposé à la classe « 4e B »
@@ -501,8 +504,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > Reprise : après la fusion d'API-L3b.6, `GET classrooms/event-applications/` (candidatures des élèves actifs des
   > classes de l'enseignant, lecture seule, sans donnée sensible).
 - [ ] **Critères de fin d'API-L5**
-  - [ ] Un enseignant ne peut pas créer de contenu (S5)
-  - [ ] Seed enrichi, `make openapi` committé
+  - [x] Un enseignant ne peut pas créer de contenu (S5)
+  - [x] Seed enrichi, `make openapi` committé
+  - [ ] `GET classrooms/event-applications/` livré (après API-L3b.6) ; badges du parcours sur WT05 (après API-L3a.3)
 
 ### API-L6 · Back-office — ⬜ à faire
 - [x] **API-L6.1** 2FA (D72) · réalisée par LOT-6-ADMIN 6.1 (`feature/lot6-socle-staff`, PR #38)

@@ -173,6 +173,8 @@ class ClassroomMembership(models.Model):
     )
     joined_at = models.DateTimeField(_("a rejoint le"), null=True, blank=True)
     left_at = models.DateTimeField(_("retiré le"), null=True, blank=True)
+    #: Dernière alerte de décrochage envoyée à l'enseignant (D66) : une seule par période d'inactivité.
+    dropout_notified_at = models.DateTimeField(_("décrochage signalé le"), null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
