@@ -10,8 +10,10 @@ import { Field } from "@/components/ds/Field";
 import { IdentifierInput } from "@/components/ds/IdentifierInput";
 import { PasswordInput } from "@/components/ds/PasswordInput";
 import { homeForRole } from "@/lib/auth/home-for-role";
-import { login, type LoginFailure } from "@/lib/auth/login";
+import { errorMessage, type ApiFailure } from "@/lib/api-call";
+import { login } from "@/lib/auth/login";
 import { setResumeIdentifier } from "@/lib/auth/resume-handoff";
+import { submitWith } from "@/lib/form";
 import { useReferential } from "@/lib/use-referential";
 
 import { ForgotPasswordChoice } from "./ForgotPasswordChoice";
@@ -19,10 +21,10 @@ import { ForgotPasswordChoice } from "./ForgotPasswordChoice";
 const HELP_HREF = "/aide?sujet=question#contact";
 
 type FieldErrors = { identifier?: string; password?: string };
-type State = { attempt: number; fields?: FieldErrors; failure?: LoginFailure };
+type State = { attempt: number; fields?: FieldErrors; failure?: ApiFailure };
 
 // Textes de W16 au tutoiement ; le message de l'API ne sert que pour un code sans texte propre (D4).
-function failureMessage(failure: LoginFailure): string {
+function failureMessage(failure: ApiFailure): string {
   switch (failure.code) {
     case "INVALID_CREDENTIALS":
       // Message unique, y compris pour un compte du personnel (C7) : aucun indice sur l'existence du compte
@@ -33,17 +35,13 @@ function failureMessage(failure: LoginFailure): string {
       return "Ce compte est suspendu.";
     case "ACCOUNT_DEACTIVATED":
       return "Ce compte est désactivé.";
-    case "THROTTLED":
-      return failure.retryAfter
-        ? `Trop de tentatives. Réessaie dans ${failure.retryAfter} secondes.`
-        : "Trop de tentatives. Réessaie dans quelques instants.";
     default:
-      return failure.message;
+      return errorMessage(failure, "tu");
   }
 }
 
 /** Formulaire de W16 : un seul écran pour l'apprenant, le parent et l'enseignant (S4). */
-export function LoginForm({ next }: { next: string | null }) {
+export function LoginForm({ next, notice }: { next: string | null; notice?: string }) {
   const router = useRouter();
   const { items: countries = [] } = useReferential("countries");
   const [raw, setRaw] = useState("");
@@ -61,7 +59,7 @@ export function LoginForm({ next }: { next: string | null }) {
     const result = await login(identifier, password);
     if (!result.ok) return { attempt, failure: result };
     // Retour arrière impossible vers la connexion une fois connecté
-    router.replace(next ?? homeForRole(result.user));
+    router.replace(next ?? homeForRole(result.data));
     router.refresh();
     return { attempt };
   }, { attempt: 0 });
@@ -79,7 +77,12 @@ export function LoginForm({ next }: { next: string | null }) {
   };
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-4">
+    <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-4">
+      {notice && (
+        <p role="status" className="rounded-lg bg-info-50 p-4 text-sm font-bold text-info-700">
+          {notice}
+        </p>
+      )}
       <ErrorSummary title="Connexion impossible :" errors={errors} focusKey={state.attempt} />
       {code === "ACCOUNT_PENDING_CONSENT" && (
         <Button variant="outline" onClick={resume}>
