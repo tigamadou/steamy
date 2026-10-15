@@ -1,0 +1,11 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% comment %}
+  Surcharge du thème (django-admin-env-notice → django-admin-interface → Django) : feuille de style du thème
+  « Steamy monochrome » et lien « Pilotage » vers les pages Next.js du back-office (WAD01-WAD05).
+{% endcomment %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static "core/steamy-admin.css" %}">{% endblock %}
+
+{% block userlinks %}{% if pilotage_url %}<a href="{{ pilotage_url }}">Pilotage</a> /{% endif %}
+{{ block.super }}{% endblock %}

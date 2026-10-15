@@ -95,6 +95,11 @@ describe("LoginForm (W16)", () => {
     expect(router.push).toHaveBeenCalledWith("/inscription/reprendre");
   });
 
+  it("affiche le message transmis par la page", () => {
+    render(<LoginForm next={null} notice="Vous avez déjà un compte avec ce numéro : connectez-vous." />);
+    expect(screen.getByRole("status")).toHaveTextContent("Vous avez déjà un compte avec ce numéro");
+  });
+
   it("propose l'inscription et la reprise, et reste accessible", async () => {
     const { container } = render(<LoginForm next={null} />);
     expect(screen.getByRole("link", { name: "Inscris-toi" })).toHaveAttribute("href", "/inscription/type");

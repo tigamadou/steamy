@@ -41,7 +41,7 @@ function failureMessage(failure: ApiFailure): string {
 }
 
 /** Formulaire de W16 : un seul écran pour l'apprenant, le parent et l'enseignant (S4). */
-export function LoginForm({ next }: { next: string | null }) {
+export function LoginForm({ next, notice }: { next: string | null; notice?: string }) {
   const router = useRouter();
   const { items: countries = [] } = useReferential("countries");
   const [raw, setRaw] = useState("");
@@ -78,6 +78,11 @@ export function LoginForm({ next }: { next: string | null }) {
 
   return (
     <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-4">
+      {notice && (
+        <p role="status" className="rounded-lg bg-info-50 p-4 text-sm font-bold text-info-700">
+          {notice}
+        </p>
+      )}
       <ErrorSummary title="Connexion impossible :" errors={errors} focusKey={state.attempt} />
       {code === "ACCOUNT_PENDING_CONSENT" && (
         <Button variant="outline" onClick={resume}>

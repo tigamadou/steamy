@@ -14,6 +14,7 @@ from apps.accounts.tests.factories import (
     StaffFactory,
     TeacherFactory,
 )
+from apps.core.tests.staff import verified_client
 from apps.events.models import SteamyEvent
 
 from .factories import SteamyEventFactory
@@ -137,9 +138,7 @@ def test_constraints(fields):
 def test_admin_pages_are_served(client):
     event = SteamyEventFactory()
     assert str(event) == event.title
-    client.force_login(
-        StaffFactory(is_superuser=True), backend="apps.accounts.backends.StaffBackend"
-    )
+    verified_client(client, is_superuser=True)  # session vérifiée par TOTP (WAD15)
     assert client.get(reverse("admin:events_steamyevent_changelist")).status_code == 200
     assert client.get(reverse("admin:events_steamyevent_add")).status_code == 200
     change = reverse("admin:events_steamyevent_change", args=[event.pk])
