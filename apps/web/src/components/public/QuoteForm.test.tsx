@@ -73,11 +73,11 @@ describe("QuoteForm (WL11)", () => {
       message: "Trois classes de 4e.",
       website: "",
     });
-    expect(screen.getByRole("heading", { name: "Demande envoyée" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Demande envoyée" })).toBeInTheDocument();
     expect(screen.getByText("direction@college.bj")).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Envoyer une autre demande" }));
-    expect(screen.getByLabelText(/Nom de l'établissement/)).toHaveValue("");
+    expect(await screen.findByLabelText(/Nom de l'établissement/)).toHaveValue("");
   });
 
   it("affiche les erreurs par champ de l'API (`fields`)", async () => {
