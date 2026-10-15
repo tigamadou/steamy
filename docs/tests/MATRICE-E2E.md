@@ -162,7 +162,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WX01` | Hors ligne | 1 | Hors ligne → page recouverte, « Réessayer » sans réseau, retour du réseau → rétablie | `apps/web/e2e/socle-public.spec.ts` |
 | `WX02` | Erreur réseau | 1 |  |  |
 | `WX03` | Chargement | 1 |  |  |
-| `WL22` | Fiche parcours publique (variante de WC04 sans contenu des missions) | 1 |  |  |
+| `WL22` | Fiche parcours publique (variante de WC04 sans contenu des missions) | 1 | WL06 → fiche → CTA inscription avec `next` ; sans contenu de mission ni Vimeo ; plan au clavier ; kit requis ; brouillon → 404 | `apps/web/e2e/fiche-parcours.spec.ts` |
 | `WL23` | Fiche événement (publique, réutilisée dans les espaces connectés) | 1 |  |  |
 | `WL24` | Aide & contact (FAQ + formulaire) | 1 |  |  |
 | `WD23` | Mes parcours (liste des inscriptions) | 3 |  |  |

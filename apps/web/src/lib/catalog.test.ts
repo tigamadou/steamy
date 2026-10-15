@@ -6,7 +6,8 @@ const cacheLife = vi.fn();
 const cacheTag = vi.fn();
 vi.mock("next/cache", () => ({ cacheLife, cacheTag }));
 
-const { COURSES_PAGE_SIZE, getCategories, getCourse, getCourses, getHomeCourses } = await import("./catalog");
+const { COURSES_PAGE_SIZE, getCategories, getCourse, getCourseSlugs, getCourses, getHomeCourses } =
+  await import("./catalog");
 
 let routes: Record<string, () => Response>;
 let urls: string[];
@@ -75,5 +76,12 @@ describe("catalogue public", () => {
     routes["/api/catalog/courses/?featured=true&page=1&pageSize=3"] = () => json({ results: three });
     expect(await getHomeCourses()).toEqual(three);
     expect(urls).toHaveLength(1);
+  });
+
+  it("sitemap : tous les slugs, page après page", async () => {
+    routes["/api/catalog/courses/?page=1&pageSize=100"] = () =>
+      json({ next: "http://api.test/x?page=2", results: [course({ slug: "a" })] });
+    routes["/api/catalog/courses/?page=2&pageSize=100"] = () => json({ next: null, results: [course({ slug: "b" })] });
+    expect(await getCourseSlugs()).toEqual(["a", "b"]);
   });
 });
