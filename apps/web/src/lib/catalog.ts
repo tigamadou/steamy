@@ -74,3 +74,18 @@ export async function getHomeCourses(): Promise<Schemas["CourseList"][]> {
   );
   return [...featured, ...popular].slice(0, 3);
 }
+
+/** Slugs de tous les parcours publiés, pour le sitemap. */
+export async function getCourseSlugs(): Promise<string[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("catalog");
+  const slugs: string[] = [];
+  for (let page = 1; ; page += 1) {
+    const { results, hasNext } = await getCourses({ page, pageSize: 100 });
+    slugs.push(...results.map((course) => course.slug));
+    if (!hasNext) {
+      return slugs;
+    }
+  }
+}

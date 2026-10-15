@@ -32,3 +32,40 @@ export function course(overrides: Partial<Schemas["CourseList"]> = {}): Schemas[
 export function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 }
+
+export const COURSE_DETAIL: Schemas["CourseDetail"] = {
+  ...COURSE,
+  slug: "initiation-scratch",
+  title: "Initiation à Scratch",
+  description: "Programme tes premières animations.",
+  outcomes: ["Premiers blocs", "Mini-jeu", 42],
+  audience: "Apprenants de 10 à 17 ans",
+  prerequisites: ["Savoir lire"],
+  certificateEnabled: true,
+  missionCount: 3,
+  projects: [
+    {
+      order: 0,
+      title: "Premiers blocs",
+      levels: [
+        {
+          order: 0,
+          title: "L'interface",
+          missions: [
+            { order: 0, title: "Découvrir l'interface" },
+            { order: 1, title: "Mes personnages" },
+          ],
+        },
+      ],
+    },
+    {
+      order: 1,
+      title: "Mon mini-jeu",
+      levels: [{ order: 0, title: "Le jeu", missions: [{ order: 0, title: "Écran de fin" }] }],
+    },
+  ],
+};
+
+export function courseDetail(overrides: Partial<Schemas["CourseDetail"]> = {}): Schemas["CourseDetail"] {
+  return { ...COURSE_DETAIL, ...overrides };
+}

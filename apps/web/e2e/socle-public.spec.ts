@@ -6,8 +6,8 @@ import { expect, test, type Page } from "@playwright/test";
 // Routes du lot 2 (authentification), pas encore livrées : liste blanche retirée au lot 2.
 const LOT2_ROUTES = ["/connexion", "/inscription", "/inscription/parent"];
 // Pages du lot 1 livrées par les étapes suivantes (1.1, 1.4, 1.6) : chaque étape retire les siennes.
-// Une entrée finissant par « / » couvre les fiches (`/parcours/<slug>` : WL22, étape 1.3).
-const LOT1_A_VENIR = ["/parcours/", "/boutique", "/ecoles", "/evenements", "/aide"];
+// Une entrée finissant par « / » couvre des fiches (`/evenements/<slug>`).
+const LOT1_A_VENIR = ["/boutique", "/ecoles", "/evenements", "/evenements/", "/aide"];
 // Écrans reportés ou fusionnés (S7, S8) : aucune route, aucun lien.
 const NEUTRALISEES = ["/defis", "/communaute", "/tutoriels", "/classements", "/ateliers"];
 

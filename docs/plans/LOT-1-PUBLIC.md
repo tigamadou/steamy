@@ -9,7 +9,7 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 1.3 (WL22), puis 1.4, 1.6 et l'encart newsletter de 1.5 · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : 🟡 en cours · Prochaine tâche : 1.4 (WL21, WL23, WL07), puis 1.6 et l'encart newsletter de 1.5 · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
 ### Étape 1.0 · Socle front — ✅ terminé
 - [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
@@ -81,14 +81,14 @@ Statut : 🟡 en cours · Prochaine tâche : 1.3 (WL22), puis 1.4, 1.6 et l'enca
   - [x] Parcours Playwright « découverte » (accueil → ancre → catalogue → filtre → catégories → catalogue filtré) (`e2e/decouverte.spec.ts`)
   - [x] Recette : aucun chiffre ni catégorie en dur ; les 6 catégories du jeu D2 apparaissent
 
-- [ ] **1.3** Fiche parcours publique WL22 (requiert API-L1 et 1.2) · `feature/lot1-fiche-parcours`
-  - [ ] Route `/parcours/[slug]` (`'use cache'` + `cacheTag('catalog')`, `notFound()` si non publié)
-  - [ ] `generateMetadata`, JSON-LD `Course`, slug ajouté au sitemap
-  - [ ] CTA visiteur (`/inscription?next=…`, `/connexion?next=…`) et mention du kit
-  - [ ] Appel `catalog/courses/{slug}/` sans contenu de mission
-  - [ ] Test API et test Playwright : absence de `vimeoId` / corps de mission dans le HTML
-  - [ ] Test Vitest : plan en accordéon au clavier
-  - [ ] Parcours Playwright : WL06 → WL22 → CTA → URL d'inscription avec retour
+- [x] **1.3** Fiche parcours publique `WL22` (requiert API-L1 et 1.2) · `feature/lot1-fiche-parcours` · PR #PR13
+  - [x] Route `/parcours/[slug]` (`'use cache'` + `cacheTag('catalog')`, `notFound()` si non publié, 404 propre au parcours) ; rendue sous `<Suspense>` à la requête, le slug n'étant pas connu au build
+  - [x] `generateMetadata`, JSON-LD `Course`, slugs ajoutés au sitemap (`sitemap.xml` servi à la requête, pages fixes gardées si l'API ne répond pas)
+  - [x] CTA visiteur (`/inscription?next=…`, `/connexion?next=…`) et mention du kit (« Voir le kit » au lot 3)
+  - [x] Appel `catalog/courses/{slug}/` sans contenu de mission
+  - [x] Test API (API-L1.2, `catalog/tests/test_api.py`) et test Playwright : absence de `vimeoId` / corps de mission dans le HTML
+  - [x] Test Vitest : plan en accordéon (`details`/`summary` focusables) ; Entrée et Espace vérifiés par Playwright
+  - [x] Parcours Playwright : WL06 → WL22 → CTA → URL d'inscription avec retour (`e2e/fiche-parcours.spec.ts`)
 - [ ] **1.4** Événements et boutique (requiert API-L1 et 1.2) · `feature/lot1-evenements-boutique`
   - [ ] WL21 `/evenements` (`EventRow`, prix, état vide)
   - [ ] WL23 `/evenements/[slug]` (`EventDetail` réutilisable, CTA selon l'état, JSON-LD `Event`, slug au sitemap)
