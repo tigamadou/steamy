@@ -1,23 +1,423 @@
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
+"""
+Admin des comptes (API-L6.2) : WAD06-WAD07 (utilisateurs), WAD08 (consentements, modération D15), WAD13 (équipe).
 
-from .models import LearnerProfile, ParentProfile, TeacherProfile, User
+- Les personas ne se créent jamais ici (S1, S5) : `UserAdmin` ne liste que les apprenants, parents et enseignants,
+  sans ajout ni suppression ; rôle, statut et identifiants y sont en lecture seule (D71). Le statut change par les
+  actions *suspendre*, *désactiver*, *réactiver* (motif obligatoire, journalisé).
+- Le personnel, ses groupes et son TOTP sont gérés par le seul Super-admin (`StaffMemberAdmin`).
+- Consentements en suivi seul (D70) : ni ajout, ni modification, ni suppression ; actions *relancer* et *litige*.
+"""
+
+from django import forms
+from django.contrib import admin, messages
+from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
+from django.contrib.auth.forms import UserChangeForm
+from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.translation import ngettext
+
+from apps.core.admin_actions import form_action
+from apps.core.groups import SUPER_ADMIN
+from apps.referentials.models import Relationship
+from libs.errors import ApiError
+from libs.phone import normalize_phone
+
+from . import backoffice
+from .consent import effective_status
+from .models import (
+    ConsentRequest,
+    LearnerProfile,
+    ParentChildLink,
+    ParentProfile,
+    PublicProfileReview,
+    StaffMember,
+    TeacherProfile,
+    User,
+)
+from .otp import client_ip
+from .signup import resend_consent_request
+
+#: Champs sensibles des profils (D6) : visibles avec *view_sensitive_profile* seulement.
+SENSITIVE_FIELDS = ("gender", "disability")
+
+
+class ReadOnlyAdmin(admin.ModelAdmin):
+    """Suivi seul : ni ajout, ni modification, ni suppression ; les écritures passent par des actions."""
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class ReasonForm(forms.Form):
+    reason = forms.CharField(label="Motif", widget=forms.Textarea(attrs={"rows": 3}))
+
+
+class DisputeForm(forms.Form):
+    note = forms.CharField(label="Note du litige", widget=forms.Textarea(attrs={"rows": 3}))
+
+
+class ParentChangeForm(forms.Form):
+    phone = forms.CharField(
+        label="Téléphone du nouveau parent", help_text="Format international, +229…"
+    )
+    relationship = forms.ModelChoiceField(
+        label="Lien de parenté", queryset=Relationship.objects.filter(active=True)
+    )
+
+    def clean_phone(self):
+        phone = normalize_phone(self.cleaned_data["phone"])
+        if not phone:
+            raise forms.ValidationError("Numéro invalide.")
+        return phone
+
+
+# --- Utilisateurs (WAD06, WAD07) ------------------------------------------------------------------
 
 
 @admin.register(User)
-class UserAdmin(DjangoUserAdmin):
-    list_display = ("id", "__str__", "role", "status", "is_staff", "date_joined")
-    list_filter = ("role", "status", "is_staff", "groups")
-    search_fields = ("username", "email", "phone", "first_name", "last_name")
+class UserAdmin(admin.ModelAdmin):
+    list_display = ("__str__", "full_name", "role", "status", "date_joined")
+    list_filter = ("role", "status")
+    search_fields = ("username", "phone", "email", "first_name", "last_name")
     ordering = ("-date_joined",)
-    readonly_fields = ("is_active", "date_joined", "last_login")
-    fieldsets = (
-        (None, {"fields": ("role", "status", "username", "phone", "email", "password")}),
-        ("Identité", {"fields": ("first_name", "last_name")}),
-        ("Personnel", {"fields": ("is_staff", "is_superuser", "groups")}),
-        ("Dates", {"fields": ("is_active", "date_joined", "last_login")}),
+    fields = (
+        "role",
+        "status",
+        "username",
+        "phone",
+        "email",
+        "first_name",
+        "last_name",
+        "parent",
+        "date_joined",
+        "last_login",
     )
-    # Création depuis l'admin : personnel uniquement. Les personas sont créés par leurs flux (S1, S5).
+    readonly_fields = (
+        "role",
+        "status",
+        "username",
+        "phone",
+        "email",
+        "parent",
+        "date_joined",
+        "last_login",
+    )
+    actions = ["suspend", "deactivate", "reactivate"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(is_staff=False)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_deactivate_user_permission(self, request):
+        return request.user.has_perm("accounts.deactivate_user")
+
+    @admin.display(description="Nom")
+    def full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip()
+
+    @admin.display(description="Parent")
+    def parent(self, obj):
+        link = ParentChildLink.objects.filter(learner=obj).select_related("parent").first()
+        if link is None:
+            return "—"
+        url = reverse("admin:accounts_user_change", args=[link.parent_id])
+        return format_html('<a href="{}">{}</a>', url, link.parent.get_full_name())
+
+    def _set_status(self, request, queryset, status, title):
+        def apply(data):
+            changed = sum(
+                backoffice.set_status(user, status, data["reason"], request) for user in queryset
+            )
+            skipped = queryset.count() - changed
+            self.message_user(
+                request,
+                ngettext("%d compte mis à jour.", "%d comptes mis à jour.", changed) % changed,
+                messages.SUCCESS,
+            )
+            if skipped:
+                self.message_user(
+                    request,
+                    ngettext(
+                        "%d compte ignoré (statut incompatible).",
+                        "%d comptes ignorés (statut incompatible).",
+                        skipped,
+                    )
+                    % skipped,
+                    messages.WARNING,
+                )
+
+        return form_action(
+            self,
+            request,
+            queryset,
+            ReasonForm,
+            title=title,
+            intro="Le motif est conservé dans le journal d'audit.",
+            submit_label="Confirmer",
+            apply=apply,
+        )
+
+    @admin.action(description="Suspendre", permissions=["deactivate_user"])
+    def suspend(self, request, queryset):
+        return self._set_status(request, queryset, User.Status.SUSPENDED, "Suspendre des comptes")
+
+    @admin.action(description="Désactiver", permissions=["deactivate_user"])
+    def deactivate(self, request, queryset):
+        return self._set_status(
+            request, queryset, User.Status.DEACTIVATED, "Désactiver des comptes"
+        )
+
+    @admin.action(description="Réactiver", permissions=["deactivate_user"])
+    def reactivate(self, request, queryset):
+        return self._set_status(request, queryset, User.Status.ACTIVE, "Réactiver des comptes")
+
+
+class SensitiveProfileAdmin(admin.ModelAdmin):
+    """Profils : genre et handicap retirés du formulaire sans *view_sensitive_profile* (D6)."""
+
+    list_display = ("user", "created_at")
+    raw_id_fields = ("user",)
+
+    def get_exclude(self, request, obj=None):
+        if request.user.has_perm("accounts.view_sensitive_profile"):
+            return ()
+        return SENSITIVE_FIELDS
+
+
+admin.site.register(LearnerProfile, SensitiveProfileAdmin)
+admin.site.register(ParentProfile, SensitiveProfileAdmin)
+admin.site.register(TeacherProfile, list_display=("user", "created_at"), raw_id_fields=("user",))
+
+
+# --- Consentements et liens (WAD08) ---------------------------------------------------------------
+
+
+@admin.register(ConsentRequest)
+class ConsentRequestAdmin(ReadOnlyAdmin):
+    """Suivi seul (D70) : aucune voie de l'admin ne fait passer une demande à « acceptée » ou « refusée »."""
+
+    list_display = (
+        "child",
+        "age",
+        "origin",
+        "parent_phone",
+        "created_at",
+        "current_status",
+        "disputed_at",
+    )
+    list_filter = ("status", "origin", ("disputed_at", admin.EmptyFieldListFilter))
+    search_fields = ("parent_phone", "learner__username", "subject__last_name")
+    fields = (
+        "origin",
+        "subject",
+        "learner",
+        "requested_by",
+        "parent_phone",
+        "parent",
+        "relationship",
+        "status",
+        "expires_at",
+        "last_sent_at",
+        "refusal_reason",
+        "refusal_note",
+        "resolved_at",
+        "disputed_at",
+        "dispute_note",
+        "replaces_link",
+        "created_at",
+    )
+    readonly_fields = fields
+    actions = ["resend", "flag_dispute"]
+
+    def has_resend_permission(self, request):
+        return request.user.has_perm("accounts.resend")
+
+    def has_flag_dispute_permission(self, request):
+        return request.user.has_perm("accounts.flag_dispute")
+
+    @admin.display(description="Enfant")
+    def child(self, obj):
+        return f"{obj.subject.get('first_name', '')} {obj.subject.get('last_name', '')}".strip()
+
+    @admin.display(description="Âge")
+    def age(self, obj):
+        return obj.subject.get("age")
+
+    @admin.display(description="Statut")
+    def current_status(self, obj):
+        return ConsentRequest.Status(effective_status(obj)).label
+
+    @admin.action(description="Relancer le parent (SMS)", permissions=["resend"])
+    def resend(self, request, queryset):
+        """Mêmes plafonds que la relance de W07 : délai entre deux envois, quotas par numéro et par IP (D24)."""
+        sent = 0
+        for consent in queryset:
+            try:
+                resend_consent_request(consent, client_ip(request))
+            except ApiError as error:
+                self.message_user(request, f"{consent} : {error.detail}", messages.WARNING)
+            else:
+                sent += 1
+        if sent:
+            self.message_user(
+                request,
+                ngettext("%d relance envoyée.", "%d relances envoyées.", sent) % sent,
+                messages.SUCCESS,
+            )
+
+    @admin.action(description="Marquer en litige", permissions=["flag_dispute"])
+    def flag_dispute(self, request, queryset):
+        def apply(data):
+            for consent in queryset:
+                backoffice.flag_dispute(consent, data["note"], request)
+            self.message_user(request, "Litige enregistré.", messages.SUCCESS)
+
+        return form_action(
+            self,
+            request,
+            queryset,
+            DisputeForm,
+            title="Marquer en litige",
+            intro="La demande reste à trancher par le parent ; la note est visible du support.",
+            submit_label="Enregistrer le litige",
+            apply=apply,
+        )
+
+
+@admin.register(ParentChildLink)
+class ParentChildLinkAdmin(ReadOnlyAdmin):
+    list_display = ("learner", "parent", "relationship", "created_at")
+    search_fields = ("learner__username", "parent__phone", "parent__last_name")
+    fields = ("learner", "parent", "relationship", "consent_request", "created_at", "updated_at")
+    readonly_fields = fields
+    actions = ["change_parent"]
+
+    def has_change_parent_permission(self, request):
+        return request.user.has_perm("accounts.change_parent")
+
+    @admin.action(description="Changer de parent (D22)", permissions=["change_parent"])
+    def change_parent(self, request, queryset):
+        """Une demande part vers le nouveau parent ; le lien ne change qu'à son acceptation."""
+        if queryset.count() != 1:
+            self.message_user(request, "Sélectionnez un seul lien.", messages.ERROR)
+            return None
+        link = queryset.get()
+
+        def apply(data):
+            try:
+                backoffice.request_parent_change(link, data["phone"], data["relationship"], request)
+            except ApiError as error:
+                self.message_user(request, error.detail, messages.ERROR)
+            else:
+                self.message_user(
+                    request,
+                    "Demande envoyée au nouveau parent : le lien sera remplacé à son acceptation.",
+                    messages.SUCCESS,
+                )
+
+        return form_action(
+            self,
+            request,
+            queryset,
+            ParentChangeForm,
+            title="Changer de parent",
+            intro="Le nouveau parent reçoit une demande de consentement par SMS. Rien ne change avant son "
+            "acceptation ; l'ancien parent est alors prévenu.",
+            submit_label="Envoyer la demande",
+            apply=apply,
+        )
+
+
+@admin.register(PublicProfileReview)
+class PublicProfileReviewAdmin(admin.ModelAdmin):
+    """Modération a priori de l'affichage public des mineurs (D15) : approuver ou rejeter, rien d'autre."""
+
+    list_display = ("pseudonym", "learner", "avatar", "status", "created_at", "reviewed_by")
+    list_filter = ("status",)
+    search_fields = ("pseudonym", "learner__username")
+    fields = (
+        "learner",
+        "pseudonym",
+        "avatar",
+        "status",
+        "reviewed_by",
+        "reviewed_at",
+        "created_at",
+    )
+    readonly_fields = fields
+    actions = ["approve", "reject"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def _review(self, request, queryset, approve):
+        done = sum(
+            backoffice.review_public_profile(review, approve, request) for review in queryset
+        )
+        self.message_user(
+            request,
+            ngettext("%d affichage modéré.", "%d affichages modérés.", done) % done,
+            messages.SUCCESS,
+        )
+
+    @admin.action(description="Approuver", permissions=["change"])
+    def approve(self, request, queryset):
+        self._review(request, queryset, approve=True)
+
+    @admin.action(description="Rejeter", permissions=["change"])
+    def reject(self, request, queryset):
+        self._review(request, queryset, approve=False)
+
+
+# --- Équipe (WAD13) ----------------------------------------------------------------------------------
+
+
+class StaffMemberForm(UserChangeForm):
+    """Garde-fous : le dernier Super-admin garde son groupe ; personne ne se retire soi-même du groupe."""
+
+    request = None
+
+    def clean_groups(self):
+        groups = self.cleaned_data["groups"]
+        member = self.instance
+        if member.pk is None or groups.filter(name=SUPER_ADMIN).exists():
+            return groups
+        if member.pk == self.request.user.pk and member.groups.filter(name=SUPER_ADMIN).exists():
+            raise forms.ValidationError(
+                "Vous ne pouvez pas vous retirer vous-même du groupe Super-admin."
+            )
+        if backoffice.is_last_super_admin(member):
+            raise forms.ValidationError("Le dernier Super-admin ne peut pas quitter ce groupe.")
+        return groups
+
+
+@admin.register(StaffMember)
+class StaffMemberAdmin(DjangoUserAdmin):
+    form = StaffMemberForm
+    list_display = ("email", "full_name", "staff_groups", "totp", "status", "last_login")
+    list_filter = ("groups", "status")
+    search_fields = ("email", "first_name", "last_name")
+    ordering = ("email",)
+    fieldsets = (
+        (None, {"fields": ("email", "password")}),
+        ("Identité", {"fields": ("first_name", "last_name")}),
+        ("Accès", {"fields": ("groups", "is_superuser", "status")}),
+        ("Dates", {"fields": ("date_joined", "last_login")}),
+    )
     add_fieldsets = (
         (
             None,
@@ -27,13 +427,51 @@ class UserAdmin(DjangoUserAdmin):
             },
         ),
     )
+    readonly_fields = ("is_superuser", "status", "date_joined", "last_login")
     filter_horizontal = ("groups",)
+    actions = ["reset_totp"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(is_staff=True).prefetch_related("groups")
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.request = request
+        return form
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        actions.pop("delete_selected", None)  # suppression fiche par fiche, garde-fous compris
+        return actions
+
+    def has_delete_permission(self, request, obj=None):
+        if obj is not None and (obj.pk == request.user.pk or backoffice.is_last_super_admin(obj)):
+            return False
+        return super().has_delete_permission(request, obj)
 
     def save_model(self, request, obj, form, change):
         if not change:
             obj.role, obj.is_staff = None, True
         super().save_model(request, obj, form, change)
 
+    @admin.display(description="Nom")
+    def full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip()
 
-for profile in (LearnerProfile, ParentProfile, TeacherProfile):
-    admin.site.register(profile, list_display=("user", "created_at"), raw_id_fields=("user",))
+    @admin.display(description="Groupes")
+    def staff_groups(self, obj):
+        return ", ".join(group.name for group in obj.groups.all())
+
+    @admin.display(description="TOTP", boolean=True)
+    def totp(self, obj):
+        return obj.totpdevice_set.filter(confirmed=True).exists()
+
+    @admin.action(description="Réinitialiser le TOTP (ferme les sessions)", permissions=["change"])
+    def reset_totp(self, request, queryset):
+        for staff in queryset:
+            backoffice.reset_totp(staff, request)
+        self.message_user(
+            request,
+            "TOTP réinitialisé : le membre se réenrôle à sa prochaine connexion.",
+            messages.SUCCESS,
+        )

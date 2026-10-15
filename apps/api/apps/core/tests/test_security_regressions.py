@@ -280,9 +280,10 @@ def test_s3_tracking_events_are_write_only_and_not_attributable(user):
 @pytest.mark.parametrize(
     "url", ["/api/analytics/dashboard/summary/", "/api/analytics/export/events/"]
 )
-def test_s3_dashboard_and_export_are_staff_only(user, url):
+def test_s3_dashboard_and_export_are_closed(user, url):
+    """Remplacés par `/api/backoffice/` (session vérifiée par TOTP, D72) : plus accessibles à personne."""
     client = APIClient()
     client.force_authenticate(user)
-    assert client.get(url).status_code == 403
+    assert client.get(url).status_code == 404
     client.force_authenticate(StaffFactory(email="staff@example.com"))
-    assert client.get(url).status_code == 200
+    assert client.get(url).status_code == 404

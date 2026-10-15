@@ -15,7 +15,7 @@ pytestmark = pytest.mark.django_db
 
 
 class Overview(APIView):
-    """Vue factice : le premier endpoint réel, `backoffice/overview/`, arrive avec API-L6.4."""
+    """Vue de test, isolée des routes réelles (`backoffice/overview/`, API-L6.4)."""
 
     permission_classes = [IsStaffVerified]
 
@@ -65,7 +65,6 @@ def test_group_restricted_routes(group, superuser, status):
     assert call(Impact, staff, verified=True).status_code == status
 
 
-@pytest.mark.urls("apps.core.tests.backoffice_urls")
 def test_the_session_opened_by_wad15_is_verified_by_the_api(client):
     """Bout en bout : la session ouverte par WAD15 (cookie `sessionid`) sert à l'API du back-office (D72)."""
     url = "/api/backoffice/overview/"
@@ -76,4 +75,4 @@ def test_the_session_opened_by_wad15_is_verified_by_the_api(client):
     assert (response.status_code, response.json()["code"]) == (403, "OTP_REQUIRED")
     client.logout()
     login(client, staff)
-    assert client.get(url).json() == {"ok": True}
+    assert client.get(url).status_code == 200
