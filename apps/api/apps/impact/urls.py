@@ -8,4 +8,19 @@ urlpatterns = [
     path("overview/", views.OverviewView.as_view(), name="backoffice-overview"),
     path("kpis/", views.KpiListView.as_view(), name="backoffice-kpis"),
     path("kpis/<slug:code>/", views.KpiDetailView.as_view(), name="backoffice-kpi"),
+    path(
+        "impact-reports/<str:period>/",
+        views.ImpactReportView.as_view(),
+        name="backoffice-impact-report",
+    ),
+    path(
+        "impact-reports/<str:period>/values/",
+        views.ImpactReportValuesView.as_view(),
+        name="backoffice-impact-report-values",
+    ),
+    path(
+        "impact-reports/<str:period>/submit/",
+        views.ImpactReportSubmitView.as_view(),
+        name="backoffice-impact-report-submit",
+    ),
 ]

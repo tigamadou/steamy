@@ -1266,6 +1266,161 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/backoffice/impact-reports/{period}/:
+    get:
+      operationId: backoffice_impact_reports_retrieve
+      description: 'WAD04 : lignes du rapport trimestriel (plages, réponses, statuts,
+        sources), figées une fois soumis.'
+      parameters:
+      - in: path
+        name: period
+        schema:
+          type: string
+        required: true
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactReport'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/impact-reports/{period}/submit/:
+    post:
+      operationId: backoffice_impact_reports_submit_create
+      description: 'WAD04 « Soumettre » (*submit_impact_report*) : verrouille et fige
+        le rapport ; idempotent (D74).'
+      parameters:
+      - in: path
+        name: period
+        schema:
+          type: string
+        required: true
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactReport'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/impact-reports/{period}/values/:
+    patch:
+      operationId: backoffice_impact_reports_values_partial_update
+      description: 'WAD05 : brouillon de la saisie manuelle (*enter_kpi_value*) ;
+        `REPORT_LOCKED` après soumission (D74).'
+      parameters:
+      - in: path
+        name: period
+        schema:
+          type: string
+        required: true
+      tags:
+      - backoffice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedValuesInputRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImpactReport'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/backoffice/kpis/:
     get:
       operationId: backoffice_kpis_list
@@ -4946,6 +5101,63 @@ components:
       - start
       - status
       - value
+    ImpactReport:
+      type: object
+      properties:
+        period:
+          type: string
+          description: 2026-t1
+        label:
+          type: string
+          description: T1 2026
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/ImpactReportStatusEnum'
+        submittedAt:
+          type: string
+          format: date-time
+          nullable: true
+        submittedBy:
+          type: string
+          nullable: true
+        entered:
+          type: integer
+          description: Indicateurs manuels renseignés
+        total:
+          type: integer
+          description: Indicateurs manuels
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportRow'
+      required:
+      - dueDate
+      - end
+      - entered
+      - label
+      - period
+      - rows
+      - start
+      - status
+      - submittedAt
+      - submittedBy
+      - total
+    ImpactReportStatusEnum:
+      enum:
+      - draft
+      - submitted
+      type: string
+      description: |-
+        * `draft` - Brouillon
+        * `submitted` - Soumis
     Kit:
       type: object
       properties:
@@ -6691,6 +6903,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CategoryPreferenceRequest'
+    PatchedValuesInputRequest:
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValueEntryRequest'
     Payment:
       type: object
       properties:
@@ -7340,7 +7559,7 @@ components:
           type: string
           format: date
         status:
-          $ref: '#/components/schemas/ReportDeadlineStatusEnum'
+          $ref: '#/components/schemas/ImpactReportStatusEnum'
         entered:
           type: integer
           description: Indicateurs manuels renseignés
@@ -7354,14 +7573,50 @@ components:
       - period
       - status
       - total
-    ReportDeadlineStatusEnum:
-      enum:
-      - draft
-      - submitted
-      type: string
-      description: |-
-        * `draft` - draft
-        * `submitted` - submitted
+    ReportRow:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        group:
+          type: string
+        unit:
+          $ref: '#/components/schemas/KpiUnitEnum'
+        source:
+          $ref: '#/components/schemas/KpiSourceEnum'
+        start:
+          type: string
+          format: date
+          description: Du (plage calculée par le serveur)
+        end:
+          type: string
+          format: date
+          description: Au
+        value:
+          oneOf:
+          - type: number
+          - type: boolean
+          - type: string
+          nullable: true
+          description: Nombre (unités count, fcfa, score), booléen (yes_no) ou texte
+            ; null si absente
+        status:
+          $ref: '#/components/schemas/KpiStatus'
+        note:
+          type: string
+      required:
+      - code
+      - end
+      - group
+      - label
+      - note
+      - source
+      - start
+      - status
+      - unit
+      - value
     RequiredKit:
       type: object
       description: 'Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`.'
@@ -7948,6 +8203,22 @@ components:
           type: boolean
       required:
       - available
+    ValueEntryRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+        value:
+          nullable: true
+          description: Nombre (count, fcfa, score), booléen (yes_no) ou texte ; null
+            efface la saisie
+        note:
+          type: string
+          maxLength: 500
+      required:
+      - code
+      - value
     WebhookAck:
       type: object
       properties:

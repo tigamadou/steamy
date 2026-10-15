@@ -330,6 +330,7 @@ SPECTACULAR_SETTINGS = {
         "PeriodKindEnum": "apps.impact.periods.KINDS",
         "KpiStatusEnum": "apps.impact.status.STATUS_CODES",
         "KpiToneEnum": "apps.impact.status.TONES",
+        "ImpactReportStatusEnum": "apps.impact.models.ImpactReport.Status",
         # `source` des inscriptions garde son nom face à `KpiSourceEnum`
         "SourceEnum": "apps.learning.models.Enrollment.Source",
         "KpiSourceEnum": "apps.impact.models.KpiDefinition.Source",
