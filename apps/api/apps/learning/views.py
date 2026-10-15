@@ -1,7 +1,7 @@
 # apps/learning/views.py
 from rest_framework import filters, mixins, permissions, viewsets
 
-from apps.courses.views import enrolled_course_filter
+from apps.catalog.models import Course
 from libs.scoping import OwnedByRequestUserMixin
 
 from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
@@ -17,6 +17,13 @@ from .serializers import (
 )
 
 
+def enrolled_course_filter(user, prefix):
+    """Filtre « parcours publié auquel l'utilisateur est inscrit » (le personnel voit tout)."""
+    if user.is_staff:
+        return {}
+    return {f"{prefix}status": Course.Status.PUBLISHED, f"{prefix}enrollments__user": user}
+
+
 class EnrollmentViewSet(OwnedByRequestUserMixin, viewsets.ModelViewSet):
     queryset = Enrollment.objects.select_related("user", "course")
     serializer_class = EnrollmentSerializer
@@ -29,7 +36,7 @@ class EnrollmentViewSet(OwnedByRequestUserMixin, viewsets.ModelViewSet):
 
 
 class ProgressViewSet(OwnedByRequestUserMixin, viewsets.ModelViewSet):
-    queryset = Progress.objects.select_related("lesson", "enrollment").order_by("id")
+    queryset = Progress.objects.select_related("mission", "enrollment").order_by("id")
     serializer_class = ProgressSerializer
     permission_classes = [permissions.IsAuthenticated]
     owner_field = "enrollment__user"

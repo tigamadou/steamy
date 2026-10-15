@@ -1157,6 +1157,160 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/catalog/categories/:
+    get:
+      operationId: catalog_categories_list
+      description: Catégories avec le nombre de parcours publiés (WL06, WL16) ; liste
+        courte, non paginée.
+      tags:
+      - catalog
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/catalog/courses/:
+    get:
+      operationId: catalog_courses_list
+      description: Parcours publiés, filtrés et triés (WL01, WL06, WC01-WC03), paginés.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        description: Slug de la catégorie
+      - in: query
+        name: difficulty
+        schema:
+          enum:
+          - beginner
+          - intermediate
+          - advanced
+          type: string
+          minLength: 1
+        description: |-
+          * `beginner` - Débutant
+          * `intermediate` - Intermédiaire
+          * `advanced` - Avancé
+      - in: query
+        name: featured
+        schema:
+          type: boolean
+          nullable: true
+        description: Parcours mis en avant (WL01)
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: price
+        schema:
+          enum:
+          - free
+          - paid
+          type: string
+          minLength: 1
+        description: |-
+          * `free` - Gratuit
+          * `paid` - Payant
+      - in: query
+        name: q
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description: Recherche dans le titre et la description
+      - in: query
+        name: sort
+        schema:
+          enum:
+          - popular
+          - recent
+          - price-asc
+          - price-desc
+          - title
+          type: string
+          default: popular
+          minLength: 1
+        description: |-
+          * `popular` - popular
+          * `recent` - recent
+          * `price-asc` - price-asc
+          * `price-desc` - price-desc
+          * `title` - title
+      tags:
+      - catalog
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCourseListList'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/catalog/courses/{slug}/:
+    get:
+      operationId: catalog_courses_retrieve
+      description: 'Fiche publique (WL22, WC04) : plan du parcours sans contenu de
+        mission (D11).'
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - catalog
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/core/presign/:
     post:
       operationId: core_presign_create
@@ -1204,16 +1358,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/courses/courses/:
+  /api/events/:
     get:
-      operationId: courses_courses_list
+      operationId: events_list
+      description: Événements publiés (WL21, WD10, WPD06, WT09), paginés.
       parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
       - name: page
         required: false
         in: query
@@ -1226,23 +1375,23 @@ paths:
         description: Number of results to return per page.
         schema:
           type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
+      - in: query
+        name: upcoming
         schema:
-          type: string
+          type: boolean
+          nullable: true
+        description: 'true : à venir ou en cours (du plus proche au plus lointain)
+          ; false : passés (du plus récent au plus ancien) ; absent : tous'
       tags:
-      - courses
+      - events
       security:
-      - cookieAuth: []
       - {}
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedCourseListList'
+                $ref: '#/components/schemas/PaginatedSteamyEventList'
           description: ''
         '429':
           content:
@@ -1250,9 +1399,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/courses/courses/{slug}/:
+  /api/events/{slug}/:
     get:
-      operationId: courses_courses_retrieve
+      operationId: events_retrieve
+      description: Fiche événement (WL23) ; un brouillon répond 404.
       parameters:
       - in: path
         name: slug
@@ -1260,354 +1410,15 @@ paths:
           type: string
         required: true
       tags:
-      - courses
+      - events
       security:
-      - cookieAuth: []
       - {}
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CourseDetail'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/courses/{slug}/enroll/:
-    post:
-      operationId: courses_courses_enroll_create
-      description: |-
-        Inscrit l'utilisateur courant à un parcours GRATUIT.
-        Un parcours payant s'obtient par l'achat (S7) : 402 PAYMENT_REQUIRED.
-        Retourne 201 si l'inscription est créée, 200 si elle existait déjà.
-      parameters:
-      - in: path
-        name: slug
-        schema:
-          type: string
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CourseDetail'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/lessons/:
-    get:
-      operationId: courses_lessons_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedLessonList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/lessons/{id}/:
-    get:
-      operationId: courses_lessons_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this Leçon.
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Lesson'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/modules/:
-    get:
-      operationId: courses_modules_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedModuleList'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/modules/{id}/:
-    get:
-      operationId: courses_modules_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this Module.
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Module'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/resources/:
-    get:
-      operationId: courses_resources_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedResourceList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/resources/{id}/:
-    get:
-      operationId: courses_resources_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this resource.
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Resource'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/SteamyEventDetail'
           description: ''
         '404':
           content:
@@ -3140,6 +2951,118 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/public/contact-messages/:
+    post:
+      operationId: public_contact_messages_create
+      description: Formulaire de contact (WL24, D17).
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Received'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/public/leads/:
+    post:
+      operationId: public_leads_create
+      description: 'Inscription à la newsletter (WL20, D14), réservée aux adultes
+        (C12). Un email déjà inscrit : même réponse.'
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Received'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/public/quote-requests/:
+    post:
+      operationId: public_quote_requests_create
+      description: Demande de devis d'un établissement (WL11, D13).
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteRequestRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Received'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/referentials/avatars/:
     get:
       operationId: referentials_avatars_list
@@ -3351,6 +3274,80 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/shop/kits/:
+    get:
+      operationId: shop_kits_list
+      description: Kits en vente, paginés.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        description: Slug de la catégorie
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - shop
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedKitList'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/shop/kits/{slug}/:
+    get:
+      operationId: shop_kits_retrieve
+      description: Fiche kit (WK02) ; un kit retiré de la vente répond 404.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KitDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
 components:
   schemas:
     AreaTypeEnum:
@@ -3469,6 +3466,37 @@ components:
       - emoji
       - id
       - label
+    Category:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 60
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 80
+        color:
+          type: string
+          title: Couleur
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        icon:
+          type: string
+          title: Icône
+          description: Emoji affiché sur les cartes
+          maxLength: 16
+        courseCount:
+          type: integer
+          readOnly: true
+          description: Parcours publiés
+      required:
+      - color
+      - courseCount
+      - icon
+      - label
+      - slug
     CategoryEnum:
       enum:
       - learning
@@ -3520,6 +3548,32 @@ components:
       required:
       - category
       - email
+    CategorySummary:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 60
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 80
+        color:
+          type: string
+          title: Couleur
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        icon:
+          type: string
+          title: Icône
+          description: Emoji affiché sur les cartes
+          maxLength: 16
+      required:
+      - color
+      - icon
+      - label
+      - slug
     Certificate:
       type: object
       properties:
@@ -3693,6 +3747,36 @@ components:
         * `refused` - Refusée
         * `expired` - Expirée
         * `cancelled` - Annulée
+    ContactMessageRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nom
+          maxLength: 120
+        contact:
+          type: string
+          writeOnly: true
+          minLength: 1
+          description: Email ou numéro de téléphone
+          maxLength: 254
+        subject:
+          allOf:
+          - $ref: '#/components/schemas/SubjectEnum'
+          title: Sujet
+        message:
+          type: string
+          minLength: 1
+        website:
+          type: string
+          writeOnly: true
+          description: 'Champ piège : toujours vide'
+      required:
+      - contact
+      - message
+      - name
+      - subject
     Country:
       type: object
       properties:
@@ -3735,86 +3819,145 @@ components:
     CourseDetail:
       type: object
       properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
         slug:
           type: string
-          readOnly: true
+          maxLength: 120
           pattern: ^[-a-zA-Z0-9_]+$
-        description:
+        title:
           type: string
+          title: Titre
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
           readOnly: true
-        path:
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        isFree:
+          type: boolean
+          title: Gratuit
+        price:
           type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        requiredKit:
+          allOf:
+          - $ref: '#/components/schemas/RequiredKit'
           readOnly: true
           nullable: true
-        price:
+        coverImage:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
           readOnly: true
-        createdAt:
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        featured:
+          type: boolean
+          title: Mis en avant
+        description:
           type: string
-          format: date-time
-          readOnly: true
-        updatedAt:
+        outcomes:
+          title: Ce que tu vas apprendre
+        audience:
           type: string
-          format: date-time
+          title: Public
+          maxLength: 200
+        prerequisites:
+          title: Prérequis
+        trailerVimeoId:
+          type: string
+          title: 'Bande-annonce : identifiant Vimeo'
+          pattern: ^\d+$
+          maxLength: 20
+        trailerVimeoHash:
+          type: string
+          title: 'Bande-annonce : hachage Vimeo'
+          pattern: ^[0-9A-Za-z]+$
+          maxLength: 40
+        certificateEnabled:
+          type: boolean
+          title: Certificat
+        missionCount:
+          type: integer
           readOnly: true
-        modules:
+        projects:
           type: array
           items:
-            $ref: '#/components/schemas/Module'
+            $ref: '#/components/schemas/ProjectSummary'
           readOnly: true
       required:
-      - createdAt
+      - category
+      - coverImage
       - description
-      - id
-      - modules
-      - path
-      - price
+      - difficulty
+      - missionCount
+      - projects
+      - requiredKit
       - slug
       - title
-      - updatedAt
     CourseList:
       type: object
       properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
         slug:
           type: string
-          readOnly: true
+          maxLength: 120
           pattern: ^[-a-zA-Z0-9_]+$
-        description:
+        title:
           type: string
+          title: Titre
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
           readOnly: true
-        path:
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        isFree:
+          type: boolean
+          title: Gratuit
+        price:
           type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        requiredKit:
+          allOf:
+          - $ref: '#/components/schemas/RequiredKit'
           readOnly: true
           nullable: true
-        price:
+        coverImage:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
           readOnly: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        featured:
+          type: boolean
+          title: Mis en avant
       required:
-      - createdAt
-      - description
-      - id
-      - path
-      - price
+      - category
+      - coverImage
+      - difficulty
+      - requiredKit
       - slug
       - title
     CsrfToken:
@@ -3838,6 +3981,16 @@ components:
       - eventsLast7Days
       - revenueLast30Days
       - totalUsers
+    DifficultyEnum:
+      enum:
+      - beginner
+      - intermediate
+      - advanced
+      type: string
+      description: |-
+        * `beginner` - Débutant
+        * `intermediate` - Intermédiaire
+        * `advanced` - Avancé
     Disability:
       type: object
       properties:
@@ -4140,6 +4293,130 @@ components:
         * `mcq` - QCM
         * `tf` - Vrai/Faux
         * `free` - Libre
+    Kit:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          title: Nom
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        images:
+          description: URL https ou chemins du stockage, la première sert de couverture
+        available:
+          type: boolean
+          readOnly: true
+          description: En stock (le stock exact reste interne)
+      required:
+      - available
+      - category
+      - difficulty
+      - name
+      - price
+      - slug
+    KitDetail:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          title: Nom
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        images:
+          description: URL https ou chemins du stockage, la première sert de couverture
+        available:
+          type: boolean
+          readOnly: true
+          description: En stock (le stock exact reste interne)
+        description:
+          type: string
+        contents:
+          title: Contenu de la boîte
+        compatibleCourses:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+      required:
+      - available
+      - category
+      - compatibleCourses
+      - description
+      - difficulty
+      - name
+      - price
+      - slug
+    LeadRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        source:
+          type: string
+          title: Origine
+          description: guides, footer…
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        isAdult:
+          type: boolean
+          writeOnly: true
+          description: 'Attestation : j''ai 18 ans ou plus (C12)'
+        newsletterConsent:
+          type: boolean
+          writeOnly: true
+          description: Consentement explicite, case non cochée par défaut (D14)
+        website:
+          type: string
+          writeOnly: true
+          description: 'Champ piège : toujours vide'
+      required:
+      - email
+      - isAdult
+      - newsletterConsent
     LearnerConsentRequestRequest:
       type: object
       properties:
@@ -4288,63 +4565,33 @@ components:
       - firstName
       - step
       - username
-    Lesson:
+    LevelSummary:
       type: object
       properties:
-        id:
-          type: integer
-          readOnly: true
-        module:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
-        content:
-          type: string
-          readOnly: true
-        resourceType:
-          allOf:
-          - $ref: '#/components/schemas/ResourceTypeEnum'
-          readOnly: true
         order:
           type: integer
-          readOnly: true
-          default: 0
-        resources:
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationMin:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (minutes)
+        introSummary:
+          type: string
+          title: Résumé de l'introduction
+        missions:
           type: array
           items:
-            $ref: '#/components/schemas/Resource'
+            $ref: '#/components/schemas/MissionSummary'
           readOnly: true
       required:
-      - content
-      - id
-      - module
-      - order
-      - resourceType
-      - resources
-      - title
-    LessonSummary:
-      type: object
-      description: 'Plan du parcours, sans contenu : visible avant l''inscription.'
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
-        resourceType:
-          allOf:
-          - $ref: '#/components/schemas/ResourceTypeEnum'
-          readOnly: true
-        order:
-          type: integer
-          readOnly: true
-      required:
-      - id
-      - order
-      - resourceType
+      - missions
       - title
     Locality:
       type: object
@@ -4508,32 +4755,28 @@ components:
         * `suspended` - Suspendu
         * `deactivated` - Désactivé
         * `anonymized` - Anonymisé
-    Module:
+    MissionSummary:
       type: object
       properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
         order:
           type: integer
-          readOnly: true
-          default: 0
-        lessons:
-          type: array
-          items:
-            $ref: '#/components/schemas/LessonSummary'
-          readOnly: true
-        course:
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationMin:
           type: integer
-          readOnly: true
+          maximum: 32767
+          minimum: 0
+          title: Durée (minutes)
+        icon:
+          type: string
+          title: Icône
+          maxLength: 16
       required:
-      - course
-      - id
-      - lessons
-      - order
       - title
     Notification:
       type: object
@@ -4832,7 +5075,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Enrollment'
-    PaginatedLessonList:
+    PaginatedKitList:
       type: object
       properties:
         count:
@@ -4851,27 +5094,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Lesson'
-    PaginatedModuleList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Module'
+            $ref: '#/components/schemas/Kit'
     PaginatedNotificationList:
       type: object
       properties:
@@ -4992,7 +5215,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Quiz'
-    PaginatedResourceList:
+    PaginatedSteamyEventList:
       type: object
       properties:
         count:
@@ -5011,7 +5234,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Resource'
+            $ref: '#/components/schemas/SteamyEvent'
     ParentProfile:
       type: object
       properties:
@@ -5215,7 +5438,7 @@ components:
       properties:
         enrollment:
           type: integer
-        lesson:
+        mission:
           type: integer
         completed:
           type: boolean
@@ -5355,7 +5578,7 @@ components:
           readOnly: true
         enrollment:
           type: integer
-        lesson:
+        mission:
           type: integer
         completed:
           type: boolean
@@ -5371,14 +5594,14 @@ components:
       required:
       - enrollment
       - id
-      - lesson
+      - mission
       - updatedAt
     ProgressRequest:
       type: object
       properties:
         enrollment:
           type: integer
-        lesson:
+        mission:
           type: integer
         completed:
           type: boolean
@@ -5389,7 +5612,38 @@ components:
           nullable: true
       required:
       - enrollment
-      - lesson
+      - mission
+    ProjectSummary:
+      type: object
+      properties:
+        order:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        objectives:
+          title: Objectifs
+        prerequisites:
+          title: Prérequis
+        materials:
+          title: Matériel
+        levels:
+          type: array
+          items:
+            $ref: '#/components/schemas/LevelSummary'
+          readOnly: true
+      required:
+      - levels
+      - title
     ProviderEnum:
       enum:
       - kkiapay
@@ -5449,6 +5703,46 @@ components:
       - id
       - questions
       - title
+    QuoteRequestRequest:
+      type: object
+      properties:
+        schoolName:
+          type: string
+          minLength: 1
+          title: Établissement
+          maxLength: 160
+        contactName:
+          type: string
+          minLength: 1
+          title: Personne à contacter
+          maxLength: 120
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        phone:
+          type: string
+          minLength: 1
+          title: Téléphone (E.164)
+          description: Numéro national (Bénin par défaut) ou E.164
+          maxLength: 16
+        offer:
+          type: string
+          title: Offre
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        message:
+          type: string
+        website:
+          type: string
+          writeOnly: true
+          description: 'Champ piège : toujours vide'
+      required:
+      - contactName
+      - email
+      - phone
+      - schoolName
     ReadAll:
       type: object
       properties:
@@ -5457,6 +5751,15 @@ components:
           description: Nombre de notifications marquées comme lues
       required:
       - updated
+    Received:
+      type: object
+      description: Réponse neutre, identique qu'il y ait eu enregistrement, doublon
+        ou robot.
+      properties:
+        ok:
+          type: boolean
+      required:
+      - ok
     RefusalReason:
       type: object
       properties:
@@ -5510,51 +5813,18 @@ components:
       - code
       - id
       - label
-    Resource:
+    RequiredKit:
       type: object
+      description: 'Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`.'
       properties:
-        id:
-          type: integer
-          readOnly: true
-        lesson:
-          type: integer
-          readOnly: true
-        title:
+        slug:
           type: string
-          readOnly: true
-        file:
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
           type: string
-          format: uri
-          readOnly: true
-          nullable: true
-        externalUrl:
-          type: string
-          format: uri
-          readOnly: true
-          nullable: true
-        uploadedAt:
-          type: string
-          format: date-time
-          readOnly: true
       required:
-      - externalUrl
-      - file
-      - id
-      - lesson
-      - title
-      - uploadedAt
-    ResourceTypeEnum:
-      enum:
-      - video
-      - pdf
-      - html
-      - other
-      type: string
-      description: |-
-        * `video` - Vidéo
-        * `pdf` - PDF
-        * `html` - HTML
-        * `other` - Autre
+      - name
+      - slug
     ResumeRequest:
       type: object
       properties:
@@ -5597,6 +5867,175 @@ components:
       - code
       - id
       - label
+    SteamyEvent:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        emoji:
+          type: string
+          maxLength: 16
+        color:
+          type: string
+          title: Couleur
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        startsAt:
+          type: string
+          format: date-time
+          title: Début
+        endsAt:
+          type: string
+          format: date-time
+          title: Fin
+        online:
+          type: boolean
+          title: En ligne
+        place:
+          type: string
+          title: Lieu
+          maxLength: 160
+        city:
+          type: string
+          title: Ville
+          maxLength: 80
+        audience:
+          type: string
+          title: Public visé
+          description: « 12 – 15 ans »
+          maxLength: 80
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+          description: 0 = gratuit
+        isFree:
+          type: boolean
+          readOnly: true
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Places
+        seatsLeft:
+          type: integer
+          readOnly: true
+        applicationDeadline:
+          type: string
+          format: date-time
+          title: Fin des candidatures
+        applicationsOpen:
+          type: boolean
+          readOnly: true
+          description: Places restantes et date limite non dépassée
+        isPast:
+          type: boolean
+          readOnly: true
+      required:
+      - applicationDeadline
+      - applicationsOpen
+      - capacity
+      - color
+      - endsAt
+      - isFree
+      - isPast
+      - seatsLeft
+      - slug
+      - startsAt
+      - title
+    SteamyEventDetail:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        emoji:
+          type: string
+          maxLength: 16
+        color:
+          type: string
+          title: Couleur
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        startsAt:
+          type: string
+          format: date-time
+          title: Début
+        endsAt:
+          type: string
+          format: date-time
+          title: Fin
+        online:
+          type: boolean
+          title: En ligne
+        place:
+          type: string
+          title: Lieu
+          maxLength: 160
+        city:
+          type: string
+          title: Ville
+          maxLength: 80
+        audience:
+          type: string
+          title: Public visé
+          description: « 12 – 15 ans »
+          maxLength: 80
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+          description: 0 = gratuit
+        isFree:
+          type: boolean
+          readOnly: true
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Places
+        seatsLeft:
+          type: integer
+          readOnly: true
+        applicationDeadline:
+          type: string
+          format: date-time
+          title: Fin des candidatures
+        applicationsOpen:
+          type: boolean
+          readOnly: true
+          description: Places restantes et date limite non dépassée
+        isPast:
+          type: boolean
+          readOnly: true
+        description:
+          type: string
+      required:
+      - applicationDeadline
+      - applicationsOpen
+      - capacity
+      - color
+      - description
+      - endsAt
+      - isFree
+      - isPast
+      - seatsLeft
+      - slug
+      - startsAt
+      - title
     StepEnum:
       enum:
       - parent
@@ -5609,6 +6048,22 @@ components:
         * `waiting` - W07 · Attente
         * `password` - W10 · Mot de passe
         * `refused` - W18 · Refus
+    SubjectEnum:
+      enum:
+      - question
+      - paiement
+      - livraison
+      - changement-parent
+      - candidature
+      - autre
+      type: string
+      description: |-
+        * `question` - Question
+        * `paiement` - Paiement
+        * `livraison` - Livraison
+        * `changement-parent` - Changement de parent
+        * `candidature` - Candidature
+        * `autre` - Autre
     TokenRequest:
       type: object
       properties:
