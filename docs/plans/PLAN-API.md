@@ -395,7 +395,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (ordre des identifiants) et rendu à l'expiration (30 min, `ORDER_TTL_MINUTES`), commande `cancelled`.
   > Throttle `orders` (30/h). Lecture : le payeur voit `deliveryAddress`, le bénéficiaire non. Les URL passent de
   > `{id}` à `{reference}` ; `GET payments/payments/` disparaît, remplacé par `…/payments/{id}/` en L3b.2.
-- [x] **API-L3b.2** Paiement et webhook · `feature/api-l3b-2-paiement-webhook`
+- [x] **API-L3b.2** Paiement et webhook · `feature/api-l3b-2-paiement-webhook` · PR #83
   - [x] `Payment` à 4 états ; `POST payments/orders/{reference}/payments/` (`NETWORK_UNAVAILABLE`) ; `GET payments/payments/{id}/`
   - [x] `POST payments/webhook/{provider}/` durci (signature avant traitement, montant/devise/référence, idempotence)
   - [x] Exécution post-paiement unique en transaction (inscription, stock, panier, notifications) ; Kit Codes en
