@@ -40,17 +40,23 @@ export async function apiSession(): Promise<ApiSession> {
 
 let counter = 0;
 
-/** Numéro béninois E.164 propre au test (`+22901` + 8 chiffres), distinct de ceux du jeu de démo. */
+/** Graine propre au processus : les workers Playwright tournent en parallèle et peuvent partir à la même milliseconde. */
+const SEED = `${process.pid.toString(36)}${Math.floor(Math.random() * 1296).toString(36)}`;
+
+/** Numéro béninois E.164 propre au test (`+22901` + 8 chiffres aléatoires), distinct de ceux du jeu de démo. */
 export function uniquePhone(): string {
   counter += 1;
-  const digits = `${Date.now() % 1_000_000}${process.pid % 10}${counter % 10}`.padStart(8, "0").slice(-8);
-  return `+22901${digits}`;
+  const random = Math.floor(Math.random() * 1e8)
+    .toString()
+    .padStart(8, "0");
+  // Le jeu de démo utilise 0190000001 : on évite le préfixe 9000000
+  return `+22901${random.startsWith("9000000") ? `8${random.slice(1)}` : random}`;
 }
 
 /** Suffixe court et unique pour les identifiants et noms de test. */
 export function uniqueSuffix(): string {
   counter += 1;
-  return `${Date.now().toString(36)}${counter}`;
+  return `${Date.now().toString(36)}${SEED}${counter}`;
 }
 
 /**
