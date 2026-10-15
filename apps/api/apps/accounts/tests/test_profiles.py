@@ -25,7 +25,7 @@ def client_for(user):
 
 
 def birthday(years_ago, days=0):
-    today = date.today()
+    today = timezone.localdate()  # date du Bénin (C16), comme l'API
     # Un 29 février n'existe pas toutes les années : on prend le 28.
     day = today.replace(
         year=today.year - years_ago, day=min(today.day, 28 if today.month == 2 else 31)
