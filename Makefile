@@ -2,10 +2,13 @@
 COMPOSE := docker compose
 API     := $(COMPOSE) run --rm api
 WEB     := $(COMPOSE) run --rm --no-deps web sh -c
+# Stack des parcours Playwright : projet séparé, sans port publié (cohabite avec `make up`)
+E2E     := docker compose -p steamy-e2e -f compose.yml -f compose.e2e.yml
 
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
-        test-api lint-api fix-api psql flower clean openapi lint-web typecheck-web
+        test-api coverage-api lint-api fix-api psql flower clean openapi lint-web typecheck-web \
+        test-web coverage-web e2e e2e-down
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -60,6 +63,12 @@ seed: ## Charge les fixtures (compte admin, gabarits d'e-mails)
 test-api: ## Lance les tests de l'API
 	$(API) pytest
 
+coverage-api: ## Tests de l'API + couverture 100 % exigée sur le code modifié (diff-cover)
+	$(API) sh -c "pytest --cov --cov-report=term --cov-report=xml:coverage.xml"
+	docker run --rm -v "$(CURDIR):/repo" -w /repo/apps/api python:3.11.13-bookworm sh -c \
+	  "git config --global --add safe.directory /repo && pip install -q --root-user-action=ignore diff-cover==10.6.0 \
+	   && diff-cover coverage.xml --compare-branch=origin/development --fail-under=100"
+
 lint-api: ## Lint et format de l'API (vérification seule)
 	$(API) sh -c "ruff check . && ruff format --check ."
 
@@ -77,6 +86,23 @@ lint-web: ## Lint du front
 
 typecheck-web: ## Vérification TypeScript (web + api-client)
 	$(WEB) "corepack enable && pnpm typecheck"
+
+test-web: ## Tests de composants du front (Vitest)
+	$(WEB) "corepack enable && pnpm test"
+
+coverage-web: ## Tests du front + couverture 100 % exigée sur le code modifié (diff-cover)
+	$(WEB) "corepack enable && pnpm --filter @steamy/web test:coverage"
+	docker run --rm -v "$(CURDIR):/repo" -w /repo python:3.11.13-bookworm sh -c \
+	  "git config --global --add safe.directory /repo && pip install -q --root-user-action=ignore diff-cover==10.6.0 \
+	   && diff-cover apps/web/coverage/cobertura-coverage.xml --compare-branch=origin/development --fail-under=100"
+
+e2e: ## Parcours Playwright sur la stack Docker (web en image prod, données rechargées)
+	$(E2E) up -d --build --wait web
+	$(MAKE) migrate seed COMPOSE="$(E2E)"
+	$(E2E) run --rm playwright
+
+e2e-down: ## Arrête la stack e2e et supprime ses données
+	$(E2E) --profile e2e down -v
 
 psql: ## Console PostgreSQL
 	$(COMPOSE) exec postgres psql -U steamy steamy

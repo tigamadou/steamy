@@ -9,38 +9,44 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 1.0a · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c ; renommage CSRF en 1.0a) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : 🟡 en cours · Prochaine tâche : 1.0c (après API-1) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
-### Étape 1.0 · Socle front — ⬜ à faire
-- [ ] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage`
-  - [ ] Vitest + Testing Library (`vitest.config.ts`, scripts `test` web et `pnpm -r test`, cible `make test-web`)
-  - [ ] Playwright (`apps/web/e2e/`, `playwright.config.ts` Chromium bureau + mobile 360 px, `@axe-core/playwright`)
-  - [ ] Cible `make e2e` et override `compose.e2e.yml` (web en image `prod`, `make migrate seed`, `playwright test`)
-  - [ ] CI : `pnpm test` dans le job `web`, nouveau job `e2e` et filtre `e2e`, cache des navigateurs, rapport en artefact, `e2e` ajouté aux `needs` de `ci-ok`
-  - [ ] Tokens (C1) : commentaire « magenta », `--shadow-card(-hover)` dérivés de `--primary-500` dans `tokens.css` et `design/ds-tokens.css`
-  - [ ] Polices (§1.4) : retirer JetBrains Mono (`layout.tsx`, `fonts/`, licence OFL, `--font-mono`), Nunito seule
-  - [ ] Assets `design/assets/` → `public/brand/` (logos, favicon, `app/icon.png`, `apple-icon.png`, icônes sociales)
-  - [ ] Nettoyage : supprimer `app/page.tsx` et `components/browser-api-status.tsx`, garder `/runtime-config`, chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts`
-  - [ ] Test Vitest témoin, parcours Playwright témoin (accueil en 200) et test axe
-  - [ ] Recette : `make test-web` et `make e2e` passent en local ; `e2e` exécuté en CI sur une PR qui ne touche que `apps/api/` ; aucune occurrence de `91, 63, 224` ni de `jetbrains` dans `apps/web/src`
-- [ ] **1.0b** Design system de base · `feature/lot1-design-system`
-  - [ ] `Icon`
-  - [ ] `Logo`, `Mascot` (6 poses, décoratif)
-  - [ ] `Button` (variantes dont `outline-inverse`, `loading`, rendu `a`)
-  - [ ] `Badge`, `Tag`
-  - [ ] `Avatar`
-  - [ ] `Loader` (toujours avec texte, `role="status"`)
-  - [ ] `Field`, `Input`, `Textarea`, `Select`, `Checkbox`
-  - [ ] `PhoneInput` (pays depuis `referentials/countries/`, sortie E.164)
-  - [ ] `Toast`
-  - [ ] `Tabs` (variante `tabs-pill`)
-  - [ ] `SkeletonBlock`
-  - [ ] `CourseCard`
-  - [ ] `WKKitCard` (mode vitrine)
-  - [ ] `Accordion`, `FaqAccordion`
-  - [ ] Tests : rendu, variantes, clavier et `vitest-axe` sur chaque composant ; `PhoneInput` (changement de pays, E.164, numéro invalide)
-  - [ ] Recette : contrastes AA (aucun texte en `--ink-400`), focus visible, aucun `rgba` ni hex en dur hors `tokens.css`
+### Étape 1.0 · Socle front — 🟡 en cours
+- [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
+  - [x] Vitest + Testing Library (`vitest.config.mts`, scripts `test` web et `pnpm -r test`, cible `make test-web`)
+  - [x] Playwright (`apps/web/e2e/`, `playwright.config.ts` Chromium bureau + mobile 360 px, `@axe-core/playwright`)
+  - [x] Cible `make e2e` et override `compose.e2e.yml` (web en image `prod`, `make migrate seed`, `playwright test`) : projet `steamy-e2e` sans port publié, Playwright dans l'image officielle épinglée
+  - [x] CI : `pnpm test` dans le job `web`, nouveau job `e2e` et filtre `e2e`, rapport en artefact, `e2e` ajouté aux `needs` de `ci-ok` ; navigateurs fournis par l'image officielle Playwright (au lieu d'un cache)
+  - [x] Tokens (C1) : commentaire « magenta », `--shadow-card(-hover)` dérivés de `--primary-500` dans `tokens.css` et `design/ds-tokens.css`
+  - [x] Polices (§1.4) : retirer JetBrains Mono (`layout.tsx`, `fonts/`, licence OFL, `--font-mono`), Nunito seule
+  - [x] Assets `design/assets/` → `public/brand/` (logos, icônes sociales) ; `app/icon.png`, `apple-icon.png`, `favicon.ico` recadrés sur le symbole ; logo blanc = `logo_landscape_white_tight.png` (recadré)
+  - [x] Nettoyage : page de démonstration et `components/browser-api-status.tsx` supprimés, `/runtime-config` gardé ; `app/page.tsx` remplacée par un accueil provisoire statique (le parcours témoin exige `/` en 200, WL01 arrive en 1.1)
+  - ~~Chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts`~~ : fait par API-1.2 (PR #17), qui régénère le client ; contrôlé en 1.0c
+  - [x] Test Vitest témoin, parcours Playwright témoin (accueil en 200) et test axe
+  - [x] Couverture unitaire 100 % du code ajouté ou modifié : `@vitest/coverage-v8` (rapport `apps/web/coverage/cobertura-coverage.xml`), `diff-cover --fail-under=100` dans le job `web` (`fetch-depth: 0`, même base de comparaison que le job `api`), cible `make coverage-web`
+  - [x] E2E 100 % des écrans : l'outillage Playwright permet d'écrire le test de chaque écran cité dans la matrice écran → test (job `e2e-matrice`) ; 1.0a et 1.0b ne livrent aucun écran
+  - [x] Recette : `make test-web` et `make e2e` passent en local ; aucune occurrence de `91, 63, 224` ni de `jetbrains` dans `apps/web/src`
+  - [ ] Recette après fusion : `e2e` exécuté en CI sur une PR qui ne touche que `apps/api/`
+- [x] **1.0b** Design system de base · `feature/lot1-design-system` · PR #19
+  - [x] `Icon`
+  - [x] `Logo`, `Mascot` (6 poses, décoratif) ; `Logo` sur les PNG officiels (le tagline du SVG dépend d'une police non embarquée)
+  - [x] `Button` (variantes dont `outline-inverse`, `loading`, rendu `a`)
+  - [x] `Badge`, `Tag`
+  - [x] `Avatar`
+  - [x] `Loader` (toujours avec texte, `role="status"`)
+  - [x] `Field`, `Input`, `Textarea`, `Select`, `Checkbox`
+  - [x] `PhoneInput` (pays en prop au format de `referentials/countries/`, sortie E.164) ; type `PhoneCountry` à aligner sur le client généré
+  - [x] `Toast`
+  - [x] `Tabs` (variante `tabs-pill`)
+  - [x] `SkeletonBlock`
+  - [x] `CourseCard`
+  - [x] `WKKitCard` (mode vitrine)
+  - [x] `Accordion`, `FaqAccordion`
+  - [x] Tests : rendu, variantes, clavier et `vitest-axe` sur chaque composant ; `PhoneInput` (changement de pays, E.164, numéro invalide)
+  - [x] Couverture : 100 % des lignes et des branches du design system (diff-cover à 100 % sur le code modifié)
+  - [x] Recette : contrastes AA (aucun texte en `--ink-400` ; texte foncé sur vert et ambre, survol primaire en 600, `danger` en `--error-600`), focus visible, aucun `rgba` ni hex en dur hors `tokens.css`
 - [ ] **1.0c** Shell public, enveloppes, SEO (requiert API-1) · `feature/lot1-socle-public`
+  - [ ] Contrôler le chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts` (renommé par API-1.2, PR #17)
   - [ ] `lib/routes.ts` (table unique des URL)
   - [ ] `app/(public)/layout.tsx` : `PublicShell`, `<main id="contenu">`, lien d'évitement
   - [ ] `PublicNav` + `MegaMenu` accessible (clavier, `Échap`, clic extérieur, tiroir mobile avec piège de focus) et emplacement `NavAccount`
@@ -58,10 +64,10 @@ Statut : ⬜ à faire · Prochaine tâche : 1.0a · Prérequis : API-1 (client r
 
 ### Étape 1.2 · Conception des maquettes — ⬜ à faire
 - [ ] **1.2** Conception de WL22, WL23, WL24 · `feature/lot1-conception-wl22-24`
-  - [ ] Maquette WL22 fiche parcours (d'après WC04 dans `PublicShell`, états chargement et 404)
-  - [ ] Maquette WL23 fiche événement (CTA selon visiteur / apprenant / parent / complet / passé)
-  - [ ] Maquette WL24 aide & contact (FAQ par thème, formulaire au vouvoiement, confirmation, erreur)
-  - [ ] Fichier `design/screens-public-a-concevoir-web.jsx` ajouté à `App.html` (vue « Public »)
+  - [x] Maquette WL22 fiche parcours (d'après WC04 dans `PublicShell`, états chargement et 404)
+  - [x] Maquette WL23 fiche événement (CTA selon visiteur / apprenant / parent / complet / passé)
+  - [x] Maquette WL24 aide & contact (FAQ par thème, formulaire au vouvoiement, confirmation, erreur)
+  - [x] Fichier `design/screens-public-a-concevoir-web.jsx` ajouté à `App.html` (vue « Public »)
   - [ ] Recette : validation par le porteur produit (C18) ; aucune donnée de mineur (D15)
 
 ### Écrans — ⬜ à faire
@@ -350,8 +356,8 @@ src/lib/{api-public,api-errors,routes}.ts · e2e/
 
 | Étape du lot | Requiert | Endpoints (SPEC-TECHNIQUE §7) |
 | --- | --- | --- |
-| 1.0a, 1.0b | — (1.0a : renommage CSRF après API-1) | `GET auth/csrf/` |
-| 1.0c | API-1 (client régénéré, `make seed` D2) | — |
+| 1.0a, 1.0b | — | — |
+| 1.0c | API-1 (client régénéré, `make seed` D2, renommage CSRF par API-1.2) | `GET auth/csrf/` |
 | 1.1 | API-L1 | `catalog/categories/`, `catalog/courses/` |
 | 1.2 | — | — |
 | 1.3 | API-L1 + 1.2 | `catalog/courses/{slug}/` |
@@ -386,6 +392,7 @@ gratuit).
 | --- | --- |
 | Validation juridique des textes légaux de WL09 et de la mention de finalité (D6) | Mise en production (pas le développement) |
 | Contenus éditoriaux définitifs (blog, guides PDF, FAQ, chiffres vitrine) | Recette de 1.5 et 1.6 (gabarits de départ en attendant) |
+| SVG du logo au texte vectorisé : le tagline de `logo_landscape.svg` est un `<text>` en police Agile, non embarquée (`Logo` utilise les PNG en attendant) | Rien (qualité d'affichage) |
 
 ## Critères de fin de lot
 
