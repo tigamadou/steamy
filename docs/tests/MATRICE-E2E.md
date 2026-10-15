@@ -12,18 +12,18 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 
 | Écran | Nom | Lot | Parcours | Test e2e |
 | --- | --- | --- | --- | --- |
-| `WL01` | Accueil | 1 |  |  |
+| `WL01` | Accueil | 1 | Parcours mis en avant, ancre « Comment ça marche » → catalogue | `apps/web/e2e/decouverte.spec.ts` |
 | `WL02` | Mot de passe oublié | 2 |  |  |
 | `WL03` | Code OTP | 2 |  |  |
 | `WL04` | Nouveau mot de passe | 2 |  |  |
 | `WL05` | Réinitialisé ✓ | 2 |  |  |
-| `WL06` | Projets & Parcours | 1 |  |  |
+| `WL06` | Projets & Parcours | 1 | Filtre par catégorie dans l'URL (rechargement), catégorie vide, sans brouillon | `apps/web/e2e/decouverte.spec.ts` |
 | `WL07` | Boutique de kits | 1 |  |  |
 | `WL08` | Ateliers | 1 |  |  |
 | `WL09` | Pages légales | 1 | Pied de page → CGU#consentement-parental ; onglets adressables par URL | `apps/web/e2e/editorial.spec.ts` |
 | `WL10` | À propos | 1 | Mission, chiffres, équipe, bandeau d'inscription | `apps/web/e2e/editorial.spec.ts` |
 | `WL11` | Écoles · offre B2B + devis | 1 |  |  |
-| `WL16` | Catégories | 1 |  |  |
+| `WL16` | Catégories | 1 | 6 catégories D2 → catalogue filtré | `apps/web/e2e/decouverte.spec.ts` |
 | `WL17` | Blog | 1 | Article à la une → article | `apps/web/e2e/editorial.spec.ts` |
 | `WL18` | Article | 1 | Fil d'Ariane, partage, JSON-LD, slug inconnu → 404 | `apps/web/e2e/editorial.spec.ts` |
 | `WL20` | Guides gratuits | 1 | Téléchargement libre d'un PDF, sans email (newsletter : à venir avec API-L1.4) | `apps/web/e2e/editorial.spec.ts` |

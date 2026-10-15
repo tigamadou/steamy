@@ -28,6 +28,14 @@ export const stats = [
   { value: "350", label: "Missions" },
 ] as const;
 
+/** Bande de chiffres de l'accueil (WL01) ; le premier sert aussi à la preuve sociale du hero. */
+export const homeStats = [
+  { value: "1 000+", label: "Apprenants" },
+  { value: "2 500", label: "Certifications" },
+  { value: "350", label: "Missions" },
+  { value: "20", label: "Instructeurs" },
+] as const;
+
 /** Page « À propos » (WL10). Équipe : adultes uniquement (D15). */
 export const about = {
   kicker: "Notre mission",

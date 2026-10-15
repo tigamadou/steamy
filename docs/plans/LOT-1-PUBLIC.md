@@ -9,7 +9,7 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 1.1 (après API-L1), puis l'encart newsletter de 1.5 (après API-L1.4) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : 🟡 en cours · Prochaine tâche : 1.3 (WL22), puis 1.4, 1.6 et l'encart newsletter de 1.5 · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
 ### Étape 1.0 · Socle front — ✅ terminé
 - [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
@@ -61,7 +61,7 @@ Statut : 🟡 en cours · Prochaine tâche : 1.1 (après API-L1), puis l'encart 
   - [x] Tests Vitest : `WXState` par registre, `OfflineGate`, mega-menu au clavier
   - [x] Parcours Playwright : navigation clavier nav et mega-menu, hors ligne (WX01), URL inconnue → 404, footer sans lien mort (liste blanche `/connexion`, `/inscription`, `/inscription/parent`, plus les pages du lot 1 à venir, retirées étape par étape)
   - [x] Recette : `next build` prérend toutes les routes publiques, aucune en dynamique pur ; entrées reportées absentes
-  - [ ] Parcours e2e de WX02 et WX03 : à écrire avec la grille de WL06 (1.1), seule section dont l'API peut échouer ou tarder
+  - [ ] Parcours e2e de WX02 et WX03 : la pile e2e ne sait pas faire échouer ni ralentir l'API à la demande (les appels partent du serveur Next, hors de portée de `page.route`) ; à décider : scénario dédié (API arrêtée) ou couverture Vitest seule
 
 ### Étape 1.2 · Conception des maquettes — ⬜ à faire
 - [ ] **1.2** Conception de WL22, WL23, WL24 · `feature/lot1-conception-wl22-24`
@@ -72,14 +72,15 @@ Statut : 🟡 en cours · Prochaine tâche : 1.1 (après API-L1), puis l'encart 
   - [ ] Recette : validation par le porteur produit (C18) ; aucune donnée de mineur (D15)
 
 ### Écrans — 🟡 en cours
-- [ ] **1.1** Accueil, catalogue, catégories (requiert API-L1) · `feature/lot1-accueil-catalogue`
-  - [ ] WL01 `/` (sections, ancre `#comment-ca-marche`, 3 `CourseCard` mis en avant, CTA, chiffres depuis `content/site.ts`)
-  - [ ] WL06 `/parcours` (filtres `Tag`, état dans l'URL, pagination, états skeleton, vide, erreur)
-  - [ ] WL16 `/categories` (`CategoryCard`)
-  - [ ] Appels `catalog/categories/` et `catalog/courses/?category=&page=` via `'use cache'`
-  - [ ] Tests Vitest : `CategoryCard`, sérialisation filtre ↔ URL
-  - [ ] Parcours Playwright « découverte » (accueil → ancre → catalogue → filtre → catégories → catalogue filtré)
-  - [ ] Recette : aucun chiffre ni catégorie en dur ; les 6 catégories du jeu D2 apparaissent
+- [x] **1.1** Accueil, catalogue, catégories (requiert API-L1) · `feature/lot1-accueil-catalogue` · PR #47
+  - [x] `WL01` `/` (sections, ancre `#comment-ca-marche`, 3 `CourseCard` mis en avant, complétés par les plus populaires si moins de 3 sont mis en avant, CTA, chiffres depuis `content/site.ts`)
+  - [x] `WL06` `/parcours` (filtres `Tag`, état dans l'URL, pagination, états skeleton, vide, erreur)
+  - [x] `WL16` `/categories` (`CategoryCard`)
+  - [x] Appels `catalog/categories/` et `catalog/courses/?category=&page=` via `'use cache'` (`lib/catalog.ts`, `cacheLife("minutes")`, `cacheTag("catalog")`), sous `<Suspense>` + `connection()` + `AppStateBoundary`
+  - [x] Tests Vitest : `CategoryCard`, sérialisation filtre ↔ URL
+  - [x] Parcours Playwright « découverte » (accueil → ancre → catalogue → filtre → catégories → catalogue filtré) (`e2e/decouverte.spec.ts`)
+  - [x] Recette : aucun chiffre ni catégorie en dur ; les 6 catégories du jeu D2 apparaissent
+
 - [ ] **1.3** Fiche parcours publique WL22 (requiert API-L1 et 1.2) · `feature/lot1-fiche-parcours`
   - [ ] Route `/parcours/[slug]` (`'use cache'` + `cacheTag('catalog')`, `notFound()` si non publié)
   - [ ] `generateMetadata`, JSON-LD `Course`, slug ajouté au sitemap
