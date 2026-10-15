@@ -10,5 +10,6 @@ env/
 __pycache__/
 staticfiles/
 media/
+private-media/
 .data/
 .cache/

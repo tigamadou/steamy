@@ -25,6 +25,7 @@ urlpatterns = [
     path("api/classrooms/", include("apps.classrooms.urls")),
     path("api/events/", include("apps.events.urls")),
     path("api/learning/", include("apps.learning.urls")),
+    path("api/wishlist/", include("apps.wishlist.urls")),
     path("api/shop/", include("apps.shop.urls")),
     path("api/payments/", include("apps.payments.urls")),
     path("api/analytics/", include("apps.analytics.urls")),
