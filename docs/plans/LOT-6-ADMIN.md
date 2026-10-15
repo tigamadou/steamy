@@ -85,7 +85,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   - [ ] Journal d'audit (`core/auditlog/`) en lecture seule
   - [ ] Tests : aucune action ne fait passer une candidature à `accepted` (S3, C3) ; refus exceptionnel d'une candidature payée crée un `Refund`
   - [ ] Tests : singleton non dupliquable ; réseau désactivé retiré de l'endpoint public ; seuil hors bornes refusé
-- [x] **6.6** Socle Next.js du back-office · `feature/lot6-backoffice-shell` · PR #__PR__ (requiert 6.1 ; outillage du lot 1, étape 1.0)
+- [x] **6.6** Socle Next.js du back-office · `feature/lot6-backoffice-shell` · PR #62 (requiert 6.1 ; outillage du lot 1, étape 1.0)
   - [x] Layout serveur `(backoffice)/backoffice/` : garde (`accounts/me/`, staff, `otpVerified`), redirection vers `<API_URL>/admin/login/?next=…`, métadonnées `noindex`
   - [x] Revérification du groupe par page et route `/backoffice/acces-refuse`
   - [x] `AdminShell` (groupes Pilotage / Plateforme / Système selon les groupes, déconnexion `POST auth/logout/`, menu repliable < 1024 px)
