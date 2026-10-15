@@ -45,6 +45,12 @@ export const routes = {
   login: (next?: string) => withNext("/connexion", next),
   signup: (next?: string) => withNext("/inscription", next),
   parentSignup: "/inscription/parent",
+  // Back-office Next.js (lot 6, WAD01-WAD05)
+  backoffice: {
+    home: "/backoffice",
+    impact: "/backoffice/impact",
+    accessDenied: "/backoffice/acces-refuse",
+  },
 } as const;
 
 /** Rubriques de la navigation publique : l'onglet actif est déduit du chemin. */
