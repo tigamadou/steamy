@@ -27,4 +27,10 @@ describe("format", () => {
     expect(paid.priceLabel).toBe("0 F CFA");
     expect(paid.emoji).toBe("🤖");
   });
+
+  it("dirige la carte vers la fiche de l'espace apprenant quand on le demande", () => {
+    expect(toCourseCard(course(), (slug) => `/apprenant/catalogue/${slug}`).href).toBe(
+      "/apprenant/catalogue/decouverte-robotique",
+    );
+  });
 });

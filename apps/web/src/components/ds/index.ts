@@ -24,6 +24,7 @@ export * from "./Logo";
 export * from "./Mascot";
 export * from "./Modal";
 export * from "./NewPasswordFields";
+export * from "./NotifItem";
 export * from "./NumberStepper";
 export * from "./OTPInput";
 export * from "./PasswordInput";

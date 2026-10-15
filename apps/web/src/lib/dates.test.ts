@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { datePill, formatDate, formatFullDate, formatInstant, formatTimeRange } from "./dates";
+import { datePill, formatDate, formatFullDate, formatInstant, formatRelative, formatTimeRange } from "./dates";
 
 describe("formatDate", () => {
   it("écrit la date en toutes lettres, en français", () => {
@@ -21,5 +21,25 @@ describe("formatInstant", () => {
     expect(formatInstant("2026-10-22T08:00:00Z")).toBe("22 octobre 2026");
     // 23 h 30 UTC le 21 → déjà le 22 à Porto-Novo (UTC+1)
     expect(formatInstant("2026-10-21T23:30:00Z")).toBe("22 octobre 2026");
+  });
+});
+
+describe("formatRelative", () => {
+  // Midi à Porto-Novo (UTC+1)
+  const now = new Date("2026-10-16T11:00:00Z");
+
+  it.each([
+    ["2026-10-16T10:59:30Z", "à l'instant"],
+    ["2026-10-16T10:55:00Z", "il y a 5 min"],
+    ["2026-10-16T08:00:00Z", "il y a 3 h"],
+    ["2026-10-15T20:00:00Z", "hier"],
+    ["2026-10-12T09:00:00Z", "il y a 4 j"],
+    ["2026-10-02T09:00:00Z", "2 octobre 2026"],
+  ])("%s → %s", (iso, expected) => {
+    expect(formatRelative(iso, now)).toBe(expected);
+  });
+
+  it("compte depuis maintenant par défaut", () => {
+    expect(formatRelative(new Date().toISOString())).toBe("à l'instant");
   });
 });

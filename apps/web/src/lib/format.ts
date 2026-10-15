@@ -18,10 +18,16 @@ export const DIFFICULTY_LABELS: Record<Schemas["DifficultyEnum"], string> = {
   advanced: "Avancé",
 };
 
-/** Carte d'un parcours public : lien vers sa fiche (WL22), couleur et emoji de sa catégorie. */
-export function toCourseCard(course: Schemas["CourseList"]): CourseCardData {
+/**
+ * Carte d'un parcours : lien vers sa fiche (WL22 par défaut, WC04 dans l'espace apprenant), couleur et emoji de sa
+ * catégorie.
+ */
+export function toCourseCard(
+  course: Schemas["CourseList"],
+  hrefOf: (slug: string) => string = routes.course,
+): CourseCardData {
   return {
-    href: routes.course(course.slug),
+    href: hrefOf(course.slug),
     title: course.title,
     difficulty: DIFFICULTY_LABELS[course.difficulty],
     isFree: course.isFree ?? false,

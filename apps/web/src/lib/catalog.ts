@@ -22,11 +22,15 @@ export async function getCategories(): Promise<Schemas["Category"][]> {
 export async function getCourses({
   category,
   featured,
+  price,
+  difficulty,
   page = 1,
   pageSize = COURSES_PAGE_SIZE,
 }: {
   category?: string;
   featured?: boolean;
+  price?: "free" | "paid";
+  difficulty?: Schemas["DifficultyEnum"];
   page?: number;
   pageSize?: number;
 }): Promise<CoursePage> {
@@ -36,7 +40,7 @@ export async function getCourses({
   try {
     const data = unwrap(
       await getPublicApi().GET("/api/catalog/courses/", {
-        params: { query: { category, featured, page, pageSize } },
+        params: { query: { category, featured, price, difficulty, page, pageSize } },
       }),
     );
     return { count: data.count ?? 0, results: data.results ?? [], hasNext: !!data.next };
@@ -73,6 +77,11 @@ export async function getHomeCourses(): Promise<Schemas["CourseList"][]> {
     (course) => !featured.some((f) => f.slug === course.slug),
   );
   return [...featured, ...popular].slice(0, 3);
+}
+
+/** Trois parcours gratuits de difficulté débutant, suggérés à l'apprenant qui n'a rien à reprendre (WD02, D27). */
+export async function getStarterCourses(): Promise<Schemas["CourseList"][]> {
+  return (await getCourses({ price: "free", difficulty: "beginner", pageSize: 3 })).results;
 }
 
 /** Slugs de tous les parcours publiés, pour le sitemap. */
