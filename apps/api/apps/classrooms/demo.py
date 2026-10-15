@@ -16,6 +16,7 @@ from apps.catalog.models import Course
 from apps.events.models import EventProposal, SteamyEvent
 from apps.referentials.models import Avatar, Relationship, SchoolGrade
 
+from .joining import enroll
 from .learner_invitations import Invitee, invite
 from .models import Classroom, ClassroomMembership, School
 
@@ -101,6 +102,7 @@ def seed_members(classrooms: list[Classroom], teacher, lea: User, password: str)
         ClassroomMembership.objects.create(
             classroom=classroom, learner=learner, status=Status.ACTIVE, joined_at=now
         )
+        enroll(learner, classroom.course)
     mother = Relationship.objects.get(code="mere")
     for first_name, last_name, phone, status in INVITATIONS:
         membership = invite(robotics, teacher, Invitee(first_name, last_name, phone, mother))

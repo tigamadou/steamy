@@ -3,6 +3,7 @@
 import pytest
 from django.contrib.auth import authenticate
 from django.core.management import CommandError, call_command
+from django.db.models import Q
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from apps.accounts.models import LearnerProfile, User
@@ -106,7 +107,7 @@ def test_catalog_has_published_courses_a_featured_one_a_draft_and_an_empty_categ
     call_command("seed_demo")
     call_command("seed_demo")
     published = Course.objects.filter(status=Course.Status.PUBLISHED)
-    assert published.count() == 4
+    assert published.count() == 5  # dont le parcours court du parcours Playwright P1 (API-L3a)
     assert published.filter(featured=True).count() == 1
     assert published.filter(is_free=False).exists() and published.filter(is_free=True).exists()
     assert Course.objects.filter(status=Course.Status.DRAFT).exists()
@@ -155,6 +156,64 @@ def test_seed_demo_gives_koffi_two_classrooms_within_the_offer():
     classrooms = Classroom.objects.filter(teacher=koffi)
     assert classrooms.count() == 2
     assert all(c.course.slug in OFFER_COURSES and c.school == school for c in classrooms)
+
+
+def test_lea_has_a_course_in_progress_a_finished_one_and_the_short_course_reset():
+    from apps.core.demo import SHORT_COURSE
+    from apps.learning.models import Enrollment, MissionProgress
+
+    call_command("seed_demo")
+    lea = User.objects.get(username="lea.adjovi")
+    short = Enrollment.objects.get(learner=lea, course__slug=SHORT_COURSE)
+    MissionProgress.objects.create(
+        enrollment=short, mission=short.course.projects.get().levels.get().missions.first()
+    )
+    call_command("seed_demo")
+    progress = dict(
+        Enrollment.objects.filter(learner=lea).values_list("course__slug", "progress_pct")
+    )
+    assert progress == {"decouverte-robotique": 30, "initiation-scratch": 100, SHORT_COURSE: 0}
+    assert not MissionProgress.objects.filter(enrollment=short).exists()
+    assert Enrollment.objects.get(learner=lea, course__slug=SHORT_COURSE).last_activity_at is None
+
+
+def test_every_level_and_project_has_a_quiz_and_lea_has_ok_warn_ko_attempts():
+    from apps.catalog.models import Level, Project, Quiz
+    from apps.learning.models import QuizAttempt
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    assert Quiz.objects.filter(kind="formative").count() == Level.objects.count()
+    assert Quiz.objects.filter(kind="summative").count() == Project.objects.count()
+    for quiz in Quiz.objects.all():
+        assert quiz.questions.count() == 2
+        for question in quiz.questions.all():
+            assert question.choices.filter(is_correct=True).count() == 1
+            question.full_clean()  # mission à revoir du même parcours
+    lea = QuizAttempt.objects.filter(learner__username="lea.adjovi")
+    assert set(lea.values_list("status", flat=True)) == {"ok", "warn", "ko"}
+    # « Initiation à Scratch » : tout réussi ; « Découverte » : formative du niveau 1.1 réussie au 3ᵉ essai
+    scratch = lea.filter(enrollment__course__slug="initiation-scratch")
+    assert (
+        scratch.count()
+        == Quiz.objects.filter(
+            Q(level__project__course__slug="initiation-scratch")
+            | Q(project__course__slug="initiation-scratch")
+        ).count()
+    )
+    assert not scratch.exclude(status="ok").exists()
+    discovery = lea.filter(enrollment__course__slug="decouverte-robotique").order_by("created_at")
+    assert list(discovery.values_list("status", flat=True)) == ["ko", "warn", "ok"]
+
+
+def test_seed_demo_e2e_shortens_the_summative_cooldown():
+    from apps.core.demo import E2E_SUMMATIVE_COOLDOWN
+    from apps.core.models import PlatformSettings
+
+    call_command("seed_demo")
+    assert PlatformSettings.load().summative_retry_cooldown_seconds == 600
+    call_command("seed_demo", "--e2e")
+    assert PlatformSettings.load().summative_retry_cooldown_seconds == E2E_SUMMATIVE_COOLDOWN
 
 
 def test_seed_demo_fills_koffis_classrooms_with_learners_and_invitations(sms):
