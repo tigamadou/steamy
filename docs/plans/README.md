@@ -135,6 +135,16 @@ Statut : 🟡 en cours · Prochaine tâche : API-1.2
   | Front, parcours | Playwright sur la stack Docker, un parcours par flux critique (inscription, consentement, paiement…) |
 
   L'outillage de test du front est mis en place à l'étape 1.0 du lot 1.
+- **Couverture : 100 % exigée.**
+
+  | Tests | Exigence | Contrôle |
+  | --- | --- | --- |
+  | Unitaires (API et front) | **100 % des lignes et des branches du code ajouté ou modifié** par la PR (le seuil global monte au fil de la refonte) | `diff-cover` en CI ; en local `make coverage-api` (et l'équivalent front livré à l'étape 1.0a) |
+  | E2E | **100 % des écrans v1** : tout écran livré a au moins un test Playwright, cité dans la [matrice écran → test](../tests/MATRICE-E2E.md) avec les parcours qu'il vérifie | Job CI `e2e-matrice` (`python3 scripts/e2e_matrix.py --check`) |
+
+  Un écran est **livré** dès que sa case est cochée dans la section « Avancement » de son plan : la même PR doit donc
+  remplir sa ligne de la matrice. Une exclusion de couverture (`# pragma: no cover`, `/* v8 ignore */`) n'est admise
+  que pour du code réellement inatteignable, avec un commentaire qui le justifie.
 - **Définition de « terminé »** (pour chaque écran) :
   - conforme à la spec alignée, la maquette servant de référence visuelle ;
   - responsive, du mobile (360 px) au bureau ;
@@ -142,7 +152,7 @@ Statut : 🟡 en cours · Prochaine tâche : API-1.2
   - accessible : navigation au clavier, focus visible, libellés, contrastes AA ;
   - tous les états gérés : chargement, vide, erreur, hors ligne ;
   - aucune donnée de démonstration codée en dur ;
-  - tests passants.
+  - tests passants, couverture unitaire à 100 % sur le code modifié, et ligne de la matrice e2e remplie.
 - **Données de démonstration** : un jeu unique (D2), chargé par une commande Django (`make seed`), sert au
   développement, aux tests de parcours et à la recette.
 
