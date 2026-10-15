@@ -27,6 +27,8 @@ services:
       THROTTLE_ANON: 1000/min
       THROTTLE_LOGIN: 1000/min
       THROTTLE_LOGIN_IDENTIFIER: 1000/hour
+      # Formulaires publics (devis, contact, newsletter) : 10/heure par IP en production, épuisé par les reprises
+      THROTTLE_PUBLIC_FORM: 1000/hour
     networks:
       default:
         aliases: [api.steamy.test]

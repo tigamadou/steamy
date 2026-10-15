@@ -12,6 +12,7 @@ export const site = {
   mission:
     "Nous formons les inventeurs de demain. Notre mission : faire naître des champions du numérique, partout en Afrique francophone.",
   copyright: "© 2026 Steamy · Cotonou, Bénin",
+  address: "Steamy · Cotonou, Bénin",
   // Comptes officiels : à confirmer par le porteur produit avant la mise en production.
   social: [
     { network: "instagram", label: "Instagram", href: "https://www.instagram.com/steamy" },
@@ -68,5 +69,41 @@ export const about = {
     { name: "Inès Kpadonou", role: "Événements", emoji: "🐼", color: "var(--cat-code)" },
   ],
 } as const;
+
+/**
+ * Offres B2B de WL11 (D13) : contenu éditorial, quotas contrôlés par le serveur (D61). Sans « tableau de bord
+ * établissement » ni « API & intégrations » (hors v1).
+ */
+export const schoolOffers = [
+  {
+    slug: "classe",
+    name: "Classe",
+    price: "50 000 F CFA",
+    unit: "/ mois",
+    features: ["1 classe (jusqu'à 30 élèves)", "Suivi formateur", "Rapports de progression"],
+    color: "var(--cat-code)",
+    featured: false,
+  },
+  {
+    slug: "ecole",
+    name: "École",
+    price: "180 000 F CFA",
+    unit: "/ mois",
+    features: ["Jusqu'à 5 classes", "Kits à tarif préférentiel", "Formation des formateurs"],
+    color: "var(--primary-600)",
+    featured: true,
+  },
+  {
+    slug: "reseau",
+    name: "Réseau",
+    price: "Sur devis",
+    unit: "",
+    features: ["Classes illimitées", "Multi-établissements", "Accompagnement dédié"],
+    color: "var(--info-700)",
+    featured: false,
+  },
+] as const;
+
+export type SchoolOfferSlug = (typeof schoolOffers)[number]["slug"];
 
 export type SocialNetwork = (typeof site.social)[number]["network"];
