@@ -644,6 +644,8 @@ DEMO_RANK_THRESHOLDS = [
     {"rank": "Ingénieur", "points": 600},
     {"rank": "Maître Steamy", "points": 1000},
 ]
+#: « Mes souhaits » de Léa (WW01) : un parcours à kit et un parcours payant
+LEA_WISHLIST = ["robot-bluetooth", "capteurs-electroniques"]
 #: Secondes de vidéo de Léa, d'aujourd'hui (0) aux jours précédents : un streak de 5 jours (WD01, WD21).
 LEA_ACTIVITY = [600, 1200, 900, 300, 1500]
 
@@ -714,6 +716,12 @@ def seed_learning(accounts: dict[str, User]) -> None:
         enrollment.save()
         # Parcours fini : terminé, points et badge du parcours, certificat (gardé d'un seed à l'autre) et ticket
         complete_if_done(enrollment)
+    from apps.wishlist.models import WishlistItem
+
+    for slug in LEA_WISHLIST:
+        WishlistItem.objects.get_or_create(
+            learner=lea, course=catalog.Course.objects.get(slug=slug)
+        )
     today = timezone.localdate()
     for days_ago, seconds in enumerate(LEA_ACTIVITY):
         LearningActivity.objects.create(

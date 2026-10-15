@@ -62,6 +62,7 @@ def test_dashboard_without_course_nor_scale_is_wd02(client):
         "completedEnrollments": 0,
         "certificates": 0,
         "badges": 0,
+        "wishlist": 0,
     }
 
 

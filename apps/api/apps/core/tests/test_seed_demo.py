@@ -256,3 +256,14 @@ def test_lea_dashboard_resumes_a_course_and_recommends_from_her_goals():
     assert body["counters"]["certificates"] == 1
     recommended = client.get("/api/learning/recommendations/").json()
     assert recommended and recommended[0]["matchesGoals"] is True
+
+
+def test_lea_has_two_courses_in_her_wishlist():
+    from apps.wishlist.models import WishlistItem
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    slugs = WishlistItem.objects.filter(learner__username="lea.adjovi").values_list(
+        "course__slug", flat=True
+    )
+    assert sorted(slugs) == ["capteurs-electroniques", "robot-bluetooth"]

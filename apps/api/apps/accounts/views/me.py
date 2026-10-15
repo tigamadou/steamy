@@ -20,6 +20,7 @@ class LearnerCountersSerializer(serializers.Serializer):
     completed_enrollments = serializers.IntegerField()
     certificates = serializers.IntegerField()
     badges = serializers.IntegerField()
+    wishlist = serializers.IntegerField(help_text="Parcours dans « Mes souhaits »")
 
 
 class MeSerializer(serializers.ModelSerializer):
