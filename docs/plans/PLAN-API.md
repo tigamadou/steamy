@@ -558,7 +558,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > celles de ses enfants (404 sinon), avec `parentFirstName`, `learner`, `orderReference`. La demande est réglée
   > par une commande qui la référence (`Order.paymentRequest`) ; le passage de `paymentRequestId` à
   > `POST payments/orders/` reste à API-L4.2 (WPD15). Expiration horaire (`expire_payment_requests`, à la 45ᵉ minute).
-- [x] **API-L3b.6** Candidatures · `feature/api-l3b-6-candidatures`
+- [x] **API-L3b.6** Candidatures · `feature/api-l3b-6-candidatures` · PR #90
   - [x] `EventApplication`, `EventTicket` consommé
   - [x] `POST events/{slug}/applications/`, `GET events/applications/`, `GET events/tickets/`
   - [x] Codes `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED`
