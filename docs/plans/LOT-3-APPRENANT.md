@@ -18,7 +18,7 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
 
 ### Valeur pédagogique (API-L3a) — 🟡 en cours
-- [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #—
+- [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
   - [x] `AppShell` (props de §5.5, sidebar repliable en tiroir sous 768 px)
   - [x] `NavItem`, `NotificationBell`, `HeaderSearch`
   - [x] WD16 `LogoutModal`
