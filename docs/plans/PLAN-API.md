@@ -205,10 +205,10 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Plafond quotidien par numéro **et** par IP (`PlatformSettings`, D24)
   - [x] `POST auth/otp/resend/`, codes `OTP_*`
   - [x] Tests : expiré, 4ᵉ essai, renvoi trop tôt, plafond IP
-- [ ] **API-L2.2** Inscription parent · `feature/api-l2-2-parent-signup`
-  - [ ] `POST auth/parent-signup/`, `…/verify/` (`existingAccount`), `…/password/`
-  - [ ] Réponse neutre si numéro déjà inscrit (C13) ; compte créé seulement après OTP valide
-  - [ ] Tests : numéro déjà inscrit → même réponse qu'un numéro libre, aucun flux n'accepte `role`
+- [x] **API-L2.2** Inscription parent · `feature/api-l2-2-parent-signup`
+  - [x] `POST auth/parent-signup/`, `…/verify/` (`existingAccount`), `…/password/`
+  - [x] Réponse neutre si numéro déjà inscrit (C13) ; compte créé seulement après OTP valide
+  - [x] Tests : numéro déjà inscrit → même réponse qu'un numéro libre, aucun flux n'accepte `role`
 - [ ] **API-L2.3** Inscription apprenant · `feature/api-l2-3-learner-signup`
   - [ ] `GET auth/username-availability/` (throttlé)
   - [ ] `POST/GET auth/learner-signup/`, `…/resume/` (C5), `…/password/` ; `SignupSession` + code de reprise haché (D21, C14)
