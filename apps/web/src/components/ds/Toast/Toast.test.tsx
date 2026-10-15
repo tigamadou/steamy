@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -14,6 +15,10 @@ describe("Toast", () => {
     expect(status).toHaveTextContent("Parcours ajouté à ta liste");
     expect(container).not.toContainElement(status);
     expect(status.parentElement).toBe(document.body);
+  });
+
+  it("ne rend rien côté serveur (pas de document pour le portail)", () => {
+    expect(renderToString(<Toast title="Envoyé" />)).toBe("");
   });
 
   it.each(["success", "error", "warning", "info"] as ToastTone[])("rend le ton %s", (tone) => {

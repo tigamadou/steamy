@@ -20,6 +20,11 @@ describe("Logo", () => {
     expect(img.getAttribute("style") ?? "").not.toContain("filter");
   });
 
+  it("se charge immédiatement avec eager", () => {
+    render(<Logo eager />);
+    expect(screen.getByRole("img", { name: "Steamy" })).toHaveAttribute("loading", "eager");
+  });
+
   it("ne présente aucune violation d'accessibilité", async () => {
     const { container } = render(<Logo />);
     expect(await axe(container)).toHaveNoViolations();

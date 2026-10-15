@@ -6,7 +6,7 @@ import { axe } from "@/test/axe";
 
 import { Field } from "../Field";
 import { PhoneInput } from "./PhoneInput";
-import { flagEmoji, formatNational, toE164, type PhoneCountry } from "./phone";
+import { flagEmoji, formatNational, isValidNational, toE164, type PhoneCountry } from "./phone";
 
 // Données de test au format de `referentials/countries/` (jamais codées en dur dans le composant)
 const COUNTRIES: PhoneCountry[] = [
@@ -28,6 +28,17 @@ describe("utilitaires de téléphone", () => {
     expect(toE164("0190123456", COUNTRIES[0])).toBe("+2290190123456");
     expect(toE164("90123456", COUNTRIES[0])).toBeNull();
     expect(toE164("90123456", COUNTRIES[1])).toBe("+22890123456");
+  });
+
+  it("valide par la longueur du gabarit, ou au minimum 4 chiffres, sans expression régulière", () => {
+    const byFormat: PhoneCountry = { code: "NE", name: "Niger", dialCode: "227", format: "XX XX XX XX" };
+    expect(isValidNational("90123456", byFormat)).toBe(true);
+    expect(isValidNational("9012345", byFormat)).toBe(false);
+    const bare: PhoneCountry = { code: "ML", name: "Mali", dialCode: "223" };
+    expect(isValidNational("1234", bare)).toBe(true);
+    expect(isValidNational("123", bare)).toBe(false);
+    expect(isValidNational("", bare)).toBe(false);
+    expect(isValidNational("1", { ...bare, format: "-" })).toBe(false);
   });
 });
 
@@ -82,6 +93,17 @@ describe("PhoneInput", () => {
     expect(onChange).toHaveBeenLastCalledWith({ country: "BJ", national: "1234", e164: null, valid: false });
     expect(input).toHaveAttribute("aria-invalid", "true");
     expect(document.querySelector<HTMLInputElement>('input[name="phone"]')?.value).toBe("");
+  });
+
+  it("reste utilisable avec une liste de pays vide ou un pays initial inconnu", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const { unmount } = render(<PhoneInput countries={[]} onChange={onChange} />);
+    await user.type(screen.getByRole("textbox"), "12");
+    expect(onChange).toHaveBeenLastCalledWith({ country: "", national: "12", e164: null, valid: false });
+    unmount();
+    render(<PhoneInput countries={COUNTRIES} defaultCountry="ZZ" />);
+    expect(screen.getByRole("combobox", { name: "Pays" })).toHaveValue("BJ");
   });
 
   it("ne présente aucune violation d'accessibilité", async () => {

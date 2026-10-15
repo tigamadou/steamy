@@ -47,7 +47,7 @@ describe("Button", () => {
 
   it("se rend en lien avec href", () => {
     render(
-      <Button href="/inscription" variant="outline-inverse" iconRight="arrow-right">
+      <Button href="/inscription" variant="outline-inverse" icon="user" iconRight="arrow-right">
         Créer un compte
       </Button>,
     );
@@ -64,6 +64,13 @@ describe("Button", () => {
     );
     expect(container.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
     expect(screen.getByRole("button")).toHaveClass("w-full");
+  });
+
+  it("peut être désactivé", () => {
+    render(<Button disabled>Indisponible</Button>);
+    const button = screen.getByRole("button", { name: "Indisponible" });
+    expect(button).toBeDisabled();
+    expect(button).not.toHaveAttribute("aria-busy");
   });
 
   it("ne présente aucune violation d'accessibilité", async () => {

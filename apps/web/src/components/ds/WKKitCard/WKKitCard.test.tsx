@@ -33,6 +33,12 @@ describe("WKKitCard (vitrine)", () => {
     expect(screen.getByText(label)).toBeInTheDocument();
   });
 
+  it("prend la couleur robotique par défaut", () => {
+    const { container } = render(<WKKitCard kit={{ ...KIT, color: undefined, emoji: undefined, description: undefined }} />);
+    const media = container.querySelector<HTMLElement>("article > div");
+    expect(media?.style.getPropertyValue("--card-color")).toBe("var(--cat-robotique)");
+  });
+
   it("ne présente aucune violation d'accessibilité", async () => {
     const { container } = render(<WKKitCard kit={KIT} />);
     expect(await axe(container)).toHaveNoViolations();

@@ -49,6 +49,12 @@ describe("CourseCard", () => {
     expect(onFav).toHaveBeenCalledOnce();
   });
 
+  it("prend la couleur robotique par défaut", () => {
+    const { container } = render(<CourseCard course={{ ...PAID, color: undefined, emoji: undefined }} />);
+    const media = container.querySelector<HTMLElement>("article > div");
+    expect(media?.style.getPropertyValue("--card-color")).toBe("var(--cat-robotique)");
+  });
+
   it("ne présente aucune violation d'accessibilité", async () => {
     const { container } = render(
       <div>
