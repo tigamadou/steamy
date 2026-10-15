@@ -4079,7 +4079,7 @@ components:
           readOnly: true
         origin:
           allOf:
-          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/OriginEnum'
           readOnly: true
           title: Origine
         status:
@@ -5754,6 +5754,18 @@ components:
       - title
       - total
       - unitPrice
+    OriginEnum:
+      enum:
+      - learner
+      - parent
+      - teacher
+      - support
+      type: string
+      description: |-
+        * `learner` - Apprenant
+        * `parent` - Parent
+        * `teacher` - Enseignant
+        * `support` - Support
     OtpChallenge:
       type: object
       description: 'Défi OTP en cours : sert au compte à rebours de WP02 / WL03.'

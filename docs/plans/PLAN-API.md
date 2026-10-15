@@ -519,19 +519,29 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Un enseignant ne peut pas créer de contenu (S5)
   - [ ] Seed enrichi, `make openapi` committé
 
-### API-L6 · Back-office — ⬜ à faire
+### API-L6 · Back-office — 🟡 en cours
 - [x] **API-L6.1** 2FA (D72) · réalisée par LOT-6-ADMIN 6.1 (`feature/lot6-socle-staff`, PR #38)
   - [x] `django-otp` + `otp_totp`, `OTPMiddleware`, `OTPAdminSite` (WAD15)
   - [x] Enrôlement TOTP au premier login (QR code), réinitialisation par un Super-admin
   - [x] Session du personnel limitée à 8 h (C20) ; secret TOTP fixe de développement dans `seed_demo`
   - [x] `IsStaffVerified` sur toute route `backoffice/`, sinon `OTP_REQUIRED`
   - [x] Tests : staff sans OTP vérifié → `OTP_REQUIRED` et redirection admin, non-staff → 403
-- [ ] **API-L6.2** Admin thémé et RBAC · `feature/api-l6-2-admin-rbac`
-  - [ ] Thème monochrome `--ink-*` dans `fixtures/admin.json`, titre « Steamy »
+- [ ] **API-L6.2** Admin thémé et RBAC · `feature/api-l6-2-admin-rbac` · PR #61 (partie comptes)
+  - [x] Thème monochrome `--ink-*` dans `fixtures/admin.json`, titre « Steamy » (livré par LOT-6 6.1, PR #38)
   - [ ] Enregistrement de tous les modèles avec permissions par groupe (D71)
-  - [ ] Actions : rembourser, refuser une candidature avec remboursement (C3), relancer une demande, litige de consentement, changement de parent, modération `PublicProfileReview` (D15), suspendre
-  - [ ] `AuditLog` écrit par un mixin d'admin
-  - [ ] Tests : groupe Contenu sans accès aux paiements, staff ne peut pas accepter un consentement (D70)
+    - [x] Comptes : permissions personnalisées déclarées (`invite_teacher`, `deactivate_user`, `reset_password`, `view_sensitive_profile`, `change_parent`, `resend`, `flag_dispute`) ; `UserAdmin` limité aux personas, sans ajout ni changement de rôle, statut ou identifiant ; champs sensibles des profils soumis à *view_sensitive_profile* (D6) ; `StaffMemberAdmin` (Super-admin seul, garde-fous du dernier Super-admin)
+    - [ ] Catalogue (`publish_course`) : avec API-L3a (LOT-6 6.3)
+    - [ ] Commerce et événements (`set_shipping_status`, `revoke_kitcode`, `process_refund`, `refuse_application`) : avec API-L3b (LOT-6 6.4, 6.5)
+  - [ ] Actions
+    - [x] Relancer une demande (plafonds de W07), litige de consentement (`disputedAt`, `disputeNote`), changement de parent (`replacesLink`, lien remplacé à l'acceptation), modération `PublicProfileReview` (D15), suspendre / désactiver / réactiver (motif)
+    - [ ] Rembourser, refuser une candidature avec remboursement (C3) : attendent `Refund` et `EventApplication` refondus (API-L3b)
+  - [x] `AuditLog` écrit par un mixin d'admin (LOT-6 6.1) ; actions à motif journalisées par leur service (`apps/accounts/backoffice.py`)
+  - [x] Tests : groupe Contenu sans accès aux paiements, staff ne peut pas accepter un consentement (D70)
+  > Décisions : le changement de parent crée une `ConsentRequest` d'origine `support` (nouvelle valeur de `origin`,
+  > `OriginEnum` dans le schéma) ; `consent.accept` remplace alors le lien existant au lieu d'en créer un, et prévient
+  > l'ancien parent par SMS. Le support ne peut ni suspendre un compte en attente de consentement ni toucher au
+  > personnel ; le personnel ne se gère que dans l'équipe (WAD13), ce qui retire au Support la possibilité de modifier
+  > `is_staff` et les groupes depuis la fiche utilisateur.
 - [ ] **API-L6.3** Réglages · `feature/api-l6-3-reglages`
   - [ ] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
 - [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact`

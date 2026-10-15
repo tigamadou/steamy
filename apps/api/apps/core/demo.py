@@ -17,6 +17,7 @@ from apps.accounts.models import (
     LearnerProfile,
     ParentChildLink,
     ParentProfile,
+    PublicProfileReview,
     TeacherProfile,
     User,
 )
@@ -624,6 +625,20 @@ def seed_kits() -> None:
         catalog.Course.objects.filter(slug__in=required_by).update(required_kit=kit)
 
 
+def seed_backoffice(accounts: dict[str, User]) -> None:
+    """WAD08 : le pseudonyme public de Léa attend la modération du support (D15)."""
+    PublicProfileReview.objects.update_or_create(
+        learner=accounts["lea"],
+        pseudonym="LéaBot",
+        defaults={
+            "avatar": Avatar.objects.get(code="hibou"),
+            "status": PublicProfileReview.Status.PENDING,
+            "reviewed_by": None,
+            "reviewed_at": None,
+        },
+    )
+
+
 #: Inscriptions de Léa : parcours, nombre de missions faites (None : toutes). Les quiz suivant des missions faites
 #: sont réussis ; « Découverte de la robotique » montre en plus une tentative `ko` puis `warn` avant la réussite
 #: (WD07). Le parcours court de P1 repart de zéro à chaque seed, pour rejouer le parcours Playwright.
@@ -771,6 +786,7 @@ def seed_e2e() -> None:
 
 def seed_all() -> dict[str, User]:
     accounts = seed_accounts()
+    seed_backoffice(accounts)
     seed_classrooms(accounts)
     seed_notifications(accounts)
     seed_catalog()
