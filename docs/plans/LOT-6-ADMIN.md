@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API), 6.6 · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API), 6.7 et 6.8 (après API-L6.4) · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -85,15 +85,20 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   - [ ] Journal d'audit (`core/auditlog/`) en lecture seule
   - [ ] Tests : aucune action ne fait passer une candidature à `accepted` (S3, C3) ; refus exceptionnel d'une candidature payée crée un `Refund`
   - [ ] Tests : singleton non dupliquable ; réseau désactivé retiré de l'endpoint public ; seuil hors bornes refusé
-- [ ] **6.6** Socle Next.js du back-office · `feature/lot6-backoffice-shell` (requiert 6.1 ; outillage du lot 1, étape 1.0)
-  - [ ] Layout serveur `(backoffice)/backoffice/` : garde (`accounts/me/`, staff, `otpVerified`), redirection vers `<API_URL>/admin/login/?next=…`, métadonnées `noindex`
-  - [ ] Revérification du groupe par page et route `/backoffice/acces-refuse`
-  - [ ] `AdminShell` (groupes Pilotage / Plateforme / Système selon les groupes, déconnexion `POST auth/logout/`, menu repliable < 1024 px)
-  - [ ] Primitives `Sparkline`, `BarChart`, `DonutChart`, `StatCard`, `DataTable`, `SegmentedControl`, `SourceTag`, `KpiStatusBadge`, `DeadlineTracker`, `StatusBadge` (SVG accessibles, « Voir les données »)
-  - [ ] Garde-fous : ESLint `no-restricted-imports` et test interdisant `--primary-*`
-  - [ ] États `loading.tsx`, `error.tsx` (WX02), hors ligne (WX01)
-  - [ ] Tests Vitest sur chaque primitive (rendu, valeurs vides, accessibilité)
-  - [ ] Playwright : anonyme et parent redirigés vers WAD15 ; staff vérifié voit le shell ; Contenu sur `/backoffice/impact` = accès refusé
+- [x] **6.6** Socle Next.js du back-office · `feature/lot6-backoffice-shell` · PR #__PR__ (requiert 6.1 ; outillage du lot 1, étape 1.0)
+  - [x] Layout serveur `(backoffice)/backoffice/` : garde (`accounts/me/`, staff, `otpVerified`), redirection vers `<API_URL>/admin/login/?next=…`, métadonnées `noindex`
+  - [x] Revérification du groupe par page et route `/backoffice/acces-refuse`
+  - [x] `AdminShell` (groupes Pilotage / Plateforme / Système selon les groupes, déconnexion `POST auth/logout/`, menu repliable < 1024 px)
+  - [x] Primitives `Sparkline`, `BarChart`, `DonutChart`, `StatCard`, `DataTable`, `SegmentedControl`, `SourceTag`, `KpiStatusBadge`, `DeadlineTracker`, `StatusBadge` (SVG accessibles, « Voir les données »)
+  - [x] Garde-fous : ESLint `no-restricted-imports` et test interdisant `--primary-*`
+  - [x] États `loading.tsx`, `error.tsx` (WX02), hors ligne (WX01)
+  - [x] Tests Vitest sur chaque primitive (rendu, valeurs vides, accessibilité)
+  - [x] Playwright : anonyme et parent redirigés vers WAD15 ; staff vérifié voit le shell ; Contenu sur `/backoffice/impact` = accès refusé
+  > Notes : `/backoffice` et `/backoffice/impact` affichent un panneau d'attente sans donnée, remplacé par WAD01 (6.7)
+  > et WAD02 (6.8). Le lien « Modération » vise `admin/accounts/consentrequest/`, enregistré à l'étape 6.2. Les
+  > valeurs de `SourceTag` (`auto`, `manual`, `unavailable`) sont à aligner sur le contrat d'`API-L6.4`.
+  > Le refus de `/backoffice/impact` est vérifié en e2e avec le compte Support (aussi hors Finance et Super-admin) :
+  > Contenu reçoit des codes faux dans `admin-connexion.spec.ts`, ce qui déclenche la limitation de django-otp.
 - [ ] **6.7** WAD01 Vue d'ensemble · `feature/lot6-vue-ensemble` (requiert 6.6, API-L6.4)
   - [ ] WAD01 (Next.js) `/backoffice` : hero, 4 `StatCard`, carte échéance (`DeadlineTracker`), liste « À traiter »
   - [ ] Branchement API : `GET backoffice/overview/` (entrées « À traiter » filtrées par groupe, `adminPath` fourni par le serveur)
