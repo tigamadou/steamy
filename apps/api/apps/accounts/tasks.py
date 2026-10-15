@@ -1,10 +1,18 @@
 """Tâches planifiées des comptes (CELERY_BEAT_SCHEDULE), relançables sans effet double ; `manage.py <tâche>`."""
 
 from celery import shared_task
+from django.conf import settings
+from django.core.mail import send_mail
 from django.utils import timezone
 
+from apps.core.models import PlatformSettings
+from apps.notifications.sms import queue_sms
+
 from .consent import RETENTION
-from .models import ConsentRequest, User
+from .models import ConsentRequest, OtpChallenge, User
+from .otp import code_text
+
+RESET_EMAIL_SUBJECT = "Steamy : votre code de réinitialisation"
 
 
 @shared_task
@@ -36,3 +44,20 @@ def purge_refused_requests() -> int:
         status__in=closed, resolved_at__lte=timezone.now() - RETENTION
     ).delete()
     return deleted
+
+
+@shared_task(autoretry_for=(OSError,), retry_backoff=True, max_retries=5)
+def send_reset_code(challenge_id: str, code: str) -> bool:
+    """
+    Envoie le code de « mot de passe oublié » (WL02) : SMS au parent, email à l'enseignant (C6). Rien si la saisie
+    ne désignait aucun compte : la requête HTTP a fait le même travail dans les deux cas.
+    """
+    challenge = OtpChallenge.objects.filter(pk=challenge_id, user__isnull=False).first()
+    if challenge is None:
+        return False
+    text = code_text(code, PlatformSettings.load())
+    if challenge.email:
+        send_mail(RESET_EMAIL_SUBJECT, text, settings.DEFAULT_FROM_EMAIL, [challenge.email])
+    else:
+        queue_sms(challenge.phone, text, purpose=challenge.purpose)
+    return True

@@ -80,6 +80,14 @@ CATALOG: dict[str, tuple[int, str]] = {
         "Cette inscription a expiré. Tu peux recommencer depuis le début.",
     ),
     "INVITATION_INVALID": (S.HTTP_400_BAD_REQUEST, "Ce lien d'invitation n'est plus valide."),
+    "PASSWORD_RESET_BY_PARENT": (
+        S.HTTP_400_BAD_REQUEST,
+        "Demande à ton parent : il peut changer ton mot de passe depuis son espace Steamy.",
+    ),
+    "RESET_TOKEN_INVALID": (
+        S.HTTP_400_BAD_REQUEST,
+        "Cette réinitialisation a expiré. Recommencez depuis « Mot de passe oublié ».",
+    ),
     "OTP_REQUIRED": (S.HTTP_403_FORBIDDEN, "Validation en deux étapes requise."),
     # --- Comptes ----------------------------------------------------------------------------
     "CONSENT_REQUEST_EXPIRED": (S.HTTP_410_GONE, "Cette demande a expiré."),

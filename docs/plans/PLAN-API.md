@@ -265,9 +265,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `PATCH accounts/me/`, `…/learner-profile/` (`BIRTHDATE_AGE_MISMATCH`, objectifs ≥ 2), `…/parent-profile/`
   - [x] Tests : cohérence date de naissance / âge
   - [x] `ParentProfile.children_to_enroll` (WP09 « Nombre d'enfants à inscrire »), exigé par `profileStep`
-- [ ] **API-L2.6** Mot de passe oublié · `feature/api-l2-6-reset-password`
-  - [ ] `POST auth/password-reset/` (parent OTP SMS, enseignant code email, apprenant refus D26), `…/verify/`, `…/confirm/`
-  - [ ] Tests : pas d'énumération (même réponse, même durée)
+- [x] **API-L2.6** Mot de passe oublié · `feature/api-l2-6-reset-password`
+  - [x] `POST auth/password-reset/` (parent OTP SMS, enseignant code email, apprenant refus D26), `…/verify/`, `…/confirm/`
+  - [x] Tests : pas d'énumération (même réponse, même travail dans la requête : défi créé et tâche d'envoi programmée dans tous les cas)
 - [ ] **API-L2.7** Activation enseignant · `feature/api-l2-7-activation-enseignant`
   - [ ] App `classrooms` amorcée : `School` minimale, `TeacherInvitation`
   - [ ] Invitation créée depuis l'admin Django (action « Envoyer »)

@@ -34,3 +34,9 @@ def normalize_phone(value: str, default_dial_code: str = DEFAULT_DIAL_CODE) -> s
 def mask_phone(phone: str) -> str:
     """Numéro E.164 masqué pour l'affichage et les journaux : indicatif et deux derniers chiffres (« +229 •• 00 »)."""
     return f"{phone[:4]} •• {phone[-2:]}" if len(phone or "") > 6 else "••"
+
+
+def mask_email(email: str) -> str:
+    """Email masqué : première lettre et domaine (« k•••@steamy.test »)."""
+    local, _, domain = (email or "").partition("@")
+    return f"{local[:1]}•••@{domain}" if local and domain else "••"

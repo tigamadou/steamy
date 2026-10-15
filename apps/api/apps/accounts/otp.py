@@ -43,10 +43,10 @@ def _counter_key(kind: str, value: str) -> str:
     return f"otp-daily:{kind}:{today}:{value}"
 
 
-def consume_sms_quota(phone: str, ip: str, config: PlatformSettings) -> None:
-    """Compte un SMS pour le numéro et pour l'IP ; refuse au-delà des plafonds quotidiens (D24)."""
+def consume_send_quota(destination: str, ip: str, config: PlatformSettings) -> None:
+    """Compte un envoi pour le destinataire (numéro ou email) et pour l'IP ; refuse au-delà des plafonds (D24)."""
     limits = (
-        ("phone", phone, config.otp_daily_limit_per_phone),
+        ("to", destination.lower(), config.otp_daily_limit_per_phone),
         ("ip", ip, config.otp_daily_limit_per_ip),
     )
     for kind, value, limit in limits:
@@ -66,17 +66,29 @@ def _send_code(challenge: OtpChallenge, config: PlatformSettings) -> None:
     challenge.last_sent_at = now
     challenge.attempts = 0
     challenge.save()
-    minutes = max(1, config.otp_validity_seconds // 60)
-    queue_sms(
-        challenge.phone, SMS_TEXT.format(code=code, minutes=minutes), purpose=challenge.purpose
-    )
+    if challenge.purpose == OtpChallenge.Purpose.PASSWORD_RESET:
+        # Mot de passe oublié : même travail que le compte existe ou non (pas d'énumération) ; la tâche
+        # n'envoie le code que si le défi désigne un compte.
+        from .tasks import send_reset_code
+
+        transaction.on_commit(lambda: send_reset_code.delay(str(challenge.pk), code))
+        return
+    queue_sms(challenge.phone, code_text(code, config), purpose=challenge.purpose)
 
 
-def start_challenge(phone: str, purpose: str, ip: str, data: dict | None = None) -> OtpChallenge:
-    """Crée un défi et envoie son code. `phone` est déjà normalisé en E.164."""
+def code_text(code: str, config: PlatformSettings) -> str:
+    return SMS_TEXT.format(code=code, minutes=max(1, config.otp_validity_seconds // 60))
+
+
+def start_challenge(
+    phone: str, purpose: str, ip: str, data: dict | None = None, *, email: str = "", user=None
+) -> OtpChallenge:
+    """
+    Crée un défi et envoie son code, par SMS (`phone`, déjà en E.164) ou par email (`email`, enseignant, C6).
+    """
     config = PlatformSettings.load()
-    consume_sms_quota(phone, ip, config)
-    challenge = OtpChallenge(phone=phone, purpose=purpose, data=data or {})
+    consume_send_quota(phone or email, ip, config)
+    challenge = OtpChallenge(phone=phone, email=email, user=user, purpose=purpose, data=data or {})
     _send_code(challenge, config)
     return challenge
 
@@ -97,7 +109,7 @@ def resend_challenge(challenge_id, ip: str) -> OtpChallenge:
     challenge = get_open_challenge(challenge_id)
     if resend_in_seconds(challenge, config) > 0:
         raise ApiError("OTP_RESEND_TOO_EARLY")
-    consume_sms_quota(challenge.phone, ip, config)
+    consume_send_quota(challenge.phone or challenge.email, ip, config)
     _send_code(challenge, config)
     return challenge
 
