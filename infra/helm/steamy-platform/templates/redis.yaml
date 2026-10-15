@@ -1,4 +1,4 @@
-# Redis : cache, sessions, broker Celery, Channels.
+# Redis : cache, cache des sessions, broker Celery.
 # Persistance AOF : un redémarrage ne doit pas perdre les tâches Celery en attente
 # (SMS de consentement parental, e-mails…).
 apiVersion: apps/v1

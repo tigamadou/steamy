@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from apps.accounts.tests.factories import LearnerFactory, StaffFactory, TeacherFactory
 from apps.courses.models import Course, Lesson, Module
 from apps.learning.models import Enrollment
 
@@ -12,8 +13,8 @@ User = get_user_model()
 @pytest.mark.django_db
 def test_student_enroll_and_access_lessons():
     client = APIClient()
-    teacher = User.objects.create_user(email="teacher3@example.com", password="pw", role="teacher")
-    student = User.objects.create_user(email="student4@example.com", password="pw", role="student")
+    teacher = TeacherFactory(email="teacher3@example.com")
+    student = LearnerFactory()
 
     # create course + module + lesson
     course = Course.objects.create(
@@ -61,7 +62,7 @@ WRITE_CASES = [
 @pytest.mark.parametrize("role", ["student", "teacher", "staff"])
 @pytest.mark.parametrize("method,url,payload", WRITE_CASES)
 def test_course_content_is_read_only_for_every_role(role, method, url, payload):
-    teacher = User.objects.create_user(email="auteur@example.com", password="pw", role="teacher")
+    teacher = TeacherFactory(email="auteur@example.com")
     course = Course.objects.create(title="C", slug="c", author=teacher, published=True)
     module = Module.objects.create(course=course, title="M1", order=0)
     lesson = Lesson.objects.create(module=module, title="L1", order=0)
@@ -73,11 +74,11 @@ def test_course_content_is_read_only_for_every_role(role, method, url, payload):
     }
 
     if role == "staff":
-        actor = User.objects.create_user(email="staff@example.com", password="pw", is_staff=True)
+        actor = StaffFactory(email="staff@example.com")
     elif role == "teacher":
         actor = teacher  # même l'auteur du cours ne peut plus écrire par l'API
     else:
-        actor = User.objects.create_user(email="eleve@example.com", password="pw", role="student")
+        actor = LearnerFactory()
     Enrollment.objects.create(user=actor, course=course)
     client = APIClient()
     client.force_authenticate(user=actor)
@@ -93,7 +94,7 @@ def test_course_content_is_read_only_for_every_role(role, method, url, payload):
 
 @pytest.mark.django_db
 def test_unpublished_course_and_author_email_are_hidden():
-    teacher = User.objects.create_user(email="auteur@example.com", password="pw", role="teacher")
+    teacher = TeacherFactory(email="auteur@example.com")
     Course.objects.create(title="Publié", slug="publie", author=teacher, published=True)
     Course.objects.create(title="Brouillon", slug="brouillon", author=teacher, published=False)
 

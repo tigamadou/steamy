@@ -546,56 +546,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/messaging/notifications/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["messaging_notifications_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/messaging/notifications/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["messaging_notifications_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        patch: operations["messaging_notifications_partial_update"];
-        trace?: never;
-    };
     "/api/payments/orders/": {
         parameters: {
             query?: never;
@@ -722,38 +672,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/public/user/forgot-password-step-1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["public_user_forgot_password_step_1_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/public/user/forgot-password-step-2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["public_user_forgot_password_step_2_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/public/user/session-login": {
         parameters: {
             query?: never;
@@ -770,38 +688,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/user/change-email": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["user_change_email_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/user/change-password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["user_change_password_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/user/my-profile": {
         parameters: {
             query?: never;
@@ -810,12 +696,12 @@ export interface paths {
             cookie?: never;
         };
         get: operations["user_my_profile_retrieve"];
-        put: operations["user_my_profile_update"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch: operations["user_my_profile_partial_update"];
+        patch?: never;
         trace?: never;
     };
     "/api/user/session-logout": {
@@ -914,16 +800,6 @@ export interface components {
         CsrfToken: {
             csrfToken: string;
         };
-        /**
-         * @description Modified from rest_framework.authtoken.serializers.AuthTokenSerializer
-         *     to accept email field instead of username
-         */
-        CustomAuthTokenRequest: {
-            /** Courriel */
-            email: string;
-            /** Mot de passe */
-            password: string;
-        };
         DashboardSummary: {
             totalUsers: number;
             eventsLast7Days: number;
@@ -950,26 +826,6 @@ export interface components {
          * @enum {string}
          */
         EnrollmentStatusEnum: "active" | "completed" | "cancelled";
-        Event: {
-            readonly id: number;
-            readonly user: number | null;
-            eventType: string;
-            entityType?: string | null;
-            entityId?: string | null;
-            /** Format: decimal */
-            value?: string | null;
-            metadata?: unknown;
-            /** Format: date-time */
-            readonly createdAt: string;
-        };
-        EventRequest: {
-            eventType: string;
-            entityType?: string | null;
-            entityId?: string | null;
-            /** Format: decimal */
-            value?: string | null;
-            metadata?: unknown;
-        };
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
             database: boolean;
@@ -1005,6 +861,44 @@ export interface components {
             readonly resourceType: components["schemas"]["ResourceTypeEnum"];
             readonly order: number;
         };
+        LoginRequest: {
+            /** @description Identifiant, numéro de téléphone ou email (C7) */
+            identifier: string;
+            password: string;
+        };
+        LoginResponse: {
+            userId: number;
+            csrfToken: string;
+        };
+        Me: {
+            readonly id: number;
+            /** Rôle */
+            readonly role: (components["schemas"]["RoleEnum"] | components["schemas"]["NullEnum"]) | null;
+            /** Statut */
+            readonly status: components["schemas"]["MeStatusEnum"];
+            /** Identifiant */
+            readonly username: string | null;
+            /** Téléphone */
+            readonly phone: string | null;
+            /**
+             * Adresse email
+             * Format: email
+             */
+            readonly email: string | null;
+            /** Prénom */
+            readonly firstName: string;
+            /** Nom */
+            readonly lastName: string;
+        };
+        /**
+         * @description * `pending` - En attente de consentement
+         *     * `active` - Actif
+         *     * `suspended` - Suspendu
+         *     * `deactivated` - Désactivé
+         *     * `anonymized` - Anonymisé
+         * @enum {string}
+         */
+        MeStatusEnum: "pending" | "active" | "suspended" | "deactivated" | "anonymized";
         Module: {
             readonly id: number;
             readonly title: string;
@@ -1013,16 +907,8 @@ export interface components {
             readonly lessons: components["schemas"]["LessonSummary"][];
             readonly course: number;
         };
-        Notification: {
-            readonly id: number;
-            readonly user: number;
-            readonly title: string;
-            readonly body: string;
-            readonly url: string | null;
-            /** Format: date-time */
-            readonly createdAt: string;
-            read?: boolean;
-        };
+        /** @enum {unknown} */
+        NullEnum: null;
         Order: {
             readonly id: number;
             readonly reference: string;
@@ -1151,21 +1037,6 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Module"][];
         };
-        PaginatedNotificationList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Notification"][];
-        };
         PaginatedOrderList: {
             /** @example 123 */
             count?: number;
@@ -1256,9 +1127,6 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Resource"][];
         };
-        PatchedNotificationRequest: {
-            read?: boolean;
-        };
         PatchedProgressRequest: {
             enrollment?: number;
             lesson?: number;
@@ -1316,15 +1184,6 @@ export interface components {
          * @enum {string}
          */
         ProviderEnum: "kkiapay" | "fedapay";
-        PublicForgotPasswordStep1Request: {
-            /** Format: email */
-            email: string;
-        };
-        PublicForgotPasswordStep2Request: {
-            token: string;
-            userId: number;
-            password: string;
-        };
         Question: {
             readonly id: number;
             quiz: number;
@@ -1361,27 +1220,32 @@ export interface components {
          * @enum {string}
          */
         ResourceTypeEnum: "video" | "pdf" | "html" | "other";
-        SessionLoginResponse: {
-            userId: number;
-            csrfToken: string;
-        };
-        UserChangeEmailRequest: {
-            /** Mot de passe */
-            password: string;
-            newEmail: string;
-        };
-        UserChangePasswordRequest: {
-            /** Mot de passe */
-            password: string;
-            newPassword: string;
-        };
-        UserMyProfile: {
+        /**
+         * @description * `learner` - Apprenant
+         *     * `parent` - Parent
+         *     * `teacher` - Enseignant
+         * @enum {string}
+         */
+        RoleEnum: "learner" | "parent" | "teacher";
+        TrackingEvent: {
             readonly id: number;
-            /**
-             * Adresse électronique
-             * Format: email
-             */
-            readonly email: string;
+            readonly user: number | null;
+            eventType: string;
+            entityType?: string | null;
+            entityId?: string | null;
+            /** Format: decimal */
+            value?: string | null;
+            metadata?: unknown;
+            /** Format: date-time */
+            readonly createdAt: string;
+        };
+        TrackingEventRequest: {
+            eventType: string;
+            entityType?: string | null;
+            entityId?: string | null;
+            /** Format: decimal */
+            value?: string | null;
+            metadata?: unknown;
         };
         WebhookAck: {
             ok: boolean;
@@ -1426,7 +1290,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["EventRequest"];
+                "application/json": components["schemas"]["TrackingEventRequest"];
             };
         };
         responses: {
@@ -1435,7 +1299,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Event"];
+                    "application/json": components["schemas"]["TrackingEvent"];
                 };
             };
         };
@@ -2178,82 +2042,6 @@ export interface operations {
             };
         };
     };
-    messaging_notifications_list: {
-        parameters: {
-            query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedNotificationList"];
-                };
-            };
-        };
-    };
-    messaging_notifications_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this notification. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Notification"];
-                };
-            };
-        };
-    };
-    messaging_notifications_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this notification. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedNotificationRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Notification"];
-                };
-            };
-        };
-    };
     payments_orders_list: {
         parameters: {
             query?: {
@@ -2408,50 +2196,6 @@ export interface operations {
             };
         };
     };
-    public_user_forgot_password_step_1_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PublicForgotPasswordStep1Request"];
-            };
-        };
-        responses: {
-            /** @description No response body */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    public_user_forgot_password_step_2_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PublicForgotPasswordStep2Request"];
-            };
-        };
-        responses: {
-            /** @description No response body */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     public_user_session_login_create: {
         parameters: {
             query?: never;
@@ -2461,7 +2205,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CustomAuthTokenRequest"];
+                "application/json": components["schemas"]["LoginRequest"];
             };
         };
         responses: {
@@ -2470,52 +2214,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SessionLoginResponse"];
+                    "application/json": components["schemas"]["LoginResponse"];
                 };
-            };
-        };
-    };
-    user_change_email_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UserChangeEmailRequest"];
-            };
-        };
-        responses: {
-            /** @description No response body */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    user_change_password_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UserChangePasswordRequest"];
-            };
-        };
-        responses: {
-            /** @description No response body */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -2533,45 +2233,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserMyProfile"];
-                };
-            };
-        };
-    };
-    user_my_profile_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserMyProfile"];
-                };
-            };
-        };
-    };
-    user_my_profile_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserMyProfile"];
+                    "application/json": components["schemas"]["Me"];
                 };
             };
         };

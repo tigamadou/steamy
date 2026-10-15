@@ -49,7 +49,12 @@ else:
 ALLOW_API_DOCS = os.getenv("ALLOW_API_DOCS", "false").lower() in ("1", "true", "yes")
 
 
-AUTH_USER_MODEL = "user.User"
+AUTH_USER_MODEL = "accounts.User"
+# Connexion des personas par « Identifiant ou numéro » (W16) et du personnel par l'admin (WAD15) : ADR 0001.
+AUTHENTICATION_BACKENDS = [
+    "apps.accounts.backends.IdentifierBackend",
+    "apps.accounts.backends.StaffBackend",
+]
 
 INSTALLED_APPS = [
     # Custom Admin settings (must be before django.contrib.admin)
@@ -71,16 +76,14 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "drf_spectacular_sidecar",
-    "channels",
     "storages",
     # Local
     "apps.file",
     "apps.mail",
-    "apps.user",
+    "apps.accounts",
     "apps.courses",
     "apps.learning",
     "apps.payments",
-    "apps.messaging",
     "apps.analytics",
     "apps.core",
 ]
@@ -119,7 +122,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "project.wsgi.application"
 ASGI_APPLICATION = "project.asgi.application"
 
-DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 if ENV in (STAGING, PRODUCTION):
     DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
@@ -304,15 +307,6 @@ CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", WEB_URL).sp
 PAYMENTS_KKIAPAY_SECRET = os.getenv("PAYMENTS_KKIAPAY_SECRET", "")
 PAYMENTS_FEDAPAY_SECRET = os.getenv("PAYMENTS_FEDAPAY_SECRET", "")
 
-# Messaging
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [os.getenv("CHANNELS_REDIS_URL", "redis://redis:6379/2")]},
-    }
-}
-
-
 # # ==================================================================================================
 # # FILE SETTINGS
 # # ==================================================================================================
@@ -405,8 +399,8 @@ CACHES = {
         },
     }
 }
-# Session + cache (optional)
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+# Sessions en base avec cache (C20) : une purge de Redis ne déconnecte plus tout le monde.
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 SESSION_CACHE_ALIAS = "default"
 
 # ==================================================================================================
@@ -443,11 +437,11 @@ CELERY_TASK_SOFT_TIME_LIMIT = int(os.getenv("CELERY_TASK_SOFT_TIME_LIMIT", 180))
 #
 #  CELERY_BEAT_SCHEDULE = {
 #      'example-seconds': {
-#          'task': 'apps.user.tasks.example_scheduled_task',
+#          'task': 'apps.core.tasks.example_scheduled_task',
 #          'schedule': 60.0,  # Call every 60 seconds
 #      },
 #      'example-cron': {
-#          'task': 'apps.user.tasks.example_scheduled_task',
+#          'task': 'apps.core.tasks.example_scheduled_task',
 #          'schedule': crontab(minute=0, hour=0)  # Call at midnight every day
 #      }
 #  }

@@ -34,7 +34,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EventRequest'
+              $ref: '#/components/schemas/TrackingEventRequest'
         required: true
       security:
       - cookieAuth: []
@@ -44,7 +44,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Event'
+                $ref: '#/components/schemas/TrackingEvent'
           description: ''
   /api/analytics/export/events.csv:
     get:
@@ -941,106 +941,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Quiz'
           description: ''
-  /api/messaging/notifications/:
-    get:
-      operationId: messaging_notifications_list
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - messaging
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedNotificationList'
-          description: ''
-  /api/messaging/notifications/{id}/:
-    get:
-      operationId: messaging_notifications_retrieve
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this notification.
-        required: true
-      tags:
-      - messaging
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Notification'
-          description: ''
-    patch:
-      operationId: messaging_notifications_partial_update
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this notification.
-        required: true
-      tags:
-      - messaging
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedNotificationRequest'
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Notification'
-          description: ''
   /api/payments/orders/:
     get:
       operationId: payments_orders_list
@@ -1232,40 +1132,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/CsrfToken'
           description: ''
-  /api/public/user/forgot-password-step-1:
-    post:
-      operationId: public_user_forgot_password_step_1_create
-      tags:
-      - public
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublicForgotPasswordStep1Request'
-        required: true
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '201':
-          description: No response body
-  /api/public/user/forgot-password-step-2:
-    post:
-      operationId: public_user_forgot_password_step_2_create
-      tags:
-      - public
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublicForgotPasswordStep2Request'
-        required: true
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '201':
-          description: No response body
   /api/public/user/session-login:
     post:
       operationId: public_user_session_login_create
@@ -1275,47 +1141,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CustomAuthTokenRequest'
+              $ref: '#/components/schemas/LoginRequest'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionLoginResponse'
+                $ref: '#/components/schemas/LoginResponse'
           description: ''
-  /api/user/change-email:
-    post:
-      operationId: user_change_email_create
-      tags:
-      - user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserChangeEmailRequest'
-        required: true
-      security:
-      - cookieAuth: []
-      responses:
-        '201':
-          description: No response body
-  /api/user/change-password:
-    post:
-      operationId: user_change_password_create
-      tags:
-      - user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserChangePasswordRequest'
-        required: true
-      security:
-      - cookieAuth: []
-      responses:
-        '201':
-          description: No response body
   /api/user/my-profile:
     get:
       operationId: user_my_profile_retrieve
@@ -1328,33 +1162,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserMyProfile'
-          description: ''
-    put:
-      operationId: user_my_profile_update
-      tags:
-      - user
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserMyProfile'
-          description: ''
-    patch:
-      operationId: user_my_profile_partial_update
-      tags:
-      - user
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserMyProfile'
+                $ref: '#/components/schemas/Me'
           description: ''
   /api/user/session-logout:
     post:
@@ -1582,23 +1390,6 @@ components:
           type: string
       required:
       - csrfToken
-    CustomAuthTokenRequest:
-      type: object
-      description: |-
-        Modified from rest_framework.authtoken.serializers.AuthTokenSerializer
-        to accept email field instead of username
-      properties:
-        email:
-          type: string
-          minLength: 1
-          title: Courriel
-        password:
-          type: string
-          minLength: 1
-          title: Mot de passe
-      required:
-      - email
-      - password
     DashboardSummary:
       type: object
       properties:
@@ -1661,67 +1452,6 @@ components:
         * `active` - Actif
         * `completed` - Terminé
         * `cancelled` - Annulé
-    Event:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        user:
-          type: integer
-          readOnly: true
-          nullable: true
-        eventType:
-          type: string
-          maxLength: 64
-        entityType:
-          type: string
-          nullable: true
-          maxLength: 64
-        entityId:
-          type: string
-          nullable: true
-          maxLength: 128
-        value:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        metadata:
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - createdAt
-      - eventType
-      - id
-      - user
-    EventRequest:
-      type: object
-      properties:
-        eventType:
-          type: string
-          minLength: 1
-          maxLength: 64
-        entityType:
-          type: string
-          nullable: true
-          maxLength: 64
-        entityId:
-          type: string
-          nullable: true
-          maxLength: 128
-        value:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        metadata:
-          nullable: true
-      required:
-      - eventType
     Health:
       type: object
       properties:
@@ -1811,6 +1541,95 @@ components:
       - order
       - resourceType
       - title
+    LoginRequest:
+      type: object
+      properties:
+        identifier:
+          type: string
+          minLength: 1
+          description: Identifiant, numéro de téléphone ou email (C7)
+          maxLength: 255
+        password:
+          type: string
+          minLength: 1
+      required:
+      - identifier
+      - password
+    LoginResponse:
+      type: object
+      properties:
+        userId:
+          type: integer
+        csrfToken:
+          type: string
+      required:
+      - csrfToken
+      - userId
+    Me:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        role:
+          readOnly: true
+          nullable: true
+          title: Rôle
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        status:
+          allOf:
+          - $ref: '#/components/schemas/MeStatusEnum'
+          readOnly: true
+          title: Statut
+        username:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Identifiant
+        phone:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Téléphone
+        email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+          title: Adresse email
+        firstName:
+          type: string
+          readOnly: true
+          title: Prénom
+        lastName:
+          type: string
+          readOnly: true
+          title: Nom
+      required:
+      - email
+      - firstName
+      - id
+      - lastName
+      - phone
+      - role
+      - status
+      - username
+    MeStatusEnum:
+      enum:
+      - pending
+      - active
+      - suspended
+      - deactivated
+      - anonymized
+      type: string
+      description: |-
+        * `pending` - En attente de consentement
+        * `active` - Actif
+        * `suspended` - Suspendu
+        * `deactivated` - Désactivé
+        * `anonymized` - Anonymisé
     Module:
       type: object
       properties:
@@ -1838,38 +1657,9 @@ components:
       - lessons
       - order
       - title
-    Notification:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        user:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
-        body:
-          type: string
-          readOnly: true
-        url:
-          type: string
-          readOnly: true
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
-        read:
-          type: boolean
-      required:
-      - body
-      - createdAt
-      - id
-      - title
-      - url
-      - user
+    NullEnum:
+      enum:
+      - null
     Order:
       type: object
       properties:
@@ -2089,26 +1879,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Module'
-    PaginatedNotificationList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Notification'
     PaginatedOrderList:
       type: object
       properties:
@@ -2229,11 +1999,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Resource'
-    PatchedNotificationRequest:
-      type: object
-      properties:
-        read:
-          type: boolean
     PatchedProgressRequest:
       type: object
       properties:
@@ -2374,34 +2139,6 @@ components:
       description: |-
         * `kkiapay` - Kkiapay
         * `fedapay` - FedaPay
-    PublicForgotPasswordStep1Request:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-          writeOnly: true
-          minLength: 1
-      required:
-      - email
-    PublicForgotPasswordStep2Request:
-      type: object
-      properties:
-        token:
-          type: string
-          writeOnly: true
-          minLength: 1
-        userId:
-          type: integer
-          writeOnly: true
-        password:
-          type: string
-          writeOnly: true
-          minLength: 1
-      required:
-      - password
-      - token
-      - userId
     Question:
       type: object
       properties:
@@ -2498,62 +2235,77 @@ components:
         * `pdf` - PDF
         * `html` - HTML
         * `other` - Autre
-    SessionLoginResponse:
-      type: object
-      properties:
-        userId:
-          type: integer
-        csrfToken:
-          type: string
-      required:
-      - csrfToken
-      - userId
-    UserChangeEmailRequest:
-      type: object
-      properties:
-        password:
-          type: string
-          writeOnly: true
-          minLength: 1
-          title: Mot de passe
-          maxLength: 128
-        newEmail:
-          type: string
-          writeOnly: true
-          minLength: 1
-      required:
-      - newEmail
-      - password
-    UserChangePasswordRequest:
-      type: object
-      properties:
-        password:
-          type: string
-          writeOnly: true
-          minLength: 1
-          title: Mot de passe
-          maxLength: 128
-        newPassword:
-          type: string
-          writeOnly: true
-          minLength: 1
-      required:
-      - newPassword
-      - password
-    UserMyProfile:
+    RoleEnum:
+      enum:
+      - learner
+      - parent
+      - teacher
+      type: string
+      description: |-
+        * `learner` - Apprenant
+        * `parent` - Parent
+        * `teacher` - Enseignant
+    TrackingEvent:
       type: object
       properties:
         id:
           type: integer
           readOnly: true
-        email:
-          type: string
-          format: email
+        user:
+          type: integer
           readOnly: true
-          title: Adresse électronique
+          nullable: true
+        eventType:
+          type: string
+          maxLength: 64
+        entityType:
+          type: string
+          nullable: true
+          maxLength: 64
+        entityId:
+          type: string
+          nullable: true
+          maxLength: 128
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        metadata:
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
       required:
-      - email
+      - createdAt
+      - eventType
       - id
+      - user
+    TrackingEventRequest:
+      type: object
+      properties:
+        eventType:
+          type: string
+          minLength: 1
+          maxLength: 64
+        entityType:
+          type: string
+          nullable: true
+          maxLength: 64
+        entityId:
+          type: string
+          nullable: true
+          maxLength: 128
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        metadata:
+          nullable: true
+      required:
+      - eventType
     WebhookAck:
       type: object
       properties:
