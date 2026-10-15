@@ -1551,6 +1551,8 @@ export interface components {
             /** Format: date-time */
             readonly createdAt: string;
             readonly deletion: components["schemas"]["ChildDeletionState"] | null;
+            /** @description Parcours en cours (WPD01, stat « Parcours en cours ») */
+            readonly activeCourses: number;
         };
         /** @description WPD04 : le parent crée le compte et choisit le mot de passe initial. */
         ChildCreateRequest: {
@@ -1607,6 +1609,10 @@ export interface components {
             /** Format: date-time */
             readonly createdAt: string;
             readonly deletion: components["schemas"]["ChildDeletionState"] | null;
+            /** @description Parcours en cours (WPD01, stat « Parcours en cours ») */
+            readonly activeCourses: number;
+            /** @description Progression par parcours (WPD03), la plus récente activité d'abord */
+            readonly courses: components["schemas"]["Enrollment"][];
             /** Format: date */
             readonly birthDate: string;
             readonly gender: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;

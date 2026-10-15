@@ -296,3 +296,28 @@ def test_learner_sees_their_parent_without_contact_details():
 def test_my_parent_is_reserved_to_a_linked_learner(parent):
     assert as_user(LearnerFactory()).get("/api/accounts/me/parent/").status_code == 404
     assert as_user(parent).get("/api/accounts/me/parent/").status_code == 403
+
+
+# --- WPD01, WPD03 · Progression ----------------------------------------------------------------
+
+
+def test_parent_sees_the_progress_of_their_child(parent):
+    from apps.learning.models import Enrollment, MissionProgress
+    from apps.learning.tests.factories import EnrollmentFactory, build_course, missions_of
+
+    child = link(parent)
+    started = EnrollmentFactory(learner=child, course=build_course(projects=1, levels=1))
+    MissionProgress.objects.create(enrollment=started, mission=missions_of(started.course)[0])
+    EnrollmentFactory(
+        learner=child,
+        course=build_course(projects=1, levels=1, missions=1),
+        status=Enrollment.Status.COMPLETED,
+    )
+    EnrollmentFactory(course=build_course(projects=1, levels=1))  # autre apprenant
+    client = as_user(parent)
+    assert client.get(URL).json()["results"][0]["activeCourses"] == 1
+    courses = client.get(f"{URL}{child.pk}/").json()["courses"]
+    assert len(courses) == 2
+    first = next(c for c in courses if c["id"] == started.pk)
+    assert first["course"]["slug"] == started.course.slug
+    assert (first["missionsDone"], first["missionCount"]) == (1, 2)

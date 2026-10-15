@@ -8,6 +8,7 @@ Toute route `children/{id}/` passe par le lien parent ↔ enfant du parent conne
 from datetime import date
 
 from django.db import transaction
+from django.db.models import F
 from drf_spectacular.utils import extend_schema, extend_schema_field
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
@@ -20,6 +21,10 @@ from apps.accounts import signup as signup_service
 from apps.accounts.fields import PasswordField
 from apps.accounts.models import DeletionRequest, Gender, ParentChildLink, User
 from apps.accounts.profile import ProfileStep, profile_step
+from apps.learning.models import Enrollment
+from apps.learning.progression import Progression
+from apps.learning.serializers import EnrollmentSerializer
+from apps.learning.views import enrollment_payload
 from apps.referentials.models import Disability, Relationship, SchoolGrade
 from apps.referentials.serializers import (
     AvatarSerializer,
@@ -65,6 +70,9 @@ class ChildSerializer(serializers.ModelSerializer):
     )
     created_at = serializers.DateTimeField(source="date_joined", read_only=True)
     deletion = serializers.SerializerMethodField()
+    active_courses = serializers.IntegerField(
+        read_only=True, help_text="Parcours en cours (WPD01, stat « Parcours en cours »)"
+    )
 
     class Meta:
         model = User
@@ -84,6 +92,7 @@ class ChildSerializer(serializers.ModelSerializer):
             "profile_step",
             "created_at",
             "deletion",
+            "active_courses",
         )
         read_only_fields = fields
 
@@ -123,9 +132,14 @@ class ChildDetailSerializer(ChildSerializer):
         help_text="Opt-in parental à l'affichage public (pseudonyme et avatar, D15)",
     )
 
+    courses = serializers.SerializerMethodField(
+        help_text="Progression par parcours (WPD03), la plus récente activité d'abord"
+    )
+
     class Meta(ChildSerializer.Meta):
         fields = (
             *ChildSerializer.Meta.fields,
+            "courses",
             "birth_date",
             "gender",
             "disability",
@@ -134,6 +148,14 @@ class ChildDetailSerializer(ChildSerializer):
             "public_display_allowed",
         )
         read_only_fields = fields
+
+    @extend_schema_field(EnrollmentSerializer(many=True))
+    def get_courses(self, child):
+        enrollments = Enrollment.objects.filter(learner=child).order_by(
+            F("last_activity_at").desc(nulls_last=True), "-created_at", "-id"
+        )
+        payload = [enrollment_payload(e, Progression(e)) for e in enrollments]
+        return EnrollmentSerializer(payload, many=True).data
 
 
 # --- Écriture -----------------------------------------------------------------------------------
