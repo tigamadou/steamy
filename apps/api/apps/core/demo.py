@@ -17,6 +17,7 @@ from apps.accounts.models import (
     LearnerProfile,
     ParentChildLink,
     ParentProfile,
+    PublicProfileReview,
     TeacherProfile,
     User,
 )
@@ -221,13 +222,13 @@ def seed_classrooms(accounts: dict[str, User]) -> None:
 
 
 CATEGORIES = [
-    # slug, libellé, couleur (tokens --cat-* du design system), icône
-    ("robotique", "Robotique", "#5B3FE0", "🤖"),
-    ("electronique", "Électronique", "#0EA5E9", "⚡"),
-    ("code", "Code", "#EC4899", "💻"),
-    ("ia", "IA", "#14B8A6", "🧠"),
-    ("mecanique", "Mécanique", "#F59E0B", "⚙️"),
-    ("energie", "Énergie", "#84CC16", "🔋"),  # sans parcours : état vide de WL06
+    # slug, libellé, couleur (tokens --cat-* du design system), icône, objectifs liés (recommandations, API-L3a.5)
+    ("robotique", "Robotique", "#5B3FE0", "🤖", ["robots", "challenges", "bricoler"]),
+    ("electronique", "Électronique", "#0EA5E9", "⚡", ["electronique", "domotique"]),
+    ("code", "Code", "#EC4899", "💻", ["coder", "jeu", "creativite"]),
+    ("ia", "IA", "#14B8A6", "🧠", ["ia"]),
+    ("mecanique", "Mécanique", "#F59E0B", "⚙️", ["bricoler", "robots"]),
+    ("energie", "Énergie", "#84CC16", "🔋", ["domotique"]),  # sans parcours : état vide de WL06
 ]
 
 #: Parcours court du parcours Playwright P1 (lot 3) : Léa y est inscrite sans progression, remise à zéro à chaque seed.
@@ -371,10 +372,11 @@ COURSES = [
 
 def seed_catalog() -> None:
     categories = {}
-    for order, (slug, label, color, icon) in enumerate(CATEGORIES):
+    for order, (slug, label, color, icon, goals) in enumerate(CATEGORIES):
         categories[slug], _ = catalog.Category.objects.update_or_create(
             slug=slug, defaults={"label": label, "color": color, "icon": icon, "order": order}
         )
+        categories[slug].goals.set(Goal.objects.filter(code__in=goals))
     for slug, title, category, difficulty, price, emoji, featured, status, projects in COURSES:
         course, _ = catalog.Course.objects.update_or_create(
             slug=slug,
@@ -439,7 +441,16 @@ def seed_catalog() -> None:
                         },
                     )
                 seed_quiz(catalog.Quiz.Kind.FORMATIVE, level=level)
+                catalog.Badge.objects.update_or_create(
+                    level=level, defaults={"kind": "level", "label": level_title, "icon": "🏅"}
+                )
             seed_quiz(catalog.Quiz.Kind.SUMMATIVE, project=project)
+            catalog.Badge.objects.update_or_create(
+                project=project, defaults={"kind": "project", "label": project_title, "icon": "🏆"}
+            )
+        catalog.Badge.objects.update_or_create(
+            course=course, defaults={"kind": "course", "label": f"Diplômé · {title}", "icon": "🎓"}
+        )
 
 
 def seed_quiz(kind: str, level=None, project=None) -> None:
@@ -620,6 +631,20 @@ def seed_kits() -> None:
         catalog.Course.objects.filter(slug__in=required_by).update(required_kit=kit)
 
 
+def seed_backoffice(accounts: dict[str, User]) -> None:
+    """WAD08 : le pseudonyme public de Léa attend la modération du support (D15)."""
+    PublicProfileReview.objects.update_or_create(
+        learner=accounts["lea"],
+        pseudonym="LéaBot",
+        defaults={
+            "avatar": Avatar.objects.get(code="hibou"),
+            "status": PublicProfileReview.Status.PENDING,
+            "reviewed_by": None,
+            "reviewed_at": None,
+        },
+    )
+
+
 #: Inscriptions de Léa : parcours, nombre de missions faites (None : toutes). Les quiz suivant des missions faites
 #: sont réussis ; « Découverte de la robotique » montre en plus une tentative `ko` puis `warn` avant la réussite
 #: (WD07). Le parcours court de P1 repart de zéro à chaque seed, pour rejouer le parcours Playwright.
@@ -630,11 +655,45 @@ LEA_ENROLLMENTS = [
 ]
 
 
+#: Barème de points et paliers de rang de DÉMONSTRATION (C8 : les valeurs réelles restent à fixer par l'équipe dans
+#: l'admin). Saisis seulement s'ils sont vides, pour ne pas écraser un réglage fait à la main.
+DEMO_POINTS_SCALE = {"mission": 10, "formative": 20, "summative": 50, "course": 100}
+DEMO_RANK_THRESHOLDS = [
+    {"rank": "Explorateur", "points": 0},
+    {"rank": "Bricoleur", "points": 100},
+    {"rank": "Inventeur", "points": 300},
+    {"rank": "Ingénieur", "points": 600},
+    {"rank": "Maître Steamy", "points": 1000},
+]
+#: « Mes souhaits » de Léa (WW01) : un parcours à kit et un parcours payant
+LEA_WISHLIST = ["robot-bluetooth", "capteurs-electroniques"]
+#: Secondes de vidéo de Léa, d'aujourd'hui (0) aux jours précédents : un streak de 5 jours (WD01, WD21).
+LEA_ACTIVITY = [600, 1200, 900, 300, 1500]
+
+
 def seed_learning(accounts: dict[str, User]) -> None:
-    from apps.learning.models import Enrollment, MissionProgress
+    from apps.core.models import PlatformSettings
+    from apps.learning.certification import complete_if_done
+    from apps.learning.gamification import award_badge, award_points, badge_of, streak_days
+    from apps.learning.models import (
+        Enrollment,
+        LearnerBadge,
+        LearningActivity,
+        MissionProgress,
+        PointsEntry,
+    )
     from apps.learning.progression import Progression
 
+    platform = PlatformSettings.load()
+    platform.points_scale = platform.points_scale or DEMO_POINTS_SCALE
+    platform.rank_thresholds = platform.rank_thresholds or DEMO_RANK_THRESHOLDS
+    platform.save()
+
     lea = accounts["lea"]
+    PointsEntry.objects.filter(learner=lea).delete()
+    LearnerBadge.objects.filter(learner=lea).delete()
+    LearningActivity.objects.filter(learner=lea).delete()
+    LearnerProfile.objects.filter(user=lea).update(points=0)
     for slug, done in LEA_ENROLLMENTS:
         course = catalog.Course.objects.get(slug=slug)
         enrollment, _ = Enrollment.objects.update_or_create(
@@ -661,9 +720,35 @@ def seed_learning(accounts: dict[str, User]) -> None:
                     _attempt(enrollment, quiz, right=1)
                 _attempt(enrollment, quiz, right=2)
                 progression = Progression(enrollment)
+        for mission in done_missions:
+            award_points(
+                lea, "mission", f"mission:{mission.id}", f"Mission terminée : {mission.title}"
+            )
+        for attempt in enrollment.attempts.filter(passed=True).select_related("quiz"):
+            quiz = attempt.quiz
+            attempt.points_earned = award_points(
+                lea, quiz.kind, f"quiz:{quiz.id}", f"Quiz réussi : {quiz}"
+            )
+            attempt.save(update_fields=["points_earned"])
+            award_badge(lea, badge_of(quiz.level or quiz.project))
         enrollment.progress_pct = Progression(enrollment).progress_pct
         enrollment.last_activity_at = timezone.now() if done_missions else None
+        enrollment.status, enrollment.completed_at = Enrollment.Status.ACTIVE, None
         enrollment.save()
+        # Parcours fini : terminé, points et badge du parcours, certificat (gardé d'un seed à l'autre) et ticket
+        complete_if_done(enrollment)
+    from apps.wishlist.models import WishlistItem
+
+    for slug in LEA_WISHLIST:
+        WishlistItem.objects.get_or_create(
+            learner=lea, course=catalog.Course.objects.get(slug=slug)
+        )
+    today = timezone.localdate()
+    for days_ago, seconds in enumerate(LEA_ACTIVITY):
+        LearningActivity.objects.create(
+            learner=lea, date=today - datetime.timedelta(days=days_ago), seconds=seconds
+        )
+    LearnerProfile.objects.filter(user=lea).update(streak_days=streak_days(lea))
 
 
 def _quiz_reached(progression, step) -> bool:
@@ -707,6 +792,7 @@ def seed_e2e() -> None:
 
 def seed_all() -> dict[str, User]:
     accounts = seed_accounts()
+    seed_backoffice(accounts)
     seed_classrooms(accounts)
     seed_notifications(accounts)
     seed_catalog()

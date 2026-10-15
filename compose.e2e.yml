@@ -27,6 +27,9 @@ services:
       THROTTLE_ANON: 1000/min
       THROTTLE_LOGIN: 1000/min
       THROTTLE_LOGIN_IDENTIFIER: 1000/hour
+      # Connexion du personnel (WAD15) : mêmes comptes reconnectés par plusieurs specs
+      THROTTLE_STAFF_LOGIN: 1000/min
+      THROTTLE_STAFF_LOGIN_EMAIL: 1000/hour
       THROTTLE_SIGNUP: 1000/min
       THROTTLE_SIGNUP_STEP: 1000/min
       THROTTLE_OTP: 1000/min

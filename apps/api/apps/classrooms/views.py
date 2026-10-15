@@ -29,7 +29,6 @@ from .serializers import (
     ClassroomWriteSerializer,
     CommentQuerySerializer,
     CommentRequestSerializer,
-    DashboardSerializer,
     ImportRequestSerializer,
     ImportResultSerializer,
     InvitationSerializer,
@@ -44,6 +43,7 @@ from .serializers import (
     SupervisedCourseDetailSerializer,
     SupervisedCourseSerializer,
     TeacherCommentSerializer,
+    TeacherDashboardSerializer,
 )
 
 Status = ClassroomMembership.Status
@@ -356,7 +356,7 @@ def review_rows(attempts):
 class DashboardView(TeacherMixin, generics.GenericAPIView):
     """WT01 : compteurs, classes, « À revoir » (D65) et « Décrochage » (D66)."""
 
-    serializer_class = DashboardSerializer
+    serializer_class = TeacherDashboardSerializer
     PREVIEW = 5
 
     def get(self, request):
@@ -378,7 +378,7 @@ class DashboardView(TeacherMixin, generics.GenericAPIView):
                 for seat, _, last in dropouts[: self.PREVIEW]
             ],
         }
-        return Response(DashboardSerializer(data).data)
+        return Response(TeacherDashboardSerializer(data).data)
 
 
 class ReviewListView(TeacherMixin, generics.GenericAPIView):
@@ -431,6 +431,7 @@ class LearnerFollowUpView(TeacherMixin, generics.GenericAPIView):
             "average_percentage": round(sum(percentages) / len(percentages))
             if percentages
             else None,
+            "badges": follow_up.course_badges(seat.learner, classroom.course),
             "attempts": attempts,
             "comments": classroom.comments.filter(learner=seat.learner),
         }

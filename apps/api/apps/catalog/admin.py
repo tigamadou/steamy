@@ -13,13 +13,24 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db.models import Count
 
-from .models import Category, Choice, Course, Level, Mission, Project, Question, Quiz
+from .models import (
+    Badge,
+    Category,
+    Choice,
+    Course,
+    Level,
+    Mission,
+    Project,
+    Question,
+    Quiz,
+)
 
 
 @admin.register(Category)
 class CategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
     list_display = ("label", "slug", "icon", "color", "course_count")
     prepopulated_fields = {"slug": ("label",)}
+    filter_horizontal = ("goals",)
 
     def get_queryset(self, request):
         return (
@@ -131,3 +142,11 @@ class QuestionAdmin(SortableAdminBase, admin.ModelAdmin):
     search_fields = ("text", "concept")
     autocomplete_fields = ("quiz", "remediation_mission")
     inlines = [ChoiceInline]
+
+
+@admin.register(Badge)
+class BadgeAdmin(admin.ModelAdmin):
+    list_display = ("label", "icon", "kind", "level", "project", "course")
+    list_filter = ("kind",)
+    search_fields = ("label",)
+    autocomplete_fields = ("level", "project", "course")

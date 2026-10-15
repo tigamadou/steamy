@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import EventProposal, SteamyEvent
+from .models import EventProposal, EventTicket, SteamyEvent
 
 
 @admin.register(SteamyEvent)
@@ -15,6 +15,21 @@ class SteamyEventAdmin(admin.ModelAdmin):
     @admin.display(description="Places restantes")
     def seats_left(self, obj):
         return obj.seats_left
+
+
+@admin.register(EventTicket)
+class EventTicketAdmin(admin.ModelAdmin):
+    """Tickets offerts à la certification (D33) : créés par le serveur seulement."""
+
+    list_display = ("learner", "enrollment", "created_at")
+    search_fields = ("learner__username",)
+    readonly_fields = ("learner", "enrollment", "created_at")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(EventProposal)

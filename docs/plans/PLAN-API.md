@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L3a.3
+Statut : 🟡 en cours · Prochaine tâche : API-L3b (API-L3a : reste le barème C8 à fixer)
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -290,6 +290,8 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 ### API-L3a · Pédagogie — 🟡 en cours
 - [ ] **Préalables**
   - [ ] Barème de points et paliers de rang saisis dans `PlatformSettings` (C8)
+    > Le code est prêt (L3a.3) et le seed met des valeurs de démonstration ; les valeurs réelles restent à fixer
+    > par l'équipe (point ouvert « Reste à décider »), à saisir dans l'admin.
   - [x] **ADR-Médias (Vimeo)** : vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de hors ligne (D16)
 - [x] **API-L3a.1** Inscriptions et arbre · `feature/api-l3a-1-inscriptions` · PR #64
   - [x] `Enrollment` (`source`), `MissionProgress`
@@ -338,32 +340,83 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `next.type` gagne `quiz` (+ `quizKind`, `levelId` nul pour une sommative). `GET learning/attempts/`
   > (`?status=ok|warn|ko&quiz=`) ajoute `summary {attemptCount, successRate, perfectCount, streakDays}` sur toutes
   > les tentatives (filtres ignorés).
-- [ ] **API-L3a.3** Gamification · `feature/api-l3a-3-gamification`
-  - [ ] `PointsEntry`, `Badge`, `LearnerBadge`, `LearningActivity`
-  - [ ] `POST learning/activity/` (secondes plafonnées, anti-gonflage)
-  - [ ] Streak (fuseau `TIME_ZONE`), rang dérivé, `GET learning/badges/`
-- [ ] **API-L3a.4** Certificats · `feature/api-l3a-4-certificats`
+- [x] **API-L3a.3** Gamification · `feature/api-l3a-3-gamification` · PR #68
+  - [x] `PointsEntry`, `Badge`, `LearnerBadge`, `LearningActivity`
+  - [x] `POST learning/activity/` (secondes plafonnées, anti-gonflage)
+  - [x] Streak (fuseau `TIME_ZONE`), rang dérivé, `GET learning/badges/`
+  - [x] Points et badge dans les réponses de `missions/{id}/complete/` (`pointsEarned`) et des tentatives (`pointsEarned`, `badge`)
+  - [x] Seed : badge par niveau, projet et parcours ; barème et paliers de démonstration ; points, badges et streak de 5 jours de Léa
+  > Décisions : `Badge` dans `catalog` (contenu, matrice des groupes), un par niveau, projet ou parcours
+  > (contrainte « la cible de son type, et elle seule ») ; `LearnerBadge`, `PointsEntry`, `LearningActivity` dans
+  > `learning`. Barème `points_scale` : clés `mission`, `formative`, `summative`, `course` ; un événement
+  > (`mission:<id>`, `quiz:<id>`, `course:<id>`) ne rapporte qu'une fois (contrainte d'unicité), une formative ou
+  > une sommative seulement à sa première réussite. Barème vide : aucun point (`pointsEarned = 0`) et `points` /
+  > `rank` à `null` dans le tableau de bord (L3a.5). Rang dérivé à la lecture de `rank_thresholds`
+  > (`{label, minPoints, nextLabel, nextAt}`), `LearnerProfile.rank` n'est pas utilisé. Activité :
+  > `{missionId, seconds}` (1 à 3600), mission accessible seulement, 120 s retenues au plus par appel et 4 h par
+  > jour (verrou sur le profil) ; mission terminée et quiz passé comptent aussi (ligne à 0 s). Streak calculé à la
+  > lecture (jours consécutifs jusqu'à aujourd'hui ou hier), `LearnerProfile.streakDays` gardé en cache.
+  > `GET learning/badges/?course=` : badges obtenus, paginés.
+- [x] **API-L3a.4** Certificats · `feature/api-l3a-4-certificats` · PR #69
   - [x] **ADR PDF et stockage privé** (WeasyPrint, Celery, RustFS privé, URL présignées courtes)
-  - [ ] Conditions D33 en transaction ; `Certificate.number` séquentiel
-  - [ ] Tâche `generate_certificate_pdf` ; stockage RustFS privé
-  - [ ] `GET learning/certificates/` (`pdfStatus`), `…/{id}/download/` → URL présignée 5 min
-  - [ ] `EventTicket` créé une seule fois (unique par `enrollment`)
-  - [ ] Tests : certificat à 100 % + sommatives, une seule fois en appels concurrents, ticket unique, certificats d'autrui illisibles
-- [ ] **API-L3a.5** Tableau de bord · `feature/api-l3a-5-dashboard`
-  - [ ] `GET learning/dashboard/`, `learning/progress/`, `learning/recommendations/`
-  - [ ] Compteurs du shell dans `accounts/me/`
-- [ ] **API-L3a.6** Souhaits et préférences · `feature/api-l3a-6-wishlist`
-  - [ ] App `wishlist` : `GET wishlist/`, `PUT/DELETE wishlist/{courseSlug}/` idempotents
-  - [ ] Préférences de notification apprenant (pas de SMS ni marketing pour un mineur, D6, D30)
-- [ ] **Outillage de test d'API-L3a**
+  - [x] Conditions D33 en transaction ; `Certificate.number` séquentiel
+  - [x] Tâche `generate_certificate_pdf` ; stockage RustFS privé
+  - [x] `GET learning/certificates/` (`pdfStatus`), `…/{id}/download/` → URL présignée 5 min
+  - [x] `EventTicket` créé une seule fois (unique par `enrollment`)
+  - [x] Tests : certificat à 100 % + sommatives, une seule fois en appels concurrents, ticket unique, certificats d'autrui illisibles
+  - [x] WeasyPrint 70.0 (ADR 0005 P6 ; `tinycss2` 1.5.1, `fonttools` 4.67.0), `core/pdf.py` sans aucune ressource chargée
+  - [x] Filet de sécurité `retry_pending_certificates` (toutes les 10 min, `manage.py retry_pending_certificates`), action « Régénérer le PDF » dans l'admin
+  - [x] Seed : « Initiation à Scratch » de Léa terminé, certifié, avec ticket
+  > Décisions : `Certificate` (`number` `CERT-AAAA-NNNNNN` par `core.DocumentSequence` sous verrou, `uuid` du
+  > fichier, `pdfStatus` `pending|ready|failed` (P4), `snapshot` figé) ; `events.EventTicket` (`learner`,
+  > `enrollment` unique ; `usedBy` en L3b). La fin du parcours (100 % des missions et toutes les sommatives,
+  > vérifiée l'inscription verrouillée) passe l'inscription à `completed`, crédite les points `course` et le badge
+  > du parcours, puis, si `certificateEnabled`, émet le certificat, le ticket et une notification (« Récompenses »)
+  > et lance le PDF après validation. `GET learning/enrollments/{slug}/tree/` gagne `certification` (`eligible`,
+  > compteurs, `certificate`, `eventTicket`) pour WJ07 / WJ09. Téléchargement : 302 vers l'URL présignée (5 min,
+  > `Content-Disposition: attachment; filename="certificat-<parcours>.pdf"`, `Cache-Control: no-store`) ; sans
+  > stockage objet (CI), le fichier est servi directement ; PDF pas prêt ou en échec → 409 `PDF_NOT_READY` (code
+  > ajouté au catalogue). Stockage `STORAGES["private"]` (préfixe `private/`, 403 sans signature, vérifié sur
+  > RustFS) ; signature pour `AWS_S3_PUBLIC_ENDPOINT_URL` si défini (P5, sous-domaine `media.` à créer côté
+  > infra). Polices : DejaVu de l'image en attendant Nunito (ADR 0005, « Suites »). Reportés : lecture du
+  > certificat par le parent lié (endpoints parent, API-L4) ; droits du Support sur `learning.certificate` dans la
+  > matrice des groupes (lot 6).
+- [x] **API-L3a.5** Tableau de bord · `feature/api-l3a-5-dashboard` · PR #70
+  - [x] `GET learning/dashboard/`, `learning/progress/`, `learning/recommendations/`
+  - [x] Compteurs du shell dans `accounts/me/`
+  - [x] `Category.goals` (objectifs liés, saisis dans l'admin) pour la règle de recommandation ; seed des liens
+  > Décisions : `dashboard` = `{firstName, points, rank, streakDays, secondsToday, resume, counters,
+  > recommendations (3)}` ; `resume` = inscription en cours la plus récemment active (même forme que
+  > `GET learning/enrollments/`), `null` → WD02 ; `points` / `rank` à `null` tant que barème / paliers sont vides
+  > (C8, D34). `progress` (WD21) = `{weekSeconds (lundi → aujourd'hui), lastDays (7 jours), points, rank,
+  > streakDays, counters, mastery [{category, missionsDone, missionCount, pct}]}`. Recommandations : publiées, non
+  > suivies, catégories liées aux objectifs de l'apprenant d'abord (`matchesGoals`), puis mis en avant, plus
+  > suivies, plus récentes ; `?limit=` 1 à 12 (6 par défaut), non paginé. Le lien objectif → catégorie est un
+  > ajout au modèle (`Category.goals`, M2M vers `referentials.Goal`), faute de règle dans la spec.
+  > `accounts/me/` gagne `counters {activeEnrollments, completedEnrollments, certificates, badges}` (apprenant ;
+  > `null` sinon) ; `wishlist` s'y ajoute en L3a.6.
+- [x] **API-L3a.6** Souhaits et préférences · `feature/api-l3a-6-wishlist` · PR #71
+  - [x] App `wishlist` : `GET wishlist/`, `PUT/DELETE wishlist/{courseSlug}/` idempotents
+  - [x] Préférences de notification apprenant (pas de SMS ni marketing pour un mineur, D6, D30)
+  - [x] Seed : deux parcours dans les souhaits de Léa ; compteur `wishlist` dans `accounts/me/`
+  > Décisions : `PUT` → 201, ou 200 si déjà présent ; parcours publié seulement (404 sinon) ; `DELETE` → 204 dans
+  > tous les cas. `GET wishlist/?sort=recent|title|price`, paginé (`pageSize` jusqu'à 100 pour la fusion avec le
+  > catalogue côté front), `{course (carte du catalogue), addedAt}` ; un parcours dépublié disparaît de la liste
+  > sans être supprimé. Préférences : `notifications/preferences/` existait (API-1) et ne propose déjà à
+  > l'apprenant que ses catégories d'apprentissage (in-app et email) ; s'ajoute un garde-fou au modèle qui refuse
+  > toute préférence SMS ou d'une autre catégorie pour un apprenant.
+- [x] **Outillage de test d'API-L3a**
   - [x] `seed_demo --e2e` (cooldown sommatif raccourci, parcours court P1 du lot 3) · PR #66
     > Le parcours court (`premiers-pas-zeti`) est dans le jeu unique (LOT-3 §8.3) ; `--e2e` ne fait que ramener le
     > délai à 5 s. `make e2e` appelle `make seed SEED_ARGS=--e2e`.
-  - [ ] Worker Celery dans `compose.e2e.yml`
-- [ ] **Critères de fin d'API-L3a**
-  - [ ] Un apprenant ne lit ni les tentatives ni les certificats d'un autre
-  - [ ] Seed enrichi avec les données du domaine
-  - [ ] `make openapi` committé
+  - [x] Worker Celery dans `compose.e2e.yml`
+    > Déjà démarré par `make e2e` (`up … web worker`, lot 1) ; vérifié avec la génération réelle du PDF sur RustFS.
+- [x] **Critères de fin d'API-L3a**
+  - [x] Un apprenant ne lit ni les tentatives ni les certificats d'un autre
+    > `test_another_learners_attempt_is_not_found`, `test_someone_elses_certificate_is_not_found` (404, listes
+    > vides), matrice `apps/learning/tests/test_access_matrix.py`.
+  - [x] Seed enrichi avec les données du domaine
+  - [x] `make openapi` committé
 
 ### API-L3b · Commerce, boutique, événements payants — ⬜ à faire
 - [ ] **API-L3b.0a** Comparaison paiement (S9) · `feature/api-l3b-0a-adr-paiement` · doc
@@ -487,7 +540,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > classe la plus récemment rejointe. Décrochage calculé à la lecture (`follow_up.dropouts`, seuil
   > `PlatformSettings`, date d'adhésion avant toute activité, parcours terminé exclu). WT10 : `completedCount` par
   > mission, `passRate` par niveau et projet (« missions les plus échouées » : niveaux au plus faible taux),
-  > `formativePassRate`, `summativePassRate`. Badges du parcours sur WT05 : avec API-L3a.3.
+  > `formativePassRate`, `summativePassRate`. WT05 : badges obtenus sur le parcours de la classe (API-L3a.3).
 - [ ] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage`
   - [ ] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
 - [ ] **API-L5.5** Événements de classe · `feature/api-l5-5-evenements-classe` · PR #84
@@ -504,19 +557,29 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Un enseignant ne peut pas créer de contenu (S5)
   - [ ] Seed enrichi, `make openapi` committé
 
-### API-L6 · Back-office — ⬜ à faire
+### API-L6 · Back-office — 🟡 en cours
 - [x] **API-L6.1** 2FA (D72) · réalisée par LOT-6-ADMIN 6.1 (`feature/lot6-socle-staff`, PR #38)
   - [x] `django-otp` + `otp_totp`, `OTPMiddleware`, `OTPAdminSite` (WAD15)
   - [x] Enrôlement TOTP au premier login (QR code), réinitialisation par un Super-admin
   - [x] Session du personnel limitée à 8 h (C20) ; secret TOTP fixe de développement dans `seed_demo`
   - [x] `IsStaffVerified` sur toute route `backoffice/`, sinon `OTP_REQUIRED`
   - [x] Tests : staff sans OTP vérifié → `OTP_REQUIRED` et redirection admin, non-staff → 403
-- [ ] **API-L6.2** Admin thémé et RBAC · `feature/api-l6-2-admin-rbac`
-  - [ ] Thème monochrome `--ink-*` dans `fixtures/admin.json`, titre « Steamy »
+- [ ] **API-L6.2** Admin thémé et RBAC · `feature/api-l6-2-admin-rbac` · PR #61 (partie comptes)
+  - [x] Thème monochrome `--ink-*` dans `fixtures/admin.json`, titre « Steamy » (livré par LOT-6 6.1, PR #38)
   - [ ] Enregistrement de tous les modèles avec permissions par groupe (D71)
-  - [ ] Actions : rembourser, refuser une candidature avec remboursement (C3), relancer une demande, litige de consentement, changement de parent, modération `PublicProfileReview` (D15), suspendre
-  - [ ] `AuditLog` écrit par un mixin d'admin
-  - [ ] Tests : groupe Contenu sans accès aux paiements, staff ne peut pas accepter un consentement (D70)
+    - [x] Comptes : permissions personnalisées déclarées (`invite_teacher`, `deactivate_user`, `reset_password`, `view_sensitive_profile`, `change_parent`, `resend`, `flag_dispute`) ; `UserAdmin` limité aux personas, sans ajout ni changement de rôle, statut ou identifiant ; champs sensibles des profils soumis à *view_sensitive_profile* (D6) ; `StaffMemberAdmin` (Super-admin seul, garde-fous du dernier Super-admin)
+    - [ ] Catalogue (`publish_course`) : avec API-L3a (LOT-6 6.3)
+    - [ ] Commerce et événements (`set_shipping_status`, `revoke_kitcode`, `process_refund`, `refuse_application`) : avec API-L3b (LOT-6 6.4, 6.5)
+  - [ ] Actions
+    - [x] Relancer une demande (plafonds de W07), litige de consentement (`disputedAt`, `disputeNote`), changement de parent (`replacesLink`, lien remplacé à l'acceptation), modération `PublicProfileReview` (D15), suspendre / désactiver / réactiver (motif)
+    - [ ] Rembourser, refuser une candidature avec remboursement (C3) : attendent `Refund` et `EventApplication` refondus (API-L3b)
+  - [x] `AuditLog` écrit par un mixin d'admin (LOT-6 6.1) ; actions à motif journalisées par leur service (`apps/accounts/backoffice.py`)
+  - [x] Tests : groupe Contenu sans accès aux paiements, staff ne peut pas accepter un consentement (D70)
+  > Décisions : le changement de parent crée une `ConsentRequest` d'origine `support` (nouvelle valeur de `origin`,
+  > `OriginEnum` dans le schéma) ; `consent.accept` remplace alors le lien existant au lieu d'en créer un, et prévient
+  > l'ancien parent par SMS. Le support ne peut ni suspendre un compte en attente de consentement ni toucher au
+  > personnel ; le personnel ne se gère que dans l'équipe (WAD13), ce qui retire au Support la possibilité de modifier
+  > `is_staff` et les groupes depuis la fiche utilisateur.
 - [ ] **API-L6.3** Réglages · `feature/api-l6-3-reglages`
   - [ ] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
 - [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact`
