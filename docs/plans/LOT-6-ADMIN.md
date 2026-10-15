@@ -17,7 +17,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API), 6.6 · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
-- [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #NN (requiert API-0, API-1 ; réalise API-L6.1)
+- [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
   - [x] `WAD15` Connexion (admin Django) : gabarit `admin/login.html` (email, mot de passe, code TOTP à 6 chiffres), throttling par IP et par email, `next` limité à `WEB_URL/backoffice`
   - [x] Index de l'admin Django
   - [x] django-otp : `INSTALLED_APPS`, `OTPMiddleware`, `SteamyAdminSite(OTPAdminSite)` remplaçant `admin.site`

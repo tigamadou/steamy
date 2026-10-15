@@ -67,7 +67,7 @@ plan.
 | [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | ⬜ à faire | — | 3.0 (après API-1 et API-L3a) |
 | [LOT-4-PARENT](LOT-4-PARENT.md) | ⬜ à faire | — | 4.0 conception de WPD15 (sans prérequis d'API) |
 | [LOT-5-ENSEIGNANT](LOT-5-ENSEIGNANT.md) | ⬜ à faire | — | 5.1 (après API-L5) |
-| [LOT-6-ADMIN](LOT-6-ADMIN.md) | 🟡 en cours | 6.1 (PR #NN) | 6.6 (après lot 1, étape 1.0) ; 6.2 à 6.5 après leurs étapes d'API |
+| [LOT-6-ADMIN](LOT-6-ADMIN.md) | 🟡 en cours | 6.1 (PR #38) | 6.6 (après lot 1, étape 1.0) ; 6.2 à 6.5 après leurs étapes d'API |
 
 ## Suivi d'exécution
 
