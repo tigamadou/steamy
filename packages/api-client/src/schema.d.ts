@@ -125,7 +125,7 @@ export interface paths {
         };
         get: operations["courses_courses_list"];
         put?: never;
-        post: operations["courses_courses_create"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -140,12 +140,12 @@ export interface paths {
             cookie?: never;
         };
         get: operations["courses_courses_retrieve"];
-        put: operations["courses_courses_update"];
+        put?: never;
         post?: never;
-        delete: operations["courses_courses_destroy"];
+        delete?: never;
         options?: never;
         head?: never;
-        patch: operations["courses_courses_partial_update"];
+        patch?: never;
         trace?: never;
     };
     "/api/courses/courses/{slug}/enroll/": {
@@ -158,8 +158,9 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Action simple pour inscrire l'utilisateur courant au cours.
-         *     Retourne 201 si créé, 200 si existe déjà.
+         * @description Inscrit l'utilisateur courant à un parcours GRATUIT.
+         *     Un parcours payant s'obtient par l'achat (S7) : 402 PAYMENT_REQUIRED.
+         *     Retourne 201 si l'inscription est créée, 200 si elle existait déjà.
          */
         post: operations["courses_courses_enroll_create"];
         delete?: never;
@@ -177,7 +178,7 @@ export interface paths {
         };
         get: operations["courses_lessons_list"];
         put?: never;
-        post: operations["courses_lessons_create"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -192,12 +193,12 @@ export interface paths {
             cookie?: never;
         };
         get: operations["courses_lessons_retrieve"];
-        put: operations["courses_lessons_update"];
+        put?: never;
         post?: never;
-        delete: operations["courses_lessons_destroy"];
+        delete?: never;
         options?: never;
         head?: never;
-        patch: operations["courses_lessons_partial_update"];
+        patch?: never;
         trace?: never;
     };
     "/api/courses/modules/": {
@@ -209,7 +210,7 @@ export interface paths {
         };
         get: operations["courses_modules_list"];
         put?: never;
-        post: operations["courses_modules_create"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -224,12 +225,12 @@ export interface paths {
             cookie?: never;
         };
         get: operations["courses_modules_retrieve"];
-        put: operations["courses_modules_update"];
+        put?: never;
         post?: never;
-        delete: operations["courses_modules_destroy"];
+        delete?: never;
         options?: never;
         head?: never;
-        patch: operations["courses_modules_partial_update"];
+        patch?: never;
         trace?: never;
     };
     "/api/courses/resources/": {
@@ -241,7 +242,7 @@ export interface paths {
         };
         get: operations["courses_resources_list"];
         put?: never;
-        post: operations["courses_resources_create"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -256,12 +257,12 @@ export interface paths {
             cookie?: never;
         };
         get: operations["courses_resources_retrieve"];
-        put: operations["courses_resources_update"];
+        put?: never;
         post?: never;
-        delete: operations["courses_resources_destroy"];
+        delete?: never;
         options?: never;
         head?: never;
-        patch: operations["courses_resources_partial_update"];
+        patch?: never;
         trace?: never;
     };
     "/api/health/": {
@@ -308,24 +309,8 @@ export interface paths {
             cookie?: never;
         };
         get: operations["learning_attempts_retrieve"];
-        put: operations["learning_attempts_update"];
-        post?: never;
-        delete: operations["learning_attempts_destroy"];
-        options?: never;
-        head?: never;
-        patch: operations["learning_attempts_partial_update"];
-        trace?: never;
-    };
-    "/api/learning/attempts/{id}/manual_grade/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
         put?: never;
-        post: operations["learning_attempts_manual_grade_create"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -373,7 +358,7 @@ export interface paths {
         };
         get: operations["learning_choices_list"];
         put?: never;
-        post: operations["learning_choices_create"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -388,12 +373,12 @@ export interface paths {
             cookie?: never;
         };
         get: operations["learning_choices_retrieve"];
-        put: operations["learning_choices_update"];
+        put?: never;
         post?: never;
-        delete: operations["learning_choices_destroy"];
+        delete?: never;
         options?: never;
         head?: never;
-        patch: operations["learning_choices_partial_update"];
+        patch?: never;
         trace?: never;
     };
     "/api/learning/enrollments/": {
@@ -420,12 +405,12 @@ export interface paths {
             cookie?: never;
         };
         get: operations["learning_enrollments_retrieve"];
-        put: operations["learning_enrollments_update"];
+        put?: never;
         post?: never;
-        delete: operations["learning_enrollments_destroy"];
+        delete?: never;
         options?: never;
         head?: never;
-        patch: operations["learning_enrollments_partial_update"];
+        patch?: never;
         trace?: never;
     };
     "/api/learning/progress/": {
@@ -469,7 +454,7 @@ export interface paths {
         };
         get: operations["learning_questions_list"];
         put?: never;
-        post: operations["learning_questions_create"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -484,12 +469,12 @@ export interface paths {
             cookie?: never;
         };
         get: operations["learning_questions_retrieve"];
-        put: operations["learning_questions_update"];
+        put?: never;
         post?: never;
-        delete: operations["learning_questions_destroy"];
+        delete?: never;
         options?: never;
         head?: never;
-        patch: operations["learning_questions_partial_update"];
+        patch?: never;
         trace?: never;
     };
     "/api/learning/quizzes/": {
@@ -501,7 +486,7 @@ export interface paths {
         };
         get: operations["learning_quizzes_list"];
         put?: never;
-        post: operations["learning_quizzes_create"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -516,12 +501,12 @@ export interface paths {
             cookie?: never;
         };
         get: operations["learning_quizzes_retrieve"];
-        put: operations["learning_quizzes_update"];
+        put?: never;
         post?: never;
-        delete: operations["learning_quizzes_destroy"];
+        delete?: never;
         options?: never;
         head?: never;
-        patch: operations["learning_quizzes_partial_update"];
+        patch?: never;
         trace?: never;
     };
     "/api/messaging/notifications/": {
@@ -776,14 +761,14 @@ export interface components {
     schemas: {
         Attempt: {
             readonly id: number;
-            user: number;
-            quiz: number;
+            readonly user: number;
+            readonly quiz: number;
             /** Format: date-time */
             readonly createdAt: string;
             /** Format: decimal */
             readonly score: string | null;
             readonly passed: boolean;
-            data?: unknown;
+            readonly data: unknown;
         };
         /**
          * @description Atttempt: client envoie `data` : {question_id: choice_id} pour MCQ/TF
@@ -791,7 +776,6 @@ export interface components {
          */
         AttemptCreate: {
             readonly id: number;
-            user: number;
             quiz: number;
             /** Format: date-time */
             readonly createdAt: string;
@@ -805,12 +789,6 @@ export interface components {
          *     On calcule le score côté serveur à la sauvegarde via create()
          */
         AttemptCreateRequest: {
-            user: number;
-            quiz: number;
-            data?: unknown;
-        };
-        AttemptRequest: {
-            user: number;
             quiz: number;
             data?: unknown;
         };
@@ -826,50 +804,31 @@ export interface components {
         };
         Choice: {
             readonly id: number;
-            question: number;
-            text: string;
-            isCorrect?: boolean;
-        };
-        ChoiceRequest: {
-            question: number;
-            text: string;
-            isCorrect?: boolean;
+            readonly question: number;
+            readonly text: string;
         };
         CourseDetail: {
             readonly id: number;
-            title: string;
-            slug?: string;
-            description?: string;
-            readonly author: string;
-            path?: number | null;
-            published?: boolean;
+            readonly title: string;
+            readonly slug: string;
+            readonly description: string;
+            readonly path: number | null;
             /** Format: decimal */
-            price?: string;
+            readonly price: string;
             /** Format: date-time */
             readonly createdAt: string;
             /** Format: date-time */
             readonly updatedAt: string;
             readonly modules: components["schemas"]["Module"][];
         };
-        CourseDetailRequest: {
-            title: string;
-            slug?: string;
-            description?: string;
-            path?: number | null;
-            published?: boolean;
-            /** Format: decimal */
-            price?: string;
-        };
         CourseList: {
             readonly id: number;
-            title: string;
-            slug?: string;
-            description?: string;
-            readonly author: string;
-            path?: number | null;
-            published?: boolean;
+            readonly title: string;
+            readonly slug: string;
+            readonly description: string;
+            readonly path: number | null;
             /** Format: decimal */
-            price?: string;
+            readonly price: string;
             /** Format: date-time */
             readonly createdAt: string;
         };
@@ -896,13 +855,12 @@ export interface components {
             /** Format: date-time */
             readonly startedAt: string;
             readonly completed: boolean;
-            status?: components["schemas"]["EnrollmentStatusEnum"];
+            readonly status: components["schemas"]["EnrollmentStatusEnum"];
             /** Format: decimal */
             readonly progress: string;
         };
         EnrollmentRequest: {
             course: number;
-            status?: components["schemas"]["EnrollmentStatusEnum"];
         };
         /**
          * @description * `active` - Actif
@@ -952,35 +910,28 @@ export interface components {
         KindEnum: "mcq" | "tf" | "free";
         Lesson: {
             readonly id: number;
-            module: number;
-            title: string;
-            content?: string;
-            resourceType?: components["schemas"]["ResourceTypeEnum"];
+            readonly module: number;
+            readonly title: string;
+            readonly content: string;
+            readonly resourceType: components["schemas"]["ResourceTypeEnum"];
             /** @default 0 */
-            order: number;
+            readonly order: number;
             readonly resources: components["schemas"]["Resource"][];
         };
-        LessonRequest: {
-            module: number;
-            title: string;
-            content?: string;
-            resourceType?: components["schemas"]["ResourceTypeEnum"];
-            /** @default 0 */
-            order: number;
+        /** @description Plan du parcours, sans contenu : visible avant l'inscription. */
+        LessonSummary: {
+            readonly id: number;
+            readonly title: string;
+            readonly resourceType: components["schemas"]["ResourceTypeEnum"];
+            readonly order: number;
         };
         Module: {
             readonly id: number;
-            title: string;
+            readonly title: string;
             /** @default 0 */
-            order: number;
-            readonly lessons: components["schemas"]["Lesson"][];
-            course?: number;
-        };
-        ModuleRequest: {
-            title: string;
-            /** @default 0 */
-            order: number;
-            course?: number;
+            readonly order: number;
+            readonly lessons: components["schemas"]["LessonSummary"][];
+            readonly course: number;
         };
         Notification: {
             readonly id: number;
@@ -1258,29 +1209,6 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Resource"][];
         };
-        PatchedAttemptRequest: {
-            user?: number;
-            quiz?: number;
-            data?: unknown;
-        };
-        PatchedChoiceRequest: {
-            question?: number;
-            text?: string;
-            isCorrect?: boolean;
-        };
-        PatchedCourseDetailRequest: {
-            title?: string;
-            slug?: string;
-            description?: string;
-            path?: number | null;
-            published?: boolean;
-            /** Format: decimal */
-            price?: string;
-        };
-        PatchedEnrollmentRequest: {
-            course?: number;
-            status?: components["schemas"]["EnrollmentStatusEnum"];
-        };
         PatchedEventRequest: {
             user?: number | null;
             eventType?: string;
@@ -1289,20 +1217,6 @@ export interface components {
             /** Format: decimal */
             value?: string | null;
             metadata?: unknown;
-        };
-        PatchedLessonRequest: {
-            module?: number;
-            title?: string;
-            content?: string;
-            resourceType?: components["schemas"]["ResourceTypeEnum"];
-            /** @default 0 */
-            order: number;
-        };
-        PatchedModuleRequest: {
-            title?: string;
-            /** @default 0 */
-            order: number;
-            course?: number;
         };
         PatchedNotificationRequest: {
             title?: string;
@@ -1324,27 +1238,6 @@ export interface components {
             completed?: boolean;
             /** Format: decimal */
             score?: string | null;
-        };
-        PatchedQuestionRequest: {
-            quiz?: number;
-            text?: string;
-            kind?: components["schemas"]["KindEnum"];
-            /** Format: decimal */
-            weight?: string;
-        };
-        PatchedQuizRequest: {
-            course?: number;
-            title?: string;
-            /** Format: decimal */
-            passScore?: string;
-        };
-        PatchedResourceRequest: {
-            lesson?: number;
-            title?: string;
-            /** Format: binary */
-            file?: string | null;
-            /** Format: uri */
-            externalUrl?: string | null;
         };
         Payment: {
             readonly id: number;
@@ -1415,13 +1308,6 @@ export interface components {
             weight?: string;
             readonly choices: components["schemas"]["Choice"][];
         };
-        QuestionRequest: {
-            quiz: number;
-            text: string;
-            kind?: components["schemas"]["KindEnum"];
-            /** Format: decimal */
-            weight?: string;
-        };
         Quiz: {
             readonly id: number;
             course: number;
@@ -1430,30 +1316,16 @@ export interface components {
             passScore?: string;
             readonly questions: components["schemas"]["Question"][];
         };
-        QuizRequest: {
-            course: number;
-            title: string;
-            /** Format: decimal */
-            passScore?: string;
-        };
         Resource: {
             readonly id: number;
-            lesson: number;
-            title?: string;
+            readonly lesson: number;
+            readonly title: string;
             /** Format: uri */
-            file?: string | null;
+            readonly file: string | null;
             /** Format: uri */
-            externalUrl?: string | null;
+            readonly externalUrl: string | null;
             /** Format: date-time */
             readonly uploadedAt: string;
-        };
-        ResourceRequest: {
-            lesson: number;
-            title?: string;
-            /** Format: binary */
-            file?: string | null;
-            /** Format: uri */
-            externalUrl?: string | null;
         };
         /**
          * @description * `video` - Vidéo
@@ -1736,29 +1608,6 @@ export interface operations {
             };
         };
     };
-    courses_courses_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CourseDetailRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CourseDetail"];
-                };
-            };
-        };
-    };
     courses_courses_retrieve: {
         parameters: {
             query?: never;
@@ -1780,76 +1629,6 @@ export interface operations {
             };
         };
     };
-    courses_courses_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CourseDetailRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CourseDetail"];
-                };
-            };
-        };
-    };
-    courses_courses_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    courses_courses_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedCourseDetailRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CourseDetail"];
-                };
-            };
-        };
-    };
     courses_courses_enroll_create: {
         parameters: {
             query?: never;
@@ -1859,11 +1638,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CourseDetailRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {
@@ -1903,29 +1678,6 @@ export interface operations {
             };
         };
     };
-    courses_lessons_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LessonRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Lesson"];
-                };
-            };
-        };
-    };
     courses_lessons_retrieve: {
         parameters: {
             query?: never;
@@ -1937,79 +1689,6 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Lesson"];
-                };
-            };
-        };
-    };
-    courses_lessons_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this Leçon. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LessonRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Lesson"];
-                };
-            };
-        };
-    };
-    courses_lessons_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this Leçon. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    courses_lessons_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this Leçon. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedLessonRequest"];
-            };
-        };
         responses: {
             200: {
                 headers: {
@@ -2049,29 +1728,6 @@ export interface operations {
             };
         };
     };
-    courses_modules_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ModuleRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Module"];
-                };
-            };
-        };
-    };
     courses_modules_retrieve: {
         parameters: {
             query?: never;
@@ -2083,79 +1739,6 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Module"];
-                };
-            };
-        };
-    };
-    courses_modules_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this Module. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ModuleRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Module"];
-                };
-            };
-        };
-    };
-    courses_modules_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this Module. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    courses_modules_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this Module. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedModuleRequest"];
-            };
-        };
         responses: {
             200: {
                 headers: {
@@ -2195,29 +1778,6 @@ export interface operations {
             };
         };
     };
-    courses_resources_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ResourceRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Resource"];
-                };
-            };
-        };
-    };
     courses_resources_retrieve: {
         parameters: {
             query?: never;
@@ -2229,79 +1789,6 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Resource"];
-                };
-            };
-        };
-    };
-    courses_resources_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this resource. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ResourceRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Resource"];
-                };
-            };
-        };
-    };
-    courses_resources_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this resource. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    courses_resources_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this resource. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedResourceRequest"];
-            };
-        };
         responses: {
             200: {
                 headers: {
@@ -2411,105 +1898,6 @@ export interface operations {
             };
         };
     };
-    learning_attempts_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this attempt. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AttemptRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Attempt"];
-                };
-            };
-        };
-    };
-    learning_attempts_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this attempt. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    learning_attempts_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this attempt. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedAttemptRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Attempt"];
-                };
-            };
-        };
-    };
-    learning_attempts_manual_grade_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this attempt. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AttemptRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Attempt"];
-                };
-            };
-        };
-    };
     learning_certificates_list: {
         parameters: {
             query?: {
@@ -2588,29 +1976,6 @@ export interface operations {
             };
         };
     };
-    learning_choices_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChoiceRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Choice"];
-                };
-            };
-        };
-    };
     learning_choices_retrieve: {
         parameters: {
             query?: never;
@@ -2622,79 +1987,6 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Choice"];
-                };
-            };
-        };
-    };
-    learning_choices_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this choice. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChoiceRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Choice"];
-                };
-            };
-        };
-    };
-    learning_choices_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this choice. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    learning_choices_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this choice. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedChoiceRequest"];
-            };
-        };
         responses: {
             200: {
                 headers: {
@@ -2768,79 +2060,6 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Enrollment"];
-                };
-            };
-        };
-    };
-    learning_enrollments_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this enrollment. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EnrollmentRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Enrollment"];
-                };
-            };
-        };
-    };
-    learning_enrollments_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this enrollment. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    learning_enrollments_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this enrollment. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedEnrollmentRequest"];
-            };
-        };
         responses: {
             200: {
                 headers: {
@@ -3026,29 +2245,6 @@ export interface operations {
             };
         };
     };
-    learning_questions_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["QuestionRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Question"];
-                };
-            };
-        };
-    };
     learning_questions_retrieve: {
         parameters: {
             query?: never;
@@ -3060,79 +2256,6 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Question"];
-                };
-            };
-        };
-    };
-    learning_questions_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this question. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["QuestionRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Question"];
-                };
-            };
-        };
-    };
-    learning_questions_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this question. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    learning_questions_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this question. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedQuestionRequest"];
-            };
-        };
         responses: {
             200: {
                 headers: {
@@ -3172,29 +2295,6 @@ export interface operations {
             };
         };
     };
-    learning_quizzes_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["QuizRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Quiz"];
-                };
-            };
-        };
-    };
     learning_quizzes_retrieve: {
         parameters: {
             query?: never;
@@ -3206,79 +2306,6 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Quiz"];
-                };
-            };
-        };
-    };
-    learning_quizzes_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this quiz. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["QuizRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Quiz"];
-                };
-            };
-        };
-    };
-    learning_quizzes_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this quiz. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    learning_quizzes_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this quiz. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedQuizRequest"];
-            };
-        };
         responses: {
             200: {
                 headers: {

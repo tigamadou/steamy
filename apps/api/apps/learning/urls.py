@@ -15,9 +15,9 @@ router = DefaultRouter()
 router.register(r"enrollments", EnrollmentViewSet)
 router.register(r"progress", ProgressViewSet)
 router.register(r"certificates", CertificateViewSet, basename="certificate")
-router.register(r"quizzes", QuizViewSet)
-router.register(r"questions", QuestionViewSet)
-router.register(r"choices", ChoiceViewSet)
+router.register(r"quizzes", QuizViewSet, basename="quiz")
+router.register(r"questions", QuestionViewSet, basename="question")
+router.register(r"choices", ChoiceViewSet, basename="choice")
 router.register(r"attempts", AttemptViewSet)
 
 urlpatterns = router.urls
