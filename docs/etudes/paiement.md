@@ -1,5 +1,9 @@
 # Étude · Prestataires de paiement Mobile Money (S9)
 
+> **Décision : FedaPay (ADR 0003, acceptée).** FedaPay est le seul prestataire intégré, remplaçable via l'interface
+> commune ; KKiaPay et CinetPay sont des options de secours ou de remplacement, non intégrées en v1. Ce document est
+> l'étude qui a précédé la décision.
+
 Étude préalable à l'[ADR 0003 · Prestataire de paiement](../adr/0003-prestataire-paiement.md), tâche `API-L3b.0a` de
 [PLAN-API](../plans/PLAN-API.md). Sources consultées le **15 octobre 2026**, sur les sites et documentations officiels
 sauf mention « tiers ». Ce qui n'a pas pu être confirmé est marqué **à confirmer** : il devient une question au
