@@ -26,6 +26,7 @@ from apps.classrooms.models import School, TeacherInvitation
 from apps.core.groups import CONTENT, FINANCE, SUPER_ADMIN, SUPPORT
 from apps.events.models import SteamyEvent
 from apps.notifications.models import Category, Notification, Tone
+from apps.payments.demo import seed_commerce
 from apps.referentials.models import (
     Avatar,
     Country,
@@ -777,4 +778,5 @@ def seed_all() -> dict[str, User]:
     seed_events()
     seed_kits()
     seed_learning(accounts)
+    seed_commerce(accounts)
     return accounts

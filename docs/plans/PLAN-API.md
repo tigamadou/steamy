@@ -578,10 +578,14 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > que l'enfant n'a pas recandidaté, sinon remboursé. `GET events/tickets/` (apprenant, non paginé) :
   > `{id, courseSlug, courseTitle, createdAt, used, usedFor}`. Accepter / refuser une candidature de l'enfant :
   > API-L4.2.
-- [ ] **Critères de fin d'API-L3b**
-  - [ ] Tests prioritaires de la section « Points délicats » passants
-  - [ ] Seed enrichi (commandes, kits en rupture…)
-  - [ ] `make openapi` committé
+- [x] **Critères de fin d'API-L3b** · `feature/api-l3b-criteres-fin`
+  - [x] Tests prioritaires de la section « Points délicats » passants
+  - [x] Seed enrichi (commandes, kits en rupture…)
+  - [x] `make openapi` committé
+  > Seed (`apps/payments/demo.py`, appelé par `seed_demo`) : 3 zones de livraison du Bénin, adresse de Marie, une
+  > commande de kit payée par Marie pour Léa (expédiée, Kit Code, reçu), une demande de paiement de Léa en attente,
+  > une candidature de Léa à un événement payant (en attente de Marie, couverte par son ticket). Le kit en rupture
+  > existait déjà (L1.5). Reste ouvert : la validation du format des factures par la comptabilité (L3b.0a, P1/P2).
 
 ### API-L4 · Espace parent — ⬜ à faire
 - [ ] **API-L4.1** Enfants · `feature/api-l4-1-enfants`
