@@ -75,10 +75,10 @@ describe("ContactForm (WL24)", () => {
       message: MESSAGE,
       website: "",
     });
-    expect(screen.getByRole("heading", { name: "Message envoyé" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Message envoyé" })).toBeInTheDocument();
     expect(screen.getByText(/Merci Marie Adjovi/)).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Envoyer un autre message" }));
-    expect(screen.getByLabelText(/^Nom/)).toHaveValue("");
+    expect(await screen.findByLabelText(/^Nom/)).toHaveValue("");
   });
 
   it("coupure réseau : message conservé et « Réessayer l'envoi »", async () => {
@@ -86,7 +86,7 @@ describe("ContactForm (WL24)", () => {
     render(<ContactForm />);
     await fill();
     await userEvent.click(screen.getByRole("button", { name: "Envoyer" }));
-    expect(screen.getByText(/Il est conservé ci-dessous/)).toBeInTheDocument();
+    expect(await screen.findByText(/Il est conservé ci-dessous/)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Message/)).toHaveValue(MESSAGE);
     expect(screen.getByRole("button", { name: "Réessayer l'envoi" })).toBeInTheDocument();
   });
