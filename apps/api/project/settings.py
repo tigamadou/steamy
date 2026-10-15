@@ -86,8 +86,6 @@ INSTALLED_APPS = [
     "apps.file",
     "apps.mail",
     "apps.accounts",
-    # Coquille : ne garde que ses migrations (tables supprimées en 0002), voir apps/courses/__init__.py
-    "apps.courses",
     "apps.catalog",
     "apps.events",
     "apps.public",
@@ -326,6 +324,7 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "ErrorCodeEnum": "libs.errors.ERROR_CODES",
         "RoleEnum": "apps.accounts.models.User.Role",
+        "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
         "OrderKindEnum": "apps.payments.models.Order.Kind",
         "OrderCreateKindEnum": "apps.payments.serializers.ORDER_CREATE_KINDS",
         "OrderStatusEnum": "apps.payments.models.Order.Status",
