@@ -13,6 +13,141 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 | [SPEC-TECHNIQUE](../SPEC-TECHNIQUE.md) | §2 design system, §3.2-3.4 modèle, §4.3-4.4 invariants, §6 états, §7 API |
 | `design/` | Référence visuelle : `screens-dashboard-web.jsx`, `-catalog-`, `-wishlist-`, `-purchase-`, `-journey-`, `-kit-shop-`, `ds-complex.jsx` |
 
+## Avancement
+
+Statut : ⬜ à faire · Prochaine tâche : 3.0 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
+
+### Valeur pédagogique (API-L3a) — ⬜ à faire
+- [ ] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell`
+  - [ ] `AppShell` (props de §5.5, sidebar repliable en tiroir sous 768 px)
+  - [ ] `NavItem`, `NotificationBell`, `HeaderSearch`
+  - [ ] WD16 `LogoutModal`
+  - [ ] Config `learnerNav` et table unique `active` dérivée de l'URL
+  - [ ] Promotions au DS : `SectionHeader`, `StatPill`, `ProgressBar`, `QuickActionTile`, `SettingsRow`, `Toggle`
+  - [ ] Layout `apprenant/layout.tsx` (garde de rôle `learner`) et layout `(shell)`, drapeaux `src/lib/features.ts`
+  - [ ] Données du shell : `accounts/me/`, `notifications/unread-count/` (rafraîchi toutes les 60 s onglet visible)
+  - [ ] Tests unitaires : nav à 5 entrées visibles, `active` dérivé de l'URL, compteur, modale au clavier
+  - [ ] Parcours Playwright : apprenant → shell ; parent sur `/apprenant` → redirection ; non connecté → `/connexion?next=` puis retour
+  - [ ] Recette : aucune donnée en dur, aucun `title="Bientôt"`, rendu 360 px, squelette du shell pendant le chargement
+- [ ] **3.1** Accueil, notifications et aide (requiert API-L3a) · `feature/lot3-accueil-notifications`
+  - [ ] WD01 tableau de bord avec reprise (`StatPill` Streak, Points, Rang masqués si `null`)
+  - [ ] WD02 tableau de bord sans reprise (catalogue `prix=gratuit`)
+  - [ ] WD03 `loading.tsx` fidèle à WD01
+  - [ ] WD04 notifications (onglets Toutes / Non lues, lecture au clic, « Tout marquer comme lu »)
+  - [ ] WD05 notifications vides
+  - [ ] WD06 préférences de notification
+  - [ ] WD12 aide (FAQ statique, recherche locale, lien WL24)
+  - [ ] Composants `NotifItem`, `ResumeCard`
+  - [ ] Tests unitaires : WD01 sans points, notification lue au clic, toggle email désactivé sans adresse
+  - [ ] Parcours Playwright : « Tout marquer comme lu » met le compteur du shell à 0
+- [ ] **3.2** Catalogue, fiche parcours et souhaits (requiert API-L1, API-L3a) · `feature/lot3-catalogue-souhaits`
+  - [ ] WC01 catalogue (filtres catégorie × difficulté × prix + tri + `q` dans l'URL)
+  - [ ] WC02 filtres actifs (`ActiveFilterBar`)
+  - [ ] WC02b état ouvert des menus déroulants
+  - [ ] WC03 aucun résultat (« Effacer les filtres »)
+  - [ ] WC04 fiche parcours (`CourseHero`, `Curriculum`, `EnrollCard` sticky, `VimeoPlayer` bande-annonce)
+  - [ ] WC05 fiche parcours avec kit ou payant (`KitMiniCard`, CTA derrière le drapeau `unlock`)
+  - [ ] WW01 souhaits
+  - [ ] WW02 souhaits vides
+  - [ ] WW03 retrait optimiste avec `Toast` d'annulation
+  - [ ] Composants `CourseCard` (cœur distinct), `ActiveFilterBar`, `DropdownMenu`, `useUndoableAction`
+  - [ ] Inscription `POST learning/enrollments/` et gestion de `PAYMENT_REQUIRED`, `KIT_CODE_REQUIRED`
+  - [ ] Tests unitaires : filtres ↔ URL, carte « Gratuit », pas de prix de parcours sur un parcours avec kit
+  - [ ] Parcours Playwright « souhaits » : ajouter depuis WC01, retirer depuis WW01, annuler, recharger
+- [ ] **3.3a** Mes parcours, arbre et missions (requiert API-L3a, maquette WD23 validée, offre Vimeo) · `feature/lot3-mes-parcours-missions`
+  - [ ] Conception de la maquette WD23 dans `design/screens-apprenant-a-concevoir-web.jsx`, validée (C18)
+  - [ ] WD23 mes parcours (onglets En cours / Terminés, `EnrolledCourseCard`)
+  - [ ] WC06a arbre du parcours
+  - [ ] WC06b projet déplié (`?projet=`)
+  - [ ] WJ01 projet
+  - [ ] WJ02 niveau
+  - [ ] WJ03 mission (`MissionBlocks`, « Marquer comme terminée », navigation vers `next`)
+  - [ ] Composants `ProjectAccordion`, `MissionItem`, `TeacherCommentCard`, `LockedContentState`
+  - [ ] `VimeoPlayer` (`@vimeo/player` épinglé, chargement différé, suivi `learning/activity/`, repli en cas d'erreur, CSP `frame-src`)
+  - [ ] Tests unitaires : `MissionItem` verrouillé non activable, `next` respecté, `VimeoPlayer` avec faux `Player`
+  - [ ] Parcours Playwright : accès direct à une mission verrouillée → `LockedContentState` ; `player.vimeo.com` intercepté
+- [ ] **3.3b** Quiz, résultats et badges (requiert API-L3a) · `feature/lot3-quiz`
+  - [ ] WJ04 quiz formatif
+  - [ ] WJ10 quiz sommatif
+  - [ ] WJ05 résultat formatif
+  - [ ] WJ08 résultat sommatif (`RetryCountdown`)
+  - [ ] WJ06 badge de niveau (plein écran)
+  - [ ] WJ11 badge de projet (plein écran)
+  - [ ] Composants `Quiz`, `QuizResult`, `QuestionReview`, `RetryCountdown`, `Medal`
+  - [ ] Brouillon des réponses en `sessionStorage`, envoi unique, protection contre la double soumission
+  - [ ] Tests unitaires : seuil affiché = seuil de l'API, compte à rebours, aucune bonne réponse dans le DOM avant soumission
+  - [ ] Parcours Playwright P1
+- [ ] **3.3c** Certification (requiert API-L3a ; ticket via API-L3b) · `feature/lot3-certification`
+  - [ ] WJ07 certification obtenue (PDF avec état « Préparation… », ticket derrière le drapeau `events`)
+  - [ ] WJ09 certification non obtenue (projets ou missions restants)
+  - [ ] Test unitaire `CertificateView` : réponse d'API affichée telle quelle
+- [ ] **3.4** Tentatives et progression (requiert API-L3a) · `feature/lot3-tentatives-progression`
+  - [ ] WD07 liste des tentatives (bandeau, filtres et tri dans l'URL)
+  - [ ] WD09 liste vide (renvoi vers WD23)
+  - [ ] WD08 détail d'une tentative (corrigé, concepts, `RetryCountdown`)
+  - [ ] WD21 progression (`WeeklyActivityBars`, maîtrise par catégorie, recommandations)
+  - [ ] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
+  - [ ] Tests unitaires : statut issu du serveur affiché tel quel (D31)
+- [ ] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres`
+  - [ ] WD13 profil (hub de `SettingsRow`, identifiant en lecture seule)
+  - [ ] WD17 modification du profil (`ProfileForm`, `AvatarPicker`, `GoalChip`)
+  - [ ] WD18 mot de passe
+  - [ ] WD19 adresse de livraison (`AddressForm`)
+  - [ ] WD22 parent
+  - [ ] WD15 suppression du compte (texte D40, annulation tant que `pending_parent`)
+  - [ ] Composants `Section`, `InfoCard`, `ProfileForm`, `AddressForm`
+  - [ ] Tests unitaires : erreurs de champ issues de `fields`
+  - [ ] Parcours Playwright : modifier le profil puis recharger
+
+### Commerce (API-L3b) — ⬜ à faire
+- [ ] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage`
+  - [ ] WA01 saisie du Kit Code (`KitCodeInput`)
+  - [ ] WA06 erreur de Kit Code (`KIT_CODE_INVALID`, `KIT_CODE_ALREADY_USED`, `KIT_CODE_NOT_COMPATIBLE`, `THROTTLED`)
+  - [ ] WA02 suivi de la demande au parent (interrogation 10 s, relance, annulation)
+  - [ ] Drapeau `unlock` activé sur WC05
+  - [ ] WD14 commandes de l'apprenant
+  - [ ] Bandeau des demandes en attente dans WD23
+  - [ ] Composant `PaymentForm` (WA03, `WANetworkCard`)
+  - [ ] Composant `PaymentStatusPanel` (WA04 attente, WA05 succès, WA07 échec ; prop `register`)
+  - [ ] Tests unitaires : `KitCodeInput`, `PaymentForm` sans réseau en dur, `PaymentStatusPanel` dans ses 3 états
+  - [ ] Parcours Playwright P2 (Kit Code)
+  - [ ] Parcours Playwright P3 (demande de paiement)
+- [ ] **3.7a** Boutique : catalogue, détail et panier (requiert API-L3b) · `feature/lot3-boutique-catalogue-panier`
+  - [ ] WK01 catalogue de la boutique (connecté ; `/boutique` invité = WL07)
+  - [ ] WK02 détail d'un kit
+  - [ ] WK11 kit en rupture (alerte de réassort)
+  - [ ] WK03 panier
+  - [ ] WK10 panier vide
+  - [ ] Composants `WKGallery`, `WKQtyStepper`, `WKCartRow`, `WKSummaryRow`, `RestockAlertForm`, `useCart`
+  - [ ] Panier invité en `localStorage`, panier connecté côté serveur, `mergeGuestCart()` au retour de W16, activation du panier dans `WKKitCard`
+  - [ ] Parcours Playwright P5
+- [ ] **3.7b** Checkout invité, D12 (requiert API-L3b) · `feature/lot3-boutique-checkout-invite`
+  - [ ] WK04 coordonnées de l'invité
+  - [ ] WK05 livraison (`AddressForm`, zones `shop/delivery-zones/`)
+  - [ ] WK06 paiement
+  - [ ] WK09 échec du paiement (panier conservé)
+  - [ ] WK07 suivi de commande (`ShippingTimeline`, jeton `X-Guest-Token`, `noindex`, `no-referrer`)
+  - [ ] Gestion de `OUT_OF_STOCK`, `ORDER_EXPIRED`, `NETWORK_UNAVAILABLE`
+  - [ ] Parcours Playwright P4
+- [ ] **3.7c** Demande de kit au parent (requiert API-L3b) · `feature/lot3-boutique-demande-parent`
+  - [ ] WK08 demande de kit au parent (`/apprenant/demandes/[id]`, `kind=kit`)
+- [ ] **3.8** Steamy Events côté apprenant (requiert API-L3b, `events`) · `feature/lot3-steamy-events`
+  - [ ] WD10 événements et candidatures
+  - [ ] WL23 fiche événement dans le shell (`EVENT_FULL`, `EVENT_CLOSED`)
+  - [ ] WD11 candidature (`ALREADY_APPLIED`)
+  - [ ] Drapeau `events` activé (raccourci de WD01, ticket de WJ07)
+  - [ ] Parcours Playwright P6
+
+- [ ] **Critères de fin du lot 3**
+  - [ ] Les 62 écrans respectent la définition de « terminé » du README
+  - [ ] `AppShell` dans le DS, paramétré uniquement par ses props, prêt pour les navigations parent et enseignant
+  - [ ] Composants promus et testés : `StatPill`, `SectionHeader`, `ProgressBar`, `QuickActionTile`, `SettingsRow`, `Toggle`, `Section`, `InfoCard`, `MissionItem`, `Quiz`, `QuizAttemptRow`, `NotifItem`, `Medal`, `WANetworkCard`, `PaymentForm`, `PaymentStatusPanel`, `ShippingTimeline`, `VimeoPlayer`, `AddressForm`, `KitCodeInput`
+  - [ ] Aucun calcul de règle métier côté front (aucun seuil, délai, barème ni montant codé en dur)
+  - [ ] Parcours Playwright P1 à P7 verts en CI sur la stack Docker avec le jeu D2
+  - [ ] Aucun appel hors du client généré ; `make openapi` à jour
+  - [ ] Drapeaux `unlock` et `events` retirés
+  - [ ] Lots 4 et 5 démarrables : `AppShell`, `PaymentForm`, `PaymentStatusPanel`, `AddressForm`, `Section`, `InfoCard`, `ShippingTimeline` et composants de tunnel boutique réutilisables sans modification
+
 ## 1. Périmètre
 
 62 écrans à livrer (61 v1 + `WD23` à concevoir) ; `WD20` est supprimé (D30).

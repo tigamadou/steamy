@@ -8,6 +8,381 @@ tables : il dit **dans quel ordre** et **en quelles PR** les réaliser, et préc
 
 Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-delà : découper).
 
+## Avancement
+
+Statut : 🟡 en cours · Prochaine tâche : API-1.1
+
+Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
+
+### API-0 · Correctifs de sécurité sur le code existant — ✅ terminé
+- [x] **API-0.1** Surfaces inutiles · `feature/api-0-surfaces` · PR #5
+  - [x] Supprimer `POST signup/` et `public/user/signup` (S1)
+  - [x] Supprimer `public/user/login`, `TokenAuthentication` et `rest_framework.authtoken` (S12)
+  - [x] Supprimer `api-auth/` et `api_root`
+  - [x] Retirer les routes `messaging/conversations|messages|attachments` et le websocket (garder `messaging/notifications/`)
+  - [x] Retirer `courses/paths/`
+  - [x] Retirer les routes `file` (`create-signed-file`, `files`, `files/<pk>`)
+  - [x] Tests : `POST /api/signup/` → 404, aucun endpoint n'accepte `role`, jeton refusé, websocket non servi
+  - [x] Supprimer `user/tests/test_signup_with_role.py`, `test_login_views.py`, `test_views.py` et les tests `public/{login,signup}`
+- [x] **API-0.2** Contenu et pédagogie · `feature/api-0-contenu` · PR #6
+  - [x] `courses/*` en lecture seule (S2)
+  - [x] Liste et détail filtrés sur `published=True`, `author` retiré des serializers (S6)
+  - [x] `lessons`, `resources` et contenu des modules réservés aux inscrits (S6)
+  - [x] `enroll` et `POST learning/enrollments/` refusés si `price > 0` → 402 `PAYMENT_REQUIRED` (S7)
+  - [x] `quizzes`/`questions`/`choices` en lecture seule, `is_correct` retiré, `manual_grade` supprimé (S8)
+  - [x] Signal `on_attempt_saved` (certificat au premier quiz) désactivé (S8)
+  - [x] `attempts` : création seulement, correction côté serveur, score client ignoré
+  - [x] Tests : `courses/tests/test_courses.py` réécrits en refus (405 pour tous les rôles)
+  - [x] Tests : inscription gratuite → 201, payante → 402 `PAYMENT_REQUIRED`
+  - [x] Tests : `learning/tests/test_signals.py` remplacé (« une tentative réussie ne délivre pas de certificat »)
+  - [x] Tests : `isCorrect` absent des réponses, liste des cours sans brouillon ni email, contenu de leçon refusé à l'anonyme
+- [x] **API-0.3** Scoping propriétaire (S4) · `feature/api-0-scoping` · PR #7
+  - [x] `get_queryset` filtré sur `request.user` : `enrollments`, `progress`, `attempts`, `certificates`, `orders`, `payments`, `notifications`
+  - [x] Champs `user`/`owner`/`enrollment` en `read_only` ou validés contre l'utilisateur
+  - [x] `IsAdminOrOwner` remplacé par le filtrage (404 sur l'objet d'autrui)
+  - [x] Tests : accès croisé refusé sur `learning/*`
+- [x] **API-0.4** Paiements (S5) · `feature/api-0-paiements` · PR #8
+  - [x] `payments/orders/` et `payments/payments/` en lecture seule
+  - [x] Webhook : montant **et** devise vérifiés contre `Order.total`
+  - [x] Webhook idempotent : `select_for_update` sur la commande, contrainte unique `provider`+`provider_transaction_id`
+  - [x] Réponse neutre `{ok: true}` ou 400 sans détail, exception journalisée et jamais renvoyée
+  - [x] Tests : webhook à montant falsifié (commande non payée), rejoué (un seul `Payment`), signature invalide, erreur interne non divulguée
+- [x] **API-0.5** Throttling, langue, erreurs, docs, télémétrie · `feature/api-0-durcissement` · PR #9
+  - [x] Throttles DRF (S9) : `anon` et `user` globaux, portées `login`, `signup`, `password-reset`, `webhook`
+  - [x] `LANGUAGE_CODE = "fr"`
+  - [x] Gestionnaire d'erreurs au format `{code, message, fields}` (D4) avec les codes génériques
+  - [x] `/api/docs/`, `/api/schema/`, `/api/redoc/` montés seulement si `ALLOW_API_DOCS` ; titre OpenAPI « API Steamy »
+  - [x] `USE_TZ = True`, `TIME_ZONE = "Africa/Porto-Novo"` (C16)
+  - [x] Télémétrie fermée (S3, oubliée par le plan) : ingestion en écriture seule, dashboard et export réservés au personnel
+  - [x] Bug corrigé : export CSV sans dates
+  - [x] Bug corrigé : libellés du modèle User en gettext_lazy (migration parasite avec la locale fr)
+  - [x] Tests : 6ᵉ tentative de connexion en une minute → 429 `THROTTLED`, message d'erreur en français, docs fermées par défaut, télémétrie non attribuable et réservée au personnel
+  - [x] `apps/core/tests/test_security_regressions.py` : un test par faille S1-S9
+- [x] **Critères de fin d'API-0**
+  - [x] CI verte
+  - [x] `AllowAny` limité à `csrf`, `session-login`, `health`, webhook et lectures de catalogue
+  - [x] Aucune route d'écriture client sur contenu, quiz, commandes ou paiements
+
+### API-1 · Socle — ⬜ à faire
+- [ ] **ADR Identité et connexion** (avant API-1.1) · `docs/adr/`
+  - [ ] `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé
+- [ ] **API-1.1** Remise à zéro + `accounts.User` · `feature/api-1-identite`
+  - [ ] Supprimer tous les `apps/*/migrations/0*.py` (garder les `__init__.py`)
+  - [ ] `AUTH_USER_MODEL = "accounts.User"` ; retirer `apps.user`, `apps.messaging`, `rest_framework.authtoken`, `channels` d'`INSTALLED_APPS`
+  - [ ] App `accounts` : `User`, `LearnerProfile`, `ParentProfile`, `TeacherProfile` (champs §3.1)
+  - [ ] Unicité conditionnelle (`username`, `phone`, `email`) et `CheckConstraint` par rôle ; regex `username` (sans `@`, pas tout-numérique)
+  - [ ] `status` et `is_active` dérivé ; `admin` supprimé (D71)
+  - [ ] `IdentifierBackend` (email / téléphone E.164 / `username`), personnel refusé sur `auth/login/`, temps constant
+  - [ ] Refus par statut : `ACCOUNT_PENDING_CONSENT`, `ACCOUNT_SUSPENDED`, `ACCOUNT_DEACTIVATED`
+  - [ ] `SESSION_ENGINE` en `cached_db`, rotation de session au login
+  - [ ] Suppression des apps `user` et `messaging` (tag git `archive/messaging`)
+  - [ ] `analytics.Event` → `TrackingEvent` ; `DEFAULT_AUTO_FIELD = BigAutoField`
+  - [ ] `make makemigrations` : un `0001_initial` par app ; `makemigrations --check` passe
+  - [ ] Annoncer la PR (`make clean && make up && make seed` pour les développeurs)
+  - [ ] Tests : identifiant numérique ou avec `@` refusé, doublon insensible à la casse, trois personas + personnel refusé, statuts refusés
+- [ ] **API-1.2** Domaine `auth` + `accounts/me/` · `feature/api-1-auth-me`
+  - [ ] `GET auth/csrf/`, `POST auth/login/` (C7), `POST auth/logout/`
+  - [ ] `GET accounts/me/` (identité, rôle, statut, `profileStep`, données du shell, champs personnel)
+  - [ ] `POST accounts/me/password/`, `POST accounts/me/email/`
+  - [ ] Pagination `page`/`pageSize`
+  - [ ] Front : `apps/web/src/lib/api-browser.ts` et `apps/web/src/app/page.tsx` mis à jour, `packages/api-client` régénéré
+  - [ ] Retirer le commentaire d'en-tête de `session/views.py` (login par token)
+  - [ ] Tests : CSRF exigé sur login et logout, throttle de login par IP **et** par identifiant
+- [ ] **API-1.3** Erreurs et validation · `feature/api-1-erreurs`
+  - [ ] Catalogue complet des codes §7.1 (`libs/errors.py`, message français par code)
+  - [ ] Composant `Error` déclaré dans le schéma OpenAPI (400/401/403/404/409/429)
+  - [ ] Validateur de mot de passe D25 (`PASSWORD_TOO_WEAK`) ; validateurs Django par défaut retirés
+  - [ ] Tests : erreurs en français avec `code`
+- [ ] **API-1.4** Notifications · `feature/api-1-notifications`
+  - [ ] App `notifications` : `Notification`, `NotificationPreference`
+  - [ ] Endpoints §7.7 : `notifications/`, `unread-count/`, `{id}/read/`, `read-all/`, `preferences/`
+  - [ ] Service `notify(user, type, …)` (base + email selon la préférence, C12)
+  - [ ] Tests : scoping propriétaire, préférences respectées
+- [ ] **API-1.5** Référentiels (D3) · `feature/api-1-referentiels`
+  - [ ] App `referentials` : `Country`, `PaymentNetwork` (Celtiis inclus, D76), `SchoolGrade`, `Goal`, `Avatar`, `Disability`, `Relationship`, `RefusalReason`, `Locality`
+  - [ ] Données initiales par migration de données
+  - [ ] Endpoints `GET referentials/*` publics, `Cache-Control: public, max-age=3600`
+  - [ ] Tests : référentiels lisibles anonymement
+- [ ] **API-1.6** Plateforme et personnel · `feature/api-1-plateforme`
+  - [ ] `core.PlatformSettings` (singleton, défauts D24, D32, D66 ; barème C8 vide)
+  - [ ] `core.AuditLog`
+  - [ ] 4 groupes Django par migration de données (Super-admin, Contenu, Support, Finance, D71)
+- [ ] **API-1.7** Données de démo (D2) · `feature/api-1-seed-demo`
+  - [ ] Commande `seed_demo` idempotente, refusée si `DJANGO_ENV=production`
+  - [ ] `make seed` : `loaddata fixtures/admin.json fixtures/mail.json` puis `seed_demo`
+  - [ ] Comptes : Léa Adjovi, son parent, un enseignant, un membre du personnel par groupe avec secret TOTP fixe de développement
+  - [ ] Mots de passe de démo documentés dans `fixtures/README`
+  - [ ] Tests : `seed_demo` deux fois de suite sans doublon
+- [ ] **Critères de fin d'API-1**
+  - [ ] `make clean && make up && make seed` fonctionne
+  - [ ] Front compilé contre le nouveau client
+  - [ ] Plus aucune route hors `/api/<domaine>/…/`
+
+### API-L1 · Catalogue public, événements, formulaires, kits — ⬜ à faire
+- [ ] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog`
+  - [ ] Modèles `Category`, `Course`, `Project`, `Level`, `Mission` (`vimeoId`, `blocks` JSON validé)
+  - [ ] Suppression de `courses`
+  - [ ] Admin Django (groupe Contenu, ordre par glisser via `order`)
+- [ ] **API-L1.2** Endpoints catalogue · `feature/api-l1-2-catalogue-api`
+  - [ ] `GET catalog/categories/` (avec `courseCount`)
+  - [ ] `GET catalog/courses/` (filtres `category`, `difficulty`, `price`, `featured`, `q`, `sort`)
+  - [ ] `GET catalog/courses/{slug}/` sans `blocks` ni `vimeoId` de mission (D11), publiés uniquement
+  - [ ] Tests : brouillon invisible (liste et détail 404), détail sans contenu de mission, aucune écriture possible
+- [ ] **API-L1.3** Événements en lecture · `feature/api-l1-3-events`
+  - [ ] App `events` : `SteamyEvent` (§3.4) + admin
+  - [ ] `GET events/?upcoming=`, `GET events/{slug}/` (`seatsLeft` calculé)
+  - [ ] Tests : brouillon invisible, aucune écriture publique
+- [ ] **API-L1.4** Formulaires publics · `feature/api-l1-4-formulaires`
+  - [ ] App `public` : `QuoteRequest` (D13), `Lead` (D14, attestation adulte C12), `ContactMessage` (D17)
+  - [ ] `POST public/*` anonymes : CSRF, throttle dédié, champ piège, erreurs `fields`
+  - [ ] Email à l'équipe par Celery
+  - [ ] Tests : formulaires throttlés
+- [ ] **API-L1.5** Kits en lecture · `feature/api-l1-5-kits`
+  - [ ] App `shop` : `Kit` (§3.3) + admin
+  - [ ] `GET shop/kits/?category=`, `GET shop/kits/{slug}/` (disponibilité booléenne, jamais le stock exact)
+  - [ ] Tests : stock exact absent, aucune écriture publique
+- [ ] **Critères de fin d'API-L1**
+  - [ ] Réponses publiques sans donnée de mineur, indépendantes de la session, sans `rating`
+  - [ ] Seed : 3-4 parcours publiés complets dont un mis en avant, une catégorie vide, 4 événements (gratuit, payant, complet, passé), 3 kits
+  - [ ] `make openapi` committé
+
+### API-L2 · Inscriptions, consentement, OTP, connexion — ⬜ à faire
+- [ ] **API-L2.0a** Comparaison SMS (S10) · `feature/api-l2-0a-adr-sms` · doc
+  - [ ] Comparer coût par SMS et par pays, couverture MTN/Moov/Celtiis, délivrabilité, expéditeur « STEAMY », API et webhooks, sandbox, FCFA, support local
+  - [ ] Écrire l'**ADR-SMS** (critères éliminatoires : pas d'API serveur, pas de couverture Bénin)
+- [ ] **API-L2.0b** Interface SMS · `feature/api-l2-0b-sms`
+  - [ ] `notifications/sms/` : `SmsProvider.send(phone, text) → message_id`
+  - [ ] `FakeSmsProvider` : journalise et envoie le SMS comme email à Mailpit (`<e164>@sms.test`), jamais activable si `DEPLOYED`
+  - [ ] Tâche `send_sms` avec réessais exponentiels
+  - [ ] Fournisseur réel branché après l'ADR
+  - [ ] Tests : faux SMS lisible dans Mailpit, refus du faux fournisseur si `DEPLOYED`
+- [ ] **API-L2.1** OTP · `feature/api-l2-1-otp`
+  - [ ] `OtpChallenge` : code haché, 6 chiffres, 5 min, 3 essais, renvoi après 60 s
+  - [ ] Plafond quotidien par numéro **et** par IP (`PlatformSettings`, D24)
+  - [ ] `POST auth/otp/resend/`, codes `OTP_*`
+  - [ ] Tests : expiré, 4ᵉ essai, renvoi trop tôt, plafond IP
+- [ ] **API-L2.2** Inscription parent · `feature/api-l2-2-parent-signup`
+  - [ ] `POST auth/parent-signup/`, `…/verify/` (`existingAccount`), `…/password/`
+  - [ ] Réponse neutre si numéro déjà inscrit (C13) ; compte créé seulement après OTP valide
+  - [ ] Tests : numéro déjà inscrit → même réponse qu'un numéro libre, aucun flux n'accepte `role`
+- [ ] **API-L2.3** Inscription apprenant · `feature/api-l2-3-learner-signup`
+  - [ ] `GET auth/username-availability/` (throttlé)
+  - [ ] `POST/GET auth/learner-signup/`, `…/resume/` (C5), `…/password/` ; `SignupSession` + code de reprise haché (D21, C14)
+  - [ ] Âge 10-17 (D23)
+  - [ ] `POST accounts/consent-requests/` (origine `learner`, SMS au parent avec lien à jeton, annulation de la demande en attente C14), `…/{id}/resend/`
+  - [ ] Tests : jeton à usage unique et haché, apprenant `pending` ne peut pas se connecter
+- [ ] **API-L2.4** Décision du parent · `feature/api-l2-4-decision-parent`
+  - [ ] `POST accounts/consent-requests/preview/` (public, throttlé, numéro masqué)
+  - [ ] `POST accounts/consent-requests/claim/` (`CONSENT_PHONE_MISMATCH`)
+  - [ ] `GET accounts/consent-requests/`, `GET …/{id}/` (D20)
+  - [ ] `…/accept/`, `…/refuse/` (motif obligatoire) ; création de `ParentChildLink`
+  - [ ] Refus : demande gardée 30 j (C9), `CONSENT_COOLDOWN`, compte purgé, identifiant libéré (D22)
+  - [ ] Tests : parent ne voit que les demandes de son numéro, double acceptation → `CONSENT_ALREADY_RESOLVED`, nouvelle demande avant 30 j refusée
+- [ ] **API-L2.5** Profils · `feature/api-l2-5-profils`
+  - [ ] `profileStep` de `accounts/me/`
+  - [ ] `PATCH accounts/me/`, `…/learner-profile/` (`BIRTHDATE_AGE_MISMATCH`, objectifs ≥ 2), `…/parent-profile/`
+  - [ ] Tests : cohérence date de naissance / âge
+- [ ] **API-L2.6** Mot de passe oublié · `feature/api-l2-6-reset-password`
+  - [ ] `POST auth/password-reset/` (parent OTP SMS, enseignant code email, apprenant refus D26), `…/verify/`, `…/confirm/`
+  - [ ] Tests : pas d'énumération (même réponse, même durée)
+- [ ] **API-L2.7** Activation enseignant · `feature/api-l2-7-activation-enseignant`
+  - [ ] App `classrooms` amorcée : `School` minimale, `TeacherInvitation`
+  - [ ] Invitation créée depuis l'admin Django (action « Envoyer »)
+  - [ ] `GET auth/teacher-invitations/{token}/`, `POST …/accept/` (C6)
+  - [ ] Tests : jeton expiré ou réutilisé refusé
+- [ ] **Tâches Celery d'API-L2**
+  - [ ] `send_sms`, `expire_consent_requests` (7 j), `purge_refused_requests` (30 j), `purge_signup_sessions`
+- [ ] **Critères de fin d'API-L2**
+  - [ ] Parcours Playwright inscription apprenant → consentement → W11-W14 passant sur la stack Docker avec le faux SMS
+  - [ ] Parcours Playwright inscription parent passant
+  - [ ] `make seed` contient une invitation enseignant en attente
+
+### API-L3a · Pédagogie — ⬜ à faire
+- [ ] **Préalables**
+  - [ ] Barème de points et paliers de rang saisis dans `PlatformSettings` (C8)
+  - [ ] **ADR-Médias (Vimeo)** : vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de hors ligne (D16)
+- [ ] **API-L3a.1** Inscriptions et arbre · `feature/api-l3a-1-inscriptions`
+  - [ ] `Enrollment` (`source`), `MissionProgress`
+  - [ ] `POST learning/enrollments/` (gratuit seulement, `PAYMENT_REQUIRED` / `KIT_CODE_REQUIRED`)
+  - [ ] `GET learning/enrollments/`, `…/{courseSlug}/tree/`
+  - [ ] `GET learning/projects|levels|missions/{id}/` (`NOT_ENROLLED` / `CONTENT_LOCKED`)
+  - [ ] `POST learning/missions/{id}/complete/` séquentiel avec `next`
+  - [ ] `vimeoHash` / `introVimeoHash`
+  - [ ] Tests : mission verrouillée → 403 `CONTENT_LOCKED` en appel direct, non inscrit → `NOT_ENROLLED`, parcours payant ou à kit non inscriptible directement
+- [ ] **API-L3a.2** Quiz · `feature/api-l3a-2-quiz`
+  - [ ] `Quiz` (formative / sommative, contrainte « exactement un »), `Question`, `Choice`
+  - [ ] `GET learning/quizzes/{id}/` sans corrigé
+  - [ ] `POST …/attempts/` : correction serveur, `ok`/`warn`/`ko` (D31), cooldown sommatif `QUIZ_COOLDOWN` (D32), `failedConcepts`, `retryInSec`, `next`
+  - [ ] `GET learning/attempts/` (+ agrégats WD07)
+  - [ ] Tests : `isCorrect` absent de toute réponse, seuils 70/80 et bornes de `warn`, cooldown
+- [ ] **API-L3a.3** Gamification · `feature/api-l3a-3-gamification`
+  - [ ] `PointsEntry`, `Badge`, `LearnerBadge`, `LearningActivity`
+  - [ ] `POST learning/activity/` (secondes plafonnées, anti-gonflage)
+  - [ ] Streak (fuseau `TIME_ZONE`), rang dérivé, `GET learning/badges/`
+- [ ] **API-L3a.4** Certificats · `feature/api-l3a-4-certificats`
+  - [ ] **ADR PDF et stockage privé** (WeasyPrint, Celery, RustFS privé, URL présignées courtes)
+  - [ ] Conditions D33 en transaction ; `Certificate.number` séquentiel
+  - [ ] Tâche `generate_certificate_pdf` ; stockage RustFS privé
+  - [ ] `GET learning/certificates/` (`pdfStatus`), `…/{id}/download/` → URL présignée 5 min
+  - [ ] `EventTicket` créé une seule fois (unique par `enrollment`)
+  - [ ] Tests : certificat à 100 % + sommatives, une seule fois en appels concurrents, ticket unique, certificats d'autrui illisibles
+- [ ] **API-L3a.5** Tableau de bord · `feature/api-l3a-5-dashboard`
+  - [ ] `GET learning/dashboard/`, `learning/progress/`, `learning/recommendations/`
+  - [ ] Compteurs du shell dans `accounts/me/`
+- [ ] **API-L3a.6** Souhaits et préférences · `feature/api-l3a-6-wishlist`
+  - [ ] App `wishlist` : `GET wishlist/`, `PUT/DELETE wishlist/{courseSlug}/` idempotents
+  - [ ] Préférences de notification apprenant (pas de SMS ni marketing pour un mineur, D6, D30)
+- [ ] **Outillage de test d'API-L3a**
+  - [ ] `seed_demo --e2e` (cooldown sommatif raccourci, parcours court P1 du lot 3)
+  - [ ] Worker Celery dans `compose.e2e.yml`
+- [ ] **Critères de fin d'API-L3a**
+  - [ ] Un apprenant ne lit ni les tentatives ni les certificats d'un autre
+  - [ ] Seed enrichi avec les données du domaine
+  - [ ] `make openapi` committé
+
+### API-L3b · Commerce, boutique, événements payants — ⬜ à faire
+- [ ] **API-L3b.0a** Comparaison paiement (S9) · `feature/api-l3b-0a-adr-paiement` · doc
+  - [ ] Comparer KKiaPay et FedaPay : réseaux par pays (MTN, Moov, Celtiis), frais, initiation côté serveur, webhook signé, vérification de transaction, remboursements par API, sandbox, reversement, XOF
+  - [ ] Écrire l'**ADR-Paiement** (un principal + un secours)
+  - [ ] Faire valider le format de `Invoice` par la comptabilité
+- [ ] **API-L3b.0b** Interface paiement · `feature/api-l3b-0b-paiement`
+  - [ ] `payments/providers/` : `PaymentProvider` (`initiate`, `verify_webhook`, `parse_event`, `fetch_status`, `refund`)
+  - [ ] `FakePaymentProvider` pilotable (numéros `…01` succès, `…02` échec, `…03` en attente), webhook signé asynchrone
+  - [ ] Commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>`
+  - [ ] Fournisseur réel branché après l'ADR
+- [ ] **API-L3b.1** Commandes · `feature/api-l3b-1-commandes`
+  - [ ] `Order`, `OrderItem` refondus (§3.3) ; service `pricing` unique
+  - [ ] `POST payments/orders/` (identifiants et quantités seulement)
+  - [ ] `GET payments/orders/`, `…/{reference}/` (jeton invité haché, `X-Guest-Token`, `kitCodes` visibles du payeur seul)
+  - [ ] L'apprenant ne crée pas de commande (`PARENT_APPROVAL_REQUIRED`)
+  - [ ] Tests : prix envoyé par le client ignoré, jeton invité d'une autre commande refusé
+- [ ] **API-L3b.2** Paiement et webhook · `feature/api-l3b-2-paiement-webhook`
+  - [ ] `Payment` à 4 états ; `POST payments/orders/{reference}/payments/` (`NETWORK_UNAVAILABLE`) ; `GET payments/payments/{id}/`
+  - [ ] `POST payments/webhook/{provider}/` durci (signature avant traitement, montant/devise/référence, idempotence)
+  - [ ] Exécution post-paiement unique en transaction (inscription, Kit Codes, stock, candidature, facture asynchrone)
+  - [ ] Tâche `reconcile_pending_payments` (5 min)
+  - [ ] Paiement tardif : honoré si stock disponible, sinon remboursement automatique (C17)
+  - [ ] Module `core/pdf.py`, tâche `generate_invoice_pdf`, `GET …/invoice/` (payeur seulement)
+  - [ ] Tests : webhook non signé, rejoué, à montant ou devise faux ; double exécution impossible (webhooks concurrents) ; facture refusée à l'apprenant bénéficiaire ; apprenant ne peut pas initier de paiement
+- [ ] **API-L3b.3** Boutique · `feature/api-l3b-3-boutique`
+  - [ ] `StockReservation`, `Cart`/`CartItem`, `DeliveryZone`, `DeliveryAddress`, `RestockAlert`
+  - [ ] `shop/cart/*`, `GET shop/delivery-zones/`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`
+  - [ ] Tâche `release_expired_reservations` (30 min)
+  - [ ] Tests : dernier kit commandé simultanément → un seul succès, `OUT_OF_STOCK`
+- [ ] **API-L3b.4** Kit Codes · `feature/api-l3b-4-kit-codes`
+  - [ ] Génération `STEAMY-XXXX-XXXX` (Crockford base32, `secrets`) à l'exécution post-paiement
+  - [ ] `POST payments/kit-codes/redeem/` : normalisation, `KIT_CODE_NOT_COMPATIBLE`, consommation atomique, throttle utilisateur et IP (D35)
+  - [ ] `Enrollment` `source=kit_code`
+  - [ ] Tests : deux rachats concurrents → un seul succès
+- [ ] **API-L3b.5** Demandes de paiement · `feature/api-l3b-5-demandes-paiement`
+  - [ ] `PaymentRequest` ; `POST payments/payment-requests/` (montant recalculé), `…/{id}/resend/`, `GET`, `…/cancel/`, `…/decline/`
+  - [ ] SMS au parent avec lien WPD15 ; tâche `expire_payment_requests` (7 j)
+  - [ ] Tests : scoping enfant / parent
+- [ ] **API-L3b.6** Candidatures · `feature/api-l3b-6-candidatures`
+  - [ ] `EventApplication`, `EventTicket` consommé
+  - [ ] `POST events/{slug}/applications/`, `GET events/applications/`, `GET events/tickets/`
+  - [ ] Codes `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED`
+- [ ] **Critères de fin d'API-L3b**
+  - [ ] Tests prioritaires de la section « Points délicats » passants
+  - [ ] Seed enrichi (commandes, kits en rupture…)
+  - [ ] `make openapi` committé
+
+### API-L4 · Espace parent — ⬜ à faire
+- [ ] **API-L4.1** Enfants · `feature/api-l4-1-enfants`
+  - [ ] `GET/POST accounts/children/` (consentement origine `parent`, D51)
+  - [ ] `GET/PATCH accounts/children/{id}/` (`publicDisplayAllowed` D15, progression et tentatives récentes)
+  - [ ] `POST …/password-reset/` (§8.9), `GET accounts/me/parent/`
+  - [ ] Tests : parent A ne lit ni ne modifie l'enfant de B (toutes les routes)
+- [ ] **API-L4.2** À valider · `feature/api-l4-2-a-valider`
+  - [ ] `GET accounts/pending-actions/` (D52)
+  - [ ] `POST events/applications/{id}/accept/` (payant → `PaymentRequest`/commande, D53), `…/refuse/`
+  - [ ] `POST payments/orders/` avec `paymentRequestId` (WPD15)
+  - [ ] Tests : l'apprenant ne peut pas accepter sa propre candidature
+- [ ] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions`
+  - [ ] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
+  - [ ] `CHILDREN_STILL_LINKED` (D54)
+  - [ ] Tâche `anonymize_due_accounts` (J+30, factures conservées, D40)
+  - [ ] Tests : anonymisation complète, factures intactes, identifiant libéré, annulation avant J+30, l'apprenant n'approuve pas sa propre suppression
+- [ ] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo`
+  - [ ] `GET accounts/children/{id}/weekly-report/?week=AAAA-Www`
+  - [ ] Tâche hebdomadaire `send_weekly_reports` (D55)
+- [ ] **API-L4.5** Changement de téléphone · `feature/api-l4-5-changement-telephone`
+  - [ ] `POST accounts/me/phone-change/`, `…/verify/` (OTP sur le nouveau numéro)
+  - [ ] Préférences parent
+- [ ] **Critères de fin d'API-L4**
+  - [ ] Un `childId` étranger → 404 partout
+  - [ ] `Notification.url` pointe vers les routes front des plans
+  - [ ] Seed enrichi, `make openapi` committé
+
+### API-L5 · Enseignant et classes — ⬜ à faire
+- [ ] **API-L5.1** Classes · `feature/api-l5-1-classes`
+  - [ ] `Classroom`, `ClassroomMembership` ; quotas `School` (`CLASSROOM_QUOTA_EXCEEDED`, `LEARNER_QUOTA_EXCEEDED`, D61)
+  - [ ] `GET classrooms/school/`, `GET/POST classrooms/` (`COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`), `GET/PATCH classrooms/{id}/`
+  - [ ] `…/members/`, `POST …/members/{memberId}/remove/`, `GET classrooms/courses/`, `…/{slug}/`
+  - [ ] Tests : enseignant A ne voit ni la classe ni les élèves de B, quota dépassé
+- [ ] **API-L5.2** Invitations · `feature/api-l5-2-invitations`
+  - [ ] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
+  - [ ] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; `Enrollment` `source=classroom` (D62)
+  - [ ] `POST …/invitations/import/` (C19 : CSV/Excel, 200 lignes, 1 Mo, import partiel, codes d'erreur par ligne)
+  - [ ] SMS par Celery, plafond par enseignant et par jour
+  - [ ] Tests : invitation non acceptée → aucun accès au parcours
+- [ ] **API-L5.3** Suivi · `feature/api-l5-3-suivi`
+  - [ ] `GET classrooms/dashboard/`
+  - [ ] `GET classrooms/learners/{id}/?classroomId=` (serializer sans handicap, localité, date de naissance, téléphone, D64)
+  - [ ] `GET classrooms/reviews/` (D65), `POST classrooms/learners/{id}/comments/` (D63), `GET classrooms/comments/`
+  - [ ] `GET classrooms/courses/{slug}/missions/{id}/` (lecture seule)
+  - [ ] Tests : aucun champ sensible dans les réponses enseignant (clés JSON)
+- [ ] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage`
+  - [ ] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
+- [ ] **API-L5.5** Événements de classe · `feature/api-l5-5-evenements-classe`
+  - [ ] `EventProposal` ; `POST events/{slug}/proposals/` (`EVENT_ALREADY_PROPOSED`)
+  - [ ] `GET classrooms/event-applications/` (lecture seule)
+- [ ] **Critères de fin d'API-L5**
+  - [ ] Un enseignant ne peut pas créer de contenu (S5)
+  - [ ] Seed enrichi, `make openapi` committé
+
+### API-L6 · Back-office — ⬜ à faire
+- [ ] **API-L6.1** 2FA (D72) · `feature/api-l6-1-2fa` (réalisée via LOT-6-ADMIN 6.1 à 6.5)
+  - [ ] `django-otp` + `otp_totp`, `OTPMiddleware`, `OTPAdminSite` (WAD15)
+  - [ ] Enrôlement TOTP au premier login (QR code), réinitialisation par un Super-admin
+  - [ ] Session du personnel limitée à 8 h (C20) ; secret TOTP fixe de développement dans `seed_demo`
+  - [ ] `IsStaffVerified` sur toute route `backoffice/`, sinon `OTP_REQUIRED`
+  - [ ] Tests : staff sans OTP vérifié → `OTP_REQUIRED` et redirection admin, non-staff → 403
+- [ ] **API-L6.2** Admin thémé et RBAC · `feature/api-l6-2-admin-rbac`
+  - [ ] Thème monochrome `--ink-*` dans `fixtures/admin.json`, titre « Steamy »
+  - [ ] Enregistrement de tous les modèles avec permissions par groupe (D71)
+  - [ ] Actions : rembourser, refuser une candidature avec remboursement (C3), relancer une demande, litige de consentement, changement de parent, modération `PublicProfileReview` (D15), suspendre
+  - [ ] `AuditLog` écrit par un mixin d'admin
+  - [ ] Tests : groupe Contenu sans accès aux paiements, staff ne peut pas accepter un consentement (D70)
+- [ ] **API-L6.3** Réglages · `feature/api-l6-3-reglages`
+  - [ ] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
+- [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact`
+  - [ ] App `impact` : `KpiDefinition` (30 KPI par migration), `KpiValue`, `ImpactReport`, `ReportExport` ; statut D73
+  - [ ] `GET backoffice/overview/`, `backoffice/kpis/…`, `backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/` (`REPORT_LOCKED`, D74)
+  - [ ] `POST …/exports/` + `GET backoffice/exports/{id}/` (CSV/PDF asynchrones, `generate_report_export`)
+  - [ ] Tâche quotidienne `aggregate_daily_stats` (`DailyAggregatedStat`, D75)
+  - [ ] Tests : rapport soumis non modifiable
+- [ ] **Critères de fin d'API-L6**
+  - [ ] Toutes les routes `backoffice/` protégées par `IsStaffVerified`
+  - [ ] Seed enrichi, `make openapi` committé
+
+### ADR et comparaisons de prestataires
+- [ ] **ADR à écrire** (`docs/adr/`)
+  - [ ] Identité et connexion (avant API-1.1)
+  - [ ] SMS (avant API-L2.0b)
+  - [ ] Médias (Vimeo) (avant API-L3a.1)
+  - [ ] Paiement (avant API-L3b.0b)
+  - [ ] PDF et stockage privé (avant API-L3a.4)
+- [ ] **Comparaisons de prestataires**
+  - [ ] SMS (S10), avant API-L2 : voir API-L2.0a
+  - [ ] Paiement (S9), avant API-L3b : voir API-L3b.0a
+- [ ] **Points ouverts** (« Reste à décider »)
+  - [ ] Valeurs du barème de points et des paliers de rang (C8), avant L3a.3
+  - [ ] Format des factures validé par la comptabilité, avant L3b.2
+  - [ ] Texte de finalité des données sensibles (D6) validé juridiquement, avant L2.5
+
+---
+
 ## Règles propres à l'API
 
 | Règle | Détail |
@@ -48,7 +423,7 @@ Bibliothèques transverses (`apps/api/libs/`) : `errors.py` (exception `ApiError
 
 ## API-0 · Correctifs de sécurité sur le code existant
 
-**Objectif** : rendre l'API existante non exploitable (S1-S9, §4.7), **sans attendre la refonte**. Principe : *fermer
+**Objectif** : rendre l'API existante non exploitable (S1-S9, §4.7 ; S3, la télémétrie, est traitée en sous-étape 0.5), **sans attendre la refonte**. Principe : *fermer
 plutôt que réparer* ; ce qui sera réécrit en API-1/L1/L3 est désactivé, pas amélioré. Débloque : tout déploiement,
 et une base saine pour API-1. Aucune migration de modèle (sauf si inévitable).
 
@@ -58,7 +433,7 @@ et une base saine pour API-1. Aucune migration de modèle (sauf si inévitable).
 | `API-0.2` Contenu et pédagogie | `courses/*` en lecture seule (S2) ; liste et détail filtrés sur `published=True`, `author` retiré des serializers (S6) ; `lessons`/`resources` et le contenu des modules réservés aux inscrits (S6) ; `enroll` et `POST learning/enrollments/` refusés si `price > 0` → 402 `PAYMENT_REQUIRED` (S7) ; `quizzes`/`questions`/`choices` en lecture seule, `is_correct` retiré, `manual_grade` supprimé, signal `on_attempt_saved` (certificat au premier quiz) désactivé (S8) ; `attempts` : création seulement, correction côté serveur, score client ignoré | M |
 | `API-0.3` Scoping propriétaire (S4) | `get_queryset` filtré sur `request.user` pour `enrollments`, `progress`, `attempts`, `certificates`, `orders`, `payments`, `notifications` ; champs `user`/`owner`/`enrollment` en `read_only` ou validés contre l'utilisateur ; `IsAdminOrOwner` remplacé par le filtrage (404 plutôt que 403 sur l'objet d'autrui) | M |
 | `API-0.4` Paiements (S5) | `payments/orders/` et `payments/payments/` en lecture seule (plus de prix envoyé par le client) ; webhook : vérification du montant **et** de la devise contre `Order.total`, idempotence (`select_for_update` sur la commande, contrainte unique `provider`+`provider_transaction_id`), réponse neutre `{ok: true}` ou 400 sans détail, exception journalisée et jamais renvoyée | S |
-| `API-0.5` Throttling, langue, erreurs, docs | Throttles DRF (S9) : `anon` et `user` globaux + portées `login`, `signup`, `password-reset`, `webhook` (cache Redis existant) ; `LANGUAGE_CODE="fr"` ; gestionnaire d'erreurs au format `{code, message, fields}` (D4) avec les codes génériques ; `/api/docs/`, `/api/schema/`, `/api/redoc/` montés seulement si `ALLOW_API_DOCS` (variable déjà définie, jamais lue aujourd'hui) ; titre OpenAPI « API Steamy » ; `USE_TZ = True`, `TIME_ZONE = "Africa/Porto-Novo"` (C16) | M |
+| `API-0.5` Throttling, langue, erreurs, docs, télémétrie | Throttles DRF (S9) : `anon` et `user` globaux + portées `login`, `signup`, `password-reset`, `webhook` (cache Redis existant) ; `LANGUAGE_CODE="fr"` ; gestionnaire d'erreurs au format `{code, message, fields}` (D4) avec les codes génériques ; `/api/docs/`, `/api/schema/`, `/api/redoc/` montés seulement si `ALLOW_API_DOCS` (variable déjà définie, jamais lue aujourd'hui) ; titre OpenAPI « API Steamy » ; `USE_TZ = True`, `TIME_ZONE = "Africa/Porto-Novo"` (C16) ; **télémétrie fermée (S3)** : ingestion `analytics` en écriture seule et non attribuable, dashboard et export réservés au personnel (oubliée par la première version du plan) | M |
 
 **Tests à mettre à jour** (ils figent des failles ou testent des surfaces supprimées) :
 

@@ -11,6 +11,125 @@ Les règles communes, la définition de « terminé » et les outils de test son
 **vouvoiement partout**, y compris dans les composants repris des lots 2 et 3 (modale de refus `WP11`, formulaire de
 paiement `WA03`, états `WA04`/`WA05`/`WA07`, suivi `WK07`).
 
+## Avancement
+
+Statut : ⬜ à faire · Prochaine tâche : 4.0 Conception de `WPD15` · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
+
+### Lot 4 · Espace parent — ⬜ à faire
+- [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15`
+  - [ ] Créer `design/screens-parent-a-concevoir-web.jsx` (même design system) et l'ajouter à `App.html`
+  - [ ] Concevoir `WPD15` en 3 variantes d'objet : parcours, kit (adresse + zone + frais), événement
+  - [ ] Concevoir les 8 états de `WPD15` : en attente, attente de confirmation, payée, échec, refusée, expirée, annulée par l'enfant, kit en rupture
+  - [ ] Concevoir la modale « Refuser la demande » (motif facultatif)
+  - [ ] Concevoir `WPD05` variante enseignant (D60) et son état lecture seule (expirée, déjà traitée)
+  - [ ] Concevoir la modale de réinitialisation du mot de passe (`WPD03`)
+  - [ ] Concevoir la modale de refus d'une candidature (`WPD06`)
+  - [ ] Respecter les contraintes : `WA03` (C1 magenta), carte enfant de `WPD05`, montants serveur, mention « Paiement sécurisé · aucune carte bancaire », mobile 360 px d'abord
+  - [ ] Recette : toutes variantes et tous états dessinés, aucun prix, réseau ou délai en dur, vouvoiement
+  - [ ] Maquette validée par le produit (C18) avant 4.4
+- [ ] **4.1** Socle parent, accueil et notifications · `feature/lot4-accueil` (requiert API-L4)
+  - [ ] Layout `(parent)` : contrôle du rôle côté serveur, redirection vers `/connexion?next=`, `loading.tsx`, `error.tsx`, `not-found.tsx`
+  - [ ] `ParentNav` (config de l'`AppShell`) et navigation active correcte sur chaque route
+  - [ ] `WPD01` Accueil + « À valider »
+  - [ ] `WPD14` Notifications (onglets, « Tout marquer comme lu »)
+  - [ ] Composants `PendingActionList`, `PendingActionRow`, `ChildCard`, `NotificationList`, `notificationHref(type)`
+  - [ ] Branchement API : `accounts/me/`, `accounts/pending-actions/`, `accounts/children/`, `notifications/` (`?unread=`, `unread-count/`, `{id}/read/`, `read-all/`)
+  - [ ] Règles : 4 types dans « À valider » (consentements, paiements, candidatures, suppressions), stat « À valider » = longueur de la liste, aucune alerte de connexion (D56), utilisateur issu de la session
+  - [ ] Tests unitaires : `PendingActionRow` pour les 4 types, `notificationHref` pour tous les types de §5.11, état vide sans enfant (CTA « Ajouter un enfant »), compteur de la cloche décrémenté après lecture
+  - [ ] Playwright : accès refusé à un apprenant et à un enseignant (redirection) ; parent du jeu D2 : liste « À valider » conforme au seed
+  - [ ] Recette : les 4 types mènent à la bonne route, « Tout marquer comme lu » remet le compteur à 0
+- [ ] **4.2** Enfants · `feature/lot4-enfants` (requiert 4.1, API-L4.1 ; commentaires : API-L5)
+  - [ ] `WPD02` Mes enfants (`ChildRow` : actif, demande à examiner, suppression programmée ; CTA « Examiner » vers `WPD05`)
+  - [ ] `WPD03` Détail enfant (`ChildProfileCard`, `CourseProgressList`, `AttemptList`, `TeacherComments` en lecture seule)
+  - [ ] `ResetChildPasswordDialog` de `WPD03` (« Communiquez-le à votre enfant », D26)
+  - [ ] `WPD04` Ajouter un enfant (`ChildForm` : date de naissance 10-17 ans, lien de parenté, identifiant sans `@` ni chiffres seuls, `PwReq`, redirection vers `WPD03` avec rappel de l'identifiant)
+  - [ ] `WPD10` Modifier le profil (identifiant non modifiable, genre et handicap facultatifs avec finalité, localité qualifiée, erreur `BIRTHDATE_AGE_MISMATCH`)
+  - [ ] Branchement API : `accounts/children/` (GET/POST), `{id}/` (GET/PATCH), `password-reset/`, `auth/username-availability/`, référentiels, `classrooms/comments/?learnerId=`
+  - [ ] Tests unitaires : `ChildForm` (`USERNAME_TAKEN`, `AGE_OUT_OF_RANGE`, `PASSWORD_TOO_WEAK` au champ), `ChildRow` pour les 3 statuts, `TeacherComments` vide tant qu'API-L5 n'est pas livrée
+  - [ ] Playwright : le parent crée un enfant, l'enfant se connecte sur `W16` et arrive sur `W11`
+  - [ ] Playwright : réinitialisation du mot de passe, l'ancien est refusé et le nouveau accepté
+  - [ ] Recette : `/parent/enfants/<id d'un autre parent>` affiche « introuvable » ; aucune donnée sensible hors `WPD03`/`WPD10`
+- [ ] **4.3** Demande de consentement in-app · `feature/lot4-consentement` (requiert 4.1)
+  - [ ] `WPD05` avec `ConsentRequestCard` (partagé avec `WP05`) et `ConsentOrigin` (origine enfant)
+  - [ ] `RefuseConsentDialog` (reprise de `WP11` : motif obligatoire en liste fermée + précisions, vouvoiement)
+  - [ ] Branchement API : `consent-requests/{id}/` (GET), `accept/`, `refuse/`, `referentials/refusal-reasons/`, redirection après `claim/` (lot 2)
+  - [ ] Règles : seules les données de D20, texte « nouvelle demande possible dans 30 jours », lecture seule si expirée ou déjà traitée, retour à `WPD01` avec confirmation après acceptation
+  - [ ] Tests unitaires : modale (motif requis, bouton danger, annulation sans appel API), lecture seule pour `accepted`, `refused`, `expired`, `cancelled`
+  - [ ] Playwright : refus de consentement (SMS, `WPD05`, refus avec motif, `W18` côté enfant, `CONSENT_COOLDOWN` à la nouvelle demande)
+  - [ ] Playwright : acceptation, l'enfant poursuit en `W08`/`W10`
+  - [ ] Recette : aucune information au-delà de D20 ; demande d'un autre numéro = « Demande introuvable »
+- [ ] **4.4** `WPD15` Demande de paiement · `feature/lot4-demande-paiement` (requiert 4.0, 4.1, API-L3b)
+  - [ ] `WPD15` selon la maquette de 4.0, accès réservé au parent du bénéficiaire (sinon « Demande introuvable »)
+  - [ ] `PaymentRequestSummary` (carte enfant + objet parcours / kit / événement) et `DeclineRequestDialog`
+  - [ ] Réutilisation du lot 3 au registre `vous` : `AddressForm` (kit : préremplie, zone, frais serveur), `PaymentForm` (`WA03`), `PaymentStatusPanel` (`WA04` avec interrogation du statut, `WA05`, `WA07`)
+  - [ ] Branchement API : `payment-requests/{id}/` et `decline/`, `payments/orders/`, `orders/{reference}/payments/`, `payments/{id}/`, `shop/delivery-zones/`, `accounts/me/delivery-address/`, `countries/`, `payment-networks/`
+  - [ ] Règles : montants tels que reçus (D37), succès affiché uniquement sur `succeeded` (S9), paiement tardif (C17), expiration à 7 jours et annulation par l'enfant en lecture seule, Mobile Money préféré prérempli
+  - [ ] Gestion du kit : réservation du stock, libération après 30 min, rupture = paiement impossible et refus proposé
+  - [ ] Tests unitaires : rendu des 3 objets et des 8 états, aucun montant calculé côté client
+  - [ ] Tests unitaires : `OUT_OF_STOCK`, `ORDER_EXPIRED`, `ORDER_ALREADY_PAID`, `NETWORK_UNAVAILABLE`, `PAYMENT_FAILED` traduits ; double clic sur « Payer » sans double initiation
+  - [ ] Playwright : l'enfant demande un parcours, le parent paie, l'enfant accède (`WC05`, `WA02`, SMS, `W16`, `WPD15`, webhook simulé, `WD23`, `WC06a`)
+  - [ ] Playwright : variantes échec puis réessai, demande de kit avec adresse visible en `WPD07`, refus (`WA02` « refusée »)
+  - [ ] Recette : un autre parent obtient « Demande introuvable » ; aucun numéro complet dans les journaux front ; échec avec la raison du prestataire et « Réessayer »
+- [ ] **4.5** Commandes, factures et Kit Codes · `feature/lot4-commandes` (requiert 4.4, API-L3b)
+  - [ ] `WPD07` Commandes (`OrderRow`, `OrderStatusFilter`, `?statut=`)
+  - [ ] Suivi `/parent/commandes/[reference]` (type `WK07`, `ShippingTimeline`, `KitCodeList`)
+  - [ ] Achat direct de kit `/parent/boutique/…` (`WK01`-`WK03`, `WK05`-`WK06` du lot 3)
+  - [ ] Branchement API : `payments/orders/` (`?status=`), `orders/{reference}/`, `orders/{reference}/invoice/`, endpoints `shop` du lot 3
+  - [ ] Règles : icône par `kind`, « Facture » réservée au payeur d'une commande payée, « Payer » vers `WPD15` ou reprise du paiement, Kit Codes `STEAMY-XXXX-XXXX`
+  - [ ] Tests unitaires : `OrderRow` (3 `kind`, 4 statuts), filtres, `KitCodeList`
+  - [ ] Playwright : achat d'un kit, paiement, commande payée en `WPD07`, facture téléchargée, Kit Code débloquant le parcours côté enfant (`WA06`)
+  - [ ] Recette : commande d'un autre payeur non listée ; factures conservées après suppression d'un enfant
+- [ ] **4.6** Événements · `feature/lot4-evenements` (requiert 4.4)
+  - [ ] `WPD06` Steamy Events + candidatures des enfants (`EventApplicationRow`, `RefuseApplicationDialog`)
+  - [ ] `WL23` dans le shell parent (`EventRow`, `EventDetail` du lot 1)
+  - [ ] `WPD12` Inscrire un enfant (`EventSignupForm` : enfants actifs, motivation, récapitulatif + `PaymentForm` si payant)
+  - [ ] Branchement API : `events/`, `events/{slug}/`, `events/applications/` (`accept/`, `refuse/`), `events/{slug}/applications/`, `payments/orders/` `kind: "event"`
+  - [ ] Règles : événement payant accepté vers `WPD15`, `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés, ticket Steamy Events gratuit avec accord requis, prix serveur
+  - [ ] Tests unitaires : `EventApplicationRow` par statut, `EventSignupForm` gratuit / payant, enfants non actifs exclus
+  - [ ] Playwright : accord à un événement payant (`WD11`, `WPD06`, `WPD15`, paiement, « acceptée » en `WD10`)
+  - [ ] Playwright : inscription directe par le parent (`WPD12`) à un événement payant
+  - [ ] Recette : refus notifié à l'enfant ; événement complet non payable
+- [ ] **4.7** Suppressions · `feature/lot4-suppressions` (requiert 4.2)
+  - [ ] `WPD09` Supprimer (initiative du parent) avec `DeleteChildForm` (motif* + précisions, texte D54)
+  - [ ] Validation d'une demande `WD15` (`?demande=<id>`, motif prérempli, Accepter / Refuser)
+  - [ ] Annulation de la suppression depuis `WPD02` (bouton « Annuler la suppression »)
+  - [ ] Branchement API : `children/{id}/deletion/` (POST, DELETE), `deletion-requests/{id}/approve/` et `refuse/`
+  - [ ] Règles : désactivation immédiate, anonymisation à J+30, factures conservées, ni « définitivement » ni « irréversible »
+  - [ ] Tests unitaires : texte D54, motif requis
+  - [ ] Playwright : suppression puis annulation (l'enfant peut de nouveau se connecter) ; demande `WD15` validée depuis « À valider »
+  - [ ] Recette : pendant les 30 jours, l'enfant ne peut plus se connecter (`ACCOUNT_DEACTIVATED`)
+- [ ] **4.8** Rapport hebdomadaire · `feature/lot4-rapport-hebdo` (requiert 4.2, API-L3a)
+  - [ ] `WPD11` Rapport hebdomadaire (`?semaine=AAAA-Www`)
+  - [ ] Composants `WeekNavigator`, `WeeklyStats`, `WeeklyActivityBars` (lot 3, tableau de données en alternative), `CourseProgressList`, `WeeklyEmailNotice`
+  - [ ] Branchement API : `accounts/children/{id}/weekly-report/?week=`
+  - [ ] Règles : encart « Envoyé chaque semaine à <email> » ou lien « Ajouter un email » vers `WPD08`, pas de bouton d'envoi ponctuel
+  - [ ] Tests unitaires : semaine vide, semaine sans email
+  - [ ] Playwright : navigation vers la semaine précédente
+  - [ ] Recette : chiffres identiques à ceux de l'API pour le jeu D2
+- [ ] **4.9** Paramètres et aide · `feature/lot4-parametres-aide` (requiert 4.1, 4.7, API-L3a)
+  - [ ] `WPD08` Paramètres : profil, connexion (`NewPasswordFields`, changement de numéro avec `OTPInput`), livraison et paiement (`AddressForm`), notifications, `DangerZone`
+  - [ ] `WPD13` Aide : FAQ en `FaqAccordion` avec recherche locale, « Contacter le support » vers `WL24`
+  - [ ] Branchement API : `accounts/me/` (PATCH), `parent-profile/`, `password/`, `email/`, `phone-change/` + `verify/`, `delivery-address/`, `notifications/preferences/`, `deletion-request/`
+  - [ ] Règles : changement de numéro par OTP sur le nouveau numéro (D24), suppression du compte désactivée tant qu'un enfant est rattaché (`CHILDREN_STILL_LINKED`), FAQ versionnée sans invitation par téléphone ni réseaux en dur (D76)
+  - [ ] Tests unitaires : `DangerZone` désactivée avec enfants ; OTP (`OTP_INVALID`, `OTP_RESEND_TOO_EARLY`)
+  - [ ] Playwright : changement de numéro puis connexion avec le nouveau numéro
+  - [ ] Recette : les préférences de notification sont prises en compte (pas de rapport par email si désactivé)
+- [ ] **4.10** Consentement d'origine enseignant · `feature/lot4-consentement-enseignant` (requiert 4.3, API-L5 ; livrée avec le lot 5, avant l'étape 5.9)
+  - [ ] `WPD05` variante enseignant : nom de l'enseignant, classe, établissement, parcours (D60)
+  - [ ] Acceptation avec création de l'identifiant (champs de `WPD04` préremplis), puis l'élève rejoint la classe
+  - [ ] Choix « Rattacher {Prénom} à la classe » sans nouvel identifiant si l'enfant a déjà un compte (C11)
+  - [ ] Branchement API : `consent-requests/{id}/accept/` avec `{ username, password }` ou `{ learnerId }` (API-L5.2)
+  - [ ] Playwright (lot 5 disponible) : invitation `WT06`, SMS, le parent accepte, l'élève apparaît dans `WT04`
+- [ ] **Critères de fin du lot 4**
+  - [ ] `WPD01`-`WPD15` livrés selon la définition de « terminé » du README, au vouvoiement, en 360 px et sur bureau (variante enseignant de `WPD05` livrée avec le lot 5)
+  - [ ] Parcours Playwright verts sur la stack Docker avec `make seed` : enfant demande un parcours, parent paie, enfant accède
+  - [ ] Parcours Playwright verts : refus de consentement
+  - [ ] Parcours Playwright verts : accord à un événement payant, plus achat direct de kit et création d'enfant
+  - [ ] Les 4 types de demandes de « À valider » et tous les types de notification mènent au bon écran
+  - [ ] Aucun élément de « À ne pas porter de la maquette » (§5.11) présent ; aucune donnée de démonstration en dur
+  - [ ] Aucun accès possible aux données d'un enfant, d'une commande ou d'une demande d'une autre famille (tests de refus)
+  - [ ] `make openapi` à jour, client généré seul utilisé, CI verte (`ci-ok`) sur chaque PR
+
 ## Prérequis
 
 | Prérequis | Source | Utilisé par |
