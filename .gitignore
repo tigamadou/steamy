@@ -41,3 +41,7 @@ compose.override.yml
 
 # Inventaire Ansible réel (adresses des serveurs)
 infra/ansible/inventory.yml
+
+# Rapports de couverture
+coverage.xml
+htmlcov/

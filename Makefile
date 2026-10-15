@@ -5,7 +5,7 @@ WEB     := $(COMPOSE) run --rm --no-deps web sh -c
 
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
-        test-api lint-api fix-api psql flower clean openapi lint-web typecheck-web
+        test-api coverage-api lint-api fix-api psql flower clean openapi lint-web typecheck-web
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -59,6 +59,12 @@ seed: ## Charge les fixtures (compte admin, gabarits d'e-mails)
 
 test-api: ## Lance les tests de l'API
 	$(API) pytest
+
+coverage-api: ## Tests de l'API + couverture 100 % exigée sur le code modifié (diff-cover)
+	$(API) sh -c "pytest --cov --cov-report=term --cov-report=xml:coverage.xml"
+	docker run --rm -v "$(CURDIR):/repo" -w /repo/apps/api python:3.11.13-bookworm sh -c \
+	  "git config --global --add safe.directory /repo && pip install -q --root-user-action=ignore diff-cover==10.6.0 \
+	   && diff-cover coverage.xml --compare-branch=origin/development --fail-under=100"
 
 lint-api: ## Lint et format de l'API (vérification seule)
 	$(API) sh -c "ruff check . && ruff format --check ."
