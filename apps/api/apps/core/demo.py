@@ -25,6 +25,9 @@ from apps.classrooms.invitations import send_invitation
 from apps.classrooms.models import School, TeacherInvitation
 from apps.core.groups import CONTENT, FINANCE, SUPER_ADMIN, SUPPORT
 from apps.events.models import SteamyEvent
+from apps.impact import services as impact
+from apps.impact.models import KpiDefinition, KpiValue
+from apps.impact.periods import QUARTER, Period
 from apps.notifications.models import Category, Notification, Tone
 from apps.referentials.models import (
     Avatar,
@@ -555,6 +558,35 @@ def seed_kits() -> None:
         catalog.Course.objects.filter(slug__in=required_by).update(required_kit=kit)
 
 
+#: Saisie manuelle du trimestre en cours (WAD05) : quelques indicateurs restent à renseigner.
+IMPACT_MANUAL = {
+    "fin_montant": 1951472,
+    "fin_hors": "oui",
+    "fin_first": "oui",
+    "fin_who": "OIF",
+    "prod": "non",
+    "prod_vuln": "non",
+    "nps": 10,
+    "emp": 5,
+    "emp_f": 2,
+}
+
+
+def seed_impact(accounts: dict[str, User]) -> None:
+    """Impact Tracker : KPI `auto` calculés sur le jeu D2 et saisie manuelle du trimestre en cours (brouillon)."""
+    impact.aggregate_daily_stats(timezone.localdate())
+    impact.compute_kpis(timezone.localdate())
+    quarter = Period.current(QUARTER).key
+    for code, value in IMPACT_MANUAL.items():
+        kpi = KpiDefinition.objects.get(code=code)
+        number, text = (value, "") if kpi.is_numeric else (None, value)
+        KpiValue.objects.update_or_create(
+            kpi=kpi,
+            period=quarter,
+            defaults={"number": number, "text": text, "entered_by": accounts[FINANCE]},
+        )
+
+
 def seed_all() -> dict[str, User]:
     accounts = seed_accounts()
     seed_classrooms(accounts)
@@ -562,4 +594,5 @@ def seed_all() -> dict[str, User]:
     seed_catalog()
     seed_events()
     seed_kits()
+    seed_impact(accounts)
     return accounts
