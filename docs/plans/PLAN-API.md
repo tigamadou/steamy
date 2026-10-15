@@ -285,13 +285,13 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 ### API-L3b · Commerce, boutique, événements payants — ⬜ à faire
 - [ ] **API-L3b.0a** Comparaison paiement (S9) · `feature/api-l3b-0a-adr-paiement` · doc
   - [x] Comparer KKiaPay et FedaPay : réseaux par pays (MTN, Moov, Celtiis), frais, initiation côté serveur, webhook signé, vérification de transaction, remboursements par API, sandbox, reversement, XOF
-  - [x] Écrire l'**ADR-Paiement** (un principal + un secours)
+  - [x] Écrire l'**ADR-Paiement** (FedaPay seul prestataire intégré, remplaçable ; KKiaPay/CinetPay non intégrés en v1)
   - [ ] Faire valider le format de `Invoice` par la comptabilité
 - [ ] **API-L3b.0b** Interface paiement · `feature/api-l3b-0b-paiement`
   - [ ] `payments/providers/` : `PaymentProvider` (`initiate`, `verify_webhook`, `parse_event`, `fetch_status`, `refund`)
   - [ ] `FakePaymentProvider` pilotable (numéros `…01` succès, `…02` échec, `…03` en attente), webhook signé asynchrone
   - [ ] Commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>`
-  - [ ] Fournisseur réel branché après l'ADR
+  - [ ] `FedaPayProvider` (seule implémentation réelle ; clé sandbox puis live)
 - [ ] **API-L3b.1** Commandes · `feature/api-l3b-1-commandes`
   - [ ] `Order`, `OrderItem` refondus (§3.3) ; service `pricing` unique
   - [ ] `POST payments/orders/` (identifiants et quantités seulement)
@@ -661,15 +661,16 @@ fois même en appels concurrents ; ticket unique ; un apprenant ne lit ni les te
 **Préalable : comparaison paiement** (S9), tâche `API-L3b.0a` (doc, S) → **ADR-Paiement** : KKiaPay vs FedaPay sur
 réseaux par pays (MTN, Moov, **Celtiis**, D76), pays couverts, frais par transaction, **initiation côté serveur**
 (USSD push / demande de paiement sans redirection), webhook signé + API de vérification de transaction, liens de
-paiement, remboursements par API, sandbox, délai de reversement, devise XOF. Choix : un principal + un secours,
-derrière la même interface.
+paiement, remboursements par API, sandbox, délai de reversement, devise XOF. **Décision (ADR 0003) : FedaPay seul prestataire intégré**,
+remplaçable derrière la même interface ; KKiaPay ou CinetPay réévalués en cas de panne, de couverture ou de frais
+insuffisants, non intégrés en v1.
 
 **Objectif** : WA01-WA07, WK01-WK11, WD14, WD20 (sans moyens de paiement, D30), candidatures aux événements.
 Débloque : **lot 3** (achat, boutique) et prépare le **lot 4** (paiement par le parent).
 
 | PR | Contenu | Taille |
 | --- | --- | --- |
-| `API-L3b.0b` Interface paiement | `payments/providers/` : `PaymentProvider.initiate(order, msisdn, network) → (tx_id, status)`, `verify_webhook(request) → bool`, `parse_event(payload) → (reference, tx_id, amount, currency, status)`, `fetch_status(tx_id)`, `refund(...)` ; `FakePaymentProvider` (local/CI) **pilotable** : l'issue dépend du numéro de test (`…01` succès, `…02` échec, `…03` reste en attente), webhook signé posté de façon asynchrone ; commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>` (paie une demande comme le parent, pour les parcours du lot 3 avant WPD15) ; fournisseur réel après l'ADR | M |
+| `API-L3b.0b` Interface paiement | `payments/providers/` : `PaymentProvider.initiate(order, msisdn, network) → (tx_id, status)`, `verify_webhook(request) → bool`, `parse_event(payload) → (reference, tx_id, amount, currency, status)`, `fetch_status(tx_id)`, `refund(...)` ; `FakePaymentProvider` (local/CI) **pilotable** : l'issue dépend du numéro de test (`…01` succès, `…02` échec, `…03` reste en attente), webhook signé posté de façon asynchrone ; commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>` (paie une demande comme le parent, pour les parcours du lot 3 avant WPD15) ; `FedaPayProvider` réel (ADR 0003) | M |
 | `API-L3b.1` Commandes | `Order`, `OrderItem` refondus (§3.3) ; service `pricing` unique (prix, frais de zone, total) ; `POST payments/orders/` (le client n'envoie que des identifiants et quantités) ; `GET payments/orders/` (payeur ou bénéficiaire), `…/{reference}/` (invité : jeton opaque haché, transmis en en-tête `X-Guest-Token` sur les appels qui suivent la création, C10 ; `kitCodes` visibles du payeur seul) ; l'apprenant ne peut **pas** créer de commande (`PARENT_APPROVAL_REQUIRED`) | L |
 | `API-L3b.2` Paiement et webhook | `Payment` à 4 états ; `POST payments/orders/{reference}/payments/` (réseau activé pour le pays, sinon `NETWORK_UNAVAILABLE`) ; `GET payments/payments/{id}/` ; `POST payments/webhook/{provider}/` durci ; **exécution post-paiement** une seule fois, en transaction : inscription, Kit Codes, stock confirmé, candidature confirmée, facture asynchrone ; `GET …/invoice/` (payeur seulement, C12) | L |
 | `API-L3b.3` Boutique | `StockReservation`, `Cart`/`CartItem`, `DeliveryZone`, `DeliveryAddress`, `RestockAlert` ; `shop/cart/*` (connecté ; panier invité envoyé à la commande), `GET shop/delivery-zones/`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/` (invité ou parent : un SMS unique, D38 ; apprenant : notification in-app, sans téléphone, D30) | L |
@@ -792,7 +793,7 @@ peut pas accepter un consentement à la place du parent (D70).
 | Identité et connexion | API-1.1 | `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé |
 | SMS | API-L2.0b | Comparaison S10, Twilio retenu et remplaçable, interface, faux fournisseur, coûts |
 | Médias (Vimeo) | API-L3a.1 | Vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de mode hors ligne (D16) |
-| Paiement | API-L3b.0b | Comparaison S9, principal + secours, webhook et réconciliation, paiement tardif, remboursements |
+| Paiement | API-L3b.0b | Comparaison S9, FedaPay seul (remplaçable), webhook et réconciliation, paiement tardif, remboursements |
 | PDF et stockage privé | API-L3a.4 | WeasyPrint, Celery, RustFS privé, URL présignées courtes |
 
 ---
@@ -817,7 +818,7 @@ peut pas accepter un consentement à la place du parent (D70).
 | --- | --- |
 | Remise à zéro faite après un premier déploiement | Aucun déploiement avant la fusion d'`API-1.1` ; sinon recréer la base staging |
 | Retard des comparaisons SMS / paiement | Faux fournisseurs : L2 et L3b se développent et se testent sans prestataire ; seul le branchement réel attend l'ADR |
-| Celtiis non couvert par le prestataire retenu | Critère éliminatoire de l'ADR, ou second prestataire pour ce réseau (réglage par réseau, D76) |
+| Celtiis non couvert par le prestataire retenu | Vérifier le mode Celtiis de FedaPay avant L3b.2 ; sinon réévaluer (ADR 0003) avec un second prestataire pour ce réseau (réglage par réseau, D76) |
 | Webhooks perdus ou en retard (réseau mobile) | Réconciliation périodique, états `pending` visibles côté front (WA04) |
 | Fuite de vidéos (restriction de domaine contournable) | Accepté en v1 (ADR) ; `vimeoHash` jamais exposé hors inscription |
 | Énumération d'identifiants et de numéros | Throttles dédiés, réponses identiques sur reset et connexion |
@@ -833,7 +834,7 @@ validateurs de mot de passe D25) sont tranchés et intégrés aux étapes ci-des
 | Point | Proposition | Bloque |
 | --- | --- | --- |
 | Fournisseur SMS | ADR après comparaison (S10) | Branchement réel L2 |
-| Prestataire de paiement principal et secours | ADR après comparaison (S9) | Branchement réel L3b |
+| Prestataire de paiement | Tranché : FedaPay (ADR 0003) ; contrat, KYC et frais négociés à obtenir | Branchement réel L3b |
 | Valeurs du barème de points et des paliers de rang (C8) | À saisir dans `PlatformSettings` | L3a.3 |
 | Format des factures (obligations fiscales locales) | Validation par la comptabilité | L3b.2 |
 | Texte de finalité des données sensibles (D6) | Validation juridique | L2.5 (texte front) |
