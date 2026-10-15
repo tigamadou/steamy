@@ -42,6 +42,10 @@ compose.override.yml
 # Inventaire Ansible réel (adresses des serveurs)
 infra/ansible/inventory.yml
 
+# Rapports Playwright
+apps/web/playwright-report/
+apps/web/test-results/
+
 # Rapports de couverture
 coverage.xml
 htmlcov/
