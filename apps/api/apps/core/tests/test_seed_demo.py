@@ -198,3 +198,31 @@ def test_seed_demo_e2e_shortens_the_summative_cooldown():
     assert PlatformSettings.load().summative_retry_cooldown_seconds == 600
     call_command("seed_demo", "--e2e")
     assert PlatformSettings.load().summative_retry_cooldown_seconds == E2E_SUMMATIVE_COOLDOWN
+
+
+def test_lea_has_points_badges_and_a_five_day_streak():
+    from apps.catalog.models import Badge, Course, Level, Project
+    from apps.learning.gamification import rank_for, streak_days
+    from apps.learning.models import LearnerBadge, PointsEntry
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    assert Badge.objects.filter(kind="level").count() == Level.objects.count()
+    assert Badge.objects.filter(kind="project").count() == Project.objects.count()
+    assert Badge.objects.filter(kind="course").count() == Course.objects.count()
+    lea = User.objects.get(username="lea.adjovi")
+    total = sum(PointsEntry.objects.filter(learner=lea).values_list("amount", flat=True))
+    assert total > 0 and lea.learner_profile.points == total
+    assert rank_for(total) is not None
+    assert LearnerBadge.objects.filter(learner=lea).count() > 0
+    assert streak_days(lea) == 5 and lea.learner_profile.streak_days == 5
+
+
+def test_seed_keeps_a_points_scale_set_by_hand():
+    from apps.core.models import PlatformSettings
+
+    settings_ = PlatformSettings.load()
+    settings_.points_scale = {"mission": 1}
+    settings_.save()
+    call_command("seed_demo")
+    assert PlatformSettings.load().points_scale == {"mission": 1}

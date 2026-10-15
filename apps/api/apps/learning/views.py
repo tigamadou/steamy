@@ -8,6 +8,7 @@ Toutes les réponses sont privées (`Cache-Control: private, no-store`, ADR 0004
 
 from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from drf_spectacular.utils import extend_schema
@@ -21,7 +22,8 @@ from libs.permissions import IsLearner
 from libs.schema import ErrorSerializer
 
 from . import serializers as s
-from .models import Enrollment, QuizAttempt
+from .gamification import badge_of, record_activity, seconds_on, streak_days
+from .models import Enrollment, LearnerBadge, QuizAttempt
 from .progression import Container, Progression, Step, load_course, quiz_of
 from .services import (
     complete_mission,
@@ -311,10 +313,11 @@ class MissionCompleteView(LearnerView):
     def post(self, request, pk):
         mission = _mission(pk)
         enrollment = enrollment_for(request.user, mission.level.project.course_id)
-        progression, _ = complete_mission(enrollment, mission.id)
+        progression, points = complete_mission(enrollment, mission.id)
         payload = {
             "mission_id": mission.id,
             "progress_pct": progression.progress_pct,
+            "points_earned": points,
             "next": next_payload(progression, progression.step_after("mission", mission.id)),
         }
         return Response(s.MissionCompleteSerializer(payload).data)
@@ -392,8 +395,10 @@ def attempt_detail(attempt: QuizAttempt) -> dict:
     if attempt.passed:
         progression = Progression(attempt.enrollment)
         next_step = next_payload(progression, progression.step_after("quiz", attempt.quiz_id))
+    badge = badge_of(attempt.quiz.level or attempt.quiz.project) if attempt.passed else None
     return {
         **attempt_item(attempt),
+        "badge": badge_payload(badge) if badge else None,
         "failed_concepts": attempt.failed_concepts,
         "remediation": remediation,
         "questions": review,
@@ -495,18 +500,27 @@ class AttemptPagination(PagePagination):
         return paginated
 
 
+def badge_payload(badge) -> dict:
+    return {
+        "id": badge.id,
+        "kind": badge.kind,
+        "label": badge.label,
+        "icon": badge.icon,
+        "description": badge.description,
+    }
+
+
 def attempt_summary(learner) -> dict:
     attempts = QuizAttempt.objects.filter(learner=learner).aggregate(
         count=Count("id"),
         passed=Count("id", filter=Q(passed=True)),
         perfect=Count("id", filter=Q(percentage=100)),
     )
-    profile = getattr(learner, "learner_profile", None)
     return {
         "attempt_count": attempts["count"],
         "success_rate": attempts["passed"] * 100 // attempts["count"] if attempts["count"] else 0,
         "perfect_count": attempts["perfect"],
-        "streak_days": profile.streak_days if profile else 0,
+        "streak_days": streak_days(learner),
     }
 
 
@@ -552,3 +566,74 @@ class AttemptDetailView(LearnerView):
             learner=request.user,
         )
         return Response(s.AttemptDetailSerializer(attempt_detail(attempt)).data)
+
+
+# --- Activité et badges (D34) --------------------------------------------------------------------
+
+
+class ActivityView(LearnerView):
+    """
+    Temps de vidéo réellement lu (ADR 0004 §7), envoyé par le lecteur toutes les 30 s, à la pause et à la fin.
+    Mission accessible seulement ; secondes plafonnées par appel et par jour.
+    """
+
+    @extend_schema(request=s.ActivityRequestSerializer, responses=s.ActivitySerializer)
+    def post(self, request):
+        body = s.ActivityRequestSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        mission = _mission(body.validated_data["mission_id"])
+        _, progression = _progression(request, mission.level.project.course_id)
+        ensure_unlocked(progression.mission_state(mission.id))
+        counted = record_activity(request.user, mission.id, body.validated_data["seconds"])
+        payload = {
+            "seconds_counted": counted,
+            "seconds_today": seconds_on(request.user, timezone.localdate()),
+            "streak_days": streak_days(request.user),
+        }
+        return Response(s.ActivitySerializer(payload).data)
+
+
+class BadgeListView(LearnerView, generics.ListAPIView):
+    """Mes badges (WJ06, WJ11), les plus récents d'abord ; `?course=` pour un parcours."""
+
+    serializer_class = s.LearnerBadgeSerializer
+    filter_backends = []
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):  # génération du schéma OpenAPI
+            return LearnerBadge.objects.none()
+        params = s.BadgeQuerySerializer(data=self.request.query_params)
+        params.is_valid(raise_exception=True)
+        badges = LearnerBadge.objects.filter(learner=self.request.user).select_related(
+            "badge__level__project__course", "badge__project__course", "badge__course"
+        )
+        if slug := params.validated_data.get("course"):
+            badges = badges.filter(
+                Q(badge__level__project__course__slug=slug)
+                | Q(badge__project__course__slug=slug)
+                | Q(badge__course__slug=slug)
+            )
+        return badges
+
+    @extend_schema(parameters=[s.BadgeQuerySerializer])
+    def get(self, request, *args, **kwargs):
+        page = self.paginate_queryset(self.get_queryset())
+        data = []
+        for award in page:
+            badge = award.badge
+            if badge.level_id:
+                course, project_id = badge.level.project.course, badge.level.project_id
+            elif badge.project_id:
+                course, project_id = badge.project.course, badge.project_id
+            else:
+                course, project_id = badge.course, None
+            data.append(
+                {
+                    **badge_payload(badge),
+                    "awarded_at": award.awarded_at,
+                    "course": course_ref(course),
+                    "project_id": project_id,
+                    "level_id": badge.level_id,
+                }
+            )
+        return self.get_paginated_response(s.LearnerBadgeSerializer(data, many=True).data)

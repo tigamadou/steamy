@@ -8,7 +8,7 @@ schéma OpenAPI).
 
 from rest_framework import serializers
 
-from apps.catalog.models import Quiz
+from apps.catalog.models import Badge, Quiz
 from apps.catalog.serializers import CourseListSerializer
 
 from .models import Enrollment, QuizAttempt
@@ -191,6 +191,7 @@ class MissionDetailSerializer(serializers.Serializer):
 class MissionCompleteSerializer(serializers.Serializer):
     mission_id = serializers.IntegerField()
     progress_pct = serializers.IntegerField()
+    points_earned = serializers.IntegerField(help_text="0 si déjà terminée ou sans barème (C8)")
     next = NextStepSerializer(
         help_text="Mission suivante, ou certification si le parcours est fait"
     )
@@ -304,8 +305,21 @@ class AttemptListItemSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField()
 
 
+class BadgeSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    kind = serializers.ChoiceField(choices=Badge.Kind.choices)
+    label = serializers.CharField()
+    icon = serializers.CharField()
+    description = serializers.CharField()
+
+
 class AttemptDetailSerializer(AttemptListItemSerializer):
     """Résultat d'une tentative (WJ05, WJ08, WD08)."""
+
+    badge = BadgeSerializer(
+        allow_null=True,
+        help_text="Badge du niveau ou du projet, si la tentative est réussie (WJ06, WJ11)",
+    )
 
     failed_concepts = serializers.ListField(child=serializers.CharField())
     remediation = RemediationSerializer(many=True)
@@ -331,3 +345,30 @@ class AttemptSummarySerializer(serializers.Serializer):
     success_rate = serializers.IntegerField(help_text="Part des tentatives réussies (%)")
     perfect_count = serializers.IntegerField(help_text="Tentatives à 100 %")
     streak_days = serializers.IntegerField()
+
+
+# --- Activité et badges (D34) --------------------------------------------------------------------
+
+
+class ActivityRequestSerializer(serializers.Serializer):
+    mission_id = serializers.IntegerField()
+    seconds = serializers.IntegerField(
+        min_value=1, max_value=3600, help_text="Secondes réellement lues"
+    )
+
+
+class ActivitySerializer(serializers.Serializer):
+    seconds_counted = serializers.IntegerField(help_text="Secondes retenues après plafonnement")
+    seconds_today = serializers.IntegerField()
+    streak_days = serializers.IntegerField()
+
+
+class BadgeQuerySerializer(serializers.Serializer):
+    course = serializers.SlugField(required=False, help_text="Slug du parcours")
+
+
+class LearnerBadgeSerializer(BadgeSerializer):
+    awarded_at = serializers.DateTimeField()
+    course = CourseRefSerializer()
+    project_id = serializers.IntegerField(allow_null=True)
+    level_id = serializers.IntegerField(allow_null=True)

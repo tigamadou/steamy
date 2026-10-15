@@ -1649,6 +1649,53 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/learning/activity/:
+    post:
+      operationId: learning_activity_create
+      description: |-
+        Temps de vidéo réellement lu (ADR 0004 §7), envoyé par le lecteur toutes les 30 s, à la pause et à la fin.
+        Mission accessible seulement ; secondes plafonnées par appel et par jour.
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/attempts/:
     get:
       operationId: learning_attempts_list
@@ -1748,6 +1795,60 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/badges/:
+    get:
+      operationId: learning_badges_list
+      description: Mes badges (WJ06, WJ11), les plus récents d'abord ; `?course=`
+        pour un parcours.
+      parameters:
+      - in: query
+        name: course
+        schema:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        description: Slug du parcours
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLearnerBadgeList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
           content:
             application/json:
               schema:
@@ -3145,6 +3246,33 @@ paths:
           description: ''
 components:
   schemas:
+    Activity:
+      type: object
+      properties:
+        secondsCounted:
+          type: integer
+          description: Secondes retenues après plafonnement
+        secondsToday:
+          type: integer
+        streakDays:
+          type: integer
+      required:
+      - secondsCounted
+      - secondsToday
+      - streakDays
+    ActivityRequestRequest:
+      type: object
+      properties:
+        missionId:
+          type: integer
+        seconds:
+          type: integer
+          maximum: 3600
+          minimum: 1
+          description: Secondes réellement lues
+      required:
+      - missionId
+      - seconds
     AnswerRequest:
       type: object
       properties:
@@ -3192,6 +3320,12 @@ components:
         createdAt:
           type: string
           format: date-time
+        badge:
+          allOf:
+          - $ref: '#/components/schemas/Badge'
+          nullable: true
+          description: Badge du niveau ou du projet, si la tentative est réussie (WJ06,
+            WJ11)
         failedConcepts:
           type: array
           items:
@@ -3215,6 +3349,7 @@ components:
           description: 'Après une réussite : étape suivante (après le badge) ; sinon
             null'
       required:
+      - badge
       - createdAt
       - durationSec
       - failedConcepts
@@ -3348,6 +3483,35 @@ components:
       - emoji
       - id
       - label
+    Badge:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/BadgeKindEnum'
+        label:
+          type: string
+        icon:
+          type: string
+        description:
+          type: string
+      required:
+      - description
+      - icon
+      - id
+      - kind
+      - label
+    BadgeKindEnum:
+      enum:
+      - level
+      - project
+      - course
+      type: string
+      description: |-
+        * `level` - Niveau
+        * `project` - Projet
+        * `course` - Parcours
     Category:
       type: object
       properties:
@@ -4297,6 +4461,40 @@ components:
       - email
       - isAdult
       - newsletterConsent
+    LearnerBadge:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/BadgeKindEnum'
+        label:
+          type: string
+        icon:
+          type: string
+        description:
+          type: string
+        awardedAt:
+          type: string
+          format: date-time
+        course:
+          $ref: '#/components/schemas/CourseRef'
+        projectId:
+          type: integer
+          nullable: true
+        levelId:
+          type: integer
+          nullable: true
+      required:
+      - awardedAt
+      - course
+      - description
+      - icon
+      - id
+      - kind
+      - label
+      - levelId
+      - projectId
     LearnerConsentRequestRequest:
       type: object
       properties:
@@ -4744,6 +4942,9 @@ components:
           type: integer
         progressPct:
           type: integer
+        pointsEarned:
+          type: integer
+          description: 0 si déjà terminée ou sans barème (C8)
         next:
           allOf:
           - $ref: '#/components/schemas/NextStep'
@@ -4751,6 +4952,7 @@ components:
       required:
       - missionId
       - next
+      - pointsEarned
       - progressPct
     MissionDetail:
       type: object
@@ -5193,6 +5395,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Kit'
+    PaginatedLearnerBadgeList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearnerBadge'
     PaginatedNotificationList:
       type: object
       properties:

@@ -333,8 +333,6 @@ def test_attempt_list_with_filters_and_summary(client, course, enrollment, learn
     submit(client, quiz, 2)
     other = EnrollmentFactory(course=course)
     pass_quiz(other, quiz)  # tentative d'un autre apprenant
-    learner.learner_profile.streak_days = 3
-    learner.learner_profile.save()
 
     body = client.get("/api/learning/attempts/").json()
     assert body["count"] == 3
@@ -343,7 +341,7 @@ def test_attempt_list_with_filters_and_summary(client, course, enrollment, learn
         "attemptCount": 3,
         "successRate": 33,
         "perfectCount": 1,
-        "streakDays": 3,
+        "streakDays": 1,  # quiz passés aujourd'hui
     }
     assert body["results"][0]["quiz"]["courseSlug"] == course.slug
 

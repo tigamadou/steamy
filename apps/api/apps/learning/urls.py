@@ -25,4 +25,6 @@ urlpatterns = [
     ),
     path("attempts/", views.AttemptListView.as_view(), name="learning-attempts"),
     path("attempts/<int:pk>/", views.AttemptDetailView.as_view(), name="learning-attempt"),
+    path("activity/", views.ActivityView.as_view(), name="learning-activity"),
+    path("badges/", views.BadgeListView.as_view(), name="learning-badges"),
 ]

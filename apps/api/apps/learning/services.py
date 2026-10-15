@@ -12,7 +12,8 @@ from apps.catalog.models import Course, Quiz
 from apps.core.models import PlatformSettings
 from libs.errors import ApiError
 
-from .models import Enrollment, MissionProgress, QuizAttempt
+from .gamification import award_badge, award_points, badge_of, record_activity
+from .models import Enrollment, MissionProgress, PointsEntry, QuizAttempt
 from .progression import LOCKED, Progression
 
 
@@ -57,18 +58,29 @@ def touch(enrollment: Enrollment, progression: Progression) -> None:
     enrollment.save(update_fields=["progress_pct", "last_activity_at"])
 
 
-def complete_mission(enrollment: Enrollment, mission_id: int) -> tuple[Progression, bool]:
+def complete_mission(enrollment: Enrollment, mission_id: int) -> tuple[Progression, int]:
     """
     Termine une mission disponible (séquence respectée, sinon `CONTENT_LOCKED`). Idempotent : une mission déjà
-    terminée n'est pas comptée deux fois. Renvoie la progression à jour et si la mission vient d'être terminée.
+    terminée n'est ni recomptée ni payée deux fois. Renvoie la progression à jour et les points gagnés.
     """
     progression = Progression(enrollment)
     ensure_unlocked(progression.mission_state(mission_id))
-    _, created = MissionProgress.objects.get_or_create(enrollment=enrollment, mission_id=mission_id)
-    if created:
-        progression = Progression(enrollment, progression.course)
-        touch(enrollment, progression)
-    return progression, created
+    points = 0
+    with transaction.atomic():
+        progress, created = MissionProgress.objects.get_or_create(
+            enrollment=enrollment, mission_id=mission_id
+        )
+        if created:
+            progression = Progression(enrollment, progression.course)
+            touch(enrollment, progression)
+            points = award_points(
+                enrollment.learner,
+                PointsEntry.Source.MISSION,
+                f"mission:{mission_id}",
+                f"Mission terminée : {progress.mission.title}",
+            )
+            record_activity(enrollment.learner, mission_id)
+    return progression, points
 
 
 # --- Quiz (D31, D32, C8) -------------------------------------------------------------------------
@@ -132,6 +144,9 @@ def submit_attempt(
             error = ApiError("QUIZ_COOLDOWN")
             error.wait = wait  # en-tête `Retry-After` posé par DRF
             raise error
+        first_pass = not QuizAttempt.objects.filter(
+            learner=enrollment.learner, quiz=quiz, passed=True
+        ).exists()
         result = grade(quiz, answers)
         threshold = quiz.pass_threshold
         status = attempt_status(result["score"], result["total"], threshold)
@@ -150,5 +165,12 @@ def submit_attempt(
             duration_sec=duration_sec,
             failed_concepts=result["failed_concepts"],
         )
+        if attempt.passed and first_pass:
+            attempt.points_earned = award_points(
+                enrollment.learner, quiz.kind, f"quiz:{quiz.id}", f"Quiz réussi : {quiz}"
+            )
+            attempt.save(update_fields=["points_earned"])
+            award_badge(enrollment.learner, badge_of(quiz.level or quiz.project))
+        record_activity(enrollment.learner)
         touch(enrollment, Progression(enrollment))
     return attempt

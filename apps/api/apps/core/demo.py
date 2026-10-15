@@ -433,7 +433,16 @@ def seed_catalog() -> None:
                         },
                     )
                 seed_quiz(catalog.Quiz.Kind.FORMATIVE, level=level)
+                catalog.Badge.objects.update_or_create(
+                    level=level, defaults={"kind": "level", "label": level_title, "icon": "🏅"}
+                )
             seed_quiz(catalog.Quiz.Kind.SUMMATIVE, project=project)
+            catalog.Badge.objects.update_or_create(
+                project=project, defaults={"kind": "project", "label": project_title, "icon": "🏆"}
+            )
+        catalog.Badge.objects.update_or_create(
+            course=course, defaults={"kind": "course", "label": f"Diplômé · {title}", "icon": "🎓"}
+        )
 
 
 def seed_quiz(kind: str, level=None, project=None) -> None:
@@ -624,11 +633,42 @@ LEA_ENROLLMENTS = [
 ]
 
 
+#: Barème de points et paliers de rang de DÉMONSTRATION (C8 : les valeurs réelles restent à fixer par l'équipe dans
+#: l'admin). Saisis seulement s'ils sont vides, pour ne pas écraser un réglage fait à la main.
+DEMO_POINTS_SCALE = {"mission": 10, "formative": 20, "summative": 50, "course": 100}
+DEMO_RANK_THRESHOLDS = [
+    {"rank": "Explorateur", "points": 0},
+    {"rank": "Bricoleur", "points": 100},
+    {"rank": "Inventeur", "points": 300},
+    {"rank": "Ingénieur", "points": 600},
+    {"rank": "Maître Steamy", "points": 1000},
+]
+#: Secondes de vidéo de Léa, d'aujourd'hui (0) aux jours précédents : un streak de 5 jours (WD01, WD21).
+LEA_ACTIVITY = [600, 1200, 900, 300, 1500]
+
+
 def seed_learning(accounts: dict[str, User]) -> None:
-    from apps.learning.models import Enrollment, MissionProgress
+    from apps.core.models import PlatformSettings
+    from apps.learning.gamification import award_badge, award_points, badge_of, streak_days
+    from apps.learning.models import (
+        Enrollment,
+        LearnerBadge,
+        LearningActivity,
+        MissionProgress,
+        PointsEntry,
+    )
     from apps.learning.progression import Progression
 
+    platform = PlatformSettings.load()
+    platform.points_scale = platform.points_scale or DEMO_POINTS_SCALE
+    platform.rank_thresholds = platform.rank_thresholds or DEMO_RANK_THRESHOLDS
+    platform.save()
+
     lea = accounts["lea"]
+    PointsEntry.objects.filter(learner=lea).delete()
+    LearnerBadge.objects.filter(learner=lea).delete()
+    LearningActivity.objects.filter(learner=lea).delete()
+    LearnerProfile.objects.filter(user=lea).update(points=0)
     for slug, done in LEA_ENROLLMENTS:
         course = catalog.Course.objects.get(slug=slug)
         enrollment, _ = Enrollment.objects.update_or_create(
@@ -655,9 +695,26 @@ def seed_learning(accounts: dict[str, User]) -> None:
                     _attempt(enrollment, quiz, right=1)
                 _attempt(enrollment, quiz, right=2)
                 progression = Progression(enrollment)
+        for mission in done_missions:
+            award_points(
+                lea, "mission", f"mission:{mission.id}", f"Mission terminée : {mission.title}"
+            )
+        for attempt in enrollment.attempts.filter(passed=True).select_related("quiz"):
+            quiz = attempt.quiz
+            attempt.points_earned = award_points(
+                lea, quiz.kind, f"quiz:{quiz.id}", f"Quiz réussi : {quiz}"
+            )
+            attempt.save(update_fields=["points_earned"])
+            award_badge(lea, badge_of(quiz.level or quiz.project))
         enrollment.progress_pct = Progression(enrollment).progress_pct
         enrollment.last_activity_at = timezone.now() if done_missions else None
         enrollment.save()
+    today = timezone.localdate()
+    for days_ago, seconds in enumerate(LEA_ACTIVITY):
+        LearningActivity.objects.create(
+            learner=lea, date=today - datetime.timedelta(days=days_ago), seconds=seconds
+        )
+    LearnerProfile.objects.filter(user=lea).update(streak_days=streak_days(lea))
 
 
 def _quiz_reached(progression, step) -> bool:
