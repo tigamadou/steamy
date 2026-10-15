@@ -83,6 +83,20 @@ def test_lea_pseudonym_waits_for_moderation():
     assert (review.learner.username, review.status) == ("lea.adjovi", "pending")
 
 
+def test_impact_tracker_has_computed_and_entered_values():
+    from apps.impact.models import KpiValue
+    from apps.impact.periods import MONTH, QUARTER, Period
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    month, quarter = Period.current(MONTH).key, Period.current(QUARTER).key
+    assert (
+        KpiValue.objects.get(kpi__code="na", period=month).number >= 1
+    )  # Léa, inscrite aujourd'hui
+    assert KpiValue.objects.get(kpi__code="fin_who", period=quarter).text == "OIF"
+    assert not KpiValue.objects.filter(kpi__code="prod_which", period=quarter).exists()
+
+
 def test_seed_demo_links_marie_to_lea_and_leaves_a_pending_teacher_invitation():
     from django.core import mail
 
