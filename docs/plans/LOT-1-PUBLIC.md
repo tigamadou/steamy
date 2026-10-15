@@ -21,7 +21,7 @@ Statut : 🟡 en cours · Prochaine tâche : 1.0b · Prérequis : API-1 (client 
   - [x] Polices (§1.4) : retirer JetBrains Mono (`layout.tsx`, `fonts/`, licence OFL, `--font-mono`), Nunito seule
   - [x] Assets `design/assets/` → `public/brand/` (logos, icônes sociales) ; `app/icon.png`, `apple-icon.png`, `favicon.ico` recadrés sur le symbole ; logo blanc = `logo_landscape_white_tight.png` (recadré)
   - [x] Nettoyage : page de démonstration et `components/browser-api-status.tsx` supprimés, `/runtime-config` gardé ; `app/page.tsx` remplacée par un accueil provisoire statique (le parcours témoin exige `/` en 200, WL01 arrive en 1.1)
-  - ~~Chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts`~~ : reporté à 1.0c, l'endpoint arrive avec API-1 (client pas encore régénéré)
+  - ~~Chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts`~~ : fait par API-1.2 (PR #17), qui régénère le client ; contrôlé en 1.0c
   - [x] Test Vitest témoin, parcours Playwright témoin (accueil en 200) et test axe
   - [x] Recette : `make test-web` et `make e2e` passent en local ; aucune occurrence de `91, 63, 224` ni de `jetbrains` dans `apps/web/src`
   - [ ] Recette après fusion : `e2e` exécuté en CI sur une PR qui ne touche que `apps/api/`
@@ -43,7 +43,7 @@ Statut : 🟡 en cours · Prochaine tâche : 1.0b · Prérequis : API-1 (client 
   - [ ] Tests : rendu, variantes, clavier et `vitest-axe` sur chaque composant ; `PhoneInput` (changement de pays, E.164, numéro invalide)
   - [ ] Recette : contrastes AA (aucun texte en `--ink-400`), focus visible, aucun `rgba` ni hex en dur hors `tokens.css`
 - [ ] **1.0c** Shell public, enveloppes, SEO (requiert API-1) · `feature/lot1-socle-public`
-  - [ ] Chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts` (reporté de 1.0a, après API-1)
+  - [ ] Contrôler le chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts` (renommé par API-1.2, PR #17)
   - [ ] `lib/routes.ts` (table unique des URL)
   - [ ] `app/(public)/layout.tsx` : `PublicShell`, `<main id="contenu">`, lien d'évitement
   - [ ] `PublicNav` + `MegaMenu` accessible (clavier, `Échap`, clic extérieur, tiroir mobile avec piège de focus) et emplacement `NavAccount`
@@ -354,7 +354,7 @@ src/lib/{api-public,api-errors,routes}.ts · e2e/
 | Étape du lot | Requiert | Endpoints (SPEC-TECHNIQUE §7) |
 | --- | --- | --- |
 | 1.0a, 1.0b | — | — |
-| 1.0c | API-1 (client régénéré, `make seed` D2) ; renommage CSRF reporté de 1.0a | `GET auth/csrf/` |
+| 1.0c | API-1 (client régénéré, `make seed` D2, renommage CSRF par API-1.2) | `GET auth/csrf/` |
 | 1.1 | API-L1 | `catalog/categories/`, `catalog/courses/` |
 | 1.2 | — | — |
 | 1.3 | API-L1 + 1.2 | `catalog/courses/{slug}/` |
