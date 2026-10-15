@@ -211,7 +211,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > d'email à l'équipe. Devis et contact : tâche `notify_team` (idempotente par `notifiedAt`) vers `TEAM_EMAIL`.
   > Contact : `contact` = email ou téléphone (normalisé E.164), message ≥ 20 caractères (`MIN_LENGTH`). Téléphone
   > du devis normalisé E.164 (`PHONE_INVALID`). `enforce_csrf` ajouté à `libs/authentication.py`.
-- [x] **API-L1.5** Kits en lecture · `feature/api-l1-5-kits` · PR #NUM
+- [x] **API-L1.5** Kits en lecture · `feature/api-l1-5-kits` · PR #43
   - [x] App `shop` : `Kit` (§3.3) + admin
   - [x] `GET shop/kits/?category=`, `GET shop/kits/{slug}/` (disponibilité booléenne, jamais le stock exact)
   - [x] Tests : stock exact absent, aucune écriture publique (matrice d'accès)
