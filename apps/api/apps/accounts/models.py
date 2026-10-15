@@ -295,9 +295,16 @@ class ParentProfile(TimestampedModel):
 
 
 class TeacherProfile(TimestampedModel):
-    """Profil de l'enseignant, créé sur invitation (S5). L'école arrive avec `classrooms` (API-L2.7)."""
+    """Profil de l'enseignant, créé sur invitation (S5), rattaché à une école (C6)."""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher_profile")
+    school = models.ForeignKey(
+        "classrooms.School",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="teachers",
+    )
     phone = models.CharField(_("téléphone de contact"), max_length=16, null=True, blank=True)
     specialty = models.CharField(_("spécialité"), max_length=120, blank=True)
     bio = models.TextField(blank=True)

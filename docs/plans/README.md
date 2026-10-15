@@ -61,7 +61,7 @@ plan.
 
 | Plan | Statut | Avancement | Prochaine tâche |
 | --- | --- | --- | --- |
-| [PLAN-API](PLAN-API.md) | 🟡 en cours | API-0 ✅ (PR #5 à #9) · API-1 ✅ (PR #12, #15, #17, #21 à #25) | API-L1.1 |
+| [PLAN-API](PLAN-API.md) | 🟡 en cours | API-0 ✅ (PR #5 à #9) · API-1 ✅ (PR #12, #15, #17, #21 à #25) · API-L2 : L2.0b à L2.7 (PR #29, #32, #34, #39, #42, #44, #45 et suivante) ; parcours Playwright avec le lot 2 | API-L1.1 |
 | [LOT-1-PUBLIC](LOT-1-PUBLIC.md) | 🟡 en cours | 1.0a, 1.0b (PR #18, #19) | 1.0c (après API-1) |
 | [LOT-2-AUTH](LOT-2-AUTH.md) | ⬜ à faire | — | 2.0 (après API-1 ; API-L2 dès 2.1) |
 | [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | ⬜ à faire | — | 3.0 (après API-1 et API-L3a) |

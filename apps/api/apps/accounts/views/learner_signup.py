@@ -276,7 +276,7 @@ class LearnerSignupResumeView(PublicView):
 
 
 class LearnerSignupPasswordView(PublicView):
-    throttle_scope = "signup"
+    throttle_scope = "signup-step"
 
     @extend_schema(request=LearnerPasswordSerializer, responses=LoginResponseSerializer, auth=[])
     def post(self, request):

@@ -18,6 +18,10 @@ from apps.accounts.views.password_reset import (
     PasswordResetView,
 )
 from apps.accounts.views.session import CsrfView, LoginView, LogoutView
+from apps.accounts.views.teacher_activation import (
+    TeacherInvitationAcceptView,
+    TeacherInvitationView,
+)
 
 # Domaine d'URL `auth`, servi par l'app `accounts` (pas d'app nommée `auth` : collision avec django.contrib.auth)
 urlpatterns = [
@@ -60,5 +64,15 @@ urlpatterns = [
         "parent-signup/password/",
         ParentSignupPasswordView.as_view(),
         name="auth-parent-signup-password",
+    ),
+    path(
+        "teacher-invitations/<str:token>/",
+        TeacherInvitationView.as_view(),
+        name="auth-teacher-invitation",
+    ),
+    path(
+        "teacher-invitations/<str:token>/accept/",
+        TeacherInvitationAcceptView.as_view(),
+        name="auth-teacher-invitation-accept",
     ),
 ]

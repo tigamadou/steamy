@@ -11,10 +11,25 @@ import datetime
 
 from django.contrib.auth.models import Group
 
-from apps.accounts.models import LearnerProfile, ParentProfile, TeacherProfile, User
+from apps.accounts.models import (
+    LearnerProfile,
+    ParentChildLink,
+    ParentProfile,
+    TeacherProfile,
+    User,
+)
+from apps.classrooms.invitations import send_invitation
+from apps.classrooms.models import School, TeacherInvitation
 from apps.core.groups import CONTENT, FINANCE, SUPER_ADMIN, SUPPORT
 from apps.notifications.models import Category, Notification, Tone
-from apps.referentials.models import Avatar, Goal, Locality, SchoolGrade
+from apps.referentials.models import (
+    Avatar,
+    Country,
+    Goal,
+    Locality,
+    Relationship,
+    SchoolGrade,
+)
 
 #: Mot de passe de tous les comptes de démonstration (D25 : 8 caractères, une lettre et un chiffre).
 DEMO_PASSWORD = "Steamy2026"
@@ -25,6 +40,9 @@ DEMO_TOTP_KEY = "3132333435363738393031323334353637383930"
 LEA_USERNAME = "lea.adjovi"
 MARIE_PHONE = "+2290190000001"
 KOFFI_EMAIL = "koffi.adekambi@steamy.test"
+SCHOOL_NAME = "Collège Steamy de Cotonou"
+#: Invitation enseignant en attente (P6 du lot 2 : lien lu dans Mailpit).
+INVITED_TEACHER_EMAIL = "nadia.houngbo@steamy.test"
 STAFF = [
     # email, prénom, nom, groupe, superutilisateur
     ("superadmin@steamy.test", "Awa", "Dossou", SUPER_ADMIN, True),
@@ -83,6 +101,11 @@ def seed_accounts() -> dict[str, User]:
         },
     )
     parent_profile.goals_for_children.set(Goal.objects.filter(code__in=["robots", "coder"]))
+    # Marie est le parent de Léa (S3) ; le consentement a été donné
+    ParentChildLink.objects.update_or_create(
+        learner=lea,
+        defaults={"parent": marie, "relationship": Relationship.objects.get(code="mere")},
+    )
 
     koffi = _user(
         {"email": KOFFI_EMAIL},
@@ -158,7 +181,34 @@ def seed_notifications(accounts: dict[str, User]) -> None:
             notification.save(update_fields=["read_at"])
 
 
+def seed_classrooms(accounts: dict[str, User]) -> None:
+    """L'école de M. Adékambi et une invitation enseignant en attente, envoyée (Mailpit en local)."""
+    school, _ = School.objects.update_or_create(
+        name=SCHOOL_NAME,
+        defaults={
+            "country": Country.objects.get(code="BJ"),
+            "city": "Cotonou",
+            "learner_quota": 120,
+            "classroom_quota": 4,
+        },
+    )
+    TeacherProfile.objects.filter(user=accounts["koffi"]).update(school=school)
+    invitation, _ = TeacherInvitation.objects.update_or_create(
+        email=INVITED_TEACHER_EMAIL,
+        defaults={
+            "first_name": "Nadia",
+            "last_name": "Houngbo",
+            "school": school,
+            "accepted_at": None,
+        },
+    )
+    # Invitation déjà activée lors d'un parcours précédent : on remet le compte à l'état « invité »
+    User.objects.filter(email=INVITED_TEACHER_EMAIL, role=User.Role.TEACHER).delete()
+    send_invitation(invitation, invited_by=accounts.get(SUPER_ADMIN))
+
+
 def seed_all() -> dict[str, User]:
     accounts = seed_accounts()
+    seed_classrooms(accounts)
     seed_notifications(accounts)
     return accounts

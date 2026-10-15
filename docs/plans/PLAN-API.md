@@ -231,18 +231,24 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 - [x] **API-L2.6** Mot de passe oublié · `feature/api-l2-6-reset-password`
   - [x] `POST auth/password-reset/` (parent OTP SMS, enseignant code email, apprenant refus D26), `…/verify/`, `…/confirm/`
   - [x] Tests : pas d'énumération (même réponse, même travail dans la requête : défi créé et tâche d'envoi programmée dans tous les cas)
-- [ ] **API-L2.7** Activation enseignant · `feature/api-l2-7-activation-enseignant`
-  - [ ] App `classrooms` amorcée : `School` minimale, `TeacherInvitation`
-  - [ ] Invitation créée depuis l'admin Django (action « Envoyer »)
-  - [ ] `GET auth/teacher-invitations/{token}/`, `POST …/accept/` (C6)
-  - [ ] Tests : jeton expiré ou réutilisé refusé
+- [x] **API-L2.7** Activation enseignant · `feature/api-l2-7-activation-enseignant`
+  - [x] App `classrooms` amorcée : `School` minimale, `TeacherInvitation`
+  - [x] Invitation créée depuis l'admin Django (action « Envoyer »)
+  - [x] `GET auth/teacher-invitations/{token}/`, `POST …/accept/` (C6)
+  - [x] Tests : jeton expiré ou réutilisé refusé
+  - [x] Plafonds d'inscription séparés : création (`signup`) et étapes suivantes (`signup-step`), testé par le parcours d'une famille depuis une même IP
 - [x] **Tâches Celery d'API-L2**
   - [x] `send_sms`, `expire_consent_requests` (7 j), `purge_refused_requests` (30 j), `purge_signup_sessions`
   - [x] Planifiées dans `CELERY_BEAT_SCHEDULE`, exécutables à la main (`manage.py <tâche>`)
 - [ ] **Critères de fin d'API-L2**
   - [ ] Parcours Playwright inscription apprenant → consentement → W11-W14 passant sur la stack Docker avec le faux SMS
   - [ ] Parcours Playwright inscription parent passant
-  - [ ] `make seed` contient une invitation enseignant en attente
+  - [x] `make seed` contient une invitation enseignant en attente
+  > Reprise : toutes les PR d'API-L2 sont ouvertes (L2.0b à L2.7). Les deux parcours Playwright exigent les écrans
+  > du lot 2 (LOT-2-AUTH, P1 à P6) : à cocher par la PR du lot 2 qui les fait passer. Le même enchaînement a été
+  > vérifié côté API sur PostgreSQL et Mailpit (inscription apprenant → demande → inscription parent → accord →
+  > mot de passe → W11-W14, mot de passe oublié, activation de l'invitation du seed) et figé par
+  > `test_signup_journey.py`.
 
 ### API-L3a · Pédagogie — ⬜ à faire
 - [ ] **Préalables**
