@@ -116,6 +116,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Endpoints §7.7 : `notifications/`, `unread-count/`, `{id}/read/`, `read-all/`, `preferences/`
   - [x] Service `notify(user, type, …)` (base + email selon la préférence, C12)
   - [x] Tests : scoping propriétaire, préférences respectées
+  - [x] Couverture 100 % (lignes et branches) du code modifié
   > Décisions : catégories par rôle (apprenant : apprentissage, récompenses, encadrement, Steamy Events, paiements ;
   > parent : consentements et validations, paiements, progression, Steamy Events ; enseignant : progression, tentatives
   > à revoir, Steamy Events) + `account` toujours envoyée. Dans l'application : toujours ; email activé par défaut,
