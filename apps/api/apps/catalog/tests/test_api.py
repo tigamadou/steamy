@@ -76,7 +76,7 @@ def test_detail_never_exposes_mission_content_nor_videos():
 
 def test_responses_do_not_depend_on_the_session_and_are_cachable():
     course = CourseFactory()
-    Enrollment.objects.create(user=LearnerFactory(), course=course)
+    Enrollment.objects.create(learner=LearnerFactory(), course=course, source="free")
     logged_in = APIClient()
     logged_in.force_login(LearnerFactory())
     for url in ("categories/", "courses/", f"courses/{course.slug}/"):
@@ -151,8 +151,8 @@ def test_sorts():
     b = CourseFactory(slug="b", title="Abeille", paid=True, price=10000)
     c = CourseFactory(slug="c", title="Moteur")
     for learner in LearnerFactory.create_batch(2):
-        Enrollment.objects.create(user=learner, course=b)
-    Enrollment.objects.create(user=LearnerFactory(), course=a)
+        Enrollment.objects.create(learner=learner, course=b, source="free")
+    Enrollment.objects.create(learner=LearnerFactory(), course=a, source="free")
     client = APIClient()
     assert slugs(client.get(f"{BASE}courses/")) == ["b", "a", "c"]  # popular par défaut
     assert slugs(client.get(f"{BASE}courses/?sort=popular")) == ["b", "a", "c"]

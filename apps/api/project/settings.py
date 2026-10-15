@@ -85,8 +85,6 @@ INSTALLED_APPS = [
     "apps.file",
     "apps.mail",
     "apps.accounts",
-    # Coquille : ne garde que ses migrations (tables supprimées en 0002), voir apps/courses/__init__.py
-    "apps.courses",
     "apps.catalog",
     "apps.events",
     "apps.public",
@@ -323,6 +321,7 @@ SPECTACULAR_SETTINGS = {
         "RoleEnum": "apps.accounts.models.User.Role",
         "UserStatusEnum": "apps.accounts.models.User.Status",
         "DeletionRequestStatusEnum": "apps.accounts.models.DeletionRequest.Status",
+        "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
