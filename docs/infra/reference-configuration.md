@@ -26,6 +26,10 @@ En staging et en prod, le chart les injecte dans api, worker, beat et migrate.
 | `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | non | factices | secrets du même nom | Identifiants SMTP |
 | `DEFAULT_FROM_EMAIL` | non | `no-reply@steamy.local` | values `email.from` | Expéditeur |
 | `PAYMENTS_KKIAPAY_SECRET` / `PAYMENTS_FEDAPAY_SECRET` | non | — | secrets du même nom | Vérification des webhooks de paiement |
+| `SMS_PROVIDER` | non | `fake` | `twilio` (values `sms.provider`) | Fournisseur SMS ([ADR 0002](../adr/0002-fournisseur-sms.md)). `fake` envoie chaque SMS comme e-mail à `<e164>@sms.test` (Mailpit) et **refuse de fonctionner** en staging et en prod. Défaut : `fake` en local et CI, `twilio` en déployé |
+| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | oui si `twilio` | — | secrets du même nom | Identifiants de l'API Twilio. **Jamais dans le dépôt**. En staging : identifiants de test Twilio (aucun SMS réel, numéros magiques) ou sous-compte plafonné |
+| `TWILIO_SENDER` | non | — | values `sms.sender` (`STEAMY`) | Expéditeur : identifiant alphanumérique enregistré chez Twilio, ou numéro Twilio |
+| `TWILIO_STATUS_CALLBACK_URL` | non | — | `https://<hosts.api>/api/notifications/sms/status/` (chart) | Webhook des accusés de réception, signé par Twilio (`X-Twilio-Signature`). Vide : pas d'accusés |
 | `ALLOW_API_DOCS` | non | `true` | — (désactivé) | Expose `/api/docs/` et `/api/redoc/` |
 | `GUNICORN_WORKERS` | non | — | values `api.gunicornWorkers` | Processus gunicorn par pod |
 | `GUNICORN_TIMEOUT` | non | — | `60` | Délai max d'une requête (s) |
@@ -55,6 +59,7 @@ que reçoit le serveur :
 | `WASABI_ACCESS_KEY_ID` / `WASABI_SECRET_ACCESS_KEY` | idem | Sauvegardes PostgreSQL et médias |
 | `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | idem | API (optionnel) |
 | `PAYMENTS_*` | idem | API (optionnel) |
+| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | idem | API : envoi des SMS (OTP, liens de consentement et de paiement). Sans eux, aucun SMS ne part |
 | `GHCR_PULL_USER` (variable) / `GHCR_PULL_TOKEN` | idem | Serveur : téléchargement des images et charts. **Non transmis à l'application** |
 | `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `DEPLOY_HOST` | — | CI uniquement (connexion SSH) |
 | `API_URL` (variable) | — | CI : contrôle de santé après déploiement |

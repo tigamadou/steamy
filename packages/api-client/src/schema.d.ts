@@ -4,6 +4,129 @@
  */
 
 export interface paths {
+    "/api/accounts/consent-requests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WP04, WPD01 : demandes reçues, les plus récentes d'abord. */
+        get: operations["accounts_consent_requests_list"];
+        put?: never;
+        /** @description W06 : l'enfant envoie la demande à son parent (SMS avec lien à jeton). Réservé à l'inscription en cours. */
+        post: operations["accounts_consent_requests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Demandes adressées au numéro vérifié du parent connecté. `create` et `resend` servent l'enfant pendant son
+         *     inscription (session « inscription en cours », sans compte connecté) ; `preview`, le lien SMS avant connexion.
+         */
+        get: operations["accounts_consent_requests_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/{id}/accept/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WP05 « Accepter » → WP06 : l'enfant est rattaché au parent et peut choisir son mot de passe (W10). */
+        post: operations["accounts_consent_requests_accept_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/{id}/refuse/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WP11 → WP12 : motif obligatoire. Le compte en attente de l'enfant est supprimé (D22). */
+        post: operations["accounts_consent_requests_refuse_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/{id}/resend/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description W07 « Renvoyer le SMS » : nouveau lien (seul le dernier vaut), 60 s au moins entre deux envois. */
+        post: operations["accounts_consent_requests_resend_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/claim/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Lien SMS ouvert par le parent connecté : numéro concordant exigé (`CONSENT_PHONE_MISMATCH`). */
+        post: operations["accounts_consent_requests_claim_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/consent-requests/preview/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WP01 depuis le lien SMS : numéro masqué pour guider le parent, aucune donnée de l'enfant. */
+        post: operations["accounts_consent_requests_preview_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/accounts/me/": {
         parameters: {
             query?: never;
@@ -17,7 +140,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** @description WD17, WPD08, WT08 : prénom et nom. Identifiants, rôle et statut ne se modifient pas ici (C12, S1). */
+        patch: operations["accounts_me_partial_update"];
         trace?: never;
     };
     "/api/accounts/me/email/": {
@@ -39,6 +163,40 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/me/learner-profile/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description W11-W14 (une étape par appel) et WD17. */
+        patch: operations["accounts_me_learner_profile_partial_update"];
+        trace?: never;
+    };
+    "/api/accounts/me/parent-profile/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description WP07-WP09 (une étape par appel) et WPD08. */
+        patch: operations["accounts_me_parent_profile_partial_update"];
         trace?: never;
     };
     "/api/accounts/me/password/": {
@@ -131,6 +289,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/learner-signup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description W06-W10, W18 : étape réelle de l'inscription en cours (garde du layout du flux). */
+        get: operations["auth_learner_signup_retrieve"];
+        put?: never;
+        /** @description W05 « Continuer » : crée le compte en attente et renvoie le code de reprise (une seule fois). */
+        post: operations["auth_learner_signup_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/learner-signup/password/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description W10 : après l'accord du parent, choisit le mot de passe ; le compte devient actif et la session s'ouvre. */
+        post: operations["auth_learner_signup_password_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/learner-signup/resume/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description W07 « Reprendre mon inscription » (C5) : identifiant + code de reprise. */
+        post: operations["auth_learner_signup_resume_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/login/": {
         parameters: {
             query?: never;
@@ -164,6 +374,227 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/otp/resend/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Nouveau code pour un défi en cours (60 s après le précédent, plafonds quotidiens D24). */
+        post: operations["auth_otp_resend_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/parent-signup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WP01 : envoie un code au numéro. Réponse identique que le numéro soit inscrit ou non (C13). */
+        post: operations["auth_parent_signup_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/parent-signup/password/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WP03 : crée le compte parent avec le numéro vérifié, puis ouvre la session. */
+        post: operations["auth_parent_signup_password_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/parent-signup/verify/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WP02 : vérifie le code. Le numéro est alors prouvé : on peut dire s'il a déjà un compte (C13). */
+        post: operations["auth_parent_signup_verify_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/password-reset/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WL02 : réponse identique que le compte existe ou non. Un identifiant d'apprenant est refusé (D26). */
+        post: operations["auth_password_reset_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/password-reset/confirm/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WL04 → WL05 : nouveau mot de passe (D25) ; les sessions ouvertes ailleurs sont fermées. */
+        post: operations["auth_password_reset_confirm_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/password-reset/verify/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WL03 : code valide → `resetToken` (15 min, usage unique). */
+        post: operations["auth_password_reset_verify_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/teacher-invitations/{token}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Lien `/activation/<jeton>` : invitation valable, sinon `INVITATION_INVALID`. */
+        get: operations["auth_teacher_invitations_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/teacher-invitations/{token}/accept/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Crée le compte enseignant (email de l'invitation, rattaché à l'école) et ouvre la session. */
+        post: operations["auth_teacher_invitations_accept_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/username-availability/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description W04, W19 : identifiant libre ? Throttlé : c'est une énumération des identifiants. */
+        get: operations["auth_username_availability_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/catalog/categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Catégories avec le nombre de parcours publiés (WL06, WL16) ; liste courte, non paginée. */
+        get: operations["catalog_categories_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/catalog/courses/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Parcours publiés, filtrés et triés (WL01, WL06, WC01-WC03), paginés. */
+        get: operations["catalog_courses_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/catalog/courses/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Fiche publique (WL22, WC04) : plan du parcours sans contenu de mission (D11). */
+        get: operations["catalog_courses_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/core/presign/": {
         parameters: {
             query?: never;
@@ -184,14 +615,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/courses/courses/": {
+    "/api/events/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["courses_courses_list"];
+        /** @description Événements publiés (WL21, WD10, WPD06, WT09), paginés. */
+        get: operations["events_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -200,131 +632,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/courses/courses/{slug}/": {
+    "/api/events/{slug}/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["courses_courses_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/courses/{slug}/enroll/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @description Inscrit l'utilisateur courant à un parcours GRATUIT.
-         *     Un parcours payant s'obtient par l'achat (S7) : 402 PAYMENT_REQUIRED.
-         *     Retourne 201 si l'inscription est créée, 200 si elle existait déjà.
-         */
-        post: operations["courses_courses_enroll_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/lessons/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_lessons_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/lessons/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_lessons_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/modules/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_modules_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/modules/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_modules_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/resources/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_resources_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/resources/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_resources_retrieve"];
+        /** @description Fiche événement (WL23) ; un brouillon répond 404. */
+        get: operations["events_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -851,6 +1167,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/public/contact-messages/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Formulaire de contact (WL24, D17). */
+        post: operations["public_contact_messages_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/leads/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Inscription à la newsletter (WL20, D14), réservée aux adultes (C12). Un email déjà inscrit : même réponse. */
+        post: operations["public_leads_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/quote-requests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Demande de devis d'un établissement (WL11, D13). */
+        post: operations["public_quote_requests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/referentials/avatars/": {
         parameters: {
             query?: never;
@@ -996,6 +1363,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/shop/kits/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Kits en vente, paginés. */
+        get: operations["shop_kits_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shop/kits/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Fiche kit (WK02) ; un kit retiré de la vente répond 404. */
+        get: operations["shop_kits_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1051,6 +1452,20 @@ export interface components {
              */
             color: string;
         };
+        Category: {
+            slug: string;
+            /** Libellé */
+            label: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Icône
+             * @description Emoji affiché sur les cartes
+             */
+            icon: string;
+            /** @description Parcours publiés */
+            readonly courseCount: number;
+        };
         /**
          * @description * `learning` - Apprentissage
          *     * `rewards` - Récompenses
@@ -1075,6 +1490,18 @@ export interface components {
             category: components["schemas"]["CategoryEnum"];
             email: boolean;
         };
+        CategorySummary: {
+            slug: string;
+            /** Libellé */
+            label: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Icône
+             * @description Emoji affiché sur les cartes
+             */
+            icon: string;
+        };
         Certificate: {
             readonly id: number;
             enrollment: number;
@@ -1089,6 +1516,63 @@ export interface components {
             readonly id: number;
             readonly question: number;
             readonly text: string;
+        };
+        /** @description Ce que montre le lien SMS avant toute connexion : le numéro masqué, rien de l'enfant. */
+        ConsentPreview: {
+            parentPhoneMasked: string;
+        };
+        /** @description Demande vue par le parent (WP04, WP05) : seulement ce qui existe à ce stade (D20). */
+        ConsentRequest: {
+            readonly id: number;
+            /** Origine */
+            readonly origin: components["schemas"]["RoleEnum"];
+            readonly status: string;
+            readonly firstName: string;
+            readonly lastName: string;
+            readonly username: string | null;
+            readonly age: number | null;
+            readonly relationship: components["schemas"]["Relationship"];
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly expiresAt: string;
+            /** Format: date-time */
+            readonly resolvedAt: string | null;
+            readonly refusalReason: components["schemas"]["RefusalReason"] | null;
+            /** Précisions du refus */
+            readonly refusalNote: string;
+        };
+        /** @description Demande vue par l'enfant (W07, W08, W18) : jamais le numéro du parent en clair. */
+        ConsentRequestState: {
+            readonly id: number;
+            /** Statut */
+            readonly status: components["schemas"]["ConsentRequestStateStatusEnum"];
+            readonly parentPhoneMasked: string;
+            readonly relationship: string;
+            /** Format: date-time */
+            readonly expiresAt: string;
+            readonly resendInSec: number;
+            readonly refusalReason: components["schemas"]["RefusalReason"] | null;
+        };
+        /**
+         * @description * `pending` - En attente
+         *     * `accepted` - Acceptée
+         *     * `refused` - Refusée
+         *     * `expired` - Expirée
+         *     * `cancelled` - Annulée
+         * @enum {string}
+         */
+        ConsentRequestStateStatusEnum: "pending" | "accepted" | "refused" | "expired" | "cancelled";
+        ContactMessageRequest: {
+            /** Nom */
+            name: string;
+            /** @description Email ou numéro de téléphone */
+            contact: string;
+            /** Sujet */
+            subject: components["schemas"]["SubjectEnum"];
+            message: string;
+            /** @description Champ piège : toujours vide */
+            website?: string;
         };
         Country: {
             readonly id: number;
@@ -1115,29 +1599,59 @@ export interface components {
             phoneRegex: string;
         };
         CourseDetail: {
-            readonly id: number;
-            readonly title: string;
-            readonly slug: string;
-            readonly description: string;
-            readonly path: number | null;
-            /** Format: decimal */
-            readonly price: string;
-            /** Format: date-time */
-            readonly createdAt: string;
-            /** Format: date-time */
-            readonly updatedAt: string;
-            readonly modules: components["schemas"]["Module"][];
+            slug: string;
+            /** Titre */
+            title: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** Gratuit */
+            isFree?: boolean;
+            /** Prix (FCFA) */
+            price?: number;
+            /** @description Visuel des cartes */
+            emoji?: string;
+            readonly requiredKit: components["schemas"]["RequiredKit"] | null;
+            readonly coverImage: string | null;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** Mis en avant */
+            featured?: boolean;
+            description: string;
+            /** Ce que tu vas apprendre */
+            outcomes?: unknown;
+            /** Public */
+            audience?: string;
+            /** Prérequis */
+            prerequisites?: unknown;
+            /** Bande-annonce : identifiant Vimeo */
+            trailerVimeoId?: string;
+            /** Bande-annonce : hachage Vimeo */
+            trailerVimeoHash?: string;
+            /** Certificat */
+            certificateEnabled?: boolean;
+            readonly missionCount: number;
+            readonly projects: components["schemas"]["ProjectSummary"][];
         };
         CourseList: {
-            readonly id: number;
-            readonly title: string;
-            readonly slug: string;
-            readonly description: string;
-            readonly path: number | null;
-            /** Format: decimal */
-            readonly price: string;
-            /** Format: date-time */
-            readonly createdAt: string;
+            slug: string;
+            /** Titre */
+            title: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** Gratuit */
+            isFree?: boolean;
+            /** Prix (FCFA) */
+            price?: number;
+            /** @description Visuel des cartes */
+            emoji?: string;
+            readonly requiredKit: components["schemas"]["RequiredKit"] | null;
+            readonly coverImage: string | null;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** Mis en avant */
+            featured?: boolean;
         };
         CsrfToken: {
             csrfToken: string;
@@ -1148,6 +1662,13 @@ export interface components {
             /** Format: double */
             revenueLast30Days: number;
         };
+        /**
+         * @description * `beginner` - Débutant
+         *     * `intermediate` - Intermédiaire
+         *     * `advanced` - Avancé
+         * @enum {string}
+         */
+        DifficultyEnum: "beginner" | "intermediate" | "advanced";
         Disability: {
             readonly id: number;
             code: string;
@@ -1236,6 +1757,7 @@ export interface components {
          *     * `OUT_OF_STOCK` - OUT_OF_STOCK
          *     * `PARENT_APPROVAL_REQUIRED` - PARENT_APPROVAL_REQUIRED
          *     * `PARSE_ERROR` - PARSE_ERROR
+         *     * `PASSWORD_RESET_BY_PARENT` - PASSWORD_RESET_BY_PARENT
          *     * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
          *     * `PAYMENT_FAILED` - PAYMENT_FAILED
          *     * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
@@ -1244,6 +1766,7 @@ export interface components {
          *     * `PHONE_TAKEN` - PHONE_TAKEN
          *     * `QUIZ_COOLDOWN` - QUIZ_COOLDOWN
          *     * `REPORT_LOCKED` - REPORT_LOCKED
+         *     * `RESET_TOKEN_INVALID` - RESET_TOKEN_INVALID
          *     * `RESUME_CODE_INVALID` - RESUME_CODE_INVALID
          *     * `SERVER_ERROR` - SERVER_ERROR
          *     * `SIGNUP_EXPIRED` - SIGNUP_EXPIRED
@@ -1254,11 +1777,18 @@ export interface components {
          *     * `VALIDATION_ERROR` - VALIDATION_ERROR
          * @enum {string}
          */
-        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUIRED" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUIRED" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
         FieldError: {
             code: string;
             message: string;
         };
+        /**
+         * @description * `female` - Femme
+         *     * `male` - Homme
+         *     * `other` - Autre
+         * @enum {string}
+         */
+        GenderEnum: "female" | "male" | "other";
         Goal: {
             readonly id: number;
             code: string;
@@ -1284,22 +1814,119 @@ export interface components {
          * @enum {string}
          */
         KindEnum: "mcq" | "tf" | "free";
-        Lesson: {
-            readonly id: number;
-            readonly module: number;
-            readonly title: string;
-            readonly content: string;
-            readonly resourceType: components["schemas"]["ResourceTypeEnum"];
-            /** @default 0 */
-            readonly order: number;
-            readonly resources: components["schemas"]["Resource"][];
+        Kit: {
+            slug: string;
+            /** Nom */
+            name: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Prix (FCFA) */
+            price: number;
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** @description Visuel des cartes */
+            emoji?: string;
+            /** @description URL https ou chemins du stockage, la première sert de couverture */
+            images?: unknown;
+            /** @description En stock (le stock exact reste interne) */
+            readonly available: boolean;
         };
-        /** @description Plan du parcours, sans contenu : visible avant l'inscription. */
-        LessonSummary: {
-            readonly id: number;
-            readonly title: string;
-            readonly resourceType: components["schemas"]["ResourceTypeEnum"];
-            readonly order: number;
+        KitDetail: {
+            slug: string;
+            /** Nom */
+            name: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Prix (FCFA) */
+            price: number;
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** @description Visuel des cartes */
+            emoji?: string;
+            /** @description URL https ou chemins du stockage, la première sert de couverture */
+            images?: unknown;
+            /** @description En stock (le stock exact reste interne) */
+            readonly available: boolean;
+            description: string;
+            /** Contenu de la boîte */
+            contents?: unknown;
+            readonly compatibleCourses: {
+                [key: string]: unknown;
+            }[];
+        };
+        LeadRequest: {
+            /** Format: email */
+            email: string;
+            /**
+             * Origine
+             * @description guides, footer…
+             */
+            source?: string;
+            /** @description Attestation : j'ai 18 ans ou plus (C12) */
+            isAdult: boolean;
+            /** @description Consentement explicite, case non cochée par défaut (D14) */
+            newsletterConsent: boolean;
+            /** @description Champ piège : toujours vide */
+            website?: string;
+        };
+        LearnerConsentRequestRequest: {
+            parentPhone: string;
+            relationship: string;
+        };
+        LearnerPasswordRequest: {
+            password: string;
+        };
+        LearnerProfile: {
+            /**
+             * Date de naissance
+             * Format: date
+             */
+            readonly birthDate: string | null;
+            readonly locality: components["schemas"]["Locality"] | null;
+            /**
+             * Email de contact
+             * Format: email
+             */
+            readonly email: string | null;
+            readonly schoolGrade: components["schemas"]["SchoolGrade"] | null;
+            /** Genre */
+            readonly gender: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            readonly disability: components["schemas"]["Disability"] | null;
+            readonly goals: components["schemas"]["Goal"][];
+            readonly avatar: components["schemas"]["Avatar"] | null;
+            /** @description Étape de profil restante, null si le profil est complet */
+            readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
+        };
+        LearnerSignupCreated: {
+            /** @description Code de reprise, renvoyé **une seule fois** et jamais régénéré (C14) */
+            resumeCode: string;
+            signup: components["schemas"]["LearnerSignupState"];
+        };
+        LearnerSignupRequest: {
+            firstName: string;
+            lastName: string;
+            username: string;
+            /** @description Âge déclaré (W05), entre 10 et 17 ans (D23) */
+            age: number;
+            privacyAccepted: boolean;
+        };
+        /** @description État de l'inscription en cours : le serveur est la source de vérité de l'étape (W06-W10). */
+        LearnerSignupState: {
+            step: components["schemas"]["StepEnum"];
+            firstName: string;
+            username: string;
+            /** Format: date-time */
+            expiresAt: string;
+            consentRequest: components["schemas"]["ConsentRequestState"] | null;
+        };
+        LevelSummary: {
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (minutes) */
+            durationMin?: number;
+            /** Résumé de l'introduction */
+            introSummary?: string;
+            readonly missions: components["schemas"]["MissionSummary"][];
         };
         Locality: {
             readonly id: number;
@@ -1363,13 +1990,15 @@ export interface components {
          * @enum {string}
          */
         MeStatusEnum: "pending" | "active" | "suspended" | "deactivated" | "anonymized";
-        Module: {
-            readonly id: number;
-            readonly title: string;
-            /** @default 0 */
-            readonly order: number;
-            readonly lessons: components["schemas"]["LessonSummary"][];
-            readonly course: number;
+        MissionSummary: {
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (minutes) */
+            durationMin?: number;
+            /** Icône */
+            icon?: string;
         };
         Notification: {
             readonly id: number;
@@ -1410,6 +2039,26 @@ export interface components {
             readonly quantity: number;
             /** Format: decimal */
             readonly total: string;
+        };
+        /** @description Défi OTP en cours : sert au compte à rebours de WP02 / WL03. */
+        OtpChallenge: {
+            /** Format: uuid */
+            challengeId: string;
+            /** @description Destinataire du code (numéro ou email), masqué */
+            readonly destinationMasked: string;
+            /** @description Validité du code (s) */
+            readonly expiresInSec: number;
+            /** @description Délai avant un renvoi possible (s) */
+            readonly resendInSec: number;
+        };
+        OtpResendRequest: {
+            /** Format: uuid */
+            challengeId: string;
+        };
+        OtpVerifyRequest: {
+            /** Format: uuid */
+            challengeId: string;
+            code: string;
         };
         PaginatedAttemptList: {
             /** @example 123 */
@@ -1456,6 +2105,21 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Choice"][];
         };
+        PaginatedConsentRequestList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["ConsentRequest"][];
+        };
         PaginatedCourseListList: {
             /** @example 123 */
             count?: number;
@@ -1486,7 +2150,7 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Enrollment"][];
         };
-        PaginatedLessonList: {
+        PaginatedKitList: {
             /** @example 123 */
             count?: number;
             /**
@@ -1499,22 +2163,7 @@ export interface components {
              * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
-            results?: components["schemas"]["Lesson"][];
-        };
-        PaginatedModuleList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Module"][];
+            results?: components["schemas"]["Kit"][];
         };
         PaginatedNotificationList: {
             /** @example 123 */
@@ -1606,7 +2255,7 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Quiz"][];
         };
-        PaginatedResourceList: {
+        PaginatedSteamyEventList: {
             /** @example 123 */
             count?: number;
             /**
@@ -1619,18 +2268,96 @@ export interface components {
              * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
-            results?: components["schemas"]["Resource"][];
+            results?: components["schemas"]["SteamyEvent"][];
+        };
+        ParentProfile: {
+            readonly locality: components["schemas"]["Locality"] | null;
+            /**
+             * Email de contact
+             * Format: email
+             */
+            readonly email: string | null;
+            /** Genre */
+            readonly gender: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            readonly disability: components["schemas"]["Disability"] | null;
+            readonly profession: string;
+            /** Enfants à inscrire */
+            readonly childrenToEnroll: number | null;
+            readonly goalsForChildren: components["schemas"]["Goal"][];
+            /** @description Étape de profil restante, null si le profil est complet */
+            readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
+        };
+        ParentSignupRequest: {
+            firstName: string;
+            lastName: string;
+            /** @description Numéro du parent, saisi librement ; normalisé en E.164 */
+            phone: string;
+            privacyAccepted: boolean;
+        };
+        ParentSignupVerifyResponse: {
+            /** @description Numéro déjà inscrit : aller à la connexion (W16) au lieu de créer un compte */
+            existingAccount: boolean;
         };
         PasswordChangeRequest: {
             currentPassword: string;
             newPassword: string;
+        };
+        PasswordRequest: {
+            password: string;
+        };
+        PasswordResetConfirmRequest: {
+            resetToken: string;
+            password: string;
+        };
+        PasswordResetRequestRequest: {
+            /** @description Numéro du parent ou email de l'enseignant (C7) */
+            identifier: string;
+        };
+        PatchedLearnerProfileUpdateRequest: {
+            /**
+             * Date de naissance
+             * Format: date
+             */
+            birthDate?: string | null;
+            /** @description `id` de la localité */
+            locality?: number;
+            /**
+             * Email de contact
+             * Format: email
+             */
+            email?: string | null;
+            schoolGrade?: string;
+            gender?: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            disability?: string | null;
+            /** @description Au moins 2 objectifs (W13) */
+            goals?: string[];
+            avatar?: string;
+        };
+        PatchedMeUpdateRequest: {
+            firstName?: string;
+            lastName?: string;
+        };
+        PatchedParentProfileUpdateRequest: {
+            /** @description `id` de la localité */
+            locality?: number;
+            /**
+             * Email de contact
+             * Format: email
+             */
+            email?: string | null;
+            gender?: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            disability?: string | null;
+            profession?: string;
+            childrenToEnroll?: number;
+            /** @description Au moins un objectif (WP09) */
+            goalsForChildren?: string[];
         };
         PatchedPreferencesUpdateRequest: {
             categories?: components["schemas"]["CategoryPreferenceRequest"][];
         };
         PatchedProgressRequest: {
             enrollment?: number;
-            lesson?: number;
+            mission?: number;
             completed?: boolean;
             /** Format: decimal */
             score?: string | null;
@@ -1683,7 +2410,7 @@ export interface components {
         Progress: {
             readonly id: number;
             enrollment: number;
-            lesson: number;
+            mission: number;
             completed?: boolean;
             /** Format: decimal */
             score?: string | null;
@@ -1692,10 +2419,25 @@ export interface components {
         };
         ProgressRequest: {
             enrollment: number;
-            lesson: number;
+            mission: number;
             completed?: boolean;
             /** Format: decimal */
             score?: string | null;
+        };
+        ProjectSummary: {
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** Objectifs */
+            objectives?: unknown;
+            /** Prérequis */
+            prerequisites?: unknown;
+            /** Matériel */
+            materials?: unknown;
+            readonly levels: components["schemas"]["LevelSummary"][];
         };
         /**
          * @description * `kkiapay` - Kkiapay
@@ -1720,15 +2462,43 @@ export interface components {
             passScore?: string;
             readonly questions: components["schemas"]["Question"][];
         };
+        QuoteRequestRequest: {
+            /** Établissement */
+            schoolName: string;
+            /** Personne à contacter */
+            contactName: string;
+            /** Format: email */
+            email: string;
+            /**
+             * Téléphone (E.164)
+             * @description Numéro national (Bénin par défaut) ou E.164
+             */
+            phone: string;
+            /** Offre */
+            offer?: string;
+            message?: string;
+            /** @description Champ piège : toujours vide */
+            website?: string;
+        };
         ReadAll: {
             /** @description Nombre de notifications marquées comme lues */
             updated: number;
+        };
+        /** @description Réponse neutre, identique qu'il y ait eu enregistrement, doublon ou robot. */
+        Received: {
+            ok: boolean;
         };
         RefusalReason: {
             readonly id: number;
             code: string;
             /** Libellé */
             label: string;
+        };
+        RefuseRequest: {
+            /** @description Motif obligatoire (référentiel `refusal-reasons`) */
+            reason: string;
+            /** @default  */
+            note: string;
         };
         Relationship: {
             readonly id: number;
@@ -1738,25 +2508,18 @@ export interface components {
             /** Libellé côté parent */
             parentLabel?: string;
         };
-        Resource: {
-            readonly id: number;
-            readonly lesson: number;
-            readonly title: string;
-            /** Format: uri */
-            readonly file: string | null;
-            /** Format: uri */
-            readonly externalUrl: string | null;
-            /** Format: date-time */
-            readonly uploadedAt: string;
+        /** @description Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`. */
+        RequiredKit: {
+            slug: string;
+            name: string;
         };
-        /**
-         * @description * `video` - Vidéo
-         *     * `pdf` - PDF
-         *     * `html` - HTML
-         *     * `other` - Autre
-         * @enum {string}
-         */
-        ResourceTypeEnum: "video" | "pdf" | "html" | "other";
+        ResetToken: {
+            resetToken: string;
+        };
+        ResumeRequest: {
+            username: string;
+            resumeCode: string;
+        };
         /**
          * @description * `learner` - Apprenant
          *     * `parent` - Parent
@@ -1769,6 +2532,133 @@ export interface components {
             code: string;
             /** Libellé */
             label: string;
+        };
+        SteamyEvent: {
+            slug: string;
+            /** Titre */
+            title: string;
+            emoji?: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Début
+             * Format: date-time
+             */
+            startsAt: string;
+            /**
+             * Fin
+             * Format: date-time
+             */
+            endsAt: string;
+            /** En ligne */
+            online?: boolean;
+            /** Lieu */
+            place?: string;
+            /** Ville */
+            city?: string;
+            /**
+             * Public visé
+             * @description « 12 – 15 ans »
+             */
+            audience?: string;
+            /**
+             * Prix (FCFA)
+             * @description 0 = gratuit
+             */
+            price?: number;
+            readonly isFree: boolean;
+            /** Places */
+            capacity: number;
+            readonly seatsLeft: number;
+            /**
+             * Fin des candidatures
+             * Format: date-time
+             */
+            applicationDeadline: string;
+            /** @description Places restantes et date limite non dépassée */
+            readonly applicationsOpen: boolean;
+            readonly isPast: boolean;
+        };
+        SteamyEventDetail: {
+            slug: string;
+            /** Titre */
+            title: string;
+            emoji?: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Début
+             * Format: date-time
+             */
+            startsAt: string;
+            /**
+             * Fin
+             * Format: date-time
+             */
+            endsAt: string;
+            /** En ligne */
+            online?: boolean;
+            /** Lieu */
+            place?: string;
+            /** Ville */
+            city?: string;
+            /**
+             * Public visé
+             * @description « 12 – 15 ans »
+             */
+            audience?: string;
+            /**
+             * Prix (FCFA)
+             * @description 0 = gratuit
+             */
+            price?: number;
+            readonly isFree: boolean;
+            /** Places */
+            capacity: number;
+            readonly seatsLeft: number;
+            /**
+             * Fin des candidatures
+             * Format: date-time
+             */
+            applicationDeadline: string;
+            /** @description Places restantes et date limite non dépassée */
+            readonly applicationsOpen: boolean;
+            readonly isPast: boolean;
+            description: string;
+        };
+        /**
+         * @description * `parent` - W06 · Parent
+         *     * `waiting` - W07 · Attente
+         *     * `password` - W10 · Mot de passe
+         *     * `refused` - W18 · Refus
+         * @enum {string}
+         */
+        StepEnum: "parent" | "waiting" | "password" | "refused";
+        /**
+         * @description * `question` - Question
+         *     * `paiement` - Paiement
+         *     * `livraison` - Livraison
+         *     * `changement-parent` - Changement de parent
+         *     * `candidature` - Candidature
+         *     * `autre` - Autre
+         * @enum {string}
+         */
+        SubjectEnum: "question" | "paiement" | "livraison" | "changement-parent" | "candidature" | "autre";
+        TeacherActivationRequest: {
+            password: string;
+        };
+        /** @description En-tête de l'écran d'activation : école et email masqué. */
+        TeacherInvitation: {
+            readonly emailMasked: string;
+            firstName: string;
+            lastName: string;
+            schoolName?: string | null;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        TokenRequest: {
+            /** @description Jeton du lien SMS /consentement/<jeton> */
+            token: string;
         };
         /**
          * @description * `info` - Information
@@ -1802,6 +2692,9 @@ export interface components {
         UnreadCount: {
             count: number;
         };
+        UsernameAvailabilityResponse: {
+            available: boolean;
+        };
         WebhookAck: {
             ok: boolean;
         };
@@ -1817,6 +2710,437 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    accounts_consent_requests_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /** @description Filtre sur le statut */
+                status?: "accepted" | "cancelled" | "expired" | "pending" | "refused";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedConsentRequestList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearnerConsentRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequestState"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequest"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_accept_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_refuse_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefuseRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_resend_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequestState"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_claim_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_consent_requests_preview_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentPreview"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_me_retrieve: {
         parameters: {
             query?: never;
@@ -1832,6 +3156,61 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedMeUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             401: {
@@ -1879,6 +3258,116 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_learner_profile_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedLearnerProfileUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnerProfile"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_parent_profile_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedParentProfileUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParentProfile"];
+                };
             };
             400: {
                 headers: {
@@ -2134,6 +3623,174 @@ export interface operations {
             };
         };
     };
+    auth_learner_signup_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnerSignupState"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_learner_signup_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearnerSignupRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnerSignupCreated"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_learner_signup_password_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearnerPasswordRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_learner_signup_resume_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResumeRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnerSignupState"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     auth_login_create: {
         parameters: {
             query?: never;
@@ -2223,6 +3880,578 @@ export interface operations {
             };
         };
     };
+    auth_otp_resend_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpResendRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OtpChallenge"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_parent_signup_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParentSignupRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OtpChallenge"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_parent_signup_password_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_parent_signup_verify_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpVerifyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParentSignupVerifyResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_password_reset_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordResetRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OtpChallenge"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_password_reset_confirm_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordResetConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_password_reset_verify_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpVerifyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResetToken"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_teacher_invitations_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherInvitation"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_teacher_invitations_accept_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeacherActivationRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_username_availability_retrieve: {
+        parameters: {
+            query: {
+                username: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsernameAvailabilityResponse"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    catalog_categories_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    catalog_courses_list: {
+        parameters: {
+            query?: {
+                /** @description Slug de la catégorie */
+                category?: string;
+                /**
+                 * @description * `beginner` - Débutant
+                 *     * `intermediate` - Intermédiaire
+                 *     * `advanced` - Avancé
+                 */
+                difficulty?: "beginner" | "intermediate" | "advanced";
+                /** @description Parcours mis en avant (WL01) */
+                featured?: boolean | null;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /**
+                 * @description * `free` - Gratuit
+                 *     * `paid` - Payant
+                 */
+                price?: "free" | "paid";
+                /** @description Recherche dans le titre et la description */
+                q?: string;
+                /**
+                 * @description * `popular` - popular
+                 *     * `recent` - recent
+                 *     * `price-asc` - price-asc
+                 *     * `price-desc` - price-desc
+                 *     * `title` - title
+                 */
+                sort?: "popular" | "recent" | "price-asc" | "price-desc" | "title";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCourseListList"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    catalog_courses_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     core_presign_create: {
         parameters: {
             query?: never;
@@ -2278,17 +4507,15 @@ export interface operations {
             };
         };
     };
-    courses_courses_list: {
+    events_list: {
         parameters: {
             query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
                 /** @description A page number within the paginated result set. */
                 page?: number;
                 /** @description Number of results to return per page. */
                 pageSize?: number;
-                /** @description A search term. */
-                search?: string;
+                /** @description true : à venir ou en cours (du plus proche au plus lointain) ; false : passés (du plus récent au plus ancien) ; absent : tous */
+                upcoming?: boolean | null;
             };
             header?: never;
             path?: never;
@@ -2301,7 +4528,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedCourseListList"];
+                    "application/json": components["schemas"]["PaginatedSteamyEventList"];
                 };
             };
             429: {
@@ -2314,7 +4541,7 @@ export interface operations {
             };
         };
     };
-    courses_courses_retrieve: {
+    events_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -2330,354 +4557,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CourseDetail"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_courses_enroll_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CourseDetail"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_lessons_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedLessonList"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_lessons_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this Leçon. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Lesson"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_modules_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedModuleList"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_modules_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this Module. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Module"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_resources_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResourceList"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_resources_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this resource. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Resource"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["SteamyEventDetail"];
                 };
             };
             404: {
@@ -4279,6 +6159,147 @@ export interface operations {
             };
         };
     };
+    public_contact_messages_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactMessageRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Received"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_leads_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeadRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Received"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_quote_requests_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuoteRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Received"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     referentials_avatars_list: {
         parameters: {
             query?: never;
@@ -4516,6 +6537,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SchoolGrade"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_kits_list: {
+        parameters: {
+            query?: {
+                /** @description Slug de la catégorie */
+                category?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedKitList"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_kits_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KitDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             429: {

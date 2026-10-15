@@ -73,3 +73,69 @@ def test_the_fixed_totp_secret_never_reaches_staging(settings):
     call_command("seed_demo")
     assert User.objects.filter(is_staff=True).count() == 4
     assert not TOTPDevice.objects.exists()  # enrôlement à la première connexion (WAD15)
+
+
+def test_seed_demo_links_marie_to_lea_and_leaves_a_pending_teacher_invitation():
+    from django.core import mail
+
+    from apps.accounts.models import ParentChildLink
+    from apps.classrooms.models import TeacherInvitation
+    from apps.core.demo import INVITED_TEACHER_EMAIL, KOFFI_EMAIL, LEA_USERNAME, MARIE_PHONE
+
+    call_command("seed_demo")
+    link = ParentChildLink.objects.get(learner__username=LEA_USERNAME)
+    assert (link.parent.phone, link.relationship.code) == (MARIE_PHONE, "mere")
+    koffi = User.objects.get(email=KOFFI_EMAIL)
+    assert koffi.teacher_profile.school.name == "Collège Steamy de Cotonou"
+    invitation = TeacherInvitation.objects.get(email=INVITED_TEACHER_EMAIL)
+    assert invitation.accepted_at is None and invitation.token_hash
+    assert mail.outbox[-1].to == [INVITED_TEACHER_EMAIL]
+    # Activée lors d'un parcours, elle redevient en attente au seed suivant
+    User.objects.create_teacher(INVITED_TEACHER_EMAIL, DEMO_PASSWORD)
+    TeacherInvitation.objects.update(accepted_at=invitation.sent_at)
+    call_command("seed_demo")
+    invitation.refresh_from_db()
+    assert invitation.accepted_at is None
+    assert not User.objects.filter(email=INVITED_TEACHER_EMAIL).exists()
+
+
+def test_catalog_has_published_courses_a_featured_one_a_draft_and_an_empty_category():
+    from apps.catalog.models import Category, Course, Mission
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    published = Course.objects.filter(status=Course.Status.PUBLISHED)
+    assert published.count() == 4
+    assert published.filter(featured=True).count() == 1
+    assert published.filter(is_free=False).exists() and published.filter(is_free=True).exists()
+    assert Course.objects.filter(status=Course.Status.DRAFT).exists()
+    assert all(
+        course.projects.filter(levels__missions__isnull=False).exists() for course in published
+    )
+    assert Category.objects.filter(courses__isnull=True).exists()
+    for mission in Mission.objects.all():
+        mission.full_clean()  # blocs valides
+
+
+def test_events_cover_free_paid_full_and_past():
+    from apps.events.models import SteamyEvent
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    events = list(SteamyEvent.objects.filter(status=SteamyEvent.Status.PUBLISHED))
+    assert len(events) == 4
+    assert any(e.price == 0 and not e.is_past for e in events)
+    assert any(e.price > 0 and e.applications_open for e in events)
+    assert any(e.seats_left == 0 and not e.is_past for e in events)
+    assert any(e.is_past for e in events)
+
+
+def test_kits_include_one_out_of_stock_and_one_required_by_a_course():
+    from apps.catalog.models import Course
+    from apps.shop.models import Kit
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    assert Kit.objects.filter(active=True).count() == 3
+    assert Kit.objects.filter(stock_quantity=0).exists()
+    assert Course.objects.filter(required_kit__isnull=False, is_free=False).exists()

@@ -55,7 +55,11 @@ def test_frozen_models_are_not_in_the_admin():
     from django.apps import apps
 
     for label in FROZEN_MODELS:
-        assert not admin.site.is_registered(apps.get_model(label))
+        try:
+            model = apps.get_model(label)
+        except LookupError:  # app supprimée (courses, API-L1.1)
+            continue
+        assert not admin.site.is_registered(model)
 
 
 def test_unregister_frozen_ignores_deleted_or_unregistered_models():
@@ -121,9 +125,9 @@ def test_each_group_only_sees_its_models(client, group, visible, hidden):
     assert visible <= models and not (hidden & models)
 
 
-def test_content_sees_no_model_until_the_catalog_exists(client):
+def test_content_sees_the_catalog_and_the_events(client):
     verified_client(client, CONTENT)
-    assert models_on_index(client) == set()
+    assert {"catalog.course", "catalog.mission", "events.steamyevent"} <= models_on_index(client)
 
 
 def test_the_index_is_in_french_with_the_pilotage_link_and_the_environment_banner(client):

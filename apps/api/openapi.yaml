@@ -4,6 +4,389 @@ info:
   version: 1.0.0
   description: API pour la plateforme de formation
 paths:
+  /api/accounts/consent-requests/:
+    get:
+      operationId: accounts_consent_requests_list
+      description: 'WP04, WPD01 : demandes reçues, les plus récentes d''abord.'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - accepted
+          - cancelled
+          - expired
+          - pending
+          - refused
+        description: Filtre sur le statut
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedConsentRequestList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: accounts_consent_requests_create
+      description: 'W06 : l''enfant envoie la demande à son parent (SMS avec lien
+        à jeton). Réservé à l''inscription en cours.'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LearnerConsentRequestRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequestState'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/consent-requests/{id}/:
+    get:
+      operationId: accounts_consent_requests_retrieve
+      description: |-
+        Demandes adressées au numéro vérifié du parent connecté. `create` et `resend` servent l'enfant pendant son
+        inscription (session « inscription en cours », sans compte connecté) ; `preview`, le lien SMS avant connexion.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequest'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/consent-requests/{id}/accept/:
+    post:
+      operationId: accounts_consent_requests_accept_create
+      description: 'WP05 « Accepter » → WP06 : l''enfant est rattaché au parent et
+        peut choisir son mot de passe (W10).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/consent-requests/{id}/refuse/:
+    post:
+      operationId: accounts_consent_requests_refuse_create
+      description: 'WP11 → WP12 : motif obligatoire. Le compte en attente de l''enfant
+        est supprimé (D22).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuseRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/consent-requests/{id}/resend/:
+    post:
+      operationId: accounts_consent_requests_resend_create
+      description: 'W07 « Renvoyer le SMS » : nouveau lien (seul le dernier vaut),
+        60 s au moins entre deux envois.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequestState'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/consent-requests/claim/:
+    post:
+      operationId: accounts_consent_requests_claim_create
+      description: 'Lien SMS ouvert par le parent connecté : numéro concordant exigé
+        (`CONSENT_PHONE_MISMATCH`).'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/consent-requests/preview/:
+    post:
+      operationId: accounts_consent_requests_preview_create
+      description: 'WP01 depuis le lien SMS : numéro masqué pour guider le parent,
+        aucune donnée de l''enfant.'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentPreview'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/me/:
     get:
       operationId: accounts_me_retrieve
@@ -17,6 +400,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Me'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    patch:
+      operationId: accounts_me_partial_update
+      description: 'WD17, WPD08, WT08 : prénom et nom. Identifiants, rôle et statut
+        ne se modifient pas ici (C12, S1).'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMeUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
         '401':
           content:
@@ -56,6 +483,94 @@ paths:
       responses:
         '204':
           description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/learner-profile/:
+    patch:
+      operationId: accounts_me_learner_profile_partial_update
+      description: W11-W14 (une étape par appel) et WD17.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedLearnerProfileUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerProfile'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/parent-profile/:
+    patch:
+      operationId: accounts_me_parent_profile_partial_update
+      description: WP07-WP09 (une étape par appel) et WPD08.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedParentProfileUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentProfile'
+          description: ''
         '400':
           content:
             application/json:
@@ -264,6 +779,139 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/auth/learner-signup/:
+    get:
+      operationId: auth_learner_signup_retrieve
+      description: 'W06-W10, W18 : étape réelle de l''inscription en cours (garde
+        du layout du flux).'
+      tags:
+      - auth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerSignupState'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: auth_learner_signup_create
+      description: 'W05 « Continuer » : crée le compte en attente et renvoie le code
+        de reprise (une seule fois).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LearnerSignupRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerSignupCreated'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/learner-signup/password/:
+    post:
+      operationId: auth_learner_signup_password_create
+      description: 'W10 : après l''accord du parent, choisit le mot de passe ; le
+        compte devient actif et la session s''ouvre.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LearnerPasswordRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/learner-signup/resume/:
+    post:
+      operationId: auth_learner_signup_resume_create
+      description: 'W07 « Reprendre mon inscription » (C5) : identifiant + code de
+        reprise.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumeRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerSignupState'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/auth/login/:
     post:
       operationId: auth_login_create
@@ -331,6 +979,528 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/auth/otp/resend/:
+    post:
+      operationId: auth_otp_resend_create
+      description: Nouveau code pour un défi en cours (60 s après le précédent, plafonds
+        quotidiens D24).
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpResendRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/parent-signup/:
+    post:
+      operationId: auth_parent_signup_create
+      description: 'WP01 : envoie un code au numéro. Réponse identique que le numéro
+        soit inscrit ou non (C13).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParentSignupRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/parent-signup/password/:
+    post:
+      operationId: auth_parent_signup_password_create
+      description: 'WP03 : crée le compte parent avec le numéro vérifié, puis ouvre
+        la session.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/parent-signup/verify/:
+    post:
+      operationId: auth_parent_signup_verify_create
+      description: 'WP02 : vérifie le code. Le numéro est alors prouvé : on peut dire
+        s''il a déjà un compte (C13).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentSignupVerifyResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/password-reset/:
+    post:
+      operationId: auth_password_reset_create
+      description: 'WL02 : réponse identique que le compte existe ou non. Un identifiant
+        d''apprenant est refusé (D26).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/password-reset/confirm/:
+    post:
+      operationId: auth_password_reset_confirm_create
+      description: 'WL04 → WL05 : nouveau mot de passe (D25) ; les sessions ouvertes
+        ailleurs sont fermées.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+        required: true
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/password-reset/verify/:
+    post:
+      operationId: auth_password_reset_verify_create
+      description: 'WL03 : code valide → `resetToken` (15 min, usage unique).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetToken'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/teacher-invitations/{token}/:
+    get:
+      operationId: auth_teacher_invitations_retrieve
+      description: 'Lien `/activation/<jeton>` : invitation valable, sinon `INVITATION_INVALID`.'
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherInvitation'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/teacher-invitations/{token}/accept/:
+    post:
+      operationId: auth_teacher_invitations_accept_create
+      description: Crée le compte enseignant (email de l'invitation, rattaché à l'école)
+        et ouvre la session.
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeacherActivationRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/username-availability/:
+    get:
+      operationId: auth_username_availability_retrieve
+      description: 'W04, W19 : identifiant libre ? Throttlé : c''est une énumération
+        des identifiants.'
+      parameters:
+      - in: query
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsernameAvailabilityResponse'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/catalog/categories/:
+    get:
+      operationId: catalog_categories_list
+      description: Catégories avec le nombre de parcours publiés (WL06, WL16) ; liste
+        courte, non paginée.
+      tags:
+      - catalog
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/catalog/courses/:
+    get:
+      operationId: catalog_courses_list
+      description: Parcours publiés, filtrés et triés (WL01, WL06, WC01-WC03), paginés.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        description: Slug de la catégorie
+      - in: query
+        name: difficulty
+        schema:
+          enum:
+          - beginner
+          - intermediate
+          - advanced
+          type: string
+          minLength: 1
+        description: |-
+          * `beginner` - Débutant
+          * `intermediate` - Intermédiaire
+          * `advanced` - Avancé
+      - in: query
+        name: featured
+        schema:
+          type: boolean
+          nullable: true
+        description: Parcours mis en avant (WL01)
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: price
+        schema:
+          enum:
+          - free
+          - paid
+          type: string
+          minLength: 1
+        description: |-
+          * `free` - Gratuit
+          * `paid` - Payant
+      - in: query
+        name: q
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description: Recherche dans le titre et la description
+      - in: query
+        name: sort
+        schema:
+          enum:
+          - popular
+          - recent
+          - price-asc
+          - price-desc
+          - title
+          type: string
+          default: popular
+          minLength: 1
+        description: |-
+          * `popular` - popular
+          * `recent` - recent
+          * `price-asc` - price-asc
+          * `price-desc` - price-desc
+          * `title` - title
+      tags:
+      - catalog
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCourseListList'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/catalog/courses/{slug}/:
+    get:
+      operationId: catalog_courses_retrieve
+      description: 'Fiche publique (WL22, WC04) : plan du parcours sans contenu de
+        mission (D11).'
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - catalog
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/core/presign/:
     post:
       operationId: core_presign_create
@@ -378,16 +1548,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/courses/courses/:
+  /api/events/:
     get:
-      operationId: courses_courses_list
+      operationId: events_list
+      description: Événements publiés (WL21, WD10, WPD06, WT09), paginés.
       parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
       - name: page
         required: false
         in: query
@@ -400,23 +1565,23 @@ paths:
         description: Number of results to return per page.
         schema:
           type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
+      - in: query
+        name: upcoming
         schema:
-          type: string
+          type: boolean
+          nullable: true
+        description: 'true : à venir ou en cours (du plus proche au plus lointain)
+          ; false : passés (du plus récent au plus ancien) ; absent : tous'
       tags:
-      - courses
+      - events
       security:
-      - cookieAuth: []
       - {}
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedCourseListList'
+                $ref: '#/components/schemas/PaginatedSteamyEventList'
           description: ''
         '429':
           content:
@@ -424,9 +1589,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/courses/courses/{slug}/:
+  /api/events/{slug}/:
     get:
-      operationId: courses_courses_retrieve
+      operationId: events_retrieve
+      description: Fiche événement (WL23) ; un brouillon répond 404.
       parameters:
       - in: path
         name: slug
@@ -434,354 +1600,15 @@ paths:
           type: string
         required: true
       tags:
-      - courses
+      - events
       security:
-      - cookieAuth: []
       - {}
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CourseDetail'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/courses/{slug}/enroll/:
-    post:
-      operationId: courses_courses_enroll_create
-      description: |-
-        Inscrit l'utilisateur courant à un parcours GRATUIT.
-        Un parcours payant s'obtient par l'achat (S7) : 402 PAYMENT_REQUIRED.
-        Retourne 201 si l'inscription est créée, 200 si elle existait déjà.
-      parameters:
-      - in: path
-        name: slug
-        schema:
-          type: string
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CourseDetail'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/lessons/:
-    get:
-      operationId: courses_lessons_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedLessonList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/lessons/{id}/:
-    get:
-      operationId: courses_lessons_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this Leçon.
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Lesson'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/modules/:
-    get:
-      operationId: courses_modules_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedModuleList'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/modules/{id}/:
-    get:
-      operationId: courses_modules_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this Module.
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Module'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/resources/:
-    get:
-      operationId: courses_resources_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedResourceList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/resources/{id}/:
-    get:
-      operationId: courses_resources_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this resource.
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Resource'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/SteamyEventDetail'
           description: ''
         '404':
           content:
@@ -2314,6 +3141,118 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/public/contact-messages/:
+    post:
+      operationId: public_contact_messages_create
+      description: Formulaire de contact (WL24, D17).
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Received'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/public/leads/:
+    post:
+      operationId: public_leads_create
+      description: 'Inscription à la newsletter (WL20, D14), réservée aux adultes
+        (C12). Un email déjà inscrit : même réponse.'
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Received'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/public/quote-requests/:
+    post:
+      operationId: public_quote_requests_create
+      description: Demande de devis d'un établissement (WL11, D13).
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteRequestRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Received'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/referentials/avatars/:
     get:
       operationId: referentials_avatars_list
@@ -2525,6 +3464,80 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/shop/kits/:
+    get:
+      operationId: shop_kits_list
+      description: Kits en vente, paginés.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        description: Slug de la catégorie
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - shop
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedKitList'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/shop/kits/{slug}/:
+    get:
+      operationId: shop_kits_retrieve
+      description: Fiche kit (WK02) ; un kit retiré de la vente répond 404.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KitDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
 components:
   schemas:
     AreaTypeEnum:
@@ -2643,6 +3656,37 @@ components:
       - emoji
       - id
       - label
+    Category:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 60
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 80
+        color:
+          type: string
+          title: Couleur
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        icon:
+          type: string
+          title: Icône
+          description: Emoji affiché sur les cartes
+          maxLength: 16
+        courseCount:
+          type: integer
+          readOnly: true
+          description: Parcours publiés
+      required:
+      - color
+      - courseCount
+      - icon
+      - label
+      - slug
     CategoryEnum:
       enum:
       - learning
@@ -2694,6 +3738,32 @@ components:
       required:
       - category
       - email
+    CategorySummary:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 60
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 80
+        color:
+          type: string
+          title: Couleur
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        icon:
+          type: string
+          title: Icône
+          description: Emoji affiché sur les cartes
+          maxLength: 16
+      required:
+      - color
+      - icon
+      - label
+      - slug
     Certificate:
       type: object
       properties:
@@ -2735,6 +3805,168 @@ components:
       - id
       - question
       - text
+    ConsentPreview:
+      type: object
+      description: 'Ce que montre le lien SMS avant toute connexion : le numéro masqué,
+        rien de l''enfant.'
+      properties:
+        parentPhoneMasked:
+          type: string
+      required:
+      - parentPhoneMasked
+    ConsentRequest:
+      type: object
+      description: 'Demande vue par le parent (WP04, WP05) : seulement ce qui existe
+        à ce stade (D20).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        origin:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+          title: Origine
+        status:
+          type: string
+          readOnly: true
+        firstName:
+          type: string
+          readOnly: true
+        lastName:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          nullable: true
+          readOnly: true
+        age:
+          type: integer
+          nullable: true
+          readOnly: true
+        relationship:
+          allOf:
+          - $ref: '#/components/schemas/Relationship'
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        expiresAt:
+          type: string
+          format: date-time
+          readOnly: true
+        resolvedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        refusalReason:
+          allOf:
+          - $ref: '#/components/schemas/RefusalReason'
+          readOnly: true
+          nullable: true
+        refusalNote:
+          type: string
+          readOnly: true
+          title: Précisions du refus
+      required:
+      - age
+      - createdAt
+      - expiresAt
+      - firstName
+      - id
+      - lastName
+      - origin
+      - refusalNote
+      - refusalReason
+      - relationship
+      - resolvedAt
+      - status
+      - username
+    ConsentRequestState:
+      type: object
+      description: 'Demande vue par l''enfant (W07, W08, W18) : jamais le numéro du
+        parent en clair.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ConsentRequestStateStatusEnum'
+          readOnly: true
+          title: Statut
+        parentPhoneMasked:
+          type: string
+          readOnly: true
+        relationship:
+          type: string
+          readOnly: true
+        expiresAt:
+          type: string
+          format: date-time
+          readOnly: true
+        resendInSec:
+          type: integer
+          readOnly: true
+        refusalReason:
+          allOf:
+          - $ref: '#/components/schemas/RefusalReason'
+          readOnly: true
+          nullable: true
+      required:
+      - expiresAt
+      - id
+      - parentPhoneMasked
+      - refusalReason
+      - relationship
+      - resendInSec
+      - status
+    ConsentRequestStateStatusEnum:
+      enum:
+      - pending
+      - accepted
+      - refused
+      - expired
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - En attente
+        * `accepted` - Acceptée
+        * `refused` - Refusée
+        * `expired` - Expirée
+        * `cancelled` - Annulée
+    ContactMessageRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nom
+          maxLength: 120
+        contact:
+          type: string
+          writeOnly: true
+          minLength: 1
+          description: Email ou numéro de téléphone
+          maxLength: 254
+        subject:
+          allOf:
+          - $ref: '#/components/schemas/SubjectEnum'
+          title: Sujet
+        message:
+          type: string
+          minLength: 1
+        website:
+          type: string
+          writeOnly: true
+          description: 'Champ piège : toujours vide'
+      required:
+      - contact
+      - message
+      - name
+      - subject
     Country:
       type: object
       properties:
@@ -2777,86 +4009,145 @@ components:
     CourseDetail:
       type: object
       properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
         slug:
           type: string
-          readOnly: true
+          maxLength: 120
           pattern: ^[-a-zA-Z0-9_]+$
-        description:
+        title:
           type: string
+          title: Titre
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
           readOnly: true
-        path:
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        isFree:
+          type: boolean
+          title: Gratuit
+        price:
           type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        requiredKit:
+          allOf:
+          - $ref: '#/components/schemas/RequiredKit'
           readOnly: true
           nullable: true
-        price:
+        coverImage:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
           readOnly: true
-        createdAt:
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        featured:
+          type: boolean
+          title: Mis en avant
+        description:
           type: string
-          format: date-time
-          readOnly: true
-        updatedAt:
+        outcomes:
+          title: Ce que tu vas apprendre
+        audience:
           type: string
-          format: date-time
+          title: Public
+          maxLength: 200
+        prerequisites:
+          title: Prérequis
+        trailerVimeoId:
+          type: string
+          title: 'Bande-annonce : identifiant Vimeo'
+          pattern: ^\d+$
+          maxLength: 20
+        trailerVimeoHash:
+          type: string
+          title: 'Bande-annonce : hachage Vimeo'
+          pattern: ^[0-9A-Za-z]+$
+          maxLength: 40
+        certificateEnabled:
+          type: boolean
+          title: Certificat
+        missionCount:
+          type: integer
           readOnly: true
-        modules:
+        projects:
           type: array
           items:
-            $ref: '#/components/schemas/Module'
+            $ref: '#/components/schemas/ProjectSummary'
           readOnly: true
       required:
-      - createdAt
+      - category
+      - coverImage
       - description
-      - id
-      - modules
-      - path
-      - price
+      - difficulty
+      - missionCount
+      - projects
+      - requiredKit
       - slug
       - title
-      - updatedAt
     CourseList:
       type: object
       properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
         slug:
           type: string
-          readOnly: true
+          maxLength: 120
           pattern: ^[-a-zA-Z0-9_]+$
-        description:
+        title:
           type: string
+          title: Titre
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
           readOnly: true
-        path:
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        isFree:
+          type: boolean
+          title: Gratuit
+        price:
           type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        requiredKit:
+          allOf:
+          - $ref: '#/components/schemas/RequiredKit'
           readOnly: true
           nullable: true
-        price:
+        coverImage:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
           readOnly: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        featured:
+          type: boolean
+          title: Mis en avant
       required:
-      - createdAt
-      - description
-      - id
-      - path
-      - price
+      - category
+      - coverImage
+      - difficulty
+      - requiredKit
       - slug
       - title
     CsrfToken:
@@ -2880,6 +4171,16 @@ components:
       - eventsLast7Days
       - revenueLast30Days
       - totalUsers
+    DifficultyEnum:
+      enum:
+      - beginner
+      - intermediate
+      - advanced
+      type: string
+      description: |-
+        * `beginner` - Débutant
+        * `intermediate` - Intermédiaire
+        * `advanced` - Avancé
     Disability:
       type: object
       properties:
@@ -3028,6 +4329,7 @@ components:
       - OUT_OF_STOCK
       - PARENT_APPROVAL_REQUIRED
       - PARSE_ERROR
+      - PASSWORD_RESET_BY_PARENT
       - PASSWORD_TOO_WEAK
       - PAYMENT_FAILED
       - PAYMENT_REQUIRED
@@ -3036,6 +4338,7 @@ components:
       - PHONE_TAKEN
       - QUIZ_COOLDOWN
       - REPORT_LOCKED
+      - RESET_TOKEN_INVALID
       - RESUME_CODE_INVALID
       - SERVER_ERROR
       - SIGNUP_EXPIRED
@@ -3094,6 +4397,7 @@ components:
         * `OUT_OF_STOCK` - OUT_OF_STOCK
         * `PARENT_APPROVAL_REQUIRED` - PARENT_APPROVAL_REQUIRED
         * `PARSE_ERROR` - PARSE_ERROR
+        * `PASSWORD_RESET_BY_PARENT` - PASSWORD_RESET_BY_PARENT
         * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
         * `PAYMENT_FAILED` - PAYMENT_FAILED
         * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
@@ -3102,6 +4406,7 @@ components:
         * `PHONE_TAKEN` - PHONE_TAKEN
         * `QUIZ_COOLDOWN` - QUIZ_COOLDOWN
         * `REPORT_LOCKED` - REPORT_LOCKED
+        * `RESET_TOKEN_INVALID` - RESET_TOKEN_INVALID
         * `RESUME_CODE_INVALID` - RESUME_CODE_INVALID
         * `SERVER_ERROR` - SERVER_ERROR
         * `SIGNUP_EXPIRED` - SIGNUP_EXPIRED
@@ -3120,6 +4425,16 @@ components:
       required:
       - code
       - message
+    GenderEnum:
+      enum:
+      - female
+      - male
+      - other
+      type: string
+      description: |-
+        * `female` - Femme
+        * `male` - Homme
+        * `other` - Autre
     Goal:
       type: object
       properties:
@@ -3172,63 +4487,305 @@ components:
         * `mcq` - QCM
         * `tf` - Vrai/Faux
         * `free` - Libre
-    Lesson:
+    Kit:
       type: object
       properties:
-        id:
-          type: integer
-          readOnly: true
-        module:
-          type: integer
-          readOnly: true
-        title:
+        slug:
           type: string
-          readOnly: true
-        content:
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
           type: string
-          readOnly: true
-        resourceType:
+          title: Nom
+          maxLength: 160
+        category:
           allOf:
-          - $ref: '#/components/schemas/ResourceTypeEnum'
+          - $ref: '#/components/schemas/CategorySummary'
           readOnly: true
-        order:
+        price:
           type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        images:
+          description: URL https ou chemins du stockage, la première sert de couverture
+        available:
+          type: boolean
           readOnly: true
-          default: 0
-        resources:
+          description: En stock (le stock exact reste interne)
+      required:
+      - available
+      - category
+      - difficulty
+      - name
+      - price
+      - slug
+    KitDetail:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          title: Nom
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        images:
+          description: URL https ou chemins du stockage, la première sert de couverture
+        available:
+          type: boolean
+          readOnly: true
+          description: En stock (le stock exact reste interne)
+        description:
+          type: string
+        contents:
+          title: Contenu de la boîte
+        compatibleCourses:
           type: array
           items:
-            $ref: '#/components/schemas/Resource'
+            type: object
+            additionalProperties: {}
           readOnly: true
       required:
-      - content
-      - id
-      - module
-      - order
-      - resourceType
-      - resources
-      - title
-    LessonSummary:
+      - available
+      - category
+      - compatibleCourses
+      - description
+      - difficulty
+      - name
+      - price
+      - slug
+    LeadRequest:
       type: object
-      description: 'Plan du parcours, sans contenu : visible avant l''inscription.'
       properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
+        email:
           type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        source:
+          type: string
+          title: Origine
+          description: guides, footer…
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        isAdult:
+          type: boolean
+          writeOnly: true
+          description: 'Attestation : j''ai 18 ans ou plus (C12)'
+        newsletterConsent:
+          type: boolean
+          writeOnly: true
+          description: Consentement explicite, case non cochée par défaut (D14)
+        website:
+          type: string
+          writeOnly: true
+          description: 'Champ piège : toujours vide'
+      required:
+      - email
+      - isAdult
+      - newsletterConsent
+    LearnerConsentRequestRequest:
+      type: object
+      properties:
+        parentPhone:
+          type: string
+          minLength: 1
+          maxLength: 32
+        relationship:
+          type: string
+          minLength: 1
+      required:
+      - parentPhone
+      - relationship
+    LearnerPasswordRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+    LearnerProfile:
+      type: object
+      properties:
+        birthDate:
+          type: string
+          format: date
           readOnly: true
-        resourceType:
+          nullable: true
+          title: Date de naissance
+        locality:
           allOf:
-          - $ref: '#/components/schemas/ResourceTypeEnum'
+          - $ref: '#/components/schemas/Locality'
           readOnly: true
+          nullable: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+          title: Email de contact
+        schoolGrade:
+          allOf:
+          - $ref: '#/components/schemas/SchoolGrade'
+          readOnly: true
+          nullable: true
+        gender:
+          readOnly: true
+          nullable: true
+          title: Genre
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        disability:
+          allOf:
+          - $ref: '#/components/schemas/Disability'
+          readOnly: true
+          nullable: true
+        goals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Goal'
+          readOnly: true
+        avatar:
+          allOf:
+          - $ref: '#/components/schemas/Avatar'
+          readOnly: true
+          nullable: true
+        profileStep:
+          description: Étape de profil restante, null si le profil est complet
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ProfileStepEnum'
+          - $ref: '#/components/schemas/NullEnum'
+      required:
+      - avatar
+      - birthDate
+      - disability
+      - email
+      - gender
+      - goals
+      - locality
+      - profileStep
+      - schoolGrade
+    LearnerSignupCreated:
+      type: object
+      properties:
+        resumeCode:
+          type: string
+          description: Code de reprise, renvoyé **une seule fois** et jamais régénéré
+            (C14)
+        signup:
+          $ref: '#/components/schemas/LearnerSignupState'
+      required:
+      - resumeCode
+      - signup
+    LearnerSignupRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        age:
+          type: integer
+          description: Âge déclaré (W05), entre 10 et 17 ans (D23)
+        privacyAccepted:
+          type: boolean
+      required:
+      - age
+      - firstName
+      - lastName
+      - privacyAccepted
+      - username
+    LearnerSignupState:
+      type: object
+      description: 'État de l''inscription en cours : le serveur est la source de
+        vérité de l''étape (W06-W10).'
+      properties:
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        firstName:
+          type: string
+        username:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        consentRequest:
+          allOf:
+          - $ref: '#/components/schemas/ConsentRequestState'
+          nullable: true
+      required:
+      - consentRequest
+      - expiresAt
+      - firstName
+      - step
+      - username
+    LevelSummary:
+      type: object
+      properties:
         order:
           type: integer
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationMin:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (minutes)
+        introSummary:
+          type: string
+          title: Résumé de l'introduction
+        missions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissionSummary'
           readOnly: true
       required:
-      - id
-      - order
-      - resourceType
+      - missions
       - title
     Locality:
       type: object
@@ -3392,32 +4949,28 @@ components:
         * `suspended` - Suspendu
         * `deactivated` - Désactivé
         * `anonymized` - Anonymisé
-    Module:
+    MissionSummary:
       type: object
       properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
         order:
           type: integer
-          readOnly: true
-          default: 0
-        lessons:
-          type: array
-          items:
-            $ref: '#/components/schemas/LessonSummary'
-          readOnly: true
-        course:
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationMin:
           type: integer
-          readOnly: true
+          maximum: 32767
+          minimum: 0
+          title: Durée (minutes)
+        icon:
+          type: string
+          title: Icône
+          maxLength: 16
       required:
-      - course
-      - id
-      - lessons
-      - order
       - title
     Notification:
       type: object
@@ -3551,6 +5104,51 @@ components:
       - title
       - total
       - unitPrice
+    OtpChallenge:
+      type: object
+      description: 'Défi OTP en cours : sert au compte à rebours de WP02 / WL03.'
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+        destinationMasked:
+          type: string
+          readOnly: true
+          description: Destinataire du code (numéro ou email), masqué
+        expiresInSec:
+          type: integer
+          readOnly: true
+          description: Validité du code (s)
+        resendInSec:
+          type: integer
+          readOnly: true
+          description: Délai avant un renvoi possible (s)
+      required:
+      - challengeId
+      - destinationMasked
+      - expiresInSec
+      - resendInSec
+    OtpResendRequest:
+      type: object
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+      required:
+      - challengeId
+    OtpVerifyRequest:
+      type: object
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          minLength: 1
+          maxLength: 12
+      required:
+      - challengeId
+      - code
     PaginatedAttemptList:
       type: object
       properties:
@@ -3611,6 +5209,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Choice'
+    PaginatedConsentRequestList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsentRequest'
     PaginatedCourseListList:
       type: object
       properties:
@@ -3651,7 +5269,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Enrollment'
-    PaginatedLessonList:
+    PaginatedKitList:
       type: object
       properties:
         count:
@@ -3670,27 +5288,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Lesson'
-    PaginatedModuleList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Module'
+            $ref: '#/components/schemas/Kit'
     PaginatedNotificationList:
       type: object
       properties:
@@ -3811,7 +5409,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Quiz'
-    PaginatedResourceList:
+    PaginatedSteamyEventList:
       type: object
       properties:
         count:
@@ -3830,7 +5428,94 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Resource'
+            $ref: '#/components/schemas/SteamyEvent'
+    ParentProfile:
+      type: object
+      properties:
+        locality:
+          allOf:
+          - $ref: '#/components/schemas/Locality'
+          readOnly: true
+          nullable: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+          title: Email de contact
+        gender:
+          readOnly: true
+          nullable: true
+          title: Genre
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        disability:
+          allOf:
+          - $ref: '#/components/schemas/Disability'
+          readOnly: true
+          nullable: true
+        profession:
+          type: string
+          readOnly: true
+        childrenToEnroll:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Enfants à inscrire
+        goalsForChildren:
+          type: array
+          items:
+            $ref: '#/components/schemas/Goal'
+          readOnly: true
+        profileStep:
+          description: Étape de profil restante, null si le profil est complet
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ProfileStepEnum'
+          - $ref: '#/components/schemas/NullEnum'
+      required:
+      - childrenToEnroll
+      - disability
+      - email
+      - gender
+      - goalsForChildren
+      - locality
+      - profession
+      - profileStep
+    ParentSignupRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        phone:
+          type: string
+          minLength: 1
+          description: Numéro du parent, saisi librement ; normalisé en E.164
+          maxLength: 32
+        privacyAccepted:
+          type: boolean
+      required:
+      - firstName
+      - lastName
+      - phone
+      - privacyAccepted
+    ParentSignupVerifyResponse:
+      type: object
+      properties:
+        existingAccount:
+          type: boolean
+          description: 'Numéro déjà inscrit : aller à la connexion (W16) au lieu de
+            créer un compte'
+      required:
+      - existingAccount
     PasswordChangeRequest:
       type: object
       properties:
@@ -3843,6 +5528,122 @@ components:
       required:
       - currentPassword
       - newPassword
+    PasswordRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+    PasswordResetConfirmRequest:
+      type: object
+      properties:
+        resetToken:
+          type: string
+          minLength: 1
+          maxLength: 128
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+      - resetToken
+    PasswordResetRequestRequest:
+      type: object
+      properties:
+        identifier:
+          type: string
+          minLength: 1
+          description: Numéro du parent ou email de l'enseignant (C7)
+          maxLength: 255
+      required:
+      - identifier
+    PatchedLearnerProfileUpdateRequest:
+      type: object
+      properties:
+        birthDate:
+          type: string
+          format: date
+          nullable: true
+          title: Date de naissance
+        locality:
+          type: integer
+          description: '`id` de la localité'
+        email:
+          type: string
+          format: email
+          nullable: true
+          title: Email de contact
+          maxLength: 254
+        schoolGrade:
+          type: string
+          minLength: 1
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        disability:
+          type: string
+          minLength: 1
+          nullable: true
+        goals:
+          type: array
+          items:
+            type: string
+            minLength: 1
+          description: Au moins 2 objectifs (W13)
+        avatar:
+          type: string
+          minLength: 1
+    PatchedMeUpdateRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+    PatchedParentProfileUpdateRequest:
+      type: object
+      properties:
+        locality:
+          type: integer
+          description: '`id` de la localité'
+        email:
+          type: string
+          format: email
+          nullable: true
+          title: Email de contact
+          maxLength: 254
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        disability:
+          type: string
+          minLength: 1
+          nullable: true
+        profession:
+          type: string
+          maxLength: 120
+        childrenToEnroll:
+          type: integer
+          maximum: 10
+          minimum: 1
+        goalsForChildren:
+          type: array
+          items:
+            type: string
+            minLength: 1
+          description: Au moins un objectif (WP09)
     PatchedPreferencesUpdateRequest:
       type: object
       properties:
@@ -3855,7 +5656,7 @@ components:
       properties:
         enrollment:
           type: integer
-        lesson:
+        mission:
           type: integer
         completed:
           type: boolean
@@ -3995,7 +5796,7 @@ components:
           readOnly: true
         enrollment:
           type: integer
-        lesson:
+        mission:
           type: integer
         completed:
           type: boolean
@@ -4011,14 +5812,14 @@ components:
       required:
       - enrollment
       - id
-      - lesson
+      - mission
       - updatedAt
     ProgressRequest:
       type: object
       properties:
         enrollment:
           type: integer
-        lesson:
+        mission:
           type: integer
         completed:
           type: boolean
@@ -4029,7 +5830,38 @@ components:
           nullable: true
       required:
       - enrollment
-      - lesson
+      - mission
+    ProjectSummary:
+      type: object
+      properties:
+        order:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        objectives:
+          title: Objectifs
+        prerequisites:
+          title: Prérequis
+        materials:
+          title: Matériel
+        levels:
+          type: array
+          items:
+            $ref: '#/components/schemas/LevelSummary'
+          readOnly: true
+      required:
+      - levels
+      - title
     ProviderEnum:
       enum:
       - kkiapay
@@ -4089,6 +5921,46 @@ components:
       - id
       - questions
       - title
+    QuoteRequestRequest:
+      type: object
+      properties:
+        schoolName:
+          type: string
+          minLength: 1
+          title: Établissement
+          maxLength: 160
+        contactName:
+          type: string
+          minLength: 1
+          title: Personne à contacter
+          maxLength: 120
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        phone:
+          type: string
+          minLength: 1
+          title: Téléphone (E.164)
+          description: Numéro national (Bénin par défaut) ou E.164
+          maxLength: 16
+        offer:
+          type: string
+          title: Offre
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        message:
+          type: string
+        website:
+          type: string
+          writeOnly: true
+          description: 'Champ piège : toujours vide'
+      required:
+      - contactName
+      - email
+      - phone
+      - schoolName
     ReadAll:
       type: object
       properties:
@@ -4097,6 +5969,15 @@ components:
           description: Nombre de notifications marquées comme lues
       required:
       - updated
+    Received:
+      type: object
+      description: Réponse neutre, identique qu'il y ait eu enregistrement, doublon
+        ou robot.
+      properties:
+        ok:
+          type: boolean
+      required:
+      - ok
     RefusalReason:
       type: object
       properties:
@@ -4115,6 +5996,19 @@ components:
       - code
       - id
       - label
+    RefuseRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          description: Motif obligatoire (référentiel `refusal-reasons`)
+        note:
+          type: string
+          default: ''
+          maxLength: 1000
+      required:
+      - reason
     Relationship:
       type: object
       properties:
@@ -4137,51 +6031,39 @@ components:
       - code
       - id
       - label
-    Resource:
+    RequiredKit:
+      type: object
+      description: 'Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`.'
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+      required:
+      - name
+      - slug
+    ResetToken:
       type: object
       properties:
-        id:
-          type: integer
-          readOnly: true
-        lesson:
-          type: integer
-          readOnly: true
-        title:
+        resetToken:
           type: string
-          readOnly: true
-        file:
-          type: string
-          format: uri
-          readOnly: true
-          nullable: true
-        externalUrl:
-          type: string
-          format: uri
-          readOnly: true
-          nullable: true
-        uploadedAt:
-          type: string
-          format: date-time
-          readOnly: true
       required:
-      - externalUrl
-      - file
-      - id
-      - lesson
-      - title
-      - uploadedAt
-    ResourceTypeEnum:
-      enum:
-      - video
-      - pdf
-      - html
-      - other
-      type: string
-      description: |-
-        * `video` - Vidéo
-        * `pdf` - PDF
-        * `html` - HTML
-        * `other` - Autre
+      - resetToken
+    ResumeRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        resumeCode:
+          type: string
+          minLength: 1
+          maxLength: 16
+      required:
+      - resumeCode
+      - username
     RoleEnum:
       enum:
       - learner
@@ -4210,6 +6092,244 @@ components:
       - code
       - id
       - label
+    SteamyEvent:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        emoji:
+          type: string
+          maxLength: 16
+        color:
+          type: string
+          title: Couleur
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        startsAt:
+          type: string
+          format: date-time
+          title: Début
+        endsAt:
+          type: string
+          format: date-time
+          title: Fin
+        online:
+          type: boolean
+          title: En ligne
+        place:
+          type: string
+          title: Lieu
+          maxLength: 160
+        city:
+          type: string
+          title: Ville
+          maxLength: 80
+        audience:
+          type: string
+          title: Public visé
+          description: « 12 – 15 ans »
+          maxLength: 80
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+          description: 0 = gratuit
+        isFree:
+          type: boolean
+          readOnly: true
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Places
+        seatsLeft:
+          type: integer
+          readOnly: true
+        applicationDeadline:
+          type: string
+          format: date-time
+          title: Fin des candidatures
+        applicationsOpen:
+          type: boolean
+          readOnly: true
+          description: Places restantes et date limite non dépassée
+        isPast:
+          type: boolean
+          readOnly: true
+      required:
+      - applicationDeadline
+      - applicationsOpen
+      - capacity
+      - color
+      - endsAt
+      - isFree
+      - isPast
+      - seatsLeft
+      - slug
+      - startsAt
+      - title
+    SteamyEventDetail:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        emoji:
+          type: string
+          maxLength: 16
+        color:
+          type: string
+          title: Couleur
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        startsAt:
+          type: string
+          format: date-time
+          title: Début
+        endsAt:
+          type: string
+          format: date-time
+          title: Fin
+        online:
+          type: boolean
+          title: En ligne
+        place:
+          type: string
+          title: Lieu
+          maxLength: 160
+        city:
+          type: string
+          title: Ville
+          maxLength: 80
+        audience:
+          type: string
+          title: Public visé
+          description: « 12 – 15 ans »
+          maxLength: 80
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+          description: 0 = gratuit
+        isFree:
+          type: boolean
+          readOnly: true
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Places
+        seatsLeft:
+          type: integer
+          readOnly: true
+        applicationDeadline:
+          type: string
+          format: date-time
+          title: Fin des candidatures
+        applicationsOpen:
+          type: boolean
+          readOnly: true
+          description: Places restantes et date limite non dépassée
+        isPast:
+          type: boolean
+          readOnly: true
+        description:
+          type: string
+      required:
+      - applicationDeadline
+      - applicationsOpen
+      - capacity
+      - color
+      - description
+      - endsAt
+      - isFree
+      - isPast
+      - seatsLeft
+      - slug
+      - startsAt
+      - title
+    StepEnum:
+      enum:
+      - parent
+      - waiting
+      - password
+      - refused
+      type: string
+      description: |-
+        * `parent` - W06 · Parent
+        * `waiting` - W07 · Attente
+        * `password` - W10 · Mot de passe
+        * `refused` - W18 · Refus
+    SubjectEnum:
+      enum:
+      - question
+      - paiement
+      - livraison
+      - changement-parent
+      - candidature
+      - autre
+      type: string
+      description: |-
+        * `question` - Question
+        * `paiement` - Paiement
+        * `livraison` - Livraison
+        * `changement-parent` - Changement de parent
+        * `candidature` - Candidature
+        * `autre` - Autre
+    TeacherActivationRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+    TeacherInvitation:
+      type: object
+      description: 'En-tête de l''écran d''activation : école et email masqué.'
+      properties:
+        emailMasked:
+          type: string
+          readOnly: true
+        firstName:
+          type: string
+        lastName:
+          type: string
+        schoolName:
+          type: string
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+      - emailMasked
+      - expiresAt
+      - firstName
+      - lastName
+    TokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          description: Jeton du lien SMS /consentement/<jeton>
+          maxLength: 128
+      required:
+      - token
     ToneEnum:
       enum:
       - info
@@ -4292,6 +6412,13 @@ components:
           type: integer
       required:
       - count
+    UsernameAvailabilityResponse:
+      type: object
+      properties:
+        available:
+          type: boolean
+      required:
+      - available
     WebhookAck:
       type: object
       properties:
