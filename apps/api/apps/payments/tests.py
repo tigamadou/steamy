@@ -6,6 +6,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
+from apps.accounts.tests.factories import ParentFactory
 from apps.payments.models import Order, Payment
 
 User = get_user_model()
@@ -20,7 +21,7 @@ def provider_secret(settings):
 
 @pytest.fixture
 def order(db):
-    user = User.objects.create_user(email="parent@example.com", password="pw")
+    user = ParentFactory()
     return Order.objects.create(user=user, reference="CM-0001", total=5000, currency="XOF")
 
 

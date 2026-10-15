@@ -12,21 +12,21 @@ from rest_framework import mixins, permissions, serializers, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from .models import DailyAggregatedStat, Event
-from .serializers import EventSerializer
+from .models import DailyAggregatedStat, TrackingEvent
+from .serializers import TrackingEventSerializer
 
 CACHE_TTL = 60  # seconds for simple endpoints (adjust)
 
 
-class EventViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+class TrackingEventViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
     Ingestion des événements de télémétrie, en ÉCRITURE SEULE (S3) : personne ne lit, ne
     modifie ni ne supprime les événements par l'API. L'utilisateur est celui de la session,
     jamais une valeur fournie par le client. Plafonné par le throttling global (S9).
     """
 
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
+    queryset = TrackingEvent.objects.all()
+    serializer_class = TrackingEventSerializer
     permission_classes = [permissions.AllowAny]
 
     def perform_create(self, serializer):
@@ -61,7 +61,7 @@ def dashboard_summary(request):
 
     now = timezone.now().date()
     last7 = now - timezone.timedelta(days=7)
-    events_last7 = Event.objects.filter(created_at__date__gte=last7).count()
+    events_last7 = TrackingEvent.objects.filter(created_at__date__gte=last7).count()
 
     revenue_last30 = (
         DailyAggregatedStat.objects.filter(
@@ -98,9 +98,9 @@ def export_events_csv(request):
         timezone.now().date() - timezone.timedelta(days=7)
     )
     end = parse_date(request.GET.get("end") or "") or timezone.now().date()
-    qs = Event.objects.filter(created_at__date__gte=start, created_at__date__lte=end).order_by(
-        "created_at"
-    )
+    qs = TrackingEvent.objects.filter(
+        created_at__date__gte=start, created_at__date__lte=end
+    ).order_by("created_at")
 
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = f'attachment; filename="events_{start}_{end}.csv"'

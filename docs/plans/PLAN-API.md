@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-1.1
+Statut : 🟡 en cours · Prochaine tâche : API-1.2
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -66,20 +66,25 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 ### API-1 · Socle — 🟡 en cours
 - [x] **ADR Identité et connexion** (avant API-1.1) · `docs/adr-identite-connexion` · [ADR 0001](../adr/0001-identite-et-connexion.md) · PR #12
   - [x] `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé
-- [ ] **API-1.1** Remise à zéro + `accounts.User` · `feature/api-1-identite`
-  - [ ] Supprimer tous les `apps/*/migrations/0*.py` (garder les `__init__.py`)
-  - [ ] `AUTH_USER_MODEL = "accounts.User"` ; retirer `apps.user`, `apps.messaging`, `rest_framework.authtoken`, `channels` d'`INSTALLED_APPS`
-  - [ ] App `accounts` : `User`, `LearnerProfile`, `ParentProfile`, `TeacherProfile` (champs §3.1)
-  - [ ] Unicité conditionnelle (`username`, `phone`, `email`) et `CheckConstraint` par rôle ; regex `username` (sans `@`, pas tout-numérique)
-  - [ ] `status` et `is_active` dérivé ; `admin` supprimé (D71)
-  - [ ] `IdentifierBackend` (email / téléphone E.164 / `username`), personnel refusé sur `auth/login/`, temps constant
-  - [ ] Refus par statut : `ACCOUNT_PENDING_CONSENT`, `ACCOUNT_SUSPENDED`, `ACCOUNT_DEACTIVATED`
-  - [ ] `SESSION_ENGINE` en `cached_db`, rotation de session au login
-  - [ ] Suppression des apps `user` et `messaging` (tag git `archive/messaging`)
-  - [ ] `analytics.Event` → `TrackingEvent` ; `DEFAULT_AUTO_FIELD = BigAutoField`
-  - [ ] `make makemigrations` : un `0001_initial` par app ; `makemigrations --check` passe
-  - [ ] Annoncer la PR (`make clean && make up && make seed` pour les développeurs)
-  - [ ] Tests : identifiant numérique ou avec `@` refusé, doublon insensible à la casse, trois personas + personnel refusé, statuts refusés
+- [x] **API-1.1** Remise à zéro + `accounts.User` · `feature/api-1-identite` · PR #__
+  - [x] Supprimer tous les `apps/*/migrations/0*.py` (garder les `__init__.py`)
+  - [x] `AUTH_USER_MODEL = "accounts.User"` ; retirer `apps.user`, `apps.messaging`, `rest_framework.authtoken`, `channels` d'`INSTALLED_APPS`
+  - [x] App `accounts` : `User`, `LearnerProfile`, `ParentProfile`, `TeacherProfile` (champs §3.1 ; les champs vers les référentiels arrivent en API-1.5, l'école en API-L2.7)
+  - [x] Unicité conditionnelle (`username`, `phone`, `email`) et `CheckConstraint` par rôle ; regex `username` (sans `@`, au moins une lettre : ADR 0001)
+  - [x] `status` et `is_active` dérivé ; `admin` supprimé (D71)
+  - [x] `IdentifierBackend` (email / téléphone E.164 / `username`), personnel refusé sur `auth/login/`, temps constant
+  - [x] Refus par statut : `ACCOUNT_PENDING_CONSENT`, `ACCOUNT_SUSPENDED`, `ACCOUNT_DEACTIVATED`
+  - [x] `SESSION_ENGINE` en `cached_db`, rotation de session au login
+  - [x] Suppression des apps `user` et `messaging` (tag git `archive/messaging`)
+  - [x] `analytics.Event` → `TrackingEvent` ; `DEFAULT_AUTO_FIELD = BigAutoField`
+  - [x] `make makemigrations` : un `0001_initial` par app ; `makemigrations --check` passe
+  - [x] Annoncer la PR (`make clean && make up && make seed` pour les développeurs) : description de la PR
+  - [x] Tests : identifiant numérique ou avec `@` refusé, doublon insensible à la casse, trois personas + personnel refusé, statuts refusés
+  > Décision : les chemins hérités (`public/user/csrf`, `public/user/session-login`, `user/session-logout`,
+  > `user/my-profile`) sont servis par `accounts` jusqu'à API-1.2, qui les renomme avec le front ; la connexion
+  > y prend déjà `{identifier, password}`. `user/change-password`, `user/change-email` et
+  > `public/user/forgot-password-step-*` sont supprimés dès API-1.1 (aucun consommateur) : les deux premiers
+  > reviennent en API-1.2 sous `accounts/me/`. `messaging/notifications/` disparaît jusqu'à API-1.4.
 - [ ] **API-1.2** Domaine `auth` + `accounts/me/` · `feature/api-1-auth-me`
   - [ ] `GET auth/csrf/`, `POST auth/login/` (C7), `POST auth/logout/`
   - [ ] `GET accounts/me/` (identité, rôle, statut, `profileStep`, données du shell, champs personnel)

@@ -5,7 +5,7 @@ from celery import shared_task
 from django.db.models import Count, Sum
 from django.utils import timezone
 
-from .models import DailyAggregatedStat, Event
+from .models import DailyAggregatedStat, TrackingEvent
 
 
 @shared_task
@@ -24,7 +24,7 @@ def aggregate_daily_stats(day=None):
     end = timezone.datetime.combine(day, timezone.datetime.max.time(), tzinfo=timezone.utc)
 
     # 1) views per course (event_type == 'course_view' and entity_type == 'course')
-    qs = Event.objects.filter(
+    qs = TrackingEvent.objects.filter(
         event_type="course_view", entity_type="course", created_at__range=(start, end)
     )
     # group by entity_id (course id/slug)
@@ -39,7 +39,7 @@ def aggregate_daily_stats(day=None):
         )
 
     # 2) enrollments per course (could be events 'enrollment')
-    qs2 = Event.objects.filter(
+    qs2 = TrackingEvent.objects.filter(
         event_type="enrollment", entity_type="course", created_at__range=(start, end)
     )
     enrolls = qs2.values("entity_id").annotate(count=Count("id"))
@@ -53,16 +53,16 @@ def aggregate_daily_stats(day=None):
         )
 
     # 3) revenue (events 'purchase' with value)
-    qs3 = Event.objects.filter(event_type="purchase", created_at__range=(start, end)).exclude(
-        value__isnull=True
-    )
+    qs3 = TrackingEvent.objects.filter(
+        event_type="purchase", created_at__range=(start, end)
+    ).exclude(value__isnull=True)
     revenue = qs3.aggregate(total=Sum("value"))["total"] or 0
     DailyAggregatedStat.objects.update_or_create(
         date=day, group_by="global", key="all", metric="revenue", defaults={"value": revenue}
     )
 
     # 4) optionally fill course revenue if purchase contains entity_type course
-    course_revenue_qs = Event.objects.filter(
+    course_revenue_qs = TrackingEvent.objects.filter(
         event_type="purchase", entity_type="course", created_at__range=(start, end)
     ).exclude(value__isnull=True)
     cr = course_revenue_qs.values("entity_id").annotate(total=Sum("value"))
@@ -77,7 +77,10 @@ def aggregate_daily_stats(day=None):
 
     # 5) global active users (unique users who triggered events that day)
     active_users = (
-        Event.objects.filter(created_at__range=(start, end)).values("user").distinct().count()
+        TrackingEvent.objects.filter(created_at__range=(start, end))
+        .values("user")
+        .distinct()
+        .count()
     )
     DailyAggregatedStat.objects.update_or_create(
         date=day,

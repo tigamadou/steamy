@@ -1,12 +1,12 @@
 # apps/analytics/serializers.py
 from rest_framework import serializers
 
-from .models import DailyAggregatedStat, Event
+from .models import DailyAggregatedStat, TrackingEvent
 
 
-class EventSerializer(serializers.ModelSerializer):
+class TrackingEventSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Event
+        model = TrackingEvent
         fields = [
             "id",
             "user",

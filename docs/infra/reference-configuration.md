@@ -17,9 +17,8 @@ En staging et en prod, le chart les injecte dans api, worker, beat et migrate.
 | `SECURE_HSTS_SECONDS` | non | — | `0` | En-tête HSTS. À activer une fois le TLS éprouvé |
 | `DATABASE_URL` | oui en déployé | — | Secret `steamy-db-app` (généré par CloudNativePG) | Connexion PostgreSQL, TLS exigé |
 | `POSTGRES_DB/USER/PASSWORD/HOST` | oui en local | `steamy`… | — | Connexion PostgreSQL locale |
-| `REDIS_URL` | oui | `redis://redis:6379/1` | `redis://steamy-redis:6379/1` | Cache et sessions |
+| `REDIS_URL` | oui | `redis://redis:6379/1` | `redis://steamy-redis:6379/1` | Cache (dont celui des sessions, stockées en base : `cached_db`) |
 | `CELERY_BROKER_URL` | oui | `…/0` | `…/0` | File de tâches Celery |
-| `CHANNELS_REDIS_URL` | non | — | `…/2` | WebSockets (Django Channels) |
 | `AWS_S3_ENDPOINT_URL` | oui | `http://rustfs:9000` | `http://steamy-rustfs:9000` | Stockage des médias |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | oui | factices | secrets `RUSTFS_ACCESS_KEY` / `RUSTFS_SECRET_KEY` | Identifiants RustFS |
 | `AWS_STORAGE_BUCKET_NAME` | oui | `steamy-media` | `steamy-media` | Bucket des médias |

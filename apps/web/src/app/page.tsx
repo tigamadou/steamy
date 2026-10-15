@@ -25,19 +25,22 @@ async function ApiStatus() {
   return <p className={className}>{text}</p>;
 }
 
-async function fetchCurrentEmail(): Promise<string | undefined> {
+async function fetchCurrentIdentifier(): Promise<string | undefined> {
   try {
     const api = await getServerApi();
     const { data } = await api.GET("/api/user/my-profile");
-    return data?.email;
+    // Identifiant propre au persona : apprenant, parent ou enseignant (ADR 0001)
+    return data?.username ?? data?.phone ?? data?.email ?? undefined;
   } catch {
     return undefined;
   }
 }
 
 async function SessionStatus() {
-  const email = await fetchCurrentEmail();
-  return <p className="text-ink-500">{email ? `Connecté : ${email}` : "Non connecté"}</p>;
+  const identifier = await fetchCurrentIdentifier();
+  return (
+    <p className="text-ink-500">{identifier ? `Connecté : ${identifier}` : "Non connecté"}</p>
+  );
 }
 
 export default function Home() {

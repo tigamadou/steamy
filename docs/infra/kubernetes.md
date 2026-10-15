@@ -77,7 +77,7 @@ Le navigateur l'appelle par son domaine public (`PUBLIC_API_URL`, servi au clien
 | Composant | Ressource | Stockage (staging / prod) | Détails |
 | --- | --- | --- | --- |
 | PostgreSQL 17 | `Cluster` CloudNativePG `steamy-db`, 1 instance | 5 Gi / 20 Gi | Base `app`, propriétaire `app`. Identifiants générés par CNPG dans le Secret `steamy-db-app` (clé `uri`) |
-| Redis 7.4 | StatefulSet `steamy-redis` | 1 Gi | Persistance AOF. Bases : `0` broker Celery, `1` cache, `2` Channels |
+| Redis 7.4 | StatefulSet `steamy-redis` | 1 Gi | Persistance AOF. Bases : `0` broker Celery, `1` cache |
 | RustFS 1.0.1 | StatefulSet `steamy-rustfs` | 10 Gi / 50 Gi | API S3 sur le port 9000, console désactivée |
 | Création du bucket | Job `steamy-rustfs-bucket` (rclone) | — | Crée `steamy-media` s'il n'existe pas |
 | Sauvegardes | voir [Données et sauvegardes](donnees-et-sauvegardes.md) | — | — |

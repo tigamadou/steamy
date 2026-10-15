@@ -8,12 +8,14 @@ import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
+from apps.accounts.tests.factories import LearnerFactory, StaffFactory
+
 User = get_user_model()
 
 
 @pytest.fixture
 def user(db):
-    return User.objects.create_user(email="eleve@example.com", password="secret123")
+    return LearnerFactory()
 
 
 # --- S1 · Inscription libre avec choix du rôle ---------------------------------------------
@@ -49,7 +51,7 @@ def test_s1_no_schema_operation_accepts_a_role():
 @pytest.mark.django_db
 def test_s12_token_login_is_gone(user):
     resp = APIClient().post(
-        "/api/public/user/login", {"email": user.email, "password": "secret123"}, format="json"
+        "/api/public/user/login", {"email": "x@example.com", "password": "secret123"}, format="json"
     )
     assert resp.status_code == 404
 
@@ -72,6 +74,7 @@ def test_s12_token_header_does_not_authenticate(user):
         "/api/messaging/conversations/",
         "/api/messaging/messages/",
         "/api/messaging/attachments/",
+        "/api/messaging/notifications/",  # messagerie supprimée (C15)
         "/api/files",
         "/api/user/files/create-signed-file",
         "/api/courses/paths/",
@@ -143,17 +146,15 @@ def test_s7_paid_course_cannot_be_enrolled_for_free(paid_course, user):
 def test_s4_lists_only_return_the_callers_objects(user):
     from apps.courses.models import Course
     from apps.learning.models import Attempt, Certificate, Enrollment, Quiz
-    from apps.messaging.models import Notification
     from apps.payments.models import Order, Payment
 
-    other = User.objects.create_user(email="autre@example.com", password="secret123")
+    other = LearnerFactory()
     course = Course.objects.create(title="Gratuit", slug="gratuit", published=True, price=0)
     enrollment = Enrollment.objects.create(user=other, course=course)
     Certificate.objects.create(enrollment=enrollment, score=90)
     Attempt.objects.create(user=other, quiz=Quiz.objects.create(course=course, title="Q"))
     order = Order.objects.create(user=other, reference="REF-AUTRE", total=1000)
     Payment.objects.create(order=order, provider="kkiapay", amount=1000)
-    Notification.objects.create(user=other, title="Privée", body="x")
 
     client = APIClient()
     client.force_authenticate(user)
@@ -164,7 +165,6 @@ def test_s4_lists_only_return_the_callers_objects(user):
         "/api/learning/certificates/",
         "/api/payments/orders/",
         "/api/payments/payments/",
-        "/api/messaging/notifications/",
     ]:
         resp = client.get(url)
         assert resp.status_code == 200, url
@@ -183,13 +183,13 @@ def test_s9_login_is_throttled_after_five_attempts(user, settings):
     for _ in range(5):
         resp = client.post(
             "/api/public/user/session-login",
-            {"email": user.email, "password": "mauvais"},
+            {"identifier": user.username, "password": "mauvais"},
             format="json",
         )
         assert resp.status_code == 400
     resp = client.post(
         "/api/public/user/session-login",
-        {"email": user.email, "password": "mauvais"},
+        {"identifier": user.username, "password": "mauvais"},
         format="json",
     )
     assert resp.status_code == 429
@@ -200,13 +200,19 @@ def test_s9_login_is_throttled_after_five_attempts(user, settings):
 def test_errors_use_the_single_format_in_french(user):
     resp = APIClient().post(
         "/api/public/user/session-login",
-        {"email": user.email, "password": "mauvais"},
+        {"identifier": user.username, "password": "mauvais"},
         format="json",
     )
     body = resp.json()
-    assert set(body) == {"code", "message", "fields"}
-    assert body["code"] == "VALIDATION_ERROR"
-    assert body["fields"]["nonFieldErrors"] == ["Identifiant ou mot de passe incorrect."]
+    assert body == {
+        "code": "INVALID_CREDENTIALS",
+        "message": "Identifiant ou mot de passe incorrect.",
+    }
+
+    invalid = APIClient().post("/api/public/user/session-login", {}, format="json").json()
+    assert set(invalid) == {"code", "message", "fields"}
+    assert invalid["code"] == "VALIDATION_ERROR"
+    assert invalid["fields"]["identifier"] == ["Ce champ est obligatoire."]
 
     not_found = APIClient().get("/api/courses/courses/inexistant/").json()
     assert not_found == {"code": "NOT_FOUND", "message": not_found["message"]}
@@ -238,20 +244,20 @@ def test_api_docs_are_closed_unless_allowed(settings):
 
 @pytest.mark.django_db
 def test_s3_tracking_events_are_write_only_and_not_attributable(user):
-    from apps.analytics.models import Event
+    from apps.analytics.models import TrackingEvent
 
-    other = User.objects.create_user(email="autre@example.com", password="secret123")
+    other = LearnerFactory()
     anonymous = APIClient()
     resp = anonymous.post(
         "/api/analytics/events/", {"eventType": "view", "user": other.id}, format="json"
     )
     assert resp.status_code == 201
-    assert Event.objects.get().user is None  # l'utilisateur fourni par le client est ignoré
+    assert TrackingEvent.objects.get().user is None  # l'utilisateur fourni par le client est ignoré
 
-    event_id = Event.objects.get().id
+    event_id = TrackingEvent.objects.get().id
     assert anonymous.get("/api/analytics/events/").status_code == 405
     assert anonymous.delete(f"/api/analytics/events/{event_id}/").status_code in (404, 405)
-    assert Event.objects.filter(id=event_id).exists()
+    assert TrackingEvent.objects.filter(id=event_id).exists()
 
 
 @pytest.mark.django_db
@@ -262,7 +268,5 @@ def test_s3_dashboard_and_export_are_staff_only(user, url):
     client = APIClient()
     client.force_authenticate(user)
     assert client.get(url).status_code == 403
-    client.force_authenticate(
-        User.objects.create_user(email="staff@example.com", password="x", is_staff=True)
-    )
+    client.force_authenticate(StaffFactory(email="staff@example.com"))
     assert client.get(url).status_code == 200

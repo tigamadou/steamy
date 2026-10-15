@@ -1,11 +1,11 @@
 # apps/analytics/admin.py
 from django.contrib import admin
 
-from .models import DailyAggregatedStat, Event
+from .models import DailyAggregatedStat, TrackingEvent
 
 
-@admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
+@admin.register(TrackingEvent)
+class TrackingEventAdmin(admin.ModelAdmin):
     list_display = ("event_type", "entity_type", "entity_id", "user", "created_at")
     list_filter = ("event_type", "entity_type")
     search_fields = ("entity_id", "user__email")
