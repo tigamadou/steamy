@@ -418,7 +418,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > en attente annule la demande au parent. Progression, dernière activité et compteurs de missions terminées
   > (WT04, WT10) arrivent avec API-L5.3, après API-L3a. Énumérations `ConsentStatusEnum` et
   > `MembershipStatusEnum` nommées dans `ENUM_NAME_OVERRIDES`.
-- [ ] **API-L5.2** Invitations · `feature/api-l5-2-invitations`
+- [ ] **API-L5.2** Invitations · `feature/api-l5-2-invitations` · PR #81
   - [x] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
   - [x] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; l'élève devient membre actif, l'enseignant est notifié
   - [ ] `Enrollment` `source=classroom` à l'adhésion (D62) : attend la fusion d'API-L3a.1 (PR #64, nouveau modèle `Enrollment`)
