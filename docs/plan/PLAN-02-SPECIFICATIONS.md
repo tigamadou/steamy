@@ -1,5 +1,15 @@
 # PLAN-02 — Spécifications : design system, API, fonctionnalités, 172 écrans
 
+> ⚠️ **Document historique (août 2026), non maintenu.** Ce plan de réécriture de la documentation date d'avant le
+> choix de l'architecture réelle. Il prévoit une stack « Next.js + MySQL/Prisma » qui a été abandonnée au profit de
+> Next.js (front) + API Django/PostgreSQL. Ses « lots 0-6 » sont des lots de *documentation*, sans rapport avec les lots
+> d'implémentation des écrans.
+> Documents à jour :
+> - [alignement des specs](../alignement/ARBITRAGES.md) ;
+> - [spec technique](../SPEC-TECHNIQUE.md) ;
+> - [infrastructure](../infra/README.md) ;
+> - plans d'implémentation par lot dans `docs/plans/`.
+
 **Couvre les lots 3 et 4 du [plan directeur](PLAN-00-DIRECTEUR.md).**
 C'est le gros du volume : ~245 fichiers sur les ~340 du projet documentaire.
 

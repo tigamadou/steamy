@@ -1,890 +1,836 @@
 # Steamy — Spécification technique
 
-**Source** : rétro-ingénierie intégrale de `template/` (32 292 lignes : `ds-*`, 14 `screens-*.jsx`, `design-canvas.jsx`, `App.html`, `README.md`, `HANDOFF.md`, `CLAUDE.md`).
-**Périmètre** : 172 écrans · 156 web (1240×760) · 16 mobile (360×760).
-**Statut du template** : canvas de design React/Babel sans build, sans API, sans routeur. Toutes les données sont en dur.
+Référence technique du monorepo : architecture, design system, modèle de données cible, invariants, surface d'API
+cible. Les décisions qui la fondent sont dans [alignement/ARBITRAGES.md](alignement/ARBITRAGES.md) (citées `S1`-`S12`,
+`D1`-`D76`) et les conventions communes dans [alignement/CONVENTIONS.md](alignement/CONVENTIONS.md). En cas de
+contradiction, les arbitrages priment.
 
-> **Convention de lecture**
-> - **[I]** = interaction réellement implémentée dans le template (état React local).
-> - **[D]** = interaction *déclarée* par le design (élément cliquable présent, aucun handler) — c'est une exigence fonctionnelle, pas du code existant.
-> - **[S]** = purement statique / illustratif.
->
-> Cette distinction est le cœur de la spec : le template livre l'**intention**, pas le comportement.
+| Document | Rôle |
+| --- | --- |
+| [INVENTAIRE-ECRANS.md](INVENTAIRE-ECRANS.md) | Liste des écrans, lot et statut de chacun |
+| `SPEC-ECRANS-*.md` | Comportement écran par écran (cités par lot et par ID d'écran) |
+| [alignement/CONSTATS.md](alignement/CONSTATS.md) | État de l'API existante et désalignements relevés |
+| [infra/](infra/README.md) | Déploiement, CI/CD, exploitation |
+| `docs/plans/` | Plans d'implémentation par lot (§9) |
 
----
+La maquette (`design/`, canvas React/Babel sans build) est une **référence visuelle et fonctionnelle**, pas du code à
+porter. Convention de lecture héritée de sa rétro-ingénierie :
+**[I]** interaction implémentée dans la maquette · **[D]** interaction déclarée (élément cliquable sans handler, donc
+exigence) · **[S]** statique.
 
 ## Sommaire
 
-1. [Architecture technique](#1-architecture-technique)
-2. [Design system : contrats de composants](#2-design-system--contrats-de-composants)
-3. [Modèle de données déduit](#3-modèle-de-données-déduit)
-4. [Rôles, sécurité et invariants métier](#4-rôles-sécurité-et-invariants-métier)
-5. [Spécification écran par écran](#5-spécification-écran-par-écran)
+1. [Architecture](#1-architecture)
+2. [Design system](#2-design-system)
+3. [Modèle de données cible](#3-modèle-de-données-cible)
+4. [Rôles, sécurité et invariants](#4-rôles-sécurité-et-invariants)
+5. [Écrans, préfixes et shells](#5-écrans-préfixes-et-shells)
 6. [États transversaux](#6-états-transversaux)
-7. [Surface d'API proposée](#7-surface-dapi-proposée)
-8. [Anomalies et arbitrages requis](#8-anomalies-et-arbitrages-requis)
+7. [Surface d'API cible](#7-surface-dapi-cible)
+8. [Anomalies et résolutions](#8-anomalies-et-résolutions)
 9. [Plan d'implémentation](#9-plan-dimplémentation)
 
 ---
 
-## 1. Architecture technique
+## 1. Architecture
 
-### 1.1 Ce qui existe (template)
+### 1.1 Vue d'ensemble
 
-| Aspect | État actuel |
-| --- | --- |
-| Runtime | React 18.3.1 + ReactDOM + Babel standalone 7.29.0, CDN unpkg, compilation JSX **à l'exécution** |
-| Modules | Aucun `import`/`export`. 35 globales explicites (`window.X = X`), le reste en globales implicites |
-| Styles | `ds-tokens.css` + un `<style>` injecté par fichier (garde par `getElementById`) + styles inline massifs |
-| Routing | Ternaire dans `App.html`, vue persistée en `localStorage` clé `steamy-flow` |
-| Données | Constantes en dur par fichier (`COURSES_DEFAULT`, `KIT_CATALOG`, `KPIS`, `PARENT_KIDS`…) |
-| Tests / lint / CI | Néant |
-| Responsive | Aucun. Deux largeurs fixes |
-
-### 1.2 Graphe de dépendances réel
-
-Confirmé par lecture du code — **plus étendu que `HANDOFF.md` §2**, qui ne liste que les composants et omet les dépendances de **données**.
-
-```
-ds-tokens.css
-  └─ design-canvas.jsx        (DesignCanvas, DCSection, DCArtboard)
-      └─ ds-mascot → ds-icons → ds-atoms → ds-complex → ds-charts
-          └─ screens-auth.jsx           [Checkbox, ChoiceCard, GoalChip, PwReq, UserTypeCard]
-              └─ screens-auth-web.jsx   [WebShell]
-                  └─ screens-auth-parent-web.jsx
-                  └─ screens-public-web.jsx
-              └─ screens-dashboard-web.jsx  [WebAppShell, SectionHeader, SettingsRow,
-                                             StatPill, QuizAttemptRow, Toggle,
-                                             QuickActionTile, SkeletonBlock, APPR_EVENTS]
-                  └─ screens-catalog-web · wishlist · purchase · journey
-                  └─ screens-parent-dashboard-web.jsx  [WebParentShell, WPDSection, WPDInfoCard]
-                      └─ screens-teacher-dashboard-web.jsx  [WebTeacherShell]
-                  └─ screens-kit-shop-web.jsx  [WKKitCard, KIT_CATALOG]
-                  └─ screens-admin-web.jsx     [WebAdminShell]
-```
-
-**Cycles à casser avant tout portage vers des modules ES :**
-
-| Cycle | Cause |
-| --- | --- |
-| `dashboard-web` ↔ `parent-dashboard-web` | `WD13` consomme `WPDSection`/`WPDInfoCard`, définis dans parent-dash |
-| `dashboard-web` ↔ `purchase-web` | `WD20` consomme `WANetworkCard`, défini dans purchase |
-
-**Dépendances de données non documentées** (à traiter comme du contenu, pas du code) :
-- `screens-public-web.jsx` → `KIT_CATALOG` (défini dans kit-shop) pour `WL07`.
-- `screens-teacher-dashboard-web.jsx` → `APPR_EVENTS` (défini dans dashboard) pour `WT09`.
-
-**`WebParentShell` est absent des listes de shells du `README` et de `HANDOFF.md` §3** alors qu'il est exposé sur `window` et porte les 14 écrans `WPD`. À ajouter à la couche layouts.
-
-### 1.3 Architecture cible recommandée
-
-| Couche | Contenu | Notes |
+| Composant | Technologie | Rôle |
 | --- | --- | --- |
-| **Tokens** | Conversion 1:1 de `ds-tokens.css` (variables CSS ou thème Tailwind) | À faire **avant** le premier composant |
-| **Primitives** | 11 atomes + 9 composés + 6 data-viz + `Icon` (30) + `Mascot` (6 poses) | §2 |
-| **Layouts** | `WebShell` (pré-login), `WebAppShell` (apprenant), `WebParentShell`, `WebTeacherShell`, `WebAdminShell`, `PublicShell` | 6 shells, pas 4 |
-| **Partagés** | Les 15 composants de `HANDOFF.md` §3 + `WebParentShell` + `PublicShell` + `Toggle` | 18 au total |
-| **Features** | Une par zone (auth, dashboard, catalogue, achat, journey, parent, teacher, kit-shop, wishlist, admin, public) | |
-| **Enveloppes** | `offline` / `error` / `loading` (`WX01`-`WX03`) comme HOC ou boundary, jamais comme pages | §6 |
+| `apps/web` | Next.js 16 (App Router), React 19, Tailwind 4, TypeScript | Front **pur** : rendu des écrans, aucune logique métier ni accès base. Appelle l'API |
+| `packages/api-client` | Client TypeScript **généré** depuis `apps/api/openapi.yaml` (+ middleware CSRF) | Seul point d'accès du front à l'API. Régénéré à chaque changement de contrat |
+| `apps/api` | Django 5.2 + DRF, drf-spectacular (OpenAPI), ASGI | Toute la logique métier, les règles et les invariants (§4) |
+| Base | PostgreSQL (CloudNativePG en production) | Source de vérité |
+| Tâches | Celery (worker + beat) sur Redis | SMS, emails, PDF (factures, certificats, exports), purges J+30, libération du stock, alertes de décrochage, agrégats KPI |
+| Médias | Stockage S3 RustFS (`django-storages`, URL présignées) | Images, PDF générés, imports. Sauvegardé sur Wasabi |
+| Vidéos | **Vimeo** | Les missions et intros de niveau référencent un `vimeoId` ; aucune vidéo n'est stockée chez nous |
+| Back-office | Admin Django (thème monochrome, django-otp) + 5 écrans Next.js | S6 : voir §5.2 |
+| Prestataires | Paiement Mobile Money (S9), SMS (S10), email (`apps/mail`) | Derrière des interfaces abstraites côté API ; faux fournisseurs en local et en CI |
+| Déploiement | k3s mono-nœud, Traefik, Helm, GHCR | Voir [infra/](infra/README.md) |
 
-**Contraintes non négociables héritées du produit :**
-- Vendorer React/ReactDOM/Babel **et** les polices (l'`@import` Google Fonts de `ds-tokens.css:6` est une dépendance réseau oubliée) — la connectivité ouest-africaine est une contrainte produit explicite.
-- Seule **Nunito** est nécessaire au produit. JetBrains Mono (showcase) et Fraunces (page d'accueil du dépôt) ne doivent pas être propagées.
-- Logo : préférer `assets/logo_landscape.svg`. Jamais de `filter: brightness(0) invert(1)` sur le PNG coloré (fond opaque → rectangle blanc).
+### 1.2 Contrat front ↔ API
+
+- **Authentification** : session Django + CSRF, cookies posés sur le domaine parent partagé par `web` et `api`.
+  Pas de token DRF (S12). Le front lit le jeton CSRF dans le cookie `csrftoken` ou le demande à `GET /api/auth/csrf/`.
+- **Deux clients** : `getBrowserApi()` (composants client, `credentials: "include"`) et `getServerApi()` (Server
+  Components, relaie les cookies du visiteur). Les pages publiques (lot 1) utilisent un **client anonyme sans
+  cookies**, cachable, pour rester statiques/ISR : `getServerApi()` rend la page dynamique.
+- **Contrat** : `openapi.yaml` est généré par drf-spectacular et versionné ; le client TS en dérive. Toute route du §7
+  doit être typée dans le schéma (pas de `APIView` sans serializer).
+- **Dates** : stockage en UTC ; `TIME_ZONE = "Africa/Porto-Novo"` pour l'affichage, les tâches planifiées et les
+  rapports (C16).
+- **Sessions** : moteur `cached_db` (base + cache) ; session du personnel limitée à 8 h (C20).
+- **URL de l'API** lue à l'exécution (`/runtime-config`), pas au build : la même image est promue de staging à prod.
+- **Conventions** (D5) : `/api/<domaine>/…/` avec slash final, kebab-case, JSON en camelCase, erreurs en français
+  avec `code` métier (D4, §7.1).
+
+### 1.3 Organisation cible de l'API
+
+Une app Django par domaine d'API (§7). S1 : pas de données réelles, les **migrations sont réinitialisées**.
+
+| App | Contenu | Sort de l'existant |
+| --- | --- | --- |
+| `accounts` | `User`, profils, lien parent↔enfant, consentement, OTP, suppression ; sert aussi le domaine d'URL `auth` (pas d'app nommée `auth` : collision avec `django.contrib.auth`) | Remplace `user` (modèle `AbstractEmailUser` incompatible) |
+| `catalog` | Catégories, `Course`, `Project`, `Level`, `Mission`, quiz (contenu) | Remplace `courses` ; `Path` supprimé (S2) |
+| `learning` | Inscriptions, progression, tentatives, badges, points, certificats, journal d'activité | Refonte de `learning` |
+| `wishlist` | Liste de souhaits | À créer |
+| `shop` | Kits, stock, panier, zones de livraison, alertes de réassort | À créer |
+| `payments` | `Order`, `Payment`, `Invoice`, `Refund`, `KitCode`, `PaymentRequest`, webhook | Refonte de `payments` |
+| `events` | `SteamyEvent`, `EventApplication`, `EventTicket` | À créer |
+| `classrooms` | `School`, `Classroom`, appartenance, invitations, commentaires | À créer |
+| `notifications` | `Notification`, préférences | Extrait de `messaging` (S11) |
+| `referentials` | Pays, réseaux, classes, objectifs, avatars, localités… | À créer (D3) |
+| `public` | Devis B2B, leads, contact | À créer |
+| `impact` | KPI, valeurs, rapports | À créer |
+| `core` | Health, presign, `PlatformSettings`, `AuditLog` | Garder, compléter |
+| `analytics` | `TrackingEvent` (télémétrie), agrégats | `Event` renommé ; endpoints fermés |
+| `mail`, `file` | Emails transactionnels, fichiers | Garder (`file` après correction des permissions) |
+| `messaging` | Conversations, websocket | **Supprimée** du dépôt (S11, C15), conservée sous le tag git `archive/messaging` |
+
+### 1.4 Contraintes produit
+
+- Connectivité ouest-africaine : polices auto-hébergées (`next/font/local`, déjà en place), pages publiques
+  statiques, images optimisées. Pas de mode hors ligne en v1 (D16).
+- Seule **Nunito** est utilisée par le produit. JetBrains Mono (chargée dans `layout.tsx`) et Fraunces sont à retirer.
+- Logo : `assets/logo_landscape.svg`. Jamais de `filter: brightness(0) invert(1)` sur le PNG coloré.
+- Mobile natif hors périmètre ; le web doit être responsive (la maquette ne dessine que 1240 px).
 
 ---
 
-## 2. Design system : contrats de composants
+## 2. Design system
 
-### 2.1 Tokens (`ds-tokens.css`)
+Source : `design/ds-*`. Implémentation dans `apps/web/src/components` (vide à ce jour : le lot 1 en est le premier
+consommateur). Tokens déjà portés dans `apps/web/src/styles/tokens.css`.
+
+### 2.1 Tokens
 
 | Famille | Échelle | Remarque |
 | --- | --- | --- |
-| `--primary-*` | 50→900 | **`--primary-500` = `#9E1B9A` (magenta)**, pas `#5B3FE0` |
-| `--success-*` | 50→800 | vert d'action / validé |
-| `--amber-*` | 50→700 | badges, récompenses, points |
-| `--error-*` | 50→700 | échec, suppression |
+| `--primary-*` | 50→900 | `--primary-500` = `#9E1B9A` (magenta) |
+| `--success-*` | 50→800 | Action validée |
+| `--amber-*` | 50→700 | Badges, récompenses, points |
+| `--error-*` | 50→700 | Échec, suppression |
 | `--info-500`, `--warning-500` | — | `--warning-500` aliase `--amber-500` |
-| `--cat-*` | 6 valeurs | robotique `#5B3FE0` · electronique `#0EA5E9` · code `#EC4899` · ia `#14B8A6` · mecanique `#F59E0B` · energie `#84CC16` |
-| `--ink-*` | 50→900 | neutres warm gray ; `--bg #FAFAF7`, `--surface #FFFFFF` |
-| Typo | `--text-xs`→`--text-4xl` + `--lh-*` | ratio ~1.2, base 16px |
-| Espacement | `--sp-1`→`--sp-20` | grille 4/8 |
+| `--cat-*` | 6 valeurs | robotique `#5B3FE0` · electronique `#0EA5E9` · code `#EC4899` · ia `#14B8A6` · mecanique `#F59E0B` · energie `#84CC16`. Les catégories étant servies par l'API (D3), la couleur est portée par la catégorie |
+| `--ink-*` | 50→900 | Neutres ; `--bg #FAFAF7`, `--surface #FFFFFF` |
+| Typo | `--text-xs`→`--text-4xl` + `--lh-*` | Ratio ~1.2, base 16 px |
+| Espacement | `--sp-1`→`--sp-20` | Grille 4/8 |
 | Rayons | `--r-sm` 8 → `--r-2xl` 28, `--r-pill` 999 | |
-| Ombres | `--shadow-pop-sm/md`, `--shadow-card`, `--shadow-card-hover`, `--shadow-modal` | style « candy » : élévation vers le bas |
+| Ombres | `--shadow-pop-sm/md`, `--shadow-card(-hover)`, `--shadow-modal` | Style « candy ». `--shadow-card*` contient encore l'ancien violet (§8.1) |
 | Animation | `--ease-out`, `--ease-bounce`, `--dur-fast/base/slow` | |
 
-> ⚠️ **`--shadow-card` et `--shadow-card-hover` encodent en dur `rgba(91,63,224,…)`** = l'ancien violet `#5B3FE0`. Idem `.app-sidebar__item.is-active`, `.welcome-card`, `.cat-project.is-current`, l'animation `pulse` de `.mission--current`. Voir §8.1.
+### 2.2 Atomes
 
-### 2.2 Atomes (`ds-atoms.jsx`)
-
-| Composant | Props | Comportement |
+| Composant | Props | Comportement cible |
 | --- | --- | --- |
-| `Button` | `variant` (`primary`\|`secondary`\|`amber`\|`outline`\|`ghost`\|`danger`), `size` (`sm`\|`md`\|`lg`), `block`, `icon`, `iconRight`, `disabled`, `onClick` | Ombre 4px vers le bas ; `:active` → `translateY(2px)` + ombre 2px. `disabled` → gris, `pointer-events:none` |
-| `Field` | `label`, `required`, `hint`, `error` | `error` **remplace** `hint` (jamais les deux) |
-| `Input` | `value`, `onChange`, `placeholder`, `type`, `icon`, `error`, `prefix` | Focus : bordure primaire + halo 4px |
-| `PhoneInput` | `value`, `onChange`, `error` | **Préfixe 🇧🇯 +229 en dur** — voir §8.6 |
-| `PasswordInput` | `value`, `onChange`, `placeholder`, `error` | **[I]** bascule œil/œil barré (`useState`) |
-| `OTPInput` | `length` (6), `value`, `activeIndex`, `error` | Affichage seul, non saisissable. `error` → shake 350 ms |
-| `Badge` | `tone` (`neutral`\|`success`\|`amber`\|`error`\|`primary`\|`info`), `solid`, `icon` | |
-| `Tag` | `active`, `color`, `onClick` | **[I]** bouton réel ; `active` → fond `--ink-900` |
-| `Avatar` | `name`, `size`, `ring`, `status`, `emoji`, `color` | Couleur dérivée du 1er caractère si non fournie (6 couleurs) |
-| `Loader` | `kind` (`dots`\|`spin`) | 3 points colorés en cascade / spinner |
-| `Toast` | `tone`, `title`, `action`, `onClose` | Fond `--ink-900`, max 320px |
+| `Button` | `variant` (`primary`\|`secondary`\|`amber`\|`outline`\|`ghost`\|`danger`), `size`, `block`, `icon`, `iconRight`, `disabled`, `loading` | Ombre 4 px ; `:active` → `translateY(2px)`. `loading` désactive le bouton (anti double-soumission) |
+| `Field` | `label`, `required`, `hint`, `error` | `error` remplace `hint` ; lié par `aria-describedby` |
+| `Input` | `value`, `onChange`, `placeholder`, `type`, `icon`, `error`, `prefix` | Focus : bordure primaire + halo |
+| `PhoneInput` | `country`, `value`, `onChange`, `error` | **Sélecteur de pays** alimenté par `referentials/countries` (indicatif, format, validation) ; émet un numéro **E.164** (D3, §8.6) |
+| `PasswordInput` | `value`, `onChange`, `error` | Afficher/masquer **[I]** |
+| `OTPInput` | `length` (6), `value`, `onChange`, `error` | **Saisissable** : une case par chiffre, collage du code entier, `autocomplete="one-time-code"`, annonce `aria-live` des erreurs |
+| `Checkbox` | `checked`, `onChange`, `label` | Promu depuis le fichier mobile |
+| `PwReq` | `password` | Liste des règles D25 (8 caractères, une lettre, un chiffre), **libellés identiques partout** ; le serveur reste juge |
+| `GoalChip` | `goal`, `selected`, `onToggle` | Objectifs servis par l'API (W13, WP08) |
+| `StatPill` | `icon`, `value`, `label` | |
+| `Badge` | `tone`, `solid`, `icon` | |
+| `Tag` | `active`, `color`, `onClick` | Bouton réel **[I]** |
+| `Avatar` | `name`, `size`, `ring`, `status`, `emoji`, `color` | Avatars servis par l'API |
+| `Loader` | `kind` (`dots`\|`spin`) | Toujours accompagné d'un texte (§6) |
+| `Toast` | `tone`, `title`, `action`, `onClose` | `aria-live="polite"` |
+| `Toggle` | `checked`, `onChange`, `label` | Rôle `switch` |
 
-### 2.3 Composés (`ds-complex.jsx`)
+### 2.3 Composés
 
-| Composant | Props | Interactions |
+| Composant | Props | Remarque |
 | --- | --- | --- |
-| `CourseCard` | `title`, `author`, `level`, `price`, `progress`, `color`, `emoji`, `favorited`, `onFav`, `free` | **[I]** cœur avec `stopPropagation` ; carte cliquable **[D]** ; `free` → pastille verte « Gratuit » |
-| `ProgressBar` | `value`, `tone`, `size`, `label` | Transition 400 ms |
-| `ProgressSteps` | `total`, `current` | Segments `done`/`current`/vide |
-| `Medal` | `icon`, `label`, `number`, `tone` (`gold`\|`silver`\|`locked`), `size` | `locked` → 🔒 |
-| `MissionItem` | `step`, `title`, `duration`, `state` (`todo`\|`current`\|`done`\|`locked`), `icon` | `current` → pulse ; `locked` → `cursor:not-allowed`, opacité .65 |
-| `Quiz` | `index`, `total`, `question`, `choices[]`, `selected`, `correct`, `showFeedback` | **[S]** choix non cliquables. **Timer `00:42` en dur** → à paramétrer |
-| `BottomNav` | `active` | 5 onglets en dur (`home`/`catalog`/`wishlist`/`badges`/`profile`), badge `2` en dur. Mobile uniquement |
-| `Modal` | `icon`, `title`, `body`, `primaryLabel`, `secondaryLabel`, `onPrimary`, `onSecondary`, `danger` | Backdrop `position:absolute` (contrainte artboard) → à passer en `fixed` + portail |
-| `NotifItem` | `icon`, `tone`, `title`, `msg`, `time`, `unread` | `unread` → fond primaire + pastille |
+| `CourseCard` | `course`, `progress`, `favorited`, `onFav` | Cœur **[I]** ; carte = lien. Pastille « Gratuit » si `isFree`. Affiche la **difficulté** (pas « niveau », S2) |
+| `ProgressBar`, `ProgressSteps` | | Compteur d'étapes cohérent avec le flux réel (lot 2) |
+| `Medal` | `icon`, `label`, `number`, `tone` | Badges |
+| `MissionItem` | `step`, `title`, `duration`, `state` (`todo`\|`current`\|`done`\|`locked`) | `locked` non activable (§4.4) |
+| `Quiz` | `question`, `choices`, `selected`, `feedback`, `timeLimitSec` | Choix **cliquables et focusables** ; timer paramétré (pas de `00:42` en dur) |
+| `QuizAttemptRow` | `attempt` | Statut `ok`/`warn`/`ko` **calculé par le serveur** (D31) |
+| `Modal` | `title`, `body`, actions, `danger` | `position: fixed` + portail, piège de focus, `Escape` |
+| `NotifItem` | `notification` | Champs `type`, `tone`, `url` (D7) |
+| `UserTypeCard`, `ChoiceCard` | `selected`, `onSelect` | Promus depuis le fichier mobile ; boutons radio accessibles |
+| `SectionHeader`, `SettingsRow`, `QuickActionTile`, `SkeletonBlock` | | Promus depuis `screens-dashboard-web.jsx` |
+| `Section`, `InfoCard` | | Ex-`WPDSection`, `WPDInfoCard`, promus depuis le fichier parent (cassent le cycle WD13 → parent) ; livrés au lot 3, réutilisés aux lots 4 et 5 |
+| `WANetworkCard` | `network`, `selected` | Promu depuis l'achat (casse le cycle WD20 → achat). **Liste des réseaux servie par l'API** par pays (D76) |
+| `WKKitCard` | `kit` | Boutique et WL07 |
+| `PaymentForm` | `amount`, `onSubmit`, `register` | Pays + réseau + numéro, mention « Paiement sécurisé · aucune carte bancaire ». Partagé par WA03, WK06, WPD12, WPD15. Livré au lot 3 |
+| `PaymentStatusPanel` | `paymentId`, `register` | Attente (WA04), succès (WA05), échec (WA07, WK09) ; interroge le statut du paiement. Livré au lot 3 |
+| `FaqAccordion` | `items` | FAQ statique (D10) : WL24 (lot 1), WD12, WPD13, WT11 |
+| `AddressForm` | `value`, `zones` | Adresse + zone de livraison (D38) : WD19, WK05, WPD08, WPD15. Livré au lot 3 |
 
-### 2.4 Data-viz (`ds-charts.jsx`) — back-office uniquement
+### 2.4 Layouts
 
-`Sparkline` · `BarChart` · `DonutChart` · `StatCard` · `DataTable` · `SegmentedControl`.
-SVG fait main, **monochrome par défaut** (`--ink-*`), couleur par prop. `DataTable` : `columns[{key,label,align,width}]` + `rows[]` objets indexés par `key`, `dense`, `onRowClick`, `empty`. `SegmentedControl` **[I]** contrôlé.
-
-### 2.5 Composants à promouvoir (18)
-
-| Origine | Composants | Destination |
+| Layout | Écrans | Remarque |
 | --- | --- | --- |
-| `screens-auth.jsx` | `Checkbox`, `PwReq`, `GoalChip` | atomes |
-| `screens-auth.jsx` | `ChoiceCard`, `UserTypeCard` | composés |
-| `screens-dashboard-web.jsx` | `StatPill` | atomes |
-| `screens-dashboard-web.jsx` | `Toggle`, `SectionHeader`, `SettingsRow`, `QuizAttemptRow`, `QuickActionTile`, `SkeletonBlock` | composés |
-| `screens-parent-dashboard-web.jsx` | `WPDSection`, `WPDInfoCard` | composés |
-| `screens-purchase-web.jsx` | `WANetworkCard` | composé **porteur de règle métier** (réseaux Mobile Money) |
-| `screens-kit-shop-web.jsx` | `WKKitCard` | composé |
-| shells | `WebAppShell`, `WebShell`, `WebParentShell`, `WebTeacherShell`, `WebAdminShell`, `PublicShell` | layouts |
+| `PublicShell` | `WL*`, `WL22`-`WL24`, WK en mode invité (D12) | Header + footer publics ; footer selon D17 |
+| `WebShell` | `W*`, `WP*`, `WL02`-`WL05` | Pré-connexion, carte centrée |
+| `AppShell` | WD, WC, WW, WA, WJ, WK (connecté), WPD, WT | **Un seul shell paramétré par la navigation** du rôle (remplace `WebAppShell`, `WebParentShell`, `WebTeacherShell`). Livré au lot 3, réutilisé aux lots 4 et 5 |
+| `AdminShell` | `WAD01`-`WAD05` | Monochrome (`--ink-*`), famille `--primary-*` bannie |
 
-`PwReq` (politique de mot de passe) et `WANetworkCard` (liste des réseaux) portent de la **règle**, pas du style : leur source doit être unique et alignée serveur.
+Navigation apprenant (D39) : 6 entrées, dont « Mes parcours » (`WD23`) ; « Badges » masqué tant que l'écran n'est
+pas conçu ; aucun `title="Bientôt"`.
+
+### 2.5 Data-viz (back-office Next.js uniquement)
+
+`Sparkline` · `BarChart` · `DonutChart` · `StatCard` · `DataTable` · `SegmentedControl`. SVG, monochrome par défaut,
+couleur par prop. Utilisés par WAD01-WAD05 (lot 6), rangés dans `src/components/backoffice/` (import interdit hors
+du back-office).
+
+### 2.6 Règles
+
+- `PwReq`, `PhoneInput`, `WANetworkCard`, `GoalChip`, `Avatar` portent de la **règle** ou un **référentiel** : leur
+  source est l'API, jamais une liste en dur.
+- Accessibilité dès la primitive : tout élément cliquable est un `button`/`a` focusable, contrastes AA (`--ink-400`
+  interdit pour du texte), `aria-live` sur toasts et erreurs.
+- Hors périmètre : `BottomNav`, `Phone` et primitives mobiles.
 
 ---
 
-## 3. Modèle de données déduit
+## 3. Modèle de données cible
 
-Déduit des props, des mocks et des libellés. Aucune API n'existe : ce modèle est une **proposition**, à confronter aux diagrammes `user flows/*.mmd` (hors dépôt).
+Légende **API** : **existe** (garder tel quel) · **à refondre** (modèle présent, à reprendre) · **à créer**.
+Les migrations sont réinitialisées (S1). Tous les montants sont en **FCFA (XOF), entiers**. Tous les téléphones en
+**E.164**. Horodatages `createdAt`/`updatedAt` implicites.
 
-### 3.1 Identité
+### 3.1 Identité et comptes (`accounts`)
 
-```
-User
-  id, role: 'learner' | 'parent' | 'teacher' | 'admin'
-  firstName, lastName
-  createdAt
-  status: 'active' | 'suspended' | 'pending'
+| Entité | Champs clés | Règles | API |
+| --- | --- | --- | --- |
+| `User` | `role` ∈ `learner`\|`parent`\|`teacher` (null pour le personnel), `username?`, `phone?`, `email?`, `firstName`, `lastName`, `status` ∈ `pending`\|`active`\|`suspended`\|`deactivated`\|`anonymized`, `isStaff`, groupes Django | Identifiant selon le persona (S4) : apprenant → `username` (unique, ni `@` ni uniquement des chiffres) ; parent → `phone` (unique, vérifié par OTP) ; enseignant et personnel → `email` (unique). Personnel = `isStaff` + groupes Super-admin, Contenu, Support, Finance (D71) ; plus de rôle `admin` | à refondre |
+| `LearnerProfile` | `birthDate`, `gender?`, `disability?`, `locality` (→ `Locality`), `schoolGrade`, `goals[]` (≥ 2), `avatar`, `email?`, `points`, `streakDays`, `rank`, `publicPseudonym?`, `publicDisplayAllowed` | Âge 10-17 ans contrôlé par le serveur, cohérent entre W05 et W11 (D23). Genre et handicap facultatifs, finalité affichée (D6). `publicDisplayAllowed` = opt-in parental (D15). Pas de téléphone (D30) | à créer |
+| `ParentProfile` | `email?`, `profession?`, `locality`, `gender?`, `disability?`, `goalsForChildren[]` | `email` sert au rapport hebdomadaire (D55) | à créer |
+| `TeacherProfile` | `school?`, `phone?`, `specialty`, `bio`, `verifiedAt?` | Compte créé **sur invitation** uniquement (S5) | à créer |
+| `ParentChildLink` | `parent`, `learner`, `relationship`, `consentRequest` | **Un parent par apprenant**, obligatoire à tout âge (S3). Changement de parent : modération admin uniquement (D22) | à créer |
+| `ConsentRequest` | `origin` ∈ `learner`\|`parent`\|`teacher`, `subject` (instantané : prénom, nom, identifiant, âge, lien de parenté), `learner?`, `requestedBy`, `parentPhone`, `parent?`, `classroom?`, `replacesLink?` (changement de parent), `status` ∈ `pending`\|`accepted`\|`refused`\|`expired`\|`cancelled`, `tokenHash`, `expiresAt`, `refusalReason?`, `refusalNote?`, `resolvedAt`, `disputedAt?`, `disputeNote?` | Toujours tranchée par le parent (D70). Expire à 7 jours (D21). Refus terminal pour la demande ; nouvelle demande au même numéro après 30 jours (D22, C9). Une nouvelle demande d'origine `learner` vers le même numéro annule la demande en attente (C14). Origine `parent` : créée acceptée par WPD04. Origine `teacher` : sans compte apprenant, créé à l'acceptation, ou rattachement d'un enfant existant (D60, C11). Changement de parent (D22) : demande créée par le support, le lien n'est remplacé qu'à l'acceptation. Litige marqué par le support (D70) | à créer |
+| `SignupSession` | `learner`, `resumeCodeHash`, `step`, `expiresAt` | Compte inactif + session « inscription en cours » + code de reprise (D21), affiché une seule fois et **non régénérable** (C14). Purge du compte et libération de l'identifiant à l'expiration ou au refus | à créer |
+| `PublicProfileReview` | `learner`, `pseudonym`, `avatar`, `status` ∈ `pending`\|`approved`\|`rejected`, `reviewedBy?` | Modération a priori de l'affichage public d'un mineur (D15, WAD08) | à créer |
+| `OtpChallenge` | `phone`, `purpose` ∈ `parent_signup`\|`password_reset`\|`phone_change`, `codeHash`, `expiresAt`, `attempts`, `lastSentAt` | 6 chiffres, 5 min, 3 essais, renvoi après 60 s, plafond quotidien par numéro et par IP (D24) | à créer |
+| `PasswordResetToken` | `user`, `tokenHash`, `expiresAt` | Émis après OTP valide (WL03) | à refondre (reset par lien email) |
+| `DeletionRequest` | `user`, `requestedBy`, `status` ∈ `pending_parent`\|`scheduled`\|`cancelled`\|`done`, `reason?`, `scheduledFor` | Désactivation puis anonymisation à J+30, annulable ; factures conservées (D40, D54). Compte parent : seulement sans enfant rattaché (D54) | à créer |
+| `DeliveryAddress` | `user`, `country`, `city`, `district`, `street`, `deliveryZone` | WD19, WK05 | à créer |
 
-LearnerProfile (1-1 User role=learner)
-  username            ← identifiant de connexion (W04, W16, W19) — UNIQUE
-  birthDate, age
-  country, locality   ← ville · quartier (W11)
-  email?              ← optionnel (W11 « pour la facture et les news »)
-  schoolLevel         ← classe (W12)
-  gender: 'F'|'M'|'other'
-  disability: 'none'|'visual'|'hearing'|'motor'|'other'
-  avatarEmoji, avatarColor
-  goals: GoalId[]     ← min. 2 (W13)
-  parentId            ← OBLIGATOIRE quel que soit l'âge
-  points, streakDays, level
+### 3.2 Pédagogie (`catalog`, `learning`)
 
-ParentProfile (1-1 User role=parent)
-  phone               ← identifiant de connexion (WP01, W16) — UNIQUE
-  email?, profession?
-  country, locality
-  gender?, disability?
-  goalsForChild: GoalId[]
-  childrenCount
+| Entité | Champs clés | Règles | API |
+| --- | --- | --- | --- |
+| `Category` | `slug`, `label`, `color`, `icon`, `order` | Référentiel unique pour WL06, WL16, WC (D3) | à créer |
+| `Course` (Parcours) | `slug`, `title`, `category`, `difficulty` ∈ `beginner`\|`intermediate`\|`advanced`, `isFree`, `price`, `requiredKit?`, `coverImage`, `trailerVimeoId?`, `durationHours`, `description`, `outcomes[]`, `audience`, `prerequisites[]`, `status` ∈ `draft`\|`published`, `featured`, `certificateEnabled` | Unité vendue et inscriptible (S2). `requiredKit` ⇒ accès **uniquement** par Kit Code (D36). Créé dans l'admin Django (groupe Contenu, S5) | à refondre (`Path` supprimé) |
+| `Project` (Projet) | `course`, `order`, `title`, `durationHours`, `objectives[]`, `prerequisites[]`, `materials[]`, `badge` | Porte la sommative | à refondre (ex-`Module`) |
+| `Level` (Niveau) | `project`, `order`, `title`, `durationMin`, `introVimeoId?`, `introVimeoHash?`, `introSummary`, `badge` | Porte la formative | à créer |
+| `Mission` | `level`, `order`, `title`, `durationMin`, `icon`, `vimeoId?`, `vimeoHash?`, `blocks[]` (texte, média, astuce) | Vidéo Vimeo non listée : `vimeoId` + `vimeoHash` exposés seulement à un inscrit sur une mission déverrouillée | à refondre (ex-`Lesson`/`Resource`) |
+| `Quiz` | `kind` ∈ `formative`\|`summative`, `level?` \| `project?` (exactement un), `threshold` (70 / 80 par défaut), `timeLimitSec?`, `retryCooldownSec` (600 en sommative) | Rattaché au niveau (formative) ou au projet (sommative) (S2) | à refondre (rattaché au `Course`, seuil 50 %) |
+| `Question`, `Choice` | `text`, `order`, `concept`, `remediationMission`, `weight` / `text`, `isCorrect` | `isCorrect` **jamais exposé** à l'apprenant | à refondre |
+| `Enrollment` | `learner`, `course`, `source` ∈ `free`\|`order`\|`kit_code`\|`classroom`, `order?`, `kitCode?`, `classroom?`, `status` ∈ `active`\|`completed`, `progressPct`, `completedAt?` | Créé uniquement par le serveur selon la source (§4.3) | à refondre |
+| `MissionProgress` | `enrollment`, `mission`, `completedAt` | Séquentiel (§4.4) | à refondre (ex-`Progress`) |
+| `QuizAttempt` | `learner`, `quiz`, `answers`, `score`, `total`, `percentage`, `status` ∈ `ok`\|`warn`\|`ko`, `passed`, `durationSec`, `pointsEarned`, `failedConcepts[]` | Corrigé par le serveur ; `warn` entre 50 % et le seuil (D31) | à refondre (ex-`Attempt`) |
+| `LearningActivity` | `learner`, `date`, `mission?`, `seconds` | Journal du temps d'apprentissage : streak (D34) et rapport hebdomadaire (D55) | à créer |
+| `Badge`, `LearnerBadge` | `kind` ∈ `level`\|`project`\|`course`, cible, `label`, `icon` / `learner`, `badge`, `awardedAt` | Attribué par le serveur à la réussite | à créer |
+| `PointsEntry` | `learner`, `amount`, `reason`, `source` | Barème par mission/quiz dans `PlatformSettings` (D34) ; `LearnerProfile.points` en cache. `rank` dérivé des points | à créer |
+| `Certificate` | `enrollment`, `number`, `pdf?`, `pdfStatus` ∈ `pending`\|`ready`, `issuedAt` | Conditions D33 ; PDF généré en asynchrone | à refondre |
+| `WishlistItem` | `learner`, `course` | Unique par couple (`wishlist`) | à créer |
 
-TeacherProfile
-  email, phone, specialty, bio
+### 3.3 Commerce (`shop`, `payments`)
 
-AdminProfile
-  email (pro), role: 'super-admin'|'contenu'|'support'|'finance'   ← RBAC non implémenté
-  twoFactorEnabled
-```
+| Entité | Champs clés | Règles | API |
+| --- | --- | --- | --- |
+| `Kit` | `slug`, `name`, `category`, `price`, `difficulty`, `description`, `contents[]`, `images[]`, `compatibleCourses[]`, `stockQuantity`, `active` | | à créer |
+| `StockReservation` | `kit`, `orderItem`, `quantity`, `expiresAt` | Réservé à la commande, libéré après 30 min sans paiement (D38) | à créer |
+| `Cart`, `CartItem` | `user` / `kit`, `quantity` | Côté serveur une fois connecté ; panier invité côté navigateur, envoyé à la commande (D38) | à créer |
+| `DeliveryZone` | `country`, `name`, `fee`, `delayLabel` | Frais de port par zone (D38) ; une seule promesse de délai par zone | à créer |
+| `RestockAlert` | `kit`, `phone?` \| `user?`, `notifiedAt?` | Un seul SMS (D38) pour un invité ou un parent ; notification in-app pour un apprenant, sans téléphone (D30) | à créer |
+| `Order` | `reference`, `kind` ∈ `course`\|`kit`\|`event`, `payer?` (parent) \| `guest` (prénom, nom, téléphone), `beneficiary?` (apprenant), `status` ∈ `pending`\|`paid`\|`cancelled`\|`refunded`, `shippingStatus?` ∈ `preparing`\|`shipped`\|`delivered`, `subtotal`, `shippingFee`, `total`, `deliveryAddress` (instantané), `paymentRequest?`, `guestAccessTokenHash?`, `paidAt?`, `expiresAt` | Payeur ≠ bénéficiaire ; **prix toujours calculé par le serveur** (D37). Invité : kits uniquement (D12), accès par jeton opaque (C10). Paiement reçu après `expiresAt` : honoré si le stock ou la place est encore disponible, sinon remboursé automatiquement (C17) | à refondre (`paid` booléen, prix client) |
+| `OrderItem` | `order`, `course?` \| `kit?` \| `eventApplication?`, `title`, `unitPrice`, `quantity`, `total` | Instantané du prix serveur | à refondre |
+| `Payment` | `order`, `provider`, `providerTransactionId`, `country`, `network`, `msisdn`, `amount`, `status` ∈ `initiated`\|`pending`\|`succeeded`\|`failed`, `failureCode?`, `failureReason?`, `payload`, `confirmedAt?` | Initié par le serveur ; seul le **webhook** vérifié fait foi (S9) | à refondre (`success` booléen, pas d'initiation) |
+| `Invoice` | `order`, `number`, `pdf`, `issuedAt` | Générée en asynchrone au paiement ; conservée après suppression de compte (D40) | existe (à brancher) |
+| `Refund` | `payment`, `amount`, `reason`, `processed` | Traité depuis l'admin Django (Finance) | existe |
+| `KitCode` | `code`, `kit`, `orderItem`, `redeemedBy?`, `redeemedCourse?`, `redeemedAt?` | Format `STEAMY-XXXX-XXXX`, Crockford base32, insensible à la casse, consommation atomique, tentatives limitées (D35). Généré à la commande de kit, imprimé sur la notice (D36) | à créer |
+| `PaymentRequest` | `requestedBy` (apprenant), `parent`, `kind`, `course?` \| `items[]` \| `eventApplication?`, `amount`, `status` ∈ `pending`\|`paid`\|`declined`\|`expired`\|`cancelled`, `order?`, `lastSentAt` | Demande de paiement de l'enfant au parent ; lien SMS vers `WPD15` (D52). Expire à 7 jours, renvoi limité, annulable par l'enfant (C4) | à créer |
 
-### 3.2 Consentement
+### 3.4 Événements (`events`)
 
-```
-ConsentRequest
-  id, learnerId, parentPhone, relationship: 'mère'|'père'|'tuteur'|'autre'
-  status: 'pending' | 'accepted' | 'refused'
-  refusalReason?: 'trop_jeune'|'discussion_maison'|'non_demandé'|'autre'
-  refusalNote?
-  createdAt, resolvedAt
-  → refus = TERMINAL (voir §8.4, formulation à trancher)
-```
+| Entité | Champs clés | Règles | API |
+| --- | --- | --- | --- |
+| `SteamyEvent` | `slug`, `title`, `emoji`, `color`, `startsAt`, `endsAt`, `place`, `city`, `price` (0 = gratuit), `capacity`, `applicationDeadline`, `description`, `status` ∈ `draft`\|`published` | Distinct de la télémétrie (`TrackingEvent`). WL08 fusionné dans WL21 (S8) | à créer |
+| `EventApplication` | `event`, `learner`, `appliedBy` (apprenant ou parent), `motivation`, `selfLevel`, `status` ∈ `pending_parent`\|`pending_payment`\|`accepted`\|`refused`\|`cancelled`, `order?`, `ticket?`, `parentDecidedAt?`, `refusalReason?` | Accord parental **systématique** (S3, S8). Événement payant : paiement par le parent (D41, D53). **Pas de sélection par Steamy** : l'accord du parent, plus le paiement si payant, confirme l'inscription dans la limite des places (C3). Le personnel suit et peut refuser exceptionnellement, avec remboursement (WAD12) | à créer |
+| `EventProposal` | `event`, `classroom`, `teacher` | Proposition d'un événement à une classe (WT09) : notification seulement, unique par couple | à créer |
+| `EventTicket` | `learner`, `enrollment` (origine), `usedBy?` | Ticket offert à la certification, attribué **une seule fois** (D33) ; couvre le prix d'une candidature | à créer |
 
-### 3.3 Pédagogie
+### 3.5 Encadrement (`classrooms`)
 
-```
-Course (Parcours)
-  id, title, slug, category: cat-*, level: 'Débutant'|'Intermédiaire'|'Avancé'
-  free: bool, price?: number (FCFA)
-  emoji, color, coverVideoUrl, videoDuration
-  durationHours, rating, studentsCount
-  description, learningOutcomes[], targetAudience, prerequisites[]
-  requiredKitId?          ← déclenche le Kit Code
-  status: 'brouillon' | 'publié'
-  badgeCount, certificateEnabled
+| Entité | Champs clés | Règles | API |
+| --- | --- | --- | --- |
+| `School` | `name`, `country`, `city`, `offer`, `courses[]` (parcours de l'offre), `learnerQuota`, `classroomQuota`, `validUntil` | Minimale ; quotas contrôlés par le serveur, invitations en attente comprises (C19) ; pas de tableau de bord établissement en v1 (D61) | à créer |
+| `TeacherInvitation` | `email`, `school?`, `invitedBy`, `tokenHash`, `expiresAt`, `acceptedAt?` | Seule voie de création d'un compte enseignant (S5) | à créer |
+| `Classroom` | `school`, `teacher`, `course`, `name`, `color`, `archivedAt?` | **Une classe = un parcours** ; accès couvert par l'offre B2B (D62) | à créer |
+| `ClassroomMembership` | `classroom`, `learner`, `consentRequest`, `status` ∈ `invited`\|`active`\|`left`, `joinedAt?` | L'élève rejoint après acceptation du parent (D60). Crée l'`Enrollment` (`source=classroom`) | à créer |
+| `TeacherComment` | `teacher`, `learner`, `classroom`, `attempt?`, `body` | À sens unique, notifié, toujours visible de l'apprenant **et** de son parent, sans choix de visibilité ; pas de messagerie (D63, S11) | à créer |
 
-Project (Projet)        n par Course
-  index, title, durationHours, objectives[], prerequisites[], audience[], materials[]
-  summativeQuizId       ← seuil 80 %
-  projectBadgeId
+### 3.6 Notifications (`notifications`)
 
-Level (Niveau)          n par Project
-  index, title, durationMin, introVideoUrl, introSummary
-  formativeQuizId       ← seuil 70 %
-  levelBadgeId
+| Entité | Champs clés | Règles | API |
+| --- | --- | --- | --- |
+| `Notification` | `user`, `type`, `tone`, `icon`, `title`, `message`, `url` (chemin front), `readAt?` | Compteur, « tout marquer comme lu » (D7) | à refondre (extrait de `messaging`) |
+| `NotificationPreference` | `user`, `category`, `channel` ∈ `in_app`\|`sms`\|`email`, `enabled` | WD06, WPD08, WT08 (D7). Aucun envoi marketing vers un mineur (D6) | à créer |
 
-Mission                 n par Level
-  index, title, durationMin, icon, contentBlocks[] (texte, média, encadré astuce)
+### 3.7 Pilotage, plateforme et référentiels
 
-Quiz
-  id, type: 'formative'|'summative', threshold: 70|80
-  questions[{ text, choices[], correctIndex, concept }]
-  timeLimitSec?
-
-QuizAttempt
-  id, learnerId, quizId, score, total, percentage
-  status: 'ok' | 'warn' | 'ko'    ← 'warn' = « à refaire », seuil intermédiaire NON SPÉCIFIÉ (§8.7)
-  durationSec, pointsEarned, answers[], failedConcepts[]
-  createdAt
-
-Enrollment
-  learnerId, courseId, progressPct, currentProjectIndex, currentLevelIndex
-  unlockedByKitCode?: string
-  certificateUrl?, eventTicketGranted: bool
-
-Badge
-  id, type: 'level'|'project'|'course', icon, label, number
-```
-
-### 3.4 Commerce
-
-```
-Kit
-  id, name, price, level, emoji, color, description
-  contents[], compatibleCourseIds[], stock, images[]
-
-Cart / CartItem   (kitId, qty)
-
-Order
-  ref (#KT-xxxx | #CMD-xxxx), buyerId | guestInfo{firstName,lastName,phone}
-  items[], subtotal, shipping, total
-  deliveryAddress{country, city, district, street}
-  paymentStatus: 'payé'|'en attente'|'échoué'|'remboursé'
-  shippingStatus: 'préparation'|'expédié'|'livré'
-  timeline[{ title, meta, state }]
-
-CoursePurchase
-  ref (#CM-xxxx), learnerId, courseId, amount
-  status: 'ok'|'pending'|'ko'
-  invoiceUrl?
-
-Payment (Mobile Money)
-  ref (MM-xxxxx), country, network: 'MTN'|'Moov'|'Celtiis', msisdn, amount
-  status: 'payé'|'échoué'|'remboursé'
-  failureReason?     ← ex. « solde insuffisant »
-  paidByParentId?    ← détour parent si apprenant
-
-KitCode (voucher)
-  code, kitId, orderId, redeemedBy?, redeemedAt?
-  → format à trancher (§8.5)
-```
-
-### 3.5 Événements & encadrement
-
-```
-Event
-  id, title, emoji, color, date, place, price, description
-  → FICHE DÉTAILLÉE NON CONÇUE (trou documenté)
-
-EventApplication
-  learnerId, eventId, motivation, selfLevel
-  status: 'pending'|'accepted'|'refused'
-  parentConsentRequired: bool (âge < 16), parentConsentStatus
-
-Classroom
-  id, name, teacherId, courseId, learnerIds[], avgProgress, color
-
-TeacherComment
-  teacherId, learnerId, target: 'learner'|'parent', body, createdAt
-
-Notification
-  userId, type, tone, icon, title, message, createdAt, read
-NotificationPreferences
-  par persona — voir WD06 / WD13 / WPD08 / WT08
-```
-
-### 3.6 Impact Tracker (admin)
-
-```
-Kpi
-  id, group, label, value, unit?, target?, base?
-  source: 'auto' | 'manuel' | 'indispo'
-  series[], note?
-  → status calculé par kpiStatus() : 'indispo'|'attente'|'hors-cible'|'validee'
-
-ImpactReport
-  period, kpiValues[], completionPct, deadlines[{label,date,state}]
-  submittedAt?
-```
-
-**30 indicateurs** répartis en 8 groupes : Ventes & finance (5), Utilisateurs NU (7), Apprenants NA (7), Écosystème (2), Impact pédagogique (2), Produit & innovation (4), Satisfaction (1), Emploi (2). Plages de dates : **mois courant** pour NU/NA/Ventes/Écosystème en source `auto`, **trimestre** pour le reste.
+| Entité | Champs clés | Règles | API |
+| --- | --- | --- | --- |
+| `KpiDefinition` | `code`, `group`, `label`, `unit`, `source` ∈ `auto`\|`manual`\|`unavailable`, `target?`, `baseline?`, `periodicity` ∈ `month`\|`quarter` | 30 indicateurs, 8 groupes. KPI d'inclusion alimentés par le profil (D75) | à créer |
+| `KpiValue` | `kpi`, `period`, `value` (nombre ou texte), `enteredBy?`, `note?` | Statut calculé (D73, §4.5) | à créer |
+| `ImpactReport` | `period` (trimestre), `status` ∈ `draft`\|`submitted`, `submittedAt?`, `submittedBy?` | « Soumettre » verrouille (D74) | à créer |
+| `ReportExport` | `report`, `format` ∈ `csv`\|`pdf`, `file?`, `status` | Généré en asynchrone (D74) | à créer |
+| `PlatformSettings` | singleton : barème de points et seuils de rang (D34), seuil de décrochage (7 j, D66), plafonds OTP (D24), délai de cooldown sommatif (D32) | Édité dans l'admin Django (WAD14) | à créer |
+| `Announcement` | `title`, `body`, `audience`, `startsAt`, `endsAt` | WAD14 | à créer |
+| `AuditLog` | `actor`, `action`, `targetType`, `targetId`, `data`, `ip` | Actions du personnel, consentements, paiements, suppressions | à créer |
+| `QuoteRequest`, `Lead`, `ContactMessage` | coordonnées, message, `newsletterConsent` | WL11 (D13), WL20 (D14), WL24 (D17) ; notification email | à créer |
+| `TrackingEvent`, `DailyAggregatedStat` | `eventType`, `entity`, `value`, `metadata` | Télémétrie interne, alimente les KPI `auto` | à refondre (`analytics.Event` renommé) |
+| Référentiels | `Country` (ISO, `dialCode`, format, regex), `PaymentNetwork` (`country`, `code`, `label`, `enabled`), `SchoolGrade`, `Goal`, `Avatar`, `Disability`, `Relationship`, `RefusalReason`, `Locality` (`country`, `city`, `district`, `areaType` ∈ `urban`\|`rural`) | Servis par l'API, jamais codés en dur (D3). Réseaux par pays, Celtiis inclus (D76). Localité qualifiée pour le KPI « zone rurale » (D75) | à créer |
+| `Mail`, `Template`, `Layout` | | Emails transactionnels | existe |
+| `File` | `owner`, `upload`, `mimeType`, `isPrivate` | Filtrer par propriétaire, `owner` non modifiable | à refondre (permissions) |
 
 ---
 
-## 4. Rôles, sécurité et invariants métier
+## 4. Rôles, sécurité et invariants
 
-Ces règles sont **encodées dans les écrans**. Elles doivent devenir des invariants **serveur**, pas des garde-fous d'interface.
+Toutes ces règles sont des **invariants serveur**. L'interface les reflète, elle ne les garantit pas.
 
 ### 4.1 Comptes
 
-| Invariant | Écrans de référence |
+| Invariant | Réf. |
 | --- | --- |
-| Tout apprenant est un **sous-compte rattaché à un parent**, quel que soit son âge | `W04`-`W08`, `WPD04` |
-| L'apprenant s'authentifie par **identifiant + mot de passe** — jamais par téléphone | `W04`, `W16`, `W19` |
-| Le parent s'authentifie par **téléphone + mot de passe** | `WP01`, `W16` |
-| L'admin s'authentifie par **email pro + mot de passe + 2FA (OTP 6)** | `WAD15` |
-| Deux points d'entrée à l'inscription : **enfant-initié** (demande au parent) ou **parent-initié** (création directe, mot de passe défini par le parent) | `W06` / `WPD04` |
-| Unicité de l'identifiant apprenant, erreur explicite et non bloquante | `W19` |
+| Tout apprenant a **un parent**, quel que soit son âge ; aucune règle « moins de 16 ans » | S3 |
+| Apprenant : identifiant + mot de passe, ni téléphone ni OTP | S4, D30 |
+| Parent : téléphone + OTP SMS à l'inscription, puis téléphone + mot de passe | S4 |
+| Enseignant : email + mot de passe ; compte créé **sur invitation** | S4, S5 |
+| Personnel : email + mot de passe + TOTP (django-otp), exigé sur l'admin Django **et** `/api/backoffice/` | S4, D72 |
+| Un seul écran de connexion (W16), champ « Identifiant ou numéro » résolu par le serveur ; le personnel se connecte à part (WAD15) | S4 |
+| Inscription libre : apprenant (W01-W19) et parent (WP01-WP12) uniquement ; le rôle n'est **jamais** choisi par le client | S1, S5 |
+| Inscription parent : réponse neutre si le numéro est déjà inscrit ; l'OTP est envoyé dans tous les cas, puis un compte existant mène à la connexion | C13 |
+| Âge entre 10 et 17 ans, cohérent avec la date de naissance | D23 |
+| Mot de passe : 8 caractères minimum, une lettre et un chiffre, validé par le serveur | D25 |
+| Mot de passe oublié (WL02-WL05) : parent et enseignant. L'apprenant le fait réinitialiser par son parent (WPD03) | D26 |
+| Suppression : désactivation puis anonymisation à J+30, annulable ; apprenant → validée par le parent ; parent → seulement sans enfant rattaché ; factures conservées | D40, D54 |
 
 ### 4.2 Consentement parental
 
-Flux asynchrone canonique :
+Trois origines, une seule décision : celle du parent (D60, D70).
 
-```
-W06 (enfant saisit n° parent + lien de parenté)
-  → SMS au parent
-  → W07 (enfant : écran d'attente, polling, « Renvoyer la demande »)
-  → WP04/WP05 (parent : voit les infos saisies) ─┬─ Accepter → WP06 + W08 → suite onboarding
-                                                 └─ Refuser  → WP11 (motif obligatoire + précisions)
-                                                             → WP12 (parent) + W18 (enfant, terminal)
-```
+| Origine | Déclencheur | Flux |
+| --- | --- | --- |
+| Enfant | W06 | Compte inactif + code de reprise (D21) → SMS au parent → W07 (attente, reprise) → parent : WP01/W16 puis WP04-WP05 ou WPD05 → **Accepter** : W08 → W10 (mot de passe) → W11-W14 · **Refuser** : WP11 (motif obligatoire) → WP12 + W18 |
+| Parent | WPD04 | Le parent crée l'enfant (prénom, nom, date de naissance, lien de parenté, identifiant, mot de passe) ; demande créée acceptée ; l'enfant fait W11-W14 à sa première connexion (D51) |
+| Enseignant | WT06 | L'enseignant saisit prénom, nom, téléphone du parent, lien de parenté → SMS au parent → le parent accepte **et crée l'identifiant** → l'élève rejoint la classe (D60) |
 
-- Le parent voit **exactement** les informations saisies par l'enfant avant de trancher (`WP05`, `WPD05`) : lien de parenté, classe, localité, centres d'intérêt.
-- Le refus **exige un motif** (liste fermée de 4 valeurs) + précisions libres, transmis à l'enfant.
-- Toute action sensible impose un **détour parent** avec écran d'attente + notification : paiement parcours (`WA02`), paiement kit (`WK08`), suppression de compte (`WD15`), participation à un event < 16 ans (`WD11`).
+- Le parent voit seulement ce qui existe à ce stade : prénom, nom, identifiant, âge, lien de parenté (D20).
+- Refus : clôt la demande ; nouvelle demande au même parent après 30 jours ; compte en attente purgé et identifiant
+  libéré ; changement de parent par la modération admin uniquement (D22).
+- Code de reprise perdu : pas de régénération, l'enfant recommence ; une nouvelle demande au même numéro annule la
+  demande en attente et libère l'identifiant (C14).
+- Expiration à 7 jours (D21). L'admin **suit** (attente, relances, litiges), il ne valide jamais à la place du parent
+  (D70).
+- Toute autre action sensible de l'enfant passe par le parent : paiement (§4.3), candidature à un événement (S8),
+  suppression de compte (D40). WPD01 regroupe consentements, paiements, événements et suppressions à valider (D52).
 
 ### 4.3 Paiement
 
-| Invariant | Référence |
+| Invariant | Réf. |
 | --- | --- |
-| **Mobile Money uniquement.** Aucun champ carte bancaire nulle part dans les 172 écrans | `WA03`, `WK06`, `WD20` |
-| Formulaire = **Pays + Réseau + Numéro** (jamais autre chose) | `WA03` |
-| Réseaux : **MTN, Moov, Celtiis** (activables individuellement côté admin) | `WANetworkCard`, `WAD14` |
-| L'échec est un état de premier plan, avec **raison explicite** et retry | `WA07`, `WK09` |
-| Mention obligatoire « Paiement sécurisé · aucune carte bancaire » sous le CTA | `WA03`, `WK06` |
-| Devise **FCFA** exclusivement | transversal |
+| Payeur : le parent, ou un invité pour les kits (WK04). L'apprenant ne paie jamais : il crée une demande de paiement | D12, D30, D52 |
+| Prix, frais de port et total **calculés par le serveur** ; le client n'envoie que des identifiants et des quantités | D37 |
+| Paiement initié par le serveur auprès du prestataire ; **le webhook signé fait foi** (montant, devise, référence vérifiés) ; idempotent | S9 |
+| Mobile Money uniquement : pays + réseau + numéro. Réseaux activables par pays (Celtiis inclus), lus publiquement | D76 |
+| L'échec est un état de premier plan, avec raison explicite et nouvelle tentative possible | WA07, WK09 |
+| Après paiement (une seule fois, en transaction) : inscription, `KitCode` générés, facture asynchrone, stock confirmé, candidature confirmée | D36, D37, C3 |
+| Paiement reçu sur une commande expirée : honoré si le stock (ou la place) est encore disponible, sinon remboursement automatique et notification | C17 |
+| Parcours avec kit : accès **uniquement** par Kit Code, qui débloque le parcours gratuitement | D36 |
+| Stock réservé 30 min ; commande non payée annulée à l'échéance | D38 |
+| Devise FCFA exclusivement, affichée « FCFA » | §8.8 |
 
 ### 4.4 Pédagogie
 
-| Invariant | Référence |
+| Invariant | Réf. |
 | --- | --- |
-| Hiérarchie stricte `Parcours → Projet → Niveau → Mission` | `WJ01`-`WJ03`, `WC06` |
-| Fin de niveau → **évaluation formative**, seuil **≥ 70 %** | `WJ04`, `WJ05` |
-| Fin de projet → **évaluation sommative**, seuil **≥ 80 %** | `WJ10`, `WJ11` |
-| Échec → **retour sur le concept échoué** (lien direct vers la mission), jamais un blocage sec | `WJ08` |
-| Récompenses : badge de niveau, badge de projet, **certification PDF** + **ticket Steamy Events offert** en fin de parcours | `WJ06`, `WJ11`, `WJ07` |
-| Progression séquentielle : un projet/niveau `locked` n'est pas ouvrable | `WC06a`, `WJ01` |
-| Un parcours avec kit exige un **Kit Code** valide avant déblocage du contenu | `WA01`, `WA06` |
+| Hiérarchie `Parcours → Projet → Niveau → Mission` | S2 |
+| Fin de niveau : formative, seuil 70 % ; fin de projet : sommative, seuil 80 % (seuils portés par le quiz) | S2 |
+| Progression **séquentielle** : mission, niveau ou projet verrouillé non accessible (contenu refusé par l'API, pas seulement masqué) | WJ01 |
+| Contenu des missions accessible uniquement à un apprenant inscrit ; la fiche publique n'expose pas les leçons | D11 |
+| Correction côté serveur ; `isCorrect` jamais exposé ; statut `ok`/`warn`/`ko` calculé (D31) | D31 |
+| Sommative ratée : tentatives illimitées, 10 min entre deux essais, renvoi vers les missions à revoir | D32 |
+| Certification : 100 % des missions et toutes les sommatives réussies ; PDF asynchrone ; ticket Events attribué une seule fois | D33 |
+| Points selon un barème serveur ; streak = jours d'activité consécutifs | D34 |
+| Parcours gratuits ouverts à tous ; pas de « parcours gratuit débloqué » | D27 |
 
-### 4.5 Interface
+### 4.5 Interface, encadrement et back-office
 
-- **100 % français**, y compris erreurs, micro-copie et textes commerciaux.
-- **Tutoiement** pour l'apprenant et l'enseignant ; **vouvoiement** pour le parent (`screens-auth-parent-web.jsx` l'établit explicitement).
+- **100 % français**, y compris les erreurs de l'API (locale `fr`, D4).
+- **Tutoiement** pour l'apprenant ; **vouvoiement** pour le parent, l'enseignant et le personnel (WL02-WL05 compris, D26).
 - Mascotte **Zeti** sur onboarding, états vides, célébrations, attentes longues.
-- Toute liste a un **état vide actionnable** (jamais « aucun résultat » nu) : `WD05`, `WD09`, `WW02`, `WC03`, `WK10`.
-- Le back-office est **monochrome** (`--ink-*`) : la famille `--primary-*` y est bannie, la couleur ne sert qu'aux statuts et aux graphes.
+- Toute liste a un état vide actionnable.
+- Back-office monochrome (`--ink-*`).
+- Enseignant : voit uniquement les parcours qu'il encadre et leurs élèves, sans données sensibles (handicap,
+  localité) (D64) ; « À revoir » = tentatives échouées à commenter, pas de correction manuelle (D65) ; alerte de
+  décrochage quotidienne, seuil réglable (D66).
+- Statut d'un KPI (D73) : source indisponible → « Indisponible » ; manuel non saisi → « En attente » ; sans cible ou
+  valeur texte → « Renseignée » ; ≥ cible → « Atteinte » ; 70-100 % de la cible → « En dessous » ; < 70 % → « Hors-cible ».
+
+### 4.6 Mineurs sur les pages publiques
+
+| Règle | Réf. |
+| --- | --- |
+| Un apprenant n'apparaît publiquement que sous **pseudonyme et avatar** : jamais nom, photo, école, localité ni identifiant de connexion | D15 |
+| Affichage public soumis à un **opt-in du parent** (`publicDisplayAllowed`), révocable | D15 |
+| Tout contenu public lié à un mineur est **modéré a priori** | D15 |
+| Les fonctions communautaires (profil public WL12, défis, classements, tutos, forum) sont reportées (S7) ; en v1 les seules apparitions publiques sont éditoriales (témoignages, événements) | S7, D10 |
+| Aucune donnée de mineur dans les URL, les métadonnées SEO ni les pages mises en cache partagées | D15 |
+
+### 4.7 Sécurité de l'API
+
+Lot « API 0 », avant tout écran (D1). Une faille corrigée = un test de non-régression ; les deux tests qui figent S1
+et S8 sont supprimés.
+
+| # | Faille (CONSTATS §2.1) | Correction |
+| --- | --- | --- |
+| S1 | Inscription avec rôle au choix | Supprimer `POST /api/signup/` et `/api/public/user/signup` ; rôle fixé par le flux (§4.1) |
+| S2 | Un enseignant écrit sur n'importe quel cours | Supprimer l'écriture du contenu par l'API publique ; contenu dans l'admin Django (groupe Contenu) |
+| S3 | Télémétrie ouverte | Fermer `analytics/events/` (écriture interne uniquement), dashboard et export réservés au personnel via `/api/backoffice/` |
+| S4 | Listes non filtrées par propriétaire, `owner` modifiable | `get_queryset` filtré par utilisateur (ou enfants du parent, ou élèves de l'enseignant) ; champs de propriété en lecture seule ; tests d'accès croisé systématiques |
+| S5 | Prix envoyé par le client, webhook non vérifié, exception renvoyée | §4.3 ; réponse webhook neutre, erreur journalisée |
+| S6 | Cours non publiés listés, contenu public, emails des auteurs | Catalogue filtré sur `published` ; aucun email exposé ; contenu réservé aux inscrits |
+| S7 | `enroll` sans payer | Inscription créée par le serveur selon la source (§3.2) |
+| S8 | Corrigé public, quiz modifiables, `manual_grade` ouvert, certificat au premier quiz | `isCorrect` masqué ; écriture des quiz retirée ; `manual_grade` supprimé (D65) ; certificat selon D33 |
+| S9 | Aucun throttling | Throttles DRF par IP et par identifiant sur connexion, inscription, OTP, reset, Kit Code, relances (D24, D35) |
+
+Autres règles : CSRF sur toute écriture ; cookies `Secure`, `HttpOnly` (session), `SameSite=Lax` ; CORS limité au
+domaine du front ; `/api/docs/` et `/api/schema/` hors production ou réservés au personnel ; journal d'audit (§3.7)
+pour les actions du personnel ; sessions `cached_db`, session du personnel limitée à 8 h (C20).
 
 ---
 
-## 5. Spécification écran par écran
+## 5. Écrans, préfixes et shells
 
-Le détail des 172 écrans est réparti en trois documents, pour rester lisible. Chaque entrée donne : le shell, le contenu, **les éléments interactifs avec leur cible**, et la distinction implémenté / déclaré / statique.
+Le comportement de chaque écran est dans les `SPEC-ECRANS-*.md`, cité par lot et par ID ; le lot et le statut de
+chaque écran sont dans [INVENTAIRE-ECRANS.md](INVENTAIRE-ECRANS.md).
 
-| Document | Zones | Écrans |
+### 5.1 Préfixes
+
+Un préfixe par zone, unique dans le dépôt. `WAD` désigne l'admin (`WA` est l'achat de parcours).
+
+| Préfixe | Zone | Fichier maquette | Écrans | Lot | Shell cible |
+| --- | --- | --- | ---: | --- | --- |
+| `WL` | Site public | `screens-public-web.jsx` | 21 + 3 à concevoir | 1 (WL02-WL05 : lot 2) | `PublicShell` (WL02-WL05 : `WebShell`) |
+| `W` | Auth apprenant | `screens-auth-web.jsx` | 17 | 2 | `WebShell` |
+| `WP` | Auth parent | `screens-auth-parent-web.jsx` | 12 | 2 | `WebShell` |
+| `01`-`16` | Auth mobile | `screens-auth.jsx` | 16 | Hors périmètre | — |
+| `WD` | Espace apprenant | `screens-dashboard-web.jsx` | 22 + 1 à concevoir | 3 | `AppShell` (apprenant) |
+| `WC` | Catalogue | `screens-catalog-web.jsx` | 8 | 3 | `AppShell` (apprenant) |
+| `WW` | Liste de souhaits | `screens-wishlist-web.jsx` | 3 | 3 | `AppShell` (apprenant) |
+| `WA` | Achat de parcours | `screens-purchase-web.jsx` | 7 | 3 | `AppShell` (apprenant) |
+| `WJ` | Déroulement pédagogique | `screens-journey-web.jsx` | 11 | 3 | `AppShell` (apprenant) |
+| `WK` | Boutique de kits | `screens-kit-shop-web.jsx` | 11 | 3 | `AppShell` connecté, `PublicShell` en invité (D12) |
+| `WPD` | Espace parent | `screens-parent-dashboard-web.jsx` | 14 + 1 à concevoir | 4 | `AppShell` (parent) |
+| `WT` | Espace enseignant | `screens-teacher-dashboard-web.jsx` | 12 + 1 à concevoir | 5 | `AppShell` (enseignant) |
+| `WAD` | Back-office | `screens-admin-web.jsx` | 15 | 6 | `AdminShell` (WAD01-WAD05) ; admin Django (WAD06-WAD15) |
+| `WX` | États transversaux | `screens-states-web.jsx` | 3 | 1 | Enveloppe (§6) |
+
+### 5.2 Réalisation du back-office (S6)
+
+| Réalisation | Écrans |
+| --- | --- |
+| Next.js (`AdminShell`, `/api/backoffice/`) | WAD01 (vue d'ensemble), WAD02-WAD05 (Impact Tracker) |
+| Admin Django, connexion unique avec TOTP | WAD15 |
+| Admin Django (la maquette sert de référence fonctionnelle) | WAD06-WAD14 : utilisateurs, modération et suivi des consentements, contenu, boutique, paiements, événements, RBAC, réglages |
+
+### 5.3 Interactions démontrées par la maquette
+
+Seuls 19 écrans portent un état React ; le reste est figé.
+
+| Écran | État | Effet |
 | --- | --- | --- |
-| [SPEC-ECRANS-1-public-auth.md](SPEC-ECRANS-1-public-auth.md) | §5.1 Site public `WL` · §5.2 Auth apprenant web `W` · §5.3 Auth parent `WP` · §5.4 Auth mobile `01`-`16` | 66 |
-| [SPEC-ECRANS-2-apprenant.md](SPEC-ECRANS-2-apprenant.md) | §5.5 Shell `WebAppShell` · §5.6 Dashboard `WD` · §5.7 Catalogue `WC` · §5.8 Souhaits `WW` · §5.9 Achat `WA` · §5.10 Déroulement `WJ` | 51 |
-| [SPEC-ECRANS-3-parent-teacher-admin.md](SPEC-ECRANS-3-parent-teacher-admin.md) | §5.11 Parent `WPD` · §5.12 Enseignant `WT` · §5.13 Boutique `WK` · §5.14 Admin `WAD` · §6 États `WX` | 55 |
-
-### 5.0 Table des préfixes
-
-Un préfixe par zone, **unique dans tout le dépôt**. 172 ID, aucun doublon.
-
-| Préfixe | Zone | Fichier | Écrans | Shell |
-| --- | --- | --- | --- | --- |
-| `WL` | Site public pré-login | `screens-public-web.jsx` | 21 | `PublicShell` / `WebShell` |
-| `W` | Auth apprenant · web | `screens-auth-web.jsx` | 17 (+2 morts) | `WebShell` |
-| `WP` | Auth parent · web | `screens-auth-parent-web.jsx` | 12 | `WebShell` |
-| `01`-`16` | Auth apprenant · **mobile** | `screens-auth.jsx` | 16 | `Phone` |
-| `WD` | Dashboard apprenant | `screens-dashboard-web.jsx` | 22 | `WebAppShell` |
-| `WC` | Catalogue | `screens-catalog-web.jsx` | 8 | `WebAppShell` |
-| `WW` | Liste de souhaits | `screens-wishlist-web.jsx` | 3 | `WebAppShell` |
-| `WA` | Achat parcours | `screens-purchase-web.jsx` | 7 | `WebAppShell` |
-| `WJ` | Déroulement pédagogique | `screens-journey-web.jsx` | 11 | `WebAppShell` |
-| `WPD` | Dashboard parent | `screens-parent-dashboard-web.jsx` | 14 | `WebParentShell` |
-| `WT` | Dashboard enseignant | `screens-teacher-dashboard-web.jsx` | 12 | `WebTeacherShell` |
-| `WK` | Boutique de kits | `screens-kit-shop-web.jsx` | 11 | `WebAppShell` |
-| `WAD` | Back-office admin | `screens-admin-web.jsx` | 15 | `WebAdminShell` |
-| `WX` | États transversaux | `screens-states-web.jsx` | 3 | aucun |
-
-> **Piège historique** : l'admin utilisait `WA`, déjà pris par l'achat de parcours (7 collisions). Renommé `WAD` en août 2026. Tout document antérieur mentionnant `WA01`-`WA15` pour l'admin doit se lire `WAD01`-`WAD15`.
-
-### 5.0.1 Inventaire des interactions réellement implémentées
-
-Seuls **19 écrans** portent un état React. Tout le reste est une maquette figée. C'est le périmètre exact de ce que le template *démontre*, par opposition à ce qu'il *spécifie*.
-
-| Écran | État | Effet réel |
-| --- | --- | --- |
-| `WD04`, `WPD14`, `WT12` | `tab` (`all`/`unread`) | Filtrage effectif de la liste |
-| `WD06`, `WD13`, `WPD08`, `WT08`, `WAD14` | Objets de toggles | Bascule visuelle des `Toggle` |
-| `WD07`, `WD14`, `WPD07`, `WT07` | `filter` | Filtrage effectif des listes |
+| `WD04`, `WPD14`, `WT12` | `tab` (`all`/`unread`) | Filtrage de la liste |
+| `WD06`, `WD13`, `WPD08`, `WT08`, `WAD14` | Toggles | Bascule visuelle |
+| `WD07`, `WD14`, `WPD07`, `WT07` | `filter` | Filtrage de la liste |
 | `WT06` | `mode` (`individual`/`batch`) | Bascule du formulaire |
-| `WAD06` | `role` | Filtrage effectif de la `DataTable` |
-| `WAD08` | `tab` | Bascule du contenu (3 onglets) |
-| `WAD02`, `WAD11` | `period` | **Aucun effet sur les données** |
-| `WL09` | `tab` | Bascule du contenu légal |
-| `WL14` | `tab` | **Aucun effet sur les données** |
-| `WL01`+ (nav) | `resOpen` | Ouverture du mega-menu Ressources |
-
-Au niveau du design system : `PasswordInput` (afficher/masquer), `Toggle`, `Tag`, `SegmentedControl`, `DataTable.onRowClick`, `CourseCard.onFav`.
+| `WAD06` | `role` | Filtrage de la `DataTable` |
+| `WAD08` | `tab` | 3 onglets |
+| `WAD02`, `WAD11` | `period` | Sans effet sur les données |
+| `WL09` | `tab` | Contenu légal |
+| `WL14` | `tab` | Sans effet |
+| `WL01`+ | `resOpen` | Méga-menu Ressources |
 
 ---
 
 ## 6. États transversaux
 
-Détaillés en [SPEC-ECRANS-3 §6](SPEC-ECRANS-3-parent-teacher-admin.md#6-états-transversaux). Synthèse :
+Détail : écrans `WX01`-`WX03` (lot 1).
 
-`WX01` hors ligne · `WX02` erreur réseau · `WX03` chargement — à implémenter **une fois**, comme enveloppe applicable à toute vue, jamais comme trois pages.
-
-Trois niveaux de chargement à distinguer : **skeleton** structurel (`WD03`), **loader + message rassurant** pour attente longue (`WA04`, `WJ04`), **pastille inline** pour attente asynchrone tierce (`W07`, `WA02`, `WK08`).
-
-**Checklist de recette par zone** : chaque liste a un état vide actionnable · chaque appel a un état de chargement et un état d'erreur · aucun spinner nu.
-
----
-
-## 7. Surface d'API proposée
-
-Déduite des écrans. Aucune API n'existe dans le template — c'est une **proposition de contrat** à confronter aux diagrammes `user flows/*.mmd`.
-
-### 7.1 Authentification
-
-```
-POST /auth/learner/login          { username, password }              → session
-POST /auth/parent/login           { phone, password }                 → session
-POST /auth/admin/login            { email, password, totp }           → session   (WAD15)
-POST /auth/password/forgot        { phone }                           → otpChallenge   (WL02)
-POST /auth/password/otp/verify    { challengeId, code }               → resetToken     (WL03)
-POST /auth/password/reset         { resetToken, password }            → 204            (WL04)
-GET  /auth/username/available     ?username=                          → { available }  (W19)
-```
-
-### 7.2 Inscription & consentement
-
-```
-POST /signup/learner              { firstName, lastName, username, age, privacyAccepted }
-POST /signup/learner/:id/consent  { parentPhone, relationship }       → ConsentRequest (W06)
-GET  /consent-requests/:id                                            → statut         (W07, polling)
-POST /consent-requests/:id/resend                                                      (W07)
-POST /consent-requests/:id/accept                                                      (WP05, WPD05)
-POST /consent-requests/:id/refuse { reason, note? }                                    (WP11)
-POST /signup/learner/:id/password { password }                                         (W10)
-PATCH /learners/:id/profile       { birthDate, country, locality, email?,
-                                    schoolLevel, gender, disability, goals[], avatar } (W11-W14)
-POST /signup/parent               { firstName, lastName, phone, privacyAccepted }      (WP01)
-POST /signup/parent/otp/verify    { code }                                             (WP02)
-```
-
-### 7.3 Catalogue & inscription à un parcours
-
-```
-GET  /courses            ?category=&level=&price=&sort=&page=         (WC01-WC03, WL06)
-GET  /courses/:slug                                                   (WC04, WC05)
-POST /courses/:id/enroll                                              (WC04, gratuit)
-GET  /me/enrollments                                                  (WC06a/b)
-GET  /me/enrollments/:courseId/tree                                   (WC06b, projets+missions)
-POST /wishlist/:courseId  · DELETE /wishlist/:courseId                (WW01, WW03)
-GET  /wishlist                                                        (WW01, WW02)
-```
-
-### 7.4 Achat
-
-```
-POST /kit-codes/redeem   { code, courseId }   → 200 | 409 INVALID_OR_USED   (WA01, WA06)
-POST /purchases          { courseId }
-  → 402 PARENT_APPROVAL_REQUIRED + { paymentLinkId, parentName }            (WA02)
-  → 200 { paymentIntentId }                                                 (WA03)
-POST /payments/mobile-money { intentId, country, network, msisdn }           (WA03, WK06)
-GET  /payments/:id                → pending | succeeded | failed{reason}     (WA04, WA05, WA07)
-POST /payment-links/:id/resend                                               (WA02, WK08)
-```
-
-### 7.5 Pédagogie
-
-```
-GET  /projects/:id                                    (WJ01)
-GET  /levels/:id                                      (WJ02)
-GET  /missions/:id                                    (WJ03)
-POST /missions/:id/complete                           (WJ03)
-GET  /quizzes/:id                                     (WJ04, WJ10)
-POST /quizzes/:id/attempts  { answers[] }
-  → { score, total, percentage, passed, threshold,
-      failedConcepts[], remediation{missionId,title} }   (WJ05, WJ08)
-GET  /me/quiz-attempts   ?status=&sort=               (WD07)
-GET  /me/quiz-attempts/:id                            (WD08)
-GET  /me/badges                                       (WJ06, WJ11)
-GET  /me/certificates/:courseId.pdf                   (WJ07)
-GET  /me/progress                                     (WD21)
-```
-
-### 7.6 Boutique
-
-```
-GET  /kits ?category=&sort=       ·  GET /kits/:id                    (WK01, WK02, WL07)
-GET/POST/PATCH/DELETE /cart/items                                     (WK03, WK10)
-POST /orders  { items[], guest?{firstName,lastName,phone},
-                delivery{country,city,district,street} }              (WK04-WK06)
-GET  /orders/:ref              → timeline[]                           (WK07)
-POST /kits/:id/restock-alert   { phone }                              (WK11)
-GET  /me/orders  ?status=                                             (WD14, WPD07)
-GET  /orders/:ref/invoice.pdf                                         (WD14, WPD07)
-```
-
-### 7.7 Parent
-
-```
-GET  /parent/children                                                 (WPD01, WPD02)
-POST /parent/children          { firstName, lastName, username, password }  (WPD04)
-GET  /parent/children/:id                                             (WPD03)
-PATCH /parent/children/:id                                            (WPD10)
-POST /parent/children/:id/reset-password                              (manquant en UI — §8.9)
-DELETE /parent/children/:id    { reason, note? }                       (WPD09)
-POST /parent/children/:id/resend-invite                                (WPD02)
-GET  /parent/children/:id/weekly-report  ?email=true                   (WPD11)
-GET  /parent/pending-approvals                                         (WPD01)
-```
-
-### 7.8 Enseignant
-
-```
-GET/POST /teacher/classrooms                                          (WT03)
-GET  /teacher/classrooms/:id/learners                                 (WT04)
-POST /teacher/classrooms/:id/learners        { firstName, lastName, phone }   (WT06)
-POST /teacher/classrooms/:id/learners/import { file | pastedList }
-  → { created[], errors[{line, reason}] }                             (WT06 — états d'erreur à concevoir)
-GET  /teacher/learners/:id                                            (WT05)
-POST /teacher/learners/:id/comments  { body, target: 'learner'|'parent' }     (WT05)
-GET  /teacher/evaluations  ?type=&status=                             (WT07)
-GET  /teacher/courses  ·  GET /teacher/courses/:id                    (WT02, WT10)
-```
-
-### 7.9 Événements
-
-```
-GET  /events                                                          (WD10, WPD06, WL08, WL21)
-GET  /events/:id                                    ← FICHE NON CONÇUE
-POST /events/:id/applications { motivation, selfLevel }
-  → { status, parentConsentRequired }                                 (WD11)
-POST /parent/events/:id/applications { childId, motivation? }         (WPD12)
-GET  /me/event-applications  ·  GET /parent/event-applications        (WD10, WPD06)
-```
-
-### 7.10 Admin
-
-```
-GET  /admin/overview                                                  (WAD01)
-GET  /admin/kpis        ?period=month|quarter|year                    (WAD02)
-GET  /admin/kpis/:id                                                  (WAD03)
-GET  /admin/reports/:period                                           (WAD04)
-POST /admin/reports/:period/manual   { values{} }                     (WAD05)
-POST /admin/reports/:period/submit                                    (WAD04 — non branché)
-GET  /admin/reports/:period/export?format=csv|pdf                     (WAD04 — non branché)
-GET  /admin/users ?role=&q=  ·  GET /admin/users/:id                  (WAD06, WAD07)
-POST /admin/users/:id/{suspend|reset-password|change-role}            (WAD07)
-GET  /admin/moderation/{consents|reports|verifications}               (WAD08)
-POST /admin/consents/:id/{approve|reject}                             (WAD08)
-GET  /admin/courses  ·  GET /admin/kits  ·  GET /admin/orders         (WAD09, WAD10)
-GET  /admin/payments ?period=                                         (WAD11)
-GET  /admin/events/applications
-POST /admin/events/applications/:id/{accept|refuse}                   (WAD12 — accept bloqué si consentement requis)
-GET/POST /admin/team  ·  GET /admin/roles                             (WAD13 — RBAC non implémenté)
-GET/PATCH /admin/settings  ·  POST /admin/announcements               (WAD14)
-```
-
-### 7.11 Transverse
-
-```
-GET  /me/notifications ?unread=  ·  POST /me/notifications/read-all
-GET/PATCH /me/notification-preferences                                (WD06, WPD08, WT08)
-GET/PATCH /me/delivery-address  ·  GET/PATCH /me/payment-method       (WD19, WD20)
-POST /me/account/deletion-request { reason? }
-  → { requiresParentApproval: true }                                  (WD15)
-```
+- `WX01` hors ligne (sans bouton « Mode hors ligne », D16) · `WX02` erreur réseau · `WX03` chargement : implémentés
+  **une fois**, comme enveloppe (`error.tsx`, `loading.tsx`, boundary client), jamais comme pages.
+- Trois niveaux de chargement : **skeleton** structurel (`WD03`) ; **loader + message rassurant** pour une attente
+  longue (`WA04`, `WJ04`) ; **pastille inline** pour une attente tierce (`W07`, `WA02`, `WK08`, `WPD15`).
+- Erreurs de l'API : message français du `code` métier (§7.1) affiché au plus près du champ (`fields`) ou en toast ;
+  `THROTTLED` affiche le délai d'attente.
+- Session expirée : redirection vers W16 (ou WAD15) avec retour à la page d'origine.
+- Recette par écran : état nominal, vide actionnable, chargement, erreur ; aucun spinner nu.
 
 ---
 
-## 8. Anomalies et arbitrages requis
+## 7. Surface d'API cible
 
-Relevé lors de la lecture du code. Classé par gravité décroissante.
+État de chaque endpoint par rapport à l'API existante : **existe** · **à aligner** (existe, à renommer ou corriger) ·
+**à créer** · **à supprimer**. Les écrans consommateurs sont cités par ID. Tous les chemins sont préfixés par `/api/`
+(omis dans les tables).
 
-### 8.1 🔴 La documentation contredit les tokens sur l'identité chromatique
+### 7.1 Conventions
 
-`README.md`, `HANDOFF.md` et `CLAUDE.md` affirment tous que « la palette violet `--primary-500` (`#5B3FE0`) reste la signature de l'app » et présentent la coexistence avec le logo orange-magenta comme **non arbitrée**.
-
-**Or `ds-tokens.css` définit `--primary-500: #9E1B9A`** — un magenta. Le violet `#5B3FE0` n'est plus que `--cat-robotique`. L'arbitrage semble donc **déjà tranché en faveur du magenta**, sans que la documentation ait suivi.
-
-Conséquence directe : plusieurs valeurs codent encore l'ancien violet en dur et sont désormais **désaccordées** de la primaire :
-
-| Emplacement | Valeur |
+| Sujet | Règle |
 | --- | --- |
-| `ds-tokens.css` `--shadow-card` / `--shadow-card-hover` | `rgba(91,63,224,…)` |
-| `dashboardWeb_styles` `.app-sidebar__item.is-active` | `background: rgba(91,63,224,.10)` |
-| `dashboardWeb_styles` `.welcome-card` | `background: rgba(91,63,224,.06)` |
-| `catalogWeb_styles` `.cat-project.is-current` | `box-shadow: 0 4px 12px rgba(91,63,224,.08)` |
-| `ds-complex.jsx` `@keyframes pulse` | `rgba(91,63,224,.4)` |
+| Chemins | `/api/<domaine>/…/`, slash final, kebab-case ; identifiants publics par `slug` ou `reference` quand ils apparaissent dans une URL front (D5) |
+| Back-office | `/api/backoffice/…/` ; `/admin/` réservé à l'admin Django (D5) |
+| Authentification | Session + CSRF (S12). `IsAuthenticated` par défaut ; les routes publiques sont explicitement marquées |
+| Autorisation | Par rôle (`learner`, `parent`, `teacher`) + propriété (soi, ses enfants, ses élèves). Back-office : `isStaff` + OTP vérifié + groupe (D71, D72) |
+| Pagination | `?page=&pageSize=` → `{ count, next, previous, results }` |
+| Erreurs | `{ "code": "…", "message": "…", "fields": { "<champ>": [{ "code", "message" }] } }`, message en français (D4) |
+| Téléphones, montants | E.164 ; entiers en FCFA |
 
-**Action** : confirmer la primaire, purger les `rgba` en dur, mettre à jour les trois documents. Bloquant avant de figer le thème.
+Catalogue des codes métier (extensible, chaque code a son message français) :
 
-### 8.2 🔴 L'apprenant a encore un téléphone et un OTP dans le dashboard
-
-L'invariant est clair : « l'apprenant se connecte par identifiant + mot de passe, **jamais** par téléphone » (`W04`, `W16`, `W19`, `WPD04`). Pourtant :
-
-- `WD13` (Paramètres) affiche une carte « Connexion » avec **Téléphone : +229 01 90 12 34 56**.
-- `WD18` (Modifier la connexion) propose une section complète « **Changer de numéro** » avec envoi de code et `OTPInput`.
-- `WL02`-`WL05` (reset mot de passe) fonctionne **par téléphone**, donc inapplicable à l'apprenant.
-
-Ce sont des vestiges du modèle pré-refonte, au même titre que `W09`/`W17` (déjà retirés du flux). **Action** : supprimer le bloc « changer de numéro » de `WD18`, remplacer « Téléphone » par « Identifiant » dans `WD13`, et cantonner `WL02`-`WL05` aux personas parent/enseignant.
-
-### 8.3 🟠 Les KPI d'inclusion sont annoncés indisponibles alors que les champs existent
-
-`WAD02` et `WAD05` marquent **Zone rurale** et **Situation de handicap** comme « Indisponibles — non collectés au signup », avec un lien « Activer la collecte ».
-
-Or `W12` (profil apprenant) **collecte déjà** « Situation de handicap » (`<select>` Aucune/Visuel/Auditif/Moteur/Autre), tout comme `WP08` (parent) et `WPD10` (édition enfant). `WAD07` affiche même le champ « Localité (urbain/rural) : Non renseigné », ce qui suppose que le champ existe côté modèle.
-
-Ce qui manque réellement :
-- **Zone rurale** : `W11` collecte « Localité (ville / quartier) » en texte libre — non exploitable en urbain/rural. Il faut soit un champ dédié, soit un référentiel de localités qualifiées.
-- **Institutions** : entité absente du modèle.
-- **Complétions de parcours** : mesure non instrumentée (`WAD01` affiche « — · mesure à activer »).
-
-**Action produit** : trancher avant de figer le schéma. Trois décisions distinctes, pas une.
-
-### 8.4 🟠 Trois formulations contradictoires du refus de consentement
-
-| Source | Formulation |
+| Domaine | Codes |
 | --- | --- |
-| `HANDOFF.md` §5 | « **Le refus est terminal.** Pas de retry, pas de contournement » |
-| `WAD08` (admin) | « Le refus est terminal. » |
-| `WP11` (parent) | « Le refus est **définitif pour cette demande**. Votre enfant pourra **refaire une demande plus tard**. » |
-| `W18` (enfant) | Deux boutons : « **Changer de parent** » et « **Réessayer plus tard** » |
+| Génériques | `VALIDATION_ERROR`, `NOT_AUTHENTICATED`, `PERMISSION_DENIED`, `NOT_FOUND`, `THROTTLED` |
+| Auth | `INVALID_CREDENTIALS`, `ACCOUNT_PENDING_CONSENT`, `ACCOUNT_SUSPENDED`, `ACCOUNT_DEACTIVATED`, `USERNAME_TAKEN`, `USERNAME_INVALID`, `PHONE_TAKEN`, `PHONE_INVALID`, `PASSWORD_TOO_WEAK`, `AGE_OUT_OF_RANGE`, `OTP_INVALID`, `OTP_EXPIRED`, `OTP_TOO_MANY_ATTEMPTS`, `OTP_RESEND_TOO_EARLY`, `OTP_DAILY_LIMIT`, `RESUME_CODE_INVALID`, `SIGNUP_EXPIRED`, `INVITATION_INVALID`, `OTP_REQUIRED` (back-office) |
+| Comptes | `CONSENT_REQUEST_EXPIRED`, `CONSENT_ALREADY_RESOLVED`, `CONSENT_COOLDOWN`, `CONSENT_PHONE_MISMATCH`, `CHILDREN_STILL_LINKED`, `BIRTHDATE_AGE_MISMATCH` |
+| Pédagogie | `PAYMENT_REQUIRED`, `KIT_CODE_REQUIRED`, `CONTENT_LOCKED`, `NOT_ENROLLED`, `QUIZ_COOLDOWN` |
+| Commerce | `PARENT_APPROVAL_REQUIRED`, `KIT_CODE_INVALID`, `KIT_CODE_ALREADY_USED`, `KIT_CODE_NOT_COMPATIBLE`, `OUT_OF_STOCK`, `DELIVERY_ZONE_UNAVAILABLE`, `NETWORK_UNAVAILABLE`, `ORDER_EXPIRED`, `ORDER_ALREADY_PAID`, `PAYMENT_FAILED` |
+| Événements, classes, pilotage | `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED`, `EVENT_ALREADY_PROPOSED`, `CLASSROOM_QUOTA_EXCEEDED`, `LEARNER_QUOTA_EXCEEDED`, `COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`, `REPORT_LOCKED` |
+| Import d'élèves (par ligne) | `DUPLICATE_ROW`, `MALFORMED_ROW`, `PHONE_INVALID`, `ALREADY_IN_CLASSROOM`, `LEARNER_QUOTA_EXCEEDED` ; fichier : `IMPORT_TOO_LARGE` (> 200 lignes, C19) |
 
-Ces quatre énoncés décrivent trois politiques différentes. `W18` offre explicitement le contournement que `HANDOFF.md` interdit.
+### 7.2 `auth`
 
-**Action** : choisir une politique et la propager (cooldown ? plafond de tentatives ? changement de référent soumis à modération admin ?). Impacte le modèle `ConsentRequest` et la modération `WAD08`.
+| Endpoint | Écrans | État |
+| --- | --- | --- |
+| `GET auth/csrf/` | tous | à aligner (`public/user/csrf`) |
+| `POST auth/login/` `{ identifier, password }` → utilisateur | W16 | à aligner (`public/user/session-login`, email seul) |
+| `POST auth/logout/` | WD16 et menus des shells | à aligner (`user/session-logout`) |
+| `GET auth/username-availability/?username=` | W04, W19 | à créer |
+| `POST auth/learner-signup/` `{ firstName, lastName, username, age, privacyAccepted }` → `{ resumeCode }` | W04, W05 | à créer |
+| `GET auth/learner-signup/` → étape, statut du consentement | W07, W08, W18 | à créer |
+| `POST auth/learner-signup/resume/` `{ username, resumeCode }` | W07, W16 | à créer |
+| `POST auth/learner-signup/password/` `{ password }` → active et connecte | W10 | à créer |
+| `POST auth/parent-signup/` `{ firstName, lastName, phone, privacyAccepted }` → `{ challengeId }` (réponse identique si le numéro est déjà inscrit, C13) | WP01 | à créer |
+| `POST auth/parent-signup/verify/` `{ challengeId, code }` → `{ existingAccount }` (compte existant → W16, C13) | WP02 | à créer |
+| `POST auth/parent-signup/password/` `{ password }` → connecte | WP03 | à créer |
+| `POST auth/otp/resend/` `{ challengeId }` | WP02, WL03 | à créer |
+| `POST auth/password-reset/` `{ identifier }` → `{ challengeId }` | WL02 | à aligner (`forgot-password-step-1`, lien email) |
+| `POST auth/password-reset/verify/` `{ challengeId, code }` → `{ resetToken }` | WL03 | à créer |
+| `POST auth/password-reset/confirm/` `{ resetToken, password }` | WL04, WL05 | à aligner (`forgot-password-step-2`) |
+| `GET auth/teacher-invitations/{token}/` · `POST …/accept/` `{ password }` | activation enseignant (§8.18) | à créer |
 
-### 8.5 🟠 Le format du Kit Code est contradictoire
+### 7.3 `accounts`
 
-`WA01` : hint « **12 caractères**, au dos de la notice », placeholder `STEAMY-XXXX-XXXX` (**16 caractères**).
-`WA06` : message d'erreur « vérifie les 12 caractères », valeur saisie `STEAMY-9F2A-001Z` (**16 caractères**).
+| Endpoint | Écrans | État |
+| --- | --- | --- |
+| `GET accounts/me/` (identité, rôle, statut, profil, étape de profil restante `profileStep` pour W11-W14 / WP07-WP09, données du shell : avatar, classe, ville, compteurs ; personnel : `isStaff`, `otpVerified`, `staffGroups`) | tous les shells, redirection après W16, garde de WAD01-WAD05 | à aligner (`user/my-profile`) |
+| `PATCH accounts/me/` | WD17, WPD08, WT08 | à créer |
+| `PATCH accounts/me/learner-profile/` | W11-W14, WD17 | à créer |
+| `PATCH accounts/me/parent-profile/` | WP07-WP09, WPD08 | à créer |
+| `PATCH accounts/me/teacher-profile/` | WT08 | à créer |
+| `POST accounts/me/password/` `{ currentPassword, newPassword }` | WD18, WPD08, WT08 | à aligner (`user/change-password`) |
+| `POST accounts/me/email/` | WPD08, WT08 | à aligner (`user/change-email`) |
+| `POST accounts/me/phone-change/` · `POST …/verify/` | WPD08 | à créer |
+| `GET accounts/me/parent/` | WD22 | à créer |
+| `GET/PUT accounts/me/delivery-address/` | WD19, WK05 | à créer |
+| `POST accounts/me/deletion-request/` · `DELETE` (annuler) | WD15, WPD08 | à créer |
+| `POST accounts/consent-requests/` `{ parentPhone, relationship }` (session d'inscription) | W06 | à créer |
+| `POST accounts/consent-requests/{id}/resend/` | W07 | à créer |
+| `POST accounts/consent-requests/preview/` `{ token }` → numéro du parent masqué (public, throttlé ; aucune donnée de l'enfant) | WP01 (prérempli depuis le lien SMS) | à créer |
+| `POST accounts/consent-requests/claim/` `{ token }` (jeton du lien SMS, après connexion du parent) | WP04, WPD05 | à créer |
+| `GET accounts/consent-requests/?status=` (demandes adressées au numéro vérifié du parent) · `GET …/{id}/` | WP04, WPD01, WPD02, WP05, WPD05 | à créer |
+| `POST accounts/consent-requests/{id}/accept/` (origine enseignant : `{ username, password }` ou `{ learnerId }` pour rattacher un enfant existant, C11) | WP05, WP06, WPD05 | à créer |
+| `POST accounts/consent-requests/{id}/refuse/` `{ reason, note? }` | WP11, WP12, WPD05 | à créer |
+| `GET accounts/children/` · `POST` `{ firstName, lastName, birthDate, relationship, username, password }` | WPD01, WPD02, WP09, WPD04 | à créer |
+| `GET/PATCH accounts/children/{id}/` (le `GET` inclut la progression par parcours et les tentatives récentes) | WPD03, WPD10 | à créer |
+| `POST accounts/children/{id}/password-reset/` `{ password }` | WPD03 | à créer |
+| `POST accounts/children/{id}/deletion/` `{ reason, note? }` · `DELETE` (annuler) | WPD09 | à créer |
+| `POST accounts/deletion-requests/{id}/approve/` · `…/refuse/` | WPD01 | à créer |
+| `GET accounts/children/{id}/weekly-report/?week=AAAA-Www` | WPD11 | à créer |
+| `GET accounts/pending-actions/` (consentements, paiements, candidatures, suppressions) | WPD01 | à créer |
 
-**Action** : fixer le format (longueur, alphabet, préfixe, séparateurs, sensibilité à la casse) — c'est un mécanisme anti-fraude, il doit être spécifié côté serveur, avec limitation de tentatives.
+### 7.4 `catalog`, `learning`, `wishlist`
+
+| Endpoint | Écrans | État |
+| --- | --- | --- |
+| `GET catalog/categories/` (avec `courseCount` publiés) | WL06, WL16, WC01 | à créer |
+| `GET catalog/courses/?category=&difficulty=&price=&featured=&q=&sort=&page=` (public, publiés seulement, indépendant de la session) | WL01, WL06, WL16, WC01-WC03, WD02 | à aligner (`courses/courses/`) |
+| `GET catalog/courses/{slug}/` (sans contenu des missions) | WL22, WC04, WC05 | à aligner |
+| `GET learning/dashboard/` (points, streak, rang, reprise, recommandations courtes) | WD01, WD02 | à créer |
+| `GET learning/enrollments/` | WD23, WC06a | à aligner (`learning/enrollments/`, filtre propriétaire) |
+| `POST learning/enrollments/` `{ courseSlug }` (gratuit seulement, sinon `PAYMENT_REQUIRED`/`KIT_CODE_REQUIRED`) | WC04, W15 | à aligner (`courses/{id}/enroll`, S7) |
+| `GET learning/enrollments/{courseSlug}/tree/` | WC06a, WC06b, WJ09 | à créer |
+| `GET learning/projects/{id}/` · `levels/{id}/` · `missions/{id}/` | WJ01, WJ02, WJ03 | à créer (remplace `modules`, `lessons`, `resources`) |
+| `POST learning/missions/{id}/complete/` → `next` (mission ou quiz suivant) | WJ03 | à aligner (`learning/progress/`) |
+| `POST learning/activity/` `{ missionId, seconds }` | WJ03 | à créer |
+| `GET learning/quizzes/{id}/` (sans corrigé) | WJ04, WJ10 | à aligner (`learning/quizzes/`) |
+| `POST learning/quizzes/{id}/attempts/` `{ answers }` (envoi groupé) → score, statut, `failedConcepts`, remédiation, badge, points, `retryInSec`, `next` | WJ05, WJ06, WJ08, WJ11 | à aligner (`learning/attempts/`) |
+| `GET learning/attempts/?status=` (+ agrégats du bandeau : taux, nombre, parfaits, streak) · `GET …/{id}/` | WD07, WD08, WD09 | à aligner |
+| `GET learning/badges/` | WJ06, WJ11 | à créer |
+| `GET learning/certificates/` (avec `pdfStatus`) · `GET …/{id}/download/` | WJ07, WD21 | à aligner (`learning/certificates/`) |
+| `GET learning/progress/` · `GET learning/recommendations/` | WD21 | à créer |
+| `GET wishlist/` · `PUT wishlist/{courseSlug}/` · `DELETE wishlist/{courseSlug}/` | WC01-WC05, WW01-WW03 | à créer |
+
+### 7.5 `shop`, `payments`
+
+| Endpoint | Écrans | État |
+| --- | --- | --- |
+| `GET shop/kits/?category=` · `GET shop/kits/{slug}/` (public) | WL07, WK01, WK02, WK11 | à créer |
+| `GET shop/cart/` · `POST shop/cart/items/` · `PATCH/DELETE shop/cart/items/{id}/` | WK03, WK10 | à créer |
+| `GET shop/delivery-zones/?country=` (public) | WK05 | à créer |
+| `POST shop/kits/{slug}/restock-alerts/` `{ phone }` (invité) ou sans corps (connecté : notification in-app, D30) | WK11 | à créer |
+| `POST payments/orders/` `{ kind, items, beneficiaryId?, guest?, deliveryAddress?, paymentRequestId? }` → total serveur (parent ou invité) | WK04-WK06, WPD12, WPD15 | à refondre (`payments/orders/`, prix client) |
+| `GET payments/orders/?status=` (payeur ou bénéficiaire) | WD14, WPD07 | à refondre |
+| `GET payments/orders/{reference}/` (invité : jeton opaque en en-tête `X-Guest-Token`, C10 ; `kitCodes` visibles du payeur seul) | WA05, WK07, WPD07 | à refondre |
+| `GET payments/orders/{reference}/invoice/` | WD14, WPD07 | à créer |
+| `POST payments/orders/{reference}/payments/` `{ country, network, msisdn }` → initiation (invité : `X-Guest-Token` ; aussi reprise d'une commande en attente sans demande) | WA03, WK06, WPD07, WPD12, WPD15 | à créer |
+| `GET payments/payments/{id}/` → `initiated`\|`pending`\|`succeeded`\|`failed` + raison | WA04, WA05, WA07, WK09 | à refondre (`payments/payments/`) |
+| `POST payments/webhook/{provider}/` (signé, idempotent) | — | à aligner (S5) |
+| `POST payments/kit-codes/redeem/` `{ code, courseSlug }` | WA01, WA06 | à créer |
+| `POST payments/payment-requests/` `{ kind, courseSlug? \| items? \| eventApplicationId? }` (apprenant) | WA02, WK08 | à créer |
+| `POST payments/payment-requests/{id}/resend/` | WA02, WK08 | à créer |
+| `GET payments/payment-requests/?status=` · `GET …/{id}/` | WPD01, WPD15 | à créer |
+| `POST payments/payment-requests/{id}/cancel/` (apprenant, C4) | WA02, WK08 | à créer |
+| `POST payments/payment-requests/{id}/decline/` | WPD15 | à créer |
+
+### 7.6 `events`, `classrooms`
+
+| Endpoint | Écrans | État |
+| --- | --- | --- |
+| `GET events/?upcoming=` · `GET events/{slug}/` (public, avec `seatsLeft`) | WL21, WL23, WD10, WPD06, WT09 | à créer |
+| `GET events/tickets/` (tickets Steamy Events de l'apprenant, D33) | WJ07, WD10, WD11 | à créer |
+| `POST events/{slug}/proposals/` `{ classroomId }` (enseignant ; notification des élèves et parents) | WT09 | à créer |
+| `POST events/{slug}/applications/` `{ motivation, selfLevel }` (apprenant) ou `{ childId, motivation? }` (parent) | WD11, WPD12 | à créer |
+| `GET events/applications/` (les siennes ou celles des enfants) | WD10, WPD06 | à créer |
+| `POST events/applications/{id}/accept/` (événement payant → demande de paiement) · `…/refuse/` | WPD06, WPD15 | à créer |
+| `GET classrooms/dashboard/` | WT01 | à créer |
+| `GET classrooms/school/` (école, offre, parcours de l'offre, quotas utilisés et restants) | WT03, WT06, WT13 | à créer |
+| `GET classrooms/` · `POST classrooms/` `{ name, courseSlug, schoolGrade? }` | WT03, WT13 | à créer |
+| `GET classrooms/{id}/` · `PATCH classrooms/{id}/` (parcours figé dès qu'il y a un membre) · `GET classrooms/{id}/members/` | WT04, WT13 | à créer |
+| `POST classrooms/{id}/members/{memberId}/remove/` (statut `left`) | WT04 | à créer |
+| `POST classrooms/{id}/invitations/` `{ firstName, lastName, parentPhone, relationship }` | WT06 | à créer |
+| `POST classrooms/{id}/invitations/import/` (CSV ou Excel, 200 lignes max, import partiel) → `{ created[], errors[{ line, code, data }] }` (C19) | WT06 | à créer |
+| `GET classrooms/learners/{id}/?classroomId=` (sans données sensibles ; tentatives et commentaires du parcours de la classe) | WT05 | à créer |
+| `POST classrooms/learners/{id}/comments/` `{ body, attemptId? }` (visible de l'apprenant et du parent, D63) | WT05 | à créer |
+| `GET classrooms/comments/?learnerId=` (apprenant : les siens ; parent : ses enfants) | WD01, WPD03 | à créer |
+| `GET classrooms/reviews/?status=` (« À revoir ») | WT01, WT07 | à créer |
+| `GET classrooms/courses/` · `GET classrooms/courses/{slug}/` · `GET classrooms/courses/{slug}/missions/{id}/` (lecture seule) | WT02, WT10 | à créer |
+| `GET classrooms/event-applications/` (candidatures des élèves, lecture seule) | WT09 | à créer |
+
+### 7.7 `notifications`, `referentials`, `public`, `core`
+
+| Endpoint | Écrans | État |
+| --- | --- | --- |
+| `GET notifications/?unread=` · `GET notifications/unread-count/` | WD04, WD05, WPD14, WT12, cloche des shells | à aligner (`messaging/notifications/`) |
+| `POST notifications/{id}/read/` · `POST notifications/read-all/` | WD04, WPD14, WT12 | à aligner |
+| `GET/PATCH notifications/preferences/` | WD06, WD13, WPD08, WT08 | à créer |
+| `GET referentials/countries/` · `payment-networks/?country=` · `school-grades/` · `goals/` · `avatars/` · `disabilities/` · `relationships/` · `refusal-reasons/` · `localities/?country=` (publics, cachables) | W05-W14, WP01-WP09, WPD04, WPD10, WT06, WA03, WK04-WK06, WPD15 | à créer |
+| `POST public/quote-requests/` | WL11 | à créer |
+| `POST public/leads/` | WL20, footer | à créer |
+| `POST public/contact-messages/` | WL24 | à créer |
+| `GET health/` · `POST core/presign/` | infra, téléversements | existe |
+
+### 7.8 `backoffice` (écrans Next.js uniquement)
+
+Les écrans WAD06-WAD15 sont dans l'admin Django et n'ont **pas** d'API.
+
+| Endpoint | Écrans | État |
+| --- | --- | --- |
+| `GET backoffice/overview/` (« À traiter » : `{ kind, count, adminPath }` filtré par groupe) | WAD01 | à créer (remplace `analytics/dashboard/summary/`) |
+| `GET backoffice/kpis/?period=` · `GET backoffice/kpis/{code}/` | WAD02, WAD03 | à créer |
+| `GET backoffice/impact-reports/{period}/` | WAD04 | à créer |
+| `PATCH backoffice/impact-reports/{period}/values/` | WAD05 | à créer |
+| `POST backoffice/impact-reports/{period}/submit/` | WAD04 | à créer |
+| `POST backoffice/impact-reports/{period}/exports/` `{ format }` · `GET backoffice/exports/{id}/` | WAD04 | à créer (remplace `analytics/export/events.csv`) |
+
+### 7.9 Endpoints existants à supprimer ou fermer
+
+| Endpoint existant | Raison | Action |
+| --- | --- | --- |
+| `POST signup/`, `POST public/user/signup` | Rôle au choix (S1) | Supprimer |
+| `POST public/user/login` (token DRF) | S12 | Supprimer, retirer `TokenAuthentication` |
+| `api-auth/` (login navigable DRF) | Surface inutile | Supprimer |
+| `GET api/` (`api_root`, cassé) | | Supprimer |
+| `messaging/conversations/`, `messages/`, `attachments/`, websocket | Messagerie gelée (S11) | Retirer des routes |
+| `analytics/events/` (CRUD `AllowAny`), `analytics/dashboard/summary/`, `analytics/export/events.csv` | S3 | Fermer ; remplacés par §7.8 |
+| `courses/paths/` | `Path` supprimé (S2) | Supprimer |
+| Écriture `courses/courses/`, `modules/`, `lessons/`, `resources/` | Contenu dans l'admin Django (S5, S2) | Supprimer (lecture remplacée par `catalog` et `learning`) |
+| Écriture `learning/quizzes/`, `questions/`, `choices/`, `attempts/{id}/manual_grade/` | S8, D65 | Supprimer |
+| `courses/courses/{id}/enroll/` | S7 | Remplacé par `POST learning/enrollments/` |
+| Écriture client `payments/orders/`, `payments/payments/` | S5 | Remplacée par §7.5 |
+| `user/files/create-signed-file`, `files`, `files/{id}` | Sans slash, S4 | À aligner (`files/…/`, filtre propriétaire) ou supprimer si aucun écran ne l'utilise |
+
+---
+
+## 8. Anomalies et résolutions
+
+Gravité : 🔴 bloquant · 🟠 important · 🟡 moyen · 🟢 mineur.
+
+### 8.1 🔴 Identité chromatique : magenta ou violet
+
+`--primary-500` vaut `#9E1B9A` (magenta) dans `design/ds-tokens.css` et `apps/web/src/styles/tokens.css`, mais
+`--shadow-card(-hover)`, `.app-sidebar__item.is-active`, `.welcome-card`, `.cat-project.is-current` et l'animation
+`pulse` codent encore `rgba(91,63,224,…)` (ancien violet), et `README`/`HANDOFF`/`CLAUDE.md` de la maquette parlent
+encore du violet.
+**Résolu : C1.** La primaire est le magenta `#9E1B9A`, qui est aussi la couleur du logo. Les `rgba` violets sont à
+dériver de `--primary-500` avant le premier composant (lot 1). Les notes de la maquette sont périmées sur ce point.
+
+### 8.2 🔴 L'apprenant a encore un téléphone et un OTP
+WD13 affiche un téléphone, WD18 « Changer de numéro », WD20 un numéro Mobile Money, WL02-WL05 au tutoiement.
+**Résolu : S4, D26, D30.** WD13/WD18 affichent l'identifiant ; WD20 est supprimé ; WL02-WL05 réservés au parent et à
+l'enseignant, au vouvoiement.
+
+### 8.3 🟠 KPI d'inclusion « indisponibles »
+**Résolu : D75** (genre, date de naissance, handicap, localité qualifiée `Locality.areaType`). « Institutions » :
+voir §8.18.
+
+### 8.4 🟠 Politique de refus du consentement
+**Résolu : D22.** Refus terminal pour la demande, nouvelle demande au même parent après 30 jours, changement de parent
+par la modération admin, compte en attente purgé. W18 : retirer « Changer de parent ».
+
+### 8.5 🟠 Format du Kit Code
+**Résolu : D35, D36.** `STEAMY-XXXX-XXXX` (8 caractères utiles, Crockford base32) ; WA01/WA06 alignent leurs textes.
 
 ### 8.6 🟠 `PhoneInput` code en dur le Bénin
+**Résolu : D3.** Pays choisi, indicatif et validation servis par `referentials/countries/`, stockage E.164.
 
-`ds-atoms.jsx` fixe `🇧🇯 +229` dans le préfixe, alors que tous les `<select>` de pays proposent **Bénin, Togo, Côte d'Ivoire, Burkina Faso**. Le pays sélectionné ne change pas l'indicatif.
+### 8.7 🟠 Statut `warn` des tentatives
+**Résolu : D31.** `ok` ≥ seuil ; `warn` de 50 % au seuil ; `ko` < 50 %.
 
-**Action** : rendre `PhoneInput` dépendant du pays, avec un référentiel indicatif + format + validation par pays. Impacte `W06`, `WP01`, `WK04`, `WT06`, `WA03`, `WK06`, `WD20`, `WK11`, `WL02`.
+### 8.8 🟡 Données de démonstration incohérentes
+**Résolu : D2.** Un seul jeu (Léa Adjovi, 4ᵉ, Cotonou…), utilisé pour les fixtures ; affichage monétaire « FCFA ».
 
-### 8.7 🟠 Le statut `warn` des tentatives de quiz n'est défini nulle part
+### 8.9 🟡 Réinitialisation du mot de passe d'un enfant absente
+**Résolu : D26.** Action « Réinitialiser le mot de passe » sur WPD03 ; FAQ de WPD13 corrigée (le parent crée
+l'enfant via WPD04, pas par lien d'inscription).
 
-`QuizAttemptRow` accepte trois statuts : `ok` « Réussi », `warn` « **À refaire** », `ko` « Échoué ». Les seuils métier n'en définissent que deux (≥ 70 % formative, ≥ 80 % sommative).
+### 8.10 🟡 Navigation applicative
+**Résolu : D39.** 6 entrées, « Mes parcours » (`WD23`) en v1, « Badges » masqué tant que l'écran n'est pas conçu,
+`title="Bientôt"` retirés.
 
-Dans les mocks, `warn` correspond à 6/10 et 7/10 — donc **sous le seuil**, comme `ko` (4/10, 5/10). Aucune règle ne sépare les deux.
+### 8.11 🟡 Fonctions annoncées non spécifiées
 
-**Action** : définir la bande `warn` (ex. 50-69 % = « à refaire », < 50 % = « échoué ») ou supprimer le statut.
-
-### 8.8 🟡 Données mock incohérentes entre écrans
-
-| Donnée | Valeurs divergentes |
-| --- | --- |
-| Nombre d'apprenants | `W02` « Plus de 12 000 jeunes inscrits » · `WL01`/`WL10` « 1 000+ apprenants » · `WAD06` « Apprenants 220 » |
-| Le kit robot | `WC05` « Kit Robot Bluetooth · 25 000 F » · `WK01`/`WK02` « Steamy Bot v1 · 35 000 F » · `WAD10` « Kit Robot Starter · 25 000 F » |
-| Email de Léa | `WD06` `seth.gnavo@example.com` (= le super-admin de `WAD13`) · `WD17` `lea.adjovi@exemple.bj` · `WAD07` `léa.adjovi@exemple.bj` (avec accent dans l'adresse) |
-| Devise | « F », « F CFA », « FCFA » employés indifféremment |
-| Classe de Léa | `WebAppShell` sidebar « 3ème » · `WD13`/`WPD03`/`WP05` « 4ème » |
-
-**Action** : constituer un **jeu de données de démonstration unique** et cohérent avant la recette. Normaliser l'affichage monétaire sur **FCFA**.
-
-### 8.9 🟡 La réinitialisation du mot de passe d'un enfant est annoncée mais absente
-
-- `WD12` (aide apprenant) : « demande à ton parent de le réinitialiser **depuis ton profil, dans son espace** ».
-- `WPD04` : « Vous pourrez le réinitialiser **depuis son profil** ».
-- `WPD13` (aide parent) : « Dans "Mes enfants" → "Ajouter un enfant" : **saisissez son numéro, il recevra un lien d'inscription** » — décrit un flux qui n'est pas celui de `WPD04` (identifiant + mot de passe défini par le parent).
-
-Or **ni `WPD03` ni `WPD10` ne portent l'action « Réinitialiser le mot de passe »**. Seul `WAD07` (admin) l'expose.
-
-**Action** : ajouter l'action au profil enfant côté parent, et corriger la FAQ `WPD13`.
-
-### 8.10 🟡 La navigation applicative ne couvre pas les zones conçues
-
-`NAV_ITEMS` de `WebAppShell` : `home`, `catalog`, `wishlist`, `badges`, `profile`.
-
-- **Aucun écran n'est rattaché à `badges`** — pourtant `WJ06`, `WJ07` et `WJ11` proposent tous « Voir mes badges ». L'écran de collection de badges **n'existe pas**.
-- **« Mes parcours » n'a pas d'onglet**, alors que `WC06a/b`, `WJ01` et `WJ09` s'y rattachent par fil d'Ariane (et détournent `active="home"`).
-- Toutes les entrées sauf `home` portent `title="Bientôt"` — vestige de prototype visible en infobulle.
-
-**Action** : concevoir l'écran « Badges », ajouter une entrée « Mes parcours », retirer les `title="Bientôt"`.
-
-### 8.11 🟡 Fonctionnalités annoncées par l'interface mais non spécifiées
-
-| Annonce | Écran | Statut |
+| Annonce | Écran | Résolution |
 | --- | --- | --- |
-| « **Mode hors ligne** » (bouton) | `WX01` | Aucune spécification nulle part |
-| « Demander un changement de parent » | `WD22` | Workflow non conçu |
-| « Créer une classe » | `WT03` | Écran non conçu |
-| « Rejoindre l'équipe » (instructeur) | `WL01` | Formulaire non conçu |
-| Export CSV / PDF, Soumettre | `WAD04` | Non branché |
-| RBAC réel | `WAD13` | Descriptif uniquement |
-| Fiche événement détaillée | `WD10`, `WPD06`, `WL21` | Non conçue |
-| Erreurs d'import par lot | `WT06` | Non conçues |
-| Soumission d'un tutoriel communautaire | `WL15` (« puis partage les tiennes ») | Non conçue |
-| Pagination / filtre du blog | `WL17` (4 catégories affichées) | Non conçus |
+| « Mode hors ligne » | WX01 | Retiré (D16) |
+| « Demander un changement de parent » | WD22 | Pas de bouton en v1 ; modération admin (D41, D22) |
+| « Créer une classe » | WT03 | Écran `WT13` à concevoir |
+| « Rejoindre l'équipe » | WL01 | Résolu : §8.18 |
+| Export CSV/PDF, Soumettre | WAD04 | Asynchrone, soumission verrouillante (D74) |
+| RBAC réel | WAD13 | Groupes Django (D71) |
+| Fiche événement | WD10, WPD06, WL21 | Écran `WL23` à concevoir (S8) |
+| Erreurs d'import par lot | WT06 | État de WT06 (CONVENTIONS) |
+| Tutoriels communautaires | WL15 | Reporté (S7) |
+| Pagination du blog | WL17 | Contenu statique versionné (D10) |
 
-### 8.12 🟡 Le réseau Celtiis manque dans les paramètres admin
+### 8.12 🟡 Celtiis absent des réglages
+**Résolu : D76.** Réseaux réglés par pays (`PaymentNetwork`), lus publiquement par `WANetworkCard`.
 
-`WA03`, `WK06` et `WD20` proposent **MTN · Moov · Celtiis**. `WAD14` ne permet d'activer que **MTN MoMo** et **Moov Money**.
+### 8.13 🟡 Accessibilité
+Éléments cliquables non focusables, `aria-*` quasi absents, `OTPInput` non saisissable, `--ink-400` sous AA, `Modal`
+sans gestion du focus. **Règle de recette** (§2.6), pas d'arbitrage nécessaire.
 
-**Action** : aligner `WAD14`, ou mieux : piloter `WANetworkCard` par la configuration serveur plutôt que par une liste en dur (le composant est explicitement identifié comme porteur de règle métier).
+### 8.14 🟠 Divergence mobile
+**Hors périmètre** (CONVENTIONS, S12) : les écrans `01`-`16` ne sont pas implémentés. Leurs référentiels divergents
+(objectifs, avatars) disparaissent avec D3.
 
-### 8.13 🟡 Accessibilité : niveau de départ très bas
-
-- Éléments cliquables non focusables : `quiz-choice`, `mission`, `cat-project__head`, `cat-dropdown-item`, `WANetworkCard`, `UserTypeCard`, `ChoiceCard`, `WKKitCard`, les cartes de catégorie et d'événement — tous des `<div>` avec `cursor:pointer`.
-- Trois `aria-label` dans tout le dépôt (cloche ×3, bouton play, bouton retirer du panier).
-- Aucun `aria-live` sur les toasts, `OTPInput` non saisissable et non annoncé.
-- Contrastes à vérifier : `--ink-400` (`#A39DBE`) sur blanc ≈ 2.6:1 — **sous le seuil AA** — utilisé pour du texte secondaire et des chevrons.
-- Aucune gestion du focus dans `Modal`, aucun piège de focus, aucun `Escape`.
-- `<select>` natifs stylés en `border:0` : contour de focus supprimé.
-
-**Action** : traiter l'accessibilité comme un critère de recette, pas comme une finition. Le public cible (10-17 ans, dont des utilisateurs en situation de handicap explicitement modélisés) le justifie.
-
-### 8.14 🟠 La divergence mobile est plus profonde que documentée
-
-`HANDOFF.md` réduit l'écart mobile/web à « l'ancien modèle : numéro propre + OTP ». La lecture ligne à ligne en révèle **neuf**, dont trois touchent le modèle ou la règle métier (détail en [SPEC-ECRANS-1 §5.4](SPEC-ECRANS-1-public-auth.md#54-auth-apprenant--mobile--01-16--screens-authjsx)) :
-
-| Écart | Écrans mobile | Nature |
-| --- | --- | --- |
-| Authentification par téléphone | `04`, `16` | Modèle de données |
-| OTP apprenant | `09` + annonce en `04` | Flux |
-| **Consentement conditionné à « < 16 ans »** au lieu de systématique | `05`, `06` | **Règle métier** |
-| Ni reset de mot de passe ni lien d'inscription | `16` | Fonctionnel |
-| Pas de contrainte « au moins 2 objectifs » | `13` | Validation |
-| **9 objectifs vs 10**, **9 avatars vs 10** | `13`, `14` | Référentiels désynchronisés |
-| Cadeau de bienvenue absent | `15` | Produit |
-| Arguments produit absents de l'accueil | `02` | Conversion |
-| Aucune branche parent | `03` | ~16 écrans à concevoir |
-
-Le point le plus coûteux est le **3ᵉ** : le mobile applique encore « parent obligatoire seulement si < 16 ans », alors que le web pose « tout apprenant est un sous-compte parent, **quel que soit son âge** ». Ce n'est pas un écart d'écran, c'est un écart de modèle.
-
-Les deux référentiels désynchronisés (objectifs, avatars) montrent par ailleurs que ces listes sont **dupliquées en dur dans chaque plateforme**. Elles doivent devenir des données serveur, comme les réseaux Mobile Money.
-
-### 8.15 🟢 En-têtes de fichiers périmés
-
-| Fichier | Annonce | Réalité |
-| --- | --- | --- |
-| `screens-dashboard-web.jsx` | « 9 écrans » | 22 |
-| `screens-auth-parent-web.jsx` | « 10 écrans (WP01–WP10) » | 12 |
-| `screens-parent-dashboard-web.jsx` | « 8 écrans WPD01–WPD08 » | 14 |
-| `screens-teacher-dashboard-web.jsx` | « 8 écrans WT01–WT08 » | 12 |
-| `screens-auth-web.jsx` | « 16 écrans » | 17 rendus + 2 morts |
-| `screens-auth.jsx` | « Mobile 360×780 » | 360×760 |
-| `HANDOFF.md` §6 | `WL09` = « gabarit sans contenu » | Contenu juridique rédigé |
-| `README.md` §3, `HANDOFF.md` §3 | 4 shells | 6 (`WebParentShell`, `PublicShell` omis) |
-| `HANDOFF.md` §2 | Dépendances de composants | Omet `KIT_CATALOG` et `APPR_EVENTS` |
+### 8.15 🟢 En-têtes de fichiers périmés dans `design/`
+Sans objet : la maquette est figée ; l'inventaire fait foi.
 
 ### 8.16 🟢 Artefacts de canvas à ne pas porter
+`onWheel` stoppé (PublicShell, WL01) ; `position: absolute` des modales et toasts (→ `fixed` + portail) ; mises en
+scène de WC02b et WD16 ; `title="Bientôt"` ; commentaire de travail `screens-admin-web.jsx:283` ; timer `00:42`.
 
-| Artefact | Emplacement | Raison |
+### 8.17 Constats de la revue d'alignement
+
+| Anomalie | Écrans | Résolution |
 | --- | --- | --- |
-| `onWheel={e => e.stopPropagation()}` | `PublicShell`, `WL01` | Permet le scroll dans l'artboard |
-| `position: absolute` sur `modal-backdrop` et `wish-toast-wrap` | `ds-complex.jsx`, `screens-wishlist-web.jsx` | Doit devenir `fixed` + portail |
-| `opacity: .55; pointer-events: none` sur la grille | `WC02b` | Mise en scène du popover |
-| `filter: blur(1px)` sur le fond | `WD16` | Mise en scène du modal |
-| `title="Bientôt"` sur la nav | `WebAppShell` | Vestige de prototype |
-| Commentaire « ⭐ TA CONTRIBUTION (mode learning) » | `screens-admin-web.jsx:283` | Note de travail |
-| Timer `00:42` et badge en dur | `ds-complex.jsx` `Quiz` | À paramétrer |
-| Badge `2` en dur | `ds-complex.jsx` `BottomNav` | À paramétrer |
+| Règle « moins de 16 ans » contradictoire avec §4.1 | WA02, WK08, WD11, WAD08, WAD12, WT06, WL09 | Supprimée partout (S3) |
+| Vocabulaire `Path`/`Course`/`Module`/`Lesson`, quiz au parcours, « Niveau » à trois sens | WC, WJ | S2 (§3.2) |
+| Documentation d'une autre architecture (MySQL, Prisma, server actions, « aucune API ») | ce document, `docs/plan` | §1 ; plans réécrits dans `docs/plans/` (§9) |
+| Pages et fiches manquantes | WL, WD, WPD, WT | Écrans à concevoir `WL22`-`WL24`, `WD23`, `WPD15`, `WT13` (CONVENTIONS) |
+| WP05 montre des données saisies après l'accord | WP05, WPD05 | D20 |
+| Enfant sans moyen de reprendre son inscription après W06 | W07 | D21 |
+| W16 sans connexion parent ni enseignant | W16 | S4 |
+| Trois politiques de mot de passe | W10, WP03, WL04 | D25 |
+| Reset par lien email dans l'API, OTP SMS dans la maquette | WL02-WL05 | D26 (§7.2) |
+| « 1 parcours gratuit débloqué » | W15 | D27 |
+| Payer une demande de l'enfant : aucun écran | WA02, WK08 | `WPD15` (D52) |
+| Valider une candidature à un événement : aucun bouton | WD11, WPD06 | D53 |
+| Événements payants inscriptibles sans paiement ; WL08 et WL21 divergents | WL08, WL21, WPD12 | S8, D41, D53 |
+| WL07 renvoie vers « créer un compte » ; WK04 dans le shell connecté | WL07, WK04 | Checkout invité (D12) |
+| Trois promesses de livraison, réseaux fixes quel que soit le pays | WK05, WA03 | D38, D76 |
+| Suite d'un Kit Code valide non définie | WA01 | D36 |
+| Règles de jeu (points, streak, sommative ratée, certification) | WJ, WD | D32-D34 |
+| Commandes de parcours et de kits séparées, `paid` booléen | WD14, WPD07 | `Order` typé (D37) |
+| Trois règles de suppression, conflit sur les factures | WD15, WPD09 | D40, D54 |
+| Enfant « en attente » + « Relancer l'invitation » | WPD02 | D50 |
+| WPD04 sans date de naissance ni lien de parenté | WPD04 | D51 |
+| Rapport hebdomadaire sans mesure du temps | WPD11 | `LearningActivity` (D55) |
+| Alerte de connexion sans modèle | WPD14 | Reportée (D56) |
+| Enseignant auteur de cours dans l'API, encadrant dans la maquette | WT | S5 |
+| WT06 demande le téléphone de l'apprenant | WT06 | D60 |
+| `Classroom` sans table d'appartenance | WT03, WT04 | D61, D62 |
+| « À corriger », commentaires, données visibles, décrochage | WT01, WT05, WT07 | D63-D66 |
+| L'admin valide des consentements parentaux | WAD08 | Suivi seulement (D70) |
+| Routes `/admin/…` en collision avec l'admin Django | §7 | `/api/backoffice/` (D5) |
+| Un seul rôle admin, pas de 2FA | WAD13, WAD15 | D71, D72 |
+| Statuts de KPI, rapport non branché | WAD02-WAD05 | D73, D74 |
+| Catégories divergentes (4 vs 6) | WL06, WL16 | Référentiel API (D3) |
+| Footer vers des pages inexistantes | PublicShell | D17 |
+| Vie privée des mineurs sur les pages publiques | WL | §4.6 (D15) |
+| Fonctions communautaires sans modèle | WL12-WL15, WL19 | Reportées (S7) |
+| Messagerie non utilisée, websocket sans JWT | — | Gelée (S11), notifications extraites (D7) |
+| Connexion par token | — | Désactivée (S12) |
+| Erreurs de l'API en anglais, URLs incohérentes | — | D4, D5 |
+| Contenu éditorial sans source | WL09, WL10, WL17-WL20 | Fichiers versionnés dans `apps/web` (D10) |
+| Fiche parcours publique absente (SEO) | WL06 | `WL22` (D11) |
+| B2B : CTA sans cible | WL11 | Formulaire de devis (D13) |
+| Prestataires de paiement et SMS non choisis | WA, WK, WP | Comparaisons avant les lots 3 et 2 (S9, S10) |
+| Pages publiques rendues dynamiques par `getServerApi()` | lot 1 | Client anonyme cachable (§1.2) |
+| JetBrains Mono chargée dans le layout | `apps/web` | À retirer (§1.4) |
+
+### 8.18 Points tranchés après l'alignement
+
+Tous les points restés ouverts pendant la réécriture des specs et des plans sont tranchés dans les compléments
+C1-C20 de [ARBITRAGES.md](alignement/ARBITRAGES.md) :
+
+| Point | Décision |
+| --- | --- |
+| Identité chromatique (§8.1) | C1 : magenta `#9E1B9A` ; purge des `rgba` violets au lot 1 |
+| Registre de l'enseignant | C2 : vouvoiement |
+| Sélection des candidats aux Steamy Events | C3 : confirmée par l'accord (et le paiement) du parent ; WAD12 = suivi et refus exceptionnel avec remboursement |
+| Activation, mot de passe oublié et école de l'enseignant | C6 : activation par lien email (variante de WL04, `auth/teacher-invitations/`), code par email, toujours rattaché à une `School` |
+| Connexion du personnel, résolution de « Identifiant ou numéro » sur W16 | C7 |
+| Barème de points et seuils de rang (D34), note des parcours | C8 : dans `PlatformSettings`, fixés avant le lot 3 ; `rating` masqué en v1 |
+| « Institutions » (KPI, D75) | Écoles (`School`) sous offre active |
+| « Rejoindre l'équipe » (WL01) | Vers WL24 avec le sujet « Candidature » (`/aide?sujet=candidature`) |
+| Collection de badges (D39) | Écran à concevoir après la v1 ; `GET learning/badges/` existe dès le lot 3 |
+| Numéro de parent déjà inscrit (WP01) | C13 : réponse neutre |
+| Code de reprise perdu | C14 : non régénérable |
+| Code de la messagerie | C15 : supprimé, tag `archive/messaging` |
+| Fuseau horaire | C16 : UTC en base, `Africa/Porto-Novo` |
+| Paiement sur une commande expirée | C17 : honoré si disponible, sinon remboursé |
+| Maquettes des écrans à concevoir | C18 : nouveaux fichiers dans `design/`, validés avant le développement |
+| Quotas d'une école, import d'élèves | C19 |
+| Sessions | C20 : `cached_db`, personnel 8 h |
 
 ---
 
 ## 9. Plan d'implémentation
 
-Ordre dicté par les dépendances réelles, pas par la valeur produit.
-
-### Étape 0 · Cadrage (bloquant)
-
-- [ ] Récupérer les **8 diagrammes `user flows/*.mmd`** — seule spécification des enchaînements. Sans eux, 172 états figés sans logique de navigation.
-- [ ] Récupérer `Steamy_Design_steps.md` et `Steamy_site_map.pdf`.
-- [ ] **Trancher les arbitrages bloquants** : §8.1 (identité chromatique), §8.3 (champs d'inscription Impact Tracker), §8.4 (politique de refus), §8.5 (format Kit Code).
-- [ ] Parcourir les 14 vues de `App.html` de bout en bout (1 à 2 h, sans coder).
-
-### Étape 1 · Fondations
-
-- [ ] Porter `ds-tokens.css` vers le format de la stack cible **avant** la première ligne de composant.
-- [ ] Vendorer React/ReactDOM et **Nunito** en local ; supprimer l'`@import` Google Fonts.
-- [ ] Purger les `rgba(91,63,224,…)` en dur (§8.1).
-- [ ] Mettre en place la couche d'états transversaux (`WX01`-`WX03`) comme enveloppe.
-
-### Étape 2 · Design system
-
-- [ ] 11 atomes · 9 composés · 30 icônes · `Mascot` 6 poses.
-- [ ] 6 primitives data-viz (peuvent attendre l'étape 4k).
-- [ ] Paramétrer ce qui est en dur : timer du `Quiz`, badge du `BottomNav`, réseaux de `WANetworkCard`, indicatif de `PhoneInput`.
-- [ ] Accessibilité dès la primitive : éléments focusables, `aria-*`, gestion du focus dans `Modal` (§8.13).
-
-### Étape 3 · Couche partagée & cassage des cycles
-
-**Avant de porter le moindre écran.** Extraire les 18 composants partagés (§2.5) : layouts → atomes → composés. Faire l'inverse duplique les composants dans chaque zone et reproduit les deux cycles.
-
-### Étape 4 · Zones
-
-| # | Zone | Écrans | Justification du rang |
-| --- | --- | --- | --- |
-| a | Auth apprenant + parent (`W`, `WP`) | 29 | Fournit `WebShell` et 5 composants partagés. Porte le consentement, qui conditionne tout |
-| b | Dashboard apprenant (`WD`) | 22 | Fournit `WebAppShell` + 6 composants dont dépendent 6 zones |
-| c | Catalogue (`WC`) | 8 | Premier consommateur de `WebAppShell`, faible surface. Bon test de l'étape 3 |
-| d | Achat parcours (`WA`) | 7 | Fournit `WANetworkCard`. Porte le Kit Code et le Mobile Money |
-| e | Déroulement (`WJ`) | 11 | Cœur produit : seuils, badges, certification |
-| f | Dashboard parent (`WPD`) | 14 | Fournit `WebParentShell`, `WPDSection`, `WPDInfoCard` |
-| g | Boutique de kits (`WK`) | 11 | Réutilise le paiement de (d) et la livraison |
-| h | Liste de souhaits (`WW`) | 3 | Petite zone, à glisser où ça arrange |
-| i | Dashboard enseignant (`WT`) | 12 | Consomme (b) et (f) |
-| j | Site public (`WL`) | 21 | Indépendant de l'app — **parallélisable dès l'étape 3** |
-| k | Back-office admin (`WAD`) | 15 | Esthétique distincte, nécessite la data-viz. Interne, donc dernier |
-
-### Étape 5 · Combler les trous
-
-Écran « Badges », entrée « Mes parcours » (§8.10) · fiche événement · réinitialisation du mot de passe enfant (§8.9) · erreurs d'import par lot · export/soumission du rapport · RBAC réel · workflow de changement de parent · mode hors ligne (§8.11).
-
-### Étape 6 · Mobile
-
-**Il n'y a presque rien à porter : il y a à concevoir.** 156 des 172 écrans n'ont aucune maquette 360×760, et les 16 existants sont divergents (§5.4). Chantier de design à cadrer avec le designer, après la parité web.
-
-### Recette par zone
-
-- [ ] Tous les écrans rendus et comparés à l'artboard
-- [ ] Tous les états présents : nominal, vide **actionnable**, chargement, erreur
-- [ ] Aucune couleur en dur : tout passe par les tokens
-- [ ] Aucune chaîne en anglais, y compris erreurs et micro-copie
-- [ ] Registre respecté : tutoiement apprenant/enseignant, vouvoiement parent
-- [ ] Les enchaînements correspondent au `.mmd` de la zone
-- [ ] **Les règles métier sont appliquées côté serveur**, pas seulement en interface
-- [ ] Navigation clavier complète, contrastes AA, `aria-live` sur les notifications
+Les plans d'implémentation sont écrits **par lot** dans `docs/plans/` : lot « API 0 » (correctifs de sécurité §4.7 et
+socle, D1), puis lots 1 à 6 selon le découpage de [INVENTAIRE-ECRANS.md](INVENTAIRE-ECRANS.md). Chaque plan reprend,
+pour son lot, les entités du §3, les endpoints du §7 et les écrans concernés, avec leurs critères de recette.

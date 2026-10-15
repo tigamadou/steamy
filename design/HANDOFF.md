@@ -486,7 +486,7 @@ Ordre suggéré : layouts (`WebAppShell`, `WebShell`) → atomes → composés.
 
 ### 4. Arbitrer la double identité chromatique
 
-L'app est violette (`#5B3FE0`), le logo est en gradient orange-magenta. **La coexistence est volontaire mais non arbitrée.** C'est une décision de marque à trancher avec le client avant de figer le thème, pas un bug à corriger.
+**Arbitré (C1)** : la primaire est le magenta `#9E1B9A`, la couleur du logo. Le violet `#5B3FE0` ne sert plus qu'à `--cat-robotique`.
 
 ### 5. Traiter les états transversaux comme un composant, pas une page
 

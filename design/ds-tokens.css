@@ -5,7 +5,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap');
 :root {
-    /* ─── Palette · Primaires (indigo/violet) ─────────────────────── */
+    /* ─── Palette · Primaires (magenta, couleur du logo) ──────────── */
     --primary-50: #FCEDFC;
     --primary-100: #F9D2F7;
     --primary-200: #F1A7EF;
