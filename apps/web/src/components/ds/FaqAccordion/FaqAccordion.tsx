@@ -13,6 +13,8 @@ export type FaqItem = {
 };
 
 export type FaqTheme = {
+  /** Ancre du thème (`#<id>`), pour y renvoyer depuis la page. */
+  id?: string;
   title: string;
   items: FaqItem[];
 };
@@ -84,7 +86,7 @@ export function FaqAccordion({
           <p className="font-semibold text-ink-600">{emptyMessage}</p>
         ) : (
           results.map((theme) => (
-            <section key={theme.title} className="flex flex-col gap-3">
+            <section key={theme.title} id={theme.id} className="flex scroll-mt-24 flex-col gap-3">
               <h3 className="text-lg font-black text-ink-900">{theme.title}</h3>
               {theme.items.map((item) => (
                 <Accordion key={item.question} title={item.question} open={searching || undefined}>

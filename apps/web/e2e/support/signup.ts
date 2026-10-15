@@ -54,3 +54,47 @@ export async function signUpParentThroughScreens(page: Page, phone: string, firs
   // Création du compte, ouverture de la session puis rendu serveur de l'étape suivante
   await expect(page).not.toHaveURL("/inscription/parent/mot-de-passe", { timeout: 20_000 });
 }
+
+/** Date de naissance cohérente avec l'âge choisi en W05 (D23). */
+export function birthDateFor(age: number): string {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - age);
+  date.setMonth(date.getMonth() - 2);
+  return date.toISOString().slice(0, 10);
+}
+
+/** W10 → W15 : mot de passe puis profil complet (âge de W05 : 14 ans avec `startLearnerSignup`). */
+export async function completeLearnerProfile(page: Page, password: string, age = 14): Promise<void> {
+  await expect(page).toHaveURL("/inscription/apprenant/mot-de-passe");
+  await page.getByRole("textbox", { name: /^Mot de passe/ }).fill(password);
+  await page.getByRole("textbox", { name: /^Confirme ton mot de passe/ }).fill(password);
+  await page.getByRole("button", { name: "Valider mon mot de passe" }).click();
+  await expect(page).toHaveURL("/inscription/apprenant/profil/infos");
+  await page.getByLabel(/^Date de naissance/).filter({ visible: true }).fill(birthDateFor(age));
+  await page.getByRole("combobox", { name: /^Localité/ }).selectOption({ index: 1 });
+  await page.getByRole("button", { name: "Suivant" }).click();
+  await expect(page).toHaveURL("/inscription/apprenant/profil/ecole");
+  await page.getByRole("combobox", { name: /^Ta classe/ }).selectOption({ index: 1 });
+  await page.getByRole("button", { name: "Suivant" }).click();
+  await expect(page).toHaveURL("/inscription/apprenant/profil/objectifs");
+  await page.getByRole("checkbox").nth(0).check({ force: true });
+  await page.getByRole("checkbox").nth(1).check({ force: true });
+  await page.getByRole("button", { name: /^Suivant · / }).click();
+  await expect(page).toHaveURL("/inscription/apprenant/profil/avatar");
+  await page.getByRole("radio").first().check({ force: true });
+  await page.getByRole("button", { name: "Terminer mon profil 🚀" }).click();
+  await expect(page).toHaveURL("/inscription/apprenant/bienvenue");
+}
+
+/** WP07 → WP10 : profil parent (WP08 laissé vide, tout y est facultatif). */
+export async function completeParentProfile(page: Page): Promise<void> {
+  await expect(page).toHaveURL("/inscription/parent/profil/localisation");
+  await page.getByRole("combobox", { name: /^Localité/ }).selectOption({ index: 1 });
+  await page.getByRole("button", { name: "Suivant" }).click();
+  await expect(page).toHaveURL("/inscription/parent/profil/a-propos");
+  await page.getByRole("button", { name: "Suivant" }).click();
+  await expect(page).toHaveURL("/inscription/parent/profil/enfants");
+  await page.getByRole("checkbox").first().check({ force: true });
+  await page.getByRole("button", { name: "Terminer mon profil 🚀" }).click();
+  await expect(page).toHaveURL("/inscription/parent/bienvenue");
+}

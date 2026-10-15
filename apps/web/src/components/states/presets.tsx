@@ -84,18 +84,28 @@ export function LoadingState({ register = "tu" }: { register?: Register }) {
   return <WXLoading title={text.title} body={text.body} />;
 }
 
-/** 404 : URL inconnue ou contenu non publié. */
-export function NotFoundState({ register = "tu" }: { register?: Register }) {
+/** 404 : URL inconnue ou contenu non publié ; textes et action propres à l'écran possibles (WL22, WL23). */
+export function NotFoundState({
+  register = "tu",
+  title,
+  body,
+  action = { label: STATE_ACTIONS.home, href: routes.home },
+}: {
+  register?: Register;
+  title?: string;
+  body?: string;
+  action?: { label: string; href: string };
+}) {
   const text = STATE_MESSAGES.notFound[register];
   return (
     <WXState
       pose="sad"
       kicker="Erreur 404"
-      title={text.title}
-      body={<p className="m-0">{text.body}</p>}
+      title={title ?? text.title}
+      body={<p className="m-0">{body ?? text.body}</p>}
       actions={
-        <Button href={routes.home} size="lg">
-          {STATE_ACTIONS.home}
+        <Button href={action.href} size="lg">
+          {action.label}
         </Button>
       }
     />
