@@ -30,11 +30,17 @@ export default function HelpPage() {
             <p className="mt-2 mb-4 max-w-[560px] text-base font-semibold text-ink-600">{DESCRIPTION}</p>
             <nav aria-label="Dans cette page">
               <ul className="flex flex-wrap gap-2">
+                {FAQ.map((theme) => (
+                  <li key={theme.id}>
+                    <Tag href={`${routes.help}#${theme.id}`}>
+                      <span aria-hidden>{theme.icon}</span> {theme.title}
+                    </Tag>
+                  </li>
+                ))}
                 <li>
-                  <Tag href={routes.faq}>❓ Questions fréquentes</Tag>
-                </li>
-                <li>
-                  <Tag href={routes.contact()}>✉️ Nous contacter</Tag>
+                  <Tag href={routes.contact()}>
+                    <span aria-hidden>✉️</span> Nous contacter
+                  </Tag>
                 </li>
               </ul>
             </nav>
