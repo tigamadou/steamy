@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import DeliveryZone, Kit, StockReservation
+from .models import DeliveryZone, Kit, RestockAlert, StockReservation
 
 
 @admin.register(Kit)
@@ -27,6 +27,18 @@ class StockReservationAdmin(admin.ModelAdmin):
 
     list_display = ("kit", "quantity", "order_item", "expires_at", "confirmed_at", "released_at")
     list_filter = ("kit",)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(RestockAlert)
+class RestockAlertAdmin(admin.ModelAdmin):
+    list_display = ("kit", "user", "created_at", "notified_at")
+    list_filter = ("kit", "notified_at")
 
     def has_add_permission(self, request):
         return False

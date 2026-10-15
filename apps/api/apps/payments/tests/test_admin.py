@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from apps.core.tests.staff import verified_client
 from apps.payments.models import Invoice, Refund
-from apps.shop.models import StockReservation
+from apps.shop.models import RestockAlert, StockReservation
 from apps.shop.tests.factories import DeliveryZoneFactory, KitFactory
 
 from .factories import OrderItemFactory, PaymentFactory
@@ -36,6 +36,7 @@ def objects():
         "payments_refund": refund,
         "shop_deliveryzone": DeliveryZoneFactory(),
         "shop_stockreservation": reservation,
+        "shop_restockalert": RestockAlert.objects.create(kit=item.kit, phone="+2290197000021"),
     }
 
 
@@ -48,6 +49,7 @@ def objects():
         "payments_refund",
         "shop_deliveryzone",
         "shop_stockreservation",
+        "shop_restockalert",
     ],
 )
 def test_admin_pages_are_served(admin_client, objects, model):
@@ -57,6 +59,9 @@ def test_admin_pages_are_served(admin_client, objects, model):
     assert str(obj)
 
 
-@pytest.mark.parametrize("model", ["payments_order", "payments_payment", "shop_stockreservation"])
+@pytest.mark.parametrize(
+    "model",
+    ["payments_order", "payments_payment", "shop_stockreservation", "shop_restockalert"],
+)
 def test_orders_and_payments_are_never_created_by_hand(admin_client, model):
     assert admin_client.get(reverse(f"admin:{model}_add")).status_code == 403

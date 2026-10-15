@@ -386,10 +386,21 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Paiement tardif : honoré si stock disponible, sinon remboursement automatique (C17)
   - [ ] Module `core/pdf.py`, tâche `generate_invoice_pdf`, `GET …/invoice/` (payeur seulement)
   - [ ] Tests : webhook non signé, rejoué, à montant ou devise faux ; double exécution impossible (webhooks concurrents) ; facture refusée à l'apprenant bénéficiaire ; apprenant ne peut pas initier de paiement
-- [ ] **API-L3b.3** Boutique · `feature/api-l3b-3-boutique`
-  - [ ] `Cart`/`CartItem`, `DeliveryAddress`, `RestockAlert` (`StockReservation` et `DeliveryZone` : L3b.1)
-  - [ ] `shop/cart/*`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`
-  - [ ] Tests : panier par utilisateur, alerte de réassort unique
+- [x] **API-L3b.3** Boutique · `feature/api-l3b-3-boutique`
+  - [x] `Cart`/`CartItem`, `DeliveryAddress`, `RestockAlert` (`StockReservation` et `DeliveryZone` : L3b.1)
+  - [x] `shop/cart/*`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`
+  - [x] Tests : panier par utilisateur, alerte de réassort unique
+  > Décisions : panier et adresse pour le parent **et** l'apprenant (l'apprenant prépare la demande de kit qu'il
+  > enverra à son parent, L3b.5) ; enseignant → 403. `GET shop/cart/` → `{items[{id, kit, quantity, total}],
+  > count, subtotal}` (prix courants ; le total définitif est celui de la commande) ; `POST shop/cart/items/`
+  > `{kitSlug, quantity}` ajoute à la quantité présente (plafond 10), kit retiré → 404, en rupture → 409
+  > `OUT_OF_STOCK` ; `PATCH/DELETE shop/cart/items/{id}/` renvoient le panier. Le panier se vide des kits payés
+  > à l'exécution post-paiement (L3b.2). Adresse : `GET` → 404 tant qu'aucune n'est enregistrée ; `PUT` `{zoneId,
+  > recipientName, phone?, city, district?, addressLine}` ; route servie par `shop` sous `accounts/me/` (montée
+  > dans `project/urls.py`). Réassort : invité `{phone}` (CSRF, throttle `restock-alert` 10/h), parent prévenu
+  > par SMS sur le numéro du compte, apprenant par notification (`/apprenant/boutique/<slug>`) ; réponse
+  > `201 {ok: true}` identique si la demande existe déjà ; l'envoi part quand le stock repasse au-dessus de zéro
+  > (signal `post_save` du kit, tâche `notify_restock_alerts`), une seule fois par demande.
 - [ ] **API-L3b.4** Kit Codes · `feature/api-l3b-4-kit-codes`
   - [ ] Génération `STEAMY-XXXX-XXXX` (Crockford base32, `secrets`) à l'exécution post-paiement
   - [ ] `POST payments/kit-codes/redeem/` : normalisation, `KIT_CODE_NOT_COMPATIBLE`, consommation atomique, throttle utilisateur et IP (D35)
