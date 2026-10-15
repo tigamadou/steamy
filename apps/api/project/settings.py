@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     # Coquille : ne garde que ses migrations (tables supprimées en 0002), voir apps/courses/__init__.py
     "apps.courses",
     "apps.catalog",
+    "apps.events",
     "apps.learning",
     "apps.payments",
     "apps.analytics",

@@ -235,6 +235,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/events/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Événements publiés (WL21, WD10, WPD06, WT09), paginés. */
+        get: operations["events_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Fiche événement (WL23) ; un brouillon répond 404. */
+        get: operations["events_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health/": {
         parameters: {
             query?: never;
@@ -1535,6 +1569,21 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Quiz"][];
         };
+        PaginatedSteamyEventList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["SteamyEvent"][];
+        };
         PasswordChangeRequest: {
             currentPassword: string;
             newPassword: string;
@@ -1679,6 +1728,99 @@ export interface components {
             code: string;
             /** Libellé */
             label: string;
+        };
+        SteamyEvent: {
+            slug: string;
+            /** Titre */
+            title: string;
+            emoji?: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Début
+             * Format: date-time
+             */
+            startsAt: string;
+            /**
+             * Fin
+             * Format: date-time
+             */
+            endsAt: string;
+            /** En ligne */
+            online?: boolean;
+            /** Lieu */
+            place?: string;
+            /** Ville */
+            city?: string;
+            /**
+             * Public visé
+             * @description « 12 – 15 ans »
+             */
+            audience?: string;
+            /**
+             * Prix (FCFA)
+             * @description 0 = gratuit
+             */
+            price?: number;
+            readonly isFree: boolean;
+            /** Places */
+            capacity: number;
+            readonly seatsLeft: number;
+            /**
+             * Fin des candidatures
+             * Format: date-time
+             */
+            applicationDeadline: string;
+            /** @description Places restantes et date limite non dépassée */
+            readonly applicationsOpen: boolean;
+            readonly isPast: boolean;
+        };
+        SteamyEventDetail: {
+            slug: string;
+            /** Titre */
+            title: string;
+            emoji?: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Début
+             * Format: date-time
+             */
+            startsAt: string;
+            /**
+             * Fin
+             * Format: date-time
+             */
+            endsAt: string;
+            /** En ligne */
+            online?: boolean;
+            /** Lieu */
+            place?: string;
+            /** Ville */
+            city?: string;
+            /**
+             * Public visé
+             * @description « 12 – 15 ans »
+             */
+            audience?: string;
+            /**
+             * Prix (FCFA)
+             * @description 0 = gratuit
+             */
+            price?: number;
+            readonly isFree: boolean;
+            /** Places */
+            capacity: number;
+            readonly seatsLeft: number;
+            /**
+             * Fin des candidatures
+             * Format: date-time
+             */
+            applicationDeadline: string;
+            /** @description Places restantes et date limite non dépassée */
+            readonly applicationsOpen: boolean;
+            readonly isPast: boolean;
+            description: string;
         };
         /**
          * @description * `info` - Information
@@ -2292,6 +2434,77 @@ export interface operations {
                 };
             };
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    events_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /** @description true : à venir ou en cours (du plus proche au plus lointain) ; false : passés (du plus récent au plus ancien) ; absent : tous */
+                upcoming?: boolean | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSteamyEventList"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    events_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SteamyEventDetail"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
