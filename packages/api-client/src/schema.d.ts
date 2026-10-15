@@ -4,6 +4,60 @@
  */
 
 export interface paths {
+    "/api/accounts/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["accounts_me_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/me/email/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Changement d'email (WPD08, WT08). Pour l'enseignant, c'est son identifiant de connexion ; pour le parent, une
+         *     adresse de contact (rapport hebdomadaire, D55), qui ne sert pas à se connecter (S4). L'apprenant renseigne la
+         *     sienne dans son profil (WD17).
+         */
+        post: operations["accounts_me_email_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/me/password/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Changement de mot de passe (WD18, WPD08, WT08). La session en cours reste ouverte. */
+        post: operations["accounts_me_password_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/analytics/dashboard/summary/": {
         parameters: {
             query?: never;
@@ -45,16 +99,65 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/analytics/export/events.csv": {
+    "/api/analytics/export/events/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["analytics_export_events.csv_retrieve"];
+        get: operations["analytics_export_events_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/csrf/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["auth_csrf_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/login/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Connexion des apprenants, parents et enseignants (W16). Le personnel passe par l'admin (WAD15). */
+        post: operations["auth_login_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/logout/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_logout_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -546,20 +649,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/messaging/notifications/": {
+    "/api/notifications/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["messaging_notifications_list"];
+        /** @description Notifications du compte connecté, les plus récentes d'abord (WD04, WPD14, WT12, cloche des shells). */
+        get: operations["notifications_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -568,7 +666,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/messaging/notifications/{id}/": {
+    "/api/notifications/{id}/read/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Notifications du compte connecté, les plus récentes d'abord (WD04, WPD14, WT12, cloche des shells). */
+        post: operations["notifications_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/preferences/": {
         parameters: {
             query?: never;
             header?: never;
@@ -576,24 +691,54 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         * @description Préférences par catégorie (WD06, WPD08, WT08). Dans l'application : toujours actif. Email : réglable, envoyé
+         *     seulement si une adresse est renseignée (`emailAddress`).
          */
-        get: operations["messaging_notifications_retrieve"];
+        get: operations["notifications_preferences_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         * @description Préférences par catégorie (WD06, WPD08, WT08). Dans l'application : toujours actif. Email : réglable, envoyé
+         *     seulement si une adresse est renseignée (`emailAddress`).
          */
-        patch: operations["messaging_notifications_partial_update"];
+        patch: operations["notifications_preferences_partial_update"];
+        trace?: never;
+    };
+    "/api/notifications/read-all/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Notifications du compte connecté, les plus récentes d'abord (WD04, WPD14, WT12, cloche des shells). */
+        post: operations["notifications_read_all_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/unread-count/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Notifications du compte connecté, les plus récentes d'abord (WD04, WPD14, WT12, cloche des shells). */
+        get: operations["notifications_unread_count_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/payments/orders/": {
@@ -706,14 +851,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/public/user/csrf": {
+    "/api/referentials/avatars/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["public_user_csrf_retrieve"];
+        get: operations["referentials_avatars_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -722,112 +867,129 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/public/user/forgot-password-step-1": {
+    "/api/referentials/countries/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["referentials_countries_list"];
         put?: never;
-        post: operations["public_user_forgot_password_step_1_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/public/user/forgot-password-step-2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["public_user_forgot_password_step_2_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/public/user/session-login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["public_user_session_login_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/user/change-email": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["user_change_email_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/user/change-password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["user_change_password_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/user/my-profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["user_my_profile_retrieve"];
-        put: operations["user_my_profile_update"];
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch: operations["user_my_profile_partial_update"];
+        patch?: never;
         trace?: never;
     };
-    "/api/user/session-logout": {
+    "/api/referentials/disabilities/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["referentials_disabilities_list"];
         put?: never;
-        post: operations["user_session_logout_create"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/goals/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_goals_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/localities/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_localities_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/payment-networks/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Réseaux Mobile Money activés (D76), lus par le formulaire de paiement. */
+        get: operations["referentials_payment_networks_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/refusal-reasons/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_refusal_reasons_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/relationships/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_relationships_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/school-grades/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_school_grades_list"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -838,6 +1000,12 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * @description * `urban` - Urbaine
+         *     * `rural` - Rurale
+         * @enum {string}
+         */
+        AreaTypeEnum: "urban" | "rural";
         Attempt: {
             readonly id: number;
             readonly user: number;
@@ -871,6 +1039,42 @@ export interface components {
             quiz: number;
             data?: unknown;
         };
+        Avatar: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+            emoji: string;
+            /**
+             * Couleur
+             * @description Jeton du design system, ex. « primary-500 »
+             */
+            color: string;
+        };
+        /**
+         * @description * `learning` - Apprentissage
+         *     * `rewards` - Récompenses
+         *     * `coaching` - Encadrement
+         *     * `events` - Steamy Events
+         *     * `payments` - Paiements
+         *     * `consents` - Consentements et validations
+         *     * `progress` - Progression
+         *     * `reviews` - Tentatives à revoir
+         *     * `account` - Compte
+         * @enum {string}
+         */
+        CategoryEnum: "learning" | "rewards" | "coaching" | "events" | "payments" | "consents" | "progress" | "reviews" | "account";
+        CategoryPreference: {
+            category: components["schemas"]["CategoryEnum"];
+            readonly label: string;
+            /** @description Toujours actif */
+            readonly inApp: boolean;
+            email: boolean;
+        };
+        CategoryPreferenceRequest: {
+            category: components["schemas"]["CategoryEnum"];
+            email: boolean;
+        };
         Certificate: {
             readonly id: number;
             enrollment: number;
@@ -885,6 +1089,30 @@ export interface components {
             readonly id: number;
             readonly question: number;
             readonly text: string;
+        };
+        Country: {
+            readonly id: number;
+            /** Code ISO */
+            code: string;
+            /** Libellé */
+            label: string;
+            /** Drapeau */
+            flag?: string;
+            /**
+             * Indicatif
+             * @description Sans « + » : 229
+             */
+            dialCode: string;
+            /**
+             * Format
+             * @description Gabarit d'affichage : « XX XX XX XX XX »
+             */
+            phoneFormat?: string;
+            /**
+             * Expression du numéro national
+             * @description Numéro sans indicatif, ex. ^01[0-9]{8}$
+             */
+            phoneRegex: string;
         };
         CourseDetail: {
             readonly id: number;
@@ -914,21 +1142,22 @@ export interface components {
         CsrfToken: {
             csrfToken: string;
         };
-        /**
-         * @description Modified from rest_framework.authtoken.serializers.AuthTokenSerializer
-         *     to accept email field instead of username
-         */
-        CustomAuthTokenRequest: {
-            /** Courriel */
-            email: string;
-            /** Mot de passe */
-            password: string;
-        };
         DashboardSummary: {
             totalUsers: number;
             eventsLast7Days: number;
             /** Format: double */
             revenueLast30Days: number;
+        };
+        Disability: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+        };
+        EmailChangeRequest: {
+            password: string;
+            /** Format: email */
+            email: string;
         };
         Enrollment: {
             readonly id: number;
@@ -950,25 +1179,92 @@ export interface components {
          * @enum {string}
          */
         EnrollmentStatusEnum: "active" | "completed" | "cancelled";
-        Event: {
-            readonly id: number;
-            readonly user: number | null;
-            eventType: string;
-            entityType?: string | null;
-            entityId?: string | null;
-            /** Format: decimal */
-            value?: string | null;
-            metadata?: unknown;
-            /** Format: date-time */
-            readonly createdAt: string;
+        Error: {
+            code: components["schemas"]["ErrorCodeEnum"];
+            message: string;
+            /** @description Erreurs par champ (camelCase), présentes seulement si des champs sont en cause */
+            fields?: {
+                [key: string]: components["schemas"]["FieldError"][];
+            };
         };
-        EventRequest: {
-            eventType: string;
-            entityType?: string | null;
-            entityId?: string | null;
-            /** Format: decimal */
-            value?: string | null;
-            metadata?: unknown;
+        /**
+         * @description * `ACCOUNT_DEACTIVATED` - ACCOUNT_DEACTIVATED
+         *     * `ACCOUNT_PENDING_CONSENT` - ACCOUNT_PENDING_CONSENT
+         *     * `ACCOUNT_SUSPENDED` - ACCOUNT_SUSPENDED
+         *     * `AGE_OUT_OF_RANGE` - AGE_OUT_OF_RANGE
+         *     * `ALREADY_APPLIED` - ALREADY_APPLIED
+         *     * `ALREADY_IN_CLASSROOM` - ALREADY_IN_CLASSROOM
+         *     * `BIRTHDATE_AGE_MISMATCH` - BIRTHDATE_AGE_MISMATCH
+         *     * `CHILDREN_STILL_LINKED` - CHILDREN_STILL_LINKED
+         *     * `CLASSROOM_NAME_TAKEN` - CLASSROOM_NAME_TAKEN
+         *     * `CLASSROOM_QUOTA_EXCEEDED` - CLASSROOM_QUOTA_EXCEEDED
+         *     * `CONSENT_ALREADY_RESOLVED` - CONSENT_ALREADY_RESOLVED
+         *     * `CONSENT_COOLDOWN` - CONSENT_COOLDOWN
+         *     * `CONSENT_PHONE_MISMATCH` - CONSENT_PHONE_MISMATCH
+         *     * `CONSENT_REQUEST_EXPIRED` - CONSENT_REQUEST_EXPIRED
+         *     * `CONTENT_LOCKED` - CONTENT_LOCKED
+         *     * `COURSE_NOT_IN_OFFER` - COURSE_NOT_IN_OFFER
+         *     * `DELIVERY_ZONE_UNAVAILABLE` - DELIVERY_ZONE_UNAVAILABLE
+         *     * `DUPLICATE_ROW` - DUPLICATE_ROW
+         *     * `EMAIL_TAKEN` - EMAIL_TAKEN
+         *     * `EVENT_ALREADY_PROPOSED` - EVENT_ALREADY_PROPOSED
+         *     * `EVENT_CLOSED` - EVENT_CLOSED
+         *     * `EVENT_FULL` - EVENT_FULL
+         *     * `IMPORT_TOO_LARGE` - IMPORT_TOO_LARGE
+         *     * `INVALID_CREDENTIALS` - INVALID_CREDENTIALS
+         *     * `INVITATION_INVALID` - INVITATION_INVALID
+         *     * `KIT_CODE_ALREADY_USED` - KIT_CODE_ALREADY_USED
+         *     * `KIT_CODE_INVALID` - KIT_CODE_INVALID
+         *     * `KIT_CODE_NOT_COMPATIBLE` - KIT_CODE_NOT_COMPATIBLE
+         *     * `KIT_CODE_REQUIRED` - KIT_CODE_REQUIRED
+         *     * `LEARNER_QUOTA_EXCEEDED` - LEARNER_QUOTA_EXCEEDED
+         *     * `MALFORMED_ROW` - MALFORMED_ROW
+         *     * `METHOD_NOT_ALLOWED` - METHOD_NOT_ALLOWED
+         *     * `NETWORK_UNAVAILABLE` - NETWORK_UNAVAILABLE
+         *     * `NOT_ACCEPTABLE` - NOT_ACCEPTABLE
+         *     * `NOT_AUTHENTICATED` - NOT_AUTHENTICATED
+         *     * `NOT_ENROLLED` - NOT_ENROLLED
+         *     * `NOT_FOUND` - NOT_FOUND
+         *     * `ORDER_ALREADY_PAID` - ORDER_ALREADY_PAID
+         *     * `ORDER_EXPIRED` - ORDER_EXPIRED
+         *     * `OTP_DAILY_LIMIT` - OTP_DAILY_LIMIT
+         *     * `OTP_EXPIRED` - OTP_EXPIRED
+         *     * `OTP_INVALID` - OTP_INVALID
+         *     * `OTP_REQUIRED` - OTP_REQUIRED
+         *     * `OTP_RESEND_TOO_EARLY` - OTP_RESEND_TOO_EARLY
+         *     * `OTP_TOO_MANY_ATTEMPTS` - OTP_TOO_MANY_ATTEMPTS
+         *     * `OUT_OF_STOCK` - OUT_OF_STOCK
+         *     * `PARENT_APPROVAL_REQUIRED` - PARENT_APPROVAL_REQUIRED
+         *     * `PARSE_ERROR` - PARSE_ERROR
+         *     * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
+         *     * `PAYMENT_FAILED` - PAYMENT_FAILED
+         *     * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
+         *     * `PERMISSION_DENIED` - PERMISSION_DENIED
+         *     * `PHONE_INVALID` - PHONE_INVALID
+         *     * `PHONE_TAKEN` - PHONE_TAKEN
+         *     * `QUIZ_COOLDOWN` - QUIZ_COOLDOWN
+         *     * `REPORT_LOCKED` - REPORT_LOCKED
+         *     * `RESUME_CODE_INVALID` - RESUME_CODE_INVALID
+         *     * `SERVER_ERROR` - SERVER_ERROR
+         *     * `SIGNUP_EXPIRED` - SIGNUP_EXPIRED
+         *     * `THROTTLED` - THROTTLED
+         *     * `UNSUPPORTED_MEDIA_TYPE` - UNSUPPORTED_MEDIA_TYPE
+         *     * `USERNAME_INVALID` - USERNAME_INVALID
+         *     * `USERNAME_TAKEN` - USERNAME_TAKEN
+         *     * `VALIDATION_ERROR` - VALIDATION_ERROR
+         * @enum {string}
+         */
+        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUIRED" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        FieldError: {
+            code: string;
+            message: string;
+        };
+        Goal: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+            emoji?: string;
         };
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
@@ -1005,6 +1301,68 @@ export interface components {
             readonly resourceType: components["schemas"]["ResourceTypeEnum"];
             readonly order: number;
         };
+        Locality: {
+            readonly id: number;
+            /** @description Code ISO du pays */
+            country: string;
+            /** Ville ou commune */
+            city: string;
+            /** Quartier ou arrondissement */
+            district?: string;
+            /** Zone */
+            areaType: components["schemas"]["AreaTypeEnum"];
+        };
+        LoginRequest: {
+            /** @description Identifiant, numéro de téléphone ou email (C7) */
+            identifier: string;
+            password: string;
+        };
+        LoginResponse: {
+            user: components["schemas"]["Me"];
+            csrfToken: string;
+        };
+        /** @description Identité et rôle du compte connecté : sert aux shells, à la redirection après W16 et aux gardes (§7.3). */
+        Me: {
+            readonly id: number;
+            /** Rôle */
+            readonly role: (components["schemas"]["RoleEnum"] | components["schemas"]["NullEnum"]) | null;
+            /** Statut */
+            readonly status: components["schemas"]["MeStatusEnum"];
+            /** Identifiant */
+            readonly username: string | null;
+            /** Téléphone */
+            readonly phone: string | null;
+            /**
+             * Adresse email
+             * Format: email
+             */
+            readonly email: string | null;
+            /** Prénom */
+            readonly firstName: string;
+            /** Nom */
+            readonly lastName: string;
+            /** @description Étape de profil restante (W11-W14, WP07-WP09), null si le profil est complet */
+            readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
+            /** @description Avatar de l'apprenant (shell) */
+            readonly avatar: components["schemas"]["Avatar"] | null;
+            /** @description Classe de l'apprenant (shell) */
+            readonly schoolGrade: components["schemas"]["SchoolGrade"] | null;
+            /** @description Ville de l'apprenant ou du parent (shell) */
+            readonly city: string | null;
+            readonly isStaff: boolean;
+            /** @description Session du personnel validée par TOTP (D72) ; toujours faux pour un persona. */
+            readonly otpVerified: boolean;
+            readonly staffGroups: string[];
+        };
+        /**
+         * @description * `pending` - En attente de consentement
+         *     * `active` - Actif
+         *     * `suspended` - Suspendu
+         *     * `deactivated` - Désactivé
+         *     * `anonymized` - Anonymisé
+         * @enum {string}
+         */
+        MeStatusEnum: "pending" | "active" | "suspended" | "deactivated" | "anonymized";
         Module: {
             readonly id: number;
             readonly title: string;
@@ -1015,14 +1373,21 @@ export interface components {
         };
         Notification: {
             readonly id: number;
-            readonly user: number;
+            readonly type: string;
+            readonly category: components["schemas"]["CategoryEnum"];
+            readonly tone: components["schemas"]["ToneEnum"];
+            readonly icon: string;
+            /** Titre */
             readonly title: string;
-            readonly body: string;
-            readonly url: string | null;
+            readonly message: string;
+            readonly url: string;
+            /** Format: date-time */
+            readonly readAt: string | null;
             /** Format: date-time */
             readonly createdAt: string;
-            read?: boolean;
         };
+        /** @enum {unknown} */
+        NullEnum: null;
         Order: {
             readonly id: number;
             readonly reference: string;
@@ -1051,12 +1416,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Attempt"][];
@@ -1066,12 +1431,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Certificate"][];
@@ -1081,12 +1446,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Choice"][];
@@ -1096,12 +1461,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["CourseList"][];
@@ -1111,12 +1476,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Enrollment"][];
@@ -1126,12 +1491,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Lesson"][];
@@ -1141,12 +1506,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Module"][];
@@ -1156,12 +1521,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Notification"][];
@@ -1171,12 +1536,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Order"][];
@@ -1186,12 +1551,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Payment"][];
@@ -1201,12 +1566,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Progress"][];
@@ -1216,12 +1581,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Question"][];
@@ -1231,12 +1596,12 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Quiz"][];
@@ -1246,18 +1611,22 @@ export interface components {
             count?: number;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
+             * @example http://api.example.org/accounts/?page=4
              */
             next?: string | null;
             /**
              * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
+             * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
             results?: components["schemas"]["Resource"][];
         };
-        PatchedNotificationRequest: {
-            read?: boolean;
+        PasswordChangeRequest: {
+            currentPassword: string;
+            newPassword: string;
+        };
+        PatchedPreferencesUpdateRequest: {
+            categories?: components["schemas"]["CategoryPreferenceRequest"][];
         };
         PatchedProgressRequest: {
             enrollment?: number;
@@ -1278,6 +1647,22 @@ export interface components {
             /** Format: date-time */
             readonly createdAt: string;
         };
+        PaymentNetwork: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+            /** @description Code ISO du pays */
+            country: string;
+        };
+        Preferences: {
+            /**
+             * Format: email
+             * @description Adresse qui recevra les emails, null si aucune
+             */
+            readonly emailAddress: string | null;
+            categories: components["schemas"]["CategoryPreference"][];
+        };
         PresignUploadRequestRequest: {
             filename: string;
             contentType?: string;
@@ -1293,6 +1678,8 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /** @enum {string} */
+        ProfileStepEnum: "learner-info" | "learner-school" | "learner-goals" | "learner-avatar" | "parent-location" | "parent-about" | "parent-children";
         Progress: {
             readonly id: number;
             enrollment: number;
@@ -1316,15 +1703,6 @@ export interface components {
          * @enum {string}
          */
         ProviderEnum: "kkiapay" | "fedapay";
-        PublicForgotPasswordStep1Request: {
-            /** Format: email */
-            email: string;
-        };
-        PublicForgotPasswordStep2Request: {
-            token: string;
-            userId: number;
-            password: string;
-        };
         Question: {
             readonly id: number;
             quiz: number;
@@ -1341,6 +1719,24 @@ export interface components {
             /** Format: decimal */
             passScore?: string;
             readonly questions: components["schemas"]["Question"][];
+        };
+        ReadAll: {
+            /** @description Nombre de notifications marquées comme lues */
+            updated: number;
+        };
+        RefusalReason: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+        };
+        Relationship: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+            /** Libellé côté parent */
+            parentLabel?: string;
         };
         Resource: {
             readonly id: number;
@@ -1361,27 +1757,50 @@ export interface components {
          * @enum {string}
          */
         ResourceTypeEnum: "video" | "pdf" | "html" | "other";
-        SessionLoginResponse: {
-            userId: number;
-            csrfToken: string;
-        };
-        UserChangeEmailRequest: {
-            /** Mot de passe */
-            password: string;
-            newEmail: string;
-        };
-        UserChangePasswordRequest: {
-            /** Mot de passe */
-            password: string;
-            newPassword: string;
-        };
-        UserMyProfile: {
+        /**
+         * @description * `learner` - Apprenant
+         *     * `parent` - Parent
+         *     * `teacher` - Enseignant
+         * @enum {string}
+         */
+        RoleEnum: "learner" | "parent" | "teacher";
+        SchoolGrade: {
             readonly id: number;
-            /**
-             * Adresse électronique
-             * Format: email
-             */
-            readonly email: string;
+            code: string;
+            /** Libellé */
+            label: string;
+        };
+        /**
+         * @description * `info` - Information
+         *     * `success` - Succès
+         *     * `warning` - Attention
+         *     * `danger` - Problème
+         *     * `primary` - Mise en avant
+         * @enum {string}
+         */
+        ToneEnum: "info" | "success" | "warning" | "danger" | "primary";
+        TrackingEvent: {
+            readonly id: number;
+            readonly user: number | null;
+            eventType: string;
+            entityType?: string | null;
+            entityId?: string | null;
+            /** Format: decimal */
+            value?: string | null;
+            metadata?: unknown;
+            /** Format: date-time */
+            readonly createdAt: string;
+        };
+        TrackingEventRequest: {
+            eventType: string;
+            entityType?: string | null;
+            entityId?: string | null;
+            /** Format: decimal */
+            value?: string | null;
+            metadata?: unknown;
+        };
+        UnreadCount: {
+            count: number;
         };
         WebhookAck: {
             ok: boolean;
@@ -1398,6 +1817,157 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    accounts_me_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_email_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_password_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     analytics_dashboard_summary_retrieve: {
         parameters: {
             query?: never;
@@ -1415,6 +1985,30 @@ export interface operations {
                     "application/json": components["schemas"]["DashboardSummary"];
                 };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     analytics_events_create: {
@@ -1426,7 +2020,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["EventRequest"];
+                "application/json": components["schemas"]["TrackingEventRequest"];
             };
         };
         responses: {
@@ -1435,12 +2029,36 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Event"];
+                    "application/json": components["schemas"]["TrackingEvent"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
     };
-    "analytics_export_events.csv_retrieve": {
+    analytics_export_events_retrieve: {
         parameters: {
             query?: {
                 /** @description Par défaut : aujourd'hui */
@@ -1461,6 +2079,146 @@ export interface operations {
                 };
                 content: {
                     "text/csv": string;
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_csrf_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsrfToken"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_login_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_logout_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -1486,17 +2244,49 @@ export interface operations {
                     "application/json": components["schemas"]["PresignUploadResponse"];
                 };
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     courses_courses_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1512,6 +2302,14 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedCourseListList"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -1535,6 +2333,22 @@ export interface operations {
                     "application/json": components["schemas"]["CourseDetail"];
                 };
             };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     courses_courses_enroll_create: {
@@ -1556,17 +2370,57 @@ export interface operations {
                     "application/json": components["schemas"]["CourseDetail"];
                 };
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     courses_lessons_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1582,6 +2436,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedLessonList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -1606,17 +2484,49 @@ export interface operations {
                     "application/json": components["schemas"]["Lesson"];
                 };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     courses_modules_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1632,6 +2542,14 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedModuleList"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -1656,17 +2574,33 @@ export interface operations {
                     "application/json": components["schemas"]["Module"];
                 };
             };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     courses_resources_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1682,6 +2616,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedResourceList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -1706,6 +2664,38 @@ export interface operations {
                     "application/json": components["schemas"]["Resource"];
                 };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     health_retrieve: {
@@ -1725,6 +2715,14 @@ export interface operations {
                     "application/json": components["schemas"]["Health"];
                 };
             };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -1738,12 +2736,12 @@ export interface operations {
     learning_attempts_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
             };
             header?: never;
             path?: never;
@@ -1757,6 +2755,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedAttemptList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -1782,6 +2804,38 @@ export interface operations {
                     "application/json": components["schemas"]["AttemptCreate"];
                 };
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     learning_attempts_retrieve: {
@@ -1804,17 +2858,49 @@ export interface operations {
                     "application/json": components["schemas"]["Attempt"];
                 };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     learning_certificates_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1830,6 +2916,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedCertificateList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -1854,17 +2964,49 @@ export interface operations {
                     "application/json": components["schemas"]["Certificate"];
                 };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     learning_choices_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1880,6 +3022,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedChoiceList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -1904,17 +3070,49 @@ export interface operations {
                     "application/json": components["schemas"]["Choice"];
                 };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     learning_enrollments_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -1930,6 +3128,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedEnrollmentList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -1955,6 +3177,38 @@ export interface operations {
                     "application/json": components["schemas"]["Enrollment"];
                 };
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     learning_enrollments_retrieve: {
@@ -1977,17 +3231,49 @@ export interface operations {
                     "application/json": components["schemas"]["Enrollment"];
                 };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     learning_progress_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -2003,6 +3289,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedProgressList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -2028,6 +3338,38 @@ export interface operations {
                     "application/json": components["schemas"]["Progress"];
                 };
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     learning_progress_retrieve: {
@@ -2048,6 +3390,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Progress"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -2076,17 +3450,57 @@ export interface operations {
                     "application/json": components["schemas"]["Progress"];
                 };
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     learning_questions_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -2102,6 +3516,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedQuestionList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -2126,17 +3564,49 @@ export interface operations {
                     "application/json": components["schemas"]["Question"];
                 };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     learning_quizzes_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -2152,6 +3622,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedQuizList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -2176,19 +3670,49 @@ export interface operations {
                     "application/json": components["schemas"]["Quiz"];
                 };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
-    messaging_notifications_list: {
+    notifications_list: {
         parameters: {
             query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
                 /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A search term. */
-                search?: string;
+                pageSize?: number;
+                /** @description Seulement les non lues */
+                unread?: boolean;
             };
             header?: never;
             path?: never;
@@ -2204,9 +3728,33 @@ export interface operations {
                     "application/json": components["schemas"]["PaginatedNotificationList"];
                 };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
-    messaging_notifications_retrieve: {
+    notifications_read_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -2226,21 +3774,101 @@ export interface operations {
                     "application/json": components["schemas"]["Notification"];
                 };
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
-    messaging_notifications_partial_update: {
+    notifications_preferences_retrieve: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @description A unique integer value identifying this notification. */
-                id: number;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Preferences"];
+                };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    notifications_preferences_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: {
             content: {
-                "application/json": components["schemas"]["PatchedNotificationRequest"];
+                "application/json": components["schemas"]["PatchedPreferencesUpdateRequest"];
             };
         };
         responses: {
@@ -2249,7 +3877,133 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Notification"];
+                    "application/json": components["schemas"]["Preferences"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    notifications_read_all_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadAll"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    notifications_unread_count_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnreadCount"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -2257,12 +4011,12 @@ export interface operations {
     payments_orders_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -2278,6 +4032,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedOrderList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -2302,17 +4080,49 @@ export interface operations {
                     "application/json": components["schemas"]["Order"];
                 };
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
     payments_payments_list: {
         parameters: {
             query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
                 /** @description A search term. */
                 search?: string;
             };
@@ -2328,6 +4138,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedPaymentList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -2350,6 +4184,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Payment"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -2387,9 +4253,33 @@ export interface operations {
                     "application/json": components["schemas"]["WebhookNack"];
                 };
             };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
         };
     };
-    public_user_csrf_retrieve: {
+    referentials_avatars_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -2403,123 +4293,20 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CsrfToken"];
+                    "application/json": components["schemas"]["Avatar"][];
                 };
             };
-        };
-    };
-    public_user_forgot_password_step_1_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PublicForgotPasswordStep1Request"];
-            };
-        };
-        responses: {
-            /** @description No response body */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    public_user_forgot_password_step_2_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PublicForgotPasswordStep2Request"];
-            };
-        };
-        responses: {
-            /** @description No response body */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    public_user_session_login_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CustomAuthTokenRequest"];
-            };
-        };
-        responses: {
-            200: {
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SessionLoginResponse"];
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
     };
-    user_change_email_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UserChangeEmailRequest"];
-            };
-        };
-        responses: {
-            /** @description No response body */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    user_change_password_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UserChangePasswordRequest"];
-            };
-        };
-        responses: {
-            /** @description No response body */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    user_my_profile_retrieve: {
+    referentials_countries_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -2533,12 +4320,20 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserMyProfile"];
+                    "application/json": components["schemas"]["Country"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
     };
-    user_my_profile_update: {
+    referentials_disabilities_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -2552,12 +4347,20 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserMyProfile"];
+                    "application/json": components["schemas"]["Disability"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
     };
-    user_my_profile_partial_update: {
+    referentials_goals_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -2571,12 +4374,80 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserMyProfile"];
+                    "application/json": components["schemas"]["Goal"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
     };
-    user_session_logout_create: {
+    referentials_localities_list: {
+        parameters: {
+            query?: {
+                /** @description Code ISO du pays (ex. BJ) */
+                country?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Locality"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_payment_networks_list: {
+        parameters: {
+            query?: {
+                /** @description Code ISO du pays (ex. BJ) */
+                country?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentNetwork"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_refusal_reasons_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -2585,12 +4456,75 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
-            204: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RefusalReason"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_relationships_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Relationship"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    referentials_school_grades_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchoolGrade"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
             };
         };
     };

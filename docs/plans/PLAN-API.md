@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-1.1
+Statut : 🟡 en cours · Prochaine tâche : API-L1.1
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -63,60 +63,102 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `AllowAny` limité à `csrf`, `session-login`, `health`, webhook et lectures de catalogue
   - [x] Aucune route d'écriture client sur contenu, quiz, commandes ou paiements
 
-### API-1 · Socle — ⬜ à faire
-- [ ] **ADR Identité et connexion** (avant API-1.1) · `docs/adr/`
-  - [ ] `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé
-- [ ] **API-1.1** Remise à zéro + `accounts.User` · `feature/api-1-identite`
-  - [ ] Supprimer tous les `apps/*/migrations/0*.py` (garder les `__init__.py`)
-  - [ ] `AUTH_USER_MODEL = "accounts.User"` ; retirer `apps.user`, `apps.messaging`, `rest_framework.authtoken`, `channels` d'`INSTALLED_APPS`
-  - [ ] App `accounts` : `User`, `LearnerProfile`, `ParentProfile`, `TeacherProfile` (champs §3.1)
-  - [ ] Unicité conditionnelle (`username`, `phone`, `email`) et `CheckConstraint` par rôle ; regex `username` (sans `@`, pas tout-numérique)
-  - [ ] `status` et `is_active` dérivé ; `admin` supprimé (D71)
-  - [ ] `IdentifierBackend` (email / téléphone E.164 / `username`), personnel refusé sur `auth/login/`, temps constant
-  - [ ] Refus par statut : `ACCOUNT_PENDING_CONSENT`, `ACCOUNT_SUSPENDED`, `ACCOUNT_DEACTIVATED`
-  - [ ] `SESSION_ENGINE` en `cached_db`, rotation de session au login
-  - [ ] Suppression des apps `user` et `messaging` (tag git `archive/messaging`)
-  - [ ] `analytics.Event` → `TrackingEvent` ; `DEFAULT_AUTO_FIELD = BigAutoField`
-  - [ ] `make makemigrations` : un `0001_initial` par app ; `makemigrations --check` passe
-  - [ ] Annoncer la PR (`make clean && make up && make seed` pour les développeurs)
-  - [ ] Tests : identifiant numérique ou avec `@` refusé, doublon insensible à la casse, trois personas + personnel refusé, statuts refusés
-- [ ] **API-1.2** Domaine `auth` + `accounts/me/` · `feature/api-1-auth-me`
-  - [ ] `GET auth/csrf/`, `POST auth/login/` (C7), `POST auth/logout/`
-  - [ ] `GET accounts/me/` (identité, rôle, statut, `profileStep`, données du shell, champs personnel)
-  - [ ] `POST accounts/me/password/`, `POST accounts/me/email/`
-  - [ ] Pagination `page`/`pageSize`
-  - [ ] Front : `apps/web/src/lib/api-browser.ts` et `apps/web/src/app/page.tsx` mis à jour, `packages/api-client` régénéré
-  - [ ] Retirer le commentaire d'en-tête de `session/views.py` (login par token)
-  - [ ] Tests : CSRF exigé sur login et logout, throttle de login par IP **et** par identifiant
-- [ ] **API-1.3** Erreurs et validation · `feature/api-1-erreurs`
-  - [ ] Catalogue complet des codes §7.1 (`libs/errors.py`, message français par code)
-  - [ ] Composant `Error` déclaré dans le schéma OpenAPI (400/401/403/404/409/429)
-  - [ ] Validateur de mot de passe D25 (`PASSWORD_TOO_WEAK`) ; validateurs Django par défaut retirés
-  - [ ] Tests : erreurs en français avec `code`
-- [ ] **API-1.4** Notifications · `feature/api-1-notifications`
-  - [ ] App `notifications` : `Notification`, `NotificationPreference`
-  - [ ] Endpoints §7.7 : `notifications/`, `unread-count/`, `{id}/read/`, `read-all/`, `preferences/`
-  - [ ] Service `notify(user, type, …)` (base + email selon la préférence, C12)
-  - [ ] Tests : scoping propriétaire, préférences respectées
-- [ ] **API-1.5** Référentiels (D3) · `feature/api-1-referentiels`
-  - [ ] App `referentials` : `Country`, `PaymentNetwork` (Celtiis inclus, D76), `SchoolGrade`, `Goal`, `Avatar`, `Disability`, `Relationship`, `RefusalReason`, `Locality`
-  - [ ] Données initiales par migration de données
-  - [ ] Endpoints `GET referentials/*` publics, `Cache-Control: public, max-age=3600`
-  - [ ] Tests : référentiels lisibles anonymement
-- [ ] **API-1.6** Plateforme et personnel · `feature/api-1-plateforme`
-  - [ ] `core.PlatformSettings` (singleton, défauts D24, D32, D66 ; barème C8 vide)
-  - [ ] `core.AuditLog`
-  - [ ] 4 groupes Django par migration de données (Super-admin, Contenu, Support, Finance, D71)
-- [ ] **API-1.7** Données de démo (D2) · `feature/api-1-seed-demo`
-  - [ ] Commande `seed_demo` idempotente, refusée si `DJANGO_ENV=production`
-  - [ ] `make seed` : `loaddata fixtures/admin.json fixtures/mail.json` puis `seed_demo`
-  - [ ] Comptes : Léa Adjovi, son parent, un enseignant, un membre du personnel par groupe avec secret TOTP fixe de développement
-  - [ ] Mots de passe de démo documentés dans `fixtures/README`
-  - [ ] Tests : `seed_demo` deux fois de suite sans doublon
-- [ ] **Critères de fin d'API-1**
-  - [ ] `make clean && make up && make seed` fonctionne
-  - [ ] Front compilé contre le nouveau client
-  - [ ] Plus aucune route hors `/api/<domaine>/…/`
+### API-1 · Socle — ✅ terminé
+- [x] **ADR Identité et connexion** (avant API-1.1) · `docs/adr-identite-connexion` · [ADR 0001](../adr/0001-identite-et-connexion.md) · PR #12
+  - [x] `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé
+- [x] **API-1.1** Remise à zéro + `accounts.User` · `feature/api-1-identite` · PR #15
+  - [x] Supprimer tous les `apps/*/migrations/0*.py` (garder les `__init__.py`)
+  - [x] `AUTH_USER_MODEL = "accounts.User"` ; retirer `apps.user`, `apps.messaging`, `rest_framework.authtoken`, `channels` d'`INSTALLED_APPS`
+  - [x] App `accounts` : `User`, `LearnerProfile`, `ParentProfile`, `TeacherProfile` (champs §3.1 ; les champs vers les référentiels arrivent en API-1.5, l'école en API-L2.7)
+  - [x] Unicité conditionnelle (`username`, `phone`, `email`) et `CheckConstraint` par rôle ; regex `username` (sans `@`, au moins une lettre : ADR 0001)
+  - [x] `status` et `is_active` dérivé ; `admin` supprimé (D71)
+  - [x] `IdentifierBackend` (email / téléphone E.164 / `username`), personnel refusé sur `auth/login/`, temps constant
+  - [x] Refus par statut : `ACCOUNT_PENDING_CONSENT`, `ACCOUNT_SUSPENDED`, `ACCOUNT_DEACTIVATED`
+  - [x] `SESSION_ENGINE` en `cached_db`, rotation de session au login
+  - [x] Suppression des apps `user` et `messaging` (tag git `archive/messaging`)
+  - [x] `analytics.Event` → `TrackingEvent` ; `DEFAULT_AUTO_FIELD = BigAutoField`
+  - [x] `make makemigrations` : un `0001_initial` par app ; `makemigrations --check` passe
+  - [x] Annoncer la PR (`make clean && make up && make seed` pour les développeurs) : description de la PR
+  - [x] Tests : identifiant numérique ou avec `@` refusé, doublon insensible à la casse, trois personas + personnel refusé, statuts refusés
+  - [x] Couverture 100 % (lignes et branches) du code modifié ; bug corrigé au passage : `aggregate_daily_stats` utilisait `django.utils.timezone.utc`, supprimé en Django 5
+  > Décision : les chemins hérités (`public/user/csrf`, `public/user/session-login`, `user/session-logout`,
+  > `user/my-profile`) sont servis par `accounts` jusqu'à API-1.2, qui les renomme avec le front ; la connexion
+  > y prend déjà `{identifier, password}`. `user/change-password`, `user/change-email` et
+  > `public/user/forgot-password-step-*` sont supprimés dès API-1.1 (aucun consommateur) : les deux premiers
+  > reviennent en API-1.2 sous `accounts/me/`. `messaging/notifications/` disparaît jusqu'à API-1.4.
+- [x] **API-1.2** Domaine `auth` + `accounts/me/` · `feature/api-1-auth-me` · PR #17
+  - [x] `GET auth/csrf/`, `POST auth/login/` (C7), `POST auth/logout/`
+  - [x] `GET accounts/me/` (identité, rôle, statut, `profileStep`, champs personnel ; données du shell avec les référentiels en API-1.5)
+  - [x] `POST accounts/me/password/`, `POST accounts/me/email/`
+  - [x] Pagination `page`/`pageSize`
+  - [x] Front : `apps/web/src/lib/api-browser.ts` mis à jour (`page.tsx` n'appelle plus l'API depuis le socle front, PR #18), `packages/api-client` régénéré
+  - [x] Retirer le commentaire d'en-tête de `session/views.py` (login par token)
+  - [x] Tests : CSRF exigé sur login et logout, throttle de login par IP **et** par identifiant
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : `auth/login/` renvoie `{user, csrfToken}` ; plafond par identifiant `10/hour` (variable
+  > `THROTTLE_LOGIN_IDENTIFIER`), en plus de `5/min` par IP. `accounts/me/email/` change l'identifiant de connexion de
+  > l'enseignant et l'email de contact du parent (`ParentProfile.email`, S4) ; refusé à l'apprenant (WD17) et au
+  > personnel. `django-otp` installé (`otpVerified`), exigé seulement en API-L6.1. `analytics/export/events.csv`
+  > renommé `analytics/export/events/` (slash final, D5).
+- [x] **API-1.3** Erreurs et validation · `feature/api-1-erreurs` · PR #21
+  - [x] Catalogue complet des codes §7.1 (`libs/errors.py`, message français par code)
+  - [x] Composant `Error` déclaré dans le schéma OpenAPI (400/401/403/404/409/429)
+  - [x] Validateur de mot de passe D25 (`PASSWORD_TOO_WEAK`) ; validateurs Django par défaut retirés
+  - [x] Tests : erreurs en français avec `code`
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : `fields` suit §7.1 (`{champ: [{code, message}]}`) au lieu de listes de chaînes ; un appel anonyme sur
+  > une route protégée renvoie **401** `NOT_AUTHENTICATED` (`libs/authentication.py`), 403 restant le refus d'un
+  > utilisateur connecté (et le CSRF). 409 est déclaré par l'opération qui le renvoie (`error_responses(409)`),
+  > les autres statuts automatiquement (`libs/schema.py`). Codes ajoutés au catalogue : génériques DRF
+  > (`PARSE_ERROR`, `METHOD_NOT_ALLOWED`…), `SERVER_ERROR`, `EMAIL_TAKEN`.
+- [x] **API-1.4** Notifications · `feature/api-1-notifications` · PR #22
+  - [x] App `notifications` : `Notification`, `NotificationPreference`
+  - [x] Endpoints §7.7 : `notifications/`, `unread-count/`, `{id}/read/`, `read-all/`, `preferences/`
+  - [x] Service `notify(user, type, …)` (base + email selon la préférence, C12)
+  - [x] Tests : scoping propriétaire, préférences respectées
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : catégories par rôle (apprenant : apprentissage, récompenses, encadrement, Steamy Events, paiements ;
+  > parent : consentements et validations, paiements, progression, Steamy Events ; enseignant : progression, tentatives
+  > à revoir, Steamy Events) + `account` toujours envoyée. Dans l'application : toujours ; email activé par défaut,
+  > réglable par catégorie, envoyé à l'adresse de contact (profil, ou email de connexion de l'enseignant) par Celery
+  > après validation de la transaction. `notify(user, category, type, title, …)`. `url` contrainte à un chemin du
+  > front. Restrictions propres aux mineurs (D6, D30) en API-L3a.6.
+- [x] **API-1.5** Référentiels (D3) · `feature/api-1-referentiels` · PR #23
+  - [x] App `referentials` : `Country`, `PaymentNetwork` (Celtiis inclus, D76), `SchoolGrade`, `Goal`, `Avatar`, `Disability`, `Relationship`, `RefusalReason`, `Locality`
+  - [x] Données initiales par migration de données
+  - [x] Endpoints `GET referentials/*` publics, `Cache-Control: public, max-age=3600`
+  - [x] Tests : référentiels lisibles anonymement
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  - [x] Profils reliés aux référentiels (localité, classe, objectifs, avatar, handicap) ; données du shell de
+    `accounts/me/` (`avatar`, `schoolGrade`, `city`) et `profileStep` complet (WP08 facultative, jamais bloquante)
+  > Décisions : identifiant public `code` (slug) pour chaque référentiel, `Country` désigné par son code ISO
+  > (`country=BJ`) ; seuls les réseaux activés sont servis (réglage D76 dans l'admin) ; Bénin activé (MTN, Moov,
+  > Celtiis), réseaux des pays voisins créés désactivés en attendant l'ADR paiement ; 20 communes du Bénin
+  > qualifiées urbain / rural (D75), complétées dans l'admin. Listes non paginées.
+- [x] **API-1.6** Plateforme et personnel · `feature/api-1-plateforme` · PR #24
+  - [x] `core.PlatformSettings` (singleton, défauts D24, D32, D66 ; barème C8 vide)
+  - [x] `core.AuditLog`
+  - [x] 4 groupes Django par migration de données (Super-admin, Contenu, Support, Finance, D71)
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : plafonds OTP quotidiens par défaut 5 par numéro et 20 par IP (D24 ne fixe pas de valeur ; réglables
+  > dans l'admin). `audit(action, actor, target, data, request)` dans `apps/core/audit.py` ; journal en lecture
+  > seule dans l'admin. Groupes créés sans permission : elles arrivent avec chaque domaine.
+- [x] **API-1.7** Données de démo (D2) · `feature/api-1-seed-demo` · PR #25
+  - [x] Commande `seed_demo` idempotente, refusée si `DJANGO_ENV=production`
+  - [x] `make seed` : `loaddata fixtures/admin.json fixtures/mail.json` puis `seed_demo`
+  - [x] Comptes : Léa Adjovi, son parent, un enseignant, un membre du personnel par groupe avec secret TOTP fixe de développement
+  - [x] Mots de passe de démo documentés dans `fixtures/README.md`
+  - [x] Tests : `seed_demo` deux fois de suite sans doublon
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : jeu dans `apps/core/demo.py` (une fonction `seed_<domaine>` par étape, appelée par `seed_all`) ;
+  > comptes Léa Adjovi (`lea.adjovi`), Marie Adjovi (parent, `+229 01 90 00 00 01`), M. Koffi Adékambi (enseignant,
+  > d'après les maquettes) et un membre du personnel par groupe (Super-admin superutilisateur) ; mot de passe unique
+  > `Steamy2026` ; secret TOTP RFC 6238 de test ; `django-otp` déjà installé en API-1.2. Le lien Marie ↔ Léa arrive
+  > avec le consentement (API-L2).
+- [x] **Critères de fin d'API-1**
+  - [x] `make clean && make up && make seed` fonctionne (vérifié sur une pile vierge : migrations, fixtures, `seed_demo` deux fois, connexion de Léa)
+  - [x] Front compilé contre le nouveau client
+  - [x] Plus aucune route hors `/api/<domaine>/…/` (routeurs DRF passés en `SimpleRouter` : ni vue racine ni suffixe `.format`)
 
 ### API-L1 · Catalogue public, événements, formulaires, kits — ⬜ à faire
 - [ ] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog`
@@ -243,13 +285,13 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 ### API-L3b · Commerce, boutique, événements payants — ⬜ à faire
 - [ ] **API-L3b.0a** Comparaison paiement (S9) · `feature/api-l3b-0a-adr-paiement` · doc
   - [x] Comparer KKiaPay et FedaPay : réseaux par pays (MTN, Moov, Celtiis), frais, initiation côté serveur, webhook signé, vérification de transaction, remboursements par API, sandbox, reversement, XOF
-  - [x] Écrire l'**ADR-Paiement** (un principal + un secours)
+  - [x] Écrire l'**ADR-Paiement** (FedaPay seul prestataire intégré, remplaçable ; KKiaPay/CinetPay non intégrés en v1)
   - [ ] Faire valider le format de `Invoice` par la comptabilité
 - [ ] **API-L3b.0b** Interface paiement · `feature/api-l3b-0b-paiement`
   - [ ] `payments/providers/` : `PaymentProvider` (`initiate`, `verify_webhook`, `parse_event`, `fetch_status`, `refund`)
   - [ ] `FakePaymentProvider` pilotable (numéros `…01` succès, `…02` échec, `…03` en attente), webhook signé asynchrone
   - [ ] Commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>`
-  - [ ] Fournisseur réel branché après l'ADR
+  - [ ] `FedaPayProvider` (seule implémentation réelle ; clé sandbox puis live)
 - [ ] **API-L3b.1** Commandes · `feature/api-l3b-1-commandes`
   - [ ] `Order`, `OrderItem` refondus (§3.3) ; service `pricing` unique
   - [ ] `POST payments/orders/` (identifiants et quantités seulement)
@@ -368,7 +410,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 
 ### ADR et comparaisons de prestataires
 - [ ] **ADR à écrire** (`docs/adr/`)
-  - [ ] Identité et connexion (avant API-1.1)
+  - [x] Identité et connexion (avant API-1.1) : [ADR 0001](../adr/0001-identite-et-connexion.md)
   - [x] SMS (avant API-L2.0b)
   - [x] Médias (Vimeo) (avant API-L3a.1)
   - [x] Paiement (avant API-L3b.0b)
@@ -619,15 +661,16 @@ fois même en appels concurrents ; ticket unique ; un apprenant ne lit ni les te
 **Préalable : comparaison paiement** (S9), tâche `API-L3b.0a` (doc, S) → **ADR-Paiement** : KKiaPay vs FedaPay sur
 réseaux par pays (MTN, Moov, **Celtiis**, D76), pays couverts, frais par transaction, **initiation côté serveur**
 (USSD push / demande de paiement sans redirection), webhook signé + API de vérification de transaction, liens de
-paiement, remboursements par API, sandbox, délai de reversement, devise XOF. Choix : un principal + un secours,
-derrière la même interface.
+paiement, remboursements par API, sandbox, délai de reversement, devise XOF. **Décision (ADR 0003) : FedaPay seul prestataire intégré**,
+remplaçable derrière la même interface ; KKiaPay ou CinetPay réévalués en cas de panne, de couverture ou de frais
+insuffisants, non intégrés en v1.
 
 **Objectif** : WA01-WA07, WK01-WK11, WD14, WD20 (sans moyens de paiement, D30), candidatures aux événements.
 Débloque : **lot 3** (achat, boutique) et prépare le **lot 4** (paiement par le parent).
 
 | PR | Contenu | Taille |
 | --- | --- | --- |
-| `API-L3b.0b` Interface paiement | `payments/providers/` : `PaymentProvider.initiate(order, msisdn, network) → (tx_id, status)`, `verify_webhook(request) → bool`, `parse_event(payload) → (reference, tx_id, amount, currency, status)`, `fetch_status(tx_id)`, `refund(...)` ; `FakePaymentProvider` (local/CI) **pilotable** : l'issue dépend du numéro de test (`…01` succès, `…02` échec, `…03` reste en attente), webhook signé posté de façon asynchrone ; commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>` (paie une demande comme le parent, pour les parcours du lot 3 avant WPD15) ; fournisseur réel après l'ADR | M |
+| `API-L3b.0b` Interface paiement | `payments/providers/` : `PaymentProvider.initiate(order, msisdn, network) → (tx_id, status)`, `verify_webhook(request) → bool`, `parse_event(payload) → (reference, tx_id, amount, currency, status)`, `fetch_status(tx_id)`, `refund(...)` ; `FakePaymentProvider` (local/CI) **pilotable** : l'issue dépend du numéro de test (`…01` succès, `…02` échec, `…03` reste en attente), webhook signé posté de façon asynchrone ; commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>` (paie une demande comme le parent, pour les parcours du lot 3 avant WPD15) ; `FedaPayProvider` réel (ADR 0003) | M |
 | `API-L3b.1` Commandes | `Order`, `OrderItem` refondus (§3.3) ; service `pricing` unique (prix, frais de zone, total) ; `POST payments/orders/` (le client n'envoie que des identifiants et quantités) ; `GET payments/orders/` (payeur ou bénéficiaire), `…/{reference}/` (invité : jeton opaque haché, transmis en en-tête `X-Guest-Token` sur les appels qui suivent la création, C10 ; `kitCodes` visibles du payeur seul) ; l'apprenant ne peut **pas** créer de commande (`PARENT_APPROVAL_REQUIRED`) | L |
 | `API-L3b.2` Paiement et webhook | `Payment` à 4 états ; `POST payments/orders/{reference}/payments/` (réseau activé pour le pays, sinon `NETWORK_UNAVAILABLE`) ; `GET payments/payments/{id}/` ; `POST payments/webhook/{provider}/` durci ; **exécution post-paiement** une seule fois, en transaction : inscription, Kit Codes, stock confirmé, candidature confirmée, facture asynchrone ; `GET …/invoice/` (payeur seulement, C12) | L |
 | `API-L3b.3` Boutique | `StockReservation`, `Cart`/`CartItem`, `DeliveryZone`, `DeliveryAddress`, `RestockAlert` ; `shop/cart/*` (connecté ; panier invité envoyé à la commande), `GET shop/delivery-zones/`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/` (invité ou parent : un SMS unique, D38 ; apprenant : notification in-app, sans téléphone, D30) | L |
@@ -750,7 +793,7 @@ peut pas accepter un consentement à la place du parent (D70).
 | Identité et connexion | API-1.1 | `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé |
 | SMS | API-L2.0b | Comparaison S10, Twilio retenu et remplaçable, interface, faux fournisseur, coûts |
 | Médias (Vimeo) | API-L3a.1 | Vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de mode hors ligne (D16) |
-| Paiement | API-L3b.0b | Comparaison S9, principal + secours, webhook et réconciliation, paiement tardif, remboursements |
+| Paiement | API-L3b.0b | Comparaison S9, FedaPay seul (remplaçable), webhook et réconciliation, paiement tardif, remboursements |
 | PDF et stockage privé | API-L3a.4 | WeasyPrint, Celery, RustFS privé, URL présignées courtes |
 
 ---
@@ -775,7 +818,7 @@ peut pas accepter un consentement à la place du parent (D70).
 | --- | --- |
 | Remise à zéro faite après un premier déploiement | Aucun déploiement avant la fusion d'`API-1.1` ; sinon recréer la base staging |
 | Retard des comparaisons SMS / paiement | Faux fournisseurs : L2 et L3b se développent et se testent sans prestataire ; seul le branchement réel attend l'ADR |
-| Celtiis non couvert par le prestataire retenu | Critère éliminatoire de l'ADR, ou second prestataire pour ce réseau (réglage par réseau, D76) |
+| Celtiis non couvert par le prestataire retenu | Vérifier le mode Celtiis de FedaPay avant L3b.2 ; sinon réévaluer (ADR 0003) avec un second prestataire pour ce réseau (réglage par réseau, D76) |
 | Webhooks perdus ou en retard (réseau mobile) | Réconciliation périodique, états `pending` visibles côté front (WA04) |
 | Fuite de vidéos (restriction de domaine contournable) | Accepté en v1 (ADR) ; `vimeoHash` jamais exposé hors inscription |
 | Énumération d'identifiants et de numéros | Throttles dédiés, réponses identiques sur reset et connexion |
@@ -791,7 +834,7 @@ validateurs de mot de passe D25) sont tranchés et intégrés aux étapes ci-des
 | Point | Proposition | Bloque |
 | --- | --- | --- |
 | Fournisseur SMS | ADR après comparaison (S10) | Branchement réel L2 |
-| Prestataire de paiement principal et secours | ADR après comparaison (S9) | Branchement réel L3b |
+| Prestataire de paiement | Tranché : FedaPay (ADR 0003) ; contrat, KYC et frais négociés à obtenir | Branchement réel L3b |
 | Valeurs du barème de points et des paliers de rang (C8) | À saisir dans `PlatformSettings` | L3a.3 |
 | Format des factures (obligations fiscales locales) | Validation par la comptabilité | L3b.2 |
 | Texte de finalité des données sensibles (D6) | Validation juridique | L2.5 (texte front) |

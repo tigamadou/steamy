@@ -4,6 +4,124 @@ info:
   version: 1.0.0
   description: API pour la plateforme de formation
 paths:
+  /api/accounts/me/:
+    get:
+      operationId: accounts_me_retrieve
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/email/:
+    post:
+      operationId: accounts_me_email_create
+      description: |-
+        Changement d'email (WPD08, WT08). Pour l'enseignant, c'est son identifiant de connexion ; pour le parent, une
+        adresse de contact (rapport hebdomadaire, D55), qui ne sert pas à se connecter (S4). L'apprenant renseigne la
+        sienne dans son profil (WD17).
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailChangeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/password/:
+    post:
+      operationId: accounts_me_password_create
+      description: Changement de mot de passe (WD18, WPD08, WT08). La session en cours
+        reste ouverte.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/analytics/dashboard/summary/:
     get:
       operationId: analytics_dashboard_summary_retrieve
@@ -21,6 +139,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/DashboardSummary'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/analytics/events/:
     post:
       operationId: analytics_events_create
@@ -34,7 +170,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EventRequest'
+              $ref: '#/components/schemas/TrackingEventRequest'
         required: true
       security:
       - cookieAuth: []
@@ -44,11 +180,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Event'
+                $ref: '#/components/schemas/TrackingEvent'
           description: ''
-  /api/analytics/export/events.csv:
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/analytics/export/events/:
     get:
-      operationId: analytics_export_events.csv_retrieve
+      operationId: analytics_export_events_retrieve
       parameters:
       - in: query
         name: end
@@ -74,6 +228,109 @@ paths:
                 type: string
                 format: binary
           description: Export CSV des événements
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/csrf/:
+    get:
+      operationId: auth_csrf_retrieve
+      tags:
+      - auth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfToken'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: Connexion des apprenants, parents et enseignants (W16). Le personnel
+        passe par l'admin (WAD15).
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/core/presign/:
     post:
       operationId: core_presign_create
@@ -97,28 +354,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/PresignUploadResponse'
           description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/courses/courses/:
     get:
       operationId: courses_courses_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -136,6 +417,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedCourseListList'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/courses/courses/{slug}/:
     get:
@@ -157,6 +444,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CourseDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/courses/courses/{slug}/enroll/:
     post:
@@ -182,28 +481,58 @@ paths:
               schema:
                 $ref: '#/components/schemas/CourseDetail'
           description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/courses/lessons/:
     get:
       operationId: courses_lessons_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -220,6 +549,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedLessonList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/courses/lessons/{id}/:
     get:
@@ -242,28 +589,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/Lesson'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/courses/modules/:
     get:
       operationId: courses_modules_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -281,6 +652,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedModuleList'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/courses/modules/{id}/:
     get:
@@ -304,28 +681,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/Module'
           description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/courses/resources/:
     get:
       operationId: courses_resources_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -342,6 +731,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedResourceList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/courses/resources/{id}/:
     get:
@@ -364,6 +771,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/Resource'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/health/:
     get:
       operationId: health_retrieve
@@ -385,6 +816,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
           description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/attempts/:
     get:
       operationId: learning_attempts_list
@@ -394,24 +831,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       tags:
       - learning
       security:
@@ -422,6 +859,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedAttemptList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
     post:
       operationId: learning_attempts_create
@@ -446,6 +901,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttemptCreate'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/attempts/{id}/:
     get:
@@ -473,6 +952,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/Attempt'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/certificates/:
     get:
       operationId: learning_certificates_list
@@ -482,24 +985,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -516,6 +1019,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedCertificateList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/certificates/{id}/:
     get:
@@ -543,28 +1064,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/Certificate'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/choices/:
     get:
       operationId: learning_choices_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -581,6 +1126,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedChoiceList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/choices/{id}/:
     get:
@@ -603,6 +1166,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/Choice'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/enrollments/:
     get:
       operationId: learning_enrollments_list
@@ -612,24 +1199,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -646,6 +1233,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedEnrollmentList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
     post:
       operationId: learning_enrollments_create
@@ -670,6 +1275,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Enrollment'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/enrollments/{id}/:
     get:
@@ -697,6 +1326,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/Enrollment'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/progress/:
     get:
       operationId: learning_progress_list
@@ -706,24 +1359,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -740,6 +1393,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedProgressList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
     post:
       operationId: learning_progress_create
@@ -764,6 +1435,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Progress'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/progress/{id}/:
     get:
@@ -790,6 +1485,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Progress'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
     patch:
       operationId: learning_progress_partial_update
@@ -821,28 +1540,58 @@ paths:
               schema:
                 $ref: '#/components/schemas/Progress'
           description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/questions/:
     get:
       operationId: learning_questions_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -859,6 +1608,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedQuestionList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/questions/{id}/:
     get:
@@ -881,28 +1648,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/Question'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/quizzes/:
     get:
       operationId: learning_quizzes_list
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -919,6 +1710,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedQuizList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/learning/quizzes/{id}/:
     get:
@@ -941,41 +1750,55 @@ paths:
               schema:
                 $ref: '#/components/schemas/Quiz'
           description: ''
-  /api/messaging/notifications/:
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/notifications/:
     get:
-      operationId: messaging_notifications_list
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+      operationId: notifications_list
+      description: Notifications du compte connecté, les plus récentes d'abord (WD04,
+        WPD14, WT12, cloche des shells).
       parameters:
-      - name: limit
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
         required: false
         in: query
         description: Number of results to return per page.
         schema:
           type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
+      - in: query
+        name: unread
         schema:
-          type: integer
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
+          type: boolean
+        description: Seulement les non lues
       tags:
-      - messaging
+      - notifications
       security:
       - cookieAuth: []
       responses:
@@ -985,14 +1808,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedNotificationList'
           description: ''
-  /api/messaging/notifications/{id}/:
-    get:
-      operationId: messaging_notifications_retrieve
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/notifications/{id}/read/:
+    post:
+      operationId: notifications_read_create
+      description: Notifications du compte connecté, les plus récentes d'abord (WD04,
+        WPD14, WT12, cloche des shells).
       parameters:
       - in: path
         name: id
@@ -1001,7 +1839,7 @@ paths:
         description: A unique integer value identifying this notification.
         required: true
       tags:
-      - messaging
+      - notifications
       security:
       - cookieAuth: []
       responses:
@@ -1011,27 +1849,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/Notification'
           description: ''
-    patch:
-      operationId: messaging_notifications_partial_update
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/notifications/preferences/:
+    get:
+      operationId: notifications_preferences_retrieve
       description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this notification.
-        required: true
+        Préférences par catégorie (WD06, WPD08, WT08). Dans l'application : toujours actif. Email : réglable, envoyé
+        seulement si une adresse est renseignée (`emailAddress`).
       tags:
-      - messaging
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedNotificationRequest'
+      - notifications
       security:
       - cookieAuth: []
       responses:
@@ -1039,7 +1894,144 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Notification'
+                $ref: '#/components/schemas/Preferences'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    patch:
+      operationId: notifications_preferences_partial_update
+      description: |-
+        Préférences par catégorie (WD06, WPD08, WT08). Dans l'application : toujours actif. Email : réglable, envoyé
+        seulement si une adresse est renseignée (`emailAddress`).
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPreferencesUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preferences'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/notifications/read-all/:
+    post:
+      operationId: notifications_read_all_create
+      description: Notifications du compte connecté, les plus récentes d'abord (WD04,
+        WPD14, WT12, cloche des shells).
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadAll'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/notifications/unread-count/:
+    get:
+      operationId: notifications_unread_count_retrieve
+      description: Notifications du compte connecté, les plus récentes d'abord (WD04,
+        WPD14, WT12, cloche des shells).
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCount'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/payments/orders/:
     get:
@@ -1050,24 +2042,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -1084,6 +2076,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedOrderList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/payments/orders/{id}/:
     get:
@@ -1111,6 +2121,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/Order'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/payments/payments/:
     get:
       operationId: payments_payments_list
@@ -1120,24 +2154,24 @@ paths:
         L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
         pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
       - name: ordering
         required: false
         in: query
         description: Which field to use when ordering the results.
         schema:
           type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       - name: search
         required: false
         in: query
@@ -1154,6 +2188,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedPaymentList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/payments/payments/{id}/:
     get:
@@ -1180,6 +2232,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Payment'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/payments/webhook/{provider_name}/:
     post:
@@ -1220,155 +2296,245 @@ paths:
               schema:
                 $ref: '#/components/schemas/WebhookNack'
           description: ''
-  /api/public/user/csrf:
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/avatars/:
     get:
-      operationId: public_user_csrf_retrieve
+      operationId: referentials_avatars_list
       tags:
-      - public
+      - referentials
+      security:
+      - {}
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CsrfToken'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Avatar'
           description: ''
-  /api/public/user/forgot-password-step-1:
-    post:
-      operationId: public_user_forgot_password_step_1_create
-      tags:
-      - public
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublicForgotPasswordStep1Request'
-        required: true
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '201':
-          description: No response body
-  /api/public/user/forgot-password-step-2:
-    post:
-      operationId: public_user_forgot_password_step_2_create
-      tags:
-      - public
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublicForgotPasswordStep2Request'
-        required: true
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '201':
-          description: No response body
-  /api/public/user/session-login:
-    post:
-      operationId: public_user_session_login_create
-      tags:
-      - public
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomAuthTokenRequest'
-        required: true
-      responses:
-        '200':
+        '429':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionLoginResponse'
+                $ref: '#/components/schemas/Error'
           description: ''
-  /api/user/change-email:
-    post:
-      operationId: user_change_email_create
-      tags:
-      - user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserChangeEmailRequest'
-        required: true
-      security:
-      - cookieAuth: []
-      responses:
-        '201':
-          description: No response body
-  /api/user/change-password:
-    post:
-      operationId: user_change_password_create
-      tags:
-      - user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserChangePasswordRequest'
-        required: true
-      security:
-      - cookieAuth: []
-      responses:
-        '201':
-          description: No response body
-  /api/user/my-profile:
+  /api/referentials/countries/:
     get:
-      operationId: user_my_profile_retrieve
+      operationId: referentials_countries_list
       tags:
-      - user
+      - referentials
       security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserMyProfile'
-          description: ''
-    put:
-      operationId: user_my_profile_update
-      tags:
-      - user
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserMyProfile'
-          description: ''
-    patch:
-      operationId: user_my_profile_partial_update
-      tags:
-      - user
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserMyProfile'
-          description: ''
-  /api/user/session-logout:
-    post:
-      operationId: user_session_logout_create
-      tags:
-      - user
-      security:
-      - cookieAuth: []
       - {}
       responses:
-        '204':
-          description: No response body
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Country'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/disabilities/:
+    get:
+      operationId: referentials_disabilities_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Disability'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/goals/:
+    get:
+      operationId: referentials_goals_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Goal'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/localities/:
+    get:
+      operationId: referentials_localities_list
+      parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+        description: Code ISO du pays (ex. BJ)
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Locality'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/payment-networks/:
+    get:
+      operationId: referentials_payment_networks_list
+      description: Réseaux Mobile Money activés (D76), lus par le formulaire de paiement.
+      parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+        description: Code ISO du pays (ex. BJ)
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentNetwork'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/refusal-reasons/:
+    get:
+      operationId: referentials_refusal_reasons_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RefusalReason'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/relationships/:
+    get:
+      operationId: referentials_relationships_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Relationship'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/referentials/school-grades/:
+    get:
+      operationId: referentials_school_grades_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SchoolGrade'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
 components:
   schemas:
+    AreaTypeEnum:
+      enum:
+      - urban
+      - rural
+      type: string
+      description: |-
+        * `urban` - Urbaine
+        * `rural` - Rurale
     Attempt:
       type: object
       properties:
@@ -1449,6 +2615,85 @@ components:
           nullable: true
       required:
       - quiz
+    Avatar:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+        emoji:
+          type: string
+          maxLength: 8
+        color:
+          type: string
+          title: Couleur
+          description: Jeton du design system, ex. « primary-500 »
+          maxLength: 32
+      required:
+      - code
+      - color
+      - emoji
+      - id
+      - label
+    CategoryEnum:
+      enum:
+      - learning
+      - rewards
+      - coaching
+      - events
+      - payments
+      - consents
+      - progress
+      - reviews
+      - account
+      type: string
+      description: |-
+        * `learning` - Apprentissage
+        * `rewards` - Récompenses
+        * `coaching` - Encadrement
+        * `events` - Steamy Events
+        * `payments` - Paiements
+        * `consents` - Consentements et validations
+        * `progress` - Progression
+        * `reviews` - Tentatives à revoir
+        * `account` - Compte
+    CategoryPreference:
+      type: object
+      properties:
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        label:
+          type: string
+          readOnly: true
+        inApp:
+          type: boolean
+          readOnly: true
+          description: Toujours actif
+        email:
+          type: boolean
+      required:
+      - category
+      - email
+      - inApp
+      - label
+    CategoryPreferenceRequest:
+      type: object
+      properties:
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        email:
+          type: boolean
+      required:
+      - category
+      - email
     Certificate:
       type: object
       properties:
@@ -1490,6 +2735,45 @@ components:
       - id
       - question
       - text
+    Country:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          title: Code ISO
+          maxLength: 2
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+        flag:
+          type: string
+          title: Drapeau
+          maxLength: 8
+        dialCode:
+          type: string
+          title: Indicatif
+          description: 'Sans « + » : 229'
+          maxLength: 4
+        phoneFormat:
+          type: string
+          title: Format
+          description: 'Gabarit d''affichage : « XX XX XX XX XX »'
+          maxLength: 32
+        phoneRegex:
+          type: string
+          title: Expression du numéro national
+          description: Numéro sans indicatif, ex. ^01[0-9]{8}$
+          maxLength: 120
+      required:
+      - code
+      - dialCode
+      - id
+      - label
+      - phoneRegex
     CourseDetail:
       type: object
       properties:
@@ -1582,23 +2866,6 @@ components:
           type: string
       required:
       - csrfToken
-    CustomAuthTokenRequest:
-      type: object
-      description: |-
-        Modified from rest_framework.authtoken.serializers.AuthTokenSerializer
-        to accept email field instead of username
-      properties:
-        email:
-          type: string
-          minLength: 1
-          title: Courriel
-        password:
-          type: string
-          minLength: 1
-          title: Mot de passe
-      required:
-      - email
-      - password
     DashboardSummary:
       type: object
       properties:
@@ -1613,6 +2880,38 @@ components:
       - eventsLast7Days
       - revenueLast30Days
       - totalUsers
+    Disability:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+      required:
+      - code
+      - id
+      - label
+    EmailChangeRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 255
+      required:
+      - email
+      - password
     Enrollment:
       type: object
       properties:
@@ -1661,67 +2960,187 @@ components:
         * `active` - Actif
         * `completed` - Terminé
         * `cancelled` - Annulé
-    Event:
+    Error:
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCodeEnum'
+        message:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldError'
+          description: Erreurs par champ (camelCase), présentes seulement si des champs
+            sont en cause
+      required:
+      - code
+      - message
+    ErrorCodeEnum:
+      enum:
+      - ACCOUNT_DEACTIVATED
+      - ACCOUNT_PENDING_CONSENT
+      - ACCOUNT_SUSPENDED
+      - AGE_OUT_OF_RANGE
+      - ALREADY_APPLIED
+      - ALREADY_IN_CLASSROOM
+      - BIRTHDATE_AGE_MISMATCH
+      - CHILDREN_STILL_LINKED
+      - CLASSROOM_NAME_TAKEN
+      - CLASSROOM_QUOTA_EXCEEDED
+      - CONSENT_ALREADY_RESOLVED
+      - CONSENT_COOLDOWN
+      - CONSENT_PHONE_MISMATCH
+      - CONSENT_REQUEST_EXPIRED
+      - CONTENT_LOCKED
+      - COURSE_NOT_IN_OFFER
+      - DELIVERY_ZONE_UNAVAILABLE
+      - DUPLICATE_ROW
+      - EMAIL_TAKEN
+      - EVENT_ALREADY_PROPOSED
+      - EVENT_CLOSED
+      - EVENT_FULL
+      - IMPORT_TOO_LARGE
+      - INVALID_CREDENTIALS
+      - INVITATION_INVALID
+      - KIT_CODE_ALREADY_USED
+      - KIT_CODE_INVALID
+      - KIT_CODE_NOT_COMPATIBLE
+      - KIT_CODE_REQUIRED
+      - LEARNER_QUOTA_EXCEEDED
+      - MALFORMED_ROW
+      - METHOD_NOT_ALLOWED
+      - NETWORK_UNAVAILABLE
+      - NOT_ACCEPTABLE
+      - NOT_AUTHENTICATED
+      - NOT_ENROLLED
+      - NOT_FOUND
+      - ORDER_ALREADY_PAID
+      - ORDER_EXPIRED
+      - OTP_DAILY_LIMIT
+      - OTP_EXPIRED
+      - OTP_INVALID
+      - OTP_REQUIRED
+      - OTP_RESEND_TOO_EARLY
+      - OTP_TOO_MANY_ATTEMPTS
+      - OUT_OF_STOCK
+      - PARENT_APPROVAL_REQUIRED
+      - PARSE_ERROR
+      - PASSWORD_TOO_WEAK
+      - PAYMENT_FAILED
+      - PAYMENT_REQUIRED
+      - PERMISSION_DENIED
+      - PHONE_INVALID
+      - PHONE_TAKEN
+      - QUIZ_COOLDOWN
+      - REPORT_LOCKED
+      - RESUME_CODE_INVALID
+      - SERVER_ERROR
+      - SIGNUP_EXPIRED
+      - THROTTLED
+      - UNSUPPORTED_MEDIA_TYPE
+      - USERNAME_INVALID
+      - USERNAME_TAKEN
+      - VALIDATION_ERROR
+      type: string
+      description: |-
+        * `ACCOUNT_DEACTIVATED` - ACCOUNT_DEACTIVATED
+        * `ACCOUNT_PENDING_CONSENT` - ACCOUNT_PENDING_CONSENT
+        * `ACCOUNT_SUSPENDED` - ACCOUNT_SUSPENDED
+        * `AGE_OUT_OF_RANGE` - AGE_OUT_OF_RANGE
+        * `ALREADY_APPLIED` - ALREADY_APPLIED
+        * `ALREADY_IN_CLASSROOM` - ALREADY_IN_CLASSROOM
+        * `BIRTHDATE_AGE_MISMATCH` - BIRTHDATE_AGE_MISMATCH
+        * `CHILDREN_STILL_LINKED` - CHILDREN_STILL_LINKED
+        * `CLASSROOM_NAME_TAKEN` - CLASSROOM_NAME_TAKEN
+        * `CLASSROOM_QUOTA_EXCEEDED` - CLASSROOM_QUOTA_EXCEEDED
+        * `CONSENT_ALREADY_RESOLVED` - CONSENT_ALREADY_RESOLVED
+        * `CONSENT_COOLDOWN` - CONSENT_COOLDOWN
+        * `CONSENT_PHONE_MISMATCH` - CONSENT_PHONE_MISMATCH
+        * `CONSENT_REQUEST_EXPIRED` - CONSENT_REQUEST_EXPIRED
+        * `CONTENT_LOCKED` - CONTENT_LOCKED
+        * `COURSE_NOT_IN_OFFER` - COURSE_NOT_IN_OFFER
+        * `DELIVERY_ZONE_UNAVAILABLE` - DELIVERY_ZONE_UNAVAILABLE
+        * `DUPLICATE_ROW` - DUPLICATE_ROW
+        * `EMAIL_TAKEN` - EMAIL_TAKEN
+        * `EVENT_ALREADY_PROPOSED` - EVENT_ALREADY_PROPOSED
+        * `EVENT_CLOSED` - EVENT_CLOSED
+        * `EVENT_FULL` - EVENT_FULL
+        * `IMPORT_TOO_LARGE` - IMPORT_TOO_LARGE
+        * `INVALID_CREDENTIALS` - INVALID_CREDENTIALS
+        * `INVITATION_INVALID` - INVITATION_INVALID
+        * `KIT_CODE_ALREADY_USED` - KIT_CODE_ALREADY_USED
+        * `KIT_CODE_INVALID` - KIT_CODE_INVALID
+        * `KIT_CODE_NOT_COMPATIBLE` - KIT_CODE_NOT_COMPATIBLE
+        * `KIT_CODE_REQUIRED` - KIT_CODE_REQUIRED
+        * `LEARNER_QUOTA_EXCEEDED` - LEARNER_QUOTA_EXCEEDED
+        * `MALFORMED_ROW` - MALFORMED_ROW
+        * `METHOD_NOT_ALLOWED` - METHOD_NOT_ALLOWED
+        * `NETWORK_UNAVAILABLE` - NETWORK_UNAVAILABLE
+        * `NOT_ACCEPTABLE` - NOT_ACCEPTABLE
+        * `NOT_AUTHENTICATED` - NOT_AUTHENTICATED
+        * `NOT_ENROLLED` - NOT_ENROLLED
+        * `NOT_FOUND` - NOT_FOUND
+        * `ORDER_ALREADY_PAID` - ORDER_ALREADY_PAID
+        * `ORDER_EXPIRED` - ORDER_EXPIRED
+        * `OTP_DAILY_LIMIT` - OTP_DAILY_LIMIT
+        * `OTP_EXPIRED` - OTP_EXPIRED
+        * `OTP_INVALID` - OTP_INVALID
+        * `OTP_REQUIRED` - OTP_REQUIRED
+        * `OTP_RESEND_TOO_EARLY` - OTP_RESEND_TOO_EARLY
+        * `OTP_TOO_MANY_ATTEMPTS` - OTP_TOO_MANY_ATTEMPTS
+        * `OUT_OF_STOCK` - OUT_OF_STOCK
+        * `PARENT_APPROVAL_REQUIRED` - PARENT_APPROVAL_REQUIRED
+        * `PARSE_ERROR` - PARSE_ERROR
+        * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
+        * `PAYMENT_FAILED` - PAYMENT_FAILED
+        * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
+        * `PERMISSION_DENIED` - PERMISSION_DENIED
+        * `PHONE_INVALID` - PHONE_INVALID
+        * `PHONE_TAKEN` - PHONE_TAKEN
+        * `QUIZ_COOLDOWN` - QUIZ_COOLDOWN
+        * `REPORT_LOCKED` - REPORT_LOCKED
+        * `RESUME_CODE_INVALID` - RESUME_CODE_INVALID
+        * `SERVER_ERROR` - SERVER_ERROR
+        * `SIGNUP_EXPIRED` - SIGNUP_EXPIRED
+        * `THROTTLED` - THROTTLED
+        * `UNSUPPORTED_MEDIA_TYPE` - UNSUPPORTED_MEDIA_TYPE
+        * `USERNAME_INVALID` - USERNAME_INVALID
+        * `USERNAME_TAKEN` - USERNAME_TAKEN
+        * `VALIDATION_ERROR` - VALIDATION_ERROR
+    FieldError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
+    Goal:
       type: object
       properties:
         id:
           type: integer
           readOnly: true
-        user:
-          type: integer
-          readOnly: true
-          nullable: true
-        eventType:
+        code:
           type: string
-          maxLength: 64
-        entityType:
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
           type: string
-          nullable: true
-          maxLength: 64
-        entityId:
+          title: Libellé
+          maxLength: 120
+        emoji:
           type: string
-          nullable: true
-          maxLength: 128
-        value:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        metadata:
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
+          maxLength: 8
       required:
-      - createdAt
-      - eventType
+      - code
       - id
-      - user
-    EventRequest:
-      type: object
-      properties:
-        eventType:
-          type: string
-          minLength: 1
-          maxLength: 64
-        entityType:
-          type: string
-          nullable: true
-          maxLength: 64
-        entityId:
-          type: string
-          nullable: true
-          maxLength: 128
-        value:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        metadata:
-          nullable: true
-      required:
-      - eventType
+      - label
     Health:
       type: object
       properties:
@@ -1811,6 +3230,168 @@ components:
       - order
       - resourceType
       - title
+    Locality:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        country:
+          type: string
+          description: Code ISO du pays
+        city:
+          type: string
+          title: Ville ou commune
+          maxLength: 120
+        district:
+          type: string
+          title: Quartier ou arrondissement
+          maxLength: 120
+        areaType:
+          allOf:
+          - $ref: '#/components/schemas/AreaTypeEnum'
+          title: Zone
+      required:
+      - areaType
+      - city
+      - country
+      - id
+    LoginRequest:
+      type: object
+      properties:
+        identifier:
+          type: string
+          minLength: 1
+          description: Identifiant, numéro de téléphone ou email (C7)
+          maxLength: 255
+        password:
+          type: string
+          minLength: 1
+      required:
+      - identifier
+      - password
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/Me'
+        csrfToken:
+          type: string
+      required:
+      - csrfToken
+      - user
+    Me:
+      type: object
+      description: 'Identité et rôle du compte connecté : sert aux shells, à la redirection
+        après W16 et aux gardes (§7.3).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        role:
+          readOnly: true
+          nullable: true
+          title: Rôle
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        status:
+          allOf:
+          - $ref: '#/components/schemas/MeStatusEnum'
+          readOnly: true
+          title: Statut
+        username:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Identifiant
+        phone:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Téléphone
+        email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+          title: Adresse email
+        firstName:
+          type: string
+          readOnly: true
+          title: Prénom
+        lastName:
+          type: string
+          readOnly: true
+          title: Nom
+        profileStep:
+          description: Étape de profil restante (W11-W14, WP07-WP09), null si le profil
+            est complet
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ProfileStepEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        avatar:
+          allOf:
+          - $ref: '#/components/schemas/Avatar'
+          nullable: true
+          readOnly: true
+          description: Avatar de l'apprenant (shell)
+        schoolGrade:
+          allOf:
+          - $ref: '#/components/schemas/SchoolGrade'
+          nullable: true
+          readOnly: true
+          description: Classe de l'apprenant (shell)
+        city:
+          type: string
+          nullable: true
+          readOnly: true
+          description: Ville de l'apprenant ou du parent (shell)
+        isStaff:
+          type: boolean
+          readOnly: true
+        otpVerified:
+          type: boolean
+          description: Session du personnel validée par TOTP (D72) ; toujours faux
+            pour un persona.
+          readOnly: true
+        staffGroups:
+          type: array
+          items:
+            type: string
+          readOnly: true
+      required:
+      - avatar
+      - city
+      - email
+      - firstName
+      - id
+      - isStaff
+      - lastName
+      - otpVerified
+      - phone
+      - profileStep
+      - role
+      - schoolGrade
+      - staffGroups
+      - status
+      - username
+    MeStatusEnum:
+      enum:
+      - pending
+      - active
+      - suspended
+      - deactivated
+      - anonymized
+      type: string
+      description: |-
+        * `pending` - En attente de consentement
+        * `active` - Actif
+        * `suspended` - Suspendu
+        * `deactivated` - Désactivé
+        * `anonymized` - Anonymisé
     Module:
       type: object
       properties:
@@ -1844,32 +3425,53 @@ components:
         id:
           type: integer
           readOnly: true
-        user:
-          type: integer
+        type:
+          type: string
+          readOnly: true
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategoryEnum'
+          readOnly: true
+        tone:
+          allOf:
+          - $ref: '#/components/schemas/ToneEnum'
+          readOnly: true
+        icon:
+          type: string
           readOnly: true
         title:
           type: string
           readOnly: true
-        body:
+          title: Titre
+        message:
           type: string
           readOnly: true
         url:
           type: string
+          readOnly: true
+        readAt:
+          type: string
+          format: date-time
           readOnly: true
           nullable: true
         createdAt:
           type: string
           format: date-time
           readOnly: true
-        read:
-          type: boolean
       required:
-      - body
+      - category
       - createdAt
+      - icon
       - id
+      - message
+      - readAt
       - title
+      - tone
+      - type
       - url
-      - user
+    NullEnum:
+      enum:
+      - null
     Order:
       type: object
       properties:
@@ -1959,12 +3561,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1979,12 +3581,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -1999,12 +3601,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -2019,12 +3621,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -2039,12 +3641,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -2059,12 +3661,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -2079,12 +3681,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -2099,12 +3701,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -2119,12 +3721,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -2139,12 +3741,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -2159,12 +3761,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -2179,12 +3781,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -2199,12 +3801,12 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
@@ -2219,21 +3821,35 @@ components:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
+          example: http://api.example.org/accounts/?page=4
         previous:
           type: string
           nullable: true
           format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
+          example: http://api.example.org/accounts/?page=2
         results:
           type: array
           items:
             $ref: '#/components/schemas/Resource'
-    PatchedNotificationRequest:
+    PasswordChangeRequest:
       type: object
       properties:
-        read:
-          type: boolean
+        currentPassword:
+          type: string
+          minLength: 1
+        newPassword:
+          type: string
+          minLength: 1
+      required:
+      - currentPassword
+      - newPassword
+    PatchedPreferencesUpdateRequest:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryPreferenceRequest'
     PatchedProgressRequest:
       type: object
       properties:
@@ -2289,6 +3905,44 @@ components:
       - provider
       - providerTransactionId
       - success
+    PaymentNetwork:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+        country:
+          type: string
+          description: Code ISO du pays
+      required:
+      - code
+      - country
+      - id
+      - label
+    Preferences:
+      type: object
+      properties:
+        emailAddress:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+          description: Adresse qui recevra les emails, null si aucune
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryPreference'
+      required:
+      - categories
+      - emailAddress
     PresignUploadRequestRequest:
       type: object
       properties:
@@ -2323,6 +3977,16 @@ components:
       required:
       - fields
       - url
+    ProfileStepEnum:
+      enum:
+      - learner-info
+      - learner-school
+      - learner-goals
+      - learner-avatar
+      - parent-location
+      - parent-about
+      - parent-children
+      type: string
     Progress:
       type: object
       properties:
@@ -2374,34 +4038,6 @@ components:
       description: |-
         * `kkiapay` - Kkiapay
         * `fedapay` - FedaPay
-    PublicForgotPasswordStep1Request:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-          writeOnly: true
-          minLength: 1
-      required:
-      - email
-    PublicForgotPasswordStep2Request:
-      type: object
-      properties:
-        token:
-          type: string
-          writeOnly: true
-          minLength: 1
-        userId:
-          type: integer
-          writeOnly: true
-        password:
-          type: string
-          writeOnly: true
-          minLength: 1
-      required:
-      - password
-      - token
-      - userId
     Question:
       type: object
       properties:
@@ -2453,6 +4089,54 @@ components:
       - id
       - questions
       - title
+    ReadAll:
+      type: object
+      properties:
+        updated:
+          type: integer
+          description: Nombre de notifications marquées comme lues
+      required:
+      - updated
+    RefusalReason:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+      required:
+      - code
+      - id
+      - label
+    Relationship:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+        parentLabel:
+          type: string
+          title: Libellé côté parent
+          maxLength: 120
+      required:
+      - code
+      - id
+      - label
     Resource:
       type: object
       properties:
@@ -2498,62 +4182,116 @@ components:
         * `pdf` - PDF
         * `html` - HTML
         * `other` - Autre
-    SessionLoginResponse:
-      type: object
-      properties:
-        userId:
-          type: integer
-        csrfToken:
-          type: string
-      required:
-      - csrfToken
-      - userId
-    UserChangeEmailRequest:
-      type: object
-      properties:
-        password:
-          type: string
-          writeOnly: true
-          minLength: 1
-          title: Mot de passe
-          maxLength: 128
-        newEmail:
-          type: string
-          writeOnly: true
-          minLength: 1
-      required:
-      - newEmail
-      - password
-    UserChangePasswordRequest:
-      type: object
-      properties:
-        password:
-          type: string
-          writeOnly: true
-          minLength: 1
-          title: Mot de passe
-          maxLength: 128
-        newPassword:
-          type: string
-          writeOnly: true
-          minLength: 1
-      required:
-      - newPassword
-      - password
-    UserMyProfile:
+    RoleEnum:
+      enum:
+      - learner
+      - parent
+      - teacher
+      type: string
+      description: |-
+        * `learner` - Apprenant
+        * `parent` - Parent
+        * `teacher` - Enseignant
+    SchoolGrade:
       type: object
       properties:
         id:
           type: integer
           readOnly: true
-        email:
+        code:
           type: string
-          format: email
-          readOnly: true
-          title: Adresse électronique
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
       required:
-      - email
+      - code
       - id
+      - label
+    ToneEnum:
+      enum:
+      - info
+      - success
+      - warning
+      - danger
+      - primary
+      type: string
+      description: |-
+        * `info` - Information
+        * `success` - Succès
+        * `warning` - Attention
+        * `danger` - Problème
+        * `primary` - Mise en avant
+    TrackingEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+          nullable: true
+        eventType:
+          type: string
+          maxLength: 64
+        entityType:
+          type: string
+          nullable: true
+          maxLength: 64
+        entityId:
+          type: string
+          nullable: true
+          maxLength: 128
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        metadata:
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - eventType
+      - id
+      - user
+    TrackingEventRequest:
+      type: object
+      properties:
+        eventType:
+          type: string
+          minLength: 1
+          maxLength: 64
+        entityType:
+          type: string
+          nullable: true
+          maxLength: 64
+        entityId:
+          type: string
+          nullable: true
+          maxLength: 128
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        metadata:
+          nullable: true
+      required:
+      - eventType
+    UnreadCount:
+      type: object
+      properties:
+        count:
+          type: integer
+      required:
+      - count
     WebhookAck:
       type: object
       properties:

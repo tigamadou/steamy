@@ -5,16 +5,17 @@ from django.db import models
 User = settings.AUTH_USER_MODEL
 
 
-class Event(models.Model):
+class TrackingEvent(models.Model):
     """
-    Stocke un événement brut généré par l'application (tracking).
+    Télémétrie interne : un événement brut généré par l'application. Distinct des Steamy Events
+    (`events.SteamyEvent`), d'où le nom (CONVENTIONS, vocabulaire).
     - event_type: eg. 'course_view', 'enrollment', 'lesson_complete', 'quiz_attempt', 'purchase'
     - entity_type/entity_id: facultatif, pour lier l'event (ex: course, lesson, quiz)
     - metadata: JSON libre (browser, ip, duration, score, country, age, sex...)
     """
 
     user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="events"
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="tracking_events"
     )
     event_type = models.CharField(max_length=64, db_index=True)
     entity_type = models.CharField(max_length=64, blank=True, null=True)

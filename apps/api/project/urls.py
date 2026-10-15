@@ -22,12 +22,14 @@ urlpatterns = [
     # Admin
     path("admin/", admin.site.urls),
     # Apps
-    path("api/", include("apps.user.urls")),
+    path("api/auth/", include("apps.accounts.urls.auth")),
+    path("api/accounts/", include("apps.accounts.urls.accounts")),
     path("api/courses/", include("apps.courses.urls")),
     path("api/learning/", include("apps.learning.urls")),
     path("api/payments/", include("apps.payments.urls")),
-    path("api/messaging/", include("apps.messaging.urls")),
     path("api/analytics/", include("apps.analytics.urls")),
+    path("api/notifications/", include("apps.notifications.urls")),
+    path("api/referentials/", include("apps.referentials.urls")),
     # path("api/core/presign/", include("apps.core.views.presign_upload")),
     path("api/core/presign/", presign_upload, name="presign-upload"),
     path("api/health/", health, name="health"),

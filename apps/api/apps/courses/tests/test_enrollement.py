@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import NoReverseMatch, reverse
 from rest_framework.test import APIClient
 
+from apps.accounts.tests.factories import LearnerFactory, TeacherFactory
 from apps.courses.models import Course, Lesson, Module
 from apps.learning.models import Enrollment
 
@@ -44,12 +45,8 @@ def find_course_action_url(course, action_names=None):
 @pytest.mark.django_db
 def test_student_can_enroll_and_access_lessons():
     client = APIClient()
-    teacher = User.objects.create_user(
-        email="teacher-enroll@example.com", password="pw", role="teacher"
-    )
-    student = User.objects.create_user(
-        email="student-enroll@example.com", password="pw", role="student"
-    )
+    teacher = TeacherFactory(email="teacher-enroll@example.com")
+    student = LearnerFactory()
 
     # create course + module + lesson
     course = Course.objects.create(
@@ -118,12 +115,8 @@ def test_student_can_enroll_and_access_lessons():
 @pytest.mark.django_db
 def test_teacher_cannot_enroll_as_student_but_can_manage_course():
     client = APIClient()
-    teacher = User.objects.create_user(
-        email="teacher2-enroll@example.com", password="pw", role="teacher"
-    )
-    other_teacher = User.objects.create_user(
-        email="teacher-other@example.com", password="pw", role="teacher"
-    )
+    teacher = TeacherFactory(email="teacher2-enroll@example.com")
+    other_teacher = TeacherFactory(email="teacher-other@example.com")
     # course authored by teacher
     course = Course.objects.create(
         title="Manage Course", slug="manage-course", author=teacher, published=True

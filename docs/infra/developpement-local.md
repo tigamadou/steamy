@@ -18,7 +18,7 @@ make help      # liste de toutes les commandes
 | `beat` | Planificateur Celery (tâches périodiques) | — |
 | `api-migrate` | Applique les migrations au démarrage, puis s'arrête | — |
 | `postgres` | PostgreSQL 17 | `localhost:5432` (steamy / steamy) — `make psql` |
-| `redis` | Cache, broker Celery, couche Channels | — |
+| `redis` | Cache (dont celui des sessions), broker Celery | — |
 | `rustfs` | Stockage S3 des médias | API `localhost:9000`, console http://localhost:9001 |
 | `rustfs-init` | Crée le bucket `steamy-media`, puis s'arrête | — |
 | `mailpit` | Capture tous les e-mails envoyés | http://localhost:8025 |

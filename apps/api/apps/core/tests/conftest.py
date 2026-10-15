@@ -1,12 +1,12 @@
 import pytest
-from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory
+
+from apps.accounts.tests.factories import LearnerFactory
 
 
 @pytest.fixture
 def user(db):
-    User = get_user_model()
-    return User.objects.create_user(email="test@example.com", password="pass1234")
+    return LearnerFactory()
 
 
 @pytest.fixture

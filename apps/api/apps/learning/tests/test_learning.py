@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from apps.accounts.tests.factories import LearnerFactory, StaffFactory, TeacherFactory
 from apps.courses.models import Course, Lesson, Module
 from apps.learning.models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
 
@@ -12,8 +13,8 @@ User = get_user_model()
 @pytest.mark.django_db
 def test_enrollment_create_sets_user_and_prevents_duplicates():
     client = APIClient()
-    teacher = User.objects.create_user(email="t@example.com", password="pw", role="teacher")
-    student = User.objects.create_user(email="s@example.com", password="pw", role="student")
+    teacher = TeacherFactory(email="t@example.com")
+    student = LearnerFactory()
 
     course = Course.objects.create(title="C1", slug="c1", author=teacher, published=True)
 
@@ -36,9 +37,9 @@ def test_enrollment_create_sets_user_and_prevents_duplicates():
 @pytest.mark.django_db
 def test_progress_create_and_owner_permission():
     client = APIClient()
-    teacher = User.objects.create_user(email="t2@example.com", password="pw", role="teacher")
-    student = User.objects.create_user(email="s2@example.com", password="pw", role="student")
-    other = User.objects.create_user(email="other@example.com", password="pw", role="student")
+    teacher = TeacherFactory(email="t2@example.com")
+    student = LearnerFactory()
+    other = LearnerFactory()
 
     course = Course.objects.create(title="CourseP", slug="course-p", author=teacher, published=True)
     module = Module.objects.create(course=course, title="M1", order=0)
@@ -81,12 +82,10 @@ def test_progress_create_and_owner_permission():
 @pytest.mark.django_db
 def test_certificate_is_visible_to_its_owner_only():
     client = APIClient()
-    teacher = User.objects.create_user(email="t3@example.com", password="pw", role="teacher")
-    student = User.objects.create_user(email="s3@example.com", password="pw", role="student")
-    other = User.objects.create_user(email="other2@example.com", password="pw", role="student")
-    admin = User.objects.create_user(
-        email="admin@example.com", password="pw", role="admin", is_staff=True
-    )
+    teacher = TeacherFactory(email="t3@example.com")
+    student = LearnerFactory()
+    other = LearnerFactory()
+    admin = StaffFactory(email="admin@example.com")
 
     course = Course.objects.create(title="Ccert", slug="ccert", author=teacher, published=True)
     enrollment = Enrollment.objects.create(user=student, course=course)
@@ -112,8 +111,8 @@ def test_certificate_is_visible_to_its_owner_only():
 def test_attempt_is_graded_by_server_and_cannot_be_regraded():
     """S8 : le score vient du serveur, et il n'y a plus de correction manuelle."""
     client = APIClient()
-    teacher = User.objects.create_user(email="tq@example.com", password="pw", role="teacher")
-    student = User.objects.create_user(email="sq@example.com", password="pw", role="student")
+    teacher = TeacherFactory(email="tq@example.com")
+    student = LearnerFactory()
 
     course = Course.objects.create(title="Cquiz", slug="cquiz", author=teacher, published=True)
     Enrollment.objects.create(user=student, course=course)
@@ -147,8 +146,8 @@ def test_attempt_is_graded_by_server_and_cannot_be_regraded():
 
 @pytest.mark.django_db
 def test_quiz_choices_never_expose_the_answer_key():
-    teacher = User.objects.create_user(email="t9@example.com", password="pw", role="teacher")
-    student = User.objects.create_user(email="s9@example.com", password="pw", role="student")
+    teacher = TeacherFactory(email="t9@example.com")
+    student = LearnerFactory()
     course = Course.objects.create(title="Cq", slug="cq", author=teacher, published=True)
     quiz = Quiz.objects.create(course=course, title="Q")
     q1 = Question.objects.create(quiz=quiz, text="Q1", kind="mcq", weight="1.0")
@@ -156,7 +155,7 @@ def test_quiz_choices_never_expose_the_answer_key():
 
     client = APIClient()
     # Ni anonyme, ni connecté non inscrit : le quiz n'est pas visible.
-    assert client.get("/api/learning/quizzes/").status_code == 403
+    assert client.get("/api/learning/quizzes/").status_code == 401
     client.force_authenticate(user=student)
     assert client.get("/api/learning/quizzes/").json()["results"] == []
 

@@ -1,5 +1,5 @@
 # apps/learning/urls.py
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 
 from .views import (
     AttemptViewSet,
@@ -11,7 +11,7 @@ from .views import (
     QuizViewSet,
 )
 
-router = DefaultRouter()
+router = SimpleRouter()
 router.register(r"enrollments", EnrollmentViewSet)
 router.register(r"progress", ProgressViewSet)
 router.register(r"certificates", CertificateViewSet, basename="certificate")

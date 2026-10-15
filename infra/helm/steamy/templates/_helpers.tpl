@@ -67,8 +67,6 @@ securityContext:
   value: {{ printf "%s/1" $redis | quote }}
 - name: CELERY_BROKER_URL
   value: {{ printf "%s/0" $redis | quote }}
-- name: CHANNELS_REDIS_URL
-  value: {{ printf "%s/2" $redis | quote }}
 - name: AWS_S3_ENDPOINT_URL
   value: {{ $v.platform.s3Endpoint | quote }}
 - name: AWS_STORAGE_BUCKET_NAME

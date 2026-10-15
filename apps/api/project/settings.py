@@ -49,7 +49,12 @@ else:
 ALLOW_API_DOCS = os.getenv("ALLOW_API_DOCS", "false").lower() in ("1", "true", "yes")
 
 
-AUTH_USER_MODEL = "user.User"
+AUTH_USER_MODEL = "accounts.User"
+# Connexion des personas par « Identifiant ou numéro » (W16) et du personnel par l'admin (WAD15) : ADR 0001.
+AUTHENTICATION_BACKENDS = [
+    "apps.accounts.backends.IdentifierBackend",
+    "apps.accounts.backends.StaffBackend",
+]
 
 INSTALLED_APPS = [
     # Custom Admin settings (must be before django.contrib.admin)
@@ -71,17 +76,19 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "drf_spectacular_sidecar",
-    "channels",
     "storages",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
     # Local
     "apps.file",
     "apps.mail",
-    "apps.user",
+    "apps.accounts",
     "apps.courses",
     "apps.learning",
     "apps.payments",
-    "apps.messaging",
     "apps.analytics",
+    "apps.notifications",
+    "apps.referentials",
     "apps.core",
 ]
 
@@ -93,6 +100,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # `request.user.is_verified()` (TOTP du personnel, D72) ; exigé sur le back-office en API-L6.1
+    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -119,7 +128,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "project.wsgi.application"
 ASGI_APPLICATION = "project.asgi.application"
 
-DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 if ENV in (STAGING, PRODUCTION):
     DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
@@ -134,19 +143,9 @@ else:
         },
     }
 
+# Politique de mot de passe D25 seule : les validateurs par défaut de Django sont retirés (messages hors `PwReq`).
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "apps.accounts.password_validation.PasswordPolicyValidator"},
 ]
 
 # Messages en français (D4) ; dates stockées en UTC, affichées et planifiées au fuseau du Bénin (C16).
@@ -243,11 +242,10 @@ REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": ("djangorestframework_camel_case.parser.CamelCaseJSONParser",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
         # Session Django + CSRF uniquement (S12) : pas de token DRF.
-        "rest_framework.authentication.SessionAuthentication",
+        "libs.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 25,
+    "DEFAULT_PAGINATION_CLASS": "libs.pagination.PagePagination",
     "DEFAULT_FILTER_BACKENDS": (
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.OrderingFilter",
@@ -264,12 +262,14 @@ REST_FRAMEWORK = {
         "anon": os.getenv("THROTTLE_ANON", "120/min"),
         "user": os.getenv("THROTTLE_USER", "600/min"),
         "login": os.getenv("THROTTLE_LOGIN", "5/min"),
+        "login-identifier": os.getenv("THROTTLE_LOGIN_IDENTIFIER", "10/hour"),
         "signup": os.getenv("THROTTLE_SIGNUP", "5/min"),
         "password-reset": os.getenv("THROTTLE_PASSWORD_RESET", "5/hour"),
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
     },
 }
-REST_FRAMEWORK.setdefault("DEFAULT_SCHEMA_CLASS", "drf_spectacular.openapi.AutoSchema")
+# Réponses d'erreur (composant `Error`) déclarées sur chaque opération
+REST_FRAMEWORK["DEFAULT_SCHEMA_CLASS"] = "libs.schema.ApiAutoSchema"
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -287,6 +287,8 @@ SPECTACULAR_SETTINGS = {
         "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
     ],
     "SCHEMA_PATH_PREFIX": r"/api",
+    # Codes du format d'erreur D4 : énumération nommée pour le client TypeScript
+    "ENUM_NAME_OVERRIDES": {"ErrorCodeEnum": "libs.errors.ERROR_CODES"},
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
 ADMIN_TITLE = "Admin"
@@ -303,15 +305,6 @@ CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", WEB_URL).sp
 # Payements
 PAYMENTS_KKIAPAY_SECRET = os.getenv("PAYMENTS_KKIAPAY_SECRET", "")
 PAYMENTS_FEDAPAY_SECRET = os.getenv("PAYMENTS_FEDAPAY_SECRET", "")
-
-# Messaging
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [os.getenv("CHANNELS_REDIS_URL", "redis://redis:6379/2")]},
-    }
-}
-
 
 # # ==================================================================================================
 # # FILE SETTINGS
@@ -405,8 +398,8 @@ CACHES = {
         },
     }
 }
-# Session + cache (optional)
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+# Sessions en base avec cache (C20) : une purge de Redis ne déconnecte plus tout le monde.
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 SESSION_CACHE_ALIAS = "default"
 
 # ==================================================================================================
@@ -423,6 +416,8 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+# Tâches exécutées sur place pendant les tests (PLAN-API, règles propres à l'API)
+CELERY_TASK_ALWAYS_EAGER = TESTING
 
 # optional default task time limits
 CELERY_TASK_TIME_LIMIT = int(os.getenv("CELERY_TASK_TIME_LIMIT", 300))
@@ -443,11 +438,11 @@ CELERY_TASK_SOFT_TIME_LIMIT = int(os.getenv("CELERY_TASK_SOFT_TIME_LIMIT", 180))
 #
 #  CELERY_BEAT_SCHEDULE = {
 #      'example-seconds': {
-#          'task': 'apps.user.tasks.example_scheduled_task',
+#          'task': 'apps.core.tasks.example_scheduled_task',
 #          'schedule': 60.0,  # Call every 60 seconds
 #      },
 #      'example-cron': {
-#          'task': 'apps.user.tasks.example_scheduled_task',
+#          'task': 'apps.core.tasks.example_scheduled_task',
 #          'schedule': crontab(minute=0, hour=0)  # Call at midnight every day
 #      }
 #  }
