@@ -667,6 +667,62 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/events/{slug}/applications/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `POST events/{slug}/applications/` (WD11, WPD12). Apprenant : candidature en attente de son parent. Parent
+         *     (`childId` d'un de ses enfants) : accord immédiat ; payant et sans ticket → place réservée et `orderReference`
+         *     à payer par `POST payments/orders/{reference}/payments/`. Codes : `EVENT_CLOSED`, `EVENT_FULL`,
+         *     `ALREADY_APPLIED`.
+         */
+        post: operations["events_applications_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events/applications/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `GET events/applications/` (WD10, WPD06) : les siennes (apprenant), celles de ses enfants (parent). */
+        get: operations["events_applications_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events/tickets/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `GET events/tickets/` (WJ07, WD10, WD11) : tickets de l'apprenant, utilisés ou non. */
+        get: operations["events_tickets_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health/": {
         parameters: {
             query?: never;
@@ -1713,6 +1769,49 @@ export interface components {
             questionId: number;
             choiceId: number;
         };
+        /** @description Candidature (WD10, WPD06) ; `orderReference` : commande à payer ou payée (événement payant). */
+        Application: {
+            readonly id: number;
+            readonly event: components["schemas"]["EventSummary"];
+            readonly learner: components["schemas"]["LearnerSummary"];
+            /** Statut */
+            readonly status: components["schemas"]["ApplicationStatusEnum"];
+            readonly motivation: string;
+            /** Niveau déclaré */
+            readonly selfLevel: components["schemas"]["DifficultyEnum"];
+            readonly ticketUsed: boolean;
+            /**
+             * Décision du parent
+             * Format: date-time
+             */
+            readonly parentDecidedAt: string | null;
+            /** Motif de refus */
+            readonly refusalReason: string;
+            readonly orderReference: string | null;
+            /**
+             * Déposée le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+        };
+        /** @description Apprenant : `{motivation, selfLevel}`. Parent : `{childId, motivation?}` (WPD12, accord immédiat). */
+        ApplicationCreateRequest: {
+            /** @description Parent : l'enfant inscrit */
+            childId?: number;
+            /** @default  */
+            motivation: string;
+            /** @default  */
+            selfLevel: components["schemas"]["DifficultyEnum"] | components["schemas"]["BlankEnum"];
+        };
+        /**
+         * @description * `pending_parent` - En attente du parent
+         *     * `pending_payment` - En attente du paiement
+         *     * `accepted` - Inscription confirmée
+         *     * `refused` - Refusée
+         *     * `cancelled` - Annulée
+         * @enum {string}
+         */
+        ApplicationStatusEnum: "pending_parent" | "pending_payment" | "accepted" | "refused" | "cancelled";
         /**
          * @description * `urban` - Urbaine
          *     * `rural` - Rurale
@@ -1809,6 +1908,8 @@ export interface components {
             id: number;
             firstName: string;
         };
+        /** @enum {unknown} */
+        BlankEnum: "";
         /** @description Panier (WK03, WK10) : prix courants des kits ; le total définitif est celui de la commande. */
         Cart: {
             items: components["schemas"]["CartItem"][];
@@ -2278,6 +2379,28 @@ export interface components {
          * @enum {string}
          */
         ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUEST_CLOSED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        EventSummary: {
+            readonly slug: string;
+            /** Titre */
+            readonly title: string;
+            readonly emoji: string;
+            /** Couleur */
+            readonly color: string;
+            /**
+             * Début
+             * Format: date-time
+             */
+            readonly startsAt: string;
+            /** Ville */
+            readonly city: string;
+            /** En ligne */
+            readonly online: boolean;
+            /**
+             * Prix (FCFA)
+             * @description 0 = gratuit
+             */
+            readonly price: number;
+        };
         FieldError: {
             code: string;
             message: string;
@@ -2456,6 +2579,10 @@ export interface components {
             /** Format: date-time */
             expiresAt: string;
             consentRequest: components["schemas"]["ConsentRequestState"] | null;
+        };
+        LearnerSummary: {
+            id: number;
+            firstName: string;
         };
         /** @description Niveau (WJ02) : introduction vidéo (identifiant et hachage, ADR 0004) et missions. */
         LevelDetail: {
@@ -2830,6 +2957,21 @@ export interface components {
             /** Format: uuid */
             challengeId: string;
             code: string;
+        };
+        PaginatedApplicationList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["Application"][];
         };
         PaginatedAttemptListItemList: {
             /** @example 123 */
@@ -3613,6 +3755,19 @@ export interface components {
             schoolName?: string | null;
             /** Format: date-time */
             expiresAt: string;
+        };
+        /** @description Ticket Steamy Events offert à la certification (D33), utilisable une fois (C12). */
+        Ticket: {
+            readonly id: number;
+            readonly courseSlug: string;
+            readonly courseTitle: string;
+            /**
+             * Offert le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+            readonly used: boolean;
+            readonly usedFor: components["schemas"]["EventSummary"] | null;
         };
         TokenRequest: {
             /** @description Jeton du lien SMS /consentement/<jeton> */
@@ -5670,6 +5825,171 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    events_applications_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ApplicationCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Application"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    events_applications_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedApplicationList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    events_tickets_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ticket"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

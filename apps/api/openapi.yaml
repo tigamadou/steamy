@@ -1701,6 +1701,174 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/events/{slug}/applications/:
+    post:
+      operationId: events_applications_create
+      description: |-
+        `POST events/{slug}/applications/` (WD11, WPD12). Apprenant : candidature en attente de son parent. Parent
+        (`childId` d'un de ses enfants) : accord immédiat ; payant et sans ticket → place réservée et `orderReference`
+        à payer par `POST payments/orders/{reference}/payments/`. Codes : `EVENT_CLOSED`, `EVENT_FULL`,
+        `ALREADY_APPLIED`.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationCreateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/events/applications/:
+    get:
+      operationId: events_applications_list
+      description: '`GET events/applications/` (WD10, WPD06) : les siennes (apprenant),
+        celles de ses enfants (parent).'
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - events
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedApplicationList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/events/tickets/:
+    get:
+      operationId: events_tickets_list
+      description: '`GET events/tickets/` (WJ07, WD10, WD11) : tickets de l''apprenant,
+        utilisés ou non.'
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - events
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ticket'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/health/:
     get:
       operationId: health_retrieve
@@ -4481,6 +4649,100 @@ components:
       required:
       - choiceId
       - questionId
+    Application:
+      type: object
+      description: 'Candidature (WD10, WPD06) ; `orderReference` : commande à payer
+        ou payée (événement payant).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        event:
+          allOf:
+          - $ref: '#/components/schemas/EventSummary'
+          readOnly: true
+        learner:
+          allOf:
+          - $ref: '#/components/schemas/LearnerSummary'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ApplicationStatusEnum'
+          readOnly: true
+          title: Statut
+        motivation:
+          type: string
+          readOnly: true
+        selfLevel:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          readOnly: true
+          title: Niveau déclaré
+        ticketUsed:
+          type: boolean
+          readOnly: true
+        parentDecidedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Décision du parent
+        refusalReason:
+          type: string
+          readOnly: true
+          title: Motif de refus
+        orderReference:
+          type: string
+          nullable: true
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Déposée le
+      required:
+      - createdAt
+      - event
+      - id
+      - learner
+      - motivation
+      - orderReference
+      - parentDecidedAt
+      - refusalReason
+      - selfLevel
+      - status
+      - ticketUsed
+    ApplicationCreateRequest:
+      type: object
+      description: 'Apprenant : `{motivation, selfLevel}`. Parent : `{childId, motivation?}`
+        (WPD12, accord immédiat).'
+      properties:
+        childId:
+          type: integer
+          description: 'Parent : l''enfant inscrit'
+        motivation:
+          type: string
+          default: ''
+          maxLength: 2000
+        selfLevel:
+          default: ''
+          oneOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+    ApplicationStatusEnum:
+      enum:
+      - pending_parent
+      - pending_payment
+      - accepted
+      - refused
+      - cancelled
+      type: string
+      description: |-
+        * `pending_parent` - En attente du parent
+        * `pending_payment` - En attente du paiement
+        * `accepted` - Inscription confirmée
+        * `refused` - Refusée
+        * `cancelled` - Annulée
     AreaTypeEnum:
       enum:
       - urban
@@ -4720,6 +4982,9 @@ components:
       required:
       - firstName
       - id
+    BlankEnum:
+      enum:
+      - ''
     Cart:
       type: object
       description: 'Panier (WK03, WK10) : prix courants des kits ; le total définitif
@@ -5815,6 +6080,51 @@ components:
         * `USERNAME_INVALID` - USERNAME_INVALID
         * `USERNAME_TAKEN` - USERNAME_TAKEN
         * `VALIDATION_ERROR` - VALIDATION_ERROR
+    EventSummary:
+      type: object
+      properties:
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        emoji:
+          type: string
+          readOnly: true
+        color:
+          type: string
+          readOnly: true
+          title: Couleur
+        startsAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Début
+        city:
+          type: string
+          readOnly: true
+          title: Ville
+        online:
+          type: boolean
+          readOnly: true
+          title: En ligne
+        price:
+          type: integer
+          readOnly: true
+          title: Prix (FCFA)
+          description: 0 = gratuit
+      required:
+      - city
+      - color
+      - emoji
+      - online
+      - price
+      - slug
+      - startsAt
+      - title
     FieldError:
       type: object
       properties:
@@ -6279,6 +6589,16 @@ components:
       - firstName
       - step
       - username
+    LearnerSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+      required:
+      - firstName
+      - id
     LevelDetail:
       type: object
       description: 'Niveau (WJ02) : introduction vidéo (identifiant et hachage, ADR
@@ -7208,6 +7528,26 @@ components:
       required:
       - challengeId
       - code
+    PaginatedApplicationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
     PaginatedAttemptListItemList:
       type: object
       properties:
@@ -8823,6 +9163,40 @@ components:
       - expiresAt
       - firstName
       - lastName
+    Ticket:
+      type: object
+      description: Ticket Steamy Events offert à la certification (D33), utilisable
+        une fois (C12).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        courseSlug:
+          type: string
+          readOnly: true
+        courseTitle:
+          type: string
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Offert le
+        used:
+          type: boolean
+          readOnly: true
+        usedFor:
+          allOf:
+          - $ref: '#/components/schemas/EventSummary'
+          nullable: true
+          readOnly: true
+      required:
+      - courseSlug
+      - courseTitle
+      - createdAt
+      - id
+      - used
+      - usedFor
     TokenRequest:
       type: object
       properties:

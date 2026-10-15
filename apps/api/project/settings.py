@@ -334,6 +334,7 @@ SPECTACULAR_SETTINGS = {
         "AttemptStatusEnum": "apps.learning.models.QuizAttempt.Status",
         "QuizKindEnum": "apps.catalog.models.Quiz.Kind",
         "BadgeKindEnum": "apps.catalog.models.Badge.Kind",
+        "DifficultyEnum": "apps.catalog.models.Course.Difficulty",
         "OrderKindEnum": "apps.payments.models.Order.Kind",
         "OrderCreateKindEnum": "apps.payments.serializers.ORDER_CREATE_KINDS",
         "OrderStatusEnum": "apps.payments.models.Order.Status",
