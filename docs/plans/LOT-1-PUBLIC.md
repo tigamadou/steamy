@@ -110,7 +110,7 @@ Statut : 🟡 en cours · Prochaine tâche : encart newsletter de 1.5 (WL20) · 
   > Reprise : pages éditoriales livrées. Reste l'encart newsletter de WL20 (composant client `getBrowserApi()`,
   > `POST public/leads/`, erreurs `fields` mappées, consentement non coché, vouvoiement) dès qu'API-L1.4 est fusionnée,
   > son test Vitest et son parcours Playwright.
-- [x] **1.6** Formulaires B2B et aide (requiert API-1, API-L1 et 1.2) · `feature/lot1-formulaires` · PR #PR16
+- [x] **1.6** Formulaires B2B et aide (requiert API-1, API-L1 et 1.2) · `feature/lot1-formulaires` · PR #50
   - [x] `WL11` `/ecoles` (3 offres de `content/site.ts`, CTA « Choisir » vers `/ecoles?offre=<offre>#devis`, formulaire au vouvoiement, confirmation en place)
   - [x] `WL24` `/aide` (FAQ `content/faq/` avec recherche, formulaire de contact, `?sujet=`, ancres `#faq` et `#contact`, message conservé en cas de coupure)
   - [x] Appels `public/quote-requests/`, `public/contact-messages/` (`lib/public-forms.ts`, champ piège), `referentials/countries/` (lu côté serveur en cache, passé à `PhoneInput`)
