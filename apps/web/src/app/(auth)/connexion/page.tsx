@@ -7,7 +7,7 @@ import { WebShell } from "@/components/ds/WebShell";
 
 import { LoginGate } from "./LoginGate";
 
-export const metadata: Metadata = { title: "Connexion · Steamy" };
+export const metadata: Metadata = { title: "Connexion" };
 
 // W16 · Connexion (SPEC-ECRANS-1 §2.7) : aucune donnée personnelle avant authentification.
 export default function ConnexionPage({ searchParams }: PageProps<"/connexion">) {
