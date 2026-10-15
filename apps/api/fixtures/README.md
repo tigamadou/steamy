@@ -16,7 +16,7 @@ Mot de passe de tous les comptes : **`Steamy2026`**.
 | Apprenante | W16 (`/connexion`) | `lea.adjovi` | Léa Adjovi, 4ᵉ, Cotonou ; profil complet |
 | Parent | W16 | `+229 01 90 00 00 01` (ou `0190000001`) | Marie Adjovi ; email de contact `marie.adjovi@steamy.test` |
 | Enseignant | W16 | `koffi.adekambi@steamy.test` | M. Koffi Adékambi |
-| Personnel · Super-admin | admin Django (`/admin/`) | `superadmin@steamy.test` | Superutilisateur |
+| Personnel · Super-admin | admin Django (`/admin/`, WAD15) | `superadmin@steamy.test` | Groupe Super-admin (pas `is_superuser`, réservé au compte de secours) |
 | Personnel · Contenu | admin Django | `contenu@steamy.test` | |
 | Personnel · Support | admin Django | `support@steamy.test` | |
 | Personnel · Finance | admin Django | `finance@steamy.test` | |
@@ -38,9 +38,12 @@ comme un email à `<numéro E.164>@sms.test`, lisible dans Mailpit.
 
 ## TOTP du personnel (développement)
 
-Chaque compte du personnel a un appareil TOTP « Démo » confirmé, avec le même secret fixe :
+En développement (`DJANGO_ENV=dev` ou `test`), chaque compte du personnel a un appareil TOTP « Démo » confirmé, avec le
+même secret fixe. En staging, `seed_demo` ne crée aucun appareil : chaque membre enrôle le sien à sa première
+connexion (QR code). Le secret :
 
 - base32 (à saisir dans une application d'authentification) : `GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ` ;
 - hexadécimal (`TOTPDevice.key`) : `3132333435363738393031323334353637383930`.
 
-Le TOTP est exigé sur l'admin et le back-office à partir d'API-L6.1.
+La connexion à l'admin (WAD15) demande l'email, le mot de passe `Steamy2026` et le code à 6 chiffres de
+l'application. Un même code ne sert qu'une fois par compte : attendre le suivant (30 s) pour se reconnecter.

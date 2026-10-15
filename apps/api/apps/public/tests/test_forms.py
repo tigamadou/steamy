@@ -5,7 +5,7 @@ from django.core import mail
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from apps.accounts.tests.factories import StaffFactory
+from apps.core.tests.staff import verified_client
 from apps.public.models import ContactMessage, Lead, QuoteRequest
 from apps.public.tasks import notify_team
 
@@ -178,7 +178,5 @@ def test_notify_team_is_idempotent():
 
 @pytest.mark.parametrize("model", ["quoterequest", "lead", "contactmessage"])
 def test_admin_pages_are_served(client, model):
-    client.force_login(
-        StaffFactory(is_superuser=True), backend="apps.accounts.backends.StaffBackend"
-    )
+    verified_client(client, is_superuser=True)  # session vérifiée par TOTP (WAD15)
     assert client.get(reverse(f"admin:public_{model}_changelist")).status_code == 200

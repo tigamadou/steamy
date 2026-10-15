@@ -11,6 +11,7 @@ from apps.accounts.tests.factories import (
     TeacherFactory,
 )
 from apps.catalog.tests.factories import CategoryFactory, CourseFactory
+from apps.core.tests.staff import verified_client
 from apps.learning.models import Enrollment
 from apps.shop.models import Kit
 
@@ -145,8 +146,6 @@ def test_admin_and_name():
     kit = KitFactory()
     assert str(kit) == kit.name
     client = APIClient()
-    client.force_login(
-        StaffFactory(is_superuser=True), backend="apps.accounts.backends.StaffBackend"
-    )
+    verified_client(client, is_superuser=True)  # session vérifiée par TOTP (WAD15)
     assert client.get(reverse("admin:shop_kit_changelist")).status_code == 200
     assert client.get(reverse("admin:shop_kit_change", args=[kit.pk])).status_code == 200

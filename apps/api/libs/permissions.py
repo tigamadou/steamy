@@ -1,6 +1,9 @@
 from rest_framework import permissions
 from rest_framework.permissions import SAFE_METHODS, IsAdminUser
 
+from apps.core.groups import SUPER_ADMIN
+from libs.errors import ApiError
+
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
@@ -22,6 +25,34 @@ class IsAdminUserOrReadOnly(IsAdminUser):
     def has_permission(self, request, view):
         is_admin = super().has_permission(request, view)
         return request.method in SAFE_METHODS or is_admin
+
+
+class IsStaffVerified(permissions.BasePermission):
+    """
+    Routes `/api/backoffice/` (D71, D72) : membre du personnel dont la session est vérifiée par TOTP (WAD15) et,
+    si la vue en déclare, membre d'un des groupes requis (`IsStaffVerified.of(FINANCE)`). Super-admin et
+    superutilisateur passent toujours le contrôle de groupe.
+
+    Anonyme → 401 `NOT_AUTHENTICATED` ; persona → 403 `PERMISSION_DENIED` ; personnel non vérifié → 403
+    `OTP_REQUIRED` (le front renvoie vers WAD15) ; groupe insuffisant → 403 `PERMISSION_DENIED`.
+    """
+
+    groups: tuple[str, ...] = ()
+
+    @classmethod
+    def of(cls, *groups: str) -> type["IsStaffVerified"]:
+        return type(cls.__name__, (cls,), {"groups": groups})
+
+    def has_permission(self, request, view):
+        user = request.user
+        if not (user and user.is_authenticated and user.is_staff):
+            return False
+        # `is_verified` est posé par `OTPMiddleware` ; absent (requête hors middleware), la session n'est pas vérifiée
+        if not getattr(user, "is_verified", lambda: False)():
+            raise ApiError("OTP_REQUIRED")
+        if not self.groups or user.is_superuser:
+            return True
+        return user.groups.filter(name__in=(*self.groups, SUPER_ADMIN)).exists()
 
 
 class IsParent(permissions.IsAuthenticated):
