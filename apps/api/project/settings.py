@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "drf_spectacular_sidecar",
+    "adminsortable2",
     "storages",
     "django_otp",
     "django_otp.plugins.otp_totp",
@@ -84,7 +85,12 @@ INSTALLED_APPS = [
     "apps.file",
     "apps.mail",
     "apps.accounts",
+    # Coquille : ne garde que ses migrations (tables supprimées en 0002), voir apps/courses/__init__.py
     "apps.courses",
+    "apps.catalog",
+    "apps.events",
+    "apps.public",
+    "apps.shop",
     "apps.learning",
     "apps.payments",
     "apps.analytics",
@@ -271,6 +277,8 @@ REST_FRAMEWORK = {
         "resume-username": os.getenv("THROTTLE_RESUME_USERNAME", "10/hour"),
         "password-reset": os.getenv("THROTTLE_PASSWORD_RESET", "5/hour"),
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
+        # Formulaires publics (devis, newsletter, contact) : par IP
+        "public-form": os.getenv("THROTTLE_PUBLIC_FORM", "10/hour"),
     },
 }
 # Réponses d'erreur (composant `Error`) déclarées sur chaque opération
@@ -386,6 +394,8 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "1") == "1"
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@example.com")
+# Destinataire des formulaires publics (devis, contact)
+TEAM_EMAIL = os.getenv("TEAM_EMAIL", "contact@steamy.local")
 
 SEND_MAIL = True if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD else False
 

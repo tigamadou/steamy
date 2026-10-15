@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L1.1
+Statut : 🟡 en cours · Prochaine tâche : API-L2.0b
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -160,33 +160,70 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Front compilé contre le nouveau client
   - [x] Plus aucune route hors `/api/<domaine>/…/` (routeurs DRF passés en `SimpleRouter` : ni vue racine ni suffixe `.format`)
 
-### API-L1 · Catalogue public, événements, formulaires, kits — ⬜ à faire
-- [ ] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog`
-  - [ ] Modèles `Category`, `Course`, `Project`, `Level`, `Mission` (`vimeoId`, `blocks` JSON validé)
-  - [ ] Suppression de `courses`
-  - [ ] Admin Django (groupe Contenu, ordre par glisser via `order`)
-- [ ] **API-L1.2** Endpoints catalogue · `feature/api-l1-2-catalogue-api`
-  - [ ] `GET catalog/categories/` (avec `courseCount`)
-  - [ ] `GET catalog/courses/` (filtres `category`, `difficulty`, `price`, `featured`, `q`, `sort`)
-  - [ ] `GET catalog/courses/{slug}/` sans `blocks` ni `vimeoId` de mission (D11), publiés uniquement
-  - [ ] Tests : brouillon invisible (liste et détail 404), détail sans contenu de mission, aucune écriture possible
-- [ ] **API-L1.3** Événements en lecture · `feature/api-l1-3-events`
-  - [ ] App `events` : `SteamyEvent` (§3.4) + admin
-  - [ ] `GET events/?upcoming=`, `GET events/{slug}/` (`seatsLeft` calculé)
-  - [ ] Tests : brouillon invisible, aucune écriture publique
-- [ ] **API-L1.4** Formulaires publics · `feature/api-l1-4-formulaires`
-  - [ ] App `public` : `QuoteRequest` (D13), `Lead` (D14, attestation adulte C12), `ContactMessage` (D17)
-  - [ ] `POST public/*` anonymes : CSRF, throttle dédié, champ piège, erreurs `fields`
-  - [ ] Email à l'équipe par Celery
-  - [ ] Tests : formulaires throttlés
-- [ ] **API-L1.5** Kits en lecture · `feature/api-l1-5-kits`
-  - [ ] App `shop` : `Kit` (§3.3) + admin
-  - [ ] `GET shop/kits/?category=`, `GET shop/kits/{slug}/` (disponibilité booléenne, jamais le stock exact)
-  - [ ] Tests : stock exact absent, aucune écriture publique
-- [ ] **Critères de fin d'API-L1**
-  - [ ] Réponses publiques sans donnée de mineur, indépendantes de la session, sans `rating`
-  - [ ] Seed : 3-4 parcours publiés complets dont un mis en avant, une catégorie vide, 4 événements (gratuit, payant, complet, passé), 3 kits
-  - [ ] `make openapi` committé
+### API-L1 · Catalogue public, événements, formulaires, kits — ✅ terminé
+- [x] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog` · PR #33
+  - [x] Modèles `Category`, `Course`, `Project`, `Level`, `Mission` (`vimeoId`, `blocks` JSON validé)
+  - [x] Suppression de `courses`
+  - [x] Admin Django (groupe Contenu, ordre par glisser via `order`)
+  - [x] `learning` rattaché au catalogue (`Enrollment.course`, `Quiz.course`, `Progress.mission`)
+  - [x] Seed : 6 catégories (dont une vide), 4 parcours publiés complets dont un mis en avant, un brouillon
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : `requiredKit` arrive avec `shop.Kit` en API-L1.5 (le modèle n'existe pas encore) ; le `badge` des
+  > projets et niveaux arrive avec `Badge` en API-L3a. Ajouts à §3.2 : `Course.emoji` (visuel des cartes de la
+  > maquette), `trailerVimeoHash` (ADR 0004, point V2), contrainte « gratuit ⇔ prix nul ». `blocks` : liste de
+  > `{type: text|tip, text}` ou `{type: media, src, alt, caption?}` (`src` en https ou chemin du stockage).
+  > `courses` n'a plus ni modèle ni route : il ne garde que ses migrations (`0002` supprime ses tables), pour ne pas
+  > réécrire `learning.0001` déjà fusionnée ; l'app disparaîtra à la refonte des migrations de `learning`
+  > (API-L3a). Les droits du groupe Contenu viennent de la matrice des groupes du lot 6.1 (`setup_staff_groups`) ;
+  > `Course` déclare la permission `publish_course`. Ordre par glisser-déposer : `django-admin-sortable2`.
+- [x] **API-L1.2** Endpoints catalogue · `feature/api-l1-2-catalogue-api` · PR #37
+  - [x] `GET catalog/categories/` (avec `courseCount`)
+  - [x] `GET catalog/courses/` (filtres `category`, `difficulty`, `price`, `featured`, `q`, `sort`)
+  - [x] `GET catalog/courses/{slug}/` sans `blocks` ni `vimeoId` de mission (D11), publiés uniquement
+  - [x] Tests : brouillon invisible (liste et détail 404), détail sans contenu de mission, aucune écriture possible
+  - [x] Matrice d'accès du domaine (`apps/catalog/tests/test_access_matrix.py`) ; couverture 100 % du code modifié
+  > Décisions : réponses sans session (`authentication_classes = []`, ni `Vary: Cookie` ni cookie posé) et
+  > `Cache-Control: public, max-age=300`. `price` ∈ `free|paid` ; `sort` ∈ `popular` (défaut : nombre
+  > d'inscriptions, puis mis en avant, puis récents) `|recent|price-asc|price-desc|title` ; valeur inconnue → 400
+  > `VALIDATION_ERROR` sur le champ. Paramètres validés par un serializer : `ChoiceFilter` de django-filter 22.1 est
+  > incompatible avec Django 5. Catégories non paginées. Le détail expose la bande-annonce (`trailerVimeoId/Hash`,
+  > ADR 0004) et le plan : projets (objectifs, prérequis, matériel), niveaux (`introSummary`), missions (titre,
+  > durée, icône), `missionCount`.
+- [x] **API-L1.3** Événements en lecture · `feature/api-l1-3-events` · PR #40
+  - [x] App `events` : `SteamyEvent` (§3.4) + admin
+  - [x] `GET events/?upcoming=`, `GET events/{slug}/` (`seatsLeft` calculé)
+  - [x] Tests : brouillon invisible, aucune écriture publique (matrice d'accès)
+  - [x] Seed : 4 événements (gratuit, payant, complet, passé) ; couverture 100 % du code modifié
+  > Décisions : `seatsLeft` = `capacity` − `seatsReserved` (places attribuées hors candidature, saisies dans l'admin) ;
+  > les candidatures acceptées s'y ajouteront en API-L3b.6. Champs dérivés `isFree`, `isPast`, `applicationsOpen`
+  > (places restantes et date limite non passée) pour les CTA de WL23. Ajouts à §3.4 : `online`, `audience`
+  > (« 12 – 15 ans », maquette WL23), `seatsReserved` ; contraintes fin > début, date limite ≤ début, places
+  > attribuées ≤ capacité. `upcoming=true` : non terminés, du plus proche au plus lointain ; `false` : terminés, du
+  > plus récent au plus ancien ; absent : tous, par date. Liste paginée, `Cache-Control: public, max-age=300`.
+- [x] **API-L1.4** Formulaires publics · `feature/api-l1-4-formulaires` · PR #41
+  - [x] App `public` : `QuoteRequest` (D13), `Lead` (D14, attestation adulte C12), `ContactMessage` (D17)
+  - [x] `POST public/*` anonymes : CSRF, throttle dédié, champ piège, erreurs `fields`
+  - [x] Email à l'équipe par Celery
+  - [x] Tests : formulaires throttlés, CSRF exigé, champ piège, erreurs par champ ; couverture 100 % du code modifié
+  > Décisions : réponse neutre `201 {ok: true}` dans tous les cas (enregistré, doublon de newsletter, robot). Champ
+  > piège `website`. Throttle `public-form` à `10/hour` par IP (`THROTTLE_PUBLIC_FORM`). Newsletter : `isAdult` et
+  > `newsletterConsent` obligatoirement vrais (code `REQUIRED`), une ligne par email (mis à jour sans le dire), pas
+  > d'email à l'équipe. Devis et contact : tâche `notify_team` (idempotente par `notifiedAt`) vers `TEAM_EMAIL`.
+  > Contact : `contact` = email ou téléphone (normalisé E.164), message ≥ 20 caractères (`MIN_LENGTH`). Téléphone
+  > du devis normalisé E.164 (`PHONE_INVALID`). `enforce_csrf` ajouté à `libs/authentication.py`.
+- [x] **API-L1.5** Kits en lecture · `feature/api-l1-5-kits` · PR #43
+  - [x] App `shop` : `Kit` (§3.3) + admin
+  - [x] `GET shop/kits/?category=`, `GET shop/kits/{slug}/` (disponibilité booléenne, jamais le stock exact)
+  - [x] Tests : stock exact absent, aucune écriture publique (matrice d'accès)
+  - [x] `Course.requiredKit` (reporté d'API-L1.1) : exposé au catalogue, `POST learning/enrollments/` → 402 `KIT_CODE_REQUIRED`
+  - [x] Seed : 3 kits dont un en rupture, Steamy Bot v1 requis par « Construis ton robot Bluetooth » ; couverture 100 %
+  > Décisions : `available` = stock > 0 ; un kit retiré de la vente (`active=False`) répond 404. Ajouts à §3.3 :
+  > `emoji` (cartes de la maquette) ; `images` = liste d'URL https ou de chemins du stockage. Le détail liste les
+  > parcours compatibles **publiés** (`{slug, title}`). Catalogue : `requiredKit` = `{slug, name}` ou `null`.
+- [x] **Critères de fin d'API-L1**
+  - [x] Réponses publiques sans donnée de mineur, indépendantes de la session, sans `rating`
+  - [x] Seed : 3-4 parcours publiés complets dont un mis en avant, une catégorie vide, 4 événements (gratuit, payant, complet, passé), 3 kits
+  - [x] `make openapi` committé
 
 ### API-L2 · Inscriptions, consentement, OTP, connexion — 🟡 en cours
 - [x] **API-L2.0a** Comparaison SMS (S10) · `feature/api-l2-0a-adr-sms` · doc

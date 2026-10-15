@@ -335,6 +335,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/catalog/categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Catégories avec le nombre de parcours publiés (WL06, WL16) ; liste courte, non paginée. */
+        get: operations["catalog_categories_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/catalog/courses/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Parcours publiés, filtrés et triés (WL01, WL06, WC01-WC03), paginés. */
+        get: operations["catalog_courses_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/catalog/courses/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Fiche publique (WL22, WC04) : plan du parcours sans contenu de mission (D11). */
+        get: operations["catalog_courses_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/core/presign/": {
         parameters: {
             query?: never;
@@ -355,14 +406,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/courses/courses/": {
+    "/api/events/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["courses_courses_list"];
+        /** @description Événements publiés (WL21, WD10, WPD06, WT09), paginés. */
+        get: operations["events_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -371,131 +423,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/courses/courses/{slug}/": {
+    "/api/events/{slug}/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["courses_courses_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/courses/{slug}/enroll/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @description Inscrit l'utilisateur courant à un parcours GRATUIT.
-         *     Un parcours payant s'obtient par l'achat (S7) : 402 PAYMENT_REQUIRED.
-         *     Retourne 201 si l'inscription est créée, 200 si elle existait déjà.
-         */
-        post: operations["courses_courses_enroll_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/lessons/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_lessons_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/lessons/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_lessons_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/modules/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_modules_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/modules/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_modules_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/resources/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_resources_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/resources/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_resources_retrieve"];
+        /** @description Fiche événement (WL23) ; un brouillon répond 404. */
+        get: operations["events_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1022,6 +958,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/public/contact-messages/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Formulaire de contact (WL24, D17). */
+        post: operations["public_contact_messages_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/leads/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Inscription à la newsletter (WL20, D14), réservée aux adultes (C12). Un email déjà inscrit : même réponse. */
+        post: operations["public_leads_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/quote-requests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Demande de devis d'un établissement (WL11, D13). */
+        post: operations["public_quote_requests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/referentials/avatars/": {
         parameters: {
             query?: never;
@@ -1167,6 +1154,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/shop/kits/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Kits en vente, paginés. */
+        get: operations["shop_kits_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shop/kits/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Fiche kit (WK02) ; un kit retiré de la vente répond 404. */
+        get: operations["shop_kits_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1222,6 +1243,20 @@ export interface components {
              */
             color: string;
         };
+        Category: {
+            slug: string;
+            /** Libellé */
+            label: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Icône
+             * @description Emoji affiché sur les cartes
+             */
+            icon: string;
+            /** @description Parcours publiés */
+            readonly courseCount: number;
+        };
         /**
          * @description * `learning` - Apprentissage
          *     * `rewards` - Récompenses
@@ -1245,6 +1280,18 @@ export interface components {
         CategoryPreferenceRequest: {
             category: components["schemas"]["CategoryEnum"];
             email: boolean;
+        };
+        CategorySummary: {
+            slug: string;
+            /** Libellé */
+            label: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Icône
+             * @description Emoji affiché sur les cartes
+             */
+            icon: string;
         };
         Certificate: {
             readonly id: number;
@@ -1281,6 +1328,17 @@ export interface components {
          * @enum {string}
          */
         ConsentRequestStateStatusEnum: "pending" | "accepted" | "refused" | "expired" | "cancelled";
+        ContactMessageRequest: {
+            /** Nom */
+            name: string;
+            /** @description Email ou numéro de téléphone */
+            contact: string;
+            /** Sujet */
+            subject: components["schemas"]["SubjectEnum"];
+            message: string;
+            /** @description Champ piège : toujours vide */
+            website?: string;
+        };
         Country: {
             readonly id: number;
             /** Code ISO */
@@ -1306,29 +1364,59 @@ export interface components {
             phoneRegex: string;
         };
         CourseDetail: {
-            readonly id: number;
-            readonly title: string;
-            readonly slug: string;
-            readonly description: string;
-            readonly path: number | null;
-            /** Format: decimal */
-            readonly price: string;
-            /** Format: date-time */
-            readonly createdAt: string;
-            /** Format: date-time */
-            readonly updatedAt: string;
-            readonly modules: components["schemas"]["Module"][];
+            slug: string;
+            /** Titre */
+            title: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** Gratuit */
+            isFree?: boolean;
+            /** Prix (FCFA) */
+            price?: number;
+            /** @description Visuel des cartes */
+            emoji?: string;
+            readonly requiredKit: components["schemas"]["RequiredKit"] | null;
+            readonly coverImage: string | null;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** Mis en avant */
+            featured?: boolean;
+            description: string;
+            /** Ce que tu vas apprendre */
+            outcomes?: unknown;
+            /** Public */
+            audience?: string;
+            /** Prérequis */
+            prerequisites?: unknown;
+            /** Bande-annonce : identifiant Vimeo */
+            trailerVimeoId?: string;
+            /** Bande-annonce : hachage Vimeo */
+            trailerVimeoHash?: string;
+            /** Certificat */
+            certificateEnabled?: boolean;
+            readonly missionCount: number;
+            readonly projects: components["schemas"]["ProjectSummary"][];
         };
         CourseList: {
-            readonly id: number;
-            readonly title: string;
-            readonly slug: string;
-            readonly description: string;
-            readonly path: number | null;
-            /** Format: decimal */
-            readonly price: string;
-            /** Format: date-time */
-            readonly createdAt: string;
+            slug: string;
+            /** Titre */
+            title: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** Gratuit */
+            isFree?: boolean;
+            /** Prix (FCFA) */
+            price?: number;
+            /** @description Visuel des cartes */
+            emoji?: string;
+            readonly requiredKit: components["schemas"]["RequiredKit"] | null;
+            readonly coverImage: string | null;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** Mis en avant */
+            featured?: boolean;
         };
         CsrfToken: {
             csrfToken: string;
@@ -1339,6 +1427,13 @@ export interface components {
             /** Format: double */
             revenueLast30Days: number;
         };
+        /**
+         * @description * `beginner` - Débutant
+         *     * `intermediate` - Intermédiaire
+         *     * `advanced` - Avancé
+         * @enum {string}
+         */
+        DifficultyEnum: "beginner" | "intermediate" | "advanced";
         Disability: {
             readonly id: number;
             code: string;
@@ -1475,6 +1570,59 @@ export interface components {
          * @enum {string}
          */
         KindEnum: "mcq" | "tf" | "free";
+        Kit: {
+            slug: string;
+            /** Nom */
+            name: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Prix (FCFA) */
+            price: number;
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** @description Visuel des cartes */
+            emoji?: string;
+            /** @description URL https ou chemins du stockage, la première sert de couverture */
+            images?: unknown;
+            /** @description En stock (le stock exact reste interne) */
+            readonly available: boolean;
+        };
+        KitDetail: {
+            slug: string;
+            /** Nom */
+            name: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Prix (FCFA) */
+            price: number;
+            /** Difficulté */
+            difficulty: components["schemas"]["DifficultyEnum"];
+            /** @description Visuel des cartes */
+            emoji?: string;
+            /** @description URL https ou chemins du stockage, la première sert de couverture */
+            images?: unknown;
+            /** @description En stock (le stock exact reste interne) */
+            readonly available: boolean;
+            description: string;
+            /** Contenu de la boîte */
+            contents?: unknown;
+            readonly compatibleCourses: {
+                [key: string]: unknown;
+            }[];
+        };
+        LeadRequest: {
+            /** Format: email */
+            email: string;
+            /**
+             * Origine
+             * @description guides, footer…
+             */
+            source?: string;
+            /** @description Attestation : j'ai 18 ans ou plus (C12) */
+            isAdult: boolean;
+            /** @description Consentement explicite, case non cochée par défaut (D14) */
+            newsletterConsent: boolean;
+            /** @description Champ piège : toujours vide */
+            website?: string;
+        };
         LearnerConsentRequestRequest: {
             parentPhone: string;
             relationship: string;
@@ -1504,22 +1652,16 @@ export interface components {
             expiresAt: string;
             consentRequest: components["schemas"]["ConsentRequestState"] | null;
         };
-        Lesson: {
-            readonly id: number;
-            readonly module: number;
-            readonly title: string;
-            readonly content: string;
-            readonly resourceType: components["schemas"]["ResourceTypeEnum"];
-            /** @default 0 */
-            readonly order: number;
-            readonly resources: components["schemas"]["Resource"][];
-        };
-        /** @description Plan du parcours, sans contenu : visible avant l'inscription. */
-        LessonSummary: {
-            readonly id: number;
-            readonly title: string;
-            readonly resourceType: components["schemas"]["ResourceTypeEnum"];
-            readonly order: number;
+        LevelSummary: {
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (minutes) */
+            durationMin?: number;
+            /** Résumé de l'introduction */
+            introSummary?: string;
+            readonly missions: components["schemas"]["MissionSummary"][];
         };
         Locality: {
             readonly id: number;
@@ -1583,13 +1725,15 @@ export interface components {
          * @enum {string}
          */
         MeStatusEnum: "pending" | "active" | "suspended" | "deactivated" | "anonymized";
-        Module: {
-            readonly id: number;
-            readonly title: string;
-            /** @default 0 */
-            readonly order: number;
-            readonly lessons: components["schemas"]["LessonSummary"][];
-            readonly course: number;
+        MissionSummary: {
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (minutes) */
+            durationMin?: number;
+            /** Icône */
+            icon?: string;
         };
         Notification: {
             readonly id: number;
@@ -1726,7 +1870,7 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Enrollment"][];
         };
-        PaginatedLessonList: {
+        PaginatedKitList: {
             /** @example 123 */
             count?: number;
             /**
@@ -1739,22 +1883,7 @@ export interface components {
              * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
-            results?: components["schemas"]["Lesson"][];
-        };
-        PaginatedModuleList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Module"][];
+            results?: components["schemas"]["Kit"][];
         };
         PaginatedNotificationList: {
             /** @example 123 */
@@ -1846,7 +1975,7 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Quiz"][];
         };
-        PaginatedResourceList: {
+        PaginatedSteamyEventList: {
             /** @example 123 */
             count?: number;
             /**
@@ -1859,7 +1988,7 @@ export interface components {
              * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
-            results?: components["schemas"]["Resource"][];
+            results?: components["schemas"]["SteamyEvent"][];
         };
         ParentSignupRequest: {
             firstName: string;
@@ -1884,7 +2013,7 @@ export interface components {
         };
         PatchedProgressRequest: {
             enrollment?: number;
-            lesson?: number;
+            mission?: number;
             completed?: boolean;
             /** Format: decimal */
             score?: string | null;
@@ -1937,7 +2066,7 @@ export interface components {
         Progress: {
             readonly id: number;
             enrollment: number;
-            lesson: number;
+            mission: number;
             completed?: boolean;
             /** Format: decimal */
             score?: string | null;
@@ -1946,10 +2075,25 @@ export interface components {
         };
         ProgressRequest: {
             enrollment: number;
-            lesson: number;
+            mission: number;
             completed?: boolean;
             /** Format: decimal */
             score?: string | null;
+        };
+        ProjectSummary: {
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** Objectifs */
+            objectives?: unknown;
+            /** Prérequis */
+            prerequisites?: unknown;
+            /** Matériel */
+            materials?: unknown;
+            readonly levels: components["schemas"]["LevelSummary"][];
         };
         /**
          * @description * `kkiapay` - Kkiapay
@@ -1974,9 +2118,31 @@ export interface components {
             passScore?: string;
             readonly questions: components["schemas"]["Question"][];
         };
+        QuoteRequestRequest: {
+            /** Établissement */
+            schoolName: string;
+            /** Personne à contacter */
+            contactName: string;
+            /** Format: email */
+            email: string;
+            /**
+             * Téléphone (E.164)
+             * @description Numéro national (Bénin par défaut) ou E.164
+             */
+            phone: string;
+            /** Offre */
+            offer?: string;
+            message?: string;
+            /** @description Champ piège : toujours vide */
+            website?: string;
+        };
         ReadAll: {
             /** @description Nombre de notifications marquées comme lues */
             updated: number;
+        };
+        /** @description Réponse neutre, identique qu'il y ait eu enregistrement, doublon ou robot. */
+        Received: {
+            ok: boolean;
         };
         RefusalReason: {
             readonly id: number;
@@ -1992,25 +2158,11 @@ export interface components {
             /** Libellé côté parent */
             parentLabel?: string;
         };
-        Resource: {
-            readonly id: number;
-            readonly lesson: number;
-            readonly title: string;
-            /** Format: uri */
-            readonly file: string | null;
-            /** Format: uri */
-            readonly externalUrl: string | null;
-            /** Format: date-time */
-            readonly uploadedAt: string;
+        /** @description Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`. */
+        RequiredKit: {
+            slug: string;
+            name: string;
         };
-        /**
-         * @description * `video` - Vidéo
-         *     * `pdf` - PDF
-         *     * `html` - HTML
-         *     * `other` - Autre
-         * @enum {string}
-         */
-        ResourceTypeEnum: "video" | "pdf" | "html" | "other";
         ResumeRequest: {
             username: string;
             resumeCode: string;
@@ -2028,6 +2180,99 @@ export interface components {
             /** Libellé */
             label: string;
         };
+        SteamyEvent: {
+            slug: string;
+            /** Titre */
+            title: string;
+            emoji?: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Début
+             * Format: date-time
+             */
+            startsAt: string;
+            /**
+             * Fin
+             * Format: date-time
+             */
+            endsAt: string;
+            /** En ligne */
+            online?: boolean;
+            /** Lieu */
+            place?: string;
+            /** Ville */
+            city?: string;
+            /**
+             * Public visé
+             * @description « 12 – 15 ans »
+             */
+            audience?: string;
+            /**
+             * Prix (FCFA)
+             * @description 0 = gratuit
+             */
+            price?: number;
+            readonly isFree: boolean;
+            /** Places */
+            capacity: number;
+            readonly seatsLeft: number;
+            /**
+             * Fin des candidatures
+             * Format: date-time
+             */
+            applicationDeadline: string;
+            /** @description Places restantes et date limite non dépassée */
+            readonly applicationsOpen: boolean;
+            readonly isPast: boolean;
+        };
+        SteamyEventDetail: {
+            slug: string;
+            /** Titre */
+            title: string;
+            emoji?: string;
+            /** Couleur */
+            color: string;
+            /**
+             * Début
+             * Format: date-time
+             */
+            startsAt: string;
+            /**
+             * Fin
+             * Format: date-time
+             */
+            endsAt: string;
+            /** En ligne */
+            online?: boolean;
+            /** Lieu */
+            place?: string;
+            /** Ville */
+            city?: string;
+            /**
+             * Public visé
+             * @description « 12 – 15 ans »
+             */
+            audience?: string;
+            /**
+             * Prix (FCFA)
+             * @description 0 = gratuit
+             */
+            price?: number;
+            readonly isFree: boolean;
+            /** Places */
+            capacity: number;
+            readonly seatsLeft: number;
+            /**
+             * Fin des candidatures
+             * Format: date-time
+             */
+            applicationDeadline: string;
+            /** @description Places restantes et date limite non dépassée */
+            readonly applicationsOpen: boolean;
+            readonly isPast: boolean;
+            description: string;
+        };
         /**
          * @description * `parent` - W06 · Parent
          *     * `waiting` - W07 · Attente
@@ -2035,6 +2280,16 @@ export interface components {
          * @enum {string}
          */
         StepEnum: "parent" | "waiting" | "password";
+        /**
+         * @description * `question` - Question
+         *     * `paiement` - Paiement
+         *     * `livraison` - Livraison
+         *     * `changement-parent` - Changement de parent
+         *     * `candidature` - Candidature
+         *     * `autre` - Autre
+         * @enum {string}
+         */
+        SubjectEnum: "question" | "paiement" | "livraison" | "changement-parent" | "candidature" | "autre";
         /**
          * @description * `info` - Information
          *     * `success` - Succès
@@ -2976,6 +3231,127 @@ export interface operations {
             };
         };
     };
+    catalog_categories_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    catalog_courses_list: {
+        parameters: {
+            query?: {
+                /** @description Slug de la catégorie */
+                category?: string;
+                /**
+                 * @description * `beginner` - Débutant
+                 *     * `intermediate` - Intermédiaire
+                 *     * `advanced` - Avancé
+                 */
+                difficulty?: "beginner" | "intermediate" | "advanced";
+                /** @description Parcours mis en avant (WL01) */
+                featured?: boolean | null;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /**
+                 * @description * `free` - Gratuit
+                 *     * `paid` - Payant
+                 */
+                price?: "free" | "paid";
+                /** @description Recherche dans le titre et la description */
+                q?: string;
+                /**
+                 * @description * `popular` - popular
+                 *     * `recent` - recent
+                 *     * `price-asc` - price-asc
+                 *     * `price-desc` - price-desc
+                 *     * `title` - title
+                 */
+                sort?: "popular" | "recent" | "price-asc" | "price-desc" | "title";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCourseListList"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    catalog_courses_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     core_presign_create: {
         parameters: {
             query?: never;
@@ -3031,17 +3407,15 @@ export interface operations {
             };
         };
     };
-    courses_courses_list: {
+    events_list: {
         parameters: {
             query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
                 /** @description A page number within the paginated result set. */
                 page?: number;
                 /** @description Number of results to return per page. */
                 pageSize?: number;
-                /** @description A search term. */
-                search?: string;
+                /** @description true : à venir ou en cours (du plus proche au plus lointain) ; false : passés (du plus récent au plus ancien) ; absent : tous */
+                upcoming?: boolean | null;
             };
             header?: never;
             path?: never;
@@ -3054,7 +3428,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedCourseListList"];
+                    "application/json": components["schemas"]["PaginatedSteamyEventList"];
                 };
             };
             429: {
@@ -3067,7 +3441,7 @@ export interface operations {
             };
         };
     };
-    courses_courses_retrieve: {
+    events_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -3083,354 +3457,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CourseDetail"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_courses_enroll_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CourseDetail"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_lessons_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedLessonList"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_lessons_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this Leçon. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Lesson"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_modules_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedModuleList"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_modules_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this Module. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Module"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_resources_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResourceList"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    courses_resources_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this resource. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Resource"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["SteamyEventDetail"];
                 };
             };
             404: {
@@ -5032,6 +5059,147 @@ export interface operations {
             };
         };
     };
+    public_contact_messages_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactMessageRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Received"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_leads_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeadRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Received"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_quote_requests_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuoteRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Received"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     referentials_avatars_list: {
         parameters: {
             query?: never;
@@ -5269,6 +5437,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SchoolGrade"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_kits_list: {
+        parameters: {
+            query?: {
+                /** @description Slug de la catégorie */
+                category?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedKitList"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_kits_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KitDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             429: {
