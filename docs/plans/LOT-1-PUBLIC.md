@@ -9,7 +9,7 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 1.4 (WL21, WL23, WL07), puis 1.6 et l'encart newsletter de 1.5 · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : 🟡 en cours · Prochaine tâche : 1.6 (WL11, WL24), puis l'encart newsletter de 1.5 · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
 ### Étape 1.0 · Socle front — ✅ terminé
 - [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
@@ -89,12 +89,12 @@ Statut : 🟡 en cours · Prochaine tâche : 1.4 (WL21, WL23, WL07), puis 1.6 et
   - [x] Test API (API-L1.2, `catalog/tests/test_api.py`) et test Playwright : absence de `vimeoId` / corps de mission dans le HTML
   - [x] Test Vitest : plan en accordéon (`details`/`summary` focusables) ; Entrée et Espace vérifiés par Playwright
   - [x] Parcours Playwright : WL06 → WL22 → CTA → URL d'inscription avec retour (`e2e/fiche-parcours.spec.ts`)
-- [ ] **1.4** Événements et boutique (requiert API-L1 et 1.2) · `feature/lot1-evenements-boutique`
-  - [ ] WL21 `/evenements` (`EventRow`, prix, état vide)
-  - [ ] WL23 `/evenements/[slug]` (`EventDetail` réutilisable, CTA selon l'état, JSON-LD `Event`, slug au sitemap)
-  - [ ] WL07 `/boutique` (grille `WKKitCard` en mode vitrine, filtres)
-  - [ ] Appels `events/`, `events/{slug}/`, `shop/kits/`
-  - [ ] Parcours Playwright « événements » (WL21 → WL23 → CTA visiteur ; événement complet → CTA désactivé)
+- [x] **1.4** Événements et boutique (requiert API-L1 et 1.2) · `feature/lot1-evenements-boutique` · PR #PR14
+  - [x] `WL21` `/evenements` (`EventRow`, prix, complet, état vide « Aucun événement à venir »)
+  - [x] `WL23` `/evenements/[slug]` (`EventDetail` réutilisable avec un encart d'action fourni par l'appelant, CTA visiteur ou motif : complet, candidatures closes, passé ; JSON-LD `Event`, slugs au sitemap, 404 propre)
+  - [x] `WL07` `/boutique` (grille `WKKitCard` en mode vitrine, filtres par catégorie dans l'URL, pagination, état vide)
+  - [x] Appels `events/`, `events/{slug}/`, `shop/kits/` (`lib/events.ts`, `lib/shop.ts`, `'use cache'`, tags `events` et `shop`)
+  - [x] Parcours Playwright « événements » (WL21 → WL23 → CTA visiteur ; événement complet → CTA désactivé ; passé) et boutique (`e2e/evenements-boutique.spec.ts`)
 - [ ] **1.5** Pages éditoriales (WL20 requiert API-L1 pour `public/leads/`, le reste sans API) · `feature/lot1-editorial` · PR #36
   - [x] `WL09` `/legal/[doc]` (`Tabs`, `#consentement-parental`, corrections S3, D6, D15, D23, D40)
   - [x] `WL10` `/a-propos`

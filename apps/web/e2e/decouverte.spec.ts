@@ -48,11 +48,11 @@ test("WL06 : une catégorie sans parcours affiche l'état vide", async ({ page }
   await expect(page).toHaveURL("/parcours");
 });
 
-test("WL01, WL06, WL16 ne présentent aucune violation d'accessibilité", async ({ page }) => {
-  for (const path of ["/", "/parcours", "/categories"]) {
+for (const path of ["/", "/parcours", "/categories"]) {
+  test(`WL01, WL06, WL16 ne présentent aucune violation d'accessibilité : ${path}`, async ({ page }) => {
     await page.goto(path);
     await expect(page.locator("[aria-busy='true']")).toHaveCount(0);
     const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     expect(violations, path).toEqual([]);
-  }
-});
+  });
+}

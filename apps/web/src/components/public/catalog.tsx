@@ -3,9 +3,10 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 
 import { CourseCard, Icon, SkeletonBlock, Tag } from "@/components/ds";
-import { catalogHref } from "@/lib/catalog-filters";
+import { catalogHref, listHref } from "@/lib/catalog-filters";
 import { cx } from "@/lib/cx";
 import { toCourseCard } from "@/lib/format";
+import { routes } from "@/lib/routes";
 
 // Briques du catalogue public (WL01, WL06, WL16).
 
@@ -47,20 +48,29 @@ export function CourseGridSkeleton({
   );
 }
 
-/** Filtres de WL06 : « Tous » puis une pastille par catégorie, chacune un lien adressable. */
-export function CategoryFilters({ categories, active }: { categories: Schemas["Category"][]; active?: string }) {
+/** Filtres de WL06 et WL07 : « Tous » puis une pastille par catégorie, chacune un lien adressable. */
+export function CategoryFilters({
+  categories,
+  active,
+  base = routes.courses,
+}: {
+  categories: Schemas["Category"][];
+  active?: string;
+  /** Liste filtrée : catalogue des parcours (défaut) ou boutique. */
+  base?: string;
+}) {
   return (
     <nav aria-label="Filtrer par catégorie">
       <ul className="flex flex-wrap gap-2">
         <li>
-          <Tag href={catalogHref({})} active={!active}>
+          <Tag href={listHref(base, {})} active={!active}>
             Tous
           </Tag>
         </li>
         {categories.map((category) => (
           <li key={category.slug}>
             <Tag
-              href={catalogHref({ category: category.slug })}
+              href={listHref(base, { category: category.slug })}
               active={active === category.slug}
               color={category.color}
             >
@@ -102,8 +112,19 @@ export function CategoryCard({ category }: { category: Schemas["Category"] }) {
   );
 }
 
-/** Pagination de WL06 : liens « Précédent » et « Suivant », la page courante annoncée. */
-export function CatalogPagination({ category, page, hasNext }: { category?: string; page: number; hasNext: boolean }) {
+/** Pagination de WL06 et WL07 : liens « Précédent » et « Suivant », la page courante annoncée. */
+export function CatalogPagination({
+  category,
+  page,
+  hasNext,
+  base = routes.courses,
+}: {
+  category?: string;
+  page: number;
+  hasNext: boolean;
+  /** Liste paginée : catalogue des parcours (défaut) ou boutique. */
+  base?: string;
+}) {
   if (page === 1 && !hasNext) {
     return null;
   }
@@ -112,7 +133,7 @@ export function CatalogPagination({ category, page, hasNext }: { category?: stri
   return (
     <nav aria-label="Pagination" className="mt-8 flex items-center justify-center gap-3">
       {page > 1 && (
-        <Link href={catalogHref({ category, page: page - 1 })} className={link} rel="prev">
+        <Link href={listHref(base, { category, page: page - 1 })} className={link} rel="prev">
           <Icon name="arrow-left" size={16} strokeWidth={2.5} />
           Précédent
         </Link>
@@ -121,7 +142,7 @@ export function CatalogPagination({ category, page, hasNext }: { category?: stri
         Page {page}
       </p>
       {hasNext && (
-        <Link href={catalogHref({ category, page: page + 1 })} className={link} rel="next">
+        <Link href={listHref(base, { category, page: page + 1 })} className={link} rel="next">
           Suivant
           <Icon name="arrow-right" size={16} strokeWidth={2.5} />
         </Link>
