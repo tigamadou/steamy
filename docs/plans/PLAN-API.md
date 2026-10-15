@@ -637,27 +637,59 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Un enseignant ne peut pas créer de contenu (S5)
   - [ ] Seed enrichi, `make openapi` committé
 
-### API-L6 · Back-office — ⬜ à faire
+### API-L6 · Back-office — 🟡 en cours
 - [x] **API-L6.1** 2FA (D72) · réalisée par LOT-6-ADMIN 6.1 (`feature/lot6-socle-staff`, PR #38)
   - [x] `django-otp` + `otp_totp`, `OTPMiddleware`, `OTPAdminSite` (WAD15)
   - [x] Enrôlement TOTP au premier login (QR code), réinitialisation par un Super-admin
   - [x] Session du personnel limitée à 8 h (C20) ; secret TOTP fixe de développement dans `seed_demo`
   - [x] `IsStaffVerified` sur toute route `backoffice/`, sinon `OTP_REQUIRED`
   - [x] Tests : staff sans OTP vérifié → `OTP_REQUIRED` et redirection admin, non-staff → 403
-- [ ] **API-L6.2** Admin thémé et RBAC · `feature/api-l6-2-admin-rbac`
-  - [ ] Thème monochrome `--ink-*` dans `fixtures/admin.json`, titre « Steamy »
+- [ ] **API-L6.2** Admin thémé et RBAC · `feature/api-l6-2-admin-rbac` · PR #61 (partie comptes)
+  - [x] Thème monochrome `--ink-*` dans `fixtures/admin.json`, titre « Steamy » (livré par LOT-6 6.1, PR #38)
   - [ ] Enregistrement de tous les modèles avec permissions par groupe (D71)
-  - [ ] Actions : rembourser, refuser une candidature avec remboursement (C3), relancer une demande, litige de consentement, changement de parent, modération `PublicProfileReview` (D15), suspendre
-  - [ ] `AuditLog` écrit par un mixin d'admin
-  - [ ] Tests : groupe Contenu sans accès aux paiements, staff ne peut pas accepter un consentement (D70)
-- [ ] **API-L6.3** Réglages · `feature/api-l6-3-reglages`
-  - [ ] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
-- [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact`
+    - [x] Comptes : permissions personnalisées déclarées (`invite_teacher`, `deactivate_user`, `reset_password`, `view_sensitive_profile`, `change_parent`, `resend`, `flag_dispute`) ; `UserAdmin` limité aux personas, sans ajout ni changement de rôle, statut ou identifiant ; champs sensibles des profils soumis à *view_sensitive_profile* (D6) ; `StaffMemberAdmin` (Super-admin seul, garde-fous du dernier Super-admin)
+    - [ ] Catalogue (`publish_course`) : avec API-L3a (LOT-6 6.3)
+    - [ ] Commerce et événements (`set_shipping_status`, `revoke_kitcode`, `process_refund`, `refuse_application`) : avec API-L3b (LOT-6 6.4, 6.5)
+  - [ ] Actions
+    - [x] Relancer une demande (plafonds de W07), litige de consentement (`disputedAt`, `disputeNote`), changement de parent (`replacesLink`, lien remplacé à l'acceptation), modération `PublicProfileReview` (D15), suspendre / désactiver / réactiver (motif)
+    - [ ] Rembourser, refuser une candidature avec remboursement (C3) : attendent `Refund` et `EventApplication` refondus (API-L3b)
+  - [x] `AuditLog` écrit par un mixin d'admin (LOT-6 6.1) ; actions à motif journalisées par leur service (`apps/accounts/backoffice.py`)
+  - [x] Tests : groupe Contenu sans accès aux paiements, staff ne peut pas accepter un consentement (D70)
+  > Décisions : le changement de parent crée une `ConsentRequest` d'origine `support` (nouvelle valeur de `origin`,
+  > `OriginEnum` dans le schéma) ; `consent.accept` remplace alors le lien existant au lieu d'en créer un, et prévient
+  > l'ancien parent par SMS. Le support ne peut ni suspendre un compte en attente de consentement ni toucher au
+  > personnel ; le personnel ne se gère que dans l'équipe (WAD13), ce qui retire au Support la possibilité de modifier
+  > `is_staff` et les groupes depuis la fiche utilisateur.
+- [x] **API-L6.3** Réglages · `feature/api-l6-3-reglages` · PR #63
+  - [x] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
+  > Décisions : bornes des réglages validées par le modèle (validateurs et `clean()` du barème et des paliers C8) ;
+  > `Announcement` dans `core`, diffusée une fois par la tâche `broadcast_announcement` aux personas actifs du public
+  > visé (notification `announcement`, D7), puis figée. Aucun cache serveur à invalider (`PlatformSettings.load()`
+  > relit la base ; les référentiels n'ont qu'un cache HTTP d'une heure). « Mode maintenance » et « inscriptions
+  > ouvertes » (WAD14) restent hors de cette étape : comportement d'API non spécifié, à trancher avant LOT-6 6.5.
+- [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact-kpi` · PR #65 (1/2), puis `feature/api-l6-4-impact-rapports` · PR #67 (2/2)
   - [ ] App `impact` : `KpiDefinition` (30 KPI par migration), `KpiValue`, `ImpactReport`, `ReportExport` ; statut D73
-  - [ ] `GET backoffice/overview/`, `backoffice/kpis/…`, `backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/` (`REPORT_LOCKED`, D74)
-  - [ ] `POST …/exports/` + `GET backoffice/exports/{id}/` (CSV/PDF asynchrones, `generate_report_export`)
-  - [ ] Tâche quotidienne `aggregate_daily_stats` (`DailyAggregatedStat`, D75)
-  - [ ] Tests : rapport soumis non modifiable
+    - [x] `KpiDefinition` (30 KPI en 8 groupes, migration `0002_kpi_definitions`), `KpiValue`, `ImpactReport` ; `kpiStatus` D73 (PR #65)
+    - [ ] `ReportExport`
+  - [x] `GET backoffice/overview/`, `backoffice/kpis/…`, `backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/` (`REPORT_LOCKED`, D74)
+    - [x] `GET backoffice/overview/`, `GET backoffice/kpis/?period=`, `GET backoffice/kpis/{code}/` (PR #65)
+    - [x] `GET backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/` (PR #67)
+  - [ ] `POST …/exports/` + `GET backoffice/exports/{id}/` (CSV/PDF asynchrones, `generate_report_export`) : attend `core/pdf.py` et `PrivateMediaStorage` d'API-L3a.4 (ADR 0005)
+  - [x] Tâche quotidienne `aggregate_daily_stats` (`DailyAggregatedStat`, D75) (PR #65)
+  - [x] Tests : valeurs de référence des KPI `auto`, table de vérité de `kpiStatus`, bornes de période, accès par groupe (PR #65)
+  - [x] Tests : rapport soumis non modifiable (PR #67 : `REPORT_LOCKED`, soumission idempotente, lignes figées)
+  > Décisions (PR #65) : agrégats quotidiens de l'année recalculés chaque nuit (une correction de profil se reflète),
+  > KPI additifs = somme des jours ; « connectés ≥ 1 fois » compté à la volée sur `last_login`, pour les seules
+  > périodes en cours. KPI saisis au trimestre lus au trimestre du mois (vue mois) ou au dernier trimestre renseigné
+  > (vue année). Inclusion : âge connu des seuls apprenants (pas de date de naissance pour parents et enseignants).
+  > `ventes`, `complete`, `complete_conf` sans collecteur jusqu'à API-L3b et API-L3a (« En attente »). Échéance du
+  > rapport : fin du trimestre + 15 jours (hypothèse). `analytics/dashboard/summary/` et `analytics/export/events/`
+  > supprimés (§7.9) : ouverts au personnel sans TOTP.
+  > Décisions (PR #67) : à la soumission, les lignes du rapport sont figées dans `ImpactReport.snapshot` (un recalcul
+  > nocturne ne change plus un rapport soumis) ; plages : dernier mois du trimestre pour les KPI `auto`
+  > d'acquisition, trimestre sinon ; saisie typée par `unit` (note de 1 à 10). « Valider la saisie » (point ouvert de
+  > LOT-6 6.9) n'est pas encore exigée par la soumission.
+  > Reprise : exports CSV/PDF (`ReportExport`, tâche `generate_report_export`, notification) après API-L3a.4.
 - [ ] **Critères de fin d'API-L6**
   - [ ] Toutes les routes `backoffice/` protégées par `IsStaffVerified`
   - [ ] Seed enrichi, `make openapi` committé
