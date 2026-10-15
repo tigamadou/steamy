@@ -242,7 +242,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 ### API-L3a · Pédagogie — ⬜ à faire
 - [ ] **Préalables**
   - [ ] Barème de points et paliers de rang saisis dans `PlatformSettings` (C8)
-  - [ ] **ADR-Médias (Vimeo)** : vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de hors ligne (D16)
+  - [x] **ADR-Médias (Vimeo)** : vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de hors ligne (D16)
 - [ ] **API-L3a.1** Inscriptions et arbre · `feature/api-l3a-1-inscriptions`
   - [ ] `Enrollment` (`source`), `MissionProgress`
   - [ ] `POST learning/enrollments/` (gratuit seulement, `PAYMENT_REQUIRED` / `KIT_CODE_REQUIRED`)
@@ -262,7 +262,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] `POST learning/activity/` (secondes plafonnées, anti-gonflage)
   - [ ] Streak (fuseau `TIME_ZONE`), rang dérivé, `GET learning/badges/`
 - [ ] **API-L3a.4** Certificats · `feature/api-l3a-4-certificats`
-  - [ ] **ADR PDF et stockage privé** (WeasyPrint, Celery, RustFS privé, URL présignées courtes)
+  - [x] **ADR PDF et stockage privé** (WeasyPrint, Celery, RustFS privé, URL présignées courtes)
   - [ ] Conditions D33 en transaction ; `Certificate.number` séquentiel
   - [ ] Tâche `generate_certificate_pdf` ; stockage RustFS privé
   - [ ] `GET learning/certificates/` (`pdfStatus`), `…/{id}/download/` → URL présignée 5 min
@@ -412,9 +412,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 - [ ] **ADR à écrire** (`docs/adr/`)
   - [x] Identité et connexion (avant API-1.1) : [ADR 0001](../adr/0001-identite-et-connexion.md)
   - [x] SMS (avant API-L2.0b)
-  - [ ] Médias (Vimeo) (avant API-L3a.1)
+  - [x] Médias (Vimeo) (avant API-L3a.1)
   - [x] Paiement (avant API-L3b.0b)
-  - [ ] PDF et stockage privé (avant API-L3a.4)
+  - [x] PDF et stockage privé (avant API-L3a.4)
 - [ ] **Comparaisons de prestataires**
   - [x] SMS (S10), avant API-L2 : voir API-L2.0a
   - [x] Paiement (S9), avant API-L3b : voir API-L3b.0a
