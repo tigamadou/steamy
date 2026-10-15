@@ -72,3 +72,26 @@ def test_audit_log_is_read_only_in_the_admin():
     assert not model_admin.has_add_permission(request)
     assert not model_admin.has_change_permission(request)
     assert not model_admin.has_delete_permission(request)
+
+
+def test_platform_settings_admin_allows_neither_a_second_row_nor_deletion():
+    from django.contrib.admin.sites import site
+
+    model_admin = site._registry[PlatformSettings]
+    request = APIRequestFactory().get("/")
+    request.user = StaffFactory(is_superuser=True)
+    PlatformSettings.objects.all().delete()
+    assert model_admin.has_add_permission(request)  # ligne absente : on peut la recréer
+    PlatformSettings.load()
+    assert not model_admin.has_add_permission(request)
+    assert not model_admin.has_delete_permission(request)
+
+
+def test_audit_log_fields_are_all_read_only_and_labels():
+    from django.contrib.admin.sites import site
+
+    entry = audit("consent.accepted")
+    readonly = site._registry[AuditLog].get_readonly_fields(None, entry)
+    assert {"actor", "action", "data", "ip", "created_at"} <= set(readonly)
+    assert str(entry).endswith(" · consent.accepted")
+    assert str(PlatformSettings.load()) == "Réglages de la plateforme"

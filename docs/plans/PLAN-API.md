@@ -139,6 +139,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `core.PlatformSettings` (singleton, défauts D24, D32, D66 ; barème C8 vide)
   - [x] `core.AuditLog`
   - [x] 4 groupes Django par migration de données (Super-admin, Contenu, Support, Finance, D71)
+  - [x] Couverture 100 % (lignes et branches) du code modifié
   > Décisions : plafonds OTP quotidiens par défaut 5 par numéro et 20 par IP (D24 ne fixe pas de valeur ; réglables
   > dans l'admin). `audit(action, actor, target, data, request)` dans `apps/core/audit.py` ; journal en lecture
   > seule dans l'admin. Groupes créés sans permission : elles arrivent avec chaque domaine.
