@@ -431,7 +431,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Un enseignant ne peut pas créer de contenu (S5)
   - [ ] Seed enrichi, `make openapi` committé
 
-### API-L6 · Back-office — ⬜ à faire
+### API-L6 · Back-office — 🟡 en cours
 - [x] **API-L6.1** 2FA (D72) · réalisée par LOT-6-ADMIN 6.1 (`feature/lot6-socle-staff`, PR #38)
   - [x] `django-otp` + `otp_totp`, `OTPMiddleware`, `OTPAdminSite` (WAD15)
   - [x] Enrôlement TOTP au premier login (QR code), réinitialisation par un Super-admin
@@ -444,8 +444,13 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Actions : rembourser, refuser une candidature avec remboursement (C3), relancer une demande, litige de consentement, changement de parent, modération `PublicProfileReview` (D15), suspendre
   - [ ] `AuditLog` écrit par un mixin d'admin
   - [ ] Tests : groupe Contenu sans accès aux paiements, staff ne peut pas accepter un consentement (D70)
-- [ ] **API-L6.3** Réglages · `feature/api-l6-3-reglages`
-  - [ ] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
+- [x] **API-L6.3** Réglages · `feature/api-l6-3-reglages` · PR #63
+  - [x] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
+  > Décisions : bornes des réglages validées par le modèle (validateurs et `clean()` du barème et des paliers C8) ;
+  > `Announcement` dans `core`, diffusée une fois par la tâche `broadcast_announcement` aux personas actifs du public
+  > visé (notification `announcement`, D7), puis figée. Aucun cache serveur à invalider (`PlatformSettings.load()`
+  > relit la base ; les référentiels n'ont qu'un cache HTTP d'une heure). « Mode maintenance » et « inscriptions
+  > ouvertes » (WAD14) restent hors de cette étape : comportement d'API non spécifié, à trancher avant LOT-6 6.5.
 - [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact`
   - [ ] App `impact` : `KpiDefinition` (30 KPI par migration), `KpiValue`, `ImpactReport`, `ReportExport` ; statut D73
   - [ ] `GET backoffice/overview/`, `backoffice/kpis/…`, `backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/` (`REPORT_LOCKED`, D74)
