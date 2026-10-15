@@ -109,6 +109,8 @@ jobs:
       DEFAULT_FILE_STORAGE: django.core.files.storage.FileSystemStorage
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # diff-cover compare la branche à sa base
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
@@ -124,8 +126,18 @@ jobs:
         run: ruff format --check --diff .
       - name: Migrations manquantes ?
         run: python manage.py makemigrations --check --dry-run
-      - name: Tests
-        run: pytest
+      - name: Tests (avec couverture)
+        run: pytest --cov --cov-report=term --cov-report=xml:coverage.xml
+      # Règle : 100 % de couverture (lignes et branches) sur le code ajouté ou modifié.
+      # En local : `make coverage-api`.
+      - name: Couverture du code modifié = 100 %
+        env:
+          COMPARE: >-
+            ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref)
+            || ((github.ref_name == 'development' || github.ref_name == 'main') && github.event.before)
+            || (startsWith(github.ref_name, 'hotfix/') && 'origin/main')
+            || 'origin/development' }}
+        run: diff-cover coverage.xml --compare-branch="$COMPARE" --fail-under=100
       - name: Contrat OpenAPI à jour ?
         run: |
           python manage.py spectacular --file /tmp/openapi.yaml --validate --fail-on-warn
@@ -260,12 +272,21 @@ jobs:
       - name: Shellcheck du script de déploiement
         run: shellcheck infra/deploy/steamy-deploy.sh
 
+  # Règle : 100 % des écrans v1 ont un test e2e. Tout écran livré (case cochée dans un plan)
+  # doit citer un test existant dans docs/tests/MATRICE-E2E.md. Contrôle rapide, toujours lancé.
+  e2e-matrice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Matrice écran → test e2e
+        run: python3 scripts/e2e_matrix.py --check
+
   # Point de contrôle unique pour la protection de branche.
   # `changes` est surveillé aussi : s'il échoue, tous les autres jobs sont sautés,
   # et « tout sauté » ne doit pas passer pour un succès.
   ci-ok:
     if: always()
-    needs: [changes, api, web, image-api, image-web, e2e, helm]
+    needs: [changes, api, web, image-api, image-web, e2e, helm, e2e-matrice]
     runs-on: ubuntu-latest
     steps:
       - name: Tous les jobs exécutés ont réussi

@@ -13,7 +13,8 @@ ce qu'il faut faire quand il échoue. Pour le **processus** (publier une version
 flowchart LR
     subgraph CI[ci.yml]
         changes --> api & web & imgapi[image-api] & imgweb[image-web] & helm
-        changes & api & web & imgapi & imgweb & helm --> ciok[ci-ok]
+        changes --> matrice[e2e-matrice]
+        changes & api & web & imgapi & imgweb & helm & matrice --> ciok[ci-ok]
     end
     subgraph Deploy[deploy.yml]
         meta --> images & charts --> deploy
@@ -101,7 +102,8 @@ Conditions : `changes.api == 'true'`. Répertoire de travail : `apps/api`.
 | Lint | `ruff check --output-format=github .` | Erreurs annotées dans le diff de la PR. Corriger avec `make fix-api` |
 | Format | `ruff format --check --diff .` | `make fix-api`, puis committer |
 | Migrations manquantes | `manage.py makemigrations --check --dry-run` | Un modèle a changé sans migration : `make makemigrations`, puis committer |
-| Tests | `pytest` | Voir le test en échec (`--maxfail=1` : arrêt au premier) |
+| Tests | `pytest --cov` (lignes et branches, rapport `coverage.xml`) | Voir le test en échec (`--maxfail=1` : arrêt au premier) |
+| Couverture du code modifié | `diff-cover coverage.xml --compare-branch=<base> --fail-under=100` ; base = cible de la PR, sinon `development` (`main` pour un `hotfix/…`), sinon le push précédent sur `development`/`main` | Ajouter les tests manquants ; le rapport liste les lignes non couvertes. En local : `make coverage-api` |
 | Contrat OpenAPI | `spectacular --validate --fail-on-warn`, puis comparaison avec `openapi.yaml` | Vue mal décrite, ou contrat pas régénéré : `make openapi`, puis committer |
 
 Durée habituelle : **≈ 1 min 30**.
@@ -150,6 +152,15 @@ Conditions : `changes.infra == 'true'`.
 Durée habituelle : **≈ 15 s**.
 
 Pour vérifier en local, voir les commandes Docker dans [Kubernetes](kubernetes.md#tester-les-charts-localement).
+
+### Job `e2e-matrice` : 100 % des écrans livrés testés
+
+Toujours lancé (quelques secondes). Exécute `python3 scripts/e2e_matrix.py --check`, qui échoue si :
+- un écran à implémenter de l'inventaire n'a pas de ligne dans `docs/tests/MATRICE-E2E.md` ;
+- un écran **livré** (case cochée dans la section Avancement de son plan) ne cite aucun test e2e ;
+- un test cité n'existe pas.
+
+Après une mise à jour de l'inventaire : `python3 scripts/e2e_matrix.py --generate`.
 
 ### Job `ci-ok` : le verdict
 
