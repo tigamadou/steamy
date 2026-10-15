@@ -44,7 +44,13 @@
     --error-600: #DC2626;
     --error-700: #991B1B;
     --warning-500: var(--amber-500);
+    --info-50: #DCEEFE;
     --info-500: #0EA5E9;
+    --info-700: #0369A1;
+    /* ─── Identité : orange du dégradé du logo, mascotte Zeti ─────── */
+    --brand-orange: #F89D32;
+    --mascot-ink: #1B1147;
+    --mascot-cheek: #FF8AA8;
     /* ─── Couleurs "fun" pour catégories de parcours ──────────────── */
     --cat-robotique: #5B3FE0;
     /* violet */
@@ -125,6 +131,8 @@
     --shadow-card: 0 1px 0 rgba(15, 13, 38, 0.04), 0 4px 16px color-mix(in srgb, var(--primary-500) 6%, transparent);
     --shadow-card-hover: 0 1px 0 rgba(15, 13, 38, 0.06), 0 12px 28px color-mix(in srgb, var(--primary-500) 14%, transparent);
     --shadow-modal: 0 24px 64px rgba(15, 13, 38, 0.24);
+    /* ombre "candy" d'un bouton clair posé sur un fond coloré */
+    --overlay-shadow: rgba(15, 13, 38, 0.25);
     /* ─── Animation ───────────────────────────────────────────────── */
     --ease-out: cubic-bezier(.22, 1, .36, 1);
     --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
