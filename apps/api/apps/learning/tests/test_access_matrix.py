@@ -14,6 +14,7 @@ from apps.accounts.tests.factories import (
     StaffFactory,
     TeacherFactory,
 )
+from apps.catalog.models import Quiz
 
 from .factories import EnrollmentFactory, build_course, missions_of
 
@@ -38,6 +39,17 @@ def matrix(ids):
         ("get", f"/api/learning/missions/{first.id}/", 200),
         ("get", f"/api/learning/missions/{locked.id}/", 403),  # CONTENT_LOCKED
         ("post", f"/api/learning/missions/{first.id}/complete/", 200),
+        ("get", f"/api/learning/quizzes/{ids['quiz']}/", 403),  # CONTENT_LOCKED
+        ("post", f"/api/learning/quizzes/{ids['quiz']}/attempts/", 403),
+        ("get", "/api/learning/attempts/", 200),
+        ("get", "/api/learning/attempts/999999/", 404),
+        ("post", "/api/learning/activity/", 200),
+        ("get", "/api/learning/badges/", 200),
+        ("get", "/api/learning/certificates/", 200),
+        ("get", "/api/learning/certificates/999999/download/", 404),
+        ("get", "/api/learning/dashboard/", 200),
+        ("get", "/api/learning/progress/", 200),
+        ("get", "/api/learning/recommendations/", 200),
         ("delete", "/api/learning/enrollments/", 405),
         ("put", f"/api/learning/missions/{first.id}/", 405),
     ]
@@ -47,7 +59,7 @@ def matrix(ids):
 @pytest.mark.parametrize("persona", PERSONAS)
 def test_learning_access_matrix(persona):
     learner = LearnerFactory()
-    course = build_course(slug="suivi", projects=1, levels=1, missions=2)
+    course = build_course(slug="suivi", projects=1, levels=1, missions=2, quizzes=True)
     build_course(slug="autre", projects=1, levels=1, missions=1)
     EnrollmentFactory(learner=learner, course=course)
     first, locked = missions_of(course)
@@ -57,8 +69,14 @@ def test_learning_access_matrix(persona):
     elif PERSONAS[persona]:
         client.force_authenticate(PERSONAS[persona]())
 
-    for method, url, learner_status in matrix({"first": first, "locked": locked}):
-        body = {"courseSlug": "suivi"} if method == "post" else {}
+    quiz = Quiz.objects.get(level__project__course=course)
+    bodies = {
+        "/api/learning/enrollments/": {"courseSlug": "suivi"},
+        "/api/learning/activity/": {"missionId": first.id, "seconds": 30},
+        f"/api/learning/quizzes/{quiz.id}/attempts/": {"answers": []},
+    }
+    for method, url, learner_status in matrix({"first": first, "locked": locked, "quiz": quiz.id}):
+        body = bodies.get(url, {}) if method == "post" else {}
         resp = getattr(client, method)(url, body, format="json")
         expected = {"anonyme": 401, "apprenant": learner_status}.get(persona, 403)
         assert resp.status_code == expected, (persona, method, url, resp.content)
