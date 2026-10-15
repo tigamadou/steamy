@@ -23,7 +23,7 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 2.3 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
+Statut : 🟡 en cours · Prochaine tâche : 2.4 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
 ### Socle — ✅ terminé
 - [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
@@ -62,20 +62,20 @@ Statut : 🟡 en cours · Prochaine tâche : 2.3 · Prérequis : API-1 (2.0 et 2
   - [x] Recette : vouvoiement partout ; aucune règle « Différent de l'ancien » ; aucun compte à rebours figé
 
 ### Inscription apprenant — ⬜ à faire
-- [ ] **2.3** Inscription apprenant W01-W06, W19 (requiert API-L2) · `feature/lot2-inscription-apprenant`
-  - [ ] W01 splash d'entrée de `/inscription`
-  - [ ] W02 `/inscription`
-  - [ ] W03 `/inscription/type` (2 `UserTypeCard`)
-  - [ ] W04 `/inscription/apprenant/identite` (`username-availability`, CGU non cochée)
-  - [ ] W19 état d'erreur `USERNAME_TAKEN` de W04
-  - [ ] W05 `/inscription/apprenant/age` (`NumberStepper` 10-17)
-  - [ ] W06 `/inscription/apprenant/parent` (`PhoneInput`, lien de parenté, `CONSENT_COOLDOWN`)
-  - [ ] `SignupDraftProvider` en mémoire et garde d'étape lisant `GET auth/learner-signup/` (layout `apprenant/`)
-  - [ ] `POST auth/learner-signup/` à la fin de W05
-  - [ ] Aucun traceur tiers (D6), pas de newsletter (C12)
-  - [ ] Tests Vitest : W04 (C7, CGU obligatoire, `USERNAME_TAKEN` → W19), W05 (bornes), W06 (`CONSENT_COOLDOWN`)
-  - [ ] Parcours Playwright : W02 → W06 jusqu'au SMS de consentement lu dans le faux fournisseur
-  - [ ] Recette : kickers et barres conformes à SPEC-ECRANS §2.4 ; aucune mention « moins de 16 ans » ; aucun élément « Ne pas porter » de §2.5
+- [x] **2.3** Inscription apprenant W01-W06, W19 (requiert API-L2) · `feature/lot2-inscription-apprenant`
+  - [x] W01 splash d'entrée de `/inscription`
+  - [x] W02 `/inscription`
+  - [x] W03 `/inscription/type` (2 `UserTypeCard`)
+  - [x] W04 `/inscription/apprenant/identite` (`username-availability`, CGU non cochée)
+  - [x] W19 état d'erreur `USERNAME_TAKEN` de W04
+  - [x] W05 `/inscription/apprenant/age` (`NumberStepper` 10-17)
+  - [x] W06 `/inscription/apprenant/parent` (`PhoneInput`, lien de parenté, `CONSENT_COOLDOWN`)
+  - [x] `SignupDraftProvider` en mémoire et garde d'étape lisant `GET auth/learner-signup/` (layout `apprenant/`)
+  - [x] `POST auth/learner-signup/` à la fin de W05
+  - [x] Aucun traceur tiers (D6), pas de newsletter (C12)
+  - [x] Tests Vitest : W04 (C7, CGU obligatoire, `USERNAME_TAKEN` → W19), W05 (bornes), W06 (`CONSENT_COOLDOWN`)
+  - [x] Parcours Playwright : W02 → W06 jusqu'au SMS de consentement lu dans le faux fournisseur
+  - [x] Recette : kickers et barres conformes à SPEC-ECRANS §2.4 ; aucune mention « moins de 16 ans » ; aucun élément « Ne pas porter » de §2.5
 - [ ] **2.4** Attente, reprise et issue W07, W08, W18 (requiert API-L2) · `feature/lot2-consentement-apprenant`
   - [ ] Composants `ResumeCodeCard` et `PendingPill`
   - [ ] W07 `/inscription/apprenant/attente` (`FullScreenStage`, `Mascot sleep`, renvoi de la demande)

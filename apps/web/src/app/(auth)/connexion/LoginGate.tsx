@@ -1,10 +1,5 @@
-import { SESSION_COOKIE } from "@steamy/api-client";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-
-import { homeForRole } from "@/lib/auth/home-for-role";
+import { SignedInRedirect } from "@/components/auth/SignedInRedirect";
 import { safeNext } from "@/lib/auth/safe-next";
-import { getCurrentUser } from "@/lib/auth/session";
 
 import { LoginForm } from "./LoginForm";
 
@@ -12,9 +7,6 @@ import { LoginForm } from "./LoginForm";
 export async function LoginGate({ searchParams }: Pick<PageProps<"/connexion">, "searchParams">) {
   const { next } = await searchParams;
   const target = safeNext(typeof next === "string" ? next : null);
-  if ((await cookies()).has(SESSION_COOKIE)) {
-    const me = await getCurrentUser();
-    if (me) redirect(target ?? homeForRole(me));
-  }
+  await SignedInRedirect({ target });
   return <LoginForm next={target} />;
 }

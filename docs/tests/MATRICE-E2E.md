@@ -28,12 +28,12 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WL18` | Article | 1 | Fil d'Ariane, partage, JSON-LD, slug inconnu → 404 | `apps/web/e2e/editorial.spec.ts` |
 | `WL20` | Guides gratuits | 1 | Téléchargement libre d'un PDF, sans email (newsletter : à venir avec API-L1.4) | `apps/web/e2e/editorial.spec.ts` |
 | `WL21` | Événements | 1 |  |  |
-| `W01` | Splash | 2 |  |  |
-| `W02` | Accueil | 2 |  |  |
-| `W03` | Type d'utilisateur | 2 |  |  |
-| `W04` | Identité & identifiant | 2 |  |  |
-| `W05` | Âge | 2 |  |  |
-| `W06` | Numéro du parent | 2 |  |  |
+| `W01` | Splash | 2 | Splash d'entrée de l'inscription (une fois par session) | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `W02` | Accueil | 2 | Accueil de l'inscription, redirection d'un utilisateur connecté | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `W03` | Type d'utilisateur | 2 | Choix apprenant / parent | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `W04` | Identité & identifiant | 2 | Identité, CGU non cochée, identifiant | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `W05` | Âge | 2 | Âge borné 10-17, création de l'inscription | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `W06` | Numéro du parent | 2 | Numéro du parent, SMS de consentement | `apps/web/e2e/inscription-apprenant.spec.ts` |
 | `W07` | Attente consentement | 2 |  |  |
 | `W08` | Accord reçu | 2 |  |  |
 | `W10` | Mot de passe | 2 |  |  |
@@ -44,7 +44,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `W15` | Bienvenue | 2 |  |  |
 | `W16` | Connexion existant | 2 | Connexion des trois rôles, `next` sûr, personnel refusé, déconnexion | `apps/web/e2e/connexion.spec.ts` |
 | `W18` | Consentement refusé (terminal) | 2 |  |  |
-| `W19` | Identifiant déjà utilisé | 2 |  |  |
+| `W19` | Identifiant déjà utilisé | 2 | Identifiant déjà pris au blur | `apps/web/e2e/inscription-apprenant.spec.ts` |
 | `WP01` | Créer un compte | 2 |  |  |
 | `WP02` | OTP | 2 |  |  |
 | `WP03` | Mot de passe | 2 |  |  |
