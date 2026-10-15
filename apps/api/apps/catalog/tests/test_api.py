@@ -91,8 +91,8 @@ def test_responses_do_not_depend_on_the_session_and_are_cachable():
 
 
 def test_categories_count_published_courses():
+    CategoryFactory(slug="energie", order=1)  # créée d'abord : l'ordre vient de `order`
     robotique = CategoryFactory(slug="robotique", order=0)
-    CategoryFactory(slug="energie", order=1)
     CourseFactory.create_batch(2, category=robotique)
     CourseFactory(category=robotique, draft=True)
     body = APIClient().get(f"{BASE}categories/").json()
