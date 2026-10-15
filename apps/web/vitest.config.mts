@@ -1,10 +1,12 @@
+import mdx from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
 // Tests de composants (Vitest + Testing Library), colocalisés : `*.test.tsx`.
 // Les Server Components async ne sont pas testables ici : ils relèvent de Playwright (e2e/).
 export default defineConfig({
-  plugins: [react()],
+  // MDX du contenu éditorial (src/content/), compilé comme par @next/mdx
+  plugins: [{ enforce: "pre", ...mdx() }, react()],
   resolve: { tsconfigPaths: true },
   test: {
     environment: "jsdom",

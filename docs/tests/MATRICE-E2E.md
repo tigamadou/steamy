@@ -20,13 +20,13 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WL06` | Projets & Parcours | 1 |  |  |
 | `WL07` | Boutique de kits | 1 |  |  |
 | `WL08` | Ateliers | 1 |  |  |
-| `WL09` | Pages légales | 1 |  |  |
-| `WL10` | À propos | 1 |  |  |
+| `WL09` | Pages légales | 1 | Pied de page → CGU#consentement-parental ; onglets adressables par URL | `apps/web/e2e/editorial.spec.ts` |
+| `WL10` | À propos | 1 | Mission, chiffres, équipe, bandeau d'inscription | `apps/web/e2e/editorial.spec.ts` |
 | `WL11` | Écoles · offre B2B + devis | 1 |  |  |
 | `WL16` | Catégories | 1 |  |  |
-| `WL17` | Blog | 1 |  |  |
-| `WL18` | Article | 1 |  |  |
-| `WL20` | Guides gratuits | 1 |  |  |
+| `WL17` | Blog | 1 | Article à la une → article | `apps/web/e2e/editorial.spec.ts` |
+| `WL18` | Article | 1 | Fil d'Ariane, partage, JSON-LD, slug inconnu → 404 | `apps/web/e2e/editorial.spec.ts` |
+| `WL20` | Guides gratuits | 1 | Téléchargement libre d'un PDF, sans email (newsletter : à venir avec API-L1.4) | `apps/web/e2e/editorial.spec.ts` |
 | `WL21` | Événements | 1 |  |  |
 | `W01` | Splash | 2 |  |  |
 | `W02` | Accueil | 2 |  |  |

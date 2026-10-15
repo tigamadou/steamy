@@ -1,0 +1,133 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+3 0 obj
+<< /Length 292 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(Bases de l'électronique) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(Ce guide explique les notions essentielles pour réaliser tes premiers circuits) '
+(sans danger.) '
+() '
+(Sommaire : 1. Tension, courant, résistance. 2. Les composants de base. 3. Ton) '
+(premier circuit.) '
+() '
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 595 842] /Contents 3 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+5 0 obj
+<< /Length 357 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(1. Tension, courant, résistance) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(La tension \(en volts\) pousse les électrons, comme la pente d'une rivière pousse) '
+(l'eau.) '
+() '
+(Le courant \(en ampères\) est la quantité d'électrons qui circulent.) '
+() '
+(La résistance \(en ohms\) freine le courant. La loi d'Ohm les relie : U = R x I.) '
+() '
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 595 842] /Contents 5 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+7 0 obj
+<< /Length 331 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(2. Les composants de base) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(La pile fournit l'énergie.) '
+() '
+(La résistance protège les composants fragiles.) '
+() '
+(La LED s'allume quand le courant la traverse dans le bon sens : sa patte longue) '
+(va vers le +.) '
+() '
+(L'interrupteur ouvre ou ferme le circuit.) '
+() '
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 595 842] /Contents 7 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+9 0 obj
+<< /Length 461 >>
+stream
+BT
+/F2 20 Tf
+60 780 Td
+(3. Ton premier circuit) Tj
+/F1 12 Tf
+0 -34 Td
+16 TL
+(Matériel : une pile de 9 V, une résistance de 470 ohms, une LED, des fils.) '
+() '
+(Relie le + de la pile à la résistance, la résistance à la patte longue de la) '
+(LED, puis la patte courte au -.) '
+() '
+(La LED s'allume ? Bravo, tu viens de fermer ton premier circuit.) '
+() '
+(Elle reste éteinte ? Retourne la LED : elle ne laisse passer le courant que dans) '
+(un sens.) '
+() '
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 11 0 R /MediaBox [0 0 595 842] /Contents 9 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> >>
+endobj
+11 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R 10 0 R] /Count 4 >>
+endobj
+12 0 obj
+<< /Title (Bases de l'électronique illustrées) /Author (Steamy) >>
+endobj
+13 0 obj
+<< /Type /Catalog /Pages 11 0 R >>
+endobj
+xref
+0 14
+0000000000 65535 f 
+0000000009 00000 n 
+0000000106 00000 n 
+0000000208 00000 n 
+0000000551 00000 n 
+0000000688 00000 n 
+0000001096 00000 n 
+0000001233 00000 n 
+0000001615 00000 n 
+0000001752 00000 n 
+0000002264 00000 n 
+0000002402 00000 n 
+0000002479 00000 n 
+0000002562 00000 n 
+trailer
+<< /Size 14 /Root 13 0 R /Info 12 0 R >>
+startxref
+2613
+%%EOF
