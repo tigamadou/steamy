@@ -407,7 +407,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `publicDisplayAllowed` ; identifiant et mot de passe ignorés. Genre, handicap et localité seulement dans le
   > détail (D6). `me/parent/` : nom et lien de parenté, ni numéro ni email (WD22). Enum `UserStatusEnum` nommé
   > dans le schéma (collision des `status`).
-- [ ] **API-L4.2** À valider · `feature/api-l4-2-a-valider`
+- [ ] **API-L4.2** À valider · `feature/api-l4-2-a-valider` · PR #79 (partie 1)
   - [x] `GET accounts/pending-actions/` (D52) : consentements et demandes de suppression
   - [ ] `pending-actions` : demandes de paiement et candidatures (attend API-L3b.5 et L3b.6)
   - [ ] `POST events/applications/{id}/accept/` (payant → `PaymentRequest`/commande, D53), `…/refuse/`
