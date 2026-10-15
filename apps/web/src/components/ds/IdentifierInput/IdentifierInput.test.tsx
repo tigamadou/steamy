@@ -55,6 +55,13 @@ describe("IdentifierInput", () => {
     expect(onChange).toHaveBeenLastCalledWith({ raw: "0190000001", kind: "phone", value: "+2280190000001" });
   });
 
+  it("propose le Bénin quand la liste des pays arrive après le premier rendu", () => {
+    const { rerender } = render(<IdentifierInput countries={[]} defaultValue="0190000001" />);
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    rerender(<IdentifierInput countries={COUNTRIES} defaultValue="0190000001" />);
+    expect(screen.getByRole("combobox", { name: "Pays du numéro" })).toHaveValue("BJ");
+  });
+
   it("n'affiche pas le pays quand l'indicatif est saisi", async () => {
     const { input, onChange, user } = setup();
     await user.type(input, "+228 90 12 34 56");
