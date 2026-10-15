@@ -55,7 +55,7 @@ Statut : ⬜ à faire · Prochaine tâche : 3.0 · Prérequis : API-1 et API-L3a
   - [ ] Tests unitaires : filtres ↔ URL, carte « Gratuit », pas de prix de parcours sur un parcours avec kit
   - [ ] Parcours Playwright « souhaits » : ajouter depuis WC01, retirer depuis WW01, annuler, recharger
 - [ ] **3.3a** Mes parcours, arbre et missions (requiert API-L3a, maquette WD23 validée, offre Vimeo) · `feature/lot3-mes-parcours-missions`
-  - [ ] Conception de la maquette WD23 dans `design/screens-apprenant-a-concevoir-web.jsx`, validée (C18)
+  - [x] Conception de la maquette WD23 dans `design/screens-apprenant-a-concevoir-web.jsx`, validée (C18)
   - [ ] WD23 mes parcours (onglets En cours / Terminés, `EnrolledCourseCard`)
   - [ ] WC06a arbre du parcours
   - [ ] WC06b projet déplié (`?projet=`)

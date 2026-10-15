@@ -1,0 +1,67 @@
+# Surcharge pour les parcours Playwright : `make e2e` (voir le Makefile).
+#   docker compose -p steamy-e2e -f compose.yml -f compose.e2e.yml …
+# - le web est servi par l'image de production (`next dev` est trop lent et instable pour des parcours) ;
+# - aucun port publié : la stack e2e cohabite avec la stack de dev (`make up`) ;
+# - Playwright tourne dans l'image officielle, qui embarque les navigateurs (même version que @playwright/test).
+
+services:
+  postgres:
+    ports: !reset []
+
+  rustfs:
+    ports: !reset []
+
+  mailpit:
+    ports: !reset []
+
+  api:
+    ports: !reset []
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/')"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  web:
+    image: steamy-web-e2e
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: prod
+    working_dir: /app
+    command: ["node", "apps/web/server.js"]
+    environment:
+      # Le navigateur de Playwright joint l'API par le réseau de la stack
+      PUBLIC_API_URL: http://api:8000
+    volumes: !reset []
+    ports: !reset []
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on: !override
+      api:
+        condition: service_healthy
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.64.1-noble
+    profiles: ["e2e"]
+    working_dir: /repo
+    environment:
+      CI: ${CI:-}
+      BASE_URL: http://web:3000
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+    command: >
+      sh -c "corepack enable
+      && pnpm install --frozen-lockfile --filter '@steamy/web...' --store-dir /pnpm-store --config.confirm-modules-purge=false
+      && pnpm --filter @steamy/web e2e"
+    volumes:
+      - .:/repo
+      - node_modules:/repo/node_modules
+      - web_node_modules:/repo/apps/web/node_modules
+      - api_client_node_modules:/repo/packages/api-client/node_modules
+      - pnpm_store:/pnpm-store
+    depends_on:
+      web:
+        condition: service_healthy

@@ -1981,6 +1981,8 @@ function WPD14_Notifs() {
 function ParentDashFlowWeb() {
   return (
     <DesignCanvas>
+      {/* Écrans à concevoir (C18) : screens-*-a-concevoir-web.jsx */}
+      {window.ParentACSections && window.ParentACSections()}
       <DCSection
         id="pdash-home"
         title="Accueil & enfants"

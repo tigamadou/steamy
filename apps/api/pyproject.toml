@@ -22,3 +22,23 @@ ignore = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["apps", "libs", "project"]
+
+[tool.coverage.run]
+branch = true
+# Chemins relatifs à apps/api : diff-cover les rapproche du diff git de la PR.
+source = ["."]
+relative_files = true
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/tests.py",
+    "conftest.py",
+    "manage.py",
+    "project/wsgi.py",
+    "project/asgi.py",
+]
+
+[tool.coverage.report]
+skip_covered = true
+show_missing = true
+exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError"]
