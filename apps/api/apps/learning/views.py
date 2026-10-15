@@ -7,23 +7,27 @@ Toutes les réponses sont privées (`Cache-Control: private, no-store`, ADR 0004
 """
 
 from django.db.models import Count, F, Q
+from django.http import FileResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.catalog.models import Course, Level, Mission, Project, Question, Quiz
+from apps.events.models import EventTicket
+from libs.errors import ApiError
 from libs.pagination import PagePagination
 from libs.permissions import IsLearner
 from libs.schema import ErrorSerializer
 
 from . import serializers as s
+from .certification import d33_status
 from .gamification import badge_of, record_activity, seconds_on, streak_days
-from .models import Enrollment, LearnerBadge, QuizAttempt
+from .models import Certificate, Enrollment, LearnerBadge, QuizAttempt
 from .progression import Container, Progression, Step, load_course, quiz_of
 from .services import (
     complete_mission,
@@ -156,7 +160,33 @@ def tree_payload(enrollment: Enrollment, progression: Progression) -> dict:
                 ],
             }
         )
-    return {**enrollment_payload(enrollment, progression), "projects": projects}
+    return {
+        **enrollment_payload(enrollment, progression),
+        "certification": certification_payload(enrollment, progression),
+        "projects": projects,
+    }
+
+
+def certification_payload(enrollment: Enrollment, progression: Progression) -> dict:
+    """Où en est la certification (WJ07, WJ09) : conditions D33, certificat et ticket."""
+    certificate = Certificate.objects.filter(enrollment=enrollment).first()
+    return {
+        **d33_status(progression),
+        "certificate_enabled": progression.course.certificate_enabled,
+        "certificate": certificate_item(certificate) if certificate else None,
+        "event_ticket": EventTicket.objects.filter(enrollment=enrollment).exists(),
+    }
+
+
+def certificate_item(certificate: Certificate) -> dict:
+    course = certificate.enrollment.course
+    return {
+        "id": certificate.id,
+        "number": certificate.number,
+        "course": course_ref(course),
+        "issued_at": certificate.issued_at,
+        "pdf_status": certificate.pdf_status,
+    }
 
 
 # --- Vues ----------------------------------------------------------------------------------------
@@ -637,3 +667,59 @@ class BadgeListView(LearnerView, generics.ListAPIView):
                 }
             )
         return self.get_paginated_response(s.LearnerBadgeSerializer(data, many=True).data)
+
+
+# --- Certificats (D33, ADR 0005) -----------------------------------------------------------------
+
+
+class CertificateListView(LearnerView, generics.ListAPIView):
+    """Mes certificats (WJ07, WD21), avec l'état de leur PDF."""
+
+    serializer_class = s.CertificateSerializer
+    filter_backends = []
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):  # génération du schéma OpenAPI
+            return Certificate.objects.none()
+        return Certificate.objects.filter(enrollment__learner=self.request.user).select_related(
+            "enrollment__course"
+        )
+
+    def get(self, request, *args, **kwargs):
+        page = self.paginate_queryset(self.get_queryset())
+        data = [certificate_item(certificate) for certificate in page]
+        return self.get_paginated_response(s.CertificateSerializer(data, many=True).data)
+
+
+class CertificateDownloadView(LearnerView):
+    """
+    Téléchargement (ADR 0005 §6) : redirection 302 vers une URL présignée de 5 minutes, jamais stockée ; sans
+    stockage objet (CI), le fichier est servi directement. PDF pas prêt : 409 `PDF_NOT_READY`. Le certificat d'un
+    autre apprenant n'existe pas (404).
+    """
+
+    @extend_schema(
+        responses={
+            (302, "*/*"): OpenApiResponse(description="Redirection vers l'URL présignée"),
+            (200, "application/pdf"): OpenApiResponse(description="Fichier PDF"),
+            409: ErrorSerializer,
+        }
+    )
+    def get(self, request, pk):
+        certificate = get_object_or_404(
+            Certificate.objects.select_related("enrollment__course"),
+            pk=pk,
+            enrollment__learner=request.user,
+        )
+        if certificate.pdf_status != Certificate.PdfStatus.READY or not certificate.pdf:
+            raise ApiError("PDF_NOT_READY")
+        filename = f"certificat-{certificate.enrollment.course.slug}.pdf"
+        url = certificate.pdf.storage.signed_url(certificate.pdf.name, filename)
+        if url:
+            return HttpResponseRedirect(url)
+        return FileResponse(
+            certificate.pdf.open("rb"),
+            as_attachment=True,
+            filename=filename,
+            content_type="application/pdf",
+        )

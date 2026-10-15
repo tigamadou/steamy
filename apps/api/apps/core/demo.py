@@ -649,6 +649,7 @@ LEA_ACTIVITY = [600, 1200, 900, 300, 1500]
 
 def seed_learning(accounts: dict[str, User]) -> None:
     from apps.core.models import PlatformSettings
+    from apps.learning.certification import complete_if_done
     from apps.learning.gamification import award_badge, award_points, badge_of, streak_days
     from apps.learning.models import (
         Enrollment,
@@ -708,7 +709,10 @@ def seed_learning(accounts: dict[str, User]) -> None:
             award_badge(lea, badge_of(quiz.level or quiz.project))
         enrollment.progress_pct = Progression(enrollment).progress_pct
         enrollment.last_activity_at = timezone.now() if done_missions else None
+        enrollment.status, enrollment.completed_at = Enrollment.Status.ACTIVE, None
         enrollment.save()
+        # Parcours fini : terminé, points et badge du parcours, certificat (gardé d'un seed à l'autre) et ticket
+        complete_if_done(enrollment)
     today = timezone.localdate()
     for days_ago, seconds in enumerate(LEA_ACTIVITY):
         LearningActivity.objects.create(

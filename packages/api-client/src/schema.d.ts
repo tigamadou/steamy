@@ -740,6 +740,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/learning/certificates/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Mes certificats (WJ07, WD21), avec l'état de leur PDF. */
+        get: operations["learning_certificates_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/learning/certificates/{id}/download/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Téléchargement (ADR 0005 §6) : redirection 302 vers une URL présignée de 5 minutes, jamais stockée ; sans
+         *     stockage objet (CI), le fichier est servi directement. PDF pas prêt : 409 `PDF_NOT_READY`. Le certificat d'un
+         *     autre apprenant n'existe pas (404).
+         */
+        get: operations["learning_certificates_download_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/learning/enrollments/": {
         parameters: {
             query?: never;
@@ -1470,6 +1508,34 @@ export interface components {
              */
             icon: string;
         };
+        Certificate: {
+            id: number;
+            /** @description CERT-AAAA-NNNNNN */
+            number: string;
+            course: components["schemas"]["CourseRef"];
+            /** Format: date-time */
+            issuedAt: string;
+            /**
+             * @description `pending` : « Préparation… », interroger de nouveau ; `failed` : échec signalé au Support
+             *
+             *     * `pending` - En préparation
+             *     * `ready` - Prêt
+             *     * `failed` - Échec
+             */
+            pdfStatus: components["schemas"]["PdfStatusEnum"];
+        };
+        /** @description Conditions D33 (100 % des missions, toutes les sommatives réussies), certificat et ticket (WJ07, WJ09). */
+        Certification: {
+            eligible: boolean;
+            missionsDone: number;
+            missionCount: number;
+            summativesPassed: number;
+            summativeCount: number;
+            certificateEnabled: boolean;
+            certificate: components["schemas"]["Certificate"] | null;
+            /** @description Ticket Steamy Events offert à la certification */
+            eventTicket: boolean;
+        };
         /** @description Réponse proposée, sans le corrigé. */
         Choice: {
             id: number;
@@ -1732,6 +1798,7 @@ export interface components {
          *     * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
          *     * `PAYMENT_FAILED` - PAYMENT_FAILED
          *     * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
+         *     * `PDF_NOT_READY` - PDF_NOT_READY
          *     * `PERMISSION_DENIED` - PERMISSION_DENIED
          *     * `PHONE_INVALID` - PHONE_INVALID
          *     * `PHONE_TAKEN` - PHONE_TAKEN
@@ -1748,7 +1815,7 @@ export interface components {
          *     * `VALIDATION_ERROR` - VALIDATION_ERROR
          * @enum {string}
          */
-        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUIRED" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
         FieldError: {
             code: string;
             message: string;
@@ -2152,6 +2219,21 @@ export interface components {
                 streakDays: number;
             };
         };
+        PaginatedCertificateList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["Certificate"][];
+        };
         PaginatedConsentRequestList: {
             /** @example 123 */
             count?: number;
@@ -2392,6 +2474,13 @@ export interface components {
             /** @description Code ISO du pays */
             country: string;
         };
+        /**
+         * @description * `pending` - En préparation
+         *     * `ready` - Prêt
+         *     * `failed` - Échec
+         * @enum {string}
+         */
+        PdfStatusEnum: "pending" | "ready" | "failed";
         Preferences: {
             /**
              * Format: email
@@ -2770,7 +2859,7 @@ export interface components {
             value?: string | null;
             metadata?: unknown;
         };
-        /** @description Arbre du parcours (WC06a, WC06b, WJ09) : titres, durées et états, sans contenu. */
+        /** @description Arbre du parcours (WC06a, WC06b, WJ07, WJ09) : titres, durées et états, sans contenu. */
         Tree: {
             id: number;
             course: components["schemas"]["CourseList"];
@@ -2790,6 +2879,7 @@ export interface components {
             /** @description Niveau de la prochaine étape */
             currentLevel: components["schemas"]["Ref"] | null;
             next: components["schemas"]["NextStep"];
+            certification: components["schemas"]["Certification"];
             projects: components["schemas"]["TreeProject"][];
         };
         TreeLevel: {
@@ -4937,6 +5027,121 @@ export interface operations {
                 };
             };
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_certificates_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCertificateList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_certificates_download_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Fichier PDF */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Redirection vers l'URL présignée */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

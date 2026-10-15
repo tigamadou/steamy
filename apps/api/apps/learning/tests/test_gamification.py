@@ -125,7 +125,7 @@ def test_quiz_points_and_badge_on_first_pass_only(scale, client, learner, course
         format="json",
     ).json()
     assert body["pointsEarned"] == 50 and body["badge"]["kind"] == "project"
-    assert points(learner) == 70
+    assert points(learner) == 170  # + 100 : parcours terminé (D33)
 
 
 def test_quiz_without_badge(scale, client, learner):

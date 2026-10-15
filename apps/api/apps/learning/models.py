@@ -6,9 +6,13 @@ l'apprenant. Une inscription n'est créée que par le serveur, selon sa source (
 commande, Kit Code ou classe dans les étapes suivantes.
 """
 
+import uuid
+
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from apps.core.storage import private_storage
 
 
 class Enrollment(models.Model):
@@ -216,3 +220,44 @@ class LearningActivity(models.Model):
 
     def __str__(self):
         return f"{self.learner} · {self.date} · {self.seconds} s"
+
+
+def certificate_path(certificate, filename) -> str:
+    return f"certificates/{certificate.uuid}.pdf"
+
+
+class Certificate(models.Model):
+    """
+    Certificat d'un parcours (D33) : émis une seule fois par inscription, dans la transaction qui vérifie les
+    conditions ; numéro `CERT-AAAA-NNNNNN` ; PDF généré ensuite par Celery dans le stockage privé (ADR 0005).
+    `snapshot` fige ce que le document affiche (régénération identique, même après un renommage).
+    """
+
+    class PdfStatus(models.TextChoices):
+        PENDING = "pending", _("En préparation")
+        READY = "ready", _("Prêt")
+        FAILED = "failed", _("Échec")
+
+    enrollment = models.OneToOneField(
+        Enrollment, models.CASCADE, related_name="certificate", verbose_name=_("inscription")
+    )
+    number = models.CharField(_("numéro"), max_length=20, unique=True)
+    uuid = models.UUIDField(
+        _("identifiant du fichier"), default=uuid.uuid4, unique=True, editable=False
+    )
+    pdf = models.FileField(
+        _("PDF"), storage=private_storage, upload_to=certificate_path, blank=True, max_length=200
+    )
+    pdf_status = models.CharField(
+        _("état du PDF"), max_length=8, choices=PdfStatus, default=PdfStatus.PENDING
+    )
+    snapshot = models.JSONField(_("contenu figé"), default=dict)
+    issued_at = models.DateTimeField(_("délivré le"), auto_now_add=True)
+
+    class Meta:
+        ordering = ["-issued_at", "-id"]
+        verbose_name = _("certificat")
+        verbose_name_plural = _("certificats")
+
+    def __str__(self):
+        return self.number

@@ -226,3 +226,19 @@ def test_seed_keeps_a_points_scale_set_by_hand():
     settings_.save()
     call_command("seed_demo")
     assert PlatformSettings.load().points_scale == {"mission": 1}
+
+
+def test_lea_finished_course_is_certified_once_with_a_ticket():
+    from apps.events.models import EventTicket
+    from apps.learning.models import Certificate, Enrollment, PointsEntry
+
+    call_command("seed_demo")
+    call_command("seed_demo")
+    finished = Enrollment.objects.get(
+        learner__username="lea.adjovi", course__slug="initiation-scratch"
+    )
+    assert finished.status == "completed"
+    assert Certificate.objects.filter(enrollment=finished).count() == 1
+    assert EventTicket.objects.filter(enrollment=finished).count() == 1
+    assert PointsEntry.objects.filter(learner=finished.learner, source="course").count() == 1
+    assert Certificate.objects.count() == 1

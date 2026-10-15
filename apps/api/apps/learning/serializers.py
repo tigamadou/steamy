@@ -11,7 +11,7 @@ from rest_framework import serializers
 from apps.catalog.models import Badge, Quiz
 from apps.catalog.serializers import CourseListSerializer
 
-from .models import Enrollment, QuizAttempt
+from .models import Certificate, Enrollment, QuizAttempt
 
 STATES = (("done", "Faite"), ("available", "Disponible"), ("locked", "Verrouillée"))
 
@@ -120,9 +120,36 @@ class TreeProjectSerializer(serializers.Serializer):
     levels = TreeLevelSerializer(many=True)
 
 
-class TreeSerializer(EnrollmentSerializer):
-    """Arbre du parcours (WC06a, WC06b, WJ09) : titres, durées et états, sans contenu."""
+class CertificateSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    number = serializers.CharField(help_text="CERT-AAAA-NNNNNN")
+    course = CourseRefSerializer()
+    issued_at = serializers.DateTimeField()
+    pdf_status = serializers.ChoiceField(
+        choices=Certificate.PdfStatus.choices,
+        help_text="`pending` : « Préparation… », interroger de nouveau ; `failed` : échec signalé au Support",
+    )
 
+
+class CertificationSerializer(serializers.Serializer):
+    """Conditions D33 (100 % des missions, toutes les sommatives réussies), certificat et ticket (WJ07, WJ09)."""
+
+    eligible = serializers.BooleanField()
+    missions_done = serializers.IntegerField()
+    mission_count = serializers.IntegerField()
+    summatives_passed = serializers.IntegerField()
+    summative_count = serializers.IntegerField()
+    certificate_enabled = serializers.BooleanField()
+    certificate = CertificateSerializer(allow_null=True)
+    event_ticket = serializers.BooleanField(
+        help_text="Ticket Steamy Events offert à la certification"
+    )
+
+
+class TreeSerializer(EnrollmentSerializer):
+    """Arbre du parcours (WC06a, WC06b, WJ07, WJ09) : titres, durées et états, sans contenu."""
+
+    certification = CertificationSerializer()
     projects = TreeProjectSerializer(many=True)
 
 
