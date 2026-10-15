@@ -1649,389 +1649,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/learning/attempts/:
-    get:
-      operationId: learning_attempts_list
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      tags:
-      - learning
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedAttemptList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-    post:
-      operationId: learning_attempts_create
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      tags:
-      - learning
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AttemptCreateRequest'
-        required: true
-      security:
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AttemptCreate'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/learning/attempts/{id}/:
-    get:
-      operationId: learning_attempts_retrieve
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this attempt.
-        required: true
-      tags:
-      - learning
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Attempt'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/learning/certificates/:
-    get:
-      operationId: learning_certificates_list
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - learning
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedCertificateList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/learning/certificates/{id}/:
-    get:
-      operationId: learning_certificates_retrieve
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this certificate.
-        required: true
-      tags:
-      - learning
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Certificate'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/learning/choices/:
-    get:
-      operationId: learning_choices_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - learning
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedChoiceList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/learning/choices/{id}/:
-    get:
-      operationId: learning_choices_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this choice.
-        required: true
-      tags:
-      - learning
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Choice'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
   /api/learning/enrollments/:
     get:
       operationId: learning_enrollments_list
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+      description: 'Mes parcours (WD23, WC06a) : inscriptions de l''apprenant, avec
+        la prochaine étape.'
       parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
       - name: page
         required: false
         in: query
@@ -2044,12 +1667,17 @@ paths:
         description: Number of results to return per page.
         schema:
           type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
+      - in: query
+        name: status
         schema:
+          enum:
+          - active
+          - completed
           type: string
+          minLength: 1
+        description: |-
+          * `active` - En cours
+          * `completed` - Terminés
       tags:
       - learning
       security:
@@ -2081,22 +1709,25 @@ paths:
           description: ''
     post:
       operationId: learning_enrollments_create
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+      description: 'Inscription à un parcours gratuit (D27) ; déjà inscrit : 200 avec
+        l''inscription existante.'
       tags:
       - learning
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EnrollmentRequest'
+              $ref: '#/components/schemas/EnrollRequestRequest'
         required: true
       security:
       - cookieAuth: []
       responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+          description: ''
         '201':
           content:
             application/json:
@@ -2127,20 +1758,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/learning/enrollments/{id}/:
+  /api/learning/enrollments/{course_slug}/tree/:
     get:
-      operationId: learning_enrollments_retrieve
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+      operationId: learning_enrollments_tree_retrieve
+      description: Arbre d'un parcours suivi (WC06a, WC06b, WJ09).
       parameters:
       - in: path
-        name: id
+        name: course_slug
         schema:
-          type: integer
-        description: A unique integer value identifying this enrollment.
+          type: string
         required: true
       tags:
       - learning
@@ -2151,7 +1777,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Enrollment'
+                $ref: '#/components/schemas/Tree'
           description: ''
         '401':
           content:
@@ -2177,39 +1803,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/learning/progress/:
+  /api/learning/levels/{id}/:
     get:
-      operationId: learning_progress_list
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+      operationId: learning_levels_retrieve
+      description: 'Niveau (WJ02) : introduction vidéo, seulement une fois le niveau
+        atteint (ADR 0004).'
       parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
+      - in: path
+        name: id
         schema:
           type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
+        required: true
       tags:
       - learning
       security:
@@ -2219,7 +1823,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedProgressList'
+                $ref: '#/components/schemas/LevelDetail'
           description: ''
         '401':
           content:
@@ -2233,74 +1837,74 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
         '429':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/learning/missions/{id}/:
+    get:
+      operationId: learning_missions_retrieve
+      description: 'Mission (WJ03) : contenu et vidéo, seulement si la mission est
+        déverrouillée (§4.4, ADR 0004).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/missions/{id}/complete/:
     post:
-      operationId: learning_progress_create
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      tags:
-      - learning
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProgressRequest'
-        required: true
-      security:
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Progress'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/learning/progress/{id}/:
-    get:
-      operationId: learning_progress_retrieve
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+      operationId: learning_missions_complete_create
+      description: '« Marquer comme terminée » (WJ03) : dans l''ordre seulement ;
+        renvoie l''étape suivante.'
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this progress.
         required: true
       tags:
       - learning
@@ -2311,61 +1915,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Progress'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-    patch:
-      operationId: learning_progress_partial_update
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this progress.
-        required: true
-      tags:
-      - learning
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedProgressRequest'
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Progress'
+                $ref: '#/components/schemas/MissionComplete'
           description: ''
         '400':
           content:
@@ -2397,72 +1947,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/learning/questions/:
+  /api/learning/projects/{id}/:
     get:
-      operationId: learning_questions_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - learning
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedQuestionList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/learning/questions/{id}/:
-    get:
-      operationId: learning_questions_retrieve
+      operationId: learning_projects_retrieve
+      description: 'Projet (WJ01) : objectifs, prérequis, matériel, niveaux et progression.'
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this question.
         required: true
       tags:
       - learning
@@ -2473,109 +1966,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Question'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/learning/quizzes/:
-    get:
-      operationId: learning_quizzes_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - learning
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedQuizList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/learning/quizzes/{id}/:
-    get:
-      operationId: learning_quizzes_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this quiz.
-        required: true
-      tags:
-      - learning
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Quiz'
+                $ref: '#/components/schemas/ProjectDetail'
           description: ''
         '401':
           content:
@@ -3548,86 +2939,6 @@ components:
       description: |-
         * `urban` - Urbaine
         * `rural` - Rurale
-    Attempt:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        user:
-          type: integer
-          readOnly: true
-        quiz:
-          type: integer
-          readOnly: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
-        score:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-          readOnly: true
-          nullable: true
-        passed:
-          type: boolean
-          readOnly: true
-        data:
-          readOnly: true
-          nullable: true
-      required:
-      - createdAt
-      - data
-      - id
-      - passed
-      - quiz
-      - score
-      - user
-    AttemptCreate:
-      type: object
-      description: |-
-        Atttempt: client envoie `data` : {question_id: choice_id} pour MCQ/TF
-        On calcule le score côté serveur à la sauvegarde via create()
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        quiz:
-          type: integer
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
-        score:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-          readOnly: true
-          nullable: true
-        passed:
-          type: boolean
-          readOnly: true
-        data:
-          nullable: true
-      required:
-      - createdAt
-      - id
-      - passed
-      - quiz
-      - score
-    AttemptCreateRequest:
-      type: object
-      description: |-
-        Atttempt: client envoie `data` : {question_id: choice_id} pour MCQ/TF
-        On calcule le score côté serveur à la sauvegarde via create()
-      properties:
-        quiz:
-          type: integer
-        data:
-          nullable: true
-      required:
-      - quiz
     Avatar:
       type: object
       properties:
@@ -3764,47 +3075,6 @@ components:
       - icon
       - label
       - slug
-    Certificate:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        enrollment:
-          type: integer
-        issuedAt:
-          type: string
-          format: date-time
-          readOnly: true
-        file:
-          type: string
-          format: uri
-          nullable: true
-        score:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-          nullable: true
-      required:
-      - enrollment
-      - id
-      - issuedAt
-    Choice:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        question:
-          type: integer
-          readOnly: true
-        text:
-          type: string
-          readOnly: true
-      required:
-      - id
-      - question
-      - text
     ConsentPreview:
       type: object
       description: 'Ce que montre le lien SMS avant toute connexion : le numéro masqué,
@@ -4150,6 +3420,17 @@ components:
       - requiredKit
       - slug
       - title
+    CourseRef:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+      required:
+      - slug
+      - title
     CsrfToken:
       type: object
       properties:
@@ -4213,54 +3494,77 @@ components:
       required:
       - email
       - password
+    EnrollRequestRequest:
+      type: object
+      properties:
+        courseSlug:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - courseSlug
     Enrollment:
       type: object
       properties:
         id:
           type: integer
-          readOnly: true
         course:
+          $ref: '#/components/schemas/CourseList'
+        source:
+          $ref: '#/components/schemas/SourceEnum'
+        status:
+          $ref: '#/components/schemas/EnrollmentStatusEnum'
+        progressPct:
           type: integer
-        startedAt:
+        missionCount:
+          type: integer
+        missionsDone:
+          type: integer
+        createdAt:
           type: string
           format: date-time
-          readOnly: true
-        completed:
-          type: boolean
-          readOnly: true
-        status:
-          allOf:
-          - $ref: '#/components/schemas/EnrollmentStatusEnum'
-          readOnly: true
-        progress:
+        lastActivityAt:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-          readOnly: true
+          format: date-time
+          nullable: true
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        currentProject:
+          allOf:
+          - $ref: '#/components/schemas/Ref'
+          nullable: true
+          description: Projet de la prochaine étape
+        currentLevel:
+          allOf:
+          - $ref: '#/components/schemas/Ref'
+          nullable: true
+          description: Niveau de la prochaine étape
+        next:
+          $ref: '#/components/schemas/NextStep'
       required:
-      - completed
+      - completedAt
       - course
+      - createdAt
+      - currentLevel
+      - currentProject
       - id
-      - progress
-      - startedAt
+      - lastActivityAt
+      - missionCount
+      - missionsDone
+      - next
+      - progressPct
+      - source
       - status
-    EnrollmentRequest:
-      type: object
-      properties:
-        course:
-          type: integer
-      required:
-      - course
     EnrollmentStatusEnum:
       enum:
       - active
       - completed
-      - cancelled
       type: string
       description: |-
-        * `active` - Actif
+        * `active` - En cours
         * `completed` - Terminé
-        * `cancelled` - Annulé
     Error:
       type: object
       properties:
@@ -4477,16 +3781,6 @@ components:
       description: |-
         * `ok` - ok
         * `degraded` - degraded
-    KindEnum:
-      enum:
-      - mcq
-      - tf
-      - free
-      type: string
-      description: |-
-        * `mcq` - QCM
-        * `tf` - Vrai/Faux
-        * `free` - Libre
     Kit:
       type: object
       properties:
@@ -4759,6 +4053,77 @@ components:
       - firstName
       - step
       - username
+    LevelDetail:
+      type: object
+      description: 'Niveau (WJ02) : introduction vidéo (identifiant et hachage, ADR
+        0004) et missions.'
+      properties:
+        id:
+          type: integer
+        order:
+          type: integer
+        title:
+          type: string
+        durationMin:
+          type: integer
+        introSummary:
+          type: string
+        introVimeoId:
+          type: string
+          nullable: true
+        introVimeoHash:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        course:
+          $ref: '#/components/schemas/CourseRef'
+        project:
+          $ref: '#/components/schemas/Ref'
+        missions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissionItem'
+      required:
+      - course
+      - durationMin
+      - id
+      - introSummary
+      - introVimeoHash
+      - introVimeoId
+      - missions
+      - order
+      - project
+      - state
+      - title
+    LevelItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        order:
+          type: integer
+        title:
+          type: string
+        durationMin:
+          type: integer
+        introSummary:
+          type: string
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        missionCount:
+          type: integer
+        missionsDone:
+          type: integer
+      required:
+      - durationMin
+      - id
+      - introSummary
+      - missionCount
+      - missionsDone
+      - order
+      - state
+      - title
     LevelSummary:
       type: object
       properties:
@@ -4949,6 +4314,119 @@ components:
         * `suspended` - Suspendu
         * `deactivated` - Désactivé
         * `anonymized` - Anonymisé
+    MissionBlock:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/MissionBlockTypeEnum'
+        text:
+          type: string
+        src:
+          type: string
+        alt:
+          type: string
+        caption:
+          type: string
+      required:
+      - type
+    MissionBlockTypeEnum:
+      enum:
+      - text
+      - tip
+      - media
+      type: string
+      description: |-
+        * `text` - Texte
+        * `tip` - Astuce
+        * `media` - Média
+    MissionComplete:
+      type: object
+      properties:
+        missionId:
+          type: integer
+        progressPct:
+          type: integer
+        next:
+          allOf:
+          - $ref: '#/components/schemas/NextStep'
+          description: Mission suivante, ou certification si le parcours est fait
+      required:
+      - missionId
+      - next
+      - progressPct
+    MissionDetail:
+      type: object
+      description: 'Mission (WJ03) : vidéo (identifiant et hachage, ADR 0004) et blocs
+        de contenu.'
+      properties:
+        id:
+          type: integer
+        order:
+          type: integer
+        title:
+          type: string
+        durationMin:
+          type: integer
+        icon:
+          type: string
+        vimeoId:
+          type: string
+          nullable: true
+        vimeoHash:
+          type: string
+          nullable: true
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissionBlock'
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        course:
+          $ref: '#/components/schemas/CourseRef'
+        project:
+          $ref: '#/components/schemas/Ref'
+        level:
+          $ref: '#/components/schemas/Ref'
+        next:
+          allOf:
+          - $ref: '#/components/schemas/NextStep'
+          description: Étape à proposer après cette mission
+      required:
+      - blocks
+      - course
+      - durationMin
+      - icon
+      - id
+      - level
+      - next
+      - order
+      - project
+      - state
+      - title
+      - vimeoHash
+      - vimeoId
+    MissionItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        order:
+          type: integer
+        title:
+          type: string
+        durationMin:
+          type: integer
+        icon:
+          type: string
+        state:
+          $ref: '#/components/schemas/StateEnum'
+      required:
+      - durationMin
+      - icon
+      - id
+      - order
+      - state
+      - title
     MissionSummary:
       type: object
       properties:
@@ -4972,6 +4450,44 @@ components:
           maxLength: 16
       required:
       - title
+    NextStep:
+      type: object
+      description: 'Étape suivante : mission à faire, ou certification quand tout
+        le parcours est fait.'
+      properties:
+        type:
+          $ref: '#/components/schemas/NextStepTypeEnum'
+        id:
+          type: integer
+          nullable: true
+          description: Mission ; null pour la certification
+        title:
+          type: string
+          nullable: true
+        courseSlug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        projectId:
+          type: integer
+          nullable: true
+        levelId:
+          type: integer
+          nullable: true
+      required:
+      - courseSlug
+      - id
+      - levelId
+      - projectId
+      - title
+      - type
+    NextStepTypeEnum:
+      enum:
+      - mission
+      - certification
+      type: string
+      description: |-
+        * `mission` - Mission
+        * `certification` - Certification
     Notification:
       type: object
       properties:
@@ -5161,66 +4677,6 @@ components:
       required:
       - challengeId
       - code
-    PaginatedAttemptList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Attempt'
-    PaginatedCertificateList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Certificate'
-    PaginatedChoiceList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Choice'
     PaginatedConsentRequestList:
       type: object
       properties:
@@ -5361,66 +4817,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Payment'
-    PaginatedProgressList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Progress'
-    PaginatedQuestionList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Question'
-    PaginatedQuizList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Quiz'
     PaginatedSteamyEventList:
       type: object
       properties:
@@ -5663,20 +5059,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CategoryPreferenceRequest'
-    PatchedProgressRequest:
-      type: object
-      properties:
-        enrollment:
-          type: integer
-        mission:
-          type: integer
-        completed:
-          type: boolean
-        score:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-          nullable: true
     Payment:
       type: object
       properties:
@@ -5800,49 +5182,55 @@ components:
       - parent-about
       - parent-children
       type: string
-    Progress:
+    ProjectDetail:
       type: object
+      description: Projet (WJ01).
       properties:
         id:
           type: integer
-          readOnly: true
-        enrollment:
+        order:
           type: integer
-        mission:
+        title:
+          type: string
+        durationHours:
           type: integer
-        completed:
-          type: boolean
-        score:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-          nullable: true
-        updatedAt:
-          type: string
-          format: date-time
-          readOnly: true
+        objectives:
+          type: array
+          items:
+            type: string
+        prerequisites:
+          type: array
+          items:
+            type: string
+        materials:
+          type: array
+          items:
+            type: string
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        missionCount:
+          type: integer
+        missionsDone:
+          type: integer
+        course:
+          $ref: '#/components/schemas/CourseRef'
+        levels:
+          type: array
+          items:
+            $ref: '#/components/schemas/LevelItem'
       required:
-      - enrollment
+      - course
+      - durationHours
       - id
-      - mission
-      - updatedAt
-    ProgressRequest:
-      type: object
-      properties:
-        enrollment:
-          type: integer
-        mission:
-          type: integer
-        completed:
-          type: boolean
-        score:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-          nullable: true
-      required:
-      - enrollment
-      - mission
+      - levels
+      - materials
+      - missionCount
+      - missionsDone
+      - objectives
+      - order
+      - prerequisites
+      - state
+      - title
     ProjectSummary:
       type: object
       properties:
@@ -5882,57 +5270,6 @@ components:
       description: |-
         * `kkiapay` - Kkiapay
         * `fedapay` - FedaPay
-    Question:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        quiz:
-          type: integer
-        text:
-          type: string
-        kind:
-          $ref: '#/components/schemas/KindEnum'
-        weight:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-        choices:
-          type: array
-          items:
-            $ref: '#/components/schemas/Choice'
-          readOnly: true
-      required:
-      - choices
-      - id
-      - quiz
-      - text
-    Quiz:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        course:
-          type: integer
-        title:
-          type: string
-          maxLength: 255
-        passScore:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
-        questions:
-          type: array
-          items:
-            $ref: '#/components/schemas/Question'
-          readOnly: true
-      required:
-      - course
-      - id
-      - questions
-      - title
     QuoteRequestRequest:
       type: object
       properties:
@@ -5990,6 +5327,20 @@ components:
           type: boolean
       required:
       - ok
+    Ref:
+      type: object
+      description: Projet ou niveau cité (fil d'Ariane, position).
+      properties:
+        id:
+          type: integer
+        order:
+          type: integer
+        title:
+          type: string
+      required:
+      - id
+      - order
+      - title
     RefusalReason:
       type: object
       properties:
@@ -6104,6 +5455,28 @@ components:
       - code
       - id
       - label
+    SourceEnum:
+      enum:
+      - free
+      - order
+      - kit_code
+      - classroom
+      type: string
+      description: |-
+        * `free` - Gratuit
+        * `order` - Commande
+        * `kit_code` - Kit Code
+        * `classroom` - Classe
+    StateEnum:
+      enum:
+      - done
+      - available
+      - locked
+      type: string
+      description: |-
+        * `done` - Faite
+        * `available` - Disponible
+        * `locked` - Verrouillée
     SteamyEvent:
       type: object
       properties:
@@ -6417,6 +5790,130 @@ components:
           nullable: true
       required:
       - eventType
+    Tree:
+      type: object
+      description: 'Arbre du parcours (WC06a, WC06b, WJ09) : titres, durées et états,
+        sans contenu.'
+      properties:
+        id:
+          type: integer
+        course:
+          $ref: '#/components/schemas/CourseList'
+        source:
+          $ref: '#/components/schemas/SourceEnum'
+        status:
+          $ref: '#/components/schemas/EnrollmentStatusEnum'
+        progressPct:
+          type: integer
+        missionCount:
+          type: integer
+        missionsDone:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        lastActivityAt:
+          type: string
+          format: date-time
+          nullable: true
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        currentProject:
+          allOf:
+          - $ref: '#/components/schemas/Ref'
+          nullable: true
+          description: Projet de la prochaine étape
+        currentLevel:
+          allOf:
+          - $ref: '#/components/schemas/Ref'
+          nullable: true
+          description: Niveau de la prochaine étape
+        next:
+          $ref: '#/components/schemas/NextStep'
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/TreeProject'
+      required:
+      - completedAt
+      - course
+      - createdAt
+      - currentLevel
+      - currentProject
+      - id
+      - lastActivityAt
+      - missionCount
+      - missionsDone
+      - next
+      - progressPct
+      - projects
+      - source
+      - status
+    TreeLevel:
+      type: object
+      properties:
+        id:
+          type: integer
+        order:
+          type: integer
+        title:
+          type: string
+        durationMin:
+          type: integer
+        introSummary:
+          type: string
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        missionCount:
+          type: integer
+        missionsDone:
+          type: integer
+        missions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissionItem'
+      required:
+      - durationMin
+      - id
+      - introSummary
+      - missionCount
+      - missions
+      - missionsDone
+      - order
+      - state
+      - title
+    TreeProject:
+      type: object
+      properties:
+        id:
+          type: integer
+        order:
+          type: integer
+        title:
+          type: string
+        durationHours:
+          type: integer
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        missionCount:
+          type: integer
+        missionsDone:
+          type: integer
+        levels:
+          type: array
+          items:
+            $ref: '#/components/schemas/TreeLevel'
+      required:
+      - durationHours
+      - id
+      - levels
+      - missionCount
+      - missionsDone
+      - order
+      - state
+      - title
     UnreadCount:
       type: object
       properties:

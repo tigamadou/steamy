@@ -225,6 +225,11 @@ CATEGORIES = [
     ("energie", "Énergie", "#84CC16", "🔋"),  # sans parcours : état vide de WL06
 ]
 
+#: Parcours court du parcours Playwright P1 (lot 3) : Léa y est inscrite sans progression, remise à zéro à chaque seed.
+SHORT_COURSE = "premiers-pas-zeti"
+#: Vidéo Vimeo de démonstration (publique, ADR 0004 point V4 : jamais une vidéo de production).
+DEMO_VIMEO_ID = "76979871"
+
 #: Parcours : slug, titre, catégorie, difficulté, prix (0 = gratuit), emoji, mis en avant, statut, projets
 #: (titre, niveaux (titre, missions)).
 COURSES = [
@@ -332,6 +337,18 @@ COURSES = [
         ],
     ),
     (
+        SHORT_COURSE,
+        "Premiers pas avec Zeti",
+        "robotique",
+        catalog.Course.Difficulty.BEGINNER,
+        0,
+        "🔦",
+        False,
+        catalog.Course.Status.PUBLISHED,
+        # Parcours court du parcours Playwright P1 (LOT-3 §8.3) : 1 projet, 1 niveau, 2 missions
+        [("Allumer une LED", [("Le circuit", ["Les composants", "Brancher la LED"])])],
+    ),
+    (
         "ia-pour-les-curieux",
         "L'IA pour les curieux",
         "ia",
@@ -386,7 +403,12 @@ def seed_catalog() -> None:
                 level, _ = catalog.Level.objects.update_or_create(
                     project=project,
                     order=l_order,
-                    defaults={"title": level_title, "duration_min": 10 * len(missions)},
+                    defaults={
+                        "title": level_title,
+                        "duration_min": 10 * len(missions),
+                        "intro_vimeo_id": DEMO_VIMEO_ID,
+                        "intro_summary": f"{level_title} : ce que tu vas faire dans ce niveau.",
+                    },
                 )
                 for m_order, mission_title in enumerate(missions):
                     catalog.Mission.objects.update_or_create(
@@ -396,6 +418,7 @@ def seed_catalog() -> None:
                             "title": mission_title,
                             "duration_min": 10,
                             "icon": "🎯",
+                            "vimeo_id": DEMO_VIMEO_ID,
                             "blocks": [
                                 {
                                     "type": "text",
@@ -570,6 +593,41 @@ def seed_backoffice(accounts: dict[str, User]) -> None:
     )
 
 
+#: Inscriptions de Léa : parcours, nombre de missions faites (None : toutes). Le parcours court de P1 repart de
+#: zéro à chaque seed, pour rejouer le parcours Playwright.
+LEA_ENROLLMENTS = [
+    ("decouverte-robotique", 3),  # en cours : niveau 1.1 fait, niveau 1.2 commencé
+    ("initiation-scratch", None),  # terminé
+    (SHORT_COURSE, 0),
+]
+
+
+def seed_learning(accounts: dict[str, User]) -> None:
+    from apps.learning.models import Enrollment, MissionProgress
+    from apps.learning.progression import Progression
+
+    lea = accounts["lea"]
+    for slug, done in LEA_ENROLLMENTS:
+        course = catalog.Course.objects.get(slug=slug)
+        enrollment, _ = Enrollment.objects.update_or_create(
+            learner=lea, course=course, defaults={"source": Enrollment.Source.FREE}
+        )
+        missions = list(
+            catalog.Mission.objects.filter(level__project__course=course).order_by(
+                "level__project__order", "level__order", "order", "id"
+            )
+        )
+        done_missions = missions if done is None else missions[:done]
+        MissionProgress.objects.filter(enrollment=enrollment).exclude(
+            mission__in=done_missions
+        ).delete()
+        for mission in done_missions:
+            MissionProgress.objects.get_or_create(enrollment=enrollment, mission=mission)
+        enrollment.progress_pct = Progression(enrollment).progress_pct
+        enrollment.last_activity_at = timezone.now() if done_missions else None
+        enrollment.save()
+
+
 def seed_all() -> dict[str, User]:
     accounts = seed_accounts()
     seed_backoffice(accounts)
@@ -578,4 +636,5 @@ def seed_all() -> dict[str, User]:
     seed_catalog()
     seed_events()
     seed_kits()
+    seed_learning(accounts)
     return accounts
