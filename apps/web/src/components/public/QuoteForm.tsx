@@ -137,7 +137,8 @@ function QuoteFormRound({ countries, onAgain }: { countries: Schemas["Country"][
       <Field label="Personne à contacter" id={IDS.contactName} required error={state.fields?.contactName}>
         <Input name="contactName" autoComplete="name" placeholder="Nom et prénom" />
       </Field>
-      <div className="grid gap-3.5 sm:grid-cols-2">
+      {/* Email et téléphone empilés : la colonne du formulaire est trop étroite pour le sélecteur de pays */}
+      <div className="grid gap-3.5">
         <Field label="Email" id={IDS.email} required error={state.fields?.email}>
           <Input name="email" type="email" autoComplete="email" icon="mail" placeholder="ecole@exemple.bj" />
         </Field>
