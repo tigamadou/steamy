@@ -6,7 +6,7 @@ import { AppShellSkeleton } from "@/components/ds/AppShell";
 
 // Espace personnel : jamais indexé.
 export const metadata: Metadata = {
-  title: { template: "%s · Mon espace Steamy", default: "Mon espace Steamy" },
+  title: "Mon espace",
   robots: { index: false, follow: false },
 };
 

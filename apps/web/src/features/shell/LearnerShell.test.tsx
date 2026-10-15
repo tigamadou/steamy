@@ -46,6 +46,14 @@ describe("LearnerShell", () => {
   });
 });
 
+describe("LearnerShell sans session", () => {
+  it("ne rend rien : la garde de rôle redirige", async () => {
+    getCurrentUser.mockResolvedValue(null);
+    GET.mockResolvedValue({ data: { count: 0 } });
+    expect(await LearnerShell({ children: "page" })).toBeNull();
+  });
+});
+
 describe("shortName", () => {
   it("prénom et initiale du nom, ou le prénom seul", () => {
     expect(shortName("Léa", "Adjovi")).toBe("Léa A.");
