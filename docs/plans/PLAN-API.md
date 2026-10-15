@@ -430,7 +430,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 - [ ] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo`
   - [ ] `GET accounts/children/{id}/weekly-report/?week=AAAA-Www`
   - [ ] Tâche hebdomadaire `send_weekly_reports` (D55)
-- [x] **API-L4.5** Changement de téléphone · `feature/api-l4-5-changement-telephone`
+- [x] **API-L4.5** Changement de téléphone · `feature/api-l4-5-changement-telephone` · PR #78
   - [x] `POST accounts/me/phone-change/`, `…/verify/` (OTP sur le nouveau numéro)
   - [x] Préférences parent
   > Décisions : `phone-change/` `{ phone, password }` exige le mot de passe actuel (`INVALID_CREDENTIALS`) ;
