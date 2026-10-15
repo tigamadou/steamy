@@ -32,4 +32,5 @@ class UserChangeEmailTests(APITestCase):
             self.url, {"password": "incorrectPassword", "new_email": self.new_email}, format="json"
         )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data["password"][0], "Invalid password.")
+        self.assertEqual(response.data["code"], "VALIDATION_ERROR")
+        self.assertEqual(response.data["fields"]["password"][0], "Mot de passe incorrect.")

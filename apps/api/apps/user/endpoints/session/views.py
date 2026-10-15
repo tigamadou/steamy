@@ -43,6 +43,7 @@ class CsrfView(APIView):
 class SessionLoginView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
+    throttle_scope = "login"  # S9 : 5 essais par minute et par IP
 
     @extend_schema(
         request=CustomAuthTokenSerializer, responses=SessionLoginResponseSerializer, auth=[]

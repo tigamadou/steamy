@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: API - MyLearningPlatform
+  title: API Steamy
   version: 1.0.0
   description: API pour la plateforme de formation
 paths:
@@ -22,53 +22,12 @@ paths:
                 $ref: '#/components/schemas/DashboardSummary'
           description: ''
   /api/analytics/events/:
-    get:
-      operationId: analytics_events_list
-      description: |-
-        Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-        Clients (frontend/mobile/backend) envoient les events ici.
-      parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - analytics
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedEventList'
-          description: ''
     post:
       operationId: analytics_events_create
       description: |-
-        Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-        Clients (frontend/mobile/backend) envoient les events ici.
+        Ingestion des événements de télémétrie, en ÉCRITURE SEULE (S3) : personne ne lit, ne
+        modifie ni ne supprime les événements par l'API. L'utilisateur est celui de la session,
+        jamais une valeur fournie par le client. Plafonné par le throttling global (S9).
       tags:
       - analytics
       requestBody:
@@ -87,110 +46,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Event'
           description: ''
-  /api/analytics/events/{id}/:
-    get:
-      operationId: analytics_events_retrieve
-      description: |-
-        Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-        Clients (frontend/mobile/backend) envoient les events ici.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this event.
-        required: true
-      tags:
-      - analytics
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Event'
-          description: ''
-    put:
-      operationId: analytics_events_update
-      description: |-
-        Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-        Clients (frontend/mobile/backend) envoient les events ici.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this event.
-        required: true
-      tags:
-      - analytics
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EventRequest'
-        required: true
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Event'
-          description: ''
-    patch:
-      operationId: analytics_events_partial_update
-      description: |-
-        Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-        Clients (frontend/mobile/backend) envoient les events ici.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this event.
-        required: true
-      tags:
-      - analytics
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedEventRequest'
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Event'
-          description: ''
-    delete:
-      operationId: analytics_events_destroy
-      description: |-
-        Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-        Clients (frontend/mobile/backend) envoient les events ici.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this event.
-        required: true
-      tags:
-      - analytics
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
   /api/analytics/export/events.csv:
     get:
       operationId: analytics_export_events.csv_retrieve
@@ -1736,9 +1591,11 @@ components:
         email:
           type: string
           minLength: 1
+          title: Courriel
         password:
           type: string
           minLength: 1
+          title: Mot de passe
       required:
       - email
       - password
@@ -1812,6 +1669,7 @@ components:
           readOnly: true
         user:
           type: integer
+          readOnly: true
           nullable: true
         eventType:
           type: string
@@ -1839,12 +1697,10 @@ components:
       - createdAt
       - eventType
       - id
+      - user
     EventRequest:
       type: object
       properties:
-        user:
-          type: integer
-          nullable: true
         eventType:
           type: string
           minLength: 1
@@ -2193,26 +2049,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Enrollment'
-    PaginatedEventList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Event'
     PaginatedLessonList:
       type: object
       properties:
@@ -2393,31 +2229,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Resource'
-    PatchedEventRequest:
-      type: object
-      properties:
-        user:
-          type: integer
-          nullable: true
-        eventType:
-          type: string
-          minLength: 1
-          maxLength: 64
-        entityType:
-          type: string
-          nullable: true
-          maxLength: 64
-        entityId:
-          type: string
-          nullable: true
-          maxLength: 128
-        value:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        metadata:
-          nullable: true
     PatchedNotificationRequest:
       type: object
       properties:
@@ -2704,6 +2515,7 @@ components:
           type: string
           writeOnly: true
           minLength: 1
+          title: Mot de passe
           maxLength: 128
         newEmail:
           type: string
@@ -2719,6 +2531,7 @@ components:
           type: string
           writeOnly: true
           minLength: 1
+          title: Mot de passe
           maxLength: 128
         newPassword:
           type: string
@@ -2737,7 +2550,7 @@ components:
           type: string
           format: email
           readOnly: true
-          title: Email address
+          title: Adresse électronique
       required:
       - email
       - id

@@ -16,7 +16,7 @@ class UserChangeEmailSerializer(serializers.ModelSerializer):
     def validate_password(self, value):
         user = self.context["request"].user
         if not user.check_password(value):
-            raise ValidationError("Invalid password.")
+            raise ValidationError("Mot de passe incorrect.")
         return value
 
     def create(self, validated_data):

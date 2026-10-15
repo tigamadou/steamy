@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
-from rest_framework import permissions, serializers, status, viewsets
+from rest_framework import mixins, permissions, serializers, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
@@ -18,26 +18,20 @@ from .serializers import EventSerializer
 CACHE_TTL = 60  # seconds for simple endpoints (adjust)
 
 
-class EventViewSet(viewsets.ModelViewSet):
+class EventViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
-    Endpoint d'ingestion d'événements. Permission : authenticated or AllowAny depending required.
-    Clients (frontend/mobile/backend) envoient les events ici.
+    Ingestion des événements de télémétrie, en ÉCRITURE SEULE (S3) : personne ne lit, ne
+    modifie ni ne supprime les événements par l'API. L'utilisateur est celui de la session,
+    jamais une valeur fournie par le client. Plafonné par le throttling global (S9).
     """
 
-    queryset = Event.objects.all().order_by("-created_at")
+    queryset = Event.objects.all()
     serializer_class = EventSerializer
-    permission_classes = [permissions.AllowAny]  # souvent public, mais tu peux limiter
+    permission_classes = [permissions.AllowAny]
 
-    def create(self, request, *args, **kwargs):
-        # Option: enrichir metadata serveur-side (IP, UA parsing)
-        data = request.data.copy()
-        # inject user if authenticated
-        if request.user and request.user.is_authenticated:
-            data["user"] = request.user.id
-        ser = self.get_serializer(data=data)
-        ser.is_valid(raise_exception=True)
-        self.perform_create(ser)
-        return Response(ser.data, status=status.HTTP_201_CREATED)
+    def perform_create(self, serializer):
+        user = self.request.user if self.request.user.is_authenticated else None
+        serializer.save(user=user)
 
 
 class DashboardSummarySerializer(serializers.Serializer):
@@ -48,7 +42,7 @@ class DashboardSummarySerializer(serializers.Serializer):
 
 @extend_schema(responses=DashboardSummarySerializer)
 @api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.IsAdminUser])  # personnel uniquement (S3)
 def dashboard_summary(request):
     """
     Exemple d'endpoint "dashboard" qui combine plusieurs métriques.
@@ -97,12 +91,13 @@ def dashboard_summary(request):
     },
 )
 @api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.IsAdminUser])  # personnel uniquement (S3)
 def export_events_csv(request):
-    start = parse_date(request.GET.get("start")) or (
+    # parse_date(None) lève une TypeError : sans paramètre, on prend les 7 derniers jours.
+    start = parse_date(request.GET.get("start") or "") or (
         timezone.now().date() - timezone.timedelta(days=7)
     )
-    end = parse_date(request.GET.get("end")) or timezone.now().date()
+    end = parse_date(request.GET.get("end") or "") or timezone.now().date()
     qs = Event.objects.filter(created_at__date__gte=start, created_at__date__lte=end).order_by(
         "created_at"
     )
