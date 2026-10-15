@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-1.7
+Statut : 🟡 en cours · Prochaine tâche : API-L1.1
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -63,7 +63,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `AllowAny` limité à `csrf`, `session-login`, `health`, webhook et lectures de catalogue
   - [x] Aucune route d'écriture client sur contenu, quiz, commandes ou paiements
 
-### API-1 · Socle — 🟡 en cours
+### API-1 · Socle — ✅ terminé
 - [x] **ADR Identité et connexion** (avant API-1.1) · `docs/adr-identite-connexion` · [ADR 0001](../adr/0001-identite-et-connexion.md) · PR #12
   - [x] `User` multi-identifiants, `IdentifierBackend` (C7), statuts, session `cached_db`, personnel séparé
 - [x] **API-1.1** Remise à zéro + `accounts.User` · `feature/api-1-identite` · PR #15
@@ -143,16 +143,22 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > Décisions : plafonds OTP quotidiens par défaut 5 par numéro et 20 par IP (D24 ne fixe pas de valeur ; réglables
   > dans l'admin). `audit(action, actor, target, data, request)` dans `apps/core/audit.py` ; journal en lecture
   > seule dans l'admin. Groupes créés sans permission : elles arrivent avec chaque domaine.
-- [ ] **API-1.7** Données de démo (D2) · `feature/api-1-seed-demo`
-  - [ ] Commande `seed_demo` idempotente, refusée si `DJANGO_ENV=production`
-  - [ ] `make seed` : `loaddata fixtures/admin.json fixtures/mail.json` puis `seed_demo`
-  - [ ] Comptes : Léa Adjovi, son parent, un enseignant, un membre du personnel par groupe avec secret TOTP fixe de développement
-  - [ ] Mots de passe de démo documentés dans `fixtures/README`
-  - [ ] Tests : `seed_demo` deux fois de suite sans doublon
-- [ ] **Critères de fin d'API-1**
-  - [ ] `make clean && make up && make seed` fonctionne
-  - [ ] Front compilé contre le nouveau client
-  - [ ] Plus aucune route hors `/api/<domaine>/…/`
+- [x] **API-1.7** Données de démo (D2) · `feature/api-1-seed-demo` · PR #25
+  - [x] Commande `seed_demo` idempotente, refusée si `DJANGO_ENV=production`
+  - [x] `make seed` : `loaddata fixtures/admin.json fixtures/mail.json` puis `seed_demo`
+  - [x] Comptes : Léa Adjovi, son parent, un enseignant, un membre du personnel par groupe avec secret TOTP fixe de développement
+  - [x] Mots de passe de démo documentés dans `fixtures/README.md`
+  - [x] Tests : `seed_demo` deux fois de suite sans doublon
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : jeu dans `apps/core/demo.py` (une fonction `seed_<domaine>` par étape, appelée par `seed_all`) ;
+  > comptes Léa Adjovi (`lea.adjovi`), Marie Adjovi (parent, `+229 01 90 00 00 01`), M. Koffi Adékambi (enseignant,
+  > d'après les maquettes) et un membre du personnel par groupe (Super-admin superutilisateur) ; mot de passe unique
+  > `Steamy2026` ; secret TOTP RFC 6238 de test ; `django-otp` déjà installé en API-1.2. Le lien Marie ↔ Léa arrive
+  > avec le consentement (API-L2).
+- [x] **Critères de fin d'API-1**
+  - [x] `make clean && make up && make seed` fonctionne (vérifié sur une pile vierge : migrations, fixtures, `seed_demo` deux fois, connexion de Léa)
+  - [x] Front compilé contre le nouveau client
+  - [x] Plus aucune route hors `/api/<domaine>/…/` (routeurs DRF passés en `SimpleRouter` : ni vue racine ni suffixe `.format`)
 
 ### API-L1 · Catalogue public, événements, formulaires, kits — ⬜ à faire
 - [ ] **API-L1.1** App `catalog` · `feature/api-l1-1-catalog`
