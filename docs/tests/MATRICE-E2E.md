@@ -34,8 +34,8 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `W04` | Identité & identifiant | 2 | Identité, CGU non cochée, identifiant | `apps/web/e2e/inscription-apprenant.spec.ts` |
 | `W05` | Âge | 2 | Âge borné 10-17, création de l'inscription | `apps/web/e2e/inscription-apprenant.spec.ts` |
 | `W06` | Numéro du parent | 2 | Numéro du parent, SMS de consentement | `apps/web/e2e/inscription-apprenant.spec.ts` |
-| `W07` | Attente consentement | 2 |  |  |
-| `W08` | Accord reçu | 2 |  |  |
+| `W07` | Attente consentement | 2 | Attente du consentement : polling, code de reprise, reprise dans un autre navigateur | `apps/web/e2e/consentement-apprenant.spec.ts` |
+| `W08` | Accord reçu | 2 | Accord du parent détecté par polling | `apps/web/e2e/consentement-apprenant.spec.ts` |
 | `W10` | Mot de passe | 2 |  |  |
 | `W11` | Profil 1 · infos | 2 |  |  |
 | `W12` | Profil 2 · école | 2 |  |  |
@@ -43,7 +43,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `W14` | Avatar | 2 |  |  |
 | `W15` | Bienvenue | 2 |  |  |
 | `W16` | Connexion existant | 2 | Connexion des trois rôles, `next` sûr, personnel refusé, déconnexion | `apps/web/e2e/connexion.spec.ts` |
-| `W18` | Consentement refusé (terminal) | 2 |  |  |
+| `W18` | Consentement refusé (terminal) | 2 | Refus avec motif, identifiant libéré, délai de 30 jours | `apps/web/e2e/consentement-apprenant.spec.ts` |
 | `W19` | Identifiant déjà utilisé | 2 | Identifiant déjà pris au blur | `apps/web/e2e/inscription-apprenant.spec.ts` |
 | `WP01` | Créer un compte | 2 |  |  |
 | `WP02` | OTP | 2 |  |  |

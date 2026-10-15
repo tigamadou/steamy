@@ -23,7 +23,7 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 2.4 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
+Statut : 🟡 en cours · Prochaine tâche : 2.5 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
 ### Socle — ✅ terminé
 - [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
@@ -76,17 +76,17 @@ Statut : 🟡 en cours · Prochaine tâche : 2.4 · Prérequis : API-1 (2.0 et 2
   - [x] Tests Vitest : W04 (C7, CGU obligatoire, `USERNAME_TAKEN` → W19), W05 (bornes), W06 (`CONSENT_COOLDOWN`)
   - [x] Parcours Playwright : W02 → W06 jusqu'au SMS de consentement lu dans le faux fournisseur
   - [x] Recette : kickers et barres conformes à SPEC-ECRANS §2.4 ; aucune mention « moins de 16 ans » ; aucun élément « Ne pas porter » de §2.5
-- [ ] **2.4** Attente, reprise et issue W07, W08, W18 (requiert API-L2) · `feature/lot2-consentement-apprenant`
-  - [ ] Composants `ResumeCodeCard` et `PendingPill`
-  - [ ] W07 `/inscription/apprenant/attente` (`FullScreenStage`, `Mascot sleep`, renvoi de la demande)
-  - [ ] Reprise `/inscription/reprendre` (C5)
-  - [ ] W08 `/inscription/apprenant/accord`
-  - [ ] W18 `/inscription/apprenant/refus`
-  - [ ] Polling `GET auth/learner-signup/` (15 s, suspendu onglet caché, arrêt sur état terminal, recul réseau)
-  - [ ] Code de reprise : affichage unique, « J'ai noté mon code », copie `sessionStorage` effacée à W08 ou W18
-  - [ ] Tests Vitest : transitions de W07, throttling du renvoi
-  - [ ] Parcours Playwright : reprise dans un nouveau contexte, `RESUME_CODE_INVALID`, connexion W16 d'un compte en attente → reprise préremplie
-  - [ ] Recette : W18 sans « Changer de parent » ni « Réessayer plus tard » ; identifiant de nouveau disponible après W18 (D22)
+- [x] **2.4** Attente, reprise et issue W07, W08, W18 (requiert API-L2) · `feature/lot2-consentement-apprenant`
+  - [x] Composants `ResumeCodeCard` et `PendingPill`
+  - [x] W07 `/inscription/apprenant/attente` (`FullScreenStage`, `Mascot sleep`, renvoi de la demande)
+  - [x] Reprise `/inscription/reprendre` (C5)
+  - [x] W08 `/inscription/apprenant/accord`
+  - [x] W18 `/inscription/apprenant/refus`
+  - [x] Polling `GET auth/learner-signup/` (15 s, suspendu onglet caché, arrêt sur état terminal, recul réseau)
+  - [x] Code de reprise : affichage unique, « J'ai noté mon code », copie `sessionStorage` effacée à W08 ou W18
+  - [x] Tests Vitest : transitions de W07, throttling du renvoi
+  - [x] Parcours Playwright : reprise dans un nouveau contexte, `RESUME_CODE_INVALID`, connexion W16 d'un compte en attente → reprise préremplie
+  - [x] Recette : W18 sans « Changer de parent » ni « Réessayer plus tard » ; identifiant de nouveau disponible après W18 (D22)
 - [ ] **2.5** Mot de passe et profil apprenant W10-W15 (requiert API-L2) · `feature/lot2-profil-apprenant`
   - [ ] W10 `/inscription/apprenant/mot-de-passe` (`NewPasswordFields`)
   - [ ] W11 `/inscription/apprenant/profil/infos`
