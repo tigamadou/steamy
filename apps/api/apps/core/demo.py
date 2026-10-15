@@ -215,13 +215,13 @@ def seed_classrooms(accounts: dict[str, User]) -> None:
 
 
 CATEGORIES = [
-    # slug, libellé, couleur (tokens --cat-* du design system), icône
-    ("robotique", "Robotique", "#5B3FE0", "🤖"),
-    ("electronique", "Électronique", "#0EA5E9", "⚡"),
-    ("code", "Code", "#EC4899", "💻"),
-    ("ia", "IA", "#14B8A6", "🧠"),
-    ("mecanique", "Mécanique", "#F59E0B", "⚙️"),
-    ("energie", "Énergie", "#84CC16", "🔋"),  # sans parcours : état vide de WL06
+    # slug, libellé, couleur (tokens --cat-* du design system), icône, objectifs liés (recommandations, API-L3a.5)
+    ("robotique", "Robotique", "#5B3FE0", "🤖", ["robots", "challenges", "bricoler"]),
+    ("electronique", "Électronique", "#0EA5E9", "⚡", ["electronique", "domotique"]),
+    ("code", "Code", "#EC4899", "💻", ["coder", "jeu", "creativite"]),
+    ("ia", "IA", "#14B8A6", "🧠", ["ia"]),
+    ("mecanique", "Mécanique", "#F59E0B", "⚙️", ["bricoler", "robots"]),
+    ("energie", "Énergie", "#84CC16", "🔋", ["domotique"]),  # sans parcours : état vide de WL06
 ]
 
 #: Parcours court du parcours Playwright P1 (lot 3) : Léa y est inscrite sans progression, remise à zéro à chaque seed.
@@ -365,10 +365,11 @@ COURSES = [
 
 def seed_catalog() -> None:
     categories = {}
-    for order, (slug, label, color, icon) in enumerate(CATEGORIES):
+    for order, (slug, label, color, icon, goals) in enumerate(CATEGORIES):
         categories[slug], _ = catalog.Category.objects.update_or_create(
             slug=slug, defaults={"label": label, "color": color, "icon": icon, "order": order}
         )
+        categories[slug].goals.set(Goal.objects.filter(code__in=goals))
     for slug, title, category, difficulty, price, emoji, featured, status, projects in COURSES:
         course, _ = catalog.Course.objects.update_or_create(
             slug=slug,

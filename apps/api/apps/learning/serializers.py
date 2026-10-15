@@ -8,8 +8,9 @@ schéma OpenAPI).
 
 from rest_framework import serializers
 
+from apps.accounts.views.me import LearnerCountersSerializer
 from apps.catalog.models import Badge, Quiz
-from apps.catalog.serializers import CourseListSerializer
+from apps.catalog.serializers import CategorySummarySerializer, CourseListSerializer
 
 from .models import Certificate, Enrollment, QuizAttempt
 
@@ -399,3 +400,71 @@ class LearnerBadgeSerializer(BadgeSerializer):
     course = CourseRefSerializer()
     project_id = serializers.IntegerField(allow_null=True)
     level_id = serializers.IntegerField(allow_null=True)
+
+
+# --- Tableau de bord, progression, recommandations (WD01, WD02, WD21) -----------------------------
+
+
+class RankSerializer(serializers.Serializer):
+    label = serializers.CharField()
+    min_points = serializers.IntegerField()
+    next_label = serializers.CharField(allow_null=True)
+    next_at = serializers.IntegerField(allow_null=True, help_text="Points du palier suivant")
+
+
+class RecommendationSerializer(CourseListSerializer):
+    matches_goals = serializers.SerializerMethodField(
+        help_text="Catégorie liée aux objectifs de l'apprenant"
+    )
+
+    class Meta(CourseListSerializer.Meta):
+        fields = (*CourseListSerializer.Meta.fields, "matches_goals")
+
+    def get_matches_goals(self, course) -> bool:
+        return bool(course.matches_goals)
+
+
+class RecommendationQuerySerializer(serializers.Serializer):
+    limit = serializers.IntegerField(min_value=1, max_value=12, default=6)
+
+
+CountersSerializer = LearnerCountersSerializer
+
+
+class DashboardSerializer(serializers.Serializer):
+    """Accueil (WD01) ; `resume` absent → WD02. `points` et `rank` à null tant que le barème n'est pas fixé (C8)."""
+
+    first_name = serializers.CharField()
+    points = serializers.IntegerField(allow_null=True)
+    rank = RankSerializer(allow_null=True)
+    streak_days = serializers.IntegerField()
+    seconds_today = serializers.IntegerField()
+    resume = EnrollmentSerializer(allow_null=True, help_text="Parcours à reprendre")
+    counters = CountersSerializer()
+    recommendations = RecommendationSerializer(many=True, help_text="3 parcours recommandés")
+
+
+class DaySecondsSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    seconds = serializers.IntegerField()
+
+
+class MasterySerializer(serializers.Serializer):
+    category = CategorySummarySerializer()
+    missions_done = serializers.IntegerField()
+    mission_count = serializers.IntegerField()
+    pct = serializers.IntegerField()
+
+
+class ProgressSerializer(serializers.Serializer):
+    """Ma progression (WD21)."""
+
+    week_seconds = serializers.IntegerField(help_text="Du lundi à aujourd'hui")
+    last_days = DaySecondsSerializer(
+        many=True, help_text="7 derniers jours, du plus ancien à aujourd'hui"
+    )
+    points = serializers.IntegerField(allow_null=True)
+    rank = RankSerializer(allow_null=True)
+    streak_days = serializers.IntegerField()
+    counters = CountersSerializer()
+    mastery = MasterySerializer(many=True, help_text="Par catégorie des parcours suivis")

@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L3a.5
+Statut : 🟡 en cours · Prochaine tâche : API-L3a.6
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -381,9 +381,20 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > infra). Polices : DejaVu de l'image en attendant Nunito (ADR 0005, « Suites »). Reportés : lecture du
   > certificat par le parent lié (endpoints parent, API-L4) ; droits du Support sur `learning.certificate` dans la
   > matrice des groupes (lot 6).
-- [ ] **API-L3a.5** Tableau de bord · `feature/api-l3a-5-dashboard`
-  - [ ] `GET learning/dashboard/`, `learning/progress/`, `learning/recommendations/`
-  - [ ] Compteurs du shell dans `accounts/me/`
+- [x] **API-L3a.5** Tableau de bord · `feature/api-l3a-5-dashboard`
+  - [x] `GET learning/dashboard/`, `learning/progress/`, `learning/recommendations/`
+  - [x] Compteurs du shell dans `accounts/me/`
+  - [x] `Category.goals` (objectifs liés, saisis dans l'admin) pour la règle de recommandation ; seed des liens
+  > Décisions : `dashboard` = `{firstName, points, rank, streakDays, secondsToday, resume, counters,
+  > recommendations (3)}` ; `resume` = inscription en cours la plus récemment active (même forme que
+  > `GET learning/enrollments/`), `null` → WD02 ; `points` / `rank` à `null` tant que barème / paliers sont vides
+  > (C8, D34). `progress` (WD21) = `{weekSeconds (lundi → aujourd'hui), lastDays (7 jours), points, rank,
+  > streakDays, counters, mastery [{category, missionsDone, missionCount, pct}]}`. Recommandations : publiées, non
+  > suivies, catégories liées aux objectifs de l'apprenant d'abord (`matchesGoals`), puis mis en avant, plus
+  > suivies, plus récentes ; `?limit=` 1 à 12 (6 par défaut), non paginé. Le lien objectif → catégorie est un
+  > ajout au modèle (`Category.goals`, M2M vers `referentials.Goal`), faute de règle dans la spec.
+  > `accounts/me/` gagne `counters {activeEnrollments, completedEnrollments, certificates, badges}` (apprenant ;
+  > `null` sinon) ; `wishlist` s'y ajoute en L3a.6.
 - [ ] **API-L3a.6** Souhaits et préférences · `feature/api-l3a-6-wishlist`
   - [ ] App `wishlist` : `GET wishlist/`, `PUT/DELETE wishlist/{courseSlug}/` idempotents
   - [ ] Préférences de notification apprenant (pas de SMS ni marketing pour un mineur, D6, D30)

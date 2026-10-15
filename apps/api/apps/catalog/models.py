@@ -30,6 +30,13 @@ class Category(models.Model):
     color = models.CharField(_("couleur"), max_length=7, validators=[validate_color])
     icon = models.CharField(_("icône"), max_length=16, help_text="Emoji affiché sur les cartes")
     order = models.PositiveSmallIntegerField(_("ordre"), default=0, db_index=True)
+    goals = models.ManyToManyField(
+        "referentials.Goal",
+        blank=True,
+        related_name="categories",
+        verbose_name=_("objectifs liés"),
+        help_text="Objectifs d'apprenant (W13) qui font recommander les parcours de cette catégorie",
+    )
 
     class Meta:
         ordering = ["order"]
