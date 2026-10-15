@@ -3,7 +3,7 @@
 import pytest
 from django.urls import reverse
 
-from apps.accounts.tests.factories import StaffFactory
+from apps.core.tests.staff import verified_client
 
 from .factories import MissionFactory
 
@@ -12,9 +12,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def admin_client(client):
-    client.force_login(
-        StaffFactory(is_superuser=True), backend="apps.accounts.backends.StaffBackend"
-    )
+    verified_client(client, is_superuser=True)  # session vérifiée par TOTP (WAD15)
     return client
 
 

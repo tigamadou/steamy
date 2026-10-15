@@ -9,7 +9,7 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 1.1 (après API-L1), puis l'encart newsletter de 1.5 (après API-L1.4) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : ✅ terminé · Prochaine tâche : — (pastilles de thème de la FAQ de WL24, PR #60) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
 ### Étape 1.0 · Socle front — ✅ terminé
 - [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
@@ -26,7 +26,7 @@ Statut : 🟡 en cours · Prochaine tâche : 1.1 (après API-L1), puis l'encart 
   - [x] Couverture unitaire 100 % du code ajouté ou modifié : `@vitest/coverage-v8` (rapport `apps/web/coverage/cobertura-coverage.xml`), `diff-cover --fail-under=100` dans le job `web` (`fetch-depth: 0`, même base de comparaison que le job `api`), cible `make coverage-web`
   - [x] E2E 100 % des écrans : l'outillage Playwright permet d'écrire le test de chaque écran cité dans la matrice écran → test (job `e2e-matrice`) ; 1.0a et 1.0b ne livrent aucun écran
   - [x] Recette : `make test-web` et `make e2e` passent en local ; aucune occurrence de `91, 63, 224` ni de `jetbrains` dans `apps/web/src`
-  - [ ] Recette après fusion : `e2e` exécuté en CI sur une PR qui ne touche que `apps/api/`
+  - [x] Recette après fusion : `e2e` exécuté en CI sur les PR d'API (#32 à #46 : `apps/api/`, client généré et plan seulement ; aucune PR strictement limitée à `apps/api/` depuis)
 - [x] **1.0b** Design system de base · `feature/lot1-design-system` · PR #19
   - [x] `Icon`
   - [x] `Logo`, `Mascot` (6 poses, décoratif) ; `Logo` sur les PNG officiels (le tagline du SVG dépend d'une police non embarquée)
@@ -61,61 +61,63 @@ Statut : 🟡 en cours · Prochaine tâche : 1.1 (après API-L1), puis l'encart 
   - [x] Tests Vitest : `WXState` par registre, `OfflineGate`, mega-menu au clavier
   - [x] Parcours Playwright : navigation clavier nav et mega-menu, hors ligne (WX01), URL inconnue → 404, footer sans lien mort (liste blanche `/connexion`, `/inscription`, `/inscription/parent`, plus les pages du lot 1 à venir, retirées étape par étape)
   - [x] Recette : `next build` prérend toutes les routes publiques, aucune en dynamique pur ; entrées reportées absentes
-  - [ ] Parcours e2e de WX02 et WX03 : à écrire avec la grille de WL06 (1.1), seule section dont l'API peut échouer ou tarder
+  - ~~Parcours e2e de WX02 et WX03~~ : la pile e2e ne sait pas faire échouer ni ralentir l'API à la demande (appels partis du serveur Next, hors de portée de `page.route`). **Décision (2026-10-15)** : couverture Vitest seule (`WXState`, presets, `AppStateBoundary`, fichiers `error`/`loading`) ; pas de scénario « API arrêtée », coûteux et fragile pour des enveloppes génériques. WX01 garde son parcours e2e
 
-### Étape 1.2 · Conception des maquettes — ⬜ à faire
-- [ ] **1.2** Conception de WL22, WL23, WL24 · `feature/lot1-conception-wl22-24`
+### Étape 1.2 · Conception des maquettes — ✅ terminé
+- [x] **1.2** Conception de WL22, WL23, WL24 · `feature/lot1-conception-wl22-24` · PR #16
   - [x] Maquette WL22 fiche parcours (d'après WC04 dans `PublicShell`, états chargement et 404)
   - [x] Maquette WL23 fiche événement (CTA selon visiteur / apprenant / parent / complet / passé)
   - [x] Maquette WL24 aide & contact (FAQ par thème, formulaire au vouvoiement, confirmation, erreur)
   - [x] Fichier `design/screens-public-a-concevoir-web.jsx` ajouté à `App.html` (vue « Public »)
-  - [ ] Recette : validation par le porteur produit (C18) ; aucune donnée de mineur (D15)
+  - [x] Recette : validation par le porteur produit (C18) ; aucune donnée de mineur (D15). Validées le 2026-10-15 sur les pages développées, le porteur ayant délégué l'arbitrage des écarts :
+    - WL22 : pas de bouton bande-annonce ni de lien « Voir le kit » avant le lot 3 ; « Créer mon compte » comme CTA principal d'un parcours à kit ; voile sombre sur la couleur de catégorie (AA)
+    - WL23 : état « Candidatures closes » ajouté (date limite passée, places restantes) ; « Steamy Event » à la place d'une catégorie, absente de l'API ; variantes apprenant et parent aux lots 3 et 4
+    - WL24 : une pastille par thème de FAQ dans l'en-tête, comme la maquette (PR #60) ; textes de la FAQ conservés comme contenu de départ
 
-### Écrans — 🟡 en cours
-- [ ] **1.1** Accueil, catalogue, catégories (requiert API-L1) · `feature/lot1-accueil-catalogue`
-  - [ ] WL01 `/` (sections, ancre `#comment-ca-marche`, 3 `CourseCard` mis en avant, CTA, chiffres depuis `content/site.ts`)
-  - [ ] WL06 `/parcours` (filtres `Tag`, état dans l'URL, pagination, états skeleton, vide, erreur)
-  - [ ] WL16 `/categories` (`CategoryCard`)
-  - [ ] Appels `catalog/categories/` et `catalog/courses/?category=&page=` via `'use cache'`
-  - [ ] Tests Vitest : `CategoryCard`, sérialisation filtre ↔ URL
-  - [ ] Parcours Playwright « découverte » (accueil → ancre → catalogue → filtre → catégories → catalogue filtré)
-  - [ ] Recette : aucun chiffre ni catégorie en dur ; les 6 catégories du jeu D2 apparaissent
-- [ ] **1.3** Fiche parcours publique WL22 (requiert API-L1 et 1.2) · `feature/lot1-fiche-parcours`
-  - [ ] Route `/parcours/[slug]` (`'use cache'` + `cacheTag('catalog')`, `notFound()` si non publié)
-  - [ ] `generateMetadata`, JSON-LD `Course`, slug ajouté au sitemap
-  - [ ] CTA visiteur (`/inscription?next=…`, `/connexion?next=…`) et mention du kit
-  - [ ] Appel `catalog/courses/{slug}/` sans contenu de mission
-  - [ ] Test API et test Playwright : absence de `vimeoId` / corps de mission dans le HTML
-  - [ ] Test Vitest : plan en accordéon au clavier
-  - [ ] Parcours Playwright : WL06 → WL22 → CTA → URL d'inscription avec retour
-- [ ] **1.4** Événements et boutique (requiert API-L1 et 1.2) · `feature/lot1-evenements-boutique`
-  - [ ] WL21 `/evenements` (`EventRow`, prix, état vide)
-  - [ ] WL23 `/evenements/[slug]` (`EventDetail` réutilisable, CTA selon l'état, JSON-LD `Event`, slug au sitemap)
-  - [ ] WL07 `/boutique` (grille `WKKitCard` en mode vitrine, filtres)
-  - [ ] Appels `events/`, `events/{slug}/`, `shop/kits/`
-  - [ ] Parcours Playwright « événements » (WL21 → WL23 → CTA visiteur ; événement complet → CTA désactivé)
-- [ ] **1.5** Pages éditoriales (WL20 requiert API-L1 pour `public/leads/`, le reste sans API) · `feature/lot1-editorial` · PR #36
+### Écrans — ✅ terminé
+- [x] **1.1** Accueil, catalogue, catégories (requiert API-L1) · `feature/lot1-accueil-catalogue` · PR #47
+  - [x] `WL01` `/` (sections, ancre `#comment-ca-marche`, 3 `CourseCard` mis en avant, complétés par les plus populaires si moins de 3 sont mis en avant, CTA, chiffres depuis `content/site.ts`)
+  - [x] `WL06` `/parcours` (filtres `Tag`, état dans l'URL, pagination, états skeleton, vide, erreur)
+  - [x] `WL16` `/categories` (`CategoryCard`)
+  - [x] Appels `catalog/categories/` et `catalog/courses/?category=&page=` via `'use cache'` (`lib/catalog.ts`, `cacheLife("minutes")`, `cacheTag("catalog")`), sous `<Suspense>` + `connection()` + `AppStateBoundary`
+  - [x] Tests Vitest : `CategoryCard`, sérialisation filtre ↔ URL
+  - [x] Parcours Playwright « découverte » (accueil → ancre → catalogue → filtre → catégories → catalogue filtré) (`e2e/decouverte.spec.ts`)
+  - [x] Recette : aucun chiffre ni catégorie en dur ; les 6 catégories du jeu D2 apparaissent
+
+- [x] **1.3** Fiche parcours publique `WL22` (requiert API-L1 et 1.2) · `feature/lot1-fiche-parcours` · PR #48
+  - [x] Route `/parcours/[slug]` (`'use cache'` + `cacheTag('catalog')`, `notFound()` si non publié, 404 propre au parcours) ; rendue sous `<Suspense>` à la requête, le slug n'étant pas connu au build
+  - [x] `generateMetadata`, JSON-LD `Course`, slugs ajoutés au sitemap (`sitemap.xml` servi à la requête, pages fixes gardées si l'API ne répond pas)
+  - [x] CTA visiteur (`/inscription?next=…`, `/connexion?next=…`) et mention du kit (« Voir le kit » au lot 3)
+  - [x] Appel `catalog/courses/{slug}/` sans contenu de mission
+  - [x] Test API (API-L1.2, `catalog/tests/test_api.py`) et test Playwright : absence de `vimeoId` / corps de mission dans le HTML
+  - [x] Test Vitest : plan en accordéon (`details`/`summary` focusables) ; Entrée et Espace vérifiés par Playwright
+  - [x] Parcours Playwright : WL06 → WL22 → CTA → URL d'inscription avec retour (`e2e/fiche-parcours.spec.ts`)
+- [x] **1.4** Événements et boutique (requiert API-L1 et 1.2) · `feature/lot1-evenements-boutique` · PR #49
+  - [x] `WL21` `/evenements` (`EventRow`, prix, complet, état vide « Aucun événement à venir »)
+  - [x] `WL23` `/evenements/[slug]` (`EventDetail` réutilisable avec un encart d'action fourni par l'appelant, CTA visiteur ou motif : complet, candidatures closes, passé ; JSON-LD `Event`, slugs au sitemap, 404 propre)
+  - [x] `WL07` `/boutique` (grille `WKKitCard` en mode vitrine, filtres par catégorie dans l'URL, pagination, état vide)
+  - [x] Appels `events/`, `events/{slug}/`, `shop/kits/` (`lib/events.ts`, `lib/shop.ts`, `'use cache'`, tags `events` et `shop`)
+  - [x] Parcours Playwright « événements » (WL21 → WL23 → CTA visiteur ; événement complet → CTA désactivé ; passé) et boutique (`e2e/evenements-boutique.spec.ts`)
+- [x] **1.5** Pages éditoriales (WL20 requiert API-L1 pour `public/leads/`, le reste sans API) · `feature/lot1-editorial` · PR #36 ; newsletter `feature/lot1-newsletter` · PR #58
   - [x] `WL09` `/legal/[doc]` (`Tabs`, `#consentement-parental`, corrections S3, D6, D15, D23, D40)
   - [x] `WL10` `/a-propos`
   - [x] `WL17` `/blog` et `WL18` `/blog/[slug]` (MDX, fil d'Ariane, partage, JSON-LD `Article`, slugs au sitemap)
   - [x] Pagination statique du blog : `BLOG_PAGE_SIZE` (9) ; les pages `/blog/page/<n>` s'ajoutent quand le blog dépasse une page (Cache Components refuse un `generateStaticParams` vide)
   - [x] `WL20` `/guides` (PDF dans `public/guides/`, `GuideCard`, téléchargement libre D14), sans l'encart newsletter
-  - [ ] Encart newsletter de WL20 (`POST public/leads/`, consentement non coché) : **attend API-L1.4**
+  - [x] Encart newsletter de WL20 (`POST public/leads/`, cases « 18 ans ou plus » et consentement non cochées, vouvoiement, origine `guides`)
   - [x] Contenus `src/content/{legal,blog,guides,faq}` et `site.ts` (`@next/mdx`, `mdx-components.tsx`)
-  - [ ] Tests Vitest : formulaire newsletter (consentement obligatoire, `VALIDATION_ERROR`) : **attend API-L1.4**
+  - [x] Tests Vitest : formulaire newsletter (consentement obligatoire, `VALIDATION_ERROR`, `THROTTLED`)
   - [x] Parcours Playwright : footer → CGU#consentement-parental, onglets légaux par URL, blog → article, téléchargement d'un guide (`e2e/editorial.spec.ts`)
-  - [ ] Parcours Playwright : newsletter acceptée : **attend API-L1.4**
+  - [x] Parcours Playwright : newsletter acceptée (`e2e/editorial.spec.ts`)
   - [x] Recette : aucune mention « moins de 16 ans » ni « numéro » de l'apprenant (test Vitest `src/content/content.test.ts`, exécuté en CI)
-  > Reprise : pages éditoriales livrées. Reste l'encart newsletter de WL20 (composant client `getBrowserApi()`,
-  > `POST public/leads/`, erreurs `fields` mappées, consentement non coché, vouvoiement) dès qu'API-L1.4 est fusionnée,
-  > son test Vitest et son parcours Playwright.
-- [ ] **1.6** Formulaires B2B et aide (requiert API-1, API-L1 et 1.2) · `feature/lot1-formulaires`
-  - [ ] WL11 `/ecoles` (3 `OfferCard`, CTA vers `#devis?offre=`, formulaire au vouvoiement, confirmation en place)
-  - [ ] WL24 `/aide` (FAQ `content/faq/`, formulaire de contact, `?sujet=`, ancres `#faq` et `#contact`)
-  - [ ] Appels `public/quote-requests/`, `public/contact-messages/`, `referentials/countries/` (passé à `PhoneInput`)
-  - [ ] Tests Vitest : validation, mapping des `fields`, `THROTTLED`
-  - [ ] Parcours Playwright « devis » (offre présélectionnée → envoi → confirmation ; email dans Mailpit)
-  - [ ] Parcours Playwright « contact » (`/aide?sujet=candidature`)
+- [x] **1.6** Formulaires B2B et aide (requiert API-1, API-L1 et 1.2) · `feature/lot1-formulaires` · PR #50
+  - [x] `WL11` `/ecoles` (3 offres de `content/site.ts`, CTA « Choisir » vers `/ecoles?offre=<offre>#devis`, formulaire au vouvoiement, confirmation en place)
+  - [x] `WL24` `/aide` (FAQ `content/faq/` avec recherche, formulaire de contact, `?sujet=`, ancres `#faq` et `#contact`, message conservé en cas de coupure)
+  - [x] Appels `public/quote-requests/`, `public/contact-messages/` (`lib/public-forms.ts`, champ piège), `referentials/countries/` (lu côté serveur en cache, passé à `PhoneInput`)
+  - [x] Tests Vitest : validation, mapping des `fields` (`lib/api-errors.ts`), `THROTTLED` avec le délai `Retry-After`
+  - [x] Parcours Playwright « devis » (offre présélectionnée → envoi → confirmation ; email dans Mailpit, `worker` ajouté à `make e2e`) (`e2e/formulaires.spec.ts`)
+  - [x] Parcours Playwright « contact » (`/aide?sujet=candidature`)
+  - [x] Liste blanche du test de liens réduite aux routes du lot 2
 
 ### Neutralisation des écrans reportés — ✅ terminé
 - [x] **Neutralisation** des écrans reportés et fusionnés (WL08, WL12-WL15, WL19) · à livrer avec 1.0c et 1.5
@@ -123,13 +125,13 @@ Statut : 🟡 en cours · Prochaine tâche : 1.1 (après API-L1), puis l'encart 
   - [x] Aucun lien vers WL12 ni WL14 (shell en 1.0c, articles et pages éditoriales en 1.5)
   - [x] Test Playwright : aucun `href` vers `/defis`, `/communaute`, `/tutoriels`, `/classements`, `/ateliers` (`e2e/socle-public.spec.ts`)
 
-- [ ] **Critères de fin du lot 1**
-  - [ ] Étapes 1.0a-1.6 fusionnées dans `development`, CI verte (`ci-ok` incluant `e2e`)
-  - [ ] Chaque écran v1 et à concevoir respecte la définition de « terminé » du README (360 px → bureau, registres, AA, états, aucune donnée en dur, tests)
-  - [ ] Parcours Playwright verts : découverte, événements, devis, contact, newsletter, navigation clavier, hors ligne ; axe sans violation sérieuse sur toutes les routes publiques
-  - [ ] `next build` : toutes les routes de `(public)` prérendues ; `getServerApi` absent de `(public)`
-  - [ ] Aucun lien vers WL08, WL12-WL15, WL19 ; aucun violet `rgba(91,63,224)` ni JetBrains Mono
-  - [ ] WX01-WX03 et `getPublicApi` documentés dans `apps/web/README.md`
+- [x] **Critères de fin du lot 1**
+  - [x] Étapes 1.0a-1.6 fusionnées dans `development`, CI verte (`ci-ok` incluant `e2e`, exécution du push de #58, `7e1ddda`)
+  - [x] Chaque écran v1 et à concevoir respecte la définition de « terminé » du README (360 px → bureau, registres, AA, états, aucune donnée en dur, tests) : contrôle visuel à 1280 et 360 px, Vitest et Playwright par écran
+  - [x] Parcours Playwright verts : découverte, événements, devis, contact, newsletter, navigation clavier, hors ligne ; axe sans violation sérieuse sur toutes les routes publiques (suite complète 128/128, bureau et 360 px)
+  - [x] `next build` : toutes les routes de `(public)` prérendues (statique ou partiel) ; `getServerApi` absent de `(public)` (règle ESLint)
+  - [x] Aucun lien vers WL08, WL12-WL15, WL19 ; aucun violet `rgba(91,63,224)` ni JetBrains Mono
+  - [x] WX01-WX03 et `getPublicApi` documentés dans `apps/web/README.md`
 
 ## Périmètre
 

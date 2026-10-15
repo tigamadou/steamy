@@ -62,8 +62,8 @@ INSTALLED_APPS = [
     "django_admin_env_notice",
     "admin_interface",
     "colorfield",
-    # Django core
-    "django.contrib.admin",
+    # Django core (admin : site du back-office avec TOTP, `apps.core.admin_site`)
+    "apps.core.apps.SteamyAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.messages",
@@ -108,7 +108,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    # `request.user.is_verified()` (TOTP du personnel, D72) ; exigé sur le back-office en API-L6.1
+    # `request.user.is_verified()` : session du personnel vérifiée par TOTP (D72)
     "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -175,16 +175,22 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 # ==================================================================================================
 
 
-# Set Django admin banner colour based on environment
-if ENV == DEV:
-    ENVIRONMENT_NAME = "Development Environment"
-    ENVIRONMENT_COLOR = "#828282"
-elif ENV == STAGING:
-    ENVIRONMENT_NAME = "Staging Staging Environment"
-    ENVIRONMENT_COLOR = "#FF2222"
-else:
-    ENVIRONMENT_NAME = None
-    ENVIRONMENT_COLOR = None
+# Bandeau d'environnement de l'admin (django-admin-env-notice), aux couleurs du thème monochrome
+ENVIRONMENT_NAME, ENVIRONMENT_COLOR = {
+    DEV: ("Développement", "#5B5479"),  # --ink-600
+    TEST: ("Test", "#5B5479"),
+    STAGING: ("Préproduction", "#9A5B02"),  # --amber-700
+    PRODUCTION: ("Production", "#161325"),  # --ink-900
+}.get(ENV, (None, None))
+ENVIRONMENT_TEXT_COLOR = "#FFFFFF"
+# Modales de django-admin-interface (pages de l'admin dans une iframe du même site)
+X_FRAME_OPTIONS = "SAMEORIGIN"
+
+# Personnel (LOT-6 6.1) : session de 8 h (C20) et TOTP (D72)
+STAFF_SESSION_AGE = 8 * 60 * 60
+OTP_TOTP_ISSUER = "Steamy"
+# Ni secret ni QR code d'un appareil TOTP dans l'admin : le QR code n'est montré qu'à l'enrôlement
+OTP_ADMIN_HIDE_SENSITIVE_DATA = True
 
 
 # ==================================================================================================
@@ -271,6 +277,9 @@ REST_FRAMEWORK = {
         "user": os.getenv("THROTTLE_USER", "600/min"),
         "login": os.getenv("THROTTLE_LOGIN", "5/min"),
         "login-identifier": os.getenv("THROTTLE_LOGIN_IDENTIFIER", "10/hour"),
+        # Connexion du personnel à l'admin (WAD15), par IP et par email
+        "staff-login": os.getenv("THROTTLE_STAFF_LOGIN", "10/min"),
+        "staff-login-email": os.getenv("THROTTLE_STAFF_LOGIN_EMAIL", "10/hour"),
         # Création d'un compte en attente (apprenant) ou d'un défi OTP (parent)
         "signup": os.getenv("THROTTLE_SIGNUP", "5/min"),
         # Étapes suivantes (demande au parent, mot de passe) : compteur séparé, sinon un parent et son enfant
@@ -315,8 +324,6 @@ SPECTACULAR_SETTINGS = {
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
-ADMIN_TITLE = "Admin"
-ADMIN_HEADER = "Admin"
 
 WEB_URL = os.environ.get("WEB_URL", "http://localhost:3000")
 RESET_PASSWORD_URL = "{}{}".format(WEB_URL, "/reset-password?state={state}")

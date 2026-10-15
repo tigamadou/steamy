@@ -52,10 +52,22 @@ test("WL18 : un article inconnu affiche la 404", async ({ page }) => {
 
 test("WL20 : téléchargement libre d'un guide PDF, sans email (D14)", async ({ page }) => {
   await page.goto("/guides");
-  await expect(page.getByRole("textbox")).toHaveCount(0);
   const download = page.waitForEvent("download");
   await page.getByRole("link", { name: /^Télécharger « Le guide du jeune roboticien »/ }).click();
   expect((await download).suggestedFilename()).toBe("guide-du-jeune-roboticien.pdf");
+});
+
+test("WL20 : newsletter facultative, réservée aux adultes, consentement explicite (D14, C12)", async ({ page }) => {
+  await page.goto("/guides");
+  const box = page.getByRole("complementary", { name: "Recevez nos nouveaux guides" });
+  await box.getByLabel(/Votre email/).fill(`parent.${Date.now()}@example.com`);
+  await box.getByRole("button", { name: "Recevoir les guides" }).click();
+  await expect(box.getByRole("alert")).toContainText("Votre consentement est nécessaire.");
+
+  await box.getByRole("checkbox", { name: /18 ans ou plus/ }).check();
+  await box.getByRole("checkbox", { name: /recevoir la newsletter/ }).check();
+  await box.getByRole("button", { name: "Recevoir les guides" }).click();
+  await expect(box.getByRole("status")).toContainText("C'est noté !");
 });
 
 test("WL10 : mission, chiffres et équipe, sans donnée de mineur", async ({ page }) => {
@@ -65,10 +77,10 @@ test("WL10 : mission, chiffres et équipe, sans donnée de mineur", async ({ pag
   await expect(page.getByRole("link", { name: "Créer un compte" }).last()).toHaveAttribute("href", "/inscription");
 });
 
-test("les pages éditoriales ne présentent aucune violation d'accessibilité", async ({ page }) => {
-  for (const path of ["/legal/cgu", "/a-propos", "/blog", "/blog/debuter-en-robotique", "/guides"]) {
+for (const path of ["/legal/cgu", "/a-propos", "/blog", "/blog/debuter-en-robotique", "/guides"]) {
+  test(`les pages éditoriales ne présentent aucune violation d'accessibilité : ${path}`, async ({ page }) => {
     await page.goto(path);
     const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     expect(violations, path).toEqual([]);
-  }
-});
+  });
+}

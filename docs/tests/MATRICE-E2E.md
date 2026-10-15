@@ -12,22 +12,22 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 
 | Écran | Nom | Lot | Parcours | Test e2e |
 | --- | --- | --- | --- | --- |
-| `WL01` | Accueil | 1 |  |  |
+| `WL01` | Accueil | 1 | Parcours mis en avant, ancre « Comment ça marche » → catalogue | `apps/web/e2e/decouverte.spec.ts` |
 | `WL02` | Mot de passe oublié | 2 | Mot de passe oublié parent (SMS) et enseignant (email), réponse neutre | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL03` | Code OTP | 2 | Code par SMS et par email, essais épuisés | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL04` | Nouveau mot de passe | 2 | Nouveau mot de passe, rechargement → WL02, sessions fermées | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL05` | Réinitialisé ✓ | 2 | Réinitialisé puis connexion | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
-| `WL06` | Projets & Parcours | 1 |  |  |
-| `WL07` | Boutique de kits | 1 |  |  |
+| `WL06` | Projets & Parcours | 1 | Filtre par catégorie dans l'URL (rechargement), catégorie vide, sans brouillon | `apps/web/e2e/decouverte.spec.ts` |
+| `WL07` | Boutique de kits | 1 | Vitrine : prix, « Épuisé », sans lien ni panier ; filtre dans l'URL ; catégorie vide | `apps/web/e2e/evenements-boutique.spec.ts` |
 | `WL08` | Ateliers | 1 |  |  |
 | `WL09` | Pages légales | 1 | Pied de page → CGU#consentement-parental ; onglets adressables par URL | `apps/web/e2e/editorial.spec.ts` |
 | `WL10` | À propos | 1 | Mission, chiffres, équipe, bandeau d'inscription | `apps/web/e2e/editorial.spec.ts` |
-| `WL11` | Écoles · offre B2B + devis | 1 |  |  |
-| `WL16` | Catégories | 1 |  |  |
+| `WL11` | Écoles · offre B2B + devis | 1 | Devis : CTA d'offre → formulaire présélectionné → validation → envoi → confirmation ; email à l'équipe (Mailpit) | `apps/web/e2e/formulaires.spec.ts` |
+| `WL16` | Catégories | 1 | 6 catégories D2 → catalogue filtré | `apps/web/e2e/decouverte.spec.ts` |
 | `WL17` | Blog | 1 | Article à la une → article | `apps/web/e2e/editorial.spec.ts` |
 | `WL18` | Article | 1 | Fil d'Ariane, partage, JSON-LD, slug inconnu → 404 | `apps/web/e2e/editorial.spec.ts` |
 | `WL20` | Guides gratuits | 1 | Téléchargement libre d'un PDF, sans email (newsletter : à venir avec API-L1.4) | `apps/web/e2e/editorial.spec.ts` |
-| `WL21` | Événements | 1 |  |  |
+| `WL21` | Événements | 1 | Événements à venir (passé exclu), complet signalé → fiche | `apps/web/e2e/evenements-boutique.spec.ts` |
 | `W01` | Splash | 2 | Splash d'entrée de l'inscription (une fois par session) | `apps/web/e2e/inscription-apprenant.spec.ts` |
 | `W02` | Accueil | 2 | Accueil de l'inscription, redirection d'un utilisateur connecté | `apps/web/e2e/inscription-apprenant.spec.ts` |
 | `W03` | Type d'utilisateur | 2 | Choix apprenant / parent | `apps/web/e2e/inscription-apprenant.spec.ts` |
@@ -158,13 +158,13 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WAD12` | Steamy Events (modération) | 6 |  |  |
 | `WAD13` | Équipe & rôles (RBAC) | 6 |  |  |
 | `WAD14` | Paramètres généraux | 6 |  |  |
-| `WAD15` | Connexion admin (2FA) | 6 |  |  |
+| `WAD15` | Connexion admin (2FA) | 6 | Connexion du personnel par TOTP, code faux refusé, index de l'admin | `apps/web/e2e/admin-connexion.spec.ts` |
 | `WX01` | Hors ligne | 1 | Hors ligne → page recouverte, « Réessayer » sans réseau, retour du réseau → rétablie | `apps/web/e2e/socle-public.spec.ts` |
 | `WX02` | Erreur réseau | 1 |  |  |
 | `WX03` | Chargement | 1 |  |  |
-| `WL22` | Fiche parcours publique (variante de WC04 sans contenu des missions) | 1 |  |  |
-| `WL23` | Fiche événement (publique, réutilisée dans les espaces connectés) | 1 |  |  |
-| `WL24` | Aide & contact (FAQ + formulaire) | 1 |  |  |
+| `WL22` | Fiche parcours publique (variante de WC04 sans contenu des missions) | 1 | WL06 → fiche → CTA inscription avec `next` ; sans contenu de mission ni Vimeo ; plan au clavier ; kit requis ; brouillon → 404 | `apps/web/e2e/fiche-parcours.spec.ts` |
+| `WL23` | Fiche événement (publique, réutilisée dans les espaces connectés) | 1 | CTA visiteur → connexion avec `next` ; complet et passé désactivés avec motif ; inconnu → 404 | `apps/web/e2e/evenements-boutique.spec.ts` |
+| `WL24` | Aide & contact (FAQ + formulaire) | 1 | Contact : « Rejoindre l'équipe » → `?sujet=candidature` → envoi → confirmation ; FAQ et recherche ; ancres | `apps/web/e2e/formulaires.spec.ts` |
 | `WD23` | Mes parcours (liste des inscriptions) | 3 |  |  |
 | `WPD15` | Demande de paiement (parcours, kit ou événement demandé par l'enfant ; reprend WA03) | 4 |  |  |
 | `WT13` | Créer une classe (une classe = un parcours, D62) | 5 |  |  |

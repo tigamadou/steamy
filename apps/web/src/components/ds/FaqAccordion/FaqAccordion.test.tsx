@@ -29,6 +29,14 @@ describe("filterFaq", () => {
 });
 
 describe("FaqAccordion", () => {
+  it("ancre chaque thème qui porte un identifiant", () => {
+    const { container } = render(<FaqAccordion themes={[{ ...THEMES[0], id: "faq-paiement" }, THEMES[1]]} />);
+    expect(container.querySelector("#faq-paiement")).toContainElement(
+      screen.getByRole("heading", { name: "Paiement" }),
+    );
+    expect(container.querySelectorAll("section[id]")).toHaveLength(1);
+  });
+
   it("regroupe les questions par thème", () => {
     render(<FaqAccordion themes={THEMES} />);
     expect(screen.getByRole("heading", { name: "Paiement" })).toBeInTheDocument();
