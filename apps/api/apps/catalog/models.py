@@ -6,7 +6,8 @@ seulement les parcours publiés (S6). Le contenu d'une mission (`blocks`, `vimeo
 par le catalogue (D11) : il est réservé à un inscrit sur une mission déverrouillée (ADR 0004, API-L3a).
 """
 
-from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
@@ -29,6 +30,13 @@ class Category(models.Model):
     color = models.CharField(_("couleur"), max_length=7, validators=[validate_color])
     icon = models.CharField(_("icône"), max_length=16, help_text="Emoji affiché sur les cartes")
     order = models.PositiveSmallIntegerField(_("ordre"), default=0, db_index=True)
+    goals = models.ManyToManyField(
+        "referentials.Goal",
+        blank=True,
+        related_name="categories",
+        verbose_name=_("objectifs liés"),
+        help_text="Objectifs d'apprenant (W13) qui font recommander les parcours de cette catégorie",
+    )
 
     class Meta:
         ordering = ["order"]
@@ -214,3 +222,183 @@ class Mission(models.Model):
 
     def __str__(self):
         return f"{self.level} · {self.title}"
+
+
+class Quiz(models.Model):
+    """
+    Évaluation : formative à la fin d'un niveau (seuil 70 %), sommative à la fin d'un projet (seuil 80 %) (S2).
+    Rattachée à exactement un niveau ou un projet, selon son type. Le délai entre deux essais d'une sommative ratée
+    est réglé dans `PlatformSettings` (D32) ; une formative se repasse immédiatement (C8).
+    """
+
+    class Kind(models.TextChoices):
+        FORMATIVE = "formative", _("Formative (niveau)")
+        SUMMATIVE = "summative", _("Sommative (projet)")
+
+    DEFAULT_THRESHOLDS = {Kind.FORMATIVE: 70, Kind.SUMMATIVE: 80}
+
+    kind = models.CharField(_("type"), max_length=10, choices=Kind)
+    level = models.OneToOneField(
+        Level, models.CASCADE, null=True, blank=True, related_name="quiz", verbose_name=_("niveau")
+    )
+    project = models.OneToOneField(
+        Project,
+        models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="quiz",
+        verbose_name=_("projet"),
+    )
+    title = models.CharField(
+        _("titre"), max_length=160, blank=True, help_text="Par défaut : « Quiz · <niveau> »"
+    )
+    threshold = models.PositiveSmallIntegerField(
+        _("seuil de réussite (%)"),
+        null=True,
+        blank=True,
+        help_text="Vide : 70 % pour une formative, 80 % pour une sommative",
+    )
+    time_limit_sec = models.PositiveIntegerField(_("durée limite (s)"), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("quiz")
+        verbose_name_plural = _("quiz")
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(kind="formative", level__isnull=False, project__isnull=True)
+                | Q(kind="summative", project__isnull=False, level__isnull=True),
+                name="quiz_kind_matches_target",
+                violation_error_message="Une formative se rattache à un niveau, une sommative à un projet.",
+            ),
+            models.CheckConstraint(
+                condition=Q(threshold__isnull=True) | Q(threshold__gte=1, threshold__lte=100),
+                name="quiz_threshold_percentage",
+                violation_error_message="Le seuil est un pourcentage entre 1 et 100.",
+            ),
+        ]
+
+    def __str__(self):
+        return self.display_title
+
+    @property
+    def display_title(self) -> str:
+        if self.title:
+            return self.title
+        if self.kind == self.Kind.FORMATIVE:
+            return f"Quiz · {self.level.title}"
+        return f"Évaluation · {self.project.title}"
+
+    @property
+    def pass_threshold(self) -> int:
+        return self.threshold or self.DEFAULT_THRESHOLDS[self.kind]
+
+    @property
+    def course_id(self) -> int:
+        return self.level.project.course_id if self.level_id else self.project.course_id
+
+
+class Question(models.Model):
+    """Question à choix unique. `concept` et `remediationMission` alimentent l'écran d'échec (D32)."""
+
+    quiz = models.ForeignKey(Quiz, models.CASCADE, related_name="questions", verbose_name=_("quiz"))
+    order = models.PositiveSmallIntegerField(_("ordre"), default=0, db_index=True)
+    text = models.TextField(_("question"))
+    concept = models.CharField(
+        _("notion"), max_length=120, help_text="Notion à revoir en cas d'erreur"
+    )
+    remediation_mission = models.ForeignKey(
+        Mission,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("mission à revoir"),
+    )
+    weight = models.PositiveSmallIntegerField(
+        _("poids"), default=1, validators=[MinValueValidator(1)]
+    )
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = _("question")
+        verbose_name_plural = _("questions")
+
+    def __str__(self):
+        return self.text[:60]
+
+    def clean(self):
+        mission = self.remediation_mission
+        if mission and self.quiz_id and mission.level.project.course_id != self.quiz.course_id:
+            raise ValidationError(
+                {"remediation_mission": "La mission à revoir doit appartenir au même parcours."}
+            )
+
+
+class Choice(models.Model):
+    """Réponse proposée. `isCorrect` ne sort jamais du serveur (§4.4, D31)."""
+
+    question = models.ForeignKey(
+        Question, models.CASCADE, related_name="choices", verbose_name=_("question")
+    )
+    order = models.PositiveSmallIntegerField(_("ordre"), default=0, db_index=True)
+    text = models.CharField(_("réponse"), max_length=300)
+    is_correct = models.BooleanField(_("bonne réponse"), default=False)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = _("réponse")
+        verbose_name_plural = _("réponses")
+
+    def __str__(self):
+        return self.text[:60]
+
+
+class Badge(models.Model):
+    """Badge attribué par le serveur à la réussite d'un niveau, d'un projet ou d'un parcours (§3.2, D34)."""
+
+    class Kind(models.TextChoices):
+        LEVEL = "level", _("Niveau")
+        PROJECT = "project", _("Projet")
+        COURSE = "course", _("Parcours")
+
+    kind = models.CharField(_("type"), max_length=8, choices=Kind)
+    level = models.OneToOneField(
+        Level, models.CASCADE, null=True, blank=True, related_name="badge", verbose_name=_("niveau")
+    )
+    project = models.OneToOneField(
+        Project,
+        models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="badge",
+        verbose_name=_("projet"),
+    )
+    course = models.OneToOneField(
+        Course,
+        models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="badge",
+        verbose_name=_("parcours"),
+    )
+    label = models.CharField(_("nom"), max_length=80)
+    icon = models.CharField(_("icône"), max_length=16, help_text="Emoji de la médaille")
+    description = models.CharField(_("description"), max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = _("badge")
+        verbose_name_plural = _("badges")
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(
+                    kind="level", level__isnull=False, project__isnull=True, course__isnull=True
+                )
+                | Q(kind="project", project__isnull=False, level__isnull=True, course__isnull=True)
+                | Q(kind="course", course__isnull=False, level__isnull=True, project__isnull=True),
+                name="badge_kind_matches_target",
+                violation_error_message="Le badge se rattache à la cible de son type, et à elle seule.",
+            ),
+        ]
+
+    def __str__(self):
+        return self.label

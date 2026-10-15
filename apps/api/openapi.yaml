@@ -1728,6 +1728,348 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/learning/activity/:
+    post:
+      operationId: learning_activity_create
+      description: |-
+        Temps de vidéo réellement lu (ADR 0004 §7), envoyé par le lecteur toutes les 30 s, à la pause et à la fin.
+        Mission accessible seulement ; secondes plafonnées par appel et par jour.
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/attempts/:
+    get:
+      operationId: learning_attempts_list
+      description: 'Mes tentatives (WD07, WD09) : filtres `status` et `quiz`, plus
+        récentes d''abord, avec le bandeau.'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: quiz
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          enum:
+          - ok
+          - warn
+          - ko
+          type: string
+          minLength: 1
+        description: |-
+          * `ok` - Réussi
+          * `warn` - À refaire
+          * `ko` - Échoué
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAttemptListItemList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/attempts/{id}/:
+    get:
+      operationId: learning_attempts_retrieve
+      description: Une de mes tentatives (WD08, WJ05, WJ08) ; celle d'un autre apprenant
+        n'existe pas (404).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/badges/:
+    get:
+      operationId: learning_badges_list
+      description: Mes badges (WJ06, WJ11), les plus récents d'abord ; `?course=`
+        pour un parcours.
+      parameters:
+      - in: query
+        name: course
+        schema:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        description: Slug du parcours
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLearnerBadgeList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/certificates/:
+    get:
+      operationId: learning_certificates_list
+      description: Mes certificats (WJ07, WD21), avec l'état de leur PDF.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCertificateList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/certificates/{id}/download/:
+    get:
+      operationId: learning_certificates_download_retrieve
+      description: |-
+        Téléchargement (ADR 0005 §6) : redirection 302 vers une URL présignée de 5 minutes, jamais stockée ; sans
+        stockage objet (CI), le fichier est servi directement. PDF pas prêt : 409 `PDF_NOT_READY`. Le certificat d'un
+        autre apprenant n'existe pas (404).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '302':
+          description: Redirection vers l'URL présignée
+        '200':
+          description: Fichier PDF
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/dashboard/:
+    get:
+      operationId: learning_dashboard_retrieve
+      description: Accueil de l'apprenant (WD01 ; WD02 si rien à reprendre).
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/enrollments/:
     get:
       operationId: learning_enrollments_list
@@ -1756,7 +2098,7 @@ paths:
           minLength: 1
         description: |-
           * `active` - En cours
-          * `completed` - Terminés
+          * `completed` - Terminé
       tags:
       - learning
       security:
@@ -2026,6 +2368,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/learning/progress/:
+    get:
+      operationId: learning_progress_retrieve
+      description: 'Ma progression (WD21) : temps, points, badges, histogramme des
+        7 jours, maîtrise par catégorie.'
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Progress'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/learning/projects/{id}/:
     get:
       operationId: learning_projects_retrieve
@@ -2060,6 +2436,154 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/quizzes/{id}/:
+    get:
+      operationId: learning_quizzes_retrieve
+      description: 'Quiz à passer (WJ04, WJ10) : sans corrigé, seulement une fois
+        atteint dans la séquence.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/quizzes/{id}/attempts/:
+    post:
+      operationId: learning_quizzes_attempts_create
+      description: 'Envoi groupé des réponses (WJ04, WJ10) : correction serveur, statut
+        D31, délai D32.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttemptRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptDetail'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/learning/recommendations/:
+    get:
+      operationId: learning_recommendations_list
+      description: 'Parcours recommandés (WD21, WJ07) : publiés, non suivis, liés
+        aux objectifs d''abord.'
+      parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          maximum: 12
+          minimum: 1
+          default: 6
+      tags:
+      - learning
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recommendation'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
           content:
             application/json:
               schema:
@@ -3712,8 +4236,204 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/wishlist/:
+    get:
+      operationId: wishlist_list
+      description: Mes souhaits (WW01), triés ; parcours publiés seulement.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: sort
+        schema:
+          enum:
+          - recent
+          - title
+          - price
+          type: string
+          default: recent
+          minLength: 1
+        description: |-
+          * `recent` - Ajoutés récemment
+          * `title` - Titre
+          * `price` - Prix croissant
+      tags:
+      - wishlist
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedWishlistItemList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/wishlist/{course_slug}/:
+    put:
+      operationId: wishlist_update
+      description: 'Ajoute un parcours publié (WC01-WC05) : 201, ou 200 s''il y était
+        déjà.'
+      parameters:
+      - in: path
+        name: course_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - wishlist
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistItem'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistItem'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: wishlist_destroy
+      description: 'Retire un parcours (WW01, annulable par un nouveau `PUT`) : 204,
+        qu''il y soit ou non.'
+      parameters:
+      - in: path
+        name: course_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - wishlist
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
 components:
   schemas:
+    Activity:
+      type: object
+      properties:
+        secondsCounted:
+          type: integer
+          description: Secondes retenues après plafonnement
+        secondsToday:
+          type: integer
+        streakDays:
+          type: integer
+      required:
+      - secondsCounted
+      - secondsToday
+      - streakDays
+    ActivityRequestRequest:
+      type: object
+      properties:
+        missionId:
+          type: integer
+        seconds:
+          type: integer
+          maximum: 3600
+          minimum: 1
+          description: Secondes réellement lues
+      required:
+      - missionId
+      - seconds
+    AnswerRequest:
+      type: object
+      properties:
+        questionId:
+          type: integer
+        choiceId:
+          type: integer
+      required:
+      - choiceId
+      - questionId
     AreaTypeEnum:
       enum:
       - urban
@@ -3722,6 +4442,170 @@ components:
       description: |-
         * `urban` - Urbaine
         * `rural` - Rurale
+    AttemptDetail:
+      type: object
+      description: Résultat d'une tentative (WJ05, WJ08, WD08).
+      properties:
+        id:
+          type: integer
+        quiz:
+          $ref: '#/components/schemas/AttemptQuiz'
+        score:
+          type: integer
+        total:
+          type: integer
+        percentage:
+          type: integer
+        threshold:
+          type: integer
+          description: Seuil appliqué à cette tentative (%)
+        status:
+          $ref: '#/components/schemas/AttemptStatusEnum'
+        passed:
+          type: boolean
+        durationSec:
+          type: integer
+          nullable: true
+        pointsEarned:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        badge:
+          allOf:
+          - $ref: '#/components/schemas/Badge'
+          nullable: true
+          description: Badge du niveau ou du projet, si la tentative est réussie (WJ06,
+            WJ11)
+        failedConcepts:
+          type: array
+          items:
+            type: string
+        remediation:
+          type: array
+          items:
+            $ref: '#/components/schemas/Remediation'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionReview'
+        retryInSec:
+          type: integer
+          description: Secondes avant de pouvoir repasser le quiz (sommative ratée,
+            D32)
+        next:
+          allOf:
+          - $ref: '#/components/schemas/NextStep'
+          nullable: true
+          description: 'Après une réussite : étape suivante (après le badge) ; sinon
+            null'
+      required:
+      - badge
+      - createdAt
+      - durationSec
+      - failedConcepts
+      - id
+      - next
+      - passed
+      - percentage
+      - pointsEarned
+      - questions
+      - quiz
+      - remediation
+      - retryInSec
+      - score
+      - status
+      - threshold
+      - total
+    AttemptListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        quiz:
+          $ref: '#/components/schemas/AttemptQuiz'
+        score:
+          type: integer
+        total:
+          type: integer
+        percentage:
+          type: integer
+        threshold:
+          type: integer
+          description: Seuil appliqué à cette tentative (%)
+        status:
+          $ref: '#/components/schemas/AttemptStatusEnum'
+        passed:
+          type: boolean
+        durationSec:
+          type: integer
+          nullable: true
+        pointsEarned:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - createdAt
+      - durationSec
+      - id
+      - passed
+      - percentage
+      - pointsEarned
+      - quiz
+      - score
+      - status
+      - threshold
+      - total
+    AttemptQuiz:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/QuizKindEnum'
+        title:
+          type: string
+        courseSlug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        projectId:
+          type: integer
+        levelId:
+          type: integer
+          nullable: true
+      required:
+      - courseSlug
+      - id
+      - kind
+      - levelId
+      - projectId
+      - title
+    AttemptRequestRequest:
+      type: object
+      description: Envoi groupé de toutes les réponses ; une question sans réponse
+        compte comme fausse.
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnswerRequest'
+        durationSec:
+          type: integer
+          minimum: 0
+          nullable: true
+      required:
+      - answers
+    AttemptStatusEnum:
+      enum:
+      - ok
+      - warn
+      - ko
+      type: string
+      description: |-
+        * `ok` - Réussi
+        * `warn` - À refaire
+        * `ko` - Échoué
     Avatar:
       type: object
       properties:
@@ -3750,6 +4634,35 @@ components:
       - emoji
       - id
       - label
+    Badge:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/BadgeKindEnum'
+        label:
+          type: string
+        icon:
+          type: string
+        description:
+          type: string
+      required:
+      - description
+      - icon
+      - id
+      - kind
+      - label
+    BadgeKindEnum:
+      enum:
+      - level
+      - project
+      - course
+      type: string
+      description: |-
+        * `level` - Niveau
+        * `project` - Projet
+        * `course` - Parcours
     Beneficiary:
       type: object
       properties:
@@ -3923,6 +4836,78 @@ components:
       - icon
       - label
       - slug
+    Certificate:
+      type: object
+      properties:
+        id:
+          type: integer
+        number:
+          type: string
+          description: CERT-AAAA-NNNNNN
+        course:
+          $ref: '#/components/schemas/CourseRef'
+        issuedAt:
+          type: string
+          format: date-time
+        pdfStatus:
+          allOf:
+          - $ref: '#/components/schemas/PdfStatusEnum'
+          description: |-
+            `pending` : « Préparation… », interroger de nouveau ; `failed` : échec signalé au Support
+
+            * `pending` - En préparation
+            * `ready` - Prêt
+            * `failed` - Échec
+      required:
+      - course
+      - id
+      - issuedAt
+      - number
+      - pdfStatus
+    Certification:
+      type: object
+      description: Conditions D33 (100 % des missions, toutes les sommatives réussies),
+        certificat et ticket (WJ07, WJ09).
+      properties:
+        eligible:
+          type: boolean
+        missionsDone:
+          type: integer
+        missionCount:
+          type: integer
+        summativesPassed:
+          type: integer
+        summativeCount:
+          type: integer
+        certificateEnabled:
+          type: boolean
+        certificate:
+          allOf:
+          - $ref: '#/components/schemas/Certificate'
+          nullable: true
+        eventTicket:
+          type: boolean
+          description: Ticket Steamy Events offert à la certification
+      required:
+      - certificate
+      - certificateEnabled
+      - eligible
+      - eventTicket
+      - missionCount
+      - missionsDone
+      - summativeCount
+      - summativesPassed
+    Choice:
+      type: object
+      description: Réponse proposée, sans le corrigé.
+      properties:
+        id:
+          type: integer
+        text:
+          type: string
+      required:
+      - id
+      - text
     ConsentPreview:
       type: object
       description: 'Ce que montre le lien SMS avant toute connexion : le numéro masqué,
@@ -4296,6 +5281,45 @@ components:
           type: string
       required:
       - csrfToken
+    Dashboard:
+      type: object
+      description: Accueil (WD01) ; `resume` absent → WD02. `points` et `rank` à null
+        tant que le barème n'est pas fixé (C8).
+      properties:
+        firstName:
+          type: string
+        points:
+          type: integer
+          nullable: true
+        rank:
+          allOf:
+          - $ref: '#/components/schemas/Rank'
+          nullable: true
+        streakDays:
+          type: integer
+        secondsToday:
+          type: integer
+        resume:
+          allOf:
+          - $ref: '#/components/schemas/Enrollment'
+          nullable: true
+          description: Parcours à reprendre
+        counters:
+          $ref: '#/components/schemas/LearnerCounters'
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommendation'
+          description: 3 parcours recommandés
+      required:
+      - counters
+      - firstName
+      - points
+      - rank
+      - recommendations
+      - resume
+      - secondsToday
+      - streakDays
     DashboardSummary:
       type: object
       properties:
@@ -4310,6 +5334,17 @@ components:
       - eventsLast7Days
       - revenueLast30Days
       - totalUsers
+    DaySeconds:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        seconds:
+          type: integer
+      required:
+      - date
+      - seconds
     DeliveryAddress:
       type: object
       description: 'Adresse de livraison enregistrée (WD19, WK05). `phone` : par défaut,
@@ -4648,6 +5683,7 @@ components:
       - PAYMENT_FAILED
       - PAYMENT_REQUEST_CLOSED
       - PAYMENT_REQUIRED
+      - PDF_NOT_READY
       - PERMISSION_DENIED
       - PHONE_INVALID
       - PHONE_TAKEN
@@ -4717,6 +5753,7 @@ components:
         * `PAYMENT_FAILED` - PAYMENT_FAILED
         * `PAYMENT_REQUEST_CLOSED` - PAYMENT_REQUEST_CLOSED
         * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
+        * `PDF_NOT_READY` - PDF_NOT_READY
         * `PERMISSION_DENIED` - PERMISSION_DENIED
         * `PHONE_INVALID` - PHONE_INVALID
         * `PHONE_TAKEN` - PHONE_TAKEN
@@ -4983,6 +6020,40 @@ components:
       - email
       - isAdult
       - newsletterConsent
+    LearnerBadge:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/BadgeKindEnum'
+        label:
+          type: string
+        icon:
+          type: string
+        description:
+          type: string
+        awardedAt:
+          type: string
+          format: date-time
+        course:
+          $ref: '#/components/schemas/CourseRef'
+        projectId:
+          type: integer
+          nullable: true
+        levelId:
+          type: integer
+          nullable: true
+      required:
+      - awardedAt
+      - course
+      - description
+      - icon
+      - id
+      - kind
+      - label
+      - levelId
+      - projectId
     LearnerConsentRequestRequest:
       type: object
       properties:
@@ -4996,6 +6067,26 @@ components:
       required:
       - parentPhone
       - relationship
+    LearnerCounters:
+      type: object
+      properties:
+        activeEnrollments:
+          type: integer
+        completedEnrollments:
+          type: integer
+        certificates:
+          type: integer
+        badges:
+          type: integer
+        wishlist:
+          type: integer
+          description: Parcours dans « Mes souhaits »
+      required:
+      - activeEnrollments
+      - badges
+      - certificates
+      - completedEnrollments
+      - wishlist
     LearnerPasswordRequest:
       type: object
       properties:
@@ -5193,6 +6284,11 @@ components:
           type: integer
         missionsDone:
           type: integer
+        quiz:
+          allOf:
+          - $ref: '#/components/schemas/QuizItem'
+          nullable: true
+          description: Formative du niveau
       required:
       - durationMin
       - id
@@ -5200,6 +6296,7 @@ components:
       - missionCount
       - missionsDone
       - order
+      - quiz
       - state
       - title
     LevelSummary:
@@ -5280,6 +6377,22 @@ components:
       required:
       - csrfToken
       - user
+    Mastery:
+      type: object
+      properties:
+        category:
+          $ref: '#/components/schemas/CategorySummary'
+        missionsDone:
+          type: integer
+        missionCount:
+          type: integer
+        pct:
+          type: integer
+      required:
+      - category
+      - missionCount
+      - missionsDone
+      - pct
     Me:
       type: object
       description: 'Identité et rôle du compte connecté : sert aux shells, à la redirection
@@ -5362,9 +6475,17 @@ components:
           items:
             type: string
           readOnly: true
+        counters:
+          allOf:
+          - $ref: '#/components/schemas/LearnerCounters'
+          nullable: true
+          readOnly: true
+          description: Compteurs du shell de l'apprenant (parcours, certificats, badges),
+            null pour les autres rôles
       required:
       - avatar
       - city
+      - counters
       - email
       - firstName
       - id
@@ -5424,6 +6545,9 @@ components:
           type: integer
         progressPct:
           type: integer
+        pointsEarned:
+          type: integer
+          description: 0 si déjà terminée ou sans barème (C8)
         next:
           allOf:
           - $ref: '#/components/schemas/NextStep'
@@ -5431,6 +6555,7 @@ components:
       required:
       - missionId
       - next
+      - pointsEarned
       - progressPct
     MissionDetail:
       type: object
@@ -5530,15 +6655,15 @@ components:
       - title
     NextStep:
       type: object
-      description: 'Étape suivante : mission à faire, ou certification quand tout
-        le parcours est fait.'
+      description: 'Étape suivante : mission ou quiz à faire, ou certification quand
+        tout le parcours est fait.'
       properties:
         type:
           $ref: '#/components/schemas/NextStepTypeEnum'
         id:
           type: integer
           nullable: true
-          description: Mission ; null pour la certification
+          description: Mission ou quiz ; null pour la certification
         title:
           type: string
           nullable: true
@@ -5551,20 +6676,29 @@ components:
         levelId:
           type: integer
           nullable: true
+          description: null pour une sommative
+        quizKind:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/QuizKindEnum'
+          - $ref: '#/components/schemas/NullEnum'
       required:
       - courseSlug
       - id
       - levelId
       - projectId
+      - quizKind
       - title
       - type
     NextStepTypeEnum:
       enum:
       - mission
+      - quiz
       - certification
       type: string
       description: |-
         * `mission` - Mission
+        * `quiz` - Quiz
         * `certification` - Certification
     Notification:
       type: object
@@ -6003,6 +7137,67 @@ components:
       required:
       - challengeId
       - code
+    PaginatedAttemptListItemList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttemptListItem'
+        summary:
+          type: object
+          description: Bandeau de WD07, sur toutes les tentatives (filtres ignorés)
+          properties:
+            attemptCount:
+              type: integer
+            successRate:
+              type: integer
+              description: Part des tentatives réussies (%)
+            perfectCount:
+              type: integer
+              description: Tentatives à 100 %
+            streakDays:
+              type: integer
+          required:
+          - attemptCount
+          - successRate
+          - perfectCount
+          - streakDays
+      required:
+      - summary
+    PaginatedCertificateList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Certificate'
     PaginatedConsentRequestList:
       type: object
       properties:
@@ -6083,6 +7278,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Kit'
+    PaginatedLearnerBadgeList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearnerBadge'
     PaginatedNotificationList:
       type: object
       properties:
@@ -6163,6 +7378,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SteamyEvent'
+    PaginatedWishlistItemList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WishlistItem'
     ParentProfile:
       type: object
       properties:
@@ -6635,6 +7870,16 @@ components:
         * `pending` - En attente de validation
         * `succeeded` - Réussi
         * `failed` - Échoué
+    PdfStatusEnum:
+      enum:
+      - pending
+      - ready
+      - failed
+      type: string
+      description: |-
+        * `pending` - En préparation
+        * `ready` - Prêt
+        * `failed` - Échec
     Preferences:
       type: object
       properties:
@@ -6695,6 +7940,42 @@ components:
       - parent-about
       - parent-children
       type: string
+    Progress:
+      type: object
+      description: Ma progression (WD21).
+      properties:
+        weekSeconds:
+          type: integer
+          description: Du lundi à aujourd'hui
+        lastDays:
+          type: array
+          items:
+            $ref: '#/components/schemas/DaySeconds'
+          description: 7 derniers jours, du plus ancien à aujourd'hui
+        points:
+          type: integer
+          nullable: true
+        rank:
+          allOf:
+          - $ref: '#/components/schemas/Rank'
+          nullable: true
+        streakDays:
+          type: integer
+        counters:
+          $ref: '#/components/schemas/LearnerCounters'
+        mastery:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mastery'
+          description: Par catégorie des parcours suivis
+      required:
+      - counters
+      - lastDays
+      - mastery
+      - points
+      - rank
+      - streakDays
+      - weekSeconds
     ProjectDetail:
       type: object
       description: Projet (WJ01).
@@ -6727,6 +8008,11 @@ components:
           type: integer
         course:
           $ref: '#/components/schemas/CourseRef'
+        quiz:
+          allOf:
+          - $ref: '#/components/schemas/QuizItem'
+          nullable: true
+          description: Sommative du projet
         levels:
           type: array
           items:
@@ -6742,6 +8028,7 @@ components:
       - objectives
       - order
       - prerequisites
+      - quiz
       - state
       - title
     ProjectSummary:
@@ -6775,6 +8062,143 @@ components:
       required:
       - levels
       - title
+    Question:
+      type: object
+      properties:
+        id:
+          type: integer
+        order:
+          type: integer
+        text:
+          type: string
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Choice'
+      required:
+      - choices
+      - id
+      - order
+      - text
+    QuestionReview:
+      type: object
+      description: 'Résultat d''une question : juste ou non, sans dévoiler la bonne
+        réponse.'
+      properties:
+        questionId:
+          type: integer
+        text:
+          type: string
+        concept:
+          type: string
+        correct:
+          type: boolean
+        chosenChoiceId:
+          type: integer
+          nullable: true
+        remediationMissionId:
+          type: integer
+          nullable: true
+      required:
+      - chosenChoiceId
+      - concept
+      - correct
+      - questionId
+      - remediationMissionId
+      - text
+    QuizDetail:
+      type: object
+      description: 'Quiz à passer (WJ04, WJ10) : questions et réponses proposées,
+        jamais le corrigé (§4.4).'
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/QuizKindEnum'
+        title:
+          type: string
+        threshold:
+          type: integer
+          description: Score minimal pour réussir (%)
+        timeLimitSec:
+          type: integer
+          nullable: true
+        questionCount:
+          type: integer
+        state:
+          allOf:
+          - $ref: '#/components/schemas/StateEnum'
+          description: |-
+            `done` : déjà réussi
+
+            * `done` - Faite
+            * `available` - Disponible
+            * `locked` - Verrouillée
+        retryInSec:
+          type: integer
+          description: Secondes avant de pouvoir le repasser (sommative ratée, D32),
+            0 sinon
+        course:
+          $ref: '#/components/schemas/CourseRef'
+        project:
+          $ref: '#/components/schemas/Ref'
+        level:
+          allOf:
+          - $ref: '#/components/schemas/Ref'
+          nullable: true
+          description: null pour une sommative
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+      required:
+      - course
+      - id
+      - kind
+      - level
+      - project
+      - questionCount
+      - questions
+      - retryInSec
+      - state
+      - threshold
+      - timeLimitSec
+      - title
+    QuizItem:
+      type: object
+      description: Quiz d'un niveau (formative) ou d'un projet (sommative), dans l'arbre.
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/QuizKindEnum'
+        title:
+          type: string
+        threshold:
+          type: integer
+        state:
+          allOf:
+          - $ref: '#/components/schemas/StateEnum'
+          description: |-
+            `done` : réussi
+
+            * `done` - Faite
+            * `available` - Disponible
+            * `locked` - Verrouillée
+      required:
+      - id
+      - kind
+      - state
+      - threshold
+      - title
+    QuizKindEnum:
+      enum:
+      - formative
+      - summative
+      type: string
+      description: |-
+        * `formative` - Formative (niveau)
+        * `summative` - Sommative (projet)
     QuoteRequestRequest:
       type: object
       properties:
@@ -6815,6 +8239,25 @@ components:
       - email
       - phone
       - schoolName
+    Rank:
+      type: object
+      properties:
+        label:
+          type: string
+        minPoints:
+          type: integer
+        nextLabel:
+          type: string
+          nullable: true
+        nextAt:
+          type: integer
+          nullable: true
+          description: Points du palier suivant
+      required:
+      - label
+      - minPoints
+      - nextAt
+      - nextLabel
     ReadAll:
       type: object
       properties:
@@ -6832,6 +8275,66 @@ components:
           type: boolean
       required:
       - ok
+    Recommendation:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          title: Difficulté
+        isFree:
+          type: boolean
+          title: Gratuit
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Prix (FCFA)
+        emoji:
+          type: string
+          description: Visuel des cartes
+          maxLength: 16
+        requiredKit:
+          allOf:
+          - $ref: '#/components/schemas/RequiredKit'
+          readOnly: true
+          nullable: true
+        coverImage:
+          type: string
+          nullable: true
+          readOnly: true
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        featured:
+          type: boolean
+          title: Mis en avant
+        matchesGoals:
+          type: boolean
+          readOnly: true
+          description: Catégorie liée aux objectifs de l'apprenant
+      required:
+      - category
+      - coverImage
+      - difficulty
+      - matchesGoals
+      - requiredKit
+      - slug
+      - title
     Ref:
       type: object
       description: Projet ou niveau cité (fil d'Ariane, position).
@@ -6899,6 +8402,20 @@ components:
       - code
       - id
       - label
+    Remediation:
+      type: object
+      description: 'Mission à revoir (WJ08) : lien vers WJ03.'
+      properties:
+        missionId:
+          type: integer
+        title:
+          type: string
+        concept:
+          type: string
+      required:
+      - concept
+      - missionId
+      - title
     RequiredKit:
       type: object
       description: 'Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`.'
@@ -6993,7 +8510,7 @@ components:
       - classroom
       type: string
       description: |-
-        * `free` - Gratuit
+        * `free` - Parcours gratuit
         * `order` - Commande
         * `kit_code` - Kit Code
         * `classroom` - Classe
@@ -7322,8 +8839,8 @@ components:
       - eventType
     Tree:
       type: object
-      description: 'Arbre du parcours (WC06a, WC06b, WJ09) : titres, durées et états,
-        sans contenu.'
+      description: 'Arbre du parcours (WC06a, WC06b, WJ07, WJ09) : titres, durées
+        et états, sans contenu.'
       properties:
         id:
           type: integer
@@ -7362,11 +8879,14 @@ components:
           description: Niveau de la prochaine étape
         next:
           $ref: '#/components/schemas/NextStep'
+        certification:
+          $ref: '#/components/schemas/Certification'
         projects:
           type: array
           items:
             $ref: '#/components/schemas/TreeProject'
       required:
+      - certification
       - completedAt
       - course
       - createdAt
@@ -7400,6 +8920,11 @@ components:
           type: integer
         missionsDone:
           type: integer
+        quiz:
+          allOf:
+          - $ref: '#/components/schemas/QuizItem'
+          nullable: true
+          description: Formative du niveau
         missions:
           type: array
           items:
@@ -7412,6 +8937,7 @@ components:
       - missions
       - missionsDone
       - order
+      - quiz
       - state
       - title
     TreeProject:
@@ -7431,6 +8957,11 @@ components:
           type: integer
         missionsDone:
           type: integer
+        quiz:
+          allOf:
+          - $ref: '#/components/schemas/QuizItem'
+          nullable: true
+          description: Sommative du projet
         levels:
           type: array
           items:
@@ -7442,6 +8973,7 @@ components:
       - missionCount
       - missionsDone
       - order
+      - quiz
       - state
       - title
     UnreadCount:
@@ -7472,6 +9004,17 @@ components:
           type: boolean
       required:
       - ok
+    WishlistItem:
+      type: object
+      properties:
+        course:
+          $ref: '#/components/schemas/CourseList'
+        addedAt:
+          type: string
+          format: date-time
+      required:
+      - addedAt
+      - course
   securitySchemes:
     cookieAuth:
       type: apiKey
