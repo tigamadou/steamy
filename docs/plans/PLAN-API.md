@@ -542,8 +542,13 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > l'ancien parent par SMS. Le support ne peut ni suspendre un compte en attente de consentement ni toucher au
   > personnel ; le personnel ne se gère que dans l'équipe (WAD13), ce qui retire au Support la possibilité de modifier
   > `is_staff` et les groupes depuis la fiche utilisateur.
-- [ ] **API-L6.3** Réglages · `feature/api-l6-3-reglages`
-  - [ ] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
+- [x] **API-L6.3** Réglages · `feature/api-l6-3-reglages` · PR #63
+  - [x] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
+  > Décisions : bornes des réglages validées par le modèle (validateurs et `clean()` du barème et des paliers C8) ;
+  > `Announcement` dans `core`, diffusée une fois par la tâche `broadcast_announcement` aux personas actifs du public
+  > visé (notification `announcement`, D7), puis figée. Aucun cache serveur à invalider (`PlatformSettings.load()`
+  > relit la base ; les référentiels n'ont qu'un cache HTTP d'une heure). « Mode maintenance » et « inscriptions
+  > ouvertes » (WAD14) restent hors de cette étape : comportement d'API non spécifié, à trancher avant LOT-6 6.5.
 - [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact-kpi` · PR #65 (1/2), puis `feature/api-l6-4-impact-rapports` · PR #67 (2/2)
   - [ ] App `impact` : `KpiDefinition` (30 KPI par migration), `KpiValue`, `ImpactReport`, `ReportExport` ; statut D73
     - [x] `KpiDefinition` (30 KPI en 8 groupes, migration `0002_kpi_definitions`), `KpiValue`, `ImpactReport` ; `kpiStatus` D73 (PR #65)
