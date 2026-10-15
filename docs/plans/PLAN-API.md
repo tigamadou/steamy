@@ -91,7 +91,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `GET accounts/me/` (identité, rôle, statut, `profileStep`, champs personnel ; données du shell avec les référentiels en API-1.5)
   - [x] `POST accounts/me/password/`, `POST accounts/me/email/`
   - [x] Pagination `page`/`pageSize`
-  - [x] Front : `apps/web/src/lib/api-browser.ts` et `apps/web/src/app/page.tsx` mis à jour, `packages/api-client` régénéré
+  - [x] Front : `apps/web/src/lib/api-browser.ts` mis à jour (`page.tsx` n'appelle plus l'API depuis le socle front, PR #18), `packages/api-client` régénéré
   - [x] Retirer le commentaire d'en-tête de `session/views.py` (login par token)
   - [x] Tests : CSRF exigé sur login et logout, throttle de login par IP **et** par identifiant
   - [x] Couverture 100 % (lignes et branches) du code modifié
