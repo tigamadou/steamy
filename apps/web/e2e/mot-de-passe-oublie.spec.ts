@@ -35,7 +35,8 @@ test("WL02 → WL05 : un parent réinitialise par SMS, se reconnecte, et son anc
   await axe(page);
   const since = new Date();
   await requestCode(page, phone);
-  await expect(page.getByText(/vient d'être envoyé à \+229 01 •• •• •• \d\d/)).toBeVisible();
+  // Numéro masqué par l'API : indicatif et deux derniers chiffres
+  await expect(page.getByText(new RegExp(`vient d'être envoyé à \\+229 •• ${phone.slice(-2)}`))).toBeVisible();
   await axe(page);
   const code = extractCode(await waitForSms(phone, { since }));
   await page.getByLabel("Code à 6 chiffres reçu par SMS").fill(code);
@@ -66,13 +67,15 @@ test("WL02 → WL05 : un parent réinitialise par SMS, se reconnecte, et son anc
 test("WL02 répond de même pour un numéro inconnu ; WL03 bloque la saisie après les essais permis", async ({ page }) => {
   await requestCode(page, uniquePhone());
   const otp = page.getByLabel("Code à 6 chiffres reçu par SMS");
-  const tooMany = page.getByText("Trop d'essais avec ce code. Demandez un nouveau code.");
-  for (let attempt = 0; attempt < 4 && !(await tooMany.isVisible()); attempt += 1) {
+  // D24 : 3 essais ; le 4ᵉ est refusé même avec le bon code
+  for (let attempt = 1; attempt <= 4; attempt += 1) {
     await otp.fill("000000");
-    await page.getByRole("button", { name: "Vérifier le code" }).click();
-    await expect(page.getByRole("button", { name: "Vérifier le code" })).not.toHaveAttribute("aria-busy", "true");
+    await Promise.all([
+      page.waitForResponse((response) => response.url().includes("/api/auth/password-reset/verify/")),
+      page.getByRole("button", { name: "Vérifier le code" }).click(),
+    ]);
   }
-  await expect(tooMany).toBeVisible();
+  await expect(page.getByText("Trop d'essais avec ce code. Demandez un nouveau code.")).toBeVisible();
   await expect(otp).toBeDisabled();
   await page.getByRole("button", { name: "Modifier le numéro" }).click();
   await expect(page).toHaveURL("/mot-de-passe-oublie");
