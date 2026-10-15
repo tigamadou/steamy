@@ -84,6 +84,7 @@ def test_cart_items_of_others_are_not_found(shopper):
     assert client.delete(f"{ITEMS}{other_item.pk}/").status_code == 404
     other_item.refresh_from_db()
     assert other_item.quantity == 1 and str(other_item.cart).startswith("Panier de")
+    assert str(other_item) == f"{other_item.kit} × 1"
 
 
 @pytest.mark.parametrize("url", [CART, ADDRESS])
