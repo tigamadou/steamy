@@ -96,7 +96,7 @@ coverage-web: ## Tests du front + couverture 100 % exigée sur le code modifié 
 	  "git config --global --add safe.directory /repo && pip install -q --root-user-action=ignore diff-cover==10.6.0 \
 	   && diff-cover apps/web/coverage/cobertura-coverage.xml --compare-branch=origin/development --fail-under=100"
 
-e2e: ## Parcours Playwright sur la stack Docker (web en image prod, données rechargées)
+e2e: ## Parcours Playwright sur la stack Docker (web en image prod, worker pour les emails, données rechargées)
 	$(E2E) up -d --build --wait web worker
 	$(MAKE) migrate seed COMPOSE="$(E2E)"
 	@# Tous les parcours partent d'une même IP : plafonds quotidiens d'OTP relevés (D24, testés côté API)

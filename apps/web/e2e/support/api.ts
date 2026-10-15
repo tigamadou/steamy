@@ -67,13 +67,19 @@ export async function createParent({
   firstName = "Parent",
   password = DEMO_PASSWORD,
   completeProfile = true,
-}: { firstName?: string; password?: string; completeProfile?: boolean } = {}): Promise<{
-  phone: string;
-  password: string;
-}> {
-  const phone = uniquePhone();
+  phone = uniquePhone(),
+  keep = false,
+}: {
+  firstName?: string;
+  password?: string;
+  completeProfile?: boolean;
+  phone?: string;
+  /** Garde la session API ouverte (connectée) et la renvoie, pour enchaîner des appels du parent. */
+  keep?: boolean;
+} = {}): Promise<{ phone: string; password: string; session?: ApiSession }> {
   const since = new Date();
-  const { post, patch, get, api } = await apiSession();
+  const session = await apiSession();
+  const { post, patch, get, api } = session;
   const challenge = (await post("/api/auth/parent-signup/", {
     firstName,
     lastName: "Test",
@@ -89,6 +95,42 @@ export async function createParent({
     await patch("/api/accounts/me/parent-profile/", { locality: locality.id });
     await patch("/api/accounts/me/parent-profile/", { childrenToEnroll: 1, goalsForChildren: [goal.code] });
   }
+  if (keep) return { phone, password, session };
   await api.dispose();
   return { phone, password };
+}
+
+/**
+ * Décision du parent par l'API (WP05 / WP11), sans passer par les écrans : un parent neuf est créé au numéro qui a
+ * reçu la demande, rattache la demande par le jeton du lien SMS, puis l'accepte ou la refuse.
+ */
+export async function decideConsent(
+  link: URL,
+  phone: string,
+  decision: { accept: true } | { accept: false; reason?: string; note?: string },
+): Promise<void> {
+  const { session } = await createParent({ phone, keep: true, firstName: "Maman" });
+  const { post, get, api } = session as ApiSession;
+  const token = link.pathname.split("/").pop() as string;
+  const request = (await post("/api/accounts/consent-requests/claim/", { token })) as { id: number };
+  if (decision.accept) {
+    await post(`/api/accounts/consent-requests/${request.id}/accept/`, {});
+  } else {
+    const [first] = (await get("/api/referentials/refusal-reasons/")) as { code: string }[];
+    await post(`/api/accounts/consent-requests/${request.id}/refuse/`, {
+      reason: decision.reason ?? first.code,
+      note: decision.note ?? "",
+    });
+  }
+  await api.dispose();
+}
+
+/** Identifiant d'apprenant libre (`auth/username-availability/`). */
+export async function isUsernameAvailable(username: string): Promise<boolean> {
+  const { get, api } = await apiSession();
+  const { available } = (await get(`/api/auth/username-availability/?username=${encodeURIComponent(username)}`)) as {
+    available: boolean;
+  };
+  await api.dispose();
+  return available;
 }
