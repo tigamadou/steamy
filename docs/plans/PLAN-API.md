@@ -408,10 +408,16 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > détail (D6). `me/parent/` : nom et lien de parenté, ni numéro ni email (WD22). Enum `UserStatusEnum` nommé
   > dans le schéma (collision des `status`).
 - [ ] **API-L4.2** À valider · `feature/api-l4-2-a-valider`
-  - [ ] `GET accounts/pending-actions/` (D52)
+  - [x] `GET accounts/pending-actions/` (D52) : consentements et demandes de suppression
+  - [ ] `pending-actions` : demandes de paiement et candidatures (attend API-L3b.5 et L3b.6)
   - [ ] `POST events/applications/{id}/accept/` (payant → `PaymentRequest`/commande, D53), `…/refuse/`
   - [ ] `POST payments/orders/` avec `paymentRequestId` (WPD15)
   - [ ] Tests : l'apprenant ne peut pas accepter sa propre candidature
+  > Décisions : `pending-actions/` renvoie une liste non paginée `{ type, id, childId, childFirstName,
+  > childLastName, createdAt, url }`, la plus récente d'abord ; `type` ∈ `consent`, `payment_request`,
+  > `event_application`, `deletion_request` (les 4 déclarés dès maintenant) ; `childId` nul pour un consentement
+  > (pas encore de lien) ; `url` = route du front (`/parent/consentements/<id>`,
+  > `/parent/enfants/<id>/supprimer?demande=<id>`). Chaque type est une source de `pending_actions.SOURCES`.
 - [x] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions` · PR #77
   - [x] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
   - [x] `CHILDREN_STILL_LINKED` (D54)

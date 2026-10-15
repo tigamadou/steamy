@@ -5,6 +5,7 @@ from apps.accounts.views.children import ChildViewSet, MyParentView
 from apps.accounts.views.consent import ConsentRequestViewSet
 from apps.accounts.views.deletion import DeletionRequestViewSet, MyDeletionRequestView
 from apps.accounts.views.me import EmailChangeView, MeView, PasswordChangeView
+from apps.accounts.views.pending_actions import PendingActionsView
 from apps.accounts.views.phone_change import PhoneChangeVerifyView, PhoneChangeView
 from apps.accounts.views.profiles import LearnerProfileView, ParentProfileView
 
@@ -31,5 +32,6 @@ urlpatterns = [
         MyDeletionRequestView.as_view(),
         name="accounts-me-deletion-request",
     ),
+    path("pending-actions/", PendingActionsView.as_view(), name="accounts-pending-actions"),
     path("", include(router.urls)),
 ]
