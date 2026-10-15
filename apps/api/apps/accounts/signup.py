@@ -24,7 +24,7 @@ from apps.notifications.sms import queue_sms
 from libs.errors import ApiError
 
 from .models import ConsentRequest, LearnerProfile, SignupSession, User
-from .otp import consume_sms_quota
+from .otp import consume_send_quota
 
 #: Âges acceptés (D23).
 MIN_AGE, MAX_AGE = 10, 17
@@ -144,7 +144,7 @@ def consent_url(token: str) -> str:
 
 def _send_consent_sms(consent: ConsentRequest, ip: str) -> None:
     """Nouveau jeton à chaque envoi : seul le dernier lien reçu est valable."""
-    consume_sms_quota(consent.parent_phone, ip, PlatformSettings.load())
+    consume_send_quota(consent.parent_phone, ip, PlatformSettings.load())
     token = secrets.token_urlsafe(24)
     consent.token_hash = hash_token(token)
     consent.last_sent_at = timezone.now()

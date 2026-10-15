@@ -1131,6 +1131,115 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/auth/password-reset/:
+    post:
+      operationId: auth_password_reset_create
+      description: 'WL02 : réponse identique que le compte existe ou non. Un identifiant
+        d''apprenant est refusé (D26).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/password-reset/confirm/:
+    post:
+      operationId: auth_password_reset_confirm_create
+      description: 'WL04 → WL05 : nouveau mot de passe (D25) ; les sessions ouvertes
+        ailleurs sont fermées.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+        required: true
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/password-reset/verify/:
+    post:
+      operationId: auth_password_reset_verify_create
+      description: 'WL03 : code valide → `resetToken` (15 min, usage unique).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetToken'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/auth/username-availability/:
     get:
       operationId: auth_username_availability_retrieve
@@ -3986,6 +4095,7 @@ components:
       - OUT_OF_STOCK
       - PARENT_APPROVAL_REQUIRED
       - PARSE_ERROR
+      - PASSWORD_RESET_BY_PARENT
       - PASSWORD_TOO_WEAK
       - PAYMENT_FAILED
       - PAYMENT_REQUIRED
@@ -3994,6 +4104,7 @@ components:
       - PHONE_TAKEN
       - QUIZ_COOLDOWN
       - REPORT_LOCKED
+      - RESET_TOKEN_INVALID
       - RESUME_CODE_INVALID
       - SERVER_ERROR
       - SIGNUP_EXPIRED
@@ -4052,6 +4163,7 @@ components:
         * `OUT_OF_STOCK` - OUT_OF_STOCK
         * `PARENT_APPROVAL_REQUIRED` - PARENT_APPROVAL_REQUIRED
         * `PARSE_ERROR` - PARSE_ERROR
+        * `PASSWORD_RESET_BY_PARENT` - PASSWORD_RESET_BY_PARENT
         * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
         * `PAYMENT_FAILED` - PAYMENT_FAILED
         * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
@@ -4060,6 +4172,7 @@ components:
         * `PHONE_TAKEN` - PHONE_TAKEN
         * `QUIZ_COOLDOWN` - QUIZ_COOLDOWN
         * `REPORT_LOCKED` - REPORT_LOCKED
+        * `RESET_TOKEN_INVALID` - RESET_TOKEN_INVALID
         * `RESUME_CODE_INVALID` - RESUME_CODE_INVALID
         * `SERVER_ERROR` - SERVER_ERROR
         * `SIGNUP_EXPIRED` - SIGNUP_EXPIRED
@@ -5120,6 +5233,30 @@ components:
           maxLength: 128
       required:
       - password
+    PasswordResetConfirmRequest:
+      type: object
+      properties:
+        resetToken:
+          type: string
+          minLength: 1
+          maxLength: 128
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+      - resetToken
+    PasswordResetRequestRequest:
+      type: object
+      properties:
+        identifier:
+          type: string
+          minLength: 1
+          description: Numéro du parent ou email de l'enseignant (C7)
+          maxLength: 255
+      required:
+      - identifier
     PatchedLearnerProfileUpdateRequest:
       type: object
       properties:
@@ -5510,6 +5647,13 @@ components:
       - code
       - id
       - label
+    ResetToken:
+      type: object
+      properties:
+        resetToken:
+          type: string
+      required:
+      - resetToken
     Resource:
       type: object
       properties:

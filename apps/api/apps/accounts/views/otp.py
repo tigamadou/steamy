@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from apps.accounts.otp import client_ip, resend_challenge, resend_in_seconds
 from apps.core.models import PlatformSettings
-from libs.phone import mask_phone
+from libs.phone import mask_email, mask_phone
 
 from .session import enforce_csrf
 
@@ -26,7 +26,7 @@ class OtpChallengeSerializer(serializers.Serializer):
     )
 
     def get_destination_masked(self, challenge) -> str:
-        return mask_phone(challenge.phone)
+        return mask_phone(challenge.phone) if challenge.phone else mask_email(challenge.email)
 
     def get_expires_in_sec(self, challenge) -> int:
         return PlatformSettings.load().otp_validity_seconds

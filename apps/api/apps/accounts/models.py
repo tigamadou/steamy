@@ -324,7 +324,13 @@ class OtpChallenge(TimestampedModel):
         PHONE_CHANGE = "phone_change", "Changement de numéro"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    phone = models.CharField(_("téléphone"), max_length=16)
+    phone = models.CharField(_("téléphone"), max_length=16, blank=True)
+    #: Code envoyé par email plutôt que par SMS (mot de passe oublié de l'enseignant, C6).
+    email = models.EmailField(_("email"), blank=True)
+    #: Compte concerné (mot de passe oublié) ; nul si la saisie ne désigne aucun compte.
+    user = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, null=True, blank=True, related_name="+"
+    )
     purpose = models.CharField(_("objet"), max_length=16, choices=Purpose.choices)
     code_hash = models.CharField(max_length=128)
     expires_at = models.DateTimeField()
@@ -453,3 +459,18 @@ class ParentChildLink(TimestampedModel):
 
     def __str__(self):
         return f"{self.parent} → {self.learner}"
+
+
+class PasswordResetToken(TimestampedModel):
+    """Jeton remis après un code valide (WL03), échangé contre un nouveau mot de passe (WL04). Stocké haché."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    token_hash = models.CharField(max_length=64, unique=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        verbose_name = _("jeton de réinitialisation")
+        verbose_name_plural = _("jetons de réinitialisation")
+
+    def __str__(self):
+        return f"Réinitialisation de {self.user}"

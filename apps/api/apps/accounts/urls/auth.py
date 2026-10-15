@@ -12,6 +12,11 @@ from apps.accounts.views.parent_signup import (
     ParentSignupVerifyView,
     ParentSignupView,
 )
+from apps.accounts.views.password_reset import (
+    PasswordResetConfirmView,
+    PasswordResetVerifyView,
+    PasswordResetView,
+)
 from apps.accounts.views.session import CsrfView, LoginView, LogoutView
 
 # Domaine d'URL `auth`, servi par l'app `accounts` (pas d'app nommée `auth` : collision avec django.contrib.auth)
@@ -35,6 +40,17 @@ urlpatterns = [
         "learner-signup/password/",
         LearnerSignupPasswordView.as_view(),
         name="auth-learner-signup-password",
+    ),
+    path("password-reset/", PasswordResetView.as_view(), name="auth-password-reset"),
+    path(
+        "password-reset/verify/",
+        PasswordResetVerifyView.as_view(),
+        name="auth-password-reset-verify",
+    ),
+    path(
+        "password-reset/confirm/",
+        PasswordResetConfirmView.as_view(),
+        name="auth-password-reset-confirm",
     ),
     path("parent-signup/", ParentSignupView.as_view(), name="auth-parent-signup"),
     path(
