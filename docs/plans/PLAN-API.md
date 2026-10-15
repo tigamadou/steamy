@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L1.3
+Statut : 🟡 en cours · Prochaine tâche : API-L1.4
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -189,10 +189,17 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > incompatible avec Django 5. Catégories non paginées. Le détail expose la bande-annonce (`trailerVimeoId/Hash`,
   > ADR 0004) et le plan : projets (objectifs, prérequis, matériel), niveaux (`introSummary`), missions (titre,
   > durée, icône), `missionCount`.
-- [ ] **API-L1.3** Événements en lecture · `feature/api-l1-3-events`
-  - [ ] App `events` : `SteamyEvent` (§3.4) + admin
-  - [ ] `GET events/?upcoming=`, `GET events/{slug}/` (`seatsLeft` calculé)
-  - [ ] Tests : brouillon invisible, aucune écriture publique
+- [x] **API-L1.3** Événements en lecture · `feature/api-l1-3-events` · PR #40
+  - [x] App `events` : `SteamyEvent` (§3.4) + admin
+  - [x] `GET events/?upcoming=`, `GET events/{slug}/` (`seatsLeft` calculé)
+  - [x] Tests : brouillon invisible, aucune écriture publique (matrice d'accès)
+  - [x] Seed : 4 événements (gratuit, payant, complet, passé) ; couverture 100 % du code modifié
+  > Décisions : `seatsLeft` = `capacity` − `seatsReserved` (places attribuées hors candidature, saisies dans l'admin) ;
+  > les candidatures acceptées s'y ajouteront en API-L3b.6. Champs dérivés `isFree`, `isPast`, `applicationsOpen`
+  > (places restantes et date limite non passée) pour les CTA de WL23. Ajouts à §3.4 : `online`, `audience`
+  > (« 12 – 15 ans », maquette WL23), `seatsReserved` ; contraintes fin > début, date limite ≤ début, places
+  > attribuées ≤ capacité. `upcoming=true` : non terminés, du plus proche au plus lointain ; `false` : terminés, du
+  > plus récent au plus ancien ; absent : tous, par date. Liste paginée, `Cache-Control: public, max-age=300`.
 - [ ] **API-L1.4** Formulaires publics · `feature/api-l1-4-formulaires`
   - [ ] App `public` : `QuoteRequest` (D13), `Lead` (D14, attestation adulte C12), `ContactMessage` (D17)
   - [ ] `POST public/*` anonymes : CSRF, throttle dédié, champ piège, erreurs `fields`

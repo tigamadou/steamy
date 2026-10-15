@@ -10,10 +10,12 @@ et le secret TOTP sont documentés dans `fixtures/README.md` ; ils ne servent ja
 import datetime
 
 from django.contrib.auth.models import Group
+from django.utils import timezone
 
 from apps.accounts.models import LearnerProfile, ParentProfile, TeacherProfile, User
 from apps.catalog import models as catalog
 from apps.core.groups import CONTENT, FINANCE, SUPER_ADMIN, SUPPORT
+from apps.events.models import SteamyEvent
 from apps.notifications.models import Category, Notification, Tone
 from apps.referentials.models import Avatar, Goal, Locality, SchoolGrade
 
@@ -349,8 +351,93 @@ def seed_catalog() -> None:
                     )
 
 
+#: Événements : slug, titre, emoji, couleur, décalage en jours depuis aujourd'hui, ville, lieu, public, prix, places,
+#: places déjà attribuées. Couvre gratuit, payant, complet et passé (WL21, WL23).
+EVENTS = [
+    (
+        "atelier-electronique",
+        "Atelier Électronique débutant",
+        "⚡",
+        "#0EA5E9",
+        21,
+        "Porto-Novo",
+        "Maison des jeunes, Ouando",
+        "12 – 15 ans",
+        0,
+        20,
+        12,
+    ),
+    (
+        "defi-robots-cotonou",
+        "Défi robots de Cotonou",
+        "🤖",
+        "#5B3FE0",
+        45,
+        "Cotonou",
+        "Institut français",
+        "10 – 17 ans",
+        5000,
+        40,
+        5,
+    ),
+    (
+        "hackathon-ia",
+        "Hackathon IA junior",
+        "🧠",
+        "#14B8A6",
+        14,
+        "Cotonou",
+        "Sèmè City",
+        "14 – 17 ans",
+        2000,
+        30,
+        30,
+    ),
+    (
+        "fete-de-la-science",
+        "Fête de la science Steamy",
+        "🔋",
+        "#84CC16",
+        -30,
+        "Parakou",
+        "Université de Parakou",
+        "10 – 17 ans",
+        0,
+        100,
+        64,
+    ),
+]
+
+
+def seed_events() -> None:
+    today = timezone.localtime().replace(hour=14, minute=0, second=0, microsecond=0)
+    for slug, title, emoji, color, days, city, place, audience, price, capacity, reserved in EVENTS:
+        starts_at = today + datetime.timedelta(days=days)
+        SteamyEvent.objects.update_or_create(
+            slug=slug,
+            defaults={
+                "title": title,
+                "emoji": emoji,
+                "color": color,
+                "starts_at": starts_at,
+                "ends_at": starts_at + datetime.timedelta(hours=2, minutes=30),
+                "application_deadline": starts_at - datetime.timedelta(days=3),
+                "city": city,
+                "place": place,
+                "audience": audience,
+                "price": price,
+                "capacity": capacity,
+                "seats_reserved": reserved,
+                "description": f"{title} : une demi-journée pour construire, tester et partager avec d'autres "
+                "jeunes inventeurs. L'accord de ton parent est toujours demandé.",
+                "status": SteamyEvent.Status.PUBLISHED,
+            },
+        )
+
+
 def seed_all() -> dict[str, User]:
     accounts = seed_accounts()
     seed_notifications(accounts)
     seed_catalog()
+    seed_events()
     return accounts
