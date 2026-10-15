@@ -31,7 +31,7 @@ export const routes = {
   events: "/evenements",
   event: (slug: string) => `/evenements/${slug}`,
   schools: "/ecoles",
-  quote: "/ecoles#devis",
+  quote: (offer?: string) => (offer ? `/ecoles?offre=${offer}#devis` : "/ecoles#devis"),
   about: "/a-propos",
   blog: "/blog",
   article: (slug: string) => `/blog/${slug}`,
