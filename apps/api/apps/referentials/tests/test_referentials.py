@@ -89,3 +89,13 @@ def test_initial_data_can_be_loaded_twice():
     count = Country.objects.count()
     load(apps)
     assert Country.objects.count() == count
+
+
+def test_labels():
+    from apps.referentials.models import Locality
+
+    assert str(Goal.objects.get(code="robots")) == "Construire des robots"
+    assert str(PaymentNetwork.objects.get(country="BJ", code="celtiis")) == "Celtiis Cash (BJ)"
+    benin = Country.objects.get(code="BJ")
+    assert str(Locality(country=benin, city="Cotonou")) == "Cotonou"
+    assert str(Locality(country=benin, city="Cotonou", district="Akpakpa")) == "Cotonou, Akpakpa"

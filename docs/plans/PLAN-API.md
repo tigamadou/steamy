@@ -128,6 +128,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Données initiales par migration de données
   - [x] Endpoints `GET referentials/*` publics, `Cache-Control: public, max-age=3600`
   - [x] Tests : référentiels lisibles anonymement
+  - [x] Couverture 100 % (lignes et branches) du code modifié
   - [x] Profils reliés aux référentiels (localité, classe, objectifs, avatar, handicap) ; données du shell de
     `accounts/me/` (`avatar`, `schoolGrade`, `city`) et `profileStep` complet (WP08 facultative, jamais bloquante)
   > Décisions : identifiant public `code` (slug) pour chaque référentiel, `Country` désigné par son code ISO
