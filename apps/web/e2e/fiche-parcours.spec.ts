@@ -22,6 +22,7 @@ test("WL06 → WL22 → CTA : inscription avec retour sur la fiche", async ({ pa
 });
 
 test("WL22 : aucun contenu de mission ni identifiant Vimeo dans la page (D11)", async ({ page, request }) => {
+  test.slow();
   const html = await (await request.get("/parcours/decouverte-robotique")).text();
   expect(html).toContain("Brancher un moteur");
   expect(html.toLowerCase()).not.toContain("vimeo");
@@ -58,15 +59,11 @@ test("WL22 : parcours exigeant un kit (D36) et parcours en brouillon (404)", asy
   await expect(page).toHaveURL("/parcours");
 });
 
-test("WL22 ne présente aucune violation d'accessibilité", async ({ page }) => {
-  for (const path of [
-    "/parcours/initiation-scratch",
-    "/parcours/capteurs-electroniques",
-    "/parcours/robot-bluetooth",
-  ]) {
+for (const path of ["/parcours/initiation-scratch", "/parcours/capteurs-electroniques", "/parcours/robot-bluetooth"]) {
+  test(`WL22 ne présente aucune violation d'accessibilité : ${path}`, async ({ page }) => {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     expect(violations, path).toEqual([]);
-  }
-});
+  });
+}

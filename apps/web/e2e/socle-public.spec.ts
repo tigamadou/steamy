@@ -6,8 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 // Routes du lot 2 (authentification), pas encore livrées : liste blanche retirée au lot 2.
 const LOT2_ROUTES = ["/connexion", "/inscription", "/inscription/parent"];
 // Pages du lot 1 livrées par les étapes suivantes (1.1, 1.4, 1.6) : chaque étape retire les siennes.
-// Une entrée finissant par « / » couvre des fiches (`/evenements/<slug>`).
-const LOT1_A_VENIR = ["/boutique", "/ecoles", "/evenements", "/evenements/", "/aide"];
+const LOT1_A_VENIR = ["/ecoles", "/aide"];
 // Écrans reportés ou fusionnés (S7, S8) : aucune route, aucun lien.
 const NEUTRALISEES = ["/defis", "/communaute", "/tutoriels", "/classements", "/ateliers"];
 
@@ -103,7 +102,7 @@ test("navigation et pied de page : aucun lien mort ni lien vers un écran report
       NEUTRALISEES.some((n) => path.startsWith(n)),
       path,
     ).toBe(false);
-    if (LOT2_ROUTES.includes(path) || LOT1_A_VENIR.some((p) => path === p || (p.endsWith("/") && path.startsWith(p)))) {
+    if (LOT2_ROUTES.includes(path) || LOT1_A_VENIR.includes(path)) {
       continue;
     }
     expect((await request.get(path)).status(), path).toBe(200);
@@ -115,10 +114,10 @@ test("navigation et pied de page : aucun lien mort ni lien vers un écran report
   }
 });
 
-test("le shell public et la 404 ne présentent aucune violation d'accessibilité", async ({ page }) => {
-  for (const path of ["/", "/introuvable"]) {
+for (const path of ["/", "/introuvable"]) {
+  test(`le shell public et la 404 ne présentent aucune violation d'accessibilité : ${path}`, async ({ page }) => {
     await page.goto(path);
     const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     expect(violations, path).toEqual([]);
-  }
-});
+  });
+}

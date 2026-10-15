@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { ARTICLES } from "@/content/blog";
 import { SITE_URL } from "@/content/site";
 import { getCourseSlugs } from "@/lib/catalog";
+import { getEventSlugs } from "@/lib/events";
 import { LEGAL_DOCS, routes } from "@/lib/routes";
 
 /** Pages publiques fixes (éditoriales et listes). */
@@ -11,6 +12,8 @@ export const SITEMAP_PATHS: string[] = [
   routes.home,
   routes.courses,
   routes.categories,
+  routes.events,
+  routes.shop,
   routes.about,
   routes.blog,
   ...ARTICLES.map((article) => routes.article(article.slug)),
@@ -18,13 +21,10 @@ export const SITEMAP_PATHS: string[] = [
   ...LEGAL_DOCS.map((doc) => routes.legal(doc)),
 ];
 
-/** Fiches issues de l'API (en cache) ; si l'API ne répond pas, le sitemap garde les pages fixes. */
+/** Fiches issues de l'API (en cache) ; une source qui ne répond pas est simplement omise. */
 async function apiPaths(): Promise<string[]> {
-  try {
-    return (await getCourseSlugs()).map((slug) => routes.course(slug));
-  } catch {
-    return [];
-  }
+  const [courses, events] = await Promise.all([getCourseSlugs().catch(() => []), getEventSlugs().catch(() => [])]);
+  return [...courses.map(routes.course), ...events.map(routes.event)];
 }
 
 /** Sitemap servi à la requête : l'API n'est pas joignable au build. */

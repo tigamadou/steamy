@@ -1,6 +1,6 @@
 import { routes } from "./routes";
 
-// État des filtres de WL06 dans l'URL (`/parcours?categorie=<slug>&page=<n>`) : partageable, indexable.
+// État des filtres de WL06 et WL07 dans l'URL (`/parcours?categorie=<slug>&page=<n>`) : partageable, indexable.
 
 export type CatalogFilters = { category?: string; page: number };
 
@@ -22,8 +22,8 @@ export function parseCatalogFilters(searchParams: SearchParams): CatalogFilters 
   };
 }
 
-/** URL de WL06 pour des filtres donnés (la page 1 et « Tous » n'apparaissent pas). */
-export function catalogHref({ category, page = 1 }: Partial<CatalogFilters>): string {
+/** URL d'une liste filtrée (la page 1 et « Tous » n'apparaissent pas). */
+export function listHref(base: string, { category, page = 1 }: Partial<CatalogFilters>): string {
   const query = new URLSearchParams();
   if (category) {
     query.set("categorie", category);
@@ -32,5 +32,10 @@ export function catalogHref({ category, page = 1 }: Partial<CatalogFilters>): st
     query.set("page", String(page));
   }
   const search = query.toString();
-  return search ? `${routes.courses}?${search}` : routes.courses;
+  return search ? `${base}?${search}` : base;
+}
+
+/** URL de WL06 pour des filtres donnés. */
+export function catalogHref(filters: Partial<CatalogFilters>): string {
+  return listHref(routes.courses, filters);
 }

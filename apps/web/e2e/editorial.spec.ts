@@ -65,10 +65,10 @@ test("WL10 : mission, chiffres et équipe, sans donnée de mineur", async ({ pag
   await expect(page.getByRole("link", { name: "Créer un compte" }).last()).toHaveAttribute("href", "/inscription");
 });
 
-test("les pages éditoriales ne présentent aucune violation d'accessibilité", async ({ page }) => {
-  for (const path of ["/legal/cgu", "/a-propos", "/blog", "/blog/debuter-en-robotique", "/guides"]) {
+for (const path of ["/legal/cgu", "/a-propos", "/blog", "/blog/debuter-en-robotique", "/guides"]) {
+  test(`les pages éditoriales ne présentent aucune violation d'accessibilité : ${path}`, async ({ page }) => {
     await page.goto(path);
     const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     expect(violations, path).toEqual([]);
-  }
-});
+  });
+}
