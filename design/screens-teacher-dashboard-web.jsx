@@ -1558,6 +1558,8 @@ function WT12_Notifs() {
 function TeacherDashFlowWeb() {
   return (
     <DesignCanvas>
+      {/* Écrans à concevoir (C18) : screens-*-a-concevoir-web.jsx */}
+      {window.TeacherACSections && window.TeacherACSections()}
       <DCSection
         id="tdash-home"
         title="Accueil & parcours"

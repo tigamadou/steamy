@@ -19,6 +19,7 @@ Statut : ⬜ à faire · Prochaine tâche : 5.1 Shell, accueil et navigation · 
   - [ ] Tests : redirection d'un apprenant ou d'un parent hors de `/enseignant`
   - [ ] Recette : compteurs conformes au seed ; « Commenter » ouvre `WT05` sur la tentative ; aucun « À corriger »
 - [ ] **5.2** Classes · `feature/lot5-classes` (requiert 5.1, maquette de `WT13` validée)
+  - [x] Conception de la maquette `WT13` dans `design/screens-enseignant-a-concevoir-web.jsx` (C18)
   - [ ] `WT03` Mes classes
   - [ ] `WT13` Créer / modifier une classe (`ClassroomForm` : nom*, parcours* limité à l'offre, niveau scolaire facultatif, établissement en lecture seule) d'après la maquette validée
   - [ ] `WT04` Élèves d'une classe (`MemberRow`, `InvitationRow` en attente / refusée / expirée)
