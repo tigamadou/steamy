@@ -117,3 +117,13 @@ def test_quiz_and_question_admin_pages():
         reverse("admin:catalog_question_change", args=[question.id]),
     ):
         assert client.get(url).status_code == 200, url
+
+
+def test_badge_admin_pages():
+    from apps.catalog.models import Badge
+
+    badge = Badge.objects.create(kind="level", level=LevelFactory(), label="Moteurs", icon="⚙️")
+    client = APIClient()
+    verified_client(client, is_superuser=True)
+    assert client.get(reverse("admin:catalog_badge_changelist")).status_code == 200
+    assert client.get(reverse("admin:catalog_badge_change", args=[badge.id])).status_code == 200

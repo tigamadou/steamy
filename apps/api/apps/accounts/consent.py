@@ -14,6 +14,7 @@ from django.utils import timezone
 from apps.core.audit import audit
 from libs.errors import ApiError
 
+from .backoffice import replace_link
 from .models import ConsentRequest, ParentChildLink, User
 from .signup import hash_token
 
@@ -70,12 +71,15 @@ def accept(consent_id, parent: User, request=None) -> ConsentRequest:
         if consent is None:
             raise ApiError("NOT_FOUND")
         ensure_open(consent)
-        ParentChildLink.objects.create(
-            parent=parent,
-            learner_id=consent.learner_id,
-            relationship=consent.relationship,
-            consent_request=consent,
-        )
+        if consent.replaces_link_id:  # changement de parent (D22) : le lien n'est remplacé qu'ici
+            replace_link(consent, parent)
+        else:
+            ParentChildLink.objects.create(
+                parent=parent,
+                learner_id=consent.learner_id,
+                relationship=consent.relationship,
+                consent_request=consent,
+            )
         consent.status = Status.ACCEPTED
         consent.parent = parent
         consent.resolved_at = timezone.now()

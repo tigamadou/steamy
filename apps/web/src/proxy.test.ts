@@ -22,7 +22,21 @@ describe("proxy", () => {
     expect(response.headers.get("x-middleware-request-x-steamy-path")).toBe("/apprenant");
   });
 
+  it.each(["/backoffice", "/backoffice/impact"])(
+    "laisse le layout du back-office renvoyer vers WAD15 sans cookie (%s)",
+    (path) => {
+      const response = proxy(request(path));
+      expect(response.headers.get("location")).toBeNull();
+      expect(response.headers.get("x-middleware-request-x-steamy-path")).toBe(path);
+    },
+  );
+
   it("ne garde que les espaces connectés", () => {
-    expect(config.matcher).toEqual(["/apprenant/:path*", "/parent/:path*", "/enseignant/:path*"]);
+    expect(config.matcher).toEqual([
+      "/apprenant/:path*",
+      "/parent/:path*",
+      "/enseignant/:path*",
+      "/backoffice/:path*",
+    ]);
   });
 });

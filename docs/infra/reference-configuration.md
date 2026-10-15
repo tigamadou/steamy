@@ -22,6 +22,8 @@ En staging et en prod, le chart les injecte dans api, worker, beat et migrate.
 | `AWS_S3_ENDPOINT_URL` | oui | `http://rustfs:9000` | `http://steamy-rustfs:9000` | Stockage des médias |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | oui | factices | secrets `RUSTFS_ACCESS_KEY` / `RUSTFS_SECRET_KEY` | Identifiants RustFS |
 | `AWS_STORAGE_BUCKET_NAME` | oui | `steamy-media` | `steamy-media` | Bucket des médias |
+| `AWS_S3_PUBLIC_ENDPOINT_URL` | non | vide | `https://media.<domaine>` (**à créer**, ADR 0005 P5) | Point d'accès joignable du navigateur, utilisé seulement pour signer les URL de téléchargement des documents privés (certificats, factures). Vide : signature pour `AWS_S3_ENDPOINT_URL`, injoignable du navigateur en déployé |
+| `PRIVATE_FILE_STORAGE` | non | `apps.core.storage.PrivateMediaStorage` (`PrivateFileSystemStorage` si `DEFAULT_FILE_STORAGE` est un `FileSystemStorage`) | idem | Stockage des documents privés : préfixe `private/` du bucket, objets privés, URL présignées de 5 min (ADR 0005) |
 | `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_USE_TLS` | non | Mailpit | values `email.*` | SMTP |
 | `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | non | factices | secrets du même nom | Identifiants SMTP |
 | `DEFAULT_FROM_EMAIL` | non | `no-reply@steamy.local` | values `email.from` | Expéditeur |
