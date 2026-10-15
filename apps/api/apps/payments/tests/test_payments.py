@@ -225,10 +225,17 @@ def test_payment_is_readable_by_its_payer_only(course_order):
 # --- Invité ----------------------------------------------------------------------------------
 
 
+class SmsInbox:
+    """Faux SMS reçus (e-mails à `<e164>@sms.test`), sans exécution immédiate des `on_commit` (fixture `sms`)."""
+
+    def last(self, phone):
+        from django.core import mail
+
+        return [m.body for m in mail.outbox if m.to == [f"{phone}@sms.test"]][-1]
+
+
 @pytest.fixture
 def sms_inbox():
-    from conftest import SmsInbox
-
     return SmsInbox()
 
 
