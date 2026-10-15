@@ -7,19 +7,26 @@ contenu (S5) : les parcours sont en lecture seule.
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from djangorestframework_camel_case.parser import CamelCaseJSONParser, CamelCaseMultiPartParser
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from apps.accounts.fields import phone_country
 from apps.catalog.models import Course, Level, Project
+from apps.referentials.models import Relationship
 from libs.permissions import IsTeacher
 
-from . import services
+from . import imports, services
+from .learner_invitations import Invitee, invite, invite_many
 from .models import Classroom, ClassroomMembership
 from .serializers import (
     ClassroomSerializer,
     ClassroomWriteSerializer,
+    ImportRequestSerializer,
+    ImportResultSerializer,
+    InvitationSerializer,
     MemberSerializer,
     SchoolSerializer,
     SupervisedCourseDetailSerializer,
@@ -109,11 +116,69 @@ class ClassroomViewSet(
         classroom = self.get_object()
         queryset = (
             classroom.memberships.exclude(status=Status.LEFT)
+            # Demande close purgée après 30 jours (C9) : l'invitation n'a plus rien à montrer
+            .exclude(status=Status.INVITED, consent_request__isnull=True)
             .select_related("learner__learner_profile__avatar", "consent_request")
             .order_by("status", "-created_at", "-id")
         )
         page = self.paginate_queryset(queryset)
         return self.get_paginated_response(MemberSerializer(page, many=True).data)
+
+    @extend_schema(request=InvitationSerializer, responses={201: MemberSerializer})
+    @action(detail=True, methods=["post"])
+    def invitations(self, request, pk=None):
+        """
+        WT06 onglet Individuel : demande de consentement d'origine enseignant, SMS au parent (D60).
+        `LEARNER_QUOTA_EXCEEDED` (invitations en attente comprises, C19), `ALREADY_IN_CLASSROOM`, `CONSENT_COOLDOWN`,
+        `INVITATION_DAILY_LIMIT`.
+        """
+        classroom = self.get_object()
+        payload = InvitationSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        membership = invite(classroom, request.user, Invitee(**payload.validated_data))
+        return Response(MemberSerializer(membership).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        request={
+            "multipart/form-data": ImportRequestSerializer,
+            "application/json": ImportRequestSerializer,
+        },
+        responses=ImportResultSerializer,
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="invitations/import",
+        parser_classes=[CamelCaseJSONParser, CamelCaseMultiPartParser],
+    )
+    def import_invitations(self, request, pk=None):
+        """
+        WT06 onglet Import par lot (C19) : import partiel. Les lignes valides partent dans la limite du quota ; les
+        autres reviennent avec leur numéro et leur code (`DUPLICATE_ROW`, `MALFORMED_ROW`, `PHONE_INVALID`,
+        `ALREADY_IN_CLASSROOM`, `LEARNER_QUOTA_EXCEEDED`…). Plus de 200 lignes : `IMPORT_TOO_LARGE`.
+        """
+        classroom = self.get_object()
+        payload = ImportRequestSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        if payload.validated_data.get("file"):
+            lines = imports.read_file(payload.validated_data["file"])
+        else:
+            lines = [
+                (
+                    row.get("line") or number,
+                    [row[name] for name in imports.COLUMNS],
+                )
+                for number, row in enumerate(payload.validated_data["rows"], start=1)
+            ]
+        imports.check_size(lines)
+        ready, result = imports.parse(
+            lines,
+            relationships=Relationship.objects.filter(active=True),
+            dial_code=classroom.school.country.dial_code,
+            phone_valid=lambda phone: phone_country(phone) is not None,
+        )
+        invite_many(classroom, request.user, ready, result)
+        return Response(ImportResultSerializer(result).data)
 
     @extend_schema(request=None, responses=MemberSerializer)
     @action(detail=True, methods=["post"], url_path=r"members/(?P<member_id>\d+)/remove")

@@ -40,6 +40,7 @@ djangorestframework==3.14.0
 djangorestframework_simplejwt==5.5.1
 drf-spectacular-sidecar==2025.8.1
 drf-spectacular==0.28.0
+et-xmlfile==2.0.0
 factory_boy==3.3.3
 Faker==12.0.1
 flower==2.0.1
@@ -57,6 +58,7 @@ kombu==5.2.4
 mixer==7.2.2
 model-bakery==1.20.5
 msgpack==1.1.1
+openpyxl==3.1.5
 packaging==25.0
 Pillow==9.4.0
 pluggy==1.6.0

@@ -7,10 +7,11 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.accounts import consent as consent_service
+from apps.accounts.fields import PhoneField
 from apps.accounts.models import ConsentRequest
 from apps.catalog.models import Course, Level, Mission, Project
 from apps.catalog.serializers import CategorySummarySerializer
-from apps.referentials.models import SchoolGrade
+from apps.referentials.models import Relationship, SchoolGrade
 from apps.referentials.serializers import AvatarSerializer, SchoolGradeSerializer
 
 from . import quotas
@@ -245,3 +246,67 @@ class SupervisedCourseDetailSerializer(SupervisedCourseSerializer):
     @extend_schema_field(ClassroomSerializer(many=True))
     def get_classrooms(self, course):
         return ClassroomSerializer(self.context["classrooms"], many=True).data
+
+
+class InvitationSerializer(serializers.Serializer):
+    """WT06 onglet Individuel : l'élève n'a pas de téléphone (D30), seul son parent est contacté."""
+
+    first_name = serializers.CharField(max_length=150)
+    last_name = serializers.CharField(max_length=150)
+    parent_phone = PhoneField()
+    relationship = serializers.SlugRelatedField(
+        slug_field="code",
+        queryset=Relationship.objects.filter(active=True),
+        help_text="Code du référentiel `relationships`",
+    )
+
+
+class ImportRowSerializer(serializers.Serializer):
+    """Ligne saisie ou corrigée dans le front ; `line` garde son numéro d'origine dans le rapport."""
+
+    line = serializers.IntegerField(required=False, min_value=1)
+    first_name = serializers.CharField(allow_blank=True, default="")
+    last_name = serializers.CharField(allow_blank=True, default="")
+    parent_phone = serializers.CharField(allow_blank=True, default="")
+    relationship = serializers.CharField(allow_blank=True, default="")
+
+
+class ImportRequestSerializer(serializers.Serializer):
+    """Un fichier CSV ou Excel (.xlsx, 1 Mo, 200 lignes) **ou** des lignes (liste collée, lignes corrigées)."""
+
+    file = serializers.FileField(required=False)
+    rows = ImportRowSerializer(many=True, required=False)
+
+    def validate(self, attrs):
+        if bool(attrs.get("file")) == ("rows" in attrs):
+            raise serializers.ValidationError("Envoyez soit un fichier, soit des lignes.")
+        return attrs
+
+
+class ImportRowDataSerializer(serializers.Serializer):
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+    parent_phone = serializers.CharField(required=False)
+    relationship = serializers.CharField(required=False)
+
+
+class ImportErrorSerializer(serializers.Serializer):
+    line = serializers.IntegerField()
+    code = serializers.ChoiceField(
+        choices=[
+            "DUPLICATE_ROW",
+            "MALFORMED_ROW",
+            "PHONE_INVALID",
+            "ALREADY_IN_CLASSROOM",
+            "LEARNER_QUOTA_EXCEEDED",
+            "CONSENT_COOLDOWN",
+            "INVITATION_DAILY_LIMIT",
+        ]
+    )
+    message = serializers.CharField()
+    data = ImportRowDataSerializer(help_text="Valeurs lues, pour corriger la ligne en place")
+
+
+class ImportResultSerializer(serializers.Serializer):
+    created = MemberSerializer(many=True)
+    errors = ImportErrorSerializer(many=True)

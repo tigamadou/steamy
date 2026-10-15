@@ -419,11 +419,25 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (WT04, WT10) arrivent avec API-L5.3, après API-L3a. Énumérations `ConsentStatusEnum` et
   > `MembershipStatusEnum` nommées dans `ENUM_NAME_OVERRIDES`.
 - [ ] **API-L5.2** Invitations · `feature/api-l5-2-invitations`
-  - [ ] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
-  - [ ] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; `Enrollment` `source=classroom` (D62)
-  - [ ] `POST …/invitations/import/` (C19 : CSV/Excel, 200 lignes, 1 Mo, import partiel, codes d'erreur par ligne)
-  - [ ] SMS par Celery, plafond par enseignant et par jour
-  - [ ] Tests : invitation non acceptée → aucun accès au parcours
+  - [x] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
+  - [x] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; l'élève devient membre actif, l'enseignant est notifié
+  - [ ] `Enrollment` `source=classroom` à l'adhésion (D62) : attend la fusion d'API-L3a.1 (PR #64, nouveau modèle `Enrollment`)
+  - [x] `POST …/invitations/import/` (C19 : CSV/Excel, 200 lignes, 1 Mo, import partiel, codes d'erreur par ligne)
+  - [x] SMS par Celery, plafond par enseignant et par jour
+  - [x] Refus et expiration : place libérée, enseignant notifié (WT04, WT12)
+  - [x] Seed D2 : élèves actifs (Léa, Yao, Sèna) et invitations en attente, refusée et expirée
+  - [ ] Tests : invitation non acceptée → aucun accès au parcours (avec l'`Enrollment`, après API-L3a.1)
+  > Décisions : import en fichier (`multipart`, champ `file`) **ou** en lignes JSON (`rows`, liste collée et lignes
+  > corrigées, `line` facultatif pour garder le numéro d'origine) ; réponse `{created[], errors[{line, code, message,
+  > data}]}`. Codes par ligne en plus de C19 : `CONSENT_COOLDOWN` (refus de ce parent depuis moins de 30 jours, C9)
+  > et `INVITATION_DAILY_LIMIT` (`CLASSROOM_INVITATIONS_PER_DAY`, 300 par défaut) ; fichier illisible :
+  > `IMPORT_INVALID_FILE`. Doublon dans la classe : même prénom et nom pour le même numéro de parent, invitation en
+  > attente ou élève actif (`ALREADY_IN_CLASSROOM`). Le compte créé par le parent est actif ; l'enfant complète son
+  > profil à la première connexion (comme D51). `GET accounts/consent-requests/{id}/` expose `classroom` (classe,
+  > enseignant, école, parcours) pour WPD05. Pas de plafond OTP par IP pour ces SMS : le plafond par enseignant le
+  > remplace.
+  > Reprise : après la fusion d'API-L3a.1 dans `development`, créer l'`Enrollment` `source=classroom` dans
+  > `apps/classrooms/joining.py` (`join_classroom`) et ajouter le test « invitation non acceptée → aucun accès ».
 - [ ] **API-L5.3** Suivi · `feature/api-l5-3-suivi`
   - [ ] `GET classrooms/dashboard/`
   - [ ] `GET classrooms/learners/{id}/?classroomId=` (serializer sans handicap, localité, date de naissance, téléphone, D64)

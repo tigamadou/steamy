@@ -345,6 +345,8 @@ SMS_PROVIDER = os.getenv("SMS_PROVIDER", "twilio" if DEPLOYED else "fake")
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
 TWILIO_SENDER = os.getenv("TWILIO_SENDER", "STEAMY")
+# Invitations d'élèves par enseignant et par jour (WT06) : plafond des SMS de consentement envoyés par une classe
+CLASSROOM_INVITATIONS_PER_DAY = int(os.getenv("CLASSROOM_INVITATIONS_PER_DAY", 300))
 # URL publique du webhook de statut (`/api/notifications/sms/status/`) ; vide : pas d'accusés de réception
 TWILIO_STATUS_CALLBACK_URL = os.getenv("TWILIO_STATUS_CALLBACK_URL", "")
 

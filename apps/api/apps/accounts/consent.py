@@ -32,7 +32,10 @@ def effective_status(consent: ConsentRequest) -> str:
 
 def ensure_open(consent: ConsentRequest) -> None:
     status = effective_status(consent)
-    if status == Status.EXPIRED or (status == Status.PENDING and consent.learner_id is None):
+    # Une demande d'enfant dont le compte en attente a disparu ne peut plus aboutir ; celle d'un enseignant n'a pas
+    # de compte avant l'accord du parent (D60)
+    orphan = consent.learner_id is None and consent.origin != ConsentRequest.Origin.TEACHER
+    if status == Status.EXPIRED or (status == Status.PENDING and orphan):
         raise ApiError("CONSENT_REQUEST_EXPIRED")
     if status != Status.PENDING:
         raise ApiError("CONSENT_ALREADY_RESOLVED")
@@ -48,7 +51,11 @@ def find_by_token(token: str) -> ConsentRequest:
 def for_parent(parent: User):
     """Demandes adressées au numéro vérifié du parent (WP04) : un parent ne voit jamais celles d'un autre."""
     return ConsentRequest.objects.filter(parent_phone=parent.phone).select_related(
-        "relationship", "refusal_reason"
+        "relationship",
+        "refusal_reason",
+        "classroom_membership__classroom__teacher",
+        "classroom_membership__classroom__school",
+        "classroom_membership__classroom__course",
     )
 
 
@@ -64,18 +71,24 @@ def claim(token: str, parent: User) -> ConsentRequest:
     return consent
 
 
-def accept(consent_id, parent: User, request=None) -> ConsentRequest:
+def accept(consent_id, parent: User, request=None, data=None) -> ConsentRequest:
+    """`data` : choix du parent pour une invitation d'enseignant (`apps.classrooms.joining`, C11)."""
     with transaction.atomic():
         consent = for_parent(parent).select_for_update(of=("self",)).filter(pk=consent_id).first()
         if consent is None:
             raise ApiError("NOT_FOUND")
         ensure_open(consent)
-        ParentChildLink.objects.create(
-            parent=parent,
-            learner_id=consent.learner_id,
-            relationship=consent.relationship,
-            consent_request=consent,
-        )
+        if consent.origin == ConsentRequest.Origin.TEACHER:
+            from apps.classrooms.joining import join_classroom
+
+            join_classroom(consent, parent, data or {})
+        else:
+            ParentChildLink.objects.create(
+                parent=parent,
+                learner_id=consent.learner_id,
+                relationship=consent.relationship,
+                consent_request=consent,
+            )
         consent.status = Status.ACCEPTED
         consent.parent = parent
         consent.resolved_at = timezone.now()
@@ -100,9 +113,13 @@ def refuse(consent_id, parent: User, reason, note: str = "", request=None) -> Co
         consent.resolved_at = timezone.now()
         consent.token_hash = ""
         consent.save()
-        if learner.status == User.Status.PENDING:
+        if learner is not None and learner.status == User.Status.PENDING:
             learner.delete()
             consent.learner = None
+        if consent.origin == ConsentRequest.Origin.TEACHER:
+            from apps.classrooms.joining import invitation_closed
+
+            invitation_closed(consent)
         audit(
             "consent.refused",
             actor=parent,

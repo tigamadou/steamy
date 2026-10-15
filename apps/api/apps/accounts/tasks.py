@@ -17,10 +17,23 @@ RESET_EMAIL_SUBJECT = "Steamy : votre code de réinitialisation"
 
 @shared_task
 def expire_consent_requests() -> int:
-    """Demandes en attente arrivées à échéance (7 jours, D21) : expirées, lien désactivé."""
-    return ConsentRequest.objects.filter(
+    """
+    Demandes en attente arrivées à échéance (7 jours, D21) : expirées, lien désactivé. L'enseignant qui avait invité
+    l'élève est prévenu (WT04, WT12).
+    """
+    from apps.classrooms.joining import invitation_closed
+
+    due = ConsentRequest.objects.filter(
         status=ConsentRequest.Status.PENDING, expires_at__lte=timezone.now()
-    ).update(status=ConsentRequest.Status.EXPIRED, resolved_at=timezone.now(), token_hash="")
+    )
+    teacher_requests = list(due.filter(origin=ConsentRequest.Origin.TEACHER))
+    expired = due.update(
+        status=ConsentRequest.Status.EXPIRED, resolved_at=timezone.now(), token_hash=""
+    )
+    for consent in teacher_requests:
+        consent.status = ConsentRequest.Status.EXPIRED
+        invitation_closed(consent)
+    return expired
 
 
 @shared_task

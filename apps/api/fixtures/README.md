@@ -16,6 +16,8 @@ Mot de passe de tous les comptes : **`Steamy2026`**.
 | Apprenante | W16 (`/connexion`) | `lea.adjovi` | Léa Adjovi, 4ᵉ, Cotonou ; profil complet |
 | Parent | W16 | `+229 01 90 00 00 01` (ou `0190000001`) | Marie Adjovi ; email de contact `marie.adjovi@steamy.test` |
 | Enseignant | W16 | `koffi.adekambi@steamy.test` | M. Koffi Adékambi |
+| Parent | W16 | `+229 01 90 00 00 02` (ou `0190000002`) | Bernard Kpadé, parent de Yao et Sèna |
+| Apprenants | W16 | `yao.kpade`, `sena.kpade` | Élèves de M. Adékambi |
 | Personnel · Super-admin | admin Django (`/admin/`, WAD15) | `superadmin@steamy.test` | Groupe Super-admin (pas `is_superuser`, réservé au compte de secours) |
 | Personnel · Contenu | admin Django | `contenu@steamy.test` | |
 | Personnel · Support | admin Django | `support@steamy.test` | |
@@ -23,6 +25,15 @@ Mot de passe de tous les comptes : **`Steamy2026`**.
 
 Marie est le parent de Léa (lien parent ↔ enfant, consentement donné). M. Adékambi est rattaché au
 « Collège Steamy de Cotonou ».
+
+## Classes de M. Adékambi (API-L5)
+
+L'école a l'offre « Offre Classe Robotique 2026 » (3 parcours, 120 élèves, 4 classes). Deux classes :
+
+| Classe | Parcours | Élèves actifs | Invitations |
+| --- | --- | --- | --- |
+| 4ᵉ B · Robotique | Découverte de la robotique | Léa, Yao | Kémi Ahouandjinou en attente (SMS au `+229 01 90 00 00 03` dans Mailpit), Ola Gbaguidi refusée, Tobi Zinsou expirée |
+| 3ᵉ A · Code | Initiation à Scratch | Sèna | — |
 
 ## Invitation enseignant en attente
 

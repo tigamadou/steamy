@@ -28,7 +28,8 @@ def test_seed_demo_twice_creates_no_duplicate():
     first = counts()
     call_command("seed_demo")
     assert counts() == first
-    assert first[0] == 7  # Léa, Marie, Koffi et un membre du personnel par groupe
+    # Léa, Marie, Koffi, un membre du personnel par groupe, Bernard Kpadé et ses deux enfants (élèves de Koffi)
+    assert first[0] == 10
 
 
 def test_seed_demo_is_refused_in_production(settings):
@@ -154,3 +155,25 @@ def test_seed_demo_gives_koffi_two_classrooms_within_the_offer():
     classrooms = Classroom.objects.filter(teacher=koffi)
     assert classrooms.count() == 2
     assert all(c.course.slug in OFFER_COURSES and c.school == school for c in classrooms)
+
+
+def test_seed_demo_fills_koffis_classrooms_with_learners_and_invitations(sms):
+    from apps.accounts.models import ConsentRequest
+    from apps.classrooms.demo import INVITATIONS, KPADE_PHONE
+    from apps.classrooms.models import ClassroomMembership
+    from apps.core.demo import KOFFI_EMAIL
+
+    call_command("seed_demo")
+    call_command("seed_demo")  # idempotent
+    koffi = User.objects.get(email=KOFFI_EMAIL)
+    memberships = ClassroomMembership.objects.filter(classroom__teacher=koffi)
+    active = memberships.filter(status="active")
+    assert sorted(active.values_list("learner__first_name", flat=True)) == ["Léa", "Sèna", "Yao"]
+    statuses = sorted(
+        memberships.filter(status="invited").values_list("consent_request__status", flat=True)
+    )
+    assert statuses == sorted(status for *_, status in INVITATIONS)
+    assert ConsentRequest.objects.filter(origin="teacher").count() == len(INVITATIONS)
+    assert User.objects.get(phone=KPADE_PHONE).children_links.count() == 2
+    # SMS de l'invitation en attente (faux fournisseur, lisible dans Mailpit)
+    assert "/consentement/" in sms.last(INVITATIONS[0][2])

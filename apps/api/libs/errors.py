@@ -167,6 +167,10 @@ CATALOG: dict[str, tuple[int, str]] = {
         "Ce parcours ne fait pas partie de votre offre.",
     ),
     "CLASSROOM_NAME_TAKEN": (S.HTTP_409_CONFLICT, "Une de vos classes porte déjà ce nom."),
+    "INVITATION_DAILY_LIMIT": (
+        S.HTTP_429_TOO_MANY_REQUESTS,
+        "Nombre maximal d'invitations atteint pour aujourd'hui. Réessayez demain.",
+    ),
     "REPORT_LOCKED": (S.HTTP_409_CONFLICT, "Ce rapport est soumis : il n'est plus modifiable."),
     # --- Import d'élèves (codes par ligne, C19) ---------------------------------------------
     "DUPLICATE_ROW": (S.HTTP_400_BAD_REQUEST, "Ligne en double dans le fichier."),
@@ -175,6 +179,10 @@ CATALOG: dict[str, tuple[int, str]] = {
     "IMPORT_TOO_LARGE": (
         S.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
         "Le fichier dépasse 200 lignes : découpez-le en plusieurs imports.",
+    ),
+    "IMPORT_INVALID_FILE": (
+        S.HTTP_400_BAD_REQUEST,
+        "Fichier illisible : envoyez un fichier CSV ou Excel (.xlsx).",
     ),
 }
 
