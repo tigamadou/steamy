@@ -95,9 +95,11 @@ Le correctif passe par une PR vers `hotfix/1.4.1`. Ensuite :
 
 ```bash
 make test-api                 # si l'API a changé
+make coverage-api             # couverture 100 % exigée sur le code modifié
 make fix-api                  # lint et format de l'API (Ruff), corrections automatiques
 make openapi                  # si un serializer ou une vue a changé, puis committer les fichiers générés
 make lint-web typecheck-web   # si le front a changé
 ```
 
-La CI refait ces vérifications ; les lancer localement évite un aller-retour.
+La CI refait ces vérifications ; les lancer localement évite un aller-retour. Si la PR livre un écran, sa ligne de
+[`docs/tests/MATRICE-E2E.md`](docs/tests/MATRICE-E2E.md) doit citer son test e2e.

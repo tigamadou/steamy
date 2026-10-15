@@ -10,3 +10,5 @@ docs
 infra
 **/.env
 **/.env.*
+**/playwright-report
+**/test-results

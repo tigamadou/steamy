@@ -26,6 +26,7 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       web: ${{ steps.filter.outputs.web }}
       infra: ${{ steps.filter.outputs.infra }}
+      e2e: ${{ steps.filter.outputs.e2e }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -60,6 +61,17 @@ jobs:
               - *ci
               - 'infra/**'
               - '.github/workflows/deploy.yml'
+            # Parcours de bout en bout : un changement d'API peut casser un parcours,
+            # le filtre `web` seul ne suffit pas.
+            e2e:
+              - *ci
+              - 'apps/api/**'
+              - 'apps/web/**'
+              - 'packages/**'
+              - 'compose.yml'
+              - 'compose.e2e.yml'
+              - 'Makefile'
+              - 'pnpm-lock.yaml'
 
   api:
     needs: changes
@@ -96,6 +108,8 @@ jobs:
       DEFAULT_FILE_STORAGE: django.core.files.storage.FileSystemStorage
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # diff-cover compare la branche à sa base
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
@@ -111,8 +125,18 @@ jobs:
         run: ruff format --check --diff .
       - name: Migrations manquantes ?
         run: python manage.py makemigrations --check --dry-run
-      - name: Tests
-        run: pytest
+      - name: Tests (avec couverture)
+        run: pytest --cov --cov-report=term --cov-report=xml:coverage.xml
+      # Règle : 100 % de couverture (lignes et branches) sur le code ajouté ou modifié.
+      # En local : `make coverage-api`.
+      - name: Couverture du code modifié = 100 %
+        env:
+          COMPARE: >-
+            ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref)
+            || ((github.ref_name == 'development' || github.ref_name == 'main') && github.event.before)
+            || (startsWith(github.ref_name, 'hotfix/') && 'origin/main')
+            || 'origin/development' }}
+        run: diff-cover coverage.xml --compare-branch="$COMPARE" --fail-under=100
       - name: Contrat OpenAPI à jour ?
         run: |
           python manage.py spectacular --file /tmp/openapi.yaml --validate --fail-on-warn
@@ -128,6 +152,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # diff-cover compare la branche à sa base
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
@@ -141,6 +167,17 @@ jobs:
             || { echo "::error::schema.d.ts n'est plus à jour : lancer \`make openapi\` et committer."; exit 1; }
       - run: pnpm lint
       - run: pnpm typecheck
+      - name: Tests (avec couverture)
+        run: pnpm --filter @steamy/web test:coverage
+      # Règle : 100 % de couverture sur le code ajouté ou modifié. En local : `make coverage-web`.
+      - name: Couverture du code modifié = 100 %
+        env:
+          COMPARE: >-
+            ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref)
+            || ((github.ref_name == 'development' || github.ref_name == 'main') && github.event.before)
+            || (startsWith(github.ref_name, 'hotfix/') && 'origin/main')
+            || 'origin/development' }}
+        run: pipx run --spec diff-cover==10.6.0 diff-cover apps/web/coverage/cobertura-coverage.xml --compare-branch="$COMPARE" --fail-under=100
       - run: pnpm build
 
   # Une image par job : modifier le front ne reconstruit pas l'image de l'API
@@ -178,6 +215,34 @@ jobs:
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web
 
+  # Parcours Playwright sur la stack Docker (`make e2e`, voir compose.e2e.yml). Les navigateurs
+  # viennent de l'image officielle Playwright, épinglée sur la version de @playwright/test.
+  e2e:
+    needs: changes
+    if: needs.changes.outputs.e2e == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v5
+      - run: make e2e
+      - name: Rapport Playwright
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report/
+            apps/web/test-results/
+          retention-days: 7
+      - name: Journaux de la stack
+        if: failure()
+        run: docker compose -p steamy-e2e -f compose.yml -f compose.e2e.yml logs --no-color --tail=200 api web
+      - name: Arrêt de la stack
+        if: always()
+        run: make e2e-down
+
   helm:
     needs: changes
     if: needs.changes.outputs.infra == 'true'
@@ -206,12 +271,21 @@ jobs:
       - name: Shellcheck du script de déploiement
         run: shellcheck infra/deploy/steamy-deploy.sh
 
+  # Règle : 100 % des écrans v1 ont un test e2e. Tout écran livré (case cochée dans un plan)
+  # doit citer un test existant dans docs/tests/MATRICE-E2E.md. Contrôle rapide, toujours lancé.
+  e2e-matrice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Matrice écran → test e2e
+        run: python3 scripts/e2e_matrix.py --check
+
   # Point de contrôle unique pour la protection de branche.
   # `changes` est surveillé aussi : s'il échoue, tous les autres jobs sont sautés,
   # et « tout sauté » ne doit pas passer pour un succès.
   ci-ok:
     if: always()
-    needs: [changes, api, web, image-api, image-web, helm]
+    needs: [changes, api, web, image-api, image-web, e2e, helm, e2e-matrice]
     runs-on: ubuntu-latest
     steps:
       - name: Tous les jobs exécutés ont réussi

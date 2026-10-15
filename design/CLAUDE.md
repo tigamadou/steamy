@@ -107,6 +107,8 @@ Il existe aussi 15 composants partagés qui vivent dans des fichiers d'écrans a
 | `WAD` | Back-office admin       | `screens-admin-web.jsx`             | 15 |
 | `WX`  | États transversaux      | `screens-states-web.jsx`            | 3  |
 
+**Écrans à concevoir (C18)** : `WL22`-`WL24`, `WD23`, `WPD15`, `WT13` sont dessinés dans `screens-public-a-concevoir-web.jsx`, `screens-apprenant-a-concevoir-web.jsx`, `screens-parent-a-concevoir-web.jsx` et `screens-enseignant-a-concevoir-web.jsx`, en attente de validation (voir `HANDOFF.md` §4). Chaque fichier expose `window.XxxACSections`, appelée en tête du `<DesignCanvas>` de la vue de son espace ; ses artboards d'états sont suffixés (`WPD15-echec`…). Ces écrans ne sont pas comptés ci-dessous tant qu'ils ne sont pas validés.
+
 **Total : 172 écrans, 172 IDs uniques.** L'admin utilisait `WA` à l'origine, en collision avec l'achat de parcours ; renommé `WAD` en août 2026. Après tout ajout ou renommage en masse, revérifier l'unicité (voir « Vérification statique »).
 
 ### Design System (`ds-*.jsx`)
