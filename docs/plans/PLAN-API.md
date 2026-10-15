@@ -291,7 +291,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 - [ ] **Préalables**
   - [ ] Barème de points et paliers de rang saisis dans `PlatformSettings` (C8)
   - [x] **ADR-Médias (Vimeo)** : vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de hors ligne (D16)
-- [x] **API-L3a.1** Inscriptions et arbre · `feature/api-l3a-1-inscriptions`
+- [x] **API-L3a.1** Inscriptions et arbre · `feature/api-l3a-1-inscriptions` · PR #64
   - [x] `Enrollment` (`source`), `MissionProgress`
   - [x] `POST learning/enrollments/` (gratuit seulement, `PAYMENT_REQUIRED` / `KIT_CODE_REQUIRED`)
   - [x] `GET learning/enrollments/`, `…/{courseSlug}/tree/`
