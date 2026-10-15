@@ -14,7 +14,7 @@ class Enrollment(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="enrollments")
     course = models.ForeignKey(
-        "courses.Course", on_delete=models.CASCADE, related_name="enrollments"
+        "catalog.Course", on_delete=models.CASCADE, related_name="enrollments"
     )
     started_at = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)
@@ -35,18 +35,18 @@ class Progress(models.Model):
     enrollment = models.ForeignKey(
         Enrollment, on_delete=models.CASCADE, related_name="progress_items"
     )
-    lesson = models.ForeignKey(
-        "courses.Lesson", on_delete=models.CASCADE, related_name="progress_entries"
+    mission = models.ForeignKey(
+        "catalog.Mission", on_delete=models.CASCADE, related_name="progress_entries"
     )
     completed = models.BooleanField(default=False)
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ("enrollment", "lesson")
+        unique_together = ("enrollment", "mission")
 
     def __str__(self):
-        return f"{self.enrollment.user} - {self.lesson} ({'ok' if self.completed else 'pending'})"
+        return f"{self.enrollment.user} - {self.mission} ({'ok' if self.completed else 'pending'})"
 
 
 class Certificate(models.Model):
@@ -63,7 +63,7 @@ class Certificate(models.Model):
 
 # Quiz system
 class Quiz(models.Model):
-    course = models.ForeignKey("courses.Course", on_delete=models.CASCADE, related_name="quizzes")
+    course = models.ForeignKey("catalog.Course", on_delete=models.CASCADE, related_name="quizzes")
     title = models.CharField(max_length=255)
     pass_score = models.DecimalField(
         max_digits=5, decimal_places=2, default=50.0
