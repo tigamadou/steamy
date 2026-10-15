@@ -4,6 +4,7 @@ import sys
 from datetime import timedelta
 
 import dj_database_url
+from celery.schedules import crontab
 
 # ==================================================================================================
 # CHANGE FIELDS
@@ -271,6 +272,9 @@ REST_FRAMEWORK = {
         "login-identifier": os.getenv("THROTTLE_LOGIN_IDENTIFIER", "10/hour"),
         "signup": os.getenv("THROTTLE_SIGNUP", "5/min"),
         "otp": os.getenv("THROTTLE_OTP", "10/min"),
+        "username-availability": os.getenv("THROTTLE_USERNAME_AVAILABILITY", "30/min"),
+        "resume": os.getenv("THROTTLE_RESUME", "5/min"),
+        "resume-username": os.getenv("THROTTLE_RESUME_USERNAME", "10/hour"),
         "password-reset": os.getenv("THROTTLE_PASSWORD_RESET", "5/hour"),
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
         # Formulaires publics (devis, newsletter, contact) : par IP
@@ -439,6 +443,18 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 # Tâches exécutées sur place pendant les tests (PLAN-API, règles propres à l'API)
 CELERY_TASK_ALWAYS_EAGER = TESTING
 
+# Tâches planifiées (versionnées ici, jamais saisies à la main dans l'admin) ; heure du Bénin (C16)
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    "expire-consent-requests": {
+        "task": "apps.accounts.tasks.expire_consent_requests",
+        "schedule": crontab(minute=5),
+    },
+    "purge-signup-sessions": {
+        "task": "apps.accounts.tasks.purge_signup_sessions",
+        "schedule": crontab(minute=15),
+    },
+}
 # optional default task time limits
 CELERY_TASK_TIME_LIMIT = int(os.getenv("CELERY_TASK_TIME_LIMIT", 300))
 CELERY_TASK_SOFT_TIME_LIMIT = int(os.getenv("CELERY_TASK_SOFT_TIME_LIMIT", 180))

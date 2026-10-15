@@ -14,6 +14,7 @@ from libs.errors import ApiError
 from libs.phone import looks_like_phone, normalize_phone
 
 from .models import User
+from .signup import matches_pending_password
 
 #: Refus révélés seulement à qui a donné le bon mot de passe.
 STATUS_ERRORS = {
@@ -51,6 +52,9 @@ class IdentifierBackend(ModelBackend):
             User().set_password(password)
             return None
         if not user.check_password(password):
+            # Compte en attente (sans mot de passe) : le code de reprise révèle l'attente, pour reprendre (C5).
+            if user.status == User.Status.PENDING and matches_pending_password(user, password):
+                raise ApiError("ACCOUNT_PENDING_CONSENT")
             return None
         if user.status in STATUS_ERRORS:
             raise ApiError(STATUS_ERRORS[user.status])

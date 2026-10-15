@@ -43,7 +43,7 @@ def _counter_key(kind: str, value: str) -> str:
     return f"otp-daily:{kind}:{today}:{value}"
 
 
-def _consume_daily_quota(phone: str, ip: str, config: PlatformSettings) -> None:
+def consume_sms_quota(phone: str, ip: str, config: PlatformSettings) -> None:
     """Compte un SMS pour le numéro et pour l'IP ; refuse au-delà des plafonds quotidiens (D24)."""
     limits = (
         ("phone", phone, config.otp_daily_limit_per_phone),
@@ -75,7 +75,7 @@ def _send_code(challenge: OtpChallenge, config: PlatformSettings) -> None:
 def start_challenge(phone: str, purpose: str, ip: str, data: dict | None = None) -> OtpChallenge:
     """Crée un défi et envoie son code. `phone` est déjà normalisé en E.164."""
     config = PlatformSettings.load()
-    _consume_daily_quota(phone, ip, config)
+    consume_sms_quota(phone, ip, config)
     challenge = OtpChallenge(phone=phone, purpose=purpose, data=data or {})
     _send_code(challenge, config)
     return challenge
@@ -97,7 +97,7 @@ def resend_challenge(challenge_id, ip: str) -> OtpChallenge:
     challenge = get_open_challenge(challenge_id)
     if resend_in_seconds(challenge, config) > 0:
         raise ApiError("OTP_RESEND_TOO_EARLY")
-    _consume_daily_quota(challenge.phone, ip, config)
+    consume_sms_quota(challenge.phone, ip, config)
     _send_code(challenge, config)
     return challenge
 

@@ -244,6 +244,8 @@ class LearnerProfile(TimestampedModel):
         related_name="+",
     )
     email = models.EmailField(_("email de contact"), null=True, blank=True)
+    #: Âge déclaré à l'inscription (W05), contrôlé avec la date de naissance de W11 (D23).
+    declared_age = models.PositiveSmallIntegerField(_("âge déclaré"), null=True, blank=True)
     points = models.PositiveIntegerField(default=0)
     streak_days = models.PositiveIntegerField(default=0)
     rank = models.CharField(_("rang"), max_length=32, blank=True)
@@ -334,3 +336,96 @@ class OtpChallenge(TimestampedModel):
 
     def __str__(self):
         return f"OTP {self.get_purpose_display()} ({self.created_at:%Y-%m-%d %H:%M})"
+
+
+class SignupSession(TimestampedModel):
+    """
+    Inscription d'un apprenant en cours (D21) : compte `pending` sans mot de passe, plus un **code de reprise** haché,
+    affiché une seule fois et non régénérable (C14). Supprimée à l'activation ; à l'expiration, le compte en attente
+    est purgé et l'identifiant libéré (`purge_signup_sessions`).
+    """
+
+    learner = models.OneToOneField(User, on_delete=models.CASCADE, related_name="signup_session")
+    resume_code_hash = models.CharField(max_length=128)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        verbose_name = _("inscription en cours")
+        verbose_name_plural = _("inscriptions en cours")
+
+    def __str__(self):
+        return f"Inscription en cours de {self.learner}"
+
+
+class ConsentRequest(TimestampedModel):
+    """
+    Demande de consentement parental (§3.1, §4.2). `subject` fige ce que le parent voit (D20) : prénom, nom,
+    identifiant, âge, lien de parenté. Le jeton du lien SMS n'est stocké que haché.
+    """
+
+    class Origin(models.TextChoices):
+        LEARNER = "learner", "Apprenant"
+        PARENT = "parent", "Parent"
+        TEACHER = "teacher", "Enseignant"
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        ACCEPTED = "accepted", "Acceptée"
+        REFUSED = "refused", "Refusée"
+        EXPIRED = "expired", "Expirée"
+        CANCELLED = "cancelled", "Annulée"
+
+    origin = models.CharField(_("origine"), max_length=8, choices=Origin.choices)
+    subject = models.JSONField(_("enfant (instantané)"), default=dict)
+    learner = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="consent_requests",
+    )
+    requested_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    parent_phone = models.CharField(_("téléphone du parent"), max_length=16)
+    parent = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="received_consent_requests",
+    )
+    relationship = models.ForeignKey(
+        "referentials.Relationship", on_delete=models.PROTECT, related_name="+"
+    )
+    status = models.CharField(
+        _("statut"), max_length=10, choices=Status.choices, default=Status.PENDING
+    )
+    token_hash = models.CharField(max_length=64, blank=True, db_index=True)
+    expires_at = models.DateTimeField()
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+    refusal_reason = models.ForeignKey(
+        "referentials.RefusalReason",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    refusal_note = models.TextField(_("précisions du refus"), blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("demande de consentement")
+        verbose_name_plural = _("demandes de consentement")
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["parent_phone", "status"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["learner"],
+                condition=Q(status="pending"),
+                name="accounts_consent_one_pending_per_learner",
+            ),
+        ]
+
+    def __str__(self):
+        return f"Demande {self.get_origin_display().lower()} du {self.created_at:%Y-%m-%d} ({self.status})"

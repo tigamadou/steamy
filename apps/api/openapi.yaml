@@ -4,6 +4,88 @@ info:
   version: 1.0.0
   description: API pour la plateforme de formation
 paths:
+  /api/accounts/consent-requests/:
+    post:
+      operationId: accounts_consent_requests_create
+      description: 'W06 : envoie la demande au parent (SMS avec lien à jeton). Réservé
+        à l''inscription en cours.'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LearnerConsentRequestRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequestState'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/consent-requests/{id}/resend/:
+    post:
+      operationId: accounts_consent_requests_resend_create
+      description: 'W07 « Renvoyer le SMS » : nouveau lien (seul le dernier est valable),
+        60 s au moins entre deux envois.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - accounts
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRequestState'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/me/:
     get:
       operationId: accounts_me_retrieve
@@ -264,6 +346,139 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/auth/learner-signup/:
+    get:
+      operationId: auth_learner_signup_retrieve
+      description: 'W06-W10 : étape réelle de l''inscription en cours (garde du layout
+        du flux).'
+      tags:
+      - auth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerSignupState'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: auth_learner_signup_create
+      description: 'W05 « Continuer » : crée le compte en attente et renvoie le code
+        de reprise (une seule fois).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LearnerSignupRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerSignupCreated'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/learner-signup/password/:
+    post:
+      operationId: auth_learner_signup_password_create
+      description: 'W10 : après l''accord du parent, choisit le mot de passe ; le
+        compte devient actif et la session s''ouvre.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LearnerPasswordRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/learner-signup/resume/:
+    post:
+      operationId: auth_learner_signup_resume_create
+      description: 'W07 « Reprendre mon inscription » (C5) : identifiant + code de
+        reprise.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumeRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerSignupState'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/auth/login/:
     post:
       operationId: auth_login_create
@@ -476,6 +691,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/username-availability/:
+    get:
+      operationId: auth_username_availability_retrieve
+      description: 'W04, W19 : identifiant libre ? Throttlé : c''est une énumération
+        des identifiants.'
+      parameters:
+      - in: query
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsernameAvailabilityResponse'
           description: ''
         '429':
           content:
@@ -2941,6 +3182,53 @@ components:
       - id
       - question
       - text
+    ConsentRequestState:
+      type: object
+      description: 'Demande vue par l''enfant (W07, W08, W18) : jamais le numéro du
+        parent en clair.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ConsentRequestStateStatusEnum'
+          readOnly: true
+          title: Statut
+        parentPhoneMasked:
+          type: string
+          readOnly: true
+        relationship:
+          type: string
+          readOnly: true
+        expiresAt:
+          type: string
+          format: date-time
+          readOnly: true
+        resendInSec:
+          type: integer
+          readOnly: true
+      required:
+      - expiresAt
+      - id
+      - parentPhoneMasked
+      - relationship
+      - resendInSec
+      - status
+    ConsentRequestStateStatusEnum:
+      enum:
+      - pending
+      - accepted
+      - refused
+      - expired
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - En attente
+        * `accepted` - Acceptée
+        * `refused` - Refusée
+        * `expired` - Expirée
+        * `cancelled` - Annulée
     ContactMessageRequest:
       type: object
       properties:
@@ -3601,6 +3889,90 @@ components:
       - email
       - isAdult
       - newsletterConsent
+    LearnerConsentRequestRequest:
+      type: object
+      properties:
+        parentPhone:
+          type: string
+          minLength: 1
+          maxLength: 32
+        relationship:
+          type: string
+          minLength: 1
+      required:
+      - parentPhone
+      - relationship
+    LearnerPasswordRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+    LearnerSignupCreated:
+      type: object
+      properties:
+        resumeCode:
+          type: string
+          description: Code de reprise, renvoyé **une seule fois** et jamais régénéré
+            (C14)
+        signup:
+          $ref: '#/components/schemas/LearnerSignupState'
+      required:
+      - resumeCode
+      - signup
+    LearnerSignupRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        age:
+          type: integer
+          description: Âge déclaré (W05), entre 10 et 17 ans (D23)
+        privacyAccepted:
+          type: boolean
+      required:
+      - age
+      - firstName
+      - lastName
+      - privacyAccepted
+      - username
+    LearnerSignupState:
+      type: object
+      description: 'État de l''inscription en cours : le serveur est la source de
+        vérité de l''étape (W06-W10).'
+      properties:
+        step:
+          $ref: '#/components/schemas/StepEnum'
+        firstName:
+          type: string
+        username:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        consentRequest:
+          allOf:
+          - $ref: '#/components/schemas/ConsentRequestState'
+          nullable: true
+      required:
+      - consentRequest
+      - expiresAt
+      - firstName
+      - step
+      - username
     LevelSummary:
       type: object
       properties:
@@ -4690,6 +5062,20 @@ components:
       required:
       - name
       - slug
+    ResumeRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        resumeCode:
+          type: string
+          minLength: 1
+          maxLength: 16
+      required:
+      - resumeCode
+      - username
     RoleEnum:
       enum:
       - learner
@@ -4887,6 +5273,16 @@ components:
       - slug
       - startsAt
       - title
+    StepEnum:
+      enum:
+      - parent
+      - waiting
+      - password
+      type: string
+      description: |-
+        * `parent` - W06 · Parent
+        * `waiting` - W07 · Attente
+        * `password` - W10 · Mot de passe
     SubjectEnum:
       enum:
       - question
@@ -4985,6 +5381,13 @@ components:
           type: integer
       required:
       - count
+    UsernameAvailabilityResponse:
+      type: object
+      properties:
+        available:
+          type: boolean
+      required:
+      - available
     WebhookAck:
       type: object
       properties:

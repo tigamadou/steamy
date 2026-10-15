@@ -246,12 +246,12 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `POST auth/parent-signup/`, `…/verify/` (`existingAccount`), `…/password/`
   - [x] Réponse neutre si numéro déjà inscrit (C13) ; compte créé seulement après OTP valide
   - [x] Tests : numéro déjà inscrit → même réponse qu'un numéro libre, aucun flux n'accepte `role`
-- [ ] **API-L2.3** Inscription apprenant · `feature/api-l2-3-learner-signup`
-  - [ ] `GET auth/username-availability/` (throttlé)
-  - [ ] `POST/GET auth/learner-signup/`, `…/resume/` (C5), `…/password/` ; `SignupSession` + code de reprise haché (D21, C14)
-  - [ ] Âge 10-17 (D23)
-  - [ ] `POST accounts/consent-requests/` (origine `learner`, SMS au parent avec lien à jeton, annulation de la demande en attente C14), `…/{id}/resend/`
-  - [ ] Tests : jeton à usage unique et haché, apprenant `pending` ne peut pas se connecter
+- [x] **API-L2.3** Inscription apprenant · `feature/api-l2-3-learner-signup`
+  - [x] `GET auth/username-availability/` (throttlé)
+  - [x] `POST/GET auth/learner-signup/`, `…/resume/` (C5), `…/password/` ; `SignupSession` + code de reprise haché (D21, C14)
+  - [x] Âge 10-17 (D23)
+  - [x] `POST accounts/consent-requests/` (origine `learner`, SMS au parent avec lien à jeton, annulation de la demande en attente C14), `…/{id}/resend/`
+  - [x] Tests : jeton haché et remplacé à chaque renvoi (usage unique à la réclamation : API-L2.4), apprenant `pending` ne peut pas se connecter (son code de reprise sur W16 donne `ACCOUNT_PENDING_CONSENT`, C5)
 - [ ] **API-L2.4** Décision du parent · `feature/api-l2-4-decision-parent`
   - [ ] `POST accounts/consent-requests/preview/` (public, throttlé, numéro masqué)
   - [ ] `POST accounts/consent-requests/claim/` (`CONSENT_PHONE_MISMATCH`)
