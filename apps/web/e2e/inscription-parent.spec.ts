@@ -9,6 +9,8 @@ import { signUpParentThroughScreens } from "./support/signup";
 // WP01-WP04, WP07-WP10 · Inscription du parent seul (LOT-2-AUTH, étape 2.6, vouvoiement)
 
 async function axe(page: Page) {
+  // Titre posé par les métadonnées de la route (générées à la requête pour les étapes de profil)
+  await expect(page).toHaveTitle(/ · Steamy$/);
   const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(violations).toEqual([]);
 }
