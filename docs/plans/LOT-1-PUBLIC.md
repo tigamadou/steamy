@@ -89,7 +89,7 @@ Statut : 🟡 en cours · Prochaine tâche : 1.6 (WL11, WL24), puis l'encart new
   - [x] Test API (API-L1.2, `catalog/tests/test_api.py`) et test Playwright : absence de `vimeoId` / corps de mission dans le HTML
   - [x] Test Vitest : plan en accordéon (`details`/`summary` focusables) ; Entrée et Espace vérifiés par Playwright
   - [x] Parcours Playwright : WL06 → WL22 → CTA → URL d'inscription avec retour (`e2e/fiche-parcours.spec.ts`)
-- [x] **1.4** Événements et boutique (requiert API-L1 et 1.2) · `feature/lot1-evenements-boutique` · PR #PR14
+- [x] **1.4** Événements et boutique (requiert API-L1 et 1.2) · `feature/lot1-evenements-boutique` · PR #49
   - [x] `WL21` `/evenements` (`EventRow`, prix, complet, état vide « Aucun événement à venir »)
   - [x] `WL23` `/evenements/[slug]` (`EventDetail` réutilisable avec un encart d'action fourni par l'appelant, CTA visiteur ou motif : complet, candidatures closes, passé ; JSON-LD `Event`, slugs au sitemap, 404 propre)
   - [x] `WL07` `/boutique` (grille `WKKitCard` en mode vitrine, filtres par catégorie dans l'URL, pagination, état vide)
