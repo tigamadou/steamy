@@ -563,14 +563,36 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > l'ancien parent par SMS. Le support ne peut ni suspendre un compte en attente de consentement ni toucher au
   > personnel ; le personnel ne se gère que dans l'équipe (WAD13), ce qui retire au Support la possibilité de modifier
   > `is_staff` et les groupes depuis la fiche utilisateur.
-- [ ] **API-L6.3** Réglages · `feature/api-l6-3-reglages`
-  - [ ] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
-- [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact`
+- [x] **API-L6.3** Réglages · `feature/api-l6-3-reglages` · PR #63
+  - [x] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
+  > Décisions : bornes des réglages validées par le modèle (validateurs et `clean()` du barème et des paliers C8) ;
+  > `Announcement` dans `core`, diffusée une fois par la tâche `broadcast_announcement` aux personas actifs du public
+  > visé (notification `announcement`, D7), puis figée. Aucun cache serveur à invalider (`PlatformSettings.load()`
+  > relit la base ; les référentiels n'ont qu'un cache HTTP d'une heure). « Mode maintenance » et « inscriptions
+  > ouvertes » (WAD14) restent hors de cette étape : comportement d'API non spécifié, à trancher avant LOT-6 6.5.
+- [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact-kpi` · PR #65 (1/2), puis `feature/api-l6-4-impact-rapports` · PR #67 (2/2)
   - [ ] App `impact` : `KpiDefinition` (30 KPI par migration), `KpiValue`, `ImpactReport`, `ReportExport` ; statut D73
-  - [ ] `GET backoffice/overview/`, `backoffice/kpis/…`, `backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/` (`REPORT_LOCKED`, D74)
-  - [ ] `POST …/exports/` + `GET backoffice/exports/{id}/` (CSV/PDF asynchrones, `generate_report_export`)
-  - [ ] Tâche quotidienne `aggregate_daily_stats` (`DailyAggregatedStat`, D75)
-  - [ ] Tests : rapport soumis non modifiable
+    - [x] `KpiDefinition` (30 KPI en 8 groupes, migration `0002_kpi_definitions`), `KpiValue`, `ImpactReport` ; `kpiStatus` D73 (PR #65)
+    - [ ] `ReportExport`
+  - [x] `GET backoffice/overview/`, `backoffice/kpis/…`, `backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/` (`REPORT_LOCKED`, D74)
+    - [x] `GET backoffice/overview/`, `GET backoffice/kpis/?period=`, `GET backoffice/kpis/{code}/` (PR #65)
+    - [x] `GET backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/` (PR #67)
+  - [ ] `POST …/exports/` + `GET backoffice/exports/{id}/` (CSV/PDF asynchrones, `generate_report_export`) : attend `core/pdf.py` et `PrivateMediaStorage` d'API-L3a.4 (ADR 0005)
+  - [x] Tâche quotidienne `aggregate_daily_stats` (`DailyAggregatedStat`, D75) (PR #65)
+  - [x] Tests : valeurs de référence des KPI `auto`, table de vérité de `kpiStatus`, bornes de période, accès par groupe (PR #65)
+  - [x] Tests : rapport soumis non modifiable (PR #67 : `REPORT_LOCKED`, soumission idempotente, lignes figées)
+  > Décisions (PR #65) : agrégats quotidiens de l'année recalculés chaque nuit (une correction de profil se reflète),
+  > KPI additifs = somme des jours ; « connectés ≥ 1 fois » compté à la volée sur `last_login`, pour les seules
+  > périodes en cours. KPI saisis au trimestre lus au trimestre du mois (vue mois) ou au dernier trimestre renseigné
+  > (vue année). Inclusion : âge connu des seuls apprenants (pas de date de naissance pour parents et enseignants).
+  > `ventes`, `complete`, `complete_conf` sans collecteur jusqu'à API-L3b et API-L3a (« En attente »). Échéance du
+  > rapport : fin du trimestre + 15 jours (hypothèse). `analytics/dashboard/summary/` et `analytics/export/events/`
+  > supprimés (§7.9) : ouverts au personnel sans TOTP.
+  > Décisions (PR #67) : à la soumission, les lignes du rapport sont figées dans `ImpactReport.snapshot` (un recalcul
+  > nocturne ne change plus un rapport soumis) ; plages : dernier mois du trimestre pour les KPI `auto`
+  > d'acquisition, trimestre sinon ; saisie typée par `unit` (note de 1 à 10). « Valider la saisie » (point ouvert de
+  > LOT-6 6.9) n'est pas encore exigée par la soumission.
+  > Reprise : exports CSV/PDF (`ReportExport`, tâche `generate_report_export`, notification) après API-L3a.4.
 - [ ] **Critères de fin d'API-L6**
   - [ ] Toutes les routes `backoffice/` protégées par `IsStaffVerified`
   - [ ] Seed enrichi, `make openapi` committé
