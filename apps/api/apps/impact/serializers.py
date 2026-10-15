@@ -1,6 +1,7 @@
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from .models import KpiDefinition
 from .periods import KINDS
 from .status import STATUS_CODES, TONES
 
@@ -56,8 +57,8 @@ class KpiSummarySerializer(serializers.Serializer):
     code = serializers.CharField()
     label = serializers.CharField()
     group = serializers.CharField()
-    unit = serializers.ChoiceField(choices=["count", "fcfa", "score", "yes_no", "text"])
-    source = serializers.ChoiceField(choices=["auto", "manual", "unavailable"])
+    unit = serializers.ChoiceField(choices=KpiDefinition.Unit.choices)
+    source = serializers.ChoiceField(choices=KpiDefinition.Source.choices)
     target = TargetField(allow_null=True)
     base_code = serializers.CharField(allow_null=True)
     value = KpiValueField()
@@ -91,7 +92,7 @@ class CompositionPartSerializer(serializers.Serializer):
 class KpiDetailSerializer(KpiSummarySerializer):
     period = PeriodSerializer()
     calculation = serializers.CharField(help_text="Définition : mode de calcul")
-    periodicity = serializers.ChoiceField(choices=["month", "quarter"])
+    periodicity = serializers.ChoiceField(choices=KpiDefinition.Periodicity.choices)
     baseline = TargetField(allow_null=True)
     attainment = serializers.IntegerField(
         allow_null=True, help_text="Taux d'atteinte de la cible, en %"

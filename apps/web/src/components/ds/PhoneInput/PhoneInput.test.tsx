@@ -77,6 +77,12 @@ describe("PhoneInput", () => {
     expect(screen.getByRole("textbox")).toHaveAttribute("autocomplete", "tel-national");
   });
 
+  it("présélectionne le Bénin quand la liste des pays arrive après le premier rendu", () => {
+    const { rerender } = render(<PhoneInput countries={[]} />);
+    rerender(<PhoneInput countries={COUNTRIES} />);
+    expect(screen.getByRole("combobox", { name: "Pays" })).toHaveValue("BJ");
+  });
+
   it("revalide le numéro au changement de pays", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

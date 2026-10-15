@@ -119,7 +119,7 @@ def test_catalog_has_published_courses_a_featured_one_a_draft_and_an_empty_categ
     call_command("seed_demo")
     call_command("seed_demo")
     published = Course.objects.filter(status=Course.Status.PUBLISHED)
-    assert published.count() == 4
+    assert published.count() == 5  # dont le parcours court du parcours Playwright P1 (API-L3a)
     assert published.filter(featured=True).count() == 1
     assert published.filter(is_free=False).exists() and published.filter(is_free=True).exists()
     assert Course.objects.filter(status=Course.Status.DRAFT).exists()
@@ -153,3 +153,22 @@ def test_kits_include_one_out_of_stock_and_one_required_by_a_course():
     assert Kit.objects.filter(active=True).count() == 3
     assert Kit.objects.filter(stock_quantity=0).exists()
     assert Course.objects.filter(required_kit__isnull=False, is_free=False).exists()
+
+
+def test_lea_has_a_course_in_progress_a_finished_one_and_the_short_course_reset():
+    from apps.core.demo import SHORT_COURSE
+    from apps.learning.models import Enrollment, MissionProgress
+
+    call_command("seed_demo")
+    lea = User.objects.get(username="lea.adjovi")
+    short = Enrollment.objects.get(learner=lea, course__slug=SHORT_COURSE)
+    MissionProgress.objects.create(
+        enrollment=short, mission=short.course.projects.get().levels.get().missions.first()
+    )
+    call_command("seed_demo")
+    progress = dict(
+        Enrollment.objects.filter(learner=lea).values_list("course__slug", "progress_pct")
+    )
+    assert progress == {"decouverte-robotique": 30, "initiation-scratch": 100, SHORT_COURSE: 0}
+    assert not MissionProgress.objects.filter(enrollment=short).exists()
+    assert Enrollment.objects.get(learner=lea, course__slug=SHORT_COURSE).last_activity_at is None

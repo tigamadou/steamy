@@ -131,6 +131,13 @@ def test_s6_mission_content_is_never_served_publicly(paid_course, user):
     detail = APIClient().get(f"/api/catalog/courses/{paid_course.slug}/")
     assert detail.status_code == 200 and "CONTENU-SECRET" not in detail.content.decode()
 
+    # En appel direct, sans inscription : `NOT_ENROLLED`, sans contenu (API-L3a.1).
+    mission = paid_course.projects.get().levels.get().missions.get()
+    client = APIClient()
+    client.force_authenticate(user)
+    resp = client.get(f"/api/learning/missions/{mission.id}/")
+    assert resp.json()["code"] == "NOT_ENROLLED" and "CONTENU-SECRET" not in resp.content.decode()
+
 
 # --- S7 · Inscription gratuite à un parcours payant ----------------------------------------
 
@@ -141,10 +148,12 @@ def test_s7_paid_course_cannot_be_enrolled_for_free(paid_course, user):
 
     client = APIClient()
     client.force_authenticate(user)
-    resp = client.post("/api/learning/enrollments/", {"course": paid_course.id}, format="json")
+    resp = client.post(
+        "/api/learning/enrollments/", {"courseSlug": paid_course.slug}, format="json"
+    )
 
     assert resp.status_code == 402 and resp.json()["code"] == "PAYMENT_REQUIRED"
-    assert not Enrollment.objects.filter(user=user).exists()
+    assert not Enrollment.objects.filter(learner=user).exists()
 
 
 # --- S4 · Listes non filtrées par propriétaire ----------------------------------------------
@@ -152,16 +161,12 @@ def test_s7_paid_course_cannot_be_enrolled_for_free(paid_course, user):
 
 @pytest.mark.django_db
 def test_s4_lists_only_return_the_callers_objects(user):
-    from apps.catalog.tests.factories import CourseFactory
-    from apps.learning.models import Attempt, Certificate, Enrollment, Quiz
+    from apps.learning.tests.factories import EnrollmentFactory
     from apps.notifications.tests.factories import NotificationFactory
     from apps.payments.models import Order, Payment
 
     other = LearnerFactory()
-    course = CourseFactory()
-    enrollment = Enrollment.objects.create(user=other, course=course)
-    Certificate.objects.create(enrollment=enrollment, score=90)
-    Attempt.objects.create(user=other, quiz=Quiz.objects.create(course=course, title="Q"))
+    EnrollmentFactory(learner=other)
     order = Order.objects.create(user=other, reference="REF-AUTRE", total=1000)
     Payment.objects.create(order=order, provider="kkiapay", amount=1000)
     NotificationFactory(user=other, title="Privée")
@@ -170,9 +175,6 @@ def test_s4_lists_only_return_the_callers_objects(user):
     client.force_authenticate(user)
     for url in [
         "/api/learning/enrollments/",
-        "/api/learning/progress/",
-        "/api/learning/attempts/",
-        "/api/learning/certificates/",
         "/api/payments/orders/",
         "/api/payments/payments/",
         "/api/notifications/",

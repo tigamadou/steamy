@@ -62,7 +62,7 @@ export function Celebration({ title, children, actions, mascot, as: Tag = "main"
           </div>
         )}
         <div>
-          <h1 className="text-[28px] leading-[1.1] font-black tracking-[-0.02em] text-success-700 md:text-4xl">
+          <h1 className="text-[28px] leading-[1.1] font-black tracking-[-0.02em] text-balance text-success-700 md:text-4xl">
             {title}
           </h1>
           {children && (
