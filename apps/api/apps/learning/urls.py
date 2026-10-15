@@ -17,4 +17,12 @@ urlpatterns = [
         views.MissionCompleteView.as_view(),
         name="learning-mission-complete",
     ),
+    path("quizzes/<int:pk>/", views.QuizDetailView.as_view(), name="learning-quiz"),
+    path(
+        "quizzes/<int:pk>/attempts/",
+        views.QuizAttemptCreateView.as_view(),
+        name="learning-quiz-attempts",
+    ),
+    path("attempts/", views.AttemptListView.as_view(), name="learning-attempts"),
+    path("attempts/<int:pk>/", views.AttemptDetailView.as_view(), name="learning-attempt"),
 ]

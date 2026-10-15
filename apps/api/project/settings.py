@@ -321,19 +321,16 @@ SPECTACULAR_SETTINGS = {
         "ErrorCodeEnum": "libs.errors.ERROR_CODES",
         "RoleEnum": "apps.accounts.models.User.Role",
         "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
+        "AttemptStatusEnum": "apps.learning.models.QuizAttempt.Status",
+        "QuizKindEnum": "apps.catalog.models.Quiz.Kind",
         # Impact Tracker : noms explicites, sans renommer `ToneEnum` (notifications)
         "ToneEnum": "apps.notifications.models.Tone",
         "PeriodKindEnum": "apps.impact.periods.KINDS",
         "KpiStatusEnum": "apps.impact.status.STATUS_CODES",
         "KpiToneEnum": "apps.impact.status.TONES",
         "ImpactReportStatusEnum": "apps.impact.models.ImpactReport.Status",
-        # `source` de `EnrollmentSerializer` (libellés propres au serializer) : garde son nom face à `KpiSourceEnum`
-        "SourceEnum": [
-            ("free", "Gratuit"),
-            ("order", "Commande"),
-            ("kit_code", "Kit Code"),
-            ("classroom", "Classe"),
-        ],
+        # `source` des inscriptions garde son nom face à `KpiSourceEnum`
+        "SourceEnum": "apps.learning.models.Enrollment.Source",
         "KpiSourceEnum": "apps.impact.models.KpiDefinition.Source",
         "KpiUnitEnum": "apps.impact.models.KpiDefinition.Unit",
         "KpiPeriodicityEnum": "apps.impact.models.KpiDefinition.Periodicity",

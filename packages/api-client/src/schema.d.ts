@@ -735,6 +735,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/learning/attempts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Mes tentatives (WD07, WD09) : filtres `status` et `quiz`, plus récentes d'abord, avec le bandeau. */
+        get: operations["learning_attempts_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/learning/attempts/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Une de mes tentatives (WD08, WJ05, WJ08) ; celle d'un autre apprenant n'existe pas (404). */
+        get: operations["learning_attempts_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/learning/enrollments/": {
         parameters: {
             query?: never;
@@ -832,6 +866,40 @@ export interface paths {
         get: operations["learning_projects_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/learning/quizzes/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Quiz à passer (WJ04, WJ10) : sans corrigé, seulement une fois atteint dans la séquence. */
+        get: operations["learning_quizzes_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/learning/quizzes/{id}/attempts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Envoi groupé des réponses (WJ04, WJ10) : correction serveur, statut D31, délai D32. */
+        post: operations["learning_quizzes_attempts_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1274,12 +1342,74 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AnswerRequest: {
+            questionId: number;
+            choiceId: number;
+        };
         /**
          * @description * `urban` - Urbaine
          *     * `rural` - Rurale
          * @enum {string}
          */
         AreaTypeEnum: "urban" | "rural";
+        /** @description Résultat d'une tentative (WJ05, WJ08, WD08). */
+        AttemptDetail: {
+            id: number;
+            quiz: components["schemas"]["AttemptQuiz"];
+            score: number;
+            total: number;
+            percentage: number;
+            /** @description Seuil appliqué à cette tentative (%) */
+            threshold: number;
+            status: components["schemas"]["AttemptStatusEnum"];
+            passed: boolean;
+            durationSec: number | null;
+            pointsEarned: number;
+            /** Format: date-time */
+            createdAt: string;
+            failedConcepts: string[];
+            remediation: components["schemas"]["Remediation"][];
+            questions: components["schemas"]["QuestionReview"][];
+            /** @description Secondes avant de pouvoir repasser le quiz (sommative ratée, D32) */
+            retryInSec: number;
+            /** @description Après une réussite : étape suivante (après le badge) ; sinon null */
+            next: components["schemas"]["NextStep"] | null;
+        };
+        AttemptListItem: {
+            id: number;
+            quiz: components["schemas"]["AttemptQuiz"];
+            score: number;
+            total: number;
+            percentage: number;
+            /** @description Seuil appliqué à cette tentative (%) */
+            threshold: number;
+            status: components["schemas"]["AttemptStatusEnum"];
+            passed: boolean;
+            durationSec: number | null;
+            pointsEarned: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AttemptQuiz: {
+            id: number;
+            kind: components["schemas"]["QuizKindEnum"];
+            title: string;
+            courseSlug: string;
+            projectId: number;
+            levelId: number | null;
+        };
+        /** @description Envoi groupé de toutes les réponses ; une question sans réponse compte comme fausse. */
+        AttemptRequestRequest: {
+            answers: components["schemas"]["AnswerRequest"][];
+            durationSec?: number | null;
+        };
+        /**
+         * @description * `ok` - Réussi
+         *     * `warn` - À refaire
+         *     * `ko` - Échoué
+         * @enum {string}
+         */
+        AttemptStatusEnum: "ok" | "warn" | "ko";
         Avatar: {
             readonly id: number;
             code: string;
@@ -1341,6 +1471,11 @@ export interface components {
              * @description Emoji affiché sur les cartes
              */
             icon: string;
+        };
+        /** @description Réponse proposée, sans le corrigé. */
+        Choice: {
+            id: number;
+            text: string;
         };
         CompositionPart: {
             code: string;
@@ -1911,6 +2046,8 @@ export interface components {
             state: components["schemas"]["StateEnum"];
             missionCount: number;
             missionsDone: number;
+            /** @description Formative du niveau */
+            quiz: components["schemas"]["QuizItem"] | null;
         };
         LevelSummary: {
             /** Ordre */
@@ -2040,22 +2177,25 @@ export interface components {
             /** Icône */
             icon?: string;
         };
-        /** @description Étape suivante : mission à faire, ou certification quand tout le parcours est fait. */
+        /** @description Étape suivante : mission ou quiz à faire, ou certification quand tout le parcours est fait. */
         NextStep: {
             type: components["schemas"]["NextStepTypeEnum"];
-            /** @description Mission ; null pour la certification */
+            /** @description Mission ou quiz ; null pour la certification */
             id: number | null;
             title: string | null;
             courseSlug: string;
             projectId: number | null;
+            /** @description null pour une sommative */
             levelId: number | null;
+            quizKind: (components["schemas"]["QuizKindEnum"] | components["schemas"]["NullEnum"]) | null;
         };
         /**
          * @description * `mission` - Mission
+         *     * `quiz` - Quiz
          *     * `certification` - Certification
          * @enum {string}
          */
-        NextStepTypeEnum: "mission" | "certification";
+        NextStepTypeEnum: "mission" | "quiz" | "certification";
         Notification: {
             readonly id: number;
             readonly type: string;
@@ -2132,6 +2272,30 @@ export interface components {
             salesMonth: (number | boolean | string) | null;
             /** Format: double */
             completionRate: number | null;
+        };
+        PaginatedAttemptListItemList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["AttemptListItem"][];
+            /** @description Bandeau de WD07, sur toutes les tentatives (filtres ignorés) */
+            summary: {
+                attemptCount: number;
+                /** @description Part des tentatives réussies (%) */
+                successRate: number;
+                /** @description Tentatives à 100 % */
+                perfectCount: number;
+                streakDays: number;
+            };
         };
         PaginatedConsentRequestList: {
             /** @example 123 */
@@ -2414,6 +2578,8 @@ export interface components {
             missionCount: number;
             missionsDone: number;
             course: components["schemas"]["CourseRef"];
+            /** @description Sommative du projet */
+            quiz: components["schemas"]["QuizItem"] | null;
             levels: components["schemas"]["LevelItem"][];
         };
         ProjectSummary: {
@@ -2437,6 +2603,67 @@ export interface components {
          * @enum {string}
          */
         ProviderEnum: "kkiapay" | "fedapay";
+        Question: {
+            id: number;
+            order: number;
+            text: string;
+            choices: components["schemas"]["Choice"][];
+        };
+        /** @description Résultat d'une question : juste ou non, sans dévoiler la bonne réponse. */
+        QuestionReview: {
+            questionId: number;
+            text: string;
+            concept: string;
+            correct: boolean;
+            chosenChoiceId: number | null;
+            remediationMissionId: number | null;
+        };
+        /** @description Quiz à passer (WJ04, WJ10) : questions et réponses proposées, jamais le corrigé (§4.4). */
+        QuizDetail: {
+            id: number;
+            kind: components["schemas"]["QuizKindEnum"];
+            title: string;
+            /** @description Score minimal pour réussir (%) */
+            threshold: number;
+            timeLimitSec: number | null;
+            questionCount: number;
+            /**
+             * @description `done` : déjà réussi
+             *
+             *     * `done` - Faite
+             *     * `available` - Disponible
+             *     * `locked` - Verrouillée
+             */
+            state: components["schemas"]["StateEnum"];
+            /** @description Secondes avant de pouvoir le repasser (sommative ratée, D32), 0 sinon */
+            retryInSec: number;
+            course: components["schemas"]["CourseRef"];
+            project: components["schemas"]["Ref"];
+            /** @description null pour une sommative */
+            level: components["schemas"]["Ref"] | null;
+            questions: components["schemas"]["Question"][];
+        };
+        /** @description Quiz d'un niveau (formative) ou d'un projet (sommative), dans l'arbre. */
+        QuizItem: {
+            id: number;
+            kind: components["schemas"]["QuizKindEnum"];
+            title: string;
+            threshold: number;
+            /**
+             * @description `done` : réussi
+             *
+             *     * `done` - Faite
+             *     * `available` - Disponible
+             *     * `locked` - Verrouillée
+             */
+            state: components["schemas"]["StateEnum"];
+        };
+        /**
+         * @description * `formative` - Formative (niveau)
+         *     * `summative` - Sommative (projet)
+         * @enum {string}
+         */
+        QuizKindEnum: "formative" | "summative";
         QuoteRequestRequest: {
             /** Établissement */
             schoolName: string;
@@ -2488,6 +2715,12 @@ export interface components {
             label: string;
             /** Libellé côté parent */
             parentLabel?: string;
+        };
+        /** @description Mission à revoir (WJ08) : lien vers WJ03. */
+        Remediation: {
+            missionId: number;
+            title: string;
+            concept: string;
         };
         ReportDeadline: {
             period: string;
@@ -2553,7 +2786,7 @@ export interface components {
             value: (number | boolean | string) | null;
         };
         /**
-         * @description * `free` - Gratuit
+         * @description * `free` - Parcours gratuit
          *     * `order` - Commande
          *     * `kit_code` - Kit Code
          *     * `classroom` - Classe
@@ -2762,6 +2995,8 @@ export interface components {
             state: components["schemas"]["StateEnum"];
             missionCount: number;
             missionsDone: number;
+            /** @description Formative du niveau */
+            quiz: components["schemas"]["QuizItem"] | null;
             missions: components["schemas"]["MissionItem"][];
         };
         TreeProject: {
@@ -2772,6 +3007,8 @@ export interface components {
             state: components["schemas"]["StateEnum"];
             missionCount: number;
             missionsDone: number;
+            /** @description Sommative du projet */
+            quiz: components["schemas"]["QuizItem"] | null;
             levels: components["schemas"]["TreeLevel"][];
         };
         UnreadCount: {
@@ -4948,6 +5185,114 @@ export interface operations {
             };
         };
     };
+    learning_attempts_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                quiz?: number;
+                /**
+                 * @description * `ok` - Réussi
+                 *     * `warn` - À refaire
+                 *     * `ko` - Échoué
+                 */
+                status?: "ok" | "warn" | "ko";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAttemptListItemList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_attempts_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttemptDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     learning_enrollments_list: {
         parameters: {
             query?: {
@@ -4957,7 +5302,7 @@ export interface operations {
                 pageSize?: number;
                 /**
                  * @description * `active` - En cours
-                 *     * `completed` - Terminés
+                 *     * `completed` - Terminé
                  */
                 status?: "active" | "completed";
             };
@@ -5301,6 +5646,124 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_quizzes_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_quizzes_attempts_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttemptRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttemptDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             401: {
