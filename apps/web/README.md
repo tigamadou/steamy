@@ -27,6 +27,17 @@ Front Next.js 16 de Steamy (App Router, Cache Components, TypeScript, Tailwind 4
   exportant `metadata`, recensé par un `index.ts` par dossier (`blog`, `legal`) ; guides PDF dans `public/guides/` ;
   FAQ et textes de marque en TS. `src/content/content.test.ts` refuse « moins de 16 ans » et tout numéro d'apprenant.
 
+## Back-office (lot 6, WAD01-WAD05)
+
+- `app/(backoffice)/` : layout gardé par `BackofficeGate` (personnel `isStaff` + `otpVerified`, sinon connexion de
+  l'admin Django WAD15 `<PUBLIC_API_URL>/admin/login/?next=<origine>/backoffice/…`), `noindex`. Chaque page
+  restreinte appelle `requireGroups(PAGE_GROUPS.…)` (`lib/backoffice/`) : hors groupe → `/backoffice/acces-refuse`.
+- `components/backoffice/` : `AdminShell` (navigation par groupes D71, Plateforme et Système vers l'admin Django),
+  `AdminHeader`/`AdminContent` par page, primitives data-viz (`Sparkline`, `BarChart`, `DonutChart`, `StatCard`,
+  `DataTable`, `SegmentedControl`) et de statut (`SourceTag`, `KpiStatusBadge`, `StatusBadge`, `DeadlineTracker`).
+  Import interdit hors de `app/(backoffice)` (ESLint) ; monochrome, aucun `--primary-*` (`monochrome.test.ts`).
+- e2e : `e2e/support/staff.ts` (`staffLogin`, code TOTP de développement).
+
 ## États transversaux (WX01-WX03)
 
 Implémentés une fois dans `src/components/states/` (SPEC-ECRANS-3 §6), textes par registre (`tu`, `vous`,

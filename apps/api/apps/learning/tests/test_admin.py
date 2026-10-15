@@ -27,3 +27,29 @@ def test_enrollment_admin_is_read_only():
     assert not inline.has_add_permission and not inline.has_delete_permission
     assert str(enrollment) == f"{enrollment.learner} → {course}"
     assert str(progress) == f"{enrollment} · {progress.mission}"
+
+
+def test_attempt_admin_is_read_only():
+    from apps.catalog.tests.factories import QuizFactory
+    from apps.learning.models import QuizAttempt
+
+    enrollment = EnrollmentFactory()
+    attempt = QuizAttempt.objects.create(
+        learner=enrollment.learner,
+        enrollment=enrollment,
+        quiz=QuizFactory(),
+        score=1,
+        total=2,
+        percentage=50,
+        threshold=70,
+        status="warn",
+    )
+    client = APIClient()
+    verified_client(client, is_superuser=True)
+    assert client.get(reverse("admin:learning_quizattempt_changelist")).status_code == 200
+    assert (
+        client.get(reverse("admin:learning_quizattempt_change", args=[attempt.id])).status_code
+        == 200
+    )
+    assert client.get(reverse("admin:learning_quizattempt_add")).status_code == 403
+    assert str(attempt) == f"{enrollment.learner} · {attempt.quiz} · 50 %"
