@@ -80,6 +80,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `make makemigrations` : un `0001_initial` par app ; `makemigrations --check` passe
   - [x] Annoncer la PR (`make clean && make up && make seed` pour les développeurs) : description de la PR
   - [x] Tests : identifiant numérique ou avec `@` refusé, doublon insensible à la casse, trois personas + personnel refusé, statuts refusés
+  - [x] Couverture 100 % (lignes et branches) du code modifié ; bug corrigé au passage : `aggregate_daily_stats` utilisait `django.utils.timezone.utc`, supprimé en Django 5
   > Décision : les chemins hérités (`public/user/csrf`, `public/user/session-login`, `user/session-logout`,
   > `user/my-profile`) sont servis par `accounts` jusqu'à API-1.2, qui les renomme avec le front ; la connexion
   > y prend déjà `{identifier, password}`. `user/change-password`, `user/change-email` et
