@@ -463,6 +463,85 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/accounts/me/delivery-address/:
+    get:
+      operationId: accounts_me_delivery_address_retrieve
+      description: '`accounts/me/delivery-address/` (WD19, WK05) : adresse proposée
+        par défaut à la commande.'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryAddress'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    put:
+      operationId: accounts_me_delivery_address_update
+      description: '`accounts/me/delivery-address/` (WD19, WK05) : adresse proposée
+        par défaut à la commande.'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryAddressRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryAddress'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/me/email/:
     post:
       operationId: accounts_me_email_create
@@ -3404,6 +3483,179 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/shop/cart/:
+    get:
+      operationId: shop_cart_retrieve
+      description: Panier côté serveur (D38) ; celui d'un invité reste dans le navigateur
+        et part avec la commande.
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/shop/cart/items/:
+    post:
+      operationId: shop_cart_items_create
+      summary: Ajouter un kit au panier (ajoute à la quantité déjà présente)
+      tags:
+      - shop
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/shop/cart/items/{id}/:
+    patch:
+      operationId: shop_cart_items_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - shop
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCartItemUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: shop_cart_items_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/shop/delivery-zones/:
     get:
       operationId: shop_delivery_zones_list
@@ -3497,6 +3749,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/KitDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/shop/kits/{slug}/restock-alerts/:
+    post:
+      operationId: shop_kits_restock_alerts_create
+      description: |-
+        Invité : `{ phone }`, un seul SMS (D38). Parent connecté : SMS sur le numéro du compte, sans corps.
+        Apprenant : notification dans l'application, jamais de téléphone (D30). Réponse identique si la demande
+        existait déjà.
+      summary: Être prévenu du retour en stock d'un kit (WK11)
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestockAlertRequest'
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestockAlertAck'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
         '404':
           content:
@@ -3638,6 +3945,61 @@ components:
       required:
       - firstName
       - id
+    Cart:
+      type: object
+      description: 'Panier (WK03, WK10) : prix courants des kits ; le total définitif
+        est celui de la commande.'
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        count:
+          type: integer
+          description: Nombre d'articles (somme des quantités)
+        subtotal:
+          type: integer
+          description: Somme des lignes, hors livraison (FCFA)
+      required:
+      - count
+      - items
+      - subtotal
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kit:
+          allOf:
+          - $ref: '#/components/schemas/Kit'
+          readOnly: true
+        quantity:
+          type: integer
+          readOnly: true
+          title: Quantité
+        total:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - kit
+      - quantity
+      - total
+    CartItemCreateRequest:
+      type: object
+      properties:
+        kitSlug:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        quantity:
+          type: integer
+          maximum: 10
+          minimum: 1
+          default: 1
+      required:
+      - kitSlug
     Category:
       type: object
       properties:
@@ -4155,29 +4517,40 @@ components:
       - totalUsers
     DeliveryAddress:
       type: object
+      description: 'Adresse de livraison enregistrée (WD19, WK05). `phone` : par défaut,
+        celui du compte.'
       properties:
+        zoneId:
+          type: integer
+        zone:
+          allOf:
+          - $ref: '#/components/schemas/DeliveryZone'
+          readOnly: true
         recipientName:
           type: string
+          title: Destinataire
+          maxLength: 150
         phone:
           type: string
-        country:
-          type: string
-        zone:
-          type: string
+          maxLength: 32
         city:
           type: string
+          title: Ville
+          maxLength: 80
         district:
           type: string
+          title: Quartier
+          maxLength: 80
         addressLine:
           type: string
+          title: Adresse
+          maxLength: 255
       required:
       - addressLine
       - city
-      - country
-      - district
-      - phone
       - recipientName
       - zone
+      - zoneId
     DeliveryAddressInputRequest:
       type: object
       properties:
@@ -4205,6 +4578,40 @@ components:
           type: string
           minLength: 1
           description: Rue, repère, indications
+          maxLength: 255
+      required:
+      - addressLine
+      - city
+      - recipientName
+      - zoneId
+    DeliveryAddressRequest:
+      type: object
+      description: 'Adresse de livraison enregistrée (WD19, WK05). `phone` : par défaut,
+        celui du compte.'
+      properties:
+        zoneId:
+          type: integer
+        recipientName:
+          type: string
+          minLength: 1
+          title: Destinataire
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 32
+        city:
+          type: string
+          minLength: 1
+          title: Ville
+          maxLength: 80
+        district:
+          type: string
+          title: Quartier
+          maxLength: 80
+        addressLine:
+          type: string
+          minLength: 1
+          title: Adresse
           maxLength: 255
       required:
       - addressLine
@@ -5196,7 +5603,7 @@ components:
           title: Créée le
         deliveryAddress:
           allOf:
-          - $ref: '#/components/schemas/DeliveryAddress'
+          - $ref: '#/components/schemas/OrderDeliveryAddress'
           readOnly: true
           nullable: true
       required:
@@ -5320,7 +5727,7 @@ components:
           title: Créée le
         deliveryAddress:
           allOf:
-          - $ref: '#/components/schemas/DeliveryAddress'
+          - $ref: '#/components/schemas/OrderDeliveryAddress'
           readOnly: true
           nullable: true
         guestToken:
@@ -5346,6 +5753,31 @@ components:
       - status
       - subtotal
       - total
+    OrderDeliveryAddress:
+      type: object
+      properties:
+        recipientName:
+          type: string
+        phone:
+          type: string
+        country:
+          type: string
+        zone:
+          type: string
+        city:
+          type: string
+        district:
+          type: string
+        addressLine:
+          type: string
+      required:
+      - addressLine
+      - city
+      - country
+      - district
+      - phone
+      - recipientName
+      - zone
     OrderItem:
       type: object
       properties:
@@ -5863,6 +6295,13 @@ components:
           maxLength: 255
       required:
       - identifier
+    PatchedCartItemUpdateRequest:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          maximum: 10
+          minimum: 1
     PatchedLearnerProfileUpdateRequest:
       type: object
       properties:
@@ -6313,6 +6752,21 @@ components:
           type: string
       required:
       - resetToken
+    RestockAlertAck:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required:
+      - ok
+    RestockAlertRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          description: 'Invité seulement : un connecté est prévenu sur son compte'
+          maxLength: 32
     ResumeRequest:
       type: object
       properties:
