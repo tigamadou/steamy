@@ -216,26 +216,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/analytics/dashboard/summary/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Exemple d'endpoint "dashboard" qui combine plusieurs métriques.
-         *     On cache la réponse brièvement pour soulager la DB.
-         */
-        get: operations["analytics_dashboard_summary_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/analytics/events/": {
         parameters: {
             query?: never;
@@ -251,22 +231,6 @@ export interface paths {
          *     jamais une valeur fournie par le client. Plafonné par le throttling global (S9).
          */
         post: operations["analytics_events_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/analytics/export/events/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["analytics_export_events_retrieve"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -536,6 +500,108 @@ export interface paths {
         };
         /** @description W04, W19 : identifiant libre ? Throttlé : c'est une énumération des identifiants. */
         get: operations["auth_username_availability_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/impact-reports/{period}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WAD04 : lignes du rapport trimestriel (plages, réponses, statuts, sources), figées une fois soumis. */
+        get: operations["backoffice_impact_reports_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/impact-reports/{period}/submit/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WAD04 « Soumettre » (*submit_impact_report*) : verrouille et fige le rapport ; idempotent (D74). */
+        post: operations["backoffice_impact_reports_submit_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/impact-reports/{period}/values/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description WAD05 : brouillon de la saisie manuelle (*enter_kpi_value*) ; `REPORT_LOCKED` après soumission (D74). */
+        patch: operations["backoffice_impact_reports_values_partial_update"];
+        trace?: never;
+    };
+    "/api/backoffice/kpis/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WAD02 : indicateurs par groupe pour la période en cours (Finance, Super-admin). */
+        get: operations["backoffice_kpis_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/kpis/{code}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WAD03 : statut, valeur, cible, historique, composition et définition d'un indicateur. */
+        get: operations["backoffice_kpis_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/overview/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WAD01 : tout membre du personnel ; « À traiter » limité aux groupes de l'utilisateur. */
+        get: operations["backoffice_overview_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1776,6 +1842,12 @@ export interface components {
             /** @description #RRGGBB */
             color?: string;
         };
+        CompositionPart: {
+            code: string;
+            label: string;
+            /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
+            value: (number | boolean | string) | null;
+        };
         /** @description Ce que montre le lien SMS avant toute connexion : le numéro masqué, rien de l'enfant. */
         ConsentPreview: {
             parentPhoneMasked: string;
@@ -1944,12 +2016,6 @@ export interface components {
             /** @description 3 parcours recommandés */
             recommendations: components["schemas"]["Recommendation"][];
         };
-        DashboardSummary: {
-            totalUsers: number;
-            eventsLast7Days: number;
-            /** Format: double */
-            revenueLast30Days: number;
-        };
         DaySeconds: {
             /** Format: date */
             date: string;
@@ -2110,6 +2176,53 @@ export interface components {
          * @enum {string}
          */
         HealthStatusEnum: "ok" | "degraded";
+        Highlight: {
+            code: string;
+            label: string;
+            /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
+            value: (number | boolean | string) | null;
+            /** Format: double */
+            target: number | null;
+            status: components["schemas"]["KpiStatus"];
+        };
+        HistoryPoint: {
+            period: string;
+            label: string;
+            /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
+            value: (number | boolean | string) | null;
+            /** Format: date */
+            start: string;
+            /** Format: date */
+            end: string;
+            status: components["schemas"]["KpiStatus"];
+        };
+        ImpactReport: {
+            /** @description 2026-t1 */
+            period: string;
+            /** @description T1 2026 */
+            label: string;
+            /** Format: date */
+            start: string;
+            /** Format: date */
+            end: string;
+            /** Format: date */
+            dueDate: string;
+            status: components["schemas"]["ImpactReportStatusEnum"];
+            /** Format: date-time */
+            submittedAt: string | null;
+            submittedBy: string | null;
+            /** @description Indicateurs manuels renseignés */
+            entered: number;
+            /** @description Indicateurs manuels */
+            total: number;
+            rows: components["schemas"]["ReportRow"][];
+        };
+        /**
+         * @description * `draft` - Brouillon
+         *     * `submitted` - Soumis
+         * @enum {string}
+         */
+        ImpactReportStatusEnum: "draft" | "submitted";
         Kit: {
             slug: string;
             /** Nom */
@@ -2148,6 +2261,99 @@ export interface components {
                 [key: string]: unknown;
             }[];
         };
+        KpiDashboard: {
+            period: components["schemas"]["Period"];
+            groups: components["schemas"]["KpiGroup"][];
+        };
+        KpiDetail: {
+            code: string;
+            label: string;
+            group: string;
+            unit: components["schemas"]["KpiUnitEnum"];
+            source: components["schemas"]["KpiSourceEnum"];
+            /** Format: double */
+            target: number | null;
+            baseCode: string | null;
+            /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
+            value: (number | boolean | string) | null;
+            status: components["schemas"]["KpiStatus"];
+            series: components["schemas"]["SeriesPoint"][];
+            period: components["schemas"]["Period"];
+            /** @description Définition : mode de calcul */
+            calculation: string;
+            periodicity: components["schemas"]["KpiPeriodicityEnum"];
+            /** Format: double */
+            baseline: number | null;
+            /** @description Taux d'atteinte de la cible, en % */
+            attainment: number | null;
+            history: components["schemas"]["HistoryPoint"][];
+            composition: components["schemas"]["CompositionPart"][];
+        };
+        KpiGroup: {
+            code: string;
+            label: string;
+            kpis: components["schemas"]["KpiSummary"][];
+        };
+        /**
+         * @description * `month` - Mensuelle
+         *     * `quarter` - Trimestrielle
+         * @enum {string}
+         */
+        KpiPeriodicityEnum: "month" | "quarter";
+        /**
+         * @description * `auto` - Auto
+         *     * `manual` - Manuel
+         *     * `unavailable` - Indisponible
+         * @enum {string}
+         */
+        KpiSourceEnum: "auto" | "manual" | "unavailable";
+        KpiStatus: {
+            status: components["schemas"]["KpiStatusEnum"];
+            tone: components["schemas"]["KpiToneEnum"];
+            label: string;
+        };
+        /**
+         * @description * `unavailable` - unavailable
+         *     * `pending` - pending
+         *     * `filled` - filled
+         *     * `off_target` - off_target
+         *     * `below` - below
+         *     * `achieved` - achieved
+         * @enum {string}
+         */
+        KpiStatusEnum: "unavailable" | "pending" | "filled" | "off_target" | "below" | "achieved";
+        KpiSummary: {
+            code: string;
+            label: string;
+            group: string;
+            unit: components["schemas"]["KpiUnitEnum"];
+            source: components["schemas"]["KpiSourceEnum"];
+            /** Format: double */
+            target: number | null;
+            baseCode: string | null;
+            /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
+            value: (number | boolean | string) | null;
+            status: components["schemas"]["KpiStatus"];
+            series: components["schemas"]["SeriesPoint"][];
+        };
+        /**
+         * @description * `neutral` - neutral
+         *     * `amber` - amber
+         *     * `info` - info
+         *     * `error` - error
+         *     * `success` - success
+         * @enum {string}
+         */
+        KpiToneEnum: "neutral" | "amber" | "info" | "error" | "success";
+        /**
+         * @description * `count` - Nombre
+         *     * `fcfa` - Montant (FCFA)
+         *     * `score` - Note
+         *     * `yes_no` - Oui / non
+         *     * `text` - Texte
+         * @enum {string}
+         */
+        KpiUnitEnum: "count" | "fcfa" | "score" | "yes_no" | "text";
         LeadRequest: {
             /** Format: email */
             email: string;
@@ -2541,6 +2747,23 @@ export interface components {
             challengeId: string;
             code: string;
         };
+        Overview: {
+            period: components["schemas"]["Period"];
+            highlight: components["schemas"]["Highlight"];
+            stats: components["schemas"]["OverviewStats"];
+            report: components["schemas"]["ReportDeadline"];
+            todo: components["schemas"]["Todo"][];
+        };
+        OverviewStats: {
+            /** @description Comptes actifs (apprenants, parents, enseignants) */
+            users: number;
+            /** @description Apprenants connectés dans les 30 jours */
+            activeLearners: number;
+            /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
+            salesMonth: (number | boolean | string) | null;
+            /** Format: double */
+            completionRate: number | null;
+        };
         PaginatedAttemptListItemList: {
             /** @example 123 */
             count?: number;
@@ -2870,6 +3093,9 @@ export interface components {
         PatchedPreferencesUpdateRequest: {
             categories?: components["schemas"]["CategoryPreferenceRequest"][];
         };
+        PatchedValuesInputRequest: {
+            values?: components["schemas"]["ValueEntryRequest"][];
+        };
         Payment: {
             readonly id: number;
             readonly order: number;
@@ -2897,6 +3123,21 @@ export interface components {
          * @enum {string}
          */
         PdfStatusEnum: "pending" | "ready" | "failed";
+        Period: {
+            /** @description 2026-01, 2026-t1 ou 2026 */
+            key: string;
+            label: string;
+            /**
+             * Format: date
+             * @description Premier jour (inclus)
+             */
+            start: string;
+            /**
+             * Format: date
+             * @description Dernier jour (inclus)
+             */
+            end: string;
+        };
         Preferences: {
             /**
              * Format: email
@@ -3131,6 +3372,38 @@ export interface components {
             title: string;
             concept: string;
         };
+        ReportDeadline: {
+            period: string;
+            label: string;
+            /** Format: date */
+            dueDate: string;
+            status: components["schemas"]["ImpactReportStatusEnum"];
+            /** @description Indicateurs manuels renseignés */
+            entered: number;
+            /** @description Indicateurs manuels */
+            total: number;
+        };
+        ReportRow: {
+            code: string;
+            label: string;
+            group: string;
+            unit: components["schemas"]["KpiUnitEnum"];
+            source: components["schemas"]["KpiSourceEnum"];
+            /**
+             * Format: date
+             * @description Du (plage calculée par le serveur)
+             */
+            start: string;
+            /**
+             * Format: date
+             * @description Au
+             */
+            end: string;
+            /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
+            value: (number | boolean | string) | null;
+            status: components["schemas"]["KpiStatus"];
+            note: string;
+        };
         /** @description Kit dont le Kit Code ouvre le parcours (D36) ; fiche : `GET shop/kits/{slug}/`. */
         RequiredKit: {
             slug: string;
@@ -3182,6 +3455,12 @@ export interface components {
             code: string;
             /** Libellé */
             label: string;
+        };
+        SeriesPoint: {
+            period: string;
+            label: string;
+            /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
+            value: (number | boolean | string) | null;
         };
         /**
          * @description * `free` - Parcours gratuit
@@ -3354,6 +3633,14 @@ export interface components {
             /** Format: date-time */
             expiresAt: string;
         };
+        Todo: {
+            /** @description consents_pending (d'autres types suivront avec API-L3b) */
+            kind: string;
+            label: string;
+            count: number;
+            /** @description Chemin de la liste filtrée dans l'admin Django */
+            adminPath: string;
+        };
         TokenRequest: {
             /** @description Jeton du lien SMS /consentement/<jeton> */
             token: string;
@@ -3440,6 +3727,12 @@ export interface components {
         };
         UsernameAvailabilityResponse: {
             available: boolean;
+        };
+        ValueEntryRequest: {
+            code: string;
+            /** @description Nombre (count, fcfa, score), booléen (yes_no) ou texte ; null efface la saisie */
+            value: unknown;
+            note?: string;
         };
         WebhookAck: {
             ok: boolean;
@@ -4208,49 +4501,6 @@ export interface operations {
             };
         };
     };
-    analytics_dashboard_summary_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DashboardSummary"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
     analytics_events_create: {
         parameters: {
             query?: never;
@@ -4273,55 +4523,6 @@ export interface operations {
                 };
             };
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    analytics_export_events_retrieve: {
-        parameters: {
-            query?: {
-                /** @description Par défaut : aujourd'hui */
-                end?: string;
-                /** @description Par défaut : il y a 7 jours */
-                start?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Export CSV des événements */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "text/csv": string;
-                };
-            };
-            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5070,6 +5271,342 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UsernameAvailabilityResponse"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_impact_reports_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                period: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpactReport"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_impact_reports_submit_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                period: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpactReport"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_impact_reports_values_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                period: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedValuesInputRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpactReport"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_kpis_list: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Période de WAD02 : mois, trimestre ou année en cours
+                 *
+                 *     * `month` - month
+                 *     * `quarter` - quarter
+                 *     * `year` - year
+                 */
+                period?: "month" | "quarter" | "year";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KpiDashboard"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_kpis_retrieve: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Période de WAD02 : mois, trimestre ou année en cours
+                 *
+                 *     * `month` - month
+                 *     * `quarter` - quarter
+                 *     * `year` - year
+                 */
+                period?: "month" | "quarter" | "year";
+            };
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KpiDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_overview_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Overview"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             429: {
