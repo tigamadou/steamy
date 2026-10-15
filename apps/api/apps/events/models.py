@@ -6,6 +6,7 @@ Les candidatures (`EventApplication`, accord parental systématique) arrivent en
 alors aussi les candidatures acceptées.
 """
 
+from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import F, Q
@@ -81,6 +82,35 @@ class SteamyEvent(models.Model):
     @property
     def applications_open(self) -> bool:
         return self.seats_left > 0 and timezone.now() < self.application_deadline
+
+
+class EventTicket(models.Model):
+    """
+    Ticket Steamy Events offert à la certification d'un parcours (D33) : un seul par inscription (contrainte
+    d'unicité), il couvre le prix d'une candidature (utilisé en API-L3b).
+    """
+
+    learner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        models.CASCADE,
+        related_name="event_tickets",
+        verbose_name=_("apprenant"),
+    )
+    enrollment = models.OneToOneField(
+        "learning.Enrollment",
+        models.CASCADE,
+        related_name="event_ticket",
+        verbose_name=_("inscription d'origine"),
+    )
+    created_at = models.DateTimeField(_("offert le"), auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        verbose_name = _("ticket Steamy Events")
+        verbose_name_plural = _("tickets Steamy Events")
+
+    def __str__(self):
+        return f"Ticket de {self.learner} ({self.enrollment.course})"
 
 
 class EventProposal(models.Model):
