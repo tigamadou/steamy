@@ -10,6 +10,7 @@ import { Field } from "@/components/ds/Field";
 import { Input } from "@/components/ds/Input";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { takeResumeIdentifier } from "@/lib/auth/resume-handoff";
+import { submitWith } from "@/lib/form";
 
 import { STEP_PATH } from "../apprenant/signup-steps";
 
@@ -57,7 +58,7 @@ export function ResumeForm() {
   ].filter((item) => !!item);
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-4">
+    <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-4">
       <ErrorSummary errors={errors} focusKey={state.attempt} />
       {state.expired && (
         <Button href="/inscription/type" variant="outline">

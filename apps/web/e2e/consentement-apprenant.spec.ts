@@ -42,6 +42,7 @@ test("W07 → W08 : l'accord du parent est détecté sans recharger la page", as
 
 test("W18 : le refus est affiché avec son motif, l'identifiant est libéré, le même parent est en délai", async ({
   page,
+  browser,
 }) => {
   const username = await startLearnerSignup(page);
   const phone = uniquePhone();
@@ -58,12 +59,14 @@ test("W18 : le refus est affiché avec son motif, l'identifiant est libéré, le
   await axe(page);
   expect(await isUsernameAvailable(username)).toBe(true);
 
-  // Nouvelle inscription vers le même parent : délai de 30 jours (C9)
-  await startLearnerSignup(page);
-  await page.getByRole("textbox", { name: /^Numéro de téléphone du parent/ }).fill(phone.slice(4));
-  await page.getByRole("combobox", { name: /^Lien de parenté/ }).selectOption({ label: "Mère" });
-  await page.getByRole("button", { name: "Envoyer la demande au parent" }).click();
-  await expect(page.getByText(/a refusé une demande il y a moins de 30 jours/).first()).toBeVisible();
+  // Nouvelle inscription vers le même parent : délai de 30 jours (C9). Dans un autre navigateur : la session de
+  // celui-ci garde le refus affiché (W18), voir le rapport du lot sur `POST auth/learner-signup/`.
+  const again = await (await browser.newContext()).newPage();
+  await startLearnerSignup(again);
+  await again.getByRole("textbox", { name: /^Numéro de téléphone du parent/ }).fill(phone.slice(4));
+  await again.getByRole("combobox", { name: /^Lien de parenté/ }).selectOption({ label: "Mère" });
+  await again.getByRole("button", { name: "Envoyer la demande au parent" }).click();
+  await expect(again.getByText(/a refusé une demande il y a moins de 30 jours/).first()).toBeVisible();
 });
 
 test("reprise : identifiant et code de reprise dans un autre navigateur, code faux refusé", async ({ page, browser }) => {
@@ -71,7 +74,7 @@ test("reprise : identifiant et code de reprise dans un autre navigateur, code fa
   await sendConsentRequest(page, uniquePhone());
   const code = await readResumeCode(page);
 
-  const other = await browser.newPage();
+  const other = await (await browser.newContext()).newPage();
   await other.goto("/inscription/reprendre");
   await expect(other.getByRole("heading", { level: 1 })).toHaveText("Reprendre mon inscription");
   await axe(other);
@@ -91,7 +94,7 @@ test("W16 : un compte en attente bascule vers la reprise, identifiant prérempli
   await sendConsentRequest(page, uniquePhone());
   const code = await readResumeCode(page);
 
-  const other = await browser.newPage();
+  const other = await (await browser.newContext()).newPage();
   await other.goto("/connexion");
   await other.getByRole("textbox", { name: /Identifiant ou numéro/ }).fill(username);
   await other.getByLabel(/^Mot de passe/).fill(code);
