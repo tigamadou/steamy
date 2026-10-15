@@ -1,6 +1,7 @@
 """
 Progression séquentielle (§4.4, WJ01) : un parcours est une suite d'étapes, dans l'ordre des projets, niveaux et
-missions. Une étape n'est accessible que si toutes les précédentes sont faites : le contenu d'une étape verrouillée
+missions ; la formative d'un niveau suit ses missions, la sommative d'un projet suit ses niveaux (S2). Une mission est
+faite une fois terminée, un quiz une fois réussi. Une étape n'est accessible que si toutes les précédentes sont faites : le contenu d'une étape verrouillée
 est refusé par l'API (`CONTENT_LOCKED`), pas seulement masqué.
 
 États : `done` (faite), `available` (la première étape non faite), `locked` (après elle). Un niveau ou un projet est
@@ -12,7 +13,7 @@ from dataclasses import dataclass, field
 
 from django.db.models import Prefetch
 
-from apps.catalog.models import Course, Level, Mission, Project
+from apps.catalog.models import Course, Level, Mission, Project, Quiz
 
 DONE = "done"
 AVAILABLE = "available"
@@ -21,11 +22,12 @@ LOCKED = "locked"
 
 @dataclass(frozen=True)
 class Step:
-    type: str  # "mission"
+    type: str  # "mission" | "quiz"
     id: int
     title: str
     project_id: int
-    level_id: int
+    level_id: int | None  # None : sommative du projet
+    quiz_kind: str | None = None
 
 
 @dataclass
@@ -39,19 +41,31 @@ class Container:
 
 
 def load_course(course_id: int) -> Course:
-    """Parcours avec ses projets, niveaux et missions, dans l'ordre."""
+    """Parcours avec ses projets, niveaux, missions et quiz, dans l'ordre."""
     missions = Mission.objects.order_by("order", "id")
-    levels = Level.objects.order_by("order", "id").prefetch_related(
-        Prefetch("missions", queryset=missions)
+    levels = (
+        Level.objects.order_by("order", "id")
+        .select_related("quiz")
+        .prefetch_related(Prefetch("missions", queryset=missions))
     )
-    projects = Project.objects.order_by("order", "id").prefetch_related(
-        Prefetch("levels", queryset=levels)
+    projects = (
+        Project.objects.order_by("order", "id")
+        .select_related("quiz")
+        .prefetch_related(Prefetch("levels", queryset=levels))
     )
     return (
         Course.objects.select_related("category")
         .prefetch_related(Prefetch("projects", queryset=projects))
         .get(pk=course_id)
     )
+
+
+def quiz_of(obj) -> Quiz | None:
+    """Quiz d'un niveau ou d'un projet (relation inverse un-à-un), ou `None`."""
+    try:
+        return obj.quiz
+    except Quiz.DoesNotExist:
+        return None
 
 
 class Progression:
@@ -70,11 +84,18 @@ class Progression:
                     self.steps.append(
                         Step("mission", mission.id, mission.title, project.id, level.id)
                     )
+                if quiz := quiz_of(level):
+                    self.steps.append(self._quiz_step(quiz, project, level))
                 level_box.end = len(self.steps)
                 project_box.levels.append(level_box)
+            if quiz := quiz_of(project):
+                self.steps.append(self._quiz_step(quiz, project, None))
             project_box.end = len(self.steps)
             self.projects.append(project_box)
         self.done_missions = set(enrollment.mission_progress.values_list("mission_id", flat=True))
+        self.passed_quizzes = set(
+            enrollment.attempts.filter(passed=True).values_list("quiz_id", flat=True)
+        )
         self._index = {(step.type, step.id): i for i, step in enumerate(self.steps)}
         self.first_open = next(
             (i for i, step in enumerate(self.steps) if not self.is_done(step)), len(self.steps)
@@ -82,7 +103,16 @@ class Progression:
 
     # --- Étapes ------------------------------------------------------------------------------------
 
+    @staticmethod
+    def _quiz_step(quiz: Quiz, project, level) -> Step:
+        quiz.level, quiz.project = level, (project if level is None else None)
+        return Step(
+            "quiz", quiz.id, quiz.display_title, project.id, getattr(level, "id", None), quiz.kind
+        )
+
     def is_done(self, step: Step) -> bool:
+        if step.type == "quiz":
+            return step.id in self.passed_quizzes
         return step.id in self.done_missions
 
     def step_state(self, index: int) -> str:
@@ -92,6 +122,9 @@ class Progression:
 
     def mission_state(self, mission_id: int) -> str:
         return self.step_state(self._index[("mission", mission_id)])
+
+    def quiz_state(self, quiz_id: int) -> str:
+        return self.step_state(self._index[("quiz", quiz_id)])
 
     def next_step(self) -> Step | None:
         """Première étape non faite ; `None` quand tout est fait."""
@@ -136,10 +169,10 @@ class Progression:
         total = self.mission_count
         return self.missions_done * 100 // total if total else 0
 
-    def position(self) -> tuple[Container, Container] | None:
-        """Projet et niveau de la prochaine étape (« Projet n · Niveau n » de WD23)."""
+    def position(self) -> tuple[Container, Container | None] | None:
+        """Projet et niveau (aucun pour une sommative) de la prochaine étape (« Projet n · Niveau n » de WD23)."""
         step = self.next_step()
         if step is None:
             return None
         project = self.project_box(step.project_id)
-        return project, self.level_box(step.level_id)
+        return project, self.level_box(step.level_id) if step.level_id else None
