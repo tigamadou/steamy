@@ -321,6 +321,8 @@ SPECTACULAR_SETTINGS = {
         "ErrorCodeEnum": "libs.errors.ERROR_CODES",
         "RoleEnum": "apps.accounts.models.User.Role",
         "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
+        "AttemptStatusEnum": "apps.learning.models.QuizAttempt.Status",
+        "QuizKindEnum": "apps.catalog.models.Quiz.Kind",
         # Impact Tracker : noms explicites, sans renommer `ToneEnum` (notifications)
         "ToneEnum": "apps.notifications.models.Tone",
         "PeriodKindEnum": "apps.impact.periods.KINDS",
