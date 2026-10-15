@@ -143,3 +143,27 @@ def test_profiles_are_created_by_factories():
     assert LearnerFactory().learner_profile.points == 0
     assert ParentFactory().parent_profile.pk
     assert TeacherFactory().teacher_profile.pk
+
+
+def test_create_user_is_reserved_to_staff():
+    user = User.objects.create_user(email="equipe@steamy.test", password="Motdepasse1")
+    assert user.is_staff and user.role is None
+
+
+def test_labels_and_role_helpers():
+    learner = LearnerFactory(username="lea", first_name="Léa", last_name="Adjovi")
+    assert str(learner) == "lea"
+    assert learner.get_full_name() == "Léa Adjovi" and learner.get_short_name() == "Léa"
+    assert (learner.is_learner, learner.is_parent, learner.is_teacher) == (True, False, False)
+    anonymous = LearnerFactory(first_name="", last_name="")
+    assert anonymous.get_full_name() == anonymous.username == anonymous.get_short_name()
+
+    parent = ParentFactory(phone="+2290197000020")
+    assert str(parent) == "+2290197000020" and parent.is_parent
+    teacher = TeacherFactory(email="prof@ecole.bj")
+    assert str(teacher) == "prof@ecole.bj" and teacher.is_teacher
+    assert str(User(pk=42)) == "Utilisateur 42"
+
+    assert str(learner.learner_profile) == "Profil apprenant de lea"
+    assert str(parent.parent_profile) == "Profil parent de +2290197000020"
+    assert str(teacher.teacher_profile) == "Profil enseignant de prof@ecole.bj"
