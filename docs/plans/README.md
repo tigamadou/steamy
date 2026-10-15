@@ -65,7 +65,7 @@ plan.
 | [LOT-1-PUBLIC](LOT-1-PUBLIC.md) | ✅ terminé | 1.0 à 1.6 fusionnées (PR #18, #19, #30, #36, #47 à #50, #58) · critères de fin et validation C18 (PR #59) | — |
 | [LOT-2-AUTH](LOT-2-AUTH.md) | 🟡 en cours | 2.0 (PR #31) · 2.1 (PR #35) · 2.2 à 2.8 (PR #51 à #57) | Critères de fin du lot (CI, correctifs API signalés) |
 | [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | ⬜ à faire | — | 3.0 (après API-1 et API-L3a) |
-| [LOT-4-PARENT](LOT-4-PARENT.md) | ⬜ à faire | — | 4.0 conception de WPD15 (sans prérequis d'API) |
+| [LOT-4-PARENT](LOT-4-PARENT.md) | 🟡 en cours | 4.0 maquette de WPD15 et des états manquants dessinée (PR #72), validation C18 en attente | Validation C18 de WPD15 ; 4.1 après API-L4 |
 | [LOT-5-ENSEIGNANT](LOT-5-ENSEIGNANT.md) | ⬜ à faire | — | 5.1 (après API-L5) |
 | [LOT-6-ADMIN](LOT-6-ADMIN.md) | 🟡 en cours | 6.1 (PR #38) · 6.6 (PR #62) | 6.2 à 6.5 après leurs étapes d'API ; 6.7 et 6.8 après API-L6.4 |
 
