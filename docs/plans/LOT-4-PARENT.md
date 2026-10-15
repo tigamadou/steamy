@@ -17,15 +17,15 @@ Statut : ⬜ à faire · Prochaine tâche : 4.0 Conception de `WPD15` · Préreq
 
 ### Lot 4 · Espace parent — ⬜ à faire
 - [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15`
-  - [ ] Créer `design/screens-parent-a-concevoir-web.jsx` (même design system) et l'ajouter à `App.html`
-  - [ ] Concevoir `WPD15` en 3 variantes d'objet : parcours, kit (adresse + zone + frais), événement
-  - [ ] Concevoir les 8 états de `WPD15` : en attente, attente de confirmation, payée, échec, refusée, expirée, annulée par l'enfant, kit en rupture
-  - [ ] Concevoir la modale « Refuser la demande » (motif facultatif)
-  - [ ] Concevoir `WPD05` variante enseignant (D60) et son état lecture seule (expirée, déjà traitée)
-  - [ ] Concevoir la modale de réinitialisation du mot de passe (`WPD03`)
-  - [ ] Concevoir la modale de refus d'une candidature (`WPD06`)
-  - [ ] Respecter les contraintes : `WA03` (C1 magenta), carte enfant de `WPD05`, montants serveur, mention « Paiement sécurisé · aucune carte bancaire », mobile 360 px d'abord
-  - [ ] Recette : toutes variantes et tous états dessinés, aucun prix, réseau ou délai en dur, vouvoiement
+  - [x] Créer `design/screens-parent-a-concevoir-web.jsx` (même design system) et l'ajouter à `App.html`
+  - [x] Concevoir `WPD15` en 3 variantes d'objet : parcours, kit (adresse + zone + frais), événement
+  - [x] Concevoir les 8 états de `WPD15` : en attente, attente de confirmation, payée, échec, refusée, expirée, annulée par l'enfant, kit en rupture
+  - [x] Concevoir la modale « Refuser la demande » (motif facultatif)
+  - [x] Concevoir `WPD05` variante enseignant (D60) et son état lecture seule (expirée, déjà traitée)
+  - [x] Concevoir la modale de réinitialisation du mot de passe (`WPD03`)
+  - [x] Concevoir la modale de refus d'une candidature (`WPD06`)
+  - [x] Respecter les contraintes : `WA03` (C1 magenta), carte enfant de `WPD05`, montants serveur, mention « Paiement sécurisé · aucune carte bancaire », mobile 360 px d'abord
+  - [x] Recette : toutes variantes et tous états dessinés, aucun prix, réseau ou délai en dur, vouvoiement
   - [ ] Maquette validée par le produit (C18) avant 4.4
 - [ ] **4.1** Socle parent, accueil et notifications · `feature/lot4-accueil` (requiert API-L4)
   - [ ] Layout `(parent)` : contrôle du rôle côté serveur, redirection vers `/connexion?next=`, `loading.tsx`, `error.tsx`, `not-found.tsx`
