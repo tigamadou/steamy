@@ -533,6 +533,11 @@ paths:
   /api/learning/attempts/:
     get:
       operationId: learning_attempts_list
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - name: limit
         required: false
@@ -565,6 +570,11 @@ paths:
           description: ''
     post:
       operationId: learning_attempts_create
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       tags:
       - learning
       requestBody:
@@ -585,6 +595,11 @@ paths:
   /api/learning/attempts/{id}/:
     get:
       operationId: learning_attempts_retrieve
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -606,6 +621,11 @@ paths:
   /api/learning/certificates/:
     get:
       operationId: learning_certificates_list
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - name: limit
         required: false
@@ -645,6 +665,11 @@ paths:
   /api/learning/certificates/{id}/:
     get:
       operationId: learning_certificates_retrieve
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -726,6 +751,11 @@ paths:
   /api/learning/enrollments/:
     get:
       operationId: learning_enrollments_list
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - name: limit
         required: false
@@ -764,6 +794,11 @@ paths:
           description: ''
     post:
       operationId: learning_enrollments_create
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       tags:
       - learning
       requestBody:
@@ -784,6 +819,11 @@ paths:
   /api/learning/enrollments/{id}/:
     get:
       operationId: learning_enrollments_retrieve
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -805,6 +845,11 @@ paths:
   /api/learning/progress/:
     get:
       operationId: learning_progress_list
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - name: limit
         required: false
@@ -843,6 +888,11 @@ paths:
           description: ''
     post:
       operationId: learning_progress_create
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       tags:
       - learning
       requestBody:
@@ -863,6 +913,11 @@ paths:
   /api/learning/progress/{id}/:
     get:
       operationId: learning_progress_retrieve
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -872,32 +927,6 @@ paths:
         required: true
       tags:
       - learning
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Progress'
-          description: ''
-    put:
-      operationId: learning_progress_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this progress.
-        required: true
-      tags:
-      - learning
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProgressRequest'
-        required: true
       security:
       - cookieAuth: []
       responses:
@@ -909,6 +938,11 @@ paths:
           description: ''
     patch:
       operationId: learning_progress_partial_update
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -932,22 +966,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Progress'
           description: ''
-    delete:
-      operationId: learning_progress_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this progress.
-        required: true
-      tags:
-      - learning
-      security:
-      - cookieAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/learning/questions/:
     get:
       operationId: learning_questions_list
@@ -1071,6 +1089,11 @@ paths:
   /api/messaging/notifications/:
     get:
       operationId: messaging_notifications_list
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - name: limit
         required: false
@@ -1110,6 +1133,11 @@ paths:
   /api/messaging/notifications/{id}/:
     get:
       operationId: messaging_notifications_retrieve
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -1130,6 +1158,11 @@ paths:
           description: ''
     patch:
       operationId: messaging_notifications_partial_update
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -1156,6 +1189,11 @@ paths:
   /api/payments/orders/:
     get:
       operationId: payments_orders_list
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - name: limit
         required: false
@@ -1194,6 +1232,11 @@ paths:
           description: ''
     post:
       operationId: payments_orders_create
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       tags:
       - payments
       requestBody:
@@ -1214,6 +1257,11 @@ paths:
   /api/payments/orders/{id}/:
     get:
       operationId: payments_orders_retrieve
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -1234,6 +1282,11 @@ paths:
           description: ''
     put:
       operationId: payments_orders_update
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -1260,6 +1313,11 @@ paths:
           description: ''
     patch:
       operationId: payments_orders_partial_update
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -1285,6 +1343,11 @@ paths:
           description: ''
     delete:
       operationId: payments_orders_destroy
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -1302,6 +1365,11 @@ paths:
   /api/payments/payments/:
     get:
       operationId: payments_payments_list
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - name: limit
         required: false
@@ -1341,6 +1409,11 @@ paths:
   /api/payments/payments/{id}/:
     get:
       operationId: payments_payments_retrieve
+      description: |-
+        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+
+        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
       parameters:
       - in: path
         name: id
@@ -2020,13 +2093,14 @@ components:
           readOnly: true
         title:
           type: string
-          maxLength: 255
+          readOnly: true
         body:
           type: string
+          readOnly: true
         url:
           type: string
+          readOnly: true
           nullable: true
-          maxLength: 512
         createdAt:
           type: string
           format: date-time
@@ -2034,9 +2108,11 @@ components:
         read:
           type: boolean
       required:
+      - body
       - createdAt
       - id
       - title
+      - url
       - user
     Order:
       type: object
@@ -2046,9 +2122,10 @@ components:
           readOnly: true
         reference:
           type: string
-          maxLength: 128
+          readOnly: true
         user:
           type: integer
+          readOnly: true
         total:
           type: string
           format: decimal
@@ -2142,12 +2219,6 @@ components:
     OrderRequest:
       type: object
       properties:
-        reference:
-          type: string
-          minLength: 1
-          maxLength: 128
-        user:
-          type: integer
         total:
           type: string
           format: decimal
@@ -2162,8 +2233,6 @@ components:
             $ref: '#/components/schemas/OrderItemRequest'
       required:
       - items
-      - reference
-      - user
     PaginatedAttemptList:
       type: object
       properties:
@@ -2492,27 +2561,11 @@ components:
     PatchedNotificationRequest:
       type: object
       properties:
-        title:
-          type: string
-          minLength: 1
-          maxLength: 255
-        body:
-          type: string
-        url:
-          type: string
-          nullable: true
-          maxLength: 512
         read:
           type: boolean
     PatchedOrderRequest:
       type: object
       properties:
-        reference:
-          type: string
-          minLength: 1
-          maxLength: 128
-        user:
-          type: integer
         total:
           type: string
           format: decimal

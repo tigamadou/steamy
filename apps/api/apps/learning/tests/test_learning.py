@@ -79,7 +79,7 @@ def test_progress_create_and_owner_permission():
 
 
 @pytest.mark.django_db
-def test_certificate_access_owner_and_admin_only():
+def test_certificate_is_visible_to_its_owner_only():
     client = APIClient()
     teacher = User.objects.create_user(email="t3@example.com", password="pw", role="teacher")
     student = User.objects.create_user(email="s3@example.com", password="pw", role="student")
@@ -101,19 +101,11 @@ def test_certificate_access_owner_and_admin_only():
         f"owner should access certificate, got {resp_owner.status_code}: {resp_owner.content}"
     )
 
-    # other non-admin cannot
-    client.force_authenticate(user=other)
-    resp_other = client.get(detail_url, format="json")
-    assert resp_other.status_code in (403, 404), (
-        f"other user should be blocked, got {resp_other.status_code}: {resp_other.content}"
-    )
-
-    # admin can access
-    client.force_authenticate(user=admin)
-    resp_admin = client.get(detail_url, format="json")
-    assert resp_admin.status_code == 200, (
-        f"admin should access, got {resp_admin.status_code}: {resp_admin.content}"
-    )
+    # Ni un autre utilisateur, ni le personnel (qui passe par le back-office) : 404 (S4)
+    for intruder in (other, admin):
+        client.force_authenticate(user=intruder)
+        assert client.get(detail_url, format="json").status_code == 404
+        assert client.get(reverse("certificate-list")).json()["results"] == []
 
 
 @pytest.mark.django_db

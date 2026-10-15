@@ -292,8 +292,20 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["learning_attempts_list"];
         put?: never;
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         post: operations["learning_attempts_create"];
         delete?: never;
         options?: never;
@@ -308,6 +320,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["learning_attempts_retrieve"];
         put?: never;
         post?: never;
@@ -324,6 +342,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["learning_certificates_list"];
         put?: never;
         post?: never;
@@ -340,6 +364,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["learning_certificates_retrieve"];
         put?: never;
         post?: never;
@@ -388,8 +418,20 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["learning_enrollments_list"];
         put?: never;
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         post: operations["learning_enrollments_create"];
         delete?: never;
         options?: never;
@@ -404,6 +446,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["learning_enrollments_retrieve"];
         put?: never;
         post?: never;
@@ -420,8 +468,20 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["learning_progress_list"];
         put?: never;
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         post: operations["learning_progress_create"];
         delete?: never;
         options?: never;
@@ -436,12 +496,24 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["learning_progress_retrieve"];
-        put: operations["learning_progress_update"];
+        put?: never;
         post?: never;
-        delete: operations["learning_progress_destroy"];
+        delete?: never;
         options?: never;
         head?: never;
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         patch: operations["learning_progress_partial_update"];
         trace?: never;
     };
@@ -516,6 +588,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["messaging_notifications_list"];
         put?: never;
         post?: never;
@@ -532,12 +610,24 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["messaging_notifications_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         patch: operations["messaging_notifications_partial_update"];
         trace?: never;
     };
@@ -548,8 +638,20 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["payments_orders_list"];
         put?: never;
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         post: operations["payments_orders_create"];
         delete?: never;
         options?: never;
@@ -564,12 +666,36 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["payments_orders_retrieve"];
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         put: operations["payments_orders_update"];
         post?: never;
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         delete: operations["payments_orders_destroy"];
         options?: never;
         head?: never;
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         patch: operations["payments_orders_partial_update"];
         trace?: never;
     };
@@ -580,6 +706,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["payments_payments_list"];
         put?: never;
         post?: never;
@@ -596,6 +728,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
+         *
+         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
+         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         */
         get: operations["payments_payments_retrieve"];
         put?: never;
         post?: never;
@@ -936,17 +1074,17 @@ export interface components {
         Notification: {
             readonly id: number;
             readonly user: number;
-            title: string;
-            body?: string;
-            url?: string | null;
+            readonly title: string;
+            readonly body: string;
+            readonly url: string | null;
             /** Format: date-time */
             readonly createdAt: string;
             read?: boolean;
         };
         Order: {
             readonly id: number;
-            reference: string;
-            user: number;
+            readonly reference: string;
+            readonly user: number;
             /** Format: decimal */
             total?: string;
             currency?: string;
@@ -977,8 +1115,6 @@ export interface components {
             total: string;
         };
         OrderRequest: {
-            reference: string;
-            user: number;
             /** Format: decimal */
             total?: string;
             currency?: string;
@@ -1219,14 +1355,9 @@ export interface components {
             metadata?: unknown;
         };
         PatchedNotificationRequest: {
-            title?: string;
-            body?: string;
-            url?: string | null;
             read?: boolean;
         };
         PatchedOrderRequest: {
-            reference?: string;
-            user?: number;
             /** Format: decimal */
             total?: string;
             currency?: string;
@@ -2141,53 +2272,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Progress"];
                 };
-            };
-        };
-    };
-    learning_progress_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this progress. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProgressRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Progress"];
-                };
-            };
-        };
-    };
-    learning_progress_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this progress. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

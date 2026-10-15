@@ -2,6 +2,7 @@
 from rest_framework import filters, mixins, permissions, viewsets
 
 from apps.courses.views import enrolled_course_filter
+from libs.scoping import OwnedByRequestUserMixin
 
 from .models import Attempt, Certificate, Choice, Enrollment, Progress, Question, Quiz
 from .serializers import (
@@ -16,19 +17,7 @@ from .serializers import (
 )
 
 
-class IsOwnerOrAdmin(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.user and request.user.is_staff:
-            return True
-        owner = (
-            getattr(obj, "user", None)
-            or getattr(obj, "enrollment", None)
-            and getattr(obj.enrollment, "user", None)
-        )
-        return owner and owner.id == request.user.id
-
-
-class EnrollmentViewSet(viewsets.ModelViewSet):
+class EnrollmentViewSet(OwnedByRequestUserMixin, viewsets.ModelViewSet):
     queryset = Enrollment.objects.select_related("user", "course")
     serializer_class = EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -39,16 +28,19 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class ProgressViewSet(viewsets.ModelViewSet):
+class ProgressViewSet(OwnedByRequestUserMixin, viewsets.ModelViewSet):
     queryset = Progress.objects.select_related("lesson", "enrollment")
     serializer_class = ProgressSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
+    permission_classes = [permissions.IsAuthenticated]
+    owner_field = "enrollment__user"
+    http_method_names = ["get", "post", "patch", "head", "options"]
 
 
-class CertificateViewSet(viewsets.ReadOnlyModelViewSet):
+class CertificateViewSet(OwnedByRequestUserMixin, viewsets.ReadOnlyModelViewSet):
     queryset = Certificate.objects.select_related("enrollment", "enrollment__user")
     serializer_class = CertificateSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
+    permission_classes = [permissions.IsAuthenticated]
+    owner_field = "enrollment__user"
 
 
 # Quiz, questions et choix : lecture seule, réservée aux inscrits du parcours (S8).
@@ -89,6 +81,7 @@ class ChoiceViewSet(viewsets.ReadOnlyModelViewSet):
 # Tentatives : création et lecture seulement. Le score est toujours calculé par le serveur
 # (S8) ; il n'y a plus de correction manuelle.
 class AttemptViewSet(
+    OwnedByRequestUserMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
