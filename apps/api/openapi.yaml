@@ -378,423 +378,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/courses/courses/:
-    get:
-      operationId: courses_courses_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedCourseListList'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/courses/{slug}/:
-    get:
-      operationId: courses_courses_retrieve
-      parameters:
-      - in: path
-        name: slug
-        schema:
-          type: string
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CourseDetail'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/courses/{slug}/enroll/:
-    post:
-      operationId: courses_courses_enroll_create
-      description: |-
-        Inscrit l'utilisateur courant à un parcours GRATUIT.
-        Un parcours payant s'obtient par l'achat (S7) : 402 PAYMENT_REQUIRED.
-        Retourne 201 si l'inscription est créée, 200 si elle existait déjà.
-      parameters:
-      - in: path
-        name: slug
-        schema:
-          type: string
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CourseDetail'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/lessons/:
-    get:
-      operationId: courses_lessons_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedLessonList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/lessons/{id}/:
-    get:
-      operationId: courses_lessons_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this Leçon.
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Lesson'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/modules/:
-    get:
-      operationId: courses_modules_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedModuleList'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/modules/{id}/:
-    get:
-      operationId: courses_modules_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this Module.
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Module'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/resources/:
-    get:
-      operationId: courses_resources_list
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedResourceList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/courses/resources/{id}/:
-    get:
-      operationId: courses_resources_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this resource.
-        required: true
-      tags:
-      - courses
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Resource'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
   /api/health/:
     get:
       operationId: health_retrieve
@@ -2774,91 +2357,6 @@ components:
       - id
       - label
       - phoneRegex
-    CourseDetail:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
-        slug:
-          type: string
-          readOnly: true
-          pattern: ^[-a-zA-Z0-9_]+$
-        description:
-          type: string
-          readOnly: true
-        path:
-          type: integer
-          readOnly: true
-          nullable: true
-        price:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
-          readOnly: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
-        updatedAt:
-          type: string
-          format: date-time
-          readOnly: true
-        modules:
-          type: array
-          items:
-            $ref: '#/components/schemas/Module'
-          readOnly: true
-      required:
-      - createdAt
-      - description
-      - id
-      - modules
-      - path
-      - price
-      - slug
-      - title
-      - updatedAt
-    CourseList:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
-        slug:
-          type: string
-          readOnly: true
-          pattern: ^[-a-zA-Z0-9_]+$
-        description:
-          type: string
-          readOnly: true
-        path:
-          type: integer
-          readOnly: true
-          nullable: true
-        price:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
-          readOnly: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - createdAt
-      - description
-      - id
-      - path
-      - price
-      - slug
-      - title
     CsrfToken:
       type: object
       properties:
@@ -3172,64 +2670,6 @@ components:
         * `mcq` - QCM
         * `tf` - Vrai/Faux
         * `free` - Libre
-    Lesson:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        module:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
-        content:
-          type: string
-          readOnly: true
-        resourceType:
-          allOf:
-          - $ref: '#/components/schemas/ResourceTypeEnum'
-          readOnly: true
-        order:
-          type: integer
-          readOnly: true
-          default: 0
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/Resource'
-          readOnly: true
-      required:
-      - content
-      - id
-      - module
-      - order
-      - resourceType
-      - resources
-      - title
-    LessonSummary:
-      type: object
-      description: 'Plan du parcours, sans contenu : visible avant l''inscription.'
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
-        resourceType:
-          allOf:
-          - $ref: '#/components/schemas/ResourceTypeEnum'
-          readOnly: true
-        order:
-          type: integer
-          readOnly: true
-      required:
-      - id
-      - order
-      - resourceType
-      - title
     Locality:
       type: object
       properties:
@@ -3392,33 +2832,6 @@ components:
         * `suspended` - Suspendu
         * `deactivated` - Désactivé
         * `anonymized` - Anonymisé
-    Module:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
-        order:
-          type: integer
-          readOnly: true
-          default: 0
-        lessons:
-          type: array
-          items:
-            $ref: '#/components/schemas/LessonSummary'
-          readOnly: true
-        course:
-          type: integer
-          readOnly: true
-      required:
-      - course
-      - id
-      - lessons
-      - order
-      - title
     Notification:
       type: object
       properties:
@@ -3611,26 +3024,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Choice'
-    PaginatedCourseListList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/CourseList'
     PaginatedEnrollmentList:
       type: object
       properties:
@@ -3651,46 +3044,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Enrollment'
-    PaginatedLessonList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Lesson'
-    PaginatedModuleList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Module'
     PaginatedNotificationList:
       type: object
       properties:
@@ -3811,26 +3164,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Quiz'
-    PaginatedResourceList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Resource'
     PasswordChangeRequest:
       type: object
       properties:
@@ -3855,7 +3188,7 @@ components:
       properties:
         enrollment:
           type: integer
-        lesson:
+        mission:
           type: integer
         completed:
           type: boolean
@@ -3995,7 +3328,7 @@ components:
           readOnly: true
         enrollment:
           type: integer
-        lesson:
+        mission:
           type: integer
         completed:
           type: boolean
@@ -4011,14 +3344,14 @@ components:
       required:
       - enrollment
       - id
-      - lesson
+      - mission
       - updatedAt
     ProgressRequest:
       type: object
       properties:
         enrollment:
           type: integer
-        lesson:
+        mission:
           type: integer
         completed:
           type: boolean
@@ -4029,7 +3362,7 @@ components:
           nullable: true
       required:
       - enrollment
-      - lesson
+      - mission
     ProviderEnum:
       enum:
       - kkiapay
@@ -4137,51 +3470,6 @@ components:
       - code
       - id
       - label
-    Resource:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        lesson:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
-        file:
-          type: string
-          format: uri
-          readOnly: true
-          nullable: true
-        externalUrl:
-          type: string
-          format: uri
-          readOnly: true
-          nullable: true
-        uploadedAt:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - externalUrl
-      - file
-      - id
-      - lesson
-      - title
-      - uploadedAt
-    ResourceTypeEnum:
-      enum:
-      - video
-      - pdf
-      - html
-      - other
-      type: string
-      description: |-
-        * `video` - Vidéo
-        * `pdf` - PDF
-        * `html` - HTML
-        * `other` - Autre
     RoleEnum:
       enum:
       - learner
