@@ -1,7 +1,7 @@
 # ADR 0002 · Fournisseur SMS
 
-- **Statut** : proposé (à trancher par le porteur du projet, arbitrage S10)
-- **Date** : 15 octobre 2026
+- **Statut** : acceptée (arbitrage S10 tranché par le porteur du projet)
+- **Date** : 2026-10-15
 - **Étape du plan** : API-L2.0a, avant API-L2.0b ([PLAN-API](../plans/PLAN-API.md))
 - **Étude détaillée** : [docs/etudes/sms.md](../etudes/sms.md)
 
@@ -21,50 +21,58 @@ facilité de bascule.
 
 | Option | Avantages | Inconvénients |
 | --- | --- | --- |
-| **A. Twilio seul** | Meilleure API, SDK Python, `StatusCallback`, sous-comptes | 146 à 282 FCFA/SMS (≈ 17 fois une route locale), USD, enregistrement d'identifiant ≈ 3 semaines (Bénin, Côte d'Ivoire), données aux États-Unis |
-| **B. BulkGate** (passerelle européenne, routes directes) | ≈ 10 FCFA/SMS au Bénin et 12 en Côte d'Ivoire avec expéditeur enregistré, 4 pays couverts, RGPD, OTP prioritaires, API REST simple | Webhook de statut et sens de « trafic international non autorisé » à confirmer, enregistrement ≈ 4 semaines, pas de SDK Python officiel, pas de sandbox, support par formulaire |
+| **A. Twilio seul (retenu)** | Meilleure API, SDK Python, `StatusCallback`, sous-comptes | 146 à 282 FCFA/SMS (≈ 17 fois une route locale), USD, enregistrement d'identifiant ≈ 3 semaines (Bénin, Côte d'Ivoire), données aux États-Unis |
+| **B. BulkGate** (candidat à la bascule) | ≈ 10 FCFA/SMS au Bénin et 12 en Côte d'Ivoire avec expéditeur enregistré, 4 pays couverts, RGPD, OTP prioritaires, API REST simple | Webhook de statut et sens de « trafic international non autorisé » à confirmer, enregistrement ≈ 4 semaines, pas de SDK Python officiel, pas de sandbox, support par formulaire |
 | **C. Prestataire local** (FasterMessage, e-MC, SMS-PRO) | Seul FasterMessage cite Celtiis ; support local, FCFA, tarifs bas | Solidité, contrat, webhooks et délivrabilité invérifiables à distance |
 | **D. Infobip ou Vonage** | API et SDK complets, webhooks, support commercial | Prix non confirmés (≈ 109 à 172 FCFA/SMS d'après des sources tierces), sites illisibles lors de l'étude |
 | **E. Africa's Talking, Orange SMS API** | Orange CI à 7,26 FCFA/SMS | **Éliminés** : couverture du Bénin non démontrée |
 
-## Décision proposée
+## Décision
 
-1. **Fournisseur principal : BulkGate**, sous réserve de lever les inconnues bloquantes ci-dessous (en particulier
-   l'enregistrement de « STEAMY » et la couverture de Celtiis). C'est la seule option dont le prix par opérateur,
-   les quatre pays et les règles d'identifiant sont publiés à la source, au coût le plus bas.
-2. **Secours : Twilio**, activé automatiquement ou à la main si le principal échoue, **limité aux OTP** pour
-   contenir le coût. Choisi pour la fiabilité de son API, de ses webhooks et de son SDK, et pour ses règles
-   publiées (Togo et Burkina Faso sans enregistrement préalable).
-3. Si BulkGate ne lève pas ses inconnues, **bascule du principal** vers le meilleur devis parmi Infobip, Vonage et
-   FasterMessage (si Celtiis y est confirmé) ; Twilio reste secours.
-4. **Contrat d'interface** (inchangé, API-L2.0b) : `SmsProvider.send(phone, text) → message_id` avec deux
-   implémentations réelles (`BulkGateProvider`, `TwilioProvider`) et `FakeSmsProvider` ; sélection par
-   `SMS_PROVIDER` et `SMS_FALLBACK_PROVIDER` ; ajouter à l'interface la lecture des **accusés** (`parse_status`) pour
-   brancher les webhooks sans coupler l'API à un fournisseur. Le faux fournisseur reste le seul autorisé hors
-   staging et production.
-5. **Texte des SMS** : pas de nom d'enfant, GSM-7 (un segment), lien court à jeton, expéditeur « STEAMY ».
+1. **Twilio est le seul fournisseur SMS en production pour l'instant**, pour tous les usages : OTP, liens de
+   consentement, liens de demande de paiement. Choisi pour la fiabilité de son API, de ses webhooks
+   (`StatusCallback`) et de son SDK Python, et pour la couverture publiée des quatre pays.
+2. **La remplaçabilité est garantie par l'interface**, pas par le contrat : `SmsProvider.send(phone, text) →
+   message_id`, sélection par `SMS_PROVIDER`, `FakeSmsProvider` seul autorisé hors staging et production.
+   Changer de fournisseur ne touche pas le code métier. L'interface expose aussi la lecture des **accusés**
+   (`parse_status`) pour brancher les webhooks sans coupler l'API à un fournisseur.
+3. **Une seule implémentation réelle dans le périmètre d'API-L2 : `TwilioProvider`.** `BulkGateProvider` n'est pas
+   développé. Un secours (`SMS_FALLBACK_PROVIDER`) reste optionnel et hors périmètre tant qu'aucun second
+   fournisseur n'est contracté.
+4. **BulkGate (candidat n° 1), Infobip, Vonage et les prestataires locaux** (FasterMessage, e-MC, SMS-PRO) sont les
+   candidats d'une bascule future.
+5. **Réévaluation** : dès que la facture SMS mensuelle dépasse **≈ 150 000 FCFA** (soit ≈ 900 SMS/mois au Bénin
+   chez Twilio) ou **un an après la mise en production**, selon ce qui arrive en premier ; ou plus tôt si la
+   délivrabilité sur MTN, Moov ou Celtiis est insuffisante.
+6. **Texte des SMS** : pas de nom d'enfant, GSM-7 (un segment), lien court à jeton, expéditeur « STEAMY ».
 
 ## Conséquences
 
-- **Coût** : ≈ 20 000 FCFA/mois pour 2 000 SMS et ≈ 98 000 FCFA pour 10 000 au Bénin avec expéditeur enregistré,
-  contre ≈ 340 000 et ≈ 1 700 000 FCFA avec Twilio seul. Sans identifiant enregistré, le coût monte de 10 à 20 fois
-  (MTN, Moov) : l'enregistrement est donc sur le chemin critique.
-- **Calendrier** : enregistrer « STEAMY » dès la validation de l'ADR (≈ 3 à 4 semaines), en parallèle d'API-L2.0b ;
-  d'ici là, développement et CI avec le faux fournisseur, tests réels via les numéros de test.
-- **Risque** : un fournisseur à support par formulaire sans présence locale : le secours Twilio et les tests de
-  délivrabilité réduisent ce risque ; un plafond de dépense et une alerte de solde sont à configurer.
-- **Données** : numéros de parents confiés à un sous-traitant européen (principal) et américain (secours) ; contrat
-  de traitement à signer, journaux sans numéro en clair, contenu des SMS minimal.
+- **Coût** : avec Twilio seul, ≈ 340 000 FCFA/mois pour 2 000 SMS au Bénin et ≈ 1 700 000 FCFA pour 10 000
+  (≈ 170 FCFA/SMS ; Côte d'Ivoire ≈ 281, Togo ≈ 282, Burkina Faso ≈ 146). C'est **≈ 17 fois** une route locale
+  enregistrée (BulkGate ≈ 10 FCFA au Bénin) : le coût est le prix de la simplicité, d'où la réévaluation planifiée
+  et des plafonds OTP stricts (D24) ; plafond de dépense et alerte de solde à configurer chez Twilio.
+- **Calendrier** : enregistrer « STEAMY » dans la console Twilio dès l'acceptation (≈ 3 semaines au Bénin et en
+  Côte d'Ivoire ; aucun préenregistrement au Togo et au Burkina Faso), en parallèle d'API-L2.0b ; développement et
+  CI avec le faux fournisseur d'ici là.
+- **Périmètre API-L2.0b** : une implémentation réelle (`TwilioProvider`), webhook de statut Twilio, tests avec les
+  numéros de test Twilio.
+- **Données** : numéros de parents traités par une société américaine ; clauses contractuelles et journaux sans
+  numéro en clair, contenu des SMS minimal.
 - **Réversibilité** : facile grâce à l'interface ; le coût de sortie est l'enregistrement d'un identifiant chez le
   nouveau fournisseur.
-- **Plan** : API-L2.0b branche le fournisseur réel seulement après la validation de cet ADR.
 
-## Inconnues à lever avant branchement (détail : [étude §7](../etudes/sms.md#7-inconnues-à-lever-avant-le-branchement-réel-api-l20b))
+## Inconnues restant à lever
 
-1. Sens de « *International traffic not allowed* » et « *registrations last 30 days* » chez BulkGate.
-2. Celtiis réellement desservi (BBCom ?), tarifs Togo et Burkina Faso avec expéditeur enregistré.
-3. Procédure, pièces et délai d'enregistrement de « STEAMY » (personne morale requise ?).
-4. Webhook de statut, débit, SLA OTP, essai gratuit.
-5. Devis Infobip et Vonage ; qualification de FasterMessage.
-6. Tests de délivrabilité sur MTN, Moov et Celtiis (délai OTP < 30 s).
-7. Contrat de traitement des données.
+Avec Twilio :
+
+1. Enregistrement de « STEAMY » au Bénin et en Côte d'Ivoire : pièces exigées, personne morale, délai réel, refus
+   éventuel (contenu promotionnel non enregistrable, identifiants génériques déconseillés).
+2. Couverture et délivrabilité réelles sur MTN, Moov et **Celtiis** (Twilio ne détaille pas par opérateur) : tests
+   avec 3 numéros par opérateur, délai de l'OTP < 30 s.
+3. Frais opérateurs éventuels en plus du tarif publié ; facturation en USD par carte.
+4. Contrat de traitement des données.
+
+Pour la bascule future ([étude §7](../etudes/sms.md#7-inconnues-à-lever-avant-le-branchement-réel-api-l20b)) : sens
+de « *International traffic not allowed* » chez BulkGate, Celtiis chez BulkGate, devis Infobip et Vonage,
+qualification des prestataires locaux.

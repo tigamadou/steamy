@@ -1,5 +1,8 @@
 # Étude · Fournisseurs SMS (S10)
 
+> **Décision : Twilio (ADR 0002, acceptée le 2026-10-15)**, remplaçable via l'interface `SmsProvider`. Le reste de
+> cette étude documente la comparaison et sert de base à une bascule future (BulkGate en tête).
+
 Étude préparatoire à l'[ADR 0002 · Fournisseur SMS](../adr/0002-fournisseur-sms.md). Tâche **API-L2.0a** du
 [PLAN-API](../plans/PLAN-API.md). Sources consultées le **15 octobre 2026** ; chaque chiffre est daté de cette
 consultation et à revalider par devis avant signature.
