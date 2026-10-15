@@ -15,9 +15,11 @@ from apps.referentials.models import Relationship
 def link_child(parent, learner=None):
     """Rattache un apprenant (créé au besoin) au parent, comme après un consentement accepté."""
     learner = learner or LearnerFactory()
-    ParentChildLink.objects.create(
-        parent=parent, learner=learner, relationship=Relationship.objects.first()
+    # Référentiel posé par migration, absent des tests `transaction=True` (base vidée) : recréé au besoin
+    relationship = Relationship.objects.first() or Relationship.objects.create(
+        code="parent", label="Parent"
     )
+    ParentChildLink.objects.create(parent=parent, learner=learner, relationship=relationship)
     return learner
 
 

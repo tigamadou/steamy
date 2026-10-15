@@ -2495,6 +2495,111 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/payments/orders/{reference}/payments/:
+    post:
+      operationId: payments_orders_payments_create
+      description: |-
+        Initie le débit (USSD push, sans redirection). La réponse donne le paiement `pending` (ou `failed` si le
+        prestataire refuse) ; son issue se lit ensuite sur `GET payments/payments/{id}/`. Aussi pour reprendre une
+        commande en attente après un échec.
+      summary: Payer une commande par Mobile Money (parent payeur, ou invité avec
+        X-Guest-Token)
+      parameters:
+      - in: header
+        name: X-Guest-Token
+        schema:
+          type: string
+        description: Jeton d'une commande invitée, remis à sa création (C10)
+      - in: path
+        name: reference
+        schema:
+          type: string
+          title: Référence
+        required: true
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/payments/{id}/:
+    get:
+      operationId: payments_payments_retrieve
+      description: Paiement lisible par le payeur de la commande seulement ; l'apprenant
+        n'y a pas accès (C12).
+      summary: État d'un paiement (payeur, ou invité avec X-Guest-Token)
+      parameters:
+      - in: header
+        name: X-Guest-Token
+        schema:
+          type: string
+        description: Jeton d'une commande invitée, remis à sa création (C10)
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this paiement.
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/payments/webhook/{provider_name}/:
     post:
       operationId: payments_webhook_create
@@ -5798,6 +5903,97 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CategoryPreferenceRequest'
+    Payment:
+      type: object
+      description: État d'un paiement (WA04, WA05, WA07, WK09), interrogé jusqu'à
+        `succeeded` ou `failed`.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        orderReference:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+          title: Statut
+        country:
+          type: string
+          readOnly: true
+          title: Pays
+        network:
+          type: string
+          readOnly: true
+          title: Réseau
+        msisdnMasked:
+          type: string
+          readOnly: true
+        amount:
+          type: integer
+          readOnly: true
+          title: Montant (FCFA)
+        currency:
+          type: string
+          readOnly: true
+          title: Devise
+        failureCode:
+          type: string
+          readOnly: true
+          title: Code d'échec
+        failureReason:
+          type: string
+          readOnly: true
+          title: Raison de l'échec
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        confirmedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Confirmé le
+      required:
+      - amount
+      - confirmedAt
+      - country
+      - createdAt
+      - currency
+      - failureCode
+      - failureReason
+      - id
+      - msisdnMasked
+      - network
+      - orderReference
+      - status
+    PaymentCreateRequest:
+      type: object
+      description: 'Mobile Money uniquement : pays, réseau (référentiel `payment-networks`)
+        et numéro du payeur (D76).'
+      properties:
+        country:
+          type: string
+          minLength: 2
+          description: Code ISO (BJ)
+          maxLength: 2
+        network:
+          type: string
+          minLength: 1
+          description: Code du réseau (mtn, moov, celtiis…)
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        msisdn:
+          type: string
+          minLength: 1
+          description: Numéro Mobile Money qui validera le paiement
+          maxLength: 32
+      required:
+      - country
+      - msisdn
+      - network
     PaymentNetwork:
       type: object
       properties:
@@ -5820,6 +6016,18 @@ components:
       - country
       - id
       - label
+    PaymentStatusEnum:
+      enum:
+      - initiated
+      - pending
+      - succeeded
+      - failed
+      type: string
+      description: |-
+        * `initiated` - Initié
+        * `pending` - En attente de validation
+        * `succeeded` - Réussi
+        * `failed` - Échoué
     Preferences:
       type: object
       properties:

@@ -932,6 +932,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/payments/orders/{reference}/payments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Payer une commande par Mobile Money (parent payeur, ou invité avec X-Guest-Token)
+         * @description Initie le débit (USSD push, sans redirection). La réponse donne le paiement `pending` (ou `failed` si le
+         *     prestataire refuse) ; son issue se lit ensuite sur `GET payments/payments/{id}/`. Aussi pour reprendre une
+         *     commande en attente après un échec.
+         */
+        post: operations["payments_orders_payments_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/payments/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * État d'un paiement (payeur, ou invité avec X-Guest-Token)
+         * @description Paiement lisible par le payeur de la commande seulement ; l'apprenant n'y a pas accès (C12).
+         */
+        get: operations["payments_payments_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/payments/webhook/{provider_name}/": {
         parameters: {
             query?: never;
@@ -2390,6 +2432,42 @@ export interface components {
         PatchedPreferencesUpdateRequest: {
             categories?: components["schemas"]["CategoryPreferenceRequest"][];
         };
+        /** @description État d'un paiement (WA04, WA05, WA07, WK09), interrogé jusqu'à `succeeded` ou `failed`. */
+        Payment: {
+            readonly id: number;
+            readonly orderReference: string;
+            /** Statut */
+            readonly status: components["schemas"]["PaymentStatusEnum"];
+            /** Pays */
+            readonly country: string;
+            /** Réseau */
+            readonly network: string;
+            readonly msisdnMasked: string;
+            /** Montant (FCFA) */
+            readonly amount: number;
+            /** Devise */
+            readonly currency: string;
+            /** Code d'échec */
+            readonly failureCode: string;
+            /** Raison de l'échec */
+            readonly failureReason: string;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /**
+             * Confirmé le
+             * Format: date-time
+             */
+            readonly confirmedAt: string | null;
+        };
+        /** @description Mobile Money uniquement : pays, réseau (référentiel `payment-networks`) et numéro du payeur (D76). */
+        PaymentCreateRequest: {
+            /** @description Code ISO (BJ) */
+            country: string;
+            /** @description Code du réseau (mtn, moov, celtiis…) */
+            network: string;
+            /** @description Numéro Mobile Money qui validera le paiement */
+            msisdn: string;
+        };
         PaymentNetwork: {
             readonly id: number;
             code: string;
@@ -2398,6 +2476,14 @@ export interface components {
             /** @description Code ISO du pays */
             country: string;
         };
+        /**
+         * @description * `initiated` - Initié
+         *     * `pending` - En attente de validation
+         *     * `succeeded` - Réussi
+         *     * `failed` - Échoué
+         * @enum {string}
+         */
+        PaymentStatusEnum: "initiated" | "pending" | "succeeded" | "failed";
         Preferences: {
             /**
              * Format: email
@@ -5599,6 +5685,107 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Order"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_orders_payments_create: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Jeton d'une commande invitée, remis à sa création (C10) */
+                "X-Guest-Token"?: string;
+            };
+            path: {
+                reference: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payments_retrieve: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Jeton d'une commande invitée, remis à sa création (C10) */
+                "X-Guest-Token"?: string;
+            };
+            path: {
+                /** @description A unique integer value identifying this paiement. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
                 };
             };
             404: {

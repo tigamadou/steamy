@@ -395,14 +395,39 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (ordre des identifiants) et rendu à l'expiration (30 min, `ORDER_TTL_MINUTES`), commande `cancelled`.
   > Throttle `orders` (30/h). Lecture : le payeur voit `deliveryAddress`, le bénéficiaire non. Les URL passent de
   > `{id}` à `{reference}` ; `GET payments/payments/` disparaît, remplacé par `…/payments/{id}/` en L3b.2.
-- [ ] **API-L3b.2** Paiement et webhook · `feature/api-l3b-2-paiement-webhook`
-  - [ ] `Payment` à 4 états ; `POST payments/orders/{reference}/payments/` (`NETWORK_UNAVAILABLE`) ; `GET payments/payments/{id}/`
-  - [ ] `POST payments/webhook/{provider}/` durci (signature avant traitement, montant/devise/référence, idempotence)
-  - [ ] Exécution post-paiement unique en transaction (inscription, Kit Codes, stock, candidature, facture asynchrone)
-  - [ ] Tâche `reconcile_pending_payments` (5 min)
-  - [ ] Paiement tardif : honoré si stock disponible, sinon remboursement automatique (C17)
-  - [ ] Module `core/pdf.py`, tâche `generate_invoice_pdf`, `GET …/invoice/` (payeur seulement)
-  - [ ] Tests : webhook non signé, rejoué, à montant ou devise faux ; double exécution impossible (webhooks concurrents) ; facture refusée à l'apprenant bénéficiaire ; apprenant ne peut pas initier de paiement
+- [x] **API-L3b.2** Paiement et webhook · `feature/api-l3b-2-paiement-webhook`
+  - [x] `Payment` à 4 états ; `POST payments/orders/{reference}/payments/` (`NETWORK_UNAVAILABLE`) ; `GET payments/payments/{id}/`
+  - [x] `POST payments/webhook/{provider}/` durci (signature avant traitement, montant/devise/référence, idempotence)
+  - [x] Exécution post-paiement unique en transaction (inscription, stock, panier, notifications) ; Kit Codes en
+    L3b.4, candidature en L3b.6, facture en L3b.2b
+  - [x] Tâche `reconcile_pending_payments` (5 min) et commande du même nom ; commande `simulate_payment <reference> success|failed`
+  - [x] Paiement tardif : honoré si stock disponible, sinon remboursement automatique (C17) ; second paiement réussi remboursé
+  - [x] Tests : webhook non signé, rejoué, à montant ou devise faux ; double exécution impossible (webhooks concurrents) ; apprenant ne peut pas initier de paiement
+  > Décisions : `POST …/payments/` `{country, network, msisdn}` : parent payeur (apprenant → `PARENT_APPROVAL_REQUIRED`,
+  > autre parent → 404) ou invité avec `X-Guest-Token` (CSRF) ; throttle `payments` (20/h) ; réseau = `PaymentNetwork`
+  > activé et actif du pays (sinon `NETWORK_UNAVAILABLE` sur `network`), numéro du même pays (sinon `PHONE_INVALID`
+  > sur `msisdn`) ; commande payée → 409 `ORDER_ALREADY_PAID`, annulée ou échue → 410 `ORDER_EXPIRED`. Réponse 201
+  > avec le paiement `pending`, ou `failed` si le prestataire refuse (`failureCode` `PROVIDER_REFUSED` /
+  > `PROVIDER_UNAVAILABLE`) ; plusieurs essais possibles. `GET payments/payments/{id}/` : payeur ou invité (jeton),
+  > jamais le bénéficiaire (C12) ; numéro masqué (`msisdnMasked`). La commande est verrouillée pendant l'initiation
+  > (un webhook très rapide attend l'enregistrement de la transaction). Webhook : commande verrouillée, paiement
+  > retrouvé par `provider` + transaction (créé s'il est inconnu), rejeu sans effet, écart de montant ou de devise →
+  > paiement `failed` (`AMOUNT_MISMATCH`) + `AuditLog` `payment.amount_mismatch` + 400 neutre. Refus du prestataire →
+  > `failed` (`DECLINED`). Exécution : commande `paid`, réservations confirmées, `Enrollment` `source=order` pour un
+  > parcours (sans champ `order` dans `learning`, pour ne pas toucher aux migrations d'API-L3a), kits retirés du
+  > panier du payeur, notification au parent (`/parent/commandes/<ref>`) ou SMS à l'invité, notification à
+  > l'apprenant. Paiement tardif honoré → `AuditLog` `payment.late_honored` ; sinon `Refund` + commande `refunded`
+  > + message au payeur. Remboursement : `refund()` du prestataire, sinon `Refund.processed=false` pour la Finance ;
+  > `AuditLog` `payment.refunded`. Invité : SMS de suivi à la création, lien `/boutique/commandes/<ref>#jeton=<jeton>`
+  > (jeton dans le fragment, jamais envoyé à un serveur). Réconciliation : paiements sans issue depuis 10 min ;
+  > sans transaction → `failed` (`INITIATION_LOST`).
+- [ ] **API-L3b.2b** Facture · `feature/api-l3b-2b-facture`
+  - [ ] `Invoice` (`pdfStatus`, instantané), module `core/pdf.py` partagé avec les certificats (API-L3a.4, PR #69)
+  - [ ] Tâche `generate_invoice_pdf` lancée par l'exécution post-paiement ; `GET payments/orders/{reference}/invoice/` (payeur seulement, invité par jeton, P7)
+  - [ ] Mentions et TVA **paramétrables** (réglages), sans valeur légale inventée, en attendant P1 (MECeF) et P2 (TVA) de l'ADR 0005
+  - [ ] Tests : facture refusée à l'apprenant bénéficiaire, numérotation sans trou
+  > Séparée de L3b.2 (tâche découverte) : elle dépend de `core/pdf.py`, du stockage privé et de `DocumentSequence`
+  > livrés par API-L3a.4 (PR #69, non fusionnée), et de la décision comptable P1/P2.
 - [x] **API-L3b.3** Boutique · `feature/api-l3b-3-boutique` · PR #82
   - [x] `Cart`/`CartItem`, `DeliveryAddress`, `RestockAlert` (`StockReservation` et `DeliveryZone` : L3b.1)
   - [x] `shop/cart/*`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`

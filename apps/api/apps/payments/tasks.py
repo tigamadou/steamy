@@ -36,3 +36,11 @@ def release_expired_reservations() -> int:
     from .orders import release_expired_orders
 
     return release_expired_orders()
+
+
+@shared_task
+def reconcile_pending_payments() -> int:
+    """Toutes les 5 min : vérifie auprès du prestataire les paiements sans issue depuis 10 min (webhook perdu)."""
+    from .checkout import reconcile_pending_payments as reconcile
+
+    return reconcile()
