@@ -357,7 +357,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > jour (verrou sur le profil) ; mission terminée et quiz passé comptent aussi (ligne à 0 s). Streak calculé à la
   > lecture (jours consécutifs jusqu'à aujourd'hui ou hier), `LearnerProfile.streakDays` gardé en cache.
   > `GET learning/badges/?course=` : badges obtenus, paginés.
-- [x] **API-L3a.4** Certificats · `feature/api-l3a-4-certificats`
+- [x] **API-L3a.4** Certificats · `feature/api-l3a-4-certificats` · PR #69
   - [x] **ADR PDF et stockage privé** (WeasyPrint, Celery, RustFS privé, URL présignées courtes)
   - [x] Conditions D33 en transaction ; `Certificate.number` séquentiel
   - [x] Tâche `generate_certificate_pdf` ; stockage RustFS privé
