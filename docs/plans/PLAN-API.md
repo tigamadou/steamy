@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-1.3
+Statut : 🟡 en cours · Prochaine tâche : API-1.4
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -100,11 +100,17 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > l'enseignant et l'email de contact du parent (`ParentProfile.email`, S4) ; refusé à l'apprenant (WD17) et au
   > personnel. `django-otp` installé (`otpVerified`), exigé seulement en API-L6.1. `analytics/export/events.csv`
   > renommé `analytics/export/events/` (slash final, D5).
-- [ ] **API-1.3** Erreurs et validation · `feature/api-1-erreurs`
-  - [ ] Catalogue complet des codes §7.1 (`libs/errors.py`, message français par code)
-  - [ ] Composant `Error` déclaré dans le schéma OpenAPI (400/401/403/404/409/429)
-  - [ ] Validateur de mot de passe D25 (`PASSWORD_TOO_WEAK`) ; validateurs Django par défaut retirés
-  - [ ] Tests : erreurs en français avec `code`
+- [x] **API-1.3** Erreurs et validation · `feature/api-1-erreurs` · PR #21
+  - [x] Catalogue complet des codes §7.1 (`libs/errors.py`, message français par code)
+  - [x] Composant `Error` déclaré dans le schéma OpenAPI (400/401/403/404/409/429)
+  - [x] Validateur de mot de passe D25 (`PASSWORD_TOO_WEAK`) ; validateurs Django par défaut retirés
+  - [x] Tests : erreurs en français avec `code`
+  - [x] Couverture 100 % (lignes et branches) du code modifié
+  > Décisions : `fields` suit §7.1 (`{champ: [{code, message}]}`) au lieu de listes de chaînes ; un appel anonyme sur
+  > une route protégée renvoie **401** `NOT_AUTHENTICATED` (`libs/authentication.py`), 403 restant le refus d'un
+  > utilisateur connecté (et le CSRF). 409 est déclaré par l'opération qui le renvoie (`error_responses(409)`),
+  > les autres statuts automatiquement (`libs/schema.py`). Codes ajoutés au catalogue : génériques DRF
+  > (`PARSE_ERROR`, `METHOD_NOT_ALLOWED`…), `SERVER_ERROR`, `EMAIL_TAKEN`.
 - [ ] **API-1.4** Notifications · `feature/api-1-notifications`
   - [ ] App `notifications` : `Notification`, `NotificationPreference`
   - [ ] Endpoints §7.7 : `notifications/`, `unread-count/`, `{id}/read/`, `read-all/`, `preferences/`

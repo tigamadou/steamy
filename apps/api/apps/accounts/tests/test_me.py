@@ -29,7 +29,7 @@ def client_for(user):
 @pytest.mark.parametrize("url", [ME, PASSWORD_URL, EMAIL_URL])
 def test_anonymous_is_refused(url):
     resp = APIClient().get(url) if url == ME else APIClient().post(url, {}, format="json")
-    assert resp.status_code == 403
+    assert resp.status_code == 401
     assert resp.json()["code"] == "NOT_AUTHENTICATED"
 
 
@@ -82,7 +82,9 @@ def test_password_change_with_wrong_current_password_is_refused():
         PASSWORD_URL, {"currentPassword": "mauvais", "newPassword": NEW_PASSWORD}, format="json"
     )
     assert resp.status_code == 400
-    assert resp.json()["fields"]["currentPassword"] == ["Mot de passe actuel incorrect."]
+    assert resp.json()["fields"]["currentPassword"] == [
+        {"code": "INVALID_CREDENTIALS", "message": "Mot de passe actuel incorrect."}
+    ]
 
 
 def test_password_change_to_the_same_password_is_refused():
@@ -112,7 +114,9 @@ def test_teacher_cannot_take_an_email_already_used():
         EMAIL_URL, {"password": PASSWORD, "email": "PRIS@ecole.bj"}, format="json"
     )
     assert resp.status_code == 400
-    assert resp.json()["fields"]["email"] == ["Cette adresse email est déjà utilisée."]
+    assert resp.json()["fields"]["email"] == [
+        {"code": "EMAIL_TAKEN", "message": "Cette adresse email est déjà utilisée."}
+    ]
 
 
 def test_parent_email_is_a_contact_address_not_a_login():

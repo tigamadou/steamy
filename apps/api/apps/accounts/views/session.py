@@ -11,12 +11,12 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 
+from libs.authentication import SessionAuthentication
 from libs.errors import ApiError
 from libs.throttles import LoginIdentifierThrottle
 

@@ -60,7 +60,7 @@ def test_s12_token_login_is_gone(user):
 def test_s12_token_header_does_not_authenticate(user):
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION="Token 0123456789abcdef")
-    assert client.get("/api/accounts/me/").status_code == 403
+    assert client.get("/api/accounts/me/").status_code == 401
 
 
 # --- Surfaces inutilisées : API navigable, messagerie, fichiers, Path -------------------
@@ -110,7 +110,7 @@ def paid_course(db):
 @pytest.mark.django_db
 def test_s6_lesson_content_requires_enrollment(paid_course, user):
     anonymous = APIClient()
-    assert anonymous.get("/api/courses/lessons/").status_code == 403
+    assert anonymous.get("/api/courses/lessons/").status_code == 401
     # Le détail public du parcours donne le plan, jamais le contenu.
     detail = anonymous.get(f"/api/courses/courses/{paid_course.slug}/")
     assert detail.status_code == 200 and "CONTENU-SECRET" not in detail.content.decode()
@@ -212,7 +212,9 @@ def test_errors_use_the_single_format_in_french(user):
     invalid = APIClient().post("/api/auth/login/", {}, format="json").json()
     assert set(invalid) == {"code", "message", "fields"}
     assert invalid["code"] == "VALIDATION_ERROR"
-    assert invalid["fields"]["identifier"] == ["Ce champ est obligatoire."]
+    assert invalid["fields"]["identifier"] == [
+        {"code": "REQUIRED", "message": "Ce champ est obligatoire."}
+    ]
 
     not_found = APIClient().get("/api/courses/courses/inexistant/").json()
     assert not_found == {"code": "NOT_FOUND", "message": not_found["message"]}

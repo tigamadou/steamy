@@ -4,12 +4,14 @@ from django.contrib.auth import password_validation, update_session_auth_hash
 from django.core.exceptions import ValidationError as DjangoValidationError
 from drf_spectacular.utils import extend_schema, extend_schema_field
 from rest_framework import exceptions, generics, serializers, status
+from rest_framework.fields import get_error_detail
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.models import ParentProfile, User
 from apps.accounts.profile import ProfileStep, profile_step
+from libs.errors import message_for
 
 
 class MeSerializer(serializers.ModelSerializer):
@@ -68,7 +70,9 @@ class PasswordChangeSerializer(serializers.Serializer):
 
     def validate_current_password(self, value):
         if not self.context["request"].user.check_password(value):
-            raise serializers.ValidationError("Mot de passe actuel incorrect.")
+            raise serializers.ValidationError(
+                "Mot de passe actuel incorrect.", code="INVALID_CREDENTIALS"
+            )
         return value
 
     def validate(self, data):
@@ -81,7 +85,7 @@ class PasswordChangeSerializer(serializers.Serializer):
                 data["new_password"], self.context["request"].user
             )
         except DjangoValidationError as error:
-            raise serializers.ValidationError({"new_password": list(error.messages)}) from error
+            raise serializers.ValidationError({"new_password": get_error_detail(error)}) from error
         return data
 
 
@@ -106,7 +110,7 @@ class EmailChangeSerializer(serializers.Serializer):
 
     def validate_password(self, value):
         if not self.context["request"].user.check_password(value):
-            raise serializers.ValidationError("Mot de passe incorrect.")
+            raise serializers.ValidationError("Mot de passe incorrect.", code="INVALID_CREDENTIALS")
         return value
 
     def validate_email(self, value):
@@ -116,7 +120,7 @@ class EmailChangeSerializer(serializers.Serializer):
             user.is_teacher
             and User.objects.filter(email__iexact=value).exclude(pk=user.pk).exists()
         ):
-            raise serializers.ValidationError("Cette adresse email est déjà utilisée.")
+            raise serializers.ValidationError(message_for("EMAIL_TAKEN"), code="EMAIL_TAKEN")
         return value
 
 
