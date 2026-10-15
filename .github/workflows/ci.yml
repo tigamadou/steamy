@@ -141,6 +141,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # diff-cover compare la branche à sa base
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
@@ -154,7 +156,17 @@ jobs:
             || { echo "::error::schema.d.ts n'est plus à jour : lancer \`make openapi\` et committer."; exit 1; }
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test
+      - name: Tests (avec couverture)
+        run: pnpm --filter @steamy/web test:coverage
+      # Règle : 100 % de couverture sur le code ajouté ou modifié. En local : `make coverage-web`.
+      - name: Couverture du code modifié = 100 %
+        env:
+          COMPARE: >-
+            ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref)
+            || ((github.ref_name == 'development' || github.ref_name == 'main') && github.event.before)
+            || (startsWith(github.ref_name, 'hotfix/') && 'origin/main')
+            || 'origin/development' }}
+        run: pipx run --spec diff-cover==10.6.0 diff-cover apps/web/coverage/cobertura-coverage.xml --compare-branch="$COMPARE" --fail-under=100
       - run: pnpm build
 
   # Une image par job : modifier le front ne reconstruit pas l'image de l'API

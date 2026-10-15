@@ -23,6 +23,8 @@ Statut : 🟡 en cours · Prochaine tâche : 1.0b · Prérequis : API-1 (client 
   - [x] Nettoyage : page de démonstration et `components/browser-api-status.tsx` supprimés, `/runtime-config` gardé ; `app/page.tsx` remplacée par un accueil provisoire statique (le parcours témoin exige `/` en 200, WL01 arrive en 1.1)
   - ~~Chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts`~~ : fait par API-1.2 (PR #17), qui régénère le client ; contrôlé en 1.0c
   - [x] Test Vitest témoin, parcours Playwright témoin (accueil en 200) et test axe
+  - [x] Couverture unitaire 100 % du code ajouté ou modifié : `@vitest/coverage-v8` (rapport `apps/web/coverage/cobertura-coverage.xml`), `diff-cover --fail-under=100` dans le job `web` (`fetch-depth: 0`, même base de comparaison que le job `api`), cible `make coverage-web`
+  - [x] E2E 100 % des écrans : l'outillage Playwright permet d'écrire le test de chaque écran cité dans la matrice écran → test (job `e2e-matrice`) ; 1.0a et 1.0b ne livrent aucun écran
   - [x] Recette : `make test-web` et `make e2e` passent en local ; aucune occurrence de `91, 63, 224` ni de `jetbrains` dans `apps/web/src`
   - [ ] Recette après fusion : `e2e` exécuté en CI sur une PR qui ne touche que `apps/api/`
 - [ ] **1.0b** Design system de base · `feature/lot1-design-system`

@@ -11,5 +11,12 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
     css: false,
+    // Rapport cobertura lu par diff-cover en CI : 100 % exigé sur le code ajouté ou modifié (`make coverage-web`)
+    coverage: {
+      provider: "v8",
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/test/**", "src/**/*.d.ts"],
+      reporter: ["text-summary", "cobertura"],
+    },
   },
 });
