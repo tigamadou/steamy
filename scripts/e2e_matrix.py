@@ -11,7 +11,8 @@ Le contrôle échoue si :
 - un écran à implémenter (statut « v1 », « v1 · admin Django » ou « À concevoir » dans
   docs/INVENTAIRE-ECRANS.md) n'a pas de ligne dans la matrice ;
 - un écran LIVRÉ n'a pas de test e2e. « Livré » = une case cochée « - [x] » qui cite l'ID de
-  l'écran entre accents graves dans la section Avancement d'un plan docs/plans/LOT-*.md ;
+  l'écran entre accents graves dans la section Avancement d'un plan docs/plans/LOT-*.md, hors cases
+  de conception de maquette ;
 - un test cité dans la matrice n'existe pas dans le dépôt.
 """
 
@@ -54,12 +55,26 @@ def required_screens():
     return screens
 
 
+DESIGN = re.compile(r"concev|conception|maquette", re.IGNORECASE)
+
+
 def delivered_screens():
+    """
+    Écrans cités par une case cochée de RÉALISATION. Les cases de conception de maquette
+    (« Concevoir… », « Conception… », « maquette »), ou rattachées à une étape de conception,
+    ne valent pas livraison.
+    """
     delivered = set()
     for plan in PLANS:
+        step = ""  # texte de l'étape de niveau 1 en cours
         for line in plan.read_text(encoding="utf-8").splitlines():
-            if re.match(r"^\s*- \[x\]", line):
-                delivered.update(re.findall(r"`([A-Z]{1,3}\d{2}[a-z]?)`", line))
+            if re.match(r"^- \[[ x]\]", line):
+                step = line
+            if not re.match(r"^\s*- \[x\]", line):
+                continue
+            if DESIGN.search(line) or DESIGN.search(step):
+                continue
+            delivered.update(re.findall(r"`([A-Z]{1,3}\d{2}[a-z]?)`", line))
     return delivered
 
 

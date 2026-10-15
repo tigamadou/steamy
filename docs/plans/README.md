@@ -142,7 +142,8 @@ Statut : 🟡 en cours · Prochaine tâche : API-1.2
   | Unitaires (API et front) | **100 % des lignes et des branches du code ajouté ou modifié** par la PR (le seuil global monte au fil de la refonte) | `diff-cover` en CI ; en local `make coverage-api` (et l'équivalent front livré à l'étape 1.0a) |
   | E2E | **100 % des écrans v1** : tout écran livré a au moins un test Playwright, cité dans la [matrice écran → test](../tests/MATRICE-E2E.md) avec les parcours qu'il vérifie | Job CI `e2e-matrice` (`python3 scripts/e2e_matrix.py --check`) |
 
-  Un écran est **livré** dès que sa case est cochée dans la section « Avancement » de son plan : la même PR doit donc
+  Un écran est **livré** dès qu'une case de réalisation qui le cite est cochée dans la section « Avancement » de son plan
+  (les cases de conception de maquette ne comptent pas) : la même PR doit donc
   remplir sa ligne de la matrice. Une exclusion de couverture (`# pragma: no cover`, `/* v8 ignore */`) n'est admise
   que pour du code réellement inatteignable, avec un commentaire qui le justifie.
 - **Définition de « terminé »** (pour chaque écran) :
