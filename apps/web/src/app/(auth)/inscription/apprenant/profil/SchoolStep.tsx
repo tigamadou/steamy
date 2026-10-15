@@ -8,6 +8,7 @@ import { ErrorSummary } from "@/components/ds/ErrorSummary";
 import { Field } from "@/components/ds/Field";
 import { ReferentialSelect } from "@/components/ds/ReferentialSelect";
 import { errorMessage } from "@/lib/api-call";
+import { submitWith } from "@/lib/form";
 import { useReferential } from "@/lib/use-referential";
 
 import { useLearnerProfileSave } from "./useProfileSave";
@@ -50,7 +51,7 @@ export function SchoolStep() {
   );
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-5">
+    <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-5">
       <ErrorSummary errors={errors} focusKey={state.attempt} />
       <Field label="Ta classe" id="classe" required error={state.grade}>
         <ReferentialSelect

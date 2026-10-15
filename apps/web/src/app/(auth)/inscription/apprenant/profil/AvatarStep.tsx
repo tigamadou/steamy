@@ -7,6 +7,7 @@ import { Button } from "@/components/ds/Button";
 import { ErrorSummary } from "@/components/ds/ErrorSummary";
 import { Loader } from "@/components/ds/Loader";
 import { errorMessage } from "@/lib/api-call";
+import { submitWith } from "@/lib/form";
 import { useReferential } from "@/lib/use-referential";
 
 import { useLearnerProfileSave } from "./useProfileSave";
@@ -40,7 +41,7 @@ export function AvatarStep() {
   if (!avatars.items) return <Loader label="Chargement des avatars…" />;
 
   return (
-    <form action={action} noValidate className="flex w-full flex-col gap-6">
+    <form onSubmit={submitWith(action)} noValidate className="flex w-full flex-col gap-6">
       <ErrorSummary errors={state.error ? [{ message: state.error }] : []} focusKey={state.attempt} />
       <AvatarPicker legend="Choisis ton avatar" legendHidden name="avatar" avatars={avatars.items} value={avatar} onChange={setAvatar} />
       <Button type="submit" block size="lg" variant="secondary" loading={pending} disabled={!avatar}>

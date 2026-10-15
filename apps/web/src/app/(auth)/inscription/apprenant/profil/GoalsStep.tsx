@@ -7,6 +7,7 @@ import { ErrorSummary } from "@/components/ds/ErrorSummary";
 import { GoalChipGroup } from "@/components/ds/GoalChip";
 import { Loader } from "@/components/ds/Loader";
 import { errorMessage } from "@/lib/api-call";
+import { submitWith } from "@/lib/form";
 import { useReferential } from "@/lib/use-referential";
 
 import { useLearnerProfileSave } from "./useProfileSave";
@@ -43,7 +44,7 @@ export function GoalsStep() {
   if (!goals.items) return <Loader label="Chargement des objectifs…" />;
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-6">
+    <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-6">
       <ErrorSummary errors={state.error ? [{ message: state.error }] : []} focusKey={state.attempt} />
       <GoalChipGroup
         legend="Tes objectifs"

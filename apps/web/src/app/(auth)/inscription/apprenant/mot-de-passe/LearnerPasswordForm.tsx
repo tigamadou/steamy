@@ -9,6 +9,7 @@ import { NewPasswordFields } from "@/components/ds/NewPasswordFields";
 import { isPasswordValid } from "@/components/ds/PwReq";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { homeForRole } from "@/lib/auth/home-for-role";
+import { submitWith } from "@/lib/form";
 
 type State = { attempt: number; password?: string; error?: string };
 
@@ -39,7 +40,7 @@ export function LearnerPasswordForm() {
   );
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-4">
+    <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-4">
       <ErrorSummary errors={errors} focusKey={state.attempt} />
       <NewPasswordFields error={state.password} showErrors={state.attempt > 0} />
       <Button type="submit" block size="lg" loading={pending} className="mt-3">

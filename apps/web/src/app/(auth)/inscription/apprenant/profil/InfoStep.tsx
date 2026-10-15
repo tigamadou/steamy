@@ -8,6 +8,7 @@ import { Field } from "@/components/ds/Field";
 import { Input } from "@/components/ds/Input";
 import { ReferentialSelect } from "@/components/ds/ReferentialSelect";
 import { errorMessage } from "@/lib/api-call";
+import { submitWith } from "@/lib/form";
 import { useReferential } from "@/lib/use-referential";
 
 import { useLearnerProfileSave } from "./useProfileSave";
@@ -61,7 +62,7 @@ export function InfoStep() {
   }));
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-4">
+    <form onSubmit={submitWith(action)} noValidate className="flex flex-col gap-4">
       <ErrorSummary errors={errors} focusKey={state.attempt} />
       <Field label="Date de naissance" id="naissance" required error={state.birthDate}>
         <Input type="date" name="birthDate" autoComplete="bday" />
