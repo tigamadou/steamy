@@ -9,7 +9,7 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 1.0b · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : 🟡 en cours · Prochaine tâche : 1.0c (après API-1) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
 ### Étape 1.0 · Socle front — 🟡 en cours
 - [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
@@ -27,23 +27,23 @@ Statut : 🟡 en cours · Prochaine tâche : 1.0b · Prérequis : API-1 (client 
   - [x] E2E 100 % des écrans : l'outillage Playwright permet d'écrire le test de chaque écran cité dans la matrice écran → test (job `e2e-matrice`) ; 1.0a et 1.0b ne livrent aucun écran
   - [x] Recette : `make test-web` et `make e2e` passent en local ; aucune occurrence de `91, 63, 224` ni de `jetbrains` dans `apps/web/src`
   - [ ] Recette après fusion : `e2e` exécuté en CI sur une PR qui ne touche que `apps/api/`
-- [ ] **1.0b** Design system de base · `feature/lot1-design-system`
-  - [ ] `Icon`
-  - [ ] `Logo`, `Mascot` (6 poses, décoratif)
-  - [ ] `Button` (variantes dont `outline-inverse`, `loading`, rendu `a`)
-  - [ ] `Badge`, `Tag`
-  - [ ] `Avatar`
-  - [ ] `Loader` (toujours avec texte, `role="status"`)
-  - [ ] `Field`, `Input`, `Textarea`, `Select`, `Checkbox`
-  - [ ] `PhoneInput` (pays depuis `referentials/countries/`, sortie E.164)
-  - [ ] `Toast`
-  - [ ] `Tabs` (variante `tabs-pill`)
-  - [ ] `SkeletonBlock`
-  - [ ] `CourseCard`
-  - [ ] `WKKitCard` (mode vitrine)
-  - [ ] `Accordion`, `FaqAccordion`
-  - [ ] Tests : rendu, variantes, clavier et `vitest-axe` sur chaque composant ; `PhoneInput` (changement de pays, E.164, numéro invalide)
-  - [ ] Recette : contrastes AA (aucun texte en `--ink-400`), focus visible, aucun `rgba` ni hex en dur hors `tokens.css`
+- [x] **1.0b** Design system de base · `feature/lot1-design-system` · PR #19
+  - [x] `Icon`
+  - [x] `Logo`, `Mascot` (6 poses, décoratif) ; `Logo` sur les PNG officiels (le tagline du SVG dépend d'une police non embarquée)
+  - [x] `Button` (variantes dont `outline-inverse`, `loading`, rendu `a`)
+  - [x] `Badge`, `Tag`
+  - [x] `Avatar`
+  - [x] `Loader` (toujours avec texte, `role="status"`)
+  - [x] `Field`, `Input`, `Textarea`, `Select`, `Checkbox`
+  - [x] `PhoneInput` (pays en prop au format de `referentials/countries/`, sortie E.164) ; type `PhoneCountry` à aligner sur le client généré
+  - [x] `Toast`
+  - [x] `Tabs` (variante `tabs-pill`)
+  - [x] `SkeletonBlock`
+  - [x] `CourseCard`
+  - [x] `WKKitCard` (mode vitrine)
+  - [x] `Accordion`, `FaqAccordion`
+  - [x] Tests : rendu, variantes, clavier et `vitest-axe` sur chaque composant ; `PhoneInput` (changement de pays, E.164, numéro invalide)
+  - [x] Recette : contrastes AA (aucun texte en `--ink-400` ; texte foncé sur vert et ambre, survol primaire en 600, `danger` en `--error-600`), focus visible, aucun `rgba` ni hex en dur hors `tokens.css`
 - [ ] **1.0c** Shell public, enveloppes, SEO (requiert API-1) · `feature/lot1-socle-public`
   - [ ] Contrôler le chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts` (renommé par API-1.2, PR #17)
   - [ ] `lib/routes.ts` (table unique des URL)
@@ -391,6 +391,7 @@ gratuit).
 | --- | --- |
 | Validation juridique des textes légaux de WL09 et de la mention de finalité (D6) | Mise en production (pas le développement) |
 | Contenus éditoriaux définitifs (blog, guides PDF, FAQ, chiffres vitrine) | Recette de 1.5 et 1.6 (gabarits de départ en attendant) |
+| SVG du logo au texte vectorisé : le tagline de `logo_landscape.svg` est un `<text>` en police Agile, non embarquée (`Logo` utilise les PNG en attendant) | Rien (qualité d'affichage) |
 
 ## Critères de fin de lot
 
