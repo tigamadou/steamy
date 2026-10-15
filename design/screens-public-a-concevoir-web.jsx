@@ -1,7 +1,7 @@
 // screens-public-a-concevoir-web.jsx - Écrans publics absents de la maquette (C18), version web (1240×760).
 // WL22 · Fiche parcours publique (D11) · WL23 · Fiche événement (S8, C3) · WL24 · Aide & contact (D17).
 // Spec : docs/SPEC-ECRANS-1-public-auth.md §1.14 à §1.16.
-// Réutilise PublicShell, WLJoinBanner, WL_WRAP (public-web), LearnList (catalog-web), WDACShell
+// Réutilise WLFooter, WLJoinBanner, WL_WRAP (public-web), LearnList (catalog-web), WDACShell
 // (apprenant-a-concevoir), WebParentShell (parent-dashboard-web) et le DS.
 // Aucune donnée de mineur (D15). Tokens uniquement.
 // Ne s'auto-monte pas : expose window.PublicACSections, appelée par PublicFlowWeb.
@@ -46,6 +46,82 @@ const WLAC_TEXTAREA = {
 };
 // Voile clair sur fond coloré, dérivé du token de surface.
 const WLAC_VEIL = "color-mix(in srgb, var(--surface) 22%, transparent)";
+
+// ─── Chrome public aligné sur la spec (§1.1) ─────────
+// Sans « Défis » (WL13 reporté, S7) ; menu Ressources réduit à Blog, Événements, Guides
+// (Ateliers fusionnés dans Événements, S8 ; Communauté et Tutoriels reportés). Les écrans
+// historiques gardent WLNavBar.
+const WLAC_RESOURCES = [
+  ["blog", "Blog", "📰"],
+  ["evenements", "Événements", "📅"],
+  ["guides", "Guides gratuits", "📥"],
+];
+
+function WLACNavBar({ active }) {
+  const items = [
+    ["accueil", "Accueil"],
+    ["parcours", "Parcours"],
+    ["boutique", "Boutique"],
+    ["ecoles", "Écoles"],
+  ];
+  const linkStyle = (id) => ({
+    fontSize: 14,
+    fontWeight: 800,
+    color: active === id ? "var(--primary-600)" : "var(--ink-700)",
+    textDecoration: "none",
+    cursor: "pointer",
+  });
+  const resActive = WLAC_RESOURCES.some((r) => r[0] === active);
+  return (
+    <div
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
+        background: "color-mix(in srgb, var(--surface) 95%, transparent)",
+        backdropFilter: "blur(8px)",
+        borderBottom: "1px solid var(--ink-100)",
+      }}
+    >
+      <div style={{ ...WL_WRAP, padding: "12px 32px", display: "flex", alignItems: "center", gap: 18 }}>
+        <Logo height={32} />
+        <nav style={{ display: "flex", gap: 16, marginLeft: 8, alignItems: "center" }}>
+          {items.map(([id, label]) => (
+            <a key={id} style={linkStyle(id)}>
+              {label}
+            </a>
+          ))}
+          <span
+            title={WLAC_RESOURCES.map((r) => r[1]).join(" · ")}
+            style={{ ...linkStyle(resActive ? active : ""), display: "inline-flex", alignItems: "center", gap: 4 }}
+          >
+            Ressources
+            <Icon name="chevron-down" size={14} color={resActive ? "var(--primary-600)" : "var(--ink-700)"} />
+          </span>
+          <a style={linkStyle("apropos")}>À propos</a>
+        </nav>
+        <div style={{ flex: 1 }} />
+        <Button variant="ghost">Se connecter</Button>
+        <Button>Créer un compte</Button>
+      </div>
+    </div>
+  );
+}
+
+// Shell public des écrans à concevoir : même structure que PublicShell, nav alignée.
+// onWheel : artefact du canvas (défilement dans l'artboard), à ne pas porter.
+function WLACPublicShell({ active, children }) {
+  return (
+    <div
+      onWheel={(e) => e.stopPropagation()}
+      style={{ height: "100%", overflowY: "auto", background: "var(--surface)", fontFamily: "var(--font-sans)", color: "var(--ink-900)" }}
+    >
+      <WLACNavBar active={active} />
+      {children}
+      <WLFooter />
+    </div>
+  );
+}
 
 // ─── Composants partagés du fichier ───────────────────
 function WLACCrumb({ children }) {
@@ -425,7 +501,7 @@ function WLACCertification() {
 
 function WL22_PublicCourse() {
   return (
-    <PublicShell active="parcours">
+    <WLACPublicShell active="parcours">
       <div style={{ ...WL_WRAP, padding: "28px 32px 56px" }}>
         <WLACCrumb>
           Parcours › Code › <b style={{ color: "var(--ink-900)" }}>Initiation à Scratch</b>
@@ -490,7 +566,7 @@ function WL22_PublicCourse() {
         </div>
         <WLJoinBanner />
       </div>
-    </PublicShell>
+    </WLACPublicShell>
   );
 }
 
@@ -498,7 +574,7 @@ function WL22_PublicCourse() {
 function WL22_Variant({ kind }) {
   const paid = kind === "paid";
   return (
-    <PublicShell active="parcours">
+    <WLACPublicShell active="parcours">
       <div style={{ ...WL_WRAP, padding: "28px 32px 56px" }}>
         <WLACCrumb>
           Parcours › {paid ? "Électronique" : "Robotique"} ›{" "}
@@ -567,13 +643,13 @@ function WL22_Variant({ kind }) {
           />
         </div>
       </div>
-    </PublicShell>
+    </WLACPublicShell>
   );
 }
 
 function WL22_Loading() {
   return (
-    <PublicShell active="parcours">
+    <WLACPublicShell active="parcours">
       <div style={{ ...WL_WRAP, padding: "28px 32px 56px" }}>
         <SkeletonBlock w={260} h={14} r={6} style={{ marginBottom: 16 }} />
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 320px", gap: 28 }}>
@@ -588,7 +664,7 @@ function WL22_Loading() {
           <SkeletonBlock h={420} r={22} />
         </div>
       </div>
-    </PublicShell>
+    </WLACPublicShell>
   );
 }
 
@@ -606,13 +682,13 @@ function WLACNotFound({ title, body, cta }) {
 
 function WL22_NotFound() {
   return (
-    <PublicShell active="parcours">
+    <WLACPublicShell active="parcours">
       <WLACNotFound
         title="Ce parcours est introuvable"
         body="Il n'existe pas ou n'est plus publié. Plein d'autres parcours t'attendent dans le catalogue."
         cta="Voir tous les parcours"
       />
-    </PublicShell>
+    </WLACPublicShell>
   );
 }
 
@@ -793,7 +869,7 @@ function WLACEventCTA({ variant = "visitor", free, e = WLAC_EVENT }) {
 
 function WL23_Event() {
   return (
-    <PublicShell active="evenements">
+    <WLACPublicShell active="evenements">
       <div style={{ ...WL_WRAP, padding: "28px 32px 56px" }}>
         <WLACCrumb>
           Événements › <b style={{ color: "var(--ink-900)" }}>{WLAC_EVENT.title}</b>
@@ -808,7 +884,7 @@ function WL23_Event() {
           </div>
         </div>
       </div>
-    </PublicShell>
+    </WLACPublicShell>
   );
 }
 
@@ -860,13 +936,13 @@ function WL23_CTAStates() {
 
 function WL23_NotFound() {
   return (
-    <PublicShell active="evenements">
+    <WLACPublicShell active="evenements">
       <WLACNotFound
         title="Cet événement est introuvable"
         body="Il a peut-être été retiré du calendrier. Retrouve tous les prochains rendez-vous Steamy."
         cta="Voir les événements"
       />
-    </PublicShell>
+    </WLACPublicShell>
   );
 }
 
@@ -1066,25 +1142,25 @@ function WLACContact({ state = "idle", subject = "Question" }) {
 
 function WL24_Help() {
   return (
-    <PublicShell>
+    <WLACPublicShell>
       <WLACHelpHero />
       <WLACFaq />
       <WLACContact />
-    </PublicShell>
+    </WLACPublicShell>
   );
 }
 
 // Arrivée sur l'ancre #contact avec ?sujet=candidature (« Rejoindre l'équipe » de WL01).
 function WL24_ContactState({ state, subject }) {
   return (
-    <PublicShell>
+    <WLACPublicShell>
       <div style={{ ...WL_WRAP, padding: "24px 32px 0" }}>
         <WLACCrumb>
           Aide & contact › <b style={{ color: "var(--ink-900)" }}>Nous contacter</b>
         </WLACCrumb>
       </div>
       <WLACContact state={state} subject={subject} />
-    </PublicShell>
+    </WLACPublicShell>
   );
 }
 
