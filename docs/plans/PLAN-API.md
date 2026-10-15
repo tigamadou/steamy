@@ -80,6 +80,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `make makemigrations` : un `0001_initial` par app ; `makemigrations --check` passe
   - [x] Annoncer la PR (`make clean && make up && make seed` pour les développeurs) : description de la PR
   - [x] Tests : identifiant numérique ou avec `@` refusé, doublon insensible à la casse, trois personas + personnel refusé, statuts refusés
+  - [x] Couverture 100 % (lignes et branches) du code modifié ; bug corrigé au passage : `aggregate_daily_stats` utilisait `django.utils.timezone.utc`, supprimé en Django 5
   > Décision : les chemins hérités (`public/user/csrf`, `public/user/session-login`, `user/session-logout`,
   > `user/my-profile`) sont servis par `accounts` jusqu'à API-1.2, qui les renomme avec le front ; la connexion
   > y prend déjà `{identifier, password}`. `user/change-password`, `user/change-email` et
@@ -93,6 +94,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Front : `apps/web/src/lib/api-browser.ts` et `apps/web/src/app/page.tsx` mis à jour, `packages/api-client` régénéré
   - [x] Retirer le commentaire d'en-tête de `session/views.py` (login par token)
   - [x] Tests : CSRF exigé sur login et logout, throttle de login par IP **et** par identifiant
+  - [x] Couverture 100 % (lignes et branches) du code modifié
   > Décisions : `auth/login/` renvoie `{user, csrfToken}` ; plafond par identifiant `10/hour` (variable
   > `THROTTLE_LOGIN_IDENTIFIER`), en plus de `5/min` par IP. `accounts/me/email/` change l'identifiant de connexion de
   > l'enseignant et l'email de contact du parent (`ParentProfile.email`, S4) ; refusé à l'apprenant (WD17) et au
@@ -103,6 +105,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Composant `Error` déclaré dans le schéma OpenAPI (400/401/403/404/409/429)
   - [x] Validateur de mot de passe D25 (`PASSWORD_TOO_WEAK`) ; validateurs Django par défaut retirés
   - [x] Tests : erreurs en français avec `code`
+  - [x] Couverture 100 % (lignes et branches) du code modifié
   > Décisions : `fields` suit §7.1 (`{champ: [{code, message}]}`) au lieu de listes de chaînes ; un appel anonyme sur
   > une route protégée renvoie **401** `NOT_AUTHENTICATED` (`libs/authentication.py`), 403 restant le refus d'un
   > utilisateur connecté (et le CSRF). 409 est déclaré par l'opération qui le renvoie (`error_responses(409)`),
@@ -113,6 +116,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Endpoints §7.7 : `notifications/`, `unread-count/`, `{id}/read/`, `read-all/`, `preferences/`
   - [x] Service `notify(user, type, …)` (base + email selon la préférence, C12)
   - [x] Tests : scoping propriétaire, préférences respectées
+  - [x] Couverture 100 % (lignes et branches) du code modifié
   > Décisions : catégories par rôle (apprenant : apprentissage, récompenses, encadrement, Steamy Events, paiements ;
   > parent : consentements et validations, paiements, progression, Steamy Events ; enseignant : progression, tentatives
   > à revoir, Steamy Events) + `account` toujours envoyée. Dans l'application : toujours ; email activé par défaut,
