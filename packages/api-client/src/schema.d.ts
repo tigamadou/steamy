@@ -232,38 +232,6 @@ export interface paths {
         patch: operations["courses_modules_partial_update"];
         trace?: never;
     };
-    "/api/courses/paths/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_paths_list"];
-        put?: never;
-        post: operations["courses_paths_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/paths/{slug}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["courses_paths_retrieve"];
-        put: operations["courses_paths_update"];
-        post?: never;
-        delete: operations["courses_paths_destroy"];
-        options?: never;
-        head?: never;
-        patch: operations["courses_paths_partial_update"];
-        trace?: never;
-    };
     "/api/courses/resources/": {
         parameters: {
             query?: never;
@@ -294,45 +262,6 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["courses_resources_partial_update"];
-        trace?: never;
-    };
-    "/api/files": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @description Upload file.
-         *
-         *     This handles uploading a file on the server, rather than returning
-         *     a signed URL for AWS S3 or the like. Though, with django-storages,
-         *     the file may very well likely end up on S3 anyway.
-         */
-        post: operations["files_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/files/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["files_retrieve"];
-        put?: never;
-        post?: never;
-        delete: operations["files_destroy"];
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/api/health/": {
@@ -595,142 +524,6 @@ export interface paths {
         patch: operations["learning_quizzes_partial_update"];
         trace?: never;
     };
-    "/api/messaging/attachments/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["messaging_attachments_list"];
-        put?: never;
-        post: operations["messaging_attachments_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/messaging/attachments/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["messaging_attachments_retrieve"];
-        put: operations["messaging_attachments_update"];
-        post?: never;
-        delete: operations["messaging_attachments_destroy"];
-        options?: never;
-        head?: never;
-        patch: operations["messaging_attachments_partial_update"];
-        trace?: never;
-    };
-    "/api/messaging/conversations/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Conversation list: returns only conversations where the user is participant (or all if staff).
-         *     Object-level access is enforced by IsParticipantOrAdmin.
-         */
-        get: operations["messaging_conversations_list"];
-        put?: never;
-        /**
-         * @description Conversation list: returns only conversations where the user is participant (or all if staff).
-         *     Object-level access is enforced by IsParticipantOrAdmin.
-         */
-        post: operations["messaging_conversations_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/messaging/conversations/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Conversation list: returns only conversations where the user is participant (or all if staff).
-         *     Object-level access is enforced by IsParticipantOrAdmin.
-         */
-        get: operations["messaging_conversations_retrieve"];
-        /**
-         * @description Conversation list: returns only conversations where the user is participant (or all if staff).
-         *     Object-level access is enforced by IsParticipantOrAdmin.
-         */
-        put: operations["messaging_conversations_update"];
-        post?: never;
-        /**
-         * @description Conversation list: returns only conversations where the user is participant (or all if staff).
-         *     Object-level access is enforced by IsParticipantOrAdmin.
-         */
-        delete: operations["messaging_conversations_destroy"];
-        options?: never;
-        head?: never;
-        /**
-         * @description Conversation list: returns only conversations where the user is participant (or all if staff).
-         *     Object-level access is enforced by IsParticipantOrAdmin.
-         */
-        patch: operations["messaging_conversations_partial_update"];
-        trace?: never;
-    };
-    "/api/messaging/messages/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["messaging_messages_list"];
-        put?: never;
-        post: operations["messaging_messages_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/messaging/messages/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["messaging_messages_retrieve"];
-        put: operations["messaging_messages_update"];
-        post?: never;
-        delete: operations["messaging_messages_destroy"];
-        options?: never;
-        head?: never;
-        patch: operations["messaging_messages_partial_update"];
-        trace?: never;
-    };
-    "/api/messaging/messages/{id}/mark_read/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["messaging_messages_mark_read_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/messaging/notifications/": {
         parameters: {
             query?: never;
@@ -897,22 +690,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/public/user/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["public_user_login_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/public/user/session-login": {
         parameters: {
             query?: never;
@@ -923,38 +700,6 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["public_user_session_login_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/public/user/signup": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["public_user_signup_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/signup/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["signup_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -987,28 +732,6 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["user_change_password_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/user/files/create-signed-file": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @description Create signed file.
-         *
-         *     This creates a file instance and generates a signed URL that the
-         *     client can upload to directly.
-         */
-        post: operations["user_files_create_signed_file_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1112,19 +835,6 @@ export interface components {
             text: string;
             isCorrect?: boolean;
         };
-        Conversation: {
-            readonly id: number;
-            title?: string;
-            participants?: number[];
-            /** Format: date-time */
-            readonly createdAt: string;
-            /** Format: date-time */
-            readonly updatedAt: string;
-        };
-        ConversationRequest: {
-            title?: string;
-            participants?: number[];
-        };
         CourseDetail: {
             readonly id: number;
             title: string;
@@ -1163,37 +873,8 @@ export interface components {
             /** Format: date-time */
             readonly createdAt: string;
         };
-        CreateConversation: {
-            readonly id: number;
-            title?: string;
-            participants?: number[];
-        };
-        CreateConversationRequest: {
-            title?: string;
-            participants?: number[];
-        };
-        CreateSignedFile: {
-            readonly fileId: number;
-            /** Format: uri */
-            readonly url: string;
-            /** Format: uri */
-            readonly presignedUrl: string;
-            readonly contentType: string;
-        };
-        CreateSignedFileRequest: {
-            fileName: string;
-            acl?: string;
-        };
         CsrfToken: {
             csrfToken: string;
-        };
-        /**
-         * @description Modified from rest_framework.authtoken.serializers.AuthTokenSerializer
-         *     to accept email field instead of username
-         */
-        CustomAuthToken: {
-            email: string;
-            password: string;
         };
         /**
          * @description Modified from rest_framework.authtoken.serializers.AuthTokenSerializer
@@ -1251,26 +932,6 @@ export interface components {
             value?: string | null;
             metadata?: unknown;
         };
-        File: {
-            readonly id: number;
-            owner?: number;
-            /** Format: uri */
-            readonly url: string;
-            readonly mimeType: string;
-            readonly isPrivate: boolean;
-            readonly isResized: boolean;
-            /** @default true */
-            isVerified: boolean;
-            /** Format: date-time */
-            readonly createdAt: string;
-        };
-        FileRequest: {
-            owner?: number;
-            /** Format: binary */
-            upload: string;
-            /** @default true */
-            isVerified: boolean;
-        };
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
             database: boolean;
@@ -1306,54 +967,6 @@ export interface components {
             resourceType?: components["schemas"]["ResourceTypeEnum"];
             /** @default 0 */
             order: number;
-        };
-        Message: {
-            readonly id: number;
-            conversation: number;
-            readonly sender: string;
-            body?: string;
-            /** Format: date-time */
-            readonly createdAt: string;
-            edited?: boolean;
-            deleted?: boolean;
-            readonly attachments: components["schemas"]["MessageAttachment"][];
-            readonly receipts: components["schemas"]["ReceiptSummary"][];
-        };
-        MessageAttachment: {
-            readonly id: number;
-            message: number;
-            /** Format: uri */
-            file: string;
-            readonly filename: string;
-            readonly size: number | null;
-            /** Format: date-time */
-            readonly uploadedAt: string;
-        };
-        MessageAttachmentRequest: {
-            message: number;
-            /** Format: binary */
-            file: string;
-        };
-        MessageCreate: {
-            readonly id: number;
-            conversation: number;
-            readonly sender: number | null;
-            body?: string;
-            /** Format: date-time */
-            readonly createdAt: string;
-            readonly edited: boolean;
-            readonly deleted: boolean;
-            readonly attachments: components["schemas"]["MessageAttachment"][];
-        };
-        MessageCreateRequest: {
-            conversation: number;
-            body?: string;
-        };
-        MessageRequest: {
-            conversation: number;
-            body?: string;
-            edited?: boolean;
-            deleted?: boolean;
         };
         Module: {
             readonly id: number;
@@ -1465,21 +1078,6 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Choice"][];
         };
-        PaginatedConversationList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Conversation"][];
-        };
         PaginatedCourseListList: {
             /** @example 123 */
             count?: number;
@@ -1540,36 +1138,6 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Lesson"][];
         };
-        PaginatedMessageAttachmentList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
-             */
-            previous?: string | null;
-            results?: components["schemas"]["MessageAttachment"][];
-        };
-        PaginatedMessageList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Message"][];
-        };
         PaginatedModuleList: {
             /** @example 123 */
             count?: number;
@@ -1614,21 +1182,6 @@ export interface components {
              */
             previous?: string | null;
             results?: components["schemas"]["Order"][];
-        };
-        PaginatedPathList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=400&limit=100
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?offset=200&limit=100
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Path"][];
         };
         PaginatedPaymentList: {
             /** @example 123 */
@@ -1715,10 +1268,6 @@ export interface components {
             text?: string;
             isCorrect?: boolean;
         };
-        PatchedConversationRequest: {
-            title?: string;
-            participants?: number[];
-        };
         PatchedCourseDetailRequest: {
             title?: string;
             slug?: string;
@@ -1749,17 +1298,6 @@ export interface components {
             /** @default 0 */
             order: number;
         };
-        PatchedMessageAttachmentRequest: {
-            message?: number;
-            /** Format: binary */
-            file?: string;
-        };
-        PatchedMessageRequest: {
-            conversation?: number;
-            body?: string;
-            edited?: boolean;
-            deleted?: boolean;
-        };
         PatchedModuleRequest: {
             title?: string;
             /** @default 0 */
@@ -1779,10 +1317,6 @@ export interface components {
             total?: string;
             currency?: string;
             items?: components["schemas"]["OrderItemRequest"][];
-        };
-        PatchedPathRequest: {
-            title?: string;
-            description?: string;
         };
         PatchedProgressRequest: {
             enrollment?: number;
@@ -1812,16 +1346,6 @@ export interface components {
             /** Format: uri */
             externalUrl?: string | null;
         };
-        Path: {
-            readonly id: number;
-            title: string;
-            readonly slug: string;
-            description?: string;
-        };
-        PathRequest: {
-            title: string;
-            description?: string;
-        };
         Payment: {
             readonly id: number;
             order: number;
@@ -1849,20 +1373,6 @@ export interface components {
             fields: {
                 [key: string]: string;
             };
-        };
-        Profile: {
-            bio?: string | null;
-            /** Format: uri */
-            avatar?: string | null;
-            country?: string | null;
-            phone?: string | null;
-        };
-        ProfileRequest: {
-            bio?: string | null;
-            /** Format: binary */
-            avatar?: string | null;
-            country?: string | null;
-            phone?: string | null;
         };
         Progress: {
             readonly id: number;
@@ -1896,18 +1406,6 @@ export interface components {
             userId: number;
             password: string;
         };
-        PublicSignup: {
-            readonly userId: number;
-            readonly token: string;
-        };
-        PublicSignupRequest: {
-            /**
-             * Email address
-             * Format: email
-             */
-            email: string;
-            password: string;
-        };
         Question: {
             readonly id: number;
             quiz: number;
@@ -1938,13 +1436,6 @@ export interface components {
             /** Format: decimal */
             passScore?: string;
         };
-        ReceiptSummary: {
-            user: number;
-            /** Format: date-time */
-            deliveredAt: string | null;
-            /** Format: date-time */
-            readAt: string | null;
-        };
         Resource: {
             readonly id: number;
             lesson: number;
@@ -1972,13 +1463,6 @@ export interface components {
          * @enum {string}
          */
         ResourceTypeEnum: "video" | "pdf" | "html" | "other";
-        /**
-         * @description * `admin` - Administrateur
-         *     * `teacher` - Formateur
-         *     * `student` - Apprenant
-         * @enum {string}
-         */
-        RoleEnum: "admin" | "teacher" | "student";
         SessionLoginResponse: {
             userId: number;
             csrfToken: string;
@@ -1998,26 +1482,6 @@ export interface components {
              * Format: email
              */
             readonly email: string;
-        };
-        UserSignup: {
-            readonly id: number;
-            /**
-             * Email address
-             * Format: email
-             */
-            email: string;
-            role?: components["schemas"]["RoleEnum"];
-            profile?: components["schemas"]["Profile"];
-        };
-        UserSignupRequest: {
-            /**
-             * Email address
-             * Format: email
-             */
-            email: string;
-            password: string;
-            role?: components["schemas"]["RoleEnum"];
-            profile?: components["schemas"]["ProfileRequest"];
         };
         WebhookAck: {
             ok: boolean;
@@ -2703,148 +2167,6 @@ export interface operations {
             };
         };
     };
-    courses_paths_list: {
-        parameters: {
-            query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedPathList"];
-                };
-            };
-        };
-    };
-    courses_paths_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PathRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Path"];
-                };
-            };
-        };
-    };
-    courses_paths_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Path"];
-                };
-            };
-        };
-    };
-    courses_paths_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PathRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Path"];
-                };
-            };
-        };
-    };
-    courses_paths_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    courses_paths_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedPathRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Path"];
-                };
-            };
-        };
-    };
     courses_resources_list: {
         parameters: {
             query?: {
@@ -2988,71 +2310,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Resource"];
                 };
-            };
-        };
-    };
-    files_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/x-www-form-urlencoded": components["schemas"]["FileRequest"];
-                "multipart/form-data": components["schemas"]["FileRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["File"];
-                };
-            };
-        };
-    };
-    files_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["File"];
-                };
-            };
-        };
-    };
-    files_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -4033,473 +3290,6 @@ export interface operations {
             };
         };
     };
-    messaging_attachments_list: {
-        parameters: {
-            query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedMessageAttachmentList"];
-                };
-            };
-        };
-    };
-    messaging_attachments_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["MessageAttachmentRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["MessageAttachmentRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MessageAttachment"];
-                };
-            };
-        };
-    };
-    messaging_attachments_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this message attachment. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MessageAttachment"];
-                };
-            };
-        };
-    };
-    messaging_attachments_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this message attachment. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["MessageAttachmentRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["MessageAttachmentRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MessageAttachment"];
-                };
-            };
-        };
-    };
-    messaging_attachments_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this message attachment. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    messaging_attachments_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this message attachment. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "multipart/form-data": components["schemas"]["PatchedMessageAttachmentRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedMessageAttachmentRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MessageAttachment"];
-                };
-            };
-        };
-    };
-    messaging_conversations_list: {
-        parameters: {
-            query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedConversationList"];
-                };
-            };
-        };
-    };
-    messaging_conversations_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["CreateConversationRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreateConversation"];
-                };
-            };
-        };
-    };
-    messaging_conversations_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this conversation. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Conversation"];
-                };
-            };
-        };
-    };
-    messaging_conversations_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this conversation. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["ConversationRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Conversation"];
-                };
-            };
-        };
-    };
-    messaging_conversations_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this conversation. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    messaging_conversations_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this conversation. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedConversationRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Conversation"];
-                };
-            };
-        };
-    };
-    messaging_messages_list: {
-        parameters: {
-            query?: {
-                /** @description Number of results to return per page. */
-                limit?: number;
-                /** @description The initial index from which to return the results. */
-                offset?: number;
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedMessageList"];
-                };
-            };
-        };
-    };
-    messaging_messages_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MessageCreateRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MessageCreate"];
-                };
-            };
-        };
-    };
-    messaging_messages_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this message. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Message"];
-                };
-            };
-        };
-    };
-    messaging_messages_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this message. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MessageRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Message"];
-                };
-            };
-        };
-    };
-    messaging_messages_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this message. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    messaging_messages_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this message. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedMessageRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Message"];
-                };
-            };
-        };
-    };
-    messaging_messages_mark_read_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this message. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MessageRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Message"];
-                };
-            };
-        };
-    };
     messaging_notifications_list: {
         parameters: {
             query?: {
@@ -4862,31 +3652,6 @@ export interface operations {
             };
         };
     };
-    public_user_login_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/x-www-form-urlencoded": components["schemas"]["CustomAuthTokenRequest"];
-                "multipart/form-data": components["schemas"]["CustomAuthTokenRequest"];
-                "application/json": components["schemas"]["CustomAuthTokenRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomAuthToken"];
-                };
-            };
-        };
-    };
     public_user_session_login_create: {
         parameters: {
             query?: never;
@@ -4906,52 +3671,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SessionLoginResponse"];
-                };
-            };
-        };
-    };
-    public_user_signup_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PublicSignupRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PublicSignup"];
-                };
-            };
-        };
-    };
-    signup_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UserSignupRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserSignup"];
                 };
             };
         };
@@ -4997,29 +3716,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    user_files_create_signed_file_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateSignedFileRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreateSignedFile"];
-                };
             };
         };
     };

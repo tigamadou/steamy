@@ -69,7 +69,6 @@ INSTALLED_APPS = [
     "django_extensions",
     "django_filters",
     "rest_framework",
-    "rest_framework.authtoken",
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "channels",
@@ -242,9 +241,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PARSER_CLASSES": ("djangorestframework_camel_case.parser.CamelCaseJSONParser",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.TokenAuthentication",
-        # SessionAuthentication may interfere with mobile API requests.
-        # If you are experiencing ssues, try commenting out the following line.
+        # Session Django + CSRF uniquement (S12) : pas de token DRF.
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
@@ -275,7 +272,7 @@ SPECTACULAR_SETTINGS = {
         "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
     ],
     "SCHEMA_PATH_PREFIX": r"/api",
-    # Schémas d'auth (cookieAuth, tokenAuth) déduits de DEFAULT_AUTHENTICATION_CLASSES
+    # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
 ADMIN_TITLE = "Admin"
 ADMIN_HEADER = "Admin"

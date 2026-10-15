@@ -5,8 +5,6 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 
 from apps.core.views import health, presign_upload
 
-from .views import api_root
-
 # try to use sidecar if available, otherwise fallback to standard SpectacularSwaggerView
 try:
     # sidecar exports a Swagger view wrapper with bundled assets
@@ -24,7 +22,6 @@ urlpatterns = [
     # Admin
     path("admin/", admin.site.urls),
     # Apps
-    path("api/", include("apps.file.urls")),
     path("api/", include("apps.user.urls")),
     path("api/courses/", include("apps.courses.urls")),
     path("api/learning/", include("apps.learning.urls")),
@@ -34,9 +31,6 @@ urlpatterns = [
     # path("api/core/presign/", include("apps.core.views.presign_upload")),
     path("api/core/presign/", presign_upload, name="presign-upload"),
     path("api/health/", health, name="health"),
-    # DRF API
-    path("api/", api_root, name="index"),
-    path("api-auth/", include("rest_framework.urls")),
     # Swagger API
     # Schema OpenAPI (JSON/YAML)
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

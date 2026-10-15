@@ -13,7 +13,6 @@ paths:
       tags:
       - analytics
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -56,7 +55,6 @@ paths:
       tags:
       - analytics
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -80,7 +78,6 @@ paths:
               $ref: '#/components/schemas/EventRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -106,7 +103,6 @@ paths:
       tags:
       - analytics
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -137,7 +133,6 @@ paths:
               $ref: '#/components/schemas/EventRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -167,7 +162,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -192,7 +186,6 @@ paths:
       tags:
       - analytics
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -217,7 +210,6 @@ paths:
       tags:
       - analytics
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -242,7 +234,6 @@ paths:
               $ref: '#/components/schemas/PresignUploadRequestRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -282,7 +273,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -303,7 +293,6 @@ paths:
               $ref: '#/components/schemas/CourseDetailRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -324,7 +313,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -351,7 +339,6 @@ paths:
               $ref: '#/components/schemas/CourseDetailRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -376,7 +363,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedCourseDetailRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -396,7 +382,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -422,7 +407,6 @@ paths:
               $ref: '#/components/schemas/CourseDetailRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -462,7 +446,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -483,7 +466,6 @@ paths:
               $ref: '#/components/schemas/LessonRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -505,7 +487,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -533,7 +514,6 @@ paths:
               $ref: '#/components/schemas/LessonRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -559,7 +539,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedLessonRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -580,7 +559,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -616,7 +594,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -637,7 +614,6 @@ paths:
               $ref: '#/components/schemas/ModuleRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -659,7 +635,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -687,7 +662,6 @@ paths:
               $ref: '#/components/schemas/ModuleRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -713,7 +687,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedModuleRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -734,157 +707,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/courses/paths/:
-    get:
-      operationId: courses_paths_list
-      parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - courses
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedPathList'
-          description: ''
-    post:
-      operationId: courses_paths_create
-      tags:
-      - courses
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PathRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Path'
-          description: ''
-  /api/courses/paths/{slug}/:
-    get:
-      operationId: courses_paths_retrieve
-      parameters:
-      - in: path
-        name: slug
-        schema:
-          type: string
-        required: true
-      tags:
-      - courses
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Path'
-          description: ''
-    put:
-      operationId: courses_paths_update
-      parameters:
-      - in: path
-        name: slug
-        schema:
-          type: string
-        required: true
-      tags:
-      - courses
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PathRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Path'
-          description: ''
-    patch:
-      operationId: courses_paths_partial_update
-      parameters:
-      - in: path
-        name: slug
-        schema:
-          type: string
-        required: true
-      tags:
-      - courses
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPathRequest'
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Path'
-          description: ''
-    delete:
-      operationId: courses_paths_destroy
-      parameters:
-      - in: path
-        name: slug
-        schema:
-          type: string
-        required: true
-      tags:
-      - courses
-      security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -920,7 +742,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -941,7 +762,6 @@ paths:
               $ref: '#/components/schemas/ResourceRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -963,7 +783,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -991,7 +810,6 @@ paths:
               $ref: '#/components/schemas/ResourceRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1017,7 +835,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedResourceRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1038,74 +855,6 @@ paths:
       tags:
       - courses
       security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/files:
-    post:
-      operationId: files_create
-      description: |-
-        Upload file.
-
-        This handles uploading a file on the server, rather than returning
-        a signed URL for AWS S3 or the like. Though, with django-storages,
-        the file may very well likely end up on S3 anyway.
-      tags:
-      - files
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/FileRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/FileRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/File'
-          description: ''
-  /api/files/{id}:
-    get:
-      operationId: files_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - files
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/File'
-          description: ''
-    delete:
-      operationId: files_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - files
-      security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1156,7 +905,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1176,7 +924,6 @@ paths:
               $ref: '#/components/schemas/AttemptCreateRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1198,7 +945,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1225,7 +971,6 @@ paths:
               $ref: '#/components/schemas/AttemptRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1251,7 +996,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttemptRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1272,7 +1016,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1296,7 +1039,6 @@ paths:
               $ref: '#/components/schemas/AttemptRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1336,7 +1078,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1358,7 +1099,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1398,7 +1138,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -1419,7 +1158,6 @@ paths:
               $ref: '#/components/schemas/ChoiceRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1441,7 +1179,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -1469,7 +1206,6 @@ paths:
               $ref: '#/components/schemas/ChoiceRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1495,7 +1231,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedChoiceRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1516,7 +1251,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1552,7 +1286,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1572,7 +1305,6 @@ paths:
               $ref: '#/components/schemas/EnrollmentRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1594,7 +1326,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1621,7 +1352,6 @@ paths:
               $ref: '#/components/schemas/EnrollmentRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1647,7 +1377,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEnrollmentRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1668,7 +1397,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1704,7 +1432,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1724,7 +1451,6 @@ paths:
               $ref: '#/components/schemas/ProgressRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1746,7 +1472,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1773,7 +1498,6 @@ paths:
               $ref: '#/components/schemas/ProgressRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1799,7 +1523,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedProgressRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1820,7 +1543,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1856,7 +1578,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -1877,7 +1598,6 @@ paths:
               $ref: '#/components/schemas/QuestionRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1899,7 +1619,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -1927,7 +1646,6 @@ paths:
               $ref: '#/components/schemas/QuestionRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1953,7 +1671,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedQuestionRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1974,7 +1691,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -2010,7 +1726,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -2031,7 +1746,6 @@ paths:
               $ref: '#/components/schemas/QuizRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -2053,7 +1767,6 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -2081,7 +1794,6 @@ paths:
               $ref: '#/components/schemas/QuizRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2107,7 +1819,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedQuizRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2128,520 +1839,10 @@ paths:
       tags:
       - learning
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
           description: No response body
-  /api/messaging/attachments/:
-    get:
-      operationId: messaging_attachments_list
-      parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - messaging
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedMessageAttachmentList'
-          description: ''
-    post:
-      operationId: messaging_attachments_create
-      tags:
-      - messaging
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/MessageAttachmentRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/MessageAttachmentRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MessageAttachment'
-          description: ''
-  /api/messaging/attachments/{id}/:
-    get:
-      operationId: messaging_attachments_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this message attachment.
-        required: true
-      tags:
-      - messaging
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MessageAttachment'
-          description: ''
-    put:
-      operationId: messaging_attachments_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this message attachment.
-        required: true
-      tags:
-      - messaging
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/MessageAttachmentRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/MessageAttachmentRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MessageAttachment'
-          description: ''
-    patch:
-      operationId: messaging_attachments_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this message attachment.
-        required: true
-      tags:
-      - messaging
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedMessageAttachmentRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedMessageAttachmentRequest'
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MessageAttachment'
-          description: ''
-    delete:
-      operationId: messaging_attachments_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this message attachment.
-        required: true
-      tags:
-      - messaging
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/messaging/conversations/:
-    get:
-      operationId: messaging_conversations_list
-      description: |-
-        Conversation list: returns only conversations where the user is participant (or all if staff).
-        Object-level access is enforced by IsParticipantOrAdmin.
-      parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - messaging
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedConversationList'
-          description: ''
-    post:
-      operationId: messaging_conversations_create
-      description: |-
-        Conversation list: returns only conversations where the user is participant (or all if staff).
-        Object-level access is enforced by IsParticipantOrAdmin.
-      tags:
-      - messaging
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateConversationRequest'
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateConversation'
-          description: ''
-  /api/messaging/conversations/{id}/:
-    get:
-      operationId: messaging_conversations_retrieve
-      description: |-
-        Conversation list: returns only conversations where the user is participant (or all if staff).
-        Object-level access is enforced by IsParticipantOrAdmin.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this conversation.
-        required: true
-      tags:
-      - messaging
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Conversation'
-          description: ''
-    put:
-      operationId: messaging_conversations_update
-      description: |-
-        Conversation list: returns only conversations where the user is participant (or all if staff).
-        Object-level access is enforced by IsParticipantOrAdmin.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this conversation.
-        required: true
-      tags:
-      - messaging
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ConversationRequest'
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Conversation'
-          description: ''
-    patch:
-      operationId: messaging_conversations_partial_update
-      description: |-
-        Conversation list: returns only conversations where the user is participant (or all if staff).
-        Object-level access is enforced by IsParticipantOrAdmin.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this conversation.
-        required: true
-      tags:
-      - messaging
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedConversationRequest'
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Conversation'
-          description: ''
-    delete:
-      operationId: messaging_conversations_destroy
-      description: |-
-        Conversation list: returns only conversations where the user is participant (or all if staff).
-        Object-level access is enforced by IsParticipantOrAdmin.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this conversation.
-        required: true
-      tags:
-      - messaging
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/messaging/messages/:
-    get:
-      operationId: messaging_messages_list
-      parameters:
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - messaging
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedMessageList'
-          description: ''
-    post:
-      operationId: messaging_messages_create
-      tags:
-      - messaging
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MessageCreateRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MessageCreate'
-          description: ''
-  /api/messaging/messages/{id}/:
-    get:
-      operationId: messaging_messages_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this message.
-        required: true
-      tags:
-      - messaging
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Message'
-          description: ''
-    put:
-      operationId: messaging_messages_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this message.
-        required: true
-      tags:
-      - messaging
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MessageRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Message'
-          description: ''
-    patch:
-      operationId: messaging_messages_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this message.
-        required: true
-      tags:
-      - messaging
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedMessageRequest'
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Message'
-          description: ''
-    delete:
-      operationId: messaging_messages_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this message.
-        required: true
-      tags:
-      - messaging
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/messaging/messages/{id}/mark_read/:
-    post:
-      operationId: messaging_messages_mark_read_create
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this message.
-        required: true
-      tags:
-      - messaging
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MessageRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Message'
-          description: ''
   /api/messaging/notifications/:
     get:
       operationId: messaging_notifications_list
@@ -2673,7 +1874,6 @@ paths:
       tags:
       - messaging
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2695,7 +1895,6 @@ paths:
       tags:
       - messaging
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2721,7 +1920,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedNotificationRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2761,7 +1959,6 @@ paths:
       tags:
       - payments
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2781,7 +1978,6 @@ paths:
               $ref: '#/components/schemas/OrderRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -2803,7 +1999,6 @@ paths:
       tags:
       - payments
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2830,7 +2025,6 @@ paths:
               $ref: '#/components/schemas/OrderRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2856,7 +2050,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOrderRequest'
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2877,7 +2070,6 @@ paths:
       tags:
       - payments
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -2913,7 +2105,6 @@ paths:
       tags:
       - payments
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2935,7 +2126,6 @@ paths:
       tags:
       - payments
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3001,7 +2191,6 @@ paths:
               $ref: '#/components/schemas/PublicForgotPasswordStep1Request'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -3019,39 +2208,11 @@ paths:
               $ref: '#/components/schemas/PublicForgotPasswordStep2Request'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       - {}
       responses:
         '201':
           description: No response body
-  /api/public/user/login:
-    post:
-      operationId: public_user_login_create
-      tags:
-      - public
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/CustomAuthTokenRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/CustomAuthTokenRequest'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomAuthTokenRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomAuthToken'
-          description: ''
   /api/public/user/session-login:
     post:
       operationId: public_user_session_login_create
@@ -3070,50 +2231,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/SessionLoginResponse'
           description: ''
-  /api/public/user/signup:
-    post:
-      operationId: public_user_signup_create
-      tags:
-      - public
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PublicSignupRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PublicSignup'
-          description: ''
-  /api/signup/:
-    post:
-      operationId: signup_create
-      tags:
-      - signup
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserSignupRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserSignup'
-          description: ''
   /api/user/change-email:
     post:
       operationId: user_change_email_create
@@ -3126,7 +2243,6 @@ paths:
               $ref: '#/components/schemas/UserChangeEmailRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -3143,44 +2259,16 @@ paths:
               $ref: '#/components/schemas/UserChangePasswordRequest'
         required: true
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '201':
           description: No response body
-  /api/user/files/create-signed-file:
-    post:
-      operationId: user_files_create_signed_file_create
-      description: |-
-        Create signed file.
-
-        This creates a file instance and generates a signed URL that the
-        client can upload to directly.
-      tags:
-      - user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateSignedFileRequest'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateSignedFile'
-          description: ''
   /api/user/my-profile:
     get:
       operationId: user_my_profile_retrieve
       tags:
       - user
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3194,7 +2282,6 @@ paths:
       tags:
       - user
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3208,7 +2295,6 @@ paths:
       tags:
       - user
       security:
-      - tokenAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3380,41 +2466,6 @@ components:
       required:
       - question
       - text
-    Conversation:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          maxLength: 255
-        participants:
-          type: array
-          items:
-            type: integer
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
-        updatedAt:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - createdAt
-      - id
-      - updatedAt
-    ConversationRequest:
-      type: object
-      properties:
-        title:
-          type: string
-          maxLength: 255
-        participants:
-          type: array
-          items:
-            type: integer
     CourseDetail:
       type: object
       properties:
@@ -3522,66 +2573,6 @@ components:
       - createdAt
       - id
       - title
-    CreateConversation:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          maxLength: 255
-        participants:
-          type: array
-          items:
-            type: integer
-      required:
-      - id
-    CreateConversationRequest:
-      type: object
-      properties:
-        title:
-          type: string
-          maxLength: 255
-        participants:
-          type: array
-          items:
-            type: integer
-    CreateSignedFile:
-      type: object
-      properties:
-        fileId:
-          type: integer
-          readOnly: true
-        url:
-          type: string
-          format: uri
-          readOnly: true
-        presignedUrl:
-          type: string
-          format: uri
-          readOnly: true
-        contentType:
-          type: string
-          readOnly: true
-      required:
-      - contentType
-      - fileId
-      - presignedUrl
-      - url
-    CreateSignedFileRequest:
-      type: object
-      properties:
-        fileName:
-          type: string
-          writeOnly: true
-          minLength: 1
-        acl:
-          type: string
-          writeOnly: true
-          minLength: 1
-      required:
-      - fileName
     CsrfToken:
       type: object
       properties:
@@ -3589,19 +2580,6 @@ components:
           type: string
       required:
       - csrfToken
-    CustomAuthToken:
-      type: object
-      description: |-
-        Modified from rest_framework.authtoken.serializers.AuthTokenSerializer
-        to accept email field instead of username
-      properties:
-        email:
-          type: string
-        password:
-          type: string
-      required:
-      - email
-      - password
     CustomAuthTokenRequest:
       type: object
       description: |-
@@ -3740,55 +2718,6 @@ components:
           nullable: true
       required:
       - eventType
-    File:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        owner:
-          type: integer
-        url:
-          type: string
-          format: uri
-          readOnly: true
-        mimeType:
-          type: string
-          readOnly: true
-        isPrivate:
-          type: boolean
-          readOnly: true
-        isResized:
-          type: boolean
-          readOnly: true
-        isVerified:
-          type: boolean
-          default: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - createdAt
-      - id
-      - isPrivate
-      - isResized
-      - mimeType
-      - url
-    FileRequest:
-      type: object
-      properties:
-        owner:
-          type: integer
-        upload:
-          type: string
-          format: binary
-          writeOnly: true
-        isVerified:
-          type: boolean
-          default: true
-      required:
-      - upload
     Health:
       type: object
       properties:
@@ -3871,143 +2800,6 @@ components:
       required:
       - module
       - title
-    Message:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        conversation:
-          type: integer
-        sender:
-          type: string
-          readOnly: true
-        body:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
-        edited:
-          type: boolean
-        deleted:
-          type: boolean
-        attachments:
-          type: array
-          items:
-            $ref: '#/components/schemas/MessageAttachment'
-          readOnly: true
-        receipts:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReceiptSummary'
-          readOnly: true
-      required:
-      - attachments
-      - conversation
-      - createdAt
-      - id
-      - receipts
-      - sender
-    MessageAttachment:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        message:
-          type: integer
-        file:
-          type: string
-          format: uri
-        filename:
-          type: string
-          readOnly: true
-        size:
-          type: integer
-          readOnly: true
-          nullable: true
-        uploadedAt:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - file
-      - filename
-      - id
-      - message
-      - size
-      - uploadedAt
-    MessageAttachmentRequest:
-      type: object
-      properties:
-        message:
-          type: integer
-        file:
-          type: string
-          format: binary
-      required:
-      - file
-      - message
-    MessageCreate:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        conversation:
-          type: integer
-        sender:
-          type: integer
-          readOnly: true
-          nullable: true
-        body:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
-        edited:
-          type: boolean
-          readOnly: true
-        deleted:
-          type: boolean
-          readOnly: true
-        attachments:
-          type: array
-          items:
-            $ref: '#/components/schemas/MessageAttachment'
-          readOnly: true
-      required:
-      - attachments
-      - conversation
-      - createdAt
-      - deleted
-      - edited
-      - id
-      - sender
-    MessageCreateRequest:
-      type: object
-      properties:
-        conversation:
-          type: integer
-        body:
-          type: string
-      required:
-      - conversation
-    MessageRequest:
-      type: object
-      properties:
-        conversation:
-          type: integer
-        body:
-          type: string
-        edited:
-          type: boolean
-        deleted:
-          type: boolean
-      required:
-      - conversation
     Module:
       type: object
       properties:
@@ -4264,26 +3056,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Choice'
-    PaginatedConversationList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Conversation'
     PaginatedCourseListList:
       type: object
       properties:
@@ -4364,46 +3136,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Lesson'
-    PaginatedMessageAttachmentList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/MessageAttachment'
-    PaginatedMessageList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Message'
     PaginatedModuleList:
       type: object
       properties:
@@ -4464,26 +3196,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Order'
-    PaginatedPathList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Path'
     PaginatedPaymentList:
       type: object
       properties:
@@ -4604,16 +3316,6 @@ components:
           maxLength: 512
         isCorrect:
           type: boolean
-    PatchedConversationRequest:
-      type: object
-      properties:
-        title:
-          type: string
-          maxLength: 255
-        participants:
-          type: array
-          items:
-            type: integer
     PatchedCourseDetailRequest:
       type: object
       properties:
@@ -4686,25 +3388,6 @@ components:
           maximum: 2147483647
           minimum: 0
           default: 0
-    PatchedMessageAttachmentRequest:
-      type: object
-      properties:
-        message:
-          type: integer
-        file:
-          type: string
-          format: binary
-    PatchedMessageRequest:
-      type: object
-      properties:
-        conversation:
-          type: integer
-        body:
-          type: string
-        edited:
-          type: boolean
-        deleted:
-          type: boolean
     PatchedModuleRequest:
       type: object
       properties:
@@ -4755,15 +3438,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderItemRequest'
-    PatchedPathRequest:
-      type: object
-      properties:
-        title:
-          type: string
-          minLength: 1
-          maxLength: 255
-        description:
-          type: string
     PatchedProgressRequest:
       type: object
       properties:
@@ -4822,36 +3496,6 @@ components:
           format: uri
           nullable: true
           maxLength: 200
-    Path:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          maxLength: 255
-        slug:
-          type: string
-          readOnly: true
-          pattern: ^[-a-zA-Z0-9_]+$
-        description:
-          type: string
-      required:
-      - id
-      - slug
-      - title
-    PathRequest:
-      type: object
-      properties:
-        title:
-          type: string
-          minLength: 1
-          maxLength: 255
-        description:
-          type: string
-      required:
-      - title
     Payment:
       type: object
       properties:
@@ -4921,42 +3565,6 @@ components:
       required:
       - fields
       - url
-    Profile:
-      type: object
-      properties:
-        bio:
-          type: string
-          nullable: true
-        avatar:
-          type: string
-          format: uri
-          nullable: true
-        country:
-          type: string
-          nullable: true
-          maxLength: 64
-        phone:
-          type: string
-          nullable: true
-          maxLength: 32
-    ProfileRequest:
-      type: object
-      properties:
-        bio:
-          type: string
-          nullable: true
-        avatar:
-          type: string
-          format: binary
-          nullable: true
-        country:
-          type: string
-          nullable: true
-          maxLength: 64
-        phone:
-          type: string
-          nullable: true
-          maxLength: 32
     Progress:
       type: object
       properties:
@@ -5036,36 +3644,6 @@ components:
       - password
       - token
       - userId
-    PublicSignup:
-      type: object
-      properties:
-        userId:
-          type: integer
-          readOnly: true
-        token:
-          type: string
-          readOnly: true
-      required:
-      - token
-      - userId
-    PublicSignupRequest:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-          writeOnly: true
-          minLength: 1
-          title: Email address
-          maxLength: 255
-        password:
-          type: string
-          writeOnly: true
-          minLength: 1
-          maxLength: 128
-      required:
-      - email
-      - password
     Question:
       type: object
       properties:
@@ -5150,23 +3728,6 @@ components:
       required:
       - course
       - title
-    ReceiptSummary:
-      type: object
-      properties:
-        user:
-          type: integer
-        deliveredAt:
-          type: string
-          format: date-time
-          nullable: true
-        readAt:
-          type: string
-          format: date-time
-          nullable: true
-      required:
-      - deliveredAt
-      - readAt
-      - user
     Resource:
       type: object
       properties:
@@ -5226,16 +3787,6 @@ components:
         * `pdf` - PDF
         * `html` - HTML
         * `other` - Autre
-    RoleEnum:
-      enum:
-      - admin
-      - teacher
-      - student
-      type: string
-      description: |-
-        * `admin` - Administrateur
-        * `teacher` - Formateur
-        * `student` - Apprenant
     SessionLoginResponse:
       type: object
       properties:
@@ -5290,45 +3841,6 @@ components:
       required:
       - email
       - id
-    UserSignup:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        email:
-          type: string
-          format: email
-          title: Email address
-          maxLength: 255
-        role:
-          $ref: '#/components/schemas/RoleEnum'
-        profile:
-          $ref: '#/components/schemas/Profile'
-      required:
-      - email
-      - id
-    UserSignupRequest:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-          minLength: 1
-          title: Email address
-          maxLength: 255
-        password:
-          type: string
-          writeOnly: true
-          minLength: 1
-          maxLength: 128
-        role:
-          $ref: '#/components/schemas/RoleEnum'
-        profile:
-          $ref: '#/components/schemas/ProfileRequest'
-      required:
-      - email
-      - password
     WebhookAck:
       type: object
       properties:
@@ -5341,8 +3853,3 @@ components:
       type: apiKey
       in: cookie
       name: sessionid
-    tokenAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: Token-based authentication with required prefix "Token"

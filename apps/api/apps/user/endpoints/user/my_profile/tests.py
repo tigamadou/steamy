@@ -17,4 +17,5 @@ class UserMyProfileTests(APITestCase):
     def test_retrieve_user_unauthenticated(self):
         self.client.force_authenticate(user=None)
         response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, 401)
+        # Session seule (S12) : un anonyme reçoit 403, sans en-tête WWW-Authenticate
+        self.assertEqual(response.status_code, 403)
