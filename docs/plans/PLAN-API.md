@@ -369,7 +369,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 ### ADR et comparaisons de prestataires
 - [ ] **ADR à écrire** (`docs/adr/`)
   - [x] Identité et connexion (avant API-1.1) : [ADR 0001](../adr/0001-identite-et-connexion.md)
-  - [ ] SMS (avant API-L2.0b)
+  - [x] SMS (avant API-L2.0b)
   - [ ] Médias (Vimeo) (avant API-L3a.1)
   - [x] Paiement (avant API-L3b.0b)
   - [ ] PDF et stockage privé (avant API-L3a.4)
