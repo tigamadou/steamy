@@ -70,3 +70,12 @@ class PaymentFactory(factory.django.DjangoModelFactory):
     msisdn = "+2290197000001"
     amount = factory.LazyAttribute(lambda o: o.order.total)
     status = Payment.Status.PENDING
+
+
+def load_referentials():
+    """Référentiels posés par migration, à recharger dans les tests `transaction=True` (base vidée entre tests)."""
+    from django.apps import apps
+
+    from apps.referentials.data import load
+
+    load(apps)
