@@ -34,7 +34,7 @@ personnel, D71). L'app `user` est supprimée.
 | Champ | Règle |
 | --- | --- |
 | `role` | `learner`, `parent` ou `teacher` ; **nul pour le personnel**. Plus de valeur `admin` (D71). Jamais accepté en entrée : fixé par le flux qui crée le compte (S1) |
-| `username` | Nullable. Unique **sans tenir compte de la casse**. 3 à 30 caractères `[A-Za-z0-9._-]`, ni `@` ni uniquement des chiffres (C7). Non modifiable (C12) |
+| `username` | Nullable. Unique **sans tenir compte de la casse**. 3 à 30 caractères `[A-Za-z0-9._-]` dont **au moins une lettre** : ni `@`, ni uniquement des chiffres (C7), ni chiffres et séparateurs (« 97.00.00 » serait lu comme un téléphone). Non modifiable (C12) |
 | `phone` | Nullable. Unique. Stocké en E.164 (`+229…`) |
 | `email` | Nullable. Unique sans tenir compte de la casse, enregistré en minuscules |
 | `first_name`, `last_name` | Prénom et nom |
@@ -67,7 +67,8 @@ l'app `referentials` (API-1.5) ; ceux qui pointent vers une école, avec l'app `
 | Commence par `+` ou ne contient que des chiffres (espaces, points, tirets et parenthèses ignorés) | Téléphone normalisé en E.164 ; sans indicatif, le pays par défaut est le Bénin (`+229`) |
 | Sinon | `username`, sans tenir compte de la casse |
 
-Le format de `username` (ni `@`, ni tout-numérique) garantit que les trois cas ne se chevauchent pas.
+Le format de `username` (pas de `@`, pas de `+`, au moins une lettre) garantit que les trois cas ne se chevauchent
+pas.
 
 Règles de sécurité :
 
