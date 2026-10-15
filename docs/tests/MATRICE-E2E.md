@@ -159,7 +159,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WAD13` | Équipe & rôles (RBAC) | 6 |  |  |
 | `WAD14` | Paramètres généraux | 6 |  |  |
 | `WAD15` | Connexion admin (2FA) | 6 |  |  |
-| `WX01` | Hors ligne | 1 |  |  |
+| `WX01` | Hors ligne | 1 | Hors ligne → page recouverte, « Réessayer » sans réseau, retour du réseau → rétablie | `apps/web/e2e/socle-public.spec.ts` |
 | `WX02` | Erreur réseau | 1 |  |  |
 | `WX03` | Chargement | 1 |  |  |
 | `WL22` | Fiche parcours publique (variante de WC04 sans contenu des missions) | 1 |  |  |

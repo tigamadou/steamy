@@ -9,9 +9,9 @@ Références : [README des plans](README.md) (étapes d'API, règles communes, d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 1.0c (après API-1) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
+Statut : 🟡 en cours · Prochaine tâche : 1.5 (pages éditoriales, sans API), puis 1.1 (après API-L1) · Prérequis : API-1 (client régénéré, `make seed` D2, avant 1.0c, renommage CSRF compris) ; API-L1 (avant 1.1, 1.3, 1.4, 1.6 et le formulaire de 1.5)
 
-### Étape 1.0 · Socle front — 🟡 en cours
+### Étape 1.0 · Socle front — ✅ terminé
 - [x] **1.0a** Outillage, tokens, assets · `feature/lot1-socle-outillage` · PR #18
   - [x] Vitest + Testing Library (`vitest.config.mts`, scripts `test` web et `pnpm -r test`, cible `make test-web`)
   - [x] Playwright (`apps/web/e2e/`, `playwright.config.ts` Chromium bureau + mobile 360 px, `@axe-core/playwright`)
@@ -45,22 +45,23 @@ Statut : 🟡 en cours · Prochaine tâche : 1.0c (après API-1) · Prérequis :
   - [x] Tests : rendu, variantes, clavier et `vitest-axe` sur chaque composant ; `PhoneInput` (changement de pays, E.164, numéro invalide)
   - [x] Couverture : 100 % des lignes et des branches du design system (diff-cover à 100 % sur le code modifié)
   - [x] Recette : contrastes AA (aucun texte en `--ink-400` ; texte foncé sur vert et ambre, survol primaire en 600, `danger` en `--error-600`), focus visible, aucun `rgba` ni hex en dur hors `tokens.css`
-- [ ] **1.0c** Shell public, enveloppes, SEO (requiert API-1) · `feature/lot1-socle-public`
-  - [ ] Contrôler le chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts` (renommé par API-1.2, PR #17)
-  - [ ] `lib/routes.ts` (table unique des URL)
-  - [ ] `app/(public)/layout.tsx` : `PublicShell`, `<main id="contenu">`, lien d'évitement
-  - [ ] `PublicNav` + `MegaMenu` accessible (clavier, `Échap`, clic extérieur, tiroir mobile avec piège de focus) et emplacement `NavAccount`
-  - [ ] `PublicFooter` (4 colonnes selon D17, icônes sociales)
-  - [ ] `WLJoinBanner`, `WLSectionHead`, `WLPillarCard`, `WLStep`, `WLSocial`
-  - [ ] `WXState`, `AppStateBoundary`
-  - [ ] WX01 `OfflineGate` dans le layout racine
-  - [ ] WX02 `error.tsx` (racine et `(public)`) et `global-error.tsx`
-  - [ ] WX03 `loading.tsx` et `not-found.tsx`
-  - [ ] Métadonnées : `metadata` racine, `robots.ts`, `sitemap.ts`, Open Graph par défaut
-  - [ ] `getPublicApi()` (`lib/api-public.ts`) et son test (jamais de `cookies()`/`headers()`), règle ESLint sur `getServerApi()` dans `(public)`
-  - [ ] Tests Vitest : `WXState` par registre, `OfflineGate`, mega-menu au clavier
-  - [ ] Parcours Playwright : navigation clavier nav et mega-menu, hors ligne (WX01), URL inconnue → 404, footer sans lien mort (liste blanche `/connexion`, `/inscription`, `/inscription/parent`)
-  - [ ] Recette : `next build` prérend toutes les routes publiques, aucune en dynamique pur ; entrées reportées absentes
+- [x] **1.0c** Shell public, enveloppes, SEO (requiert API-1) · `feature/lot1-socle-public` · PR #30
+  - [x] Contrôler le chemin CSRF `/api/auth/csrf/` dans `lib/api-browser.ts` (renommé par API-1.2, PR #17)
+  - [x] `lib/routes.ts` (table unique des URL)
+  - [x] `app/(public)/layout.tsx` : `PublicShell`, `<main id="contenu">`, lien d'évitement
+  - [x] `PublicNav` + `MegaMenu` accessible (clavier, `Échap`, clic extérieur, tiroir mobile avec piège de focus) et emplacement `NavAccount`
+  - [x] `PublicFooter` (4 colonnes selon D17, icônes sociales)
+  - [x] `WLJoinBanner`, `WLSectionHead`, `WLPillarCard`, `WLStep`, `WLSocial`
+  - [x] `WXState`, `AppStateBoundary` (limite d'erreur de section via `catchError`)
+  - [x] `WX01` `OfflineGate` dans le layout racine (registre déduit de l'URL : `tu`, `vous` pour `/parent` et `/enseignant`, neutre pour `/backoffice`)
+  - [x] WX02 `error.tsx` (racine et `(public)`) et `global-error.tsx`
+  - [x] WX03 `loading.tsx` et `not-found.tsx`
+  - [x] Métadonnées : `metadata` racine, `robots.ts`, `sitemap.ts`, Open Graph par défaut
+  - [x] `getPublicApi()` (`lib/api-public.ts`) et son test (jamais de `cookies()`/`headers()`), règle ESLint sur `getServerApi()` dans `(public)`
+  - [x] Tests Vitest : `WXState` par registre, `OfflineGate`, mega-menu au clavier
+  - [x] Parcours Playwright : navigation clavier nav et mega-menu, hors ligne (WX01), URL inconnue → 404, footer sans lien mort (liste blanche `/connexion`, `/inscription`, `/inscription/parent`, plus les pages du lot 1 à venir, retirées étape par étape)
+  - [x] Recette : `next build` prérend toutes les routes publiques, aucune en dynamique pur ; entrées reportées absentes
+  - [ ] Parcours e2e de WX02 et WX03 : à écrire avec la grille de WL06 (1.1), seule section dont l'API peut échouer ou tarder
 
 ### Étape 1.2 · Conception des maquettes — ⬜ à faire
 - [ ] **1.2** Conception de WL22, WL23, WL24 · `feature/lot1-conception-wl22-24`
@@ -111,11 +112,11 @@ Statut : 🟡 en cours · Prochaine tâche : 1.0c (après API-1) · Prérequis :
   - [ ] Parcours Playwright « devis » (offre présélectionnée → envoi → confirmation ; email dans Mailpit)
   - [ ] Parcours Playwright « contact » (`/aide?sujet=candidature`)
 
-### Neutralisation des écrans reportés — ⬜ à faire
+### Neutralisation des écrans reportés — 🟡 en cours
 - [ ] **Neutralisation** des écrans reportés et fusionnés (WL08, WL12-WL15, WL19) · à livrer avec 1.0c et 1.5
-  - [ ] Onglet WL13 retiré de `PublicNav`, WL15 et WL19 retirés du mega-menu « Ressources », WL08 retiré (« Steamy Events » → WL21)
-  - [ ] Aucun lien vers WL12 ni WL14
-  - [ ] Test Playwright : aucun `href` vers `/defis`, `/communaute`, `/tutoriels`, `/classements`, `/ateliers`
+  - [x] Onglet WL13 retiré de `PublicNav`, WL15 et WL19 retirés du mega-menu « Ressources », WL08 retiré (« Steamy Events » → WL21) (1.0c)
+  - [ ] Aucun lien vers WL12 ni WL14 (shell vérifié en 1.0c ; articles et cartes à vérifier en 1.5)
+  - [x] Test Playwright : aucun `href` vers `/defis`, `/communaute`, `/tutoriels`, `/classements`, `/ateliers` (`e2e/socle-public.spec.ts`)
 
 - [ ] **Critères de fin du lot 1**
   - [ ] Étapes 1.0a-1.6 fusionnées dans `development`, CI verte (`ci-ok` incluant `e2e`)
