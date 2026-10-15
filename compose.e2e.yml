@@ -68,6 +68,8 @@ services:
     environment:
       CI: ${CI:-}
       BASE_URL: http://web.steamy.test:3000
+      # Admin Django du back-office (WAD15), servi par l'API
+      API_URL: http://api.steamy.test:8000
       # Emails et faux SMS (adressés à `<e164>@sms.test`) lus par les helpers de `e2e/support/`
       MAILPIT_URL: http://mailpit:8025
       COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"

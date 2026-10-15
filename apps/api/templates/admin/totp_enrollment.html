@@ -1,0 +1,41 @@
+{% extends "admin/login.html" %}
+{% comment %}
+  WAD15 · Première connexion : enrôlement de l'application d'authentification (TOTP, D72). Le QR code n'est
+  visible que pendant cette étape ; il change à chaque affichage tant que l'appareil n'est pas confirmé.
+{% endcomment %}
+
+{% block content %}
+<div id="content-main" class="steamy-login__card">
+  <p class="steamy-login__eyebrow">Espace administration</p>
+  <h1 class="steamy-login__title">Configurer la double authentification</h1>
+
+  {% if form.errors %}<p class="errornote" role="alert">Le code n'a pas été accepté.</p>{% endif %}
+
+  <ol class="steamy-login__steps">
+    <li>Ouvrez votre application d'authentification (par exemple Google Authenticator, Microsoft Authenticator ou
+      FreeOTP).</li>
+    <li>Scannez ce QR code pour le compte <strong>{{ email }}</strong>.</li>
+    <li>Saisissez le code à 6 chiffres affiché par l'application.</li>
+  </ol>
+
+  <figure class="steamy-login__qr">
+    <div role="img" aria-label="QR code de configuration de l'application d'authentification">{{ qr_code|safe }}</div>
+    <figcaption>
+      Impossible de scanner ? Saisissez cette clé dans l'application :
+      <code class="steamy-login__secret">{{ secret }}</code>
+    </figcaption>
+  </figure>
+
+  <form method="post" id="totp-form" novalidate>{% csrf_token %}
+    <div class="form-row">
+      {{ form.otp_token.errors }}
+      {{ form.otp_token.label_tag }} {{ form.otp_token }}
+      <div class="help" id="{{ form.otp_token.auto_id }}_helptext">{{ form.otp_token.help_text }}</div>
+    </div>
+    <div class="submit-row">
+      <input type="submit" value="Activer et se connecter">
+    </div>
+    <p class="steamy-login__footer">Ce QR code ne sera plus affiché une fois l'application activée.</p>
+  </form>
+</div>
+{% endblock %}
