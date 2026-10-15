@@ -669,132 +669,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/learning/attempts/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["learning_attempts_list"];
-        put?: never;
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        post: operations["learning_attempts_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/learning/attempts/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["learning_attempts_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/learning/certificates/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["learning_certificates_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/learning/certificates/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["learning_certificates_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/learning/choices/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["learning_choices_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/learning/choices/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["learning_choices_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/learning/enrollments/": {
         parameters: {
             query?: never;
@@ -802,20 +676,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
+        /** @description Mes parcours (WD23, WC06a) : inscriptions de l'apprenant, avec la prochaine étape. */
         get: operations["learning_enrollments_list"];
         put?: never;
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
+        /** @description Inscription à un parcours gratuit (D27) ; déjà inscrit : 200 avec l'inscription existante. */
         post: operations["learning_enrollments_create"];
         delete?: never;
         options?: never;
@@ -823,20 +687,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/learning/enrollments/{id}/": {
+    "/api/learning/enrollments/{course_slug}/tree/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["learning_enrollments_retrieve"];
+        /** @description Arbre d'un parcours suivi (WC06a, WC06b, WJ09). */
+        get: operations["learning_enrollments_tree_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -845,70 +704,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/learning/progress/": {
+    "/api/learning/levels/{id}/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["learning_progress_list"];
-        put?: never;
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        post: operations["learning_progress_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/learning/progress/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["learning_progress_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        patch: operations["learning_progress_partial_update"];
-        trace?: never;
-    };
-    "/api/learning/questions/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["learning_questions_list"];
+        /** @description Niveau (WJ02) : introduction vidéo, seulement une fois le niveau atteint (ADR 0004). */
+        get: operations["learning_levels_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -917,14 +721,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/learning/questions/{id}/": {
+    "/api/learning/missions/{id}/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["learning_questions_retrieve"];
+        /** @description Mission (WJ03) : contenu et vidéo, seulement si la mission est déverrouillée (§4.4, ADR 0004). */
+        get: operations["learning_missions_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -933,30 +738,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/learning/quizzes/": {
+    "/api/learning/missions/{id}/complete/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["learning_quizzes_list"];
+        get?: never;
         put?: never;
-        post?: never;
+        /** @description « Marquer comme terminée » (WJ03) : dans l'ordre seulement ; renvoie l'étape suivante. */
+        post: operations["learning_missions_complete_create"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/learning/quizzes/{id}/": {
+    "/api/learning/projects/{id}/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["learning_quizzes_retrieve"];
+        /** @description Projet (WJ01) : objectifs, prérequis, matériel, niveaux et progression. */
+        get: operations["learning_projects_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1407,39 +1214,6 @@ export interface components {
          * @enum {string}
          */
         AreaTypeEnum: "urban" | "rural";
-        Attempt: {
-            readonly id: number;
-            readonly user: number;
-            readonly quiz: number;
-            /** Format: date-time */
-            readonly createdAt: string;
-            /** Format: decimal */
-            readonly score: string | null;
-            readonly passed: boolean;
-            readonly data: unknown;
-        };
-        /**
-         * @description Atttempt: client envoie `data` : {question_id: choice_id} pour MCQ/TF
-         *     On calcule le score côté serveur à la sauvegarde via create()
-         */
-        AttemptCreate: {
-            readonly id: number;
-            quiz: number;
-            /** Format: date-time */
-            readonly createdAt: string;
-            /** Format: decimal */
-            readonly score: string | null;
-            readonly passed: boolean;
-            data?: unknown;
-        };
-        /**
-         * @description Atttempt: client envoie `data` : {question_id: choice_id} pour MCQ/TF
-         *     On calcule le score côté serveur à la sauvegarde via create()
-         */
-        AttemptCreateRequest: {
-            quiz: number;
-            data?: unknown;
-        };
         Avatar: {
             readonly id: number;
             code: string;
@@ -1501,21 +1275,6 @@ export interface components {
              * @description Emoji affiché sur les cartes
              */
             icon: string;
-        };
-        Certificate: {
-            readonly id: number;
-            enrollment: number;
-            /** Format: date-time */
-            readonly issuedAt: string;
-            /** Format: uri */
-            file?: string | null;
-            /** Format: decimal */
-            score?: string | null;
-        };
-        Choice: {
-            readonly id: number;
-            readonly question: number;
-            readonly text: string;
         };
         /** @description Ce que montre le lien SMS avant toute connexion : le numéro masqué, rien de l'enfant. */
         ConsentPreview: {
@@ -1653,6 +1412,10 @@ export interface components {
             /** Mis en avant */
             featured?: boolean;
         };
+        CourseRef: {
+            slug: string;
+            title: string;
+        };
         CsrfToken: {
             csrfToken: string;
         };
@@ -1680,26 +1443,35 @@ export interface components {
             /** Format: email */
             email: string;
         };
-        Enrollment: {
-            readonly id: number;
-            course: number;
-            /** Format: date-time */
-            readonly startedAt: string;
-            readonly completed: boolean;
-            readonly status: components["schemas"]["EnrollmentStatusEnum"];
-            /** Format: decimal */
-            readonly progress: string;
+        EnrollRequestRequest: {
+            courseSlug: string;
         };
-        EnrollmentRequest: {
-            course: number;
+        Enrollment: {
+            id: number;
+            course: components["schemas"]["CourseList"];
+            source: components["schemas"]["SourceEnum"];
+            status: components["schemas"]["EnrollmentStatusEnum"];
+            progressPct: number;
+            missionCount: number;
+            missionsDone: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            lastActivityAt: string | null;
+            /** Format: date-time */
+            completedAt: string | null;
+            /** @description Projet de la prochaine étape */
+            currentProject: components["schemas"]["Ref"] | null;
+            /** @description Niveau de la prochaine étape */
+            currentLevel: components["schemas"]["Ref"] | null;
+            next: components["schemas"]["NextStep"];
         };
         /**
-         * @description * `active` - Actif
+         * @description * `active` - En cours
          *     * `completed` - Terminé
-         *     * `cancelled` - Annulé
          * @enum {string}
          */
-        EnrollmentStatusEnum: "active" | "completed" | "cancelled";
+        EnrollmentStatusEnum: "active" | "completed";
         Error: {
             code: components["schemas"]["ErrorCodeEnum"];
             message: string;
@@ -1807,13 +1579,6 @@ export interface components {
          * @enum {string}
          */
         HealthStatusEnum: "ok" | "degraded";
-        /**
-         * @description * `mcq` - QCM
-         *     * `tf` - Vrai/Faux
-         *     * `free` - Libre
-         * @enum {string}
-         */
-        KindEnum: "mcq" | "tf" | "free";
         Kit: {
             slug: string;
             /** Nom */
@@ -1917,6 +1682,30 @@ export interface components {
             expiresAt: string;
             consentRequest: components["schemas"]["ConsentRequestState"] | null;
         };
+        /** @description Niveau (WJ02) : introduction vidéo (identifiant et hachage, ADR 0004) et missions. */
+        LevelDetail: {
+            id: number;
+            order: number;
+            title: string;
+            durationMin: number;
+            introSummary: string;
+            introVimeoId: string | null;
+            introVimeoHash: string | null;
+            state: components["schemas"]["StateEnum"];
+            course: components["schemas"]["CourseRef"];
+            project: components["schemas"]["Ref"];
+            missions: components["schemas"]["MissionItem"][];
+        };
+        LevelItem: {
+            id: number;
+            order: number;
+            title: string;
+            durationMin: number;
+            introSummary: string;
+            state: components["schemas"]["StateEnum"];
+            missionCount: number;
+            missionsDone: number;
+        };
         LevelSummary: {
             /** Ordre */
             order?: number;
@@ -1990,6 +1779,51 @@ export interface components {
          * @enum {string}
          */
         MeStatusEnum: "pending" | "active" | "suspended" | "deactivated" | "anonymized";
+        MissionBlock: {
+            type: components["schemas"]["MissionBlockTypeEnum"];
+            text?: string;
+            src?: string;
+            alt?: string;
+            caption?: string;
+        };
+        /**
+         * @description * `text` - Texte
+         *     * `tip` - Astuce
+         *     * `media` - Média
+         * @enum {string}
+         */
+        MissionBlockTypeEnum: "text" | "tip" | "media";
+        MissionComplete: {
+            missionId: number;
+            progressPct: number;
+            /** @description Mission suivante, ou certification si le parcours est fait */
+            next: components["schemas"]["NextStep"];
+        };
+        /** @description Mission (WJ03) : vidéo (identifiant et hachage, ADR 0004) et blocs de contenu. */
+        MissionDetail: {
+            id: number;
+            order: number;
+            title: string;
+            durationMin: number;
+            icon: string;
+            vimeoId: string | null;
+            vimeoHash: string | null;
+            blocks: components["schemas"]["MissionBlock"][];
+            state: components["schemas"]["StateEnum"];
+            course: components["schemas"]["CourseRef"];
+            project: components["schemas"]["Ref"];
+            level: components["schemas"]["Ref"];
+            /** @description Étape à proposer après cette mission */
+            next: components["schemas"]["NextStep"];
+        };
+        MissionItem: {
+            id: number;
+            order: number;
+            title: string;
+            durationMin: number;
+            icon: string;
+            state: components["schemas"]["StateEnum"];
+        };
         MissionSummary: {
             /** Ordre */
             order?: number;
@@ -2000,6 +1834,22 @@ export interface components {
             /** Icône */
             icon?: string;
         };
+        /** @description Étape suivante : mission à faire, ou certification quand tout le parcours est fait. */
+        NextStep: {
+            type: components["schemas"]["NextStepTypeEnum"];
+            /** @description Mission ; null pour la certification */
+            id: number | null;
+            title: string | null;
+            courseSlug: string;
+            projectId: number | null;
+            levelId: number | null;
+        };
+        /**
+         * @description * `mission` - Mission
+         *     * `certification` - Certification
+         * @enum {string}
+         */
+        NextStepTypeEnum: "mission" | "certification";
         Notification: {
             readonly id: number;
             readonly type: string;
@@ -2059,51 +1909,6 @@ export interface components {
             /** Format: uuid */
             challengeId: string;
             code: string;
-        };
-        PaginatedAttemptList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Attempt"][];
-        };
-        PaginatedCertificateList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Certificate"][];
-        };
-        PaginatedChoiceList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Choice"][];
         };
         PaginatedConsentRequestList: {
             /** @example 123 */
@@ -2210,51 +2015,6 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Payment"][];
         };
-        PaginatedProgressList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Progress"][];
-        };
-        PaginatedQuestionList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Question"][];
-        };
-        PaginatedQuizList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Quiz"][];
-        };
         PaginatedSteamyEventList: {
             /** @example 123 */
             count?: number;
@@ -2355,13 +2115,6 @@ export interface components {
         PatchedPreferencesUpdateRequest: {
             categories?: components["schemas"]["CategoryPreferenceRequest"][];
         };
-        PatchedProgressRequest: {
-            enrollment?: number;
-            mission?: number;
-            completed?: boolean;
-            /** Format: decimal */
-            score?: string | null;
-        };
         Payment: {
             readonly id: number;
             readonly order: number;
@@ -2407,22 +2160,20 @@ export interface components {
         };
         /** @enum {string} */
         ProfileStepEnum: "learner-info" | "learner-school" | "learner-goals" | "learner-avatar" | "parent-location" | "parent-about" | "parent-children";
-        Progress: {
-            readonly id: number;
-            enrollment: number;
-            mission: number;
-            completed?: boolean;
-            /** Format: decimal */
-            score?: string | null;
-            /** Format: date-time */
-            readonly updatedAt: string;
-        };
-        ProgressRequest: {
-            enrollment: number;
-            mission: number;
-            completed?: boolean;
-            /** Format: decimal */
-            score?: string | null;
+        /** @description Projet (WJ01). */
+        ProjectDetail: {
+            id: number;
+            order: number;
+            title: string;
+            durationHours: number;
+            objectives: string[];
+            prerequisites: string[];
+            materials: string[];
+            state: components["schemas"]["StateEnum"];
+            missionCount: number;
+            missionsDone: number;
+            course: components["schemas"]["CourseRef"];
+            levels: components["schemas"]["LevelItem"][];
         };
         ProjectSummary: {
             /** Ordre */
@@ -2445,23 +2196,6 @@ export interface components {
          * @enum {string}
          */
         ProviderEnum: "kkiapay" | "fedapay";
-        Question: {
-            readonly id: number;
-            quiz: number;
-            text: string;
-            kind?: components["schemas"]["KindEnum"];
-            /** Format: decimal */
-            weight?: string;
-            readonly choices: components["schemas"]["Choice"][];
-        };
-        Quiz: {
-            readonly id: number;
-            course: number;
-            title: string;
-            /** Format: decimal */
-            passScore?: string;
-            readonly questions: components["schemas"]["Question"][];
-        };
         QuoteRequestRequest: {
             /** Établissement */
             schoolName: string;
@@ -2487,6 +2221,12 @@ export interface components {
         /** @description Réponse neutre, identique qu'il y ait eu enregistrement, doublon ou robot. */
         Received: {
             ok: boolean;
+        };
+        /** @description Projet ou niveau cité (fil d'Ariane, position). */
+        Ref: {
+            id: number;
+            order: number;
+            title: string;
         };
         RefusalReason: {
             readonly id: number;
@@ -2533,6 +2273,21 @@ export interface components {
             /** Libellé */
             label: string;
         };
+        /**
+         * @description * `free` - Gratuit
+         *     * `order` - Commande
+         *     * `kit_code` - Kit Code
+         *     * `classroom` - Classe
+         * @enum {string}
+         */
+        SourceEnum: "free" | "order" | "kit_code" | "classroom";
+        /**
+         * @description * `done` - Faite
+         *     * `available` - Disponible
+         *     * `locked` - Verrouillée
+         * @enum {string}
+         */
+        StateEnum: "done" | "available" | "locked";
         SteamyEvent: {
             slug: string;
             /** Titre */
@@ -2688,6 +2443,49 @@ export interface components {
             /** Format: decimal */
             value?: string | null;
             metadata?: unknown;
+        };
+        /** @description Arbre du parcours (WC06a, WC06b, WJ09) : titres, durées et états, sans contenu. */
+        Tree: {
+            id: number;
+            course: components["schemas"]["CourseList"];
+            source: components["schemas"]["SourceEnum"];
+            status: components["schemas"]["EnrollmentStatusEnum"];
+            progressPct: number;
+            missionCount: number;
+            missionsDone: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            lastActivityAt: string | null;
+            /** Format: date-time */
+            completedAt: string | null;
+            /** @description Projet de la prochaine étape */
+            currentProject: components["schemas"]["Ref"] | null;
+            /** @description Niveau de la prochaine étape */
+            currentLevel: components["schemas"]["Ref"] | null;
+            next: components["schemas"]["NextStep"];
+            projects: components["schemas"]["TreeProject"][];
+        };
+        TreeLevel: {
+            id: number;
+            order: number;
+            title: string;
+            durationMin: number;
+            introSummary: string;
+            state: components["schemas"]["StateEnum"];
+            missionCount: number;
+            missionsDone: number;
+            missions: components["schemas"]["MissionItem"][];
+        };
+        TreeProject: {
+            id: number;
+            order: number;
+            title: string;
+            durationHours: number;
+            state: components["schemas"]["StateEnum"];
+            missionCount: number;
+            missionsDone: number;
+            levels: components["schemas"]["TreeLevel"][];
         };
         UnreadCount: {
             count: number;
@@ -4613,388 +4411,18 @@ export interface operations {
             };
         };
     };
-    learning_attempts_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedAttemptList"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    learning_attempts_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AttemptCreateRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AttemptCreate"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    learning_attempts_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this attempt. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Attempt"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    learning_certificates_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedCertificateList"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    learning_certificates_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this certificate. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Certificate"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    learning_choices_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedChoiceList"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    learning_choices_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this choice. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Choice"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
     learning_enrollments_list: {
         parameters: {
             query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
                 /** @description A page number within the paginated result set. */
                 page?: number;
                 /** @description Number of results to return per page. */
                 pageSize?: number;
-                /** @description A search term. */
-                search?: string;
+                /**
+                 * @description * `active` - En cours
+                 *     * `completed` - Terminés
+                 */
+                status?: "active" | "completed";
             };
             header?: never;
             path?: never;
@@ -5045,10 +4473,18 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["EnrollmentRequest"];
+                "application/json": components["schemas"]["EnrollRequestRequest"];
             };
         };
         responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Enrollment"];
+                };
+            };
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -5091,13 +4527,12 @@ export interface operations {
             };
         };
     };
-    learning_enrollments_retrieve: {
+    learning_enrollments_tree_retrieve: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this enrollment. */
-                id: number;
+                course_slug: string;
             };
             cookie?: never;
         };
@@ -5108,7 +4543,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Enrollment"];
+                    "application/json": components["schemas"]["Tree"];
                 };
             };
             401: {
@@ -5145,119 +4580,11 @@ export interface operations {
             };
         };
     };
-    learning_progress_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedProgressList"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    learning_progress_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProgressRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Progress"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    learning_progress_retrieve: {
+    learning_levels_retrieve: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this progress. */
                 id: number;
             };
             cookie?: never;
@@ -5269,7 +4596,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Progress"];
+                    "application/json": components["schemas"]["LevelDetail"];
                 };
             };
             401: {
@@ -5306,28 +4633,76 @@ export interface operations {
             };
         };
     };
-    learning_progress_partial_update: {
+    learning_missions_retrieve: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this progress. */
                 id: number;
             };
             cookie?: never;
         };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedProgressRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Progress"];
+                    "application/json": components["schemas"]["MissionDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    learning_missions_complete_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MissionComplete"];
                 };
             };
             400: {
@@ -5372,64 +4747,11 @@ export interface operations {
             };
         };
     };
-    learning_questions_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedQuestionList"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    learning_questions_retrieve: {
+    learning_projects_retrieve: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description A unique integer value identifying this question. */
                 id: number;
             };
             cookie?: never;
@@ -5441,113 +4763,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Question"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    learning_quizzes_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedQuizList"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    learning_quizzes_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this quiz. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Quiz"];
+                    "application/json": components["schemas"]["ProjectDetail"];
                 };
             };
             401: {
