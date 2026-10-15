@@ -472,7 +472,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > enseignant, école, parcours) pour WPD05. Pas de plafond OTP par IP pour ces SMS : le plafond par enseignant le
   > remplace. Pas de champ `classroom` sur `Enrollment` (pas de migration `learning`) : la classe se retrouve par
   > `ClassroomMembership` ; l'inscription reste après un retrait de la classe (progression conservée).
-- [x] **API-L5.3** Suivi · `feature/api-l5-3-suivi`
+- [x] **API-L5.3** Suivi · `feature/api-l5-3-suivi` · PR #86
   - [x] `GET classrooms/dashboard/`
   - [x] `GET classrooms/learners/{id}/?classroomId=` (serializer sans handicap, localité, date de naissance, téléphone, D64)
   - [x] `GET classrooms/reviews/` (D65), `POST classrooms/learners/{id}/comments/` (D63), `GET classrooms/comments/`
