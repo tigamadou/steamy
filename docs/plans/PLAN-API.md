@@ -431,7 +431,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Un enseignant ne peut pas créer de contenu (S5)
   - [ ] Seed enrichi, `make openapi` committé
 
-### API-L6 · Back-office — ⬜ à faire
+### API-L6 · Back-office — 🟡 en cours
 - [x] **API-L6.1** 2FA (D72) · réalisée par LOT-6-ADMIN 6.1 (`feature/lot6-socle-staff`, PR #38)
   - [x] `django-otp` + `otp_totp`, `OTPMiddleware`, `OTPAdminSite` (WAD15)
   - [x] Enrôlement TOTP au premier login (QR code), réinitialisation par un Super-admin
@@ -446,12 +446,24 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Tests : groupe Contenu sans accès aux paiements, staff ne peut pas accepter un consentement (D70)
 - [ ] **API-L6.3** Réglages · `feature/api-l6-3-reglages`
   - [ ] `PlatformSettings` éditable, `Announcement`, `PaymentNetwork` activables par pays (D76)
-- [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact`
+- [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact-kpi` · PR #65 (1/2), puis `feature/api-l6-4-impact-rapports` (2/2)
   - [ ] App `impact` : `KpiDefinition` (30 KPI par migration), `KpiValue`, `ImpactReport`, `ReportExport` ; statut D73
+    - [x] `KpiDefinition` (30 KPI en 8 groupes, migration `0002_kpi_definitions`), `KpiValue`, `ImpactReport` ; `kpiStatus` D73 (PR #65)
+    - [ ] `ReportExport`
   - [ ] `GET backoffice/overview/`, `backoffice/kpis/…`, `backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/` (`REPORT_LOCKED`, D74)
+    - [x] `GET backoffice/overview/`, `GET backoffice/kpis/?period=`, `GET backoffice/kpis/{code}/` (PR #65)
+    - [ ] `GET backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/`
   - [ ] `POST …/exports/` + `GET backoffice/exports/{id}/` (CSV/PDF asynchrones, `generate_report_export`)
-  - [ ] Tâche quotidienne `aggregate_daily_stats` (`DailyAggregatedStat`, D75)
+  - [x] Tâche quotidienne `aggregate_daily_stats` (`DailyAggregatedStat`, D75) (PR #65)
+  - [x] Tests : valeurs de référence des KPI `auto`, table de vérité de `kpiStatus`, bornes de période, accès par groupe (PR #65)
   - [ ] Tests : rapport soumis non modifiable
+  > Décisions (PR #65) : agrégats quotidiens de l'année recalculés chaque nuit (une correction de profil se reflète),
+  > KPI additifs = somme des jours ; « connectés ≥ 1 fois » compté à la volée sur `last_login`, pour les seules
+  > périodes en cours. KPI saisis au trimestre lus au trimestre du mois (vue mois) ou au dernier trimestre renseigné
+  > (vue année). Inclusion : âge connu des seuls apprenants (pas de date de naissance pour parents et enseignants).
+  > `ventes`, `complete`, `complete_conf` sans collecteur jusqu'à API-L3b et API-L3a (« En attente »). Échéance du
+  > rapport : fin du trimestre + 15 jours (hypothèse). `analytics/dashboard/summary/` et `analytics/export/events/`
+  > supprimés (§7.9) : ouverts au personnel sans TOTP.
 - [ ] **Critères de fin d'API-L6**
   - [ ] Toutes les routes `backoffice/` protégées par `IsStaffVerified`
   - [ ] Seed enrichi, `make openapi` committé
