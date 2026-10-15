@@ -76,6 +76,7 @@ class OrderViewSet(
     """
 
     lookup_field = "reference"
+    serializer_class = OrderSerializer
     queryset = Order.objects.select_related("beneficiary", "delivery_zone").prefetch_related(
         "items__course", "items__kit", "items__event"
     )
@@ -100,11 +101,6 @@ class OrderViewSet(
         if user.is_learner:
             return queryset.filter(beneficiary=user)
         return queryset.none()
-
-    def get_serializer_class(self):
-        if self.action == "create":
-            return OrderCreateSerializer
-        return OrderSerializer
 
     def output(self, order):
         """Le bénéficiaire ne voit ni l'adresse de livraison ni les codes, réservés au payeur."""
