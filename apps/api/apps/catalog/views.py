@@ -33,7 +33,10 @@ class CategoryListView(PublicReadMixin, generics.ListAPIView):
 
     def get_queryset(self):
         published = Q(courses__status=Course.Status.PUBLISHED)
-        return Category.objects.annotate(course_count=Count("courses", filter=published))
+        # `Meta.ordering` est ignoré par Django dès qu'il y a un GROUP BY : ordre explicite.
+        return Category.objects.annotate(course_count=Count("courses", filter=published)).order_by(
+            "order"
+        )
 
 
 @method_decorator(cache_control(public=True, max_age=CACHE_SECONDS), name="dispatch")
