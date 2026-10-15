@@ -413,9 +413,15 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 - [ ] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo`
   - [ ] `GET accounts/children/{id}/weekly-report/?week=AAAA-Www`
   - [ ] Tâche hebdomadaire `send_weekly_reports` (D55)
-- [ ] **API-L4.5** Changement de téléphone · `feature/api-l4-5-changement-telephone`
-  - [ ] `POST accounts/me/phone-change/`, `…/verify/` (OTP sur le nouveau numéro)
-  - [ ] Préférences parent
+- [x] **API-L4.5** Changement de téléphone · `feature/api-l4-5-changement-telephone`
+  - [x] `POST accounts/me/phone-change/`, `…/verify/` (OTP sur le nouveau numéro)
+  - [x] Préférences parent
+  > Décisions : `phone-change/` `{ phone, password }` exige le mot de passe actuel (`INVALID_CREDENTIALS`) ;
+  > `PHONE_TAKEN` (409) si le numéro est déjà pris, `PHONE_INVALID` si c'est le même ; renvoi par
+  > `auth/otp/resend/`. Le code validé remplace le numéro de connexion et suit dans les demandes de consentement
+  > reçues ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
+  > ajout du **Mobile Money préféré** (`ParentProfile.mobileMoney` `{ country, network, phone }`, réseau activé du
+  > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
 - [ ] **Critères de fin d'API-L4**
   - [ ] Un `childId` étranger → 404 partout
   - [ ] `Notification.url` pointe vers les routes front des plans

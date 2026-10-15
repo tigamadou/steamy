@@ -1243,6 +1243,38 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
   /api/accounts/me/parent-profile/:
+    get:
+      operationId: accounts_me_parent_profile_retrieve
+      description: 'WPD08 : profil du parent connecté.'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentProfile'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
     patch:
       operationId: accounts_me_parent_profile_partial_update
       description: WP07-WP09 (une étape par appel) et WPD08.
@@ -1304,6 +1336,96 @@ paths:
       responses:
         '204':
           description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/phone-change/:
+    post:
+      operationId: accounts_me_phone_change_create
+      description: Envoie un code au nouveau numéro ; le renvoi passe par `auth/otp/resend/`.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhoneChangeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/phone-change/verify/:
+    post:
+      operationId: accounts_me_phone_change_verify_create
+      description: 'Code valide : le numéro de connexion est remplacé.'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
         '400':
           content:
             application/json:
@@ -6068,6 +6190,49 @@ components:
           maxLength: 16
       required:
       - title
+    MobileMoney:
+      type: object
+      description: 'Mobile Money préféré (WPD08) : pays, réseau activé de ce pays
+        (D76) et numéro de ce pays.'
+      properties:
+        country:
+          type: string
+          title: Code ISO
+          description: Code ISO
+        network:
+          type: string
+          description: Code du réseau (`payment-networks`)
+          maxLength: 40
+        phone:
+          type: string
+          maxLength: 32
+      required:
+      - country
+      - network
+      - phone
+    MobileMoneyRequest:
+      type: object
+      description: 'Mobile Money préféré (WPD08) : pays, réseau activé de ce pays
+        (D76) et numéro de ce pays.'
+      properties:
+        country:
+          type: string
+          minLength: 1
+          title: Code ISO
+          description: Code ISO
+        network:
+          type: string
+          minLength: 1
+          description: Code du réseau (`payment-networks`)
+          maxLength: 40
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 32
+      required:
+      - country
+      - network
+      - phone
     MyParent:
       type: object
       description: 'Le parent vu par l''apprenant (WD22) : nom et lien de parenté,
@@ -6623,6 +6788,11 @@ components:
           items:
             $ref: '#/components/schemas/Goal'
           readOnly: true
+        mobileMoney:
+          allOf:
+          - $ref: '#/components/schemas/MobileMoney'
+          nullable: true
+          readOnly: true
         profileStep:
           description: Étape de profil restante, null si le profil est complet
           nullable: true
@@ -6637,6 +6807,7 @@ components:
       - gender
       - goalsForChildren
       - locality
+      - mobileMoney
       - profession
       - profileStep
     ParentSignupRequest:
@@ -6833,6 +7004,11 @@ components:
             type: string
             minLength: 1
           description: Au moins un objectif (WP09)
+        mobileMoney:
+          allOf:
+          - $ref: '#/components/schemas/MobileMoneyRequest'
+          nullable: true
+          description: Mobile Money préféré ; null pour l'effacer
     PatchedPreferencesUpdateRequest:
       type: object
       properties:
@@ -6917,6 +7093,21 @@ components:
       - country
       - id
       - label
+    PhoneChangeRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          description: Nouveau numéro, saisi librement ; normalisé en E.164
+          maxLength: 32
+        password:
+          type: string
+          minLength: 1
+          description: Mot de passe actuel
+      required:
+      - password
+      - phone
     Preferences:
       type: object
       properties:

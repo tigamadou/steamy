@@ -305,6 +305,17 @@ class ParentProfile(TimestampedModel):
     children_to_enroll = models.PositiveSmallIntegerField(
         _("enfants à inscrire"), null=True, blank=True
     )
+    #: Mobile Money préféré (WPD08), prérempli au paiement (WPD15, WK06). Le pays est celui du réseau.
+    mobile_money_network = models.ForeignKey(
+        "referentials.PaymentNetwork",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    mobile_money_phone = models.CharField(
+        _("numéro Mobile Money"), max_length=16, null=True, blank=True
+    )
 
     class Meta:
         verbose_name = _("profil parent")
