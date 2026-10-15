@@ -7,7 +7,15 @@ import { cx } from "@/lib/cx";
 import { controlBoxClasses, useFieldControl } from "../Field";
 import { controlTextClasses } from "../Field/control";
 import { Icon } from "../Icon";
-import { digitsOnly, flagEmoji, formatNational, isValidNational, toE164, type PhoneCountry } from "./phone";
+import {
+  DEFAULT_COUNTRY,
+  digitsOnly,
+  flagEmoji,
+  formatNational,
+  isValidNational,
+  toE164,
+  type PhoneCountry,
+} from "./phone";
 
 export type PhoneChange = {
   /** Code ISO du pays choisi. */
@@ -22,7 +30,7 @@ export type PhoneChange = {
 export type PhoneInputProps = {
   /** Pays proposés (`referentials/countries/`), passés par la page. */
   countries: PhoneCountry[];
-  /** Pays initial (code ISO) ; le premier de la liste sinon. */
+  /** Pays initial (code ISO), le Bénin par défaut ; le premier de la liste s'il est absent. */
   defaultCountry?: string;
   /** Numéro national initial. */
   defaultValue?: string;
@@ -40,7 +48,7 @@ export type PhoneInputProps = {
 
 export function PhoneInput({
   countries,
-  defaultCountry,
+  defaultCountry = DEFAULT_COUNTRY,
   defaultValue = "",
   onChange,
   name,
@@ -76,14 +84,14 @@ export function PhoneInput({
   };
 
   const e164 = country && isValidNational(national, country) ? toE164(national, country) : null;
-  const placeholder = country?.format?.replace(/X/g, "0");
+  const placeholder = country?.phoneFormat?.replace(/X/g, "0");
 
   return (
     <div className={controlBoxClasses(isInvalid, cx("relative h-14", className), "pr-4")}>
       {/* Liste native transparente posée sur le drapeau : compacte à 360 px, clavier du navigateur */}
       <span className="relative flex h-full items-center gap-1 border-r-2 border-ink-100 pr-2.5 pl-4">
         <span aria-hidden className="text-lg leading-none">
-          {country ? flagEmoji(country.code) : ""}
+          {country ? country.flag || flagEmoji(country.code) : ""}
         </span>
         <Icon name="chevron-down" size={16} className="text-ink-600" />
         <select
@@ -95,7 +103,7 @@ export function PhoneInput({
         >
           {countries.map((c) => (
             <option key={c.code} value={c.code}>
-              {`${c.name} (+${digitsOnly(c.dialCode)})`}
+              {`${c.label} (+${digitsOnly(c.dialCode)})`}
             </option>
           ))}
         </select>
@@ -109,7 +117,7 @@ export function PhoneInput({
         type="tel"
         inputMode="tel"
         autoComplete="tel-national"
-        value={formatNational(national, country?.format)}
+        value={formatNational(national, country?.phoneFormat)}
         onChange={onNumber}
         placeholder={placeholder}
         disabled={disabled}

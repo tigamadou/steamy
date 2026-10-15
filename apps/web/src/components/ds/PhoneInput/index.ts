@@ -1,2 +1,10 @@
 export { PhoneInput, type PhoneChange, type PhoneInputProps } from "./PhoneInput";
-export { flagEmoji, formatNational, isValidNational, toE164, type PhoneCountry } from "./phone";
+export {
+  DEFAULT_COUNTRY,
+  flagEmoji,
+  formatNational,
+  isValidNational,
+  maskPhone,
+  toE164,
+  type PhoneCountry,
+} from "./phone";

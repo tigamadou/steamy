@@ -515,12 +515,13 @@ if TESTING:
 # SÉCURITÉ HTTP (staging / prod, derrière l'ingress Traefik qui termine le TLS)
 # ==================================================================================================
 
+# Domaine parent partagé par le front et l'API (ex : ".steamy.africa" ; ".steamy.test" sur la stack e2e) : le
+# serveur Next lit la session posée par l'API. Sans valeur, cookie limité à l'hôte de l'API (localhost en dev).
+SESSION_COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") or None
+CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN
 
 if DEPLOYED:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    # Domaine parent partagé par le front et l'API (ex : ".steamy.africa")
-    SESSION_COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") or None
-    CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN
     SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "0"))

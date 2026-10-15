@@ -23,21 +23,21 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 2.0 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
+Statut : 🟡 en cours · Prochaine tâche : 2.1 · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
-### Socle — ⬜ à faire
-- [ ] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle`
-  - [ ] Composants DS : `OTPInput`, `ResendCountdown`, `PasswordInput`, `PwReq`, `NewPasswordFields`
-  - [ ] Composants DS : `PhoneInput` complété (Bénin par défaut, `tel-national`, `maskPhone`), `IdentifierInput`, `NumberStepper`
-  - [ ] Composants DS : `Modal`, `UserTypeCard`, `ChoiceCard`, `GoalChip`, `AvatarPicker`, `ReferentialSelect`
-  - [ ] Composants DS : `ProgressSteps`, `WebShell` (`AuthLayout`, responsive), `FullScreenStage`, `Celebration`, `ErrorSummary`
-  - [ ] `lib/auth/session.ts` (`getCurrentUser()`), `homeForRole()`, `safeNext()`, `logout()`, `identifier.ts` (C7), hook `useReferential()`
-  - [ ] `proxy.ts` (contrôle optimiste du cookie de session) et layouts `(apprenant)`, `(parent)`, `(enseignant)` avec `RoleGate` et page d'attente minimale
-  - [ ] Correction du repli CSRF vers `GET /api/auth/csrf/` si non répercutée au lot 1
-  - [ ] Helpers Playwright : lecture du faux fournisseur SMS et de Mailpit, données via `make seed`
-  - [ ] Validation des cookies de session `web` ↔ `api` sur la stack Docker avec un vrai `POST auth/login/`
-  - [ ] Tests Vitest : composants (clavier, collage OTP, bornes du stepper, E.164 par pays, `PwReq` en phase avec D25), `safeNext`, `homeForRole`, `identifier` (table C7)
-  - [ ] Recette : composants conformes à la maquette, clavier seul, contrastes AA, aucun référentiel en dur
+### Socle — ✅ terminé
+- [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
+  - [x] Composants DS : `OTPInput`, `ResendCountdown`, `PasswordInput`, `PwReq`, `NewPasswordFields`
+  - [x] Composants DS : `PhoneInput` complété (Bénin par défaut, `tel-national`, `maskPhone`), `IdentifierInput`, `NumberStepper`
+  - [x] Composants DS : `Modal`, `UserTypeCard`, `ChoiceCard`, `GoalChip`, `AvatarPicker`, `ReferentialSelect`
+  - [x] Composants DS : `ProgressSteps`, `WebShell` (`AuthLayout`, responsive), `FullScreenStage`, `Celebration`, `ErrorSummary`
+  - [x] `lib/auth/session.ts` (`getCurrentUser()`), `homeForRole()`, `safeNext()`, `logout()`, `identifier.ts` (C7), hook `useReferential()`
+  - [x] `proxy.ts` (contrôle optimiste du cookie de session) et layouts `(apprenant)`, `(parent)`, `(enseignant)` avec `RoleGate` et page d'attente minimale
+  - [x] Correction du repli CSRF vers `GET /api/auth/csrf/` si non répercutée au lot 1 : déjà faite par API-1.2 (PR #17), contrôlée
+  - [x] Helpers Playwright : lecture du faux fournisseur SMS et de Mailpit, données via `make seed`
+  - [x] Validation des cookies de session `web` ↔ `api` sur la stack Docker avec un vrai `POST auth/login/` : domaine parent `steamy.test` en e2e (`COOKIE_DOMAIN` lu hors production), parcours `e2e/espaces.spec.ts`
+  - [x] Tests Vitest : composants (clavier, collage OTP, bornes du stepper, E.164 par pays, `PwReq` en phase avec D25), `safeNext`, `homeForRole`, `identifier` (table C7)
+  - [x] Recette : composants conformes à la maquette, clavier seul, contrastes AA, aucun référentiel en dur
 
 ### Connexion et mot de passe — ⬜ à faire
 - [ ] **2.1** Connexion W16 et redirection (requiert API-1, puis API-L2 pour la résolution C7 complète) · `feature/lot2-connexion`
