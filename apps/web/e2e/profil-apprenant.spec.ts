@@ -7,6 +7,8 @@ import { sendConsentRequest, startLearnerSignup } from "./support/signup";
 // W10-W15 · Mot de passe et profil de l'apprenant après l'accord du parent (LOT-2-AUTH, étape 2.5)
 
 async function axe(page: Page) {
+  // Titre posé par les métadonnées de la route (générées à la requête pour les étapes de profil)
+  await expect(page).toHaveTitle(/ · Steamy$/);
   const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(violations).toEqual([]);
 }
