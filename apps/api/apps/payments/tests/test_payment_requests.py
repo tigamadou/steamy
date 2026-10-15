@@ -252,3 +252,15 @@ def test_pay_payment_request_command_needs_a_delivery_zone(child):
     )
     with pytest.raises(CommandError, match="zone"):
         call_command("pay_payment_request", request_id)
+
+
+def test_schema_generation_sees_no_request():
+    from django.contrib.auth.models import AnonymousUser
+    from rest_framework.test import APIRequestFactory
+
+    from apps.payments.views import PaymentRequestViewSet
+
+    view = PaymentRequestViewSet()
+    view.request = APIRequestFactory().get(URL)
+    view.request.user = AnonymousUser()
+    assert not view.get_queryset().exists()

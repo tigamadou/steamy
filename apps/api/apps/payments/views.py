@@ -396,7 +396,7 @@ class PaymentRequestViewSet(
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
-        if getattr(self, "swagger_fake_view", False):
+        if not user.is_authenticated:  # génération du schéma OpenAPI
             return queryset.none()
         if user.is_learner:
             return queryset.filter(requested_by=user)
