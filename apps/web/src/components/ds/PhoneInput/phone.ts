@@ -10,6 +10,11 @@ export type PhoneCountry = Pick<Schemas["Country"], "code" | "label" | "dialCode
 /** Pays présélectionné quand la page n'en impose pas : le Bénin (ADR 0001, `DEFAULT_DIAL_CODE` de l'API). */
 export const DEFAULT_COUNTRY = "BJ";
 
+/** Pays présélectionné : `preferred` s'il est dans la liste, sinon le premier ; vide sans liste. */
+export function initialCountry(countries: PhoneCountry[], preferred: string = DEFAULT_COUNTRY): string {
+  return countries.find((c) => c.code === preferred)?.code ?? countries[0]?.code ?? "";
+}
+
 /** Drapeau emoji dérivé du code ISO (indicateurs régionaux Unicode). */
 export function flagEmoji(code: string): string {
   return code

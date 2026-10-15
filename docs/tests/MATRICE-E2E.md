@@ -13,10 +13,10 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | Écran | Nom | Lot | Parcours | Test e2e |
 | --- | --- | --- | --- | --- |
 | `WL01` | Accueil | 1 | Parcours mis en avant, ancre « Comment ça marche » → catalogue | `apps/web/e2e/decouverte.spec.ts` |
-| `WL02` | Mot de passe oublié | 2 |  |  |
-| `WL03` | Code OTP | 2 |  |  |
-| `WL04` | Nouveau mot de passe | 2 |  |  |
-| `WL05` | Réinitialisé ✓ | 2 |  |  |
+| `WL02` | Mot de passe oublié | 2 | Mot de passe oublié parent (SMS) et enseignant (email), réponse neutre | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
+| `WL03` | Code OTP | 2 | Code par SMS et par email, essais épuisés | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
+| `WL04` | Nouveau mot de passe | 2 | Nouveau mot de passe, rechargement → WL02, sessions fermées | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
+| `WL05` | Réinitialisé ✓ | 2 | Réinitialisé puis connexion | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL06` | Projets & Parcours | 1 | Filtre par catégorie dans l'URL (rechargement), catégorie vide, sans brouillon | `apps/web/e2e/decouverte.spec.ts` |
 | `WL07` | Boutique de kits | 1 | Vitrine : prix, « Épuisé », sans lien ni panier ; filtre dans l'URL ; catégorie vide | `apps/web/e2e/evenements-boutique.spec.ts` |
 | `WL08` | Ateliers | 1 |  |  |
@@ -28,35 +28,35 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WL18` | Article | 1 | Fil d'Ariane, partage, JSON-LD, slug inconnu → 404 | `apps/web/e2e/editorial.spec.ts` |
 | `WL20` | Guides gratuits | 1 | Téléchargement libre d'un PDF, sans email (newsletter : à venir avec API-L1.4) | `apps/web/e2e/editorial.spec.ts` |
 | `WL21` | Événements | 1 | Événements à venir (passé exclu), complet signalé → fiche | `apps/web/e2e/evenements-boutique.spec.ts` |
-| `W01` | Splash | 2 |  |  |
-| `W02` | Accueil | 2 |  |  |
-| `W03` | Type d'utilisateur | 2 |  |  |
-| `W04` | Identité & identifiant | 2 |  |  |
-| `W05` | Âge | 2 |  |  |
-| `W06` | Numéro du parent | 2 |  |  |
-| `W07` | Attente consentement | 2 |  |  |
-| `W08` | Accord reçu | 2 |  |  |
-| `W10` | Mot de passe | 2 |  |  |
-| `W11` | Profil 1 · infos | 2 |  |  |
-| `W12` | Profil 2 · école | 2 |  |  |
-| `W13` | Objectifs | 2 |  |  |
-| `W14` | Avatar | 2 |  |  |
-| `W15` | Bienvenue | 2 |  |  |
+| `W01` | Splash | 2 | Splash d'entrée de l'inscription (une fois par session) | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `W02` | Accueil | 2 | Accueil de l'inscription, redirection d'un utilisateur connecté | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `W03` | Type d'utilisateur | 2 | Choix apprenant / parent | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `W04` | Identité & identifiant | 2 | Identité, CGU non cochée, identifiant | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `W05` | Âge | 2 | Âge borné 10-17, création de l'inscription | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `W06` | Numéro du parent | 2 | Numéro du parent, SMS de consentement | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `W07` | Attente consentement | 2 | Attente du consentement : polling, code de reprise, reprise dans un autre navigateur | `apps/web/e2e/consentement-apprenant.spec.ts` |
+| `W08` | Accord reçu | 2 | Accord du parent détecté par polling | `apps/web/e2e/consentement-apprenant.spec.ts` |
+| `W10` | Mot de passe | 2 | Mot de passe après l'accord (D25) | `apps/web/e2e/profil-apprenant.spec.ts` |
+| `W11` | Profil 1 · infos | 2 | Date de naissance cohérente avec l'âge, localité | `apps/web/e2e/profil-apprenant.spec.ts` |
+| `W12` | Profil 2 · école | 2 | Classe, genre et handicap facultatifs | `apps/web/e2e/profil-apprenant.spec.ts` |
+| `W13` | Objectifs | 2 | Au moins 2 objectifs | `apps/web/e2e/profil-apprenant.spec.ts` |
+| `W14` | Avatar | 2 | Avatar, aucun présélectionné | `apps/web/e2e/profil-apprenant.spec.ts` |
+| `W15` | Bienvenue | 2 | Bienvenue puis tableau de bord et reconnexion | `apps/web/e2e/profil-apprenant.spec.ts` |
 | `W16` | Connexion existant | 2 | Connexion des trois rôles, `next` sûr, personnel refusé, déconnexion | `apps/web/e2e/connexion.spec.ts` |
-| `W18` | Consentement refusé (terminal) | 2 |  |  |
-| `W19` | Identifiant déjà utilisé | 2 |  |  |
-| `WP01` | Créer un compte | 2 |  |  |
-| `WP02` | OTP | 2 |  |  |
-| `WP03` | Mot de passe | 2 |  |  |
-| `WP04` | Invitation enfant ? | 2 |  |  |
-| `WP05` | Demande de l'enfant | 2 |  |  |
-| `WP06` | Demande acceptée | 2 |  |  |
-| `WP07` | Profil 1 · localisation | 2 |  |  |
-| `WP08` | Profil 2 · à propos | 2 |  |  |
-| `WP09` | Profil 3 · enfants | 2 |  |  |
-| `WP10` | Bienvenue parent | 2 |  |  |
-| `WP11` | Motifs de refus | 2 |  |  |
-| `WP12` | Refus envoyé (terminal) | 2 |  |  |
+| `W18` | Consentement refusé (terminal) | 2 | Refus avec motif, identifiant libéré, délai de 30 jours | `apps/web/e2e/consentement-apprenant.spec.ts` |
+| `W19` | Identifiant déjà utilisé | 2 | Identifiant déjà pris au blur | `apps/web/e2e/inscription-apprenant.spec.ts` |
+| `WP01` | Créer un compte | 2 | Création du compte parent, préremplissage par le lien SMS | `apps/web/e2e/inscription-parent.spec.ts`, `apps/web/e2e/decision-parent.spec.ts` |
+| `WP02` | OTP | 2 | Code SMS, essais épuisés, numéro déjà inscrit (C13) | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP03` | Mot de passe | 2 | Mot de passe du parent | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP04` | Invitation enfant ? | 2 | Demande reçue ? aucune demande, création directe | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP05` | Demande de l'enfant | 2 | Demande de l'enfant (D20) après le lien SMS, parent nouveau ou déjà inscrit | `apps/web/e2e/decision-parent.spec.ts` |
+| `WP06` | Demande acceptée | 2 | Demande acceptée puis profil | `apps/web/e2e/decision-parent.spec.ts` |
+| `WP07` | Profil 1 · localisation | 2 | Localisation | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP08` | Profil 2 · à propos | 2 | À propos, tout facultatif | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP09` | Profil 3 · enfants | 2 | Enfants et objectifs | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP10` | Bienvenue parent | 2 | Bienvenue, enfants rattachés puis espace parent | `apps/web/e2e/inscription-parent.spec.ts` |
+| `WP11` | Motifs de refus | 2 | Motif obligatoire, confirmation du refus | `apps/web/e2e/decision-parent.spec.ts` |
+| `WP12` | Refus envoyé (terminal) | 2 | Refus envoyé, W18 côté enfant | `apps/web/e2e/decision-parent.spec.ts` |
 | `WD01` | Accueil | 3 |  |  |
 | `WD02` | Accueil nouvel utilisateur | 3 |  |  |
 | `WD03` | Chargement | 3 |  |  |
