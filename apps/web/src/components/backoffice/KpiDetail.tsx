@@ -12,7 +12,7 @@ import { DonutChart } from "./DonutChart";
 import { KpiStatusBadge } from "./KpiStatusBadge";
 import { SectionHead } from "./SectionHead";
 import { SourceTag } from "./SourceTag";
-import { CARD, FOCUS } from "./styles";
+import { CARD, FOCUS, formatNumber } from "./styles";
 
 export type KpiDetailData = Schemas["KpiDetail"];
 type HistoryRow = KpiDetailData["history"][number];
@@ -71,7 +71,7 @@ export function KpiDetail({ kpi, period }: KpiDetailProps) {
                 </p>
                 <p className="m-0 mt-1.5 text-[13px] font-bold text-ink-600">
                   {kpi.target === null ? "Sans cible" : `Cible ${formatKpiValue(kpi.target, kpi.unit)}`}
-                  {kpi.attainment !== null && ` · atteinte à ${kpi.attainment} %`}
+                  {kpi.attainment !== null && ` · atteinte à ${formatNumber(kpi.attainment)} %`}
                 </p>
               </div>
               <div className="min-w-55 flex-1">
