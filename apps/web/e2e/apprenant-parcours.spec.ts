@@ -61,7 +61,7 @@ test("WC06a/WC06b : l'arbre se déplie par l'URL, une étape verrouillée n'est 
   const [first, second] = tree.projects;
   await loginAs(page, "learner");
   await page.goto("/apprenant/parcours");
-  await page.getByRole("link", { name: "Découverte de la robotique" }).click();
+  await page.getByRole("link", { name: "Découverte de la robotique", exact: true }).click();
   await expect(page).toHaveURL(`/apprenant/parcours/${COURSE}`);
   await expect(page.getByRole("navigation", { name: "Fil d'Ariane" })).toContainText("Mes parcours");
   await expect(page.getByRole("heading", { level: 2, name: "Découverte de la robotique" })).toBeVisible();
@@ -123,8 +123,9 @@ test("WJ03 : « Marquer comme terminée » mène à l'étape renvoyée par l'API
   expect(tree.next.type).toBe("mission");
   await fakeVimeo(page);
   await loginAs(page, "learner");
-  await page.goto(`/apprenant/parcours/${COURSE}/missions/${tree.next.id}`);
+  const mission = `/apprenant/parcours/${COURSE}/missions/${tree.next.id}`;
+  await page.goto(mission);
   await page.getByRole("button", { name: /Marquer comme terminée/ }).click();
+  await expect(page).not.toHaveURL(mission);
   await expect(page).toHaveURL(new RegExp(`/apprenant/parcours/${COURSE}/(missions|quiz)/\\d+$`));
-  expect(page.url()).not.toContain(`/missions/${tree.next.id}`);
 });

@@ -37,7 +37,7 @@ test("P1 : missions, formative réussie, sommative ratée puis réussie après l
 
   // WD23 → WC06a → WJ01 → WJ02 → WJ03 ×2
   await page.goto("/apprenant/parcours");
-  await page.getByRole("link", { name: "Premiers pas avec Zeti" }).click();
+  await page.getByRole("link", { name: "Premiers pas avec Zeti", exact: true }).click();
   await expect(page).toHaveURL(`/apprenant/parcours/${COURSE}`);
   await page.getByRole("link", { name: /Projet 1/ }).first().click();
   await page.getByRole("link", { name: /Voir le projet 1/ }).click();
