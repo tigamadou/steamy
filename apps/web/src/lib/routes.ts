@@ -53,6 +53,7 @@ export const routes = {
     attempts: "/apprenant/quiz",
     attempt: (id: number | string) => `/apprenant/quiz/${id}`,
     help: "/apprenant/aide",
+    events: "/apprenant/evenements",
     courses: "/apprenant/parcours",
     course: (slug: string) => `/apprenant/parcours/${slug}`,
     project: (slug: string, id: number | string) => `/apprenant/parcours/${slug}/projets/${id}`,

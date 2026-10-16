@@ -3,9 +3,9 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { loginAs } from "./support/session";
 
-// LOT-3 §8.2 · P1 (étapes 3.3a et 3.3b) : Léa suit le parcours gratuit court du jeu D2 (1 projet, 1 niveau,
+// LOT-3 §8.2 · P1 (étapes 3.3a à 3.3c) : Léa suit le parcours gratuit court du jeu D2 (1 projet, 1 niveau,
 // 2 missions, formative et sommative de 2 questions), réussit la formative, rate la sommative, attend le délai
-// court de la stack e2e (`seed_demo --e2e`), puis la réussit. Les bonnes réponses sont celles du jeu D2 (la
+// court de la stack e2e (`seed_demo --e2e`), puis la réussit, et télécharge sa certification. Les bonnes réponses sont celles du jeu D2 (la
 // première), jamais lues dans la page. Données uniques : joué une seule fois après `make seed`.
 
 const COURSE = "premiers-pas-zeti";
@@ -84,8 +84,13 @@ test("P1 : missions, formative réussie, sommative ratée puis réussie après l
   await page.getByRole("link", { name: "Voir mon badge" }).click();
   await expect(page).toHaveURL(/\/projets\/\d+\/badge\?tentative=\d+$/);
   await expect(page.getByRole("heading", { level: 1, name: "Projet validé !" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Voir ma certification" })).toHaveAttribute(
-    "href",
-    `/apprenant/parcours/${COURSE}/certification`,
-  );
+  await page.getByRole("link", { name: "Voir ma certification" }).click();
+
+  // WJ07 → PDF (généré par le worker, D33)
+  await expect(page).toHaveURL(`/apprenant/parcours/${COURSE}/certification`);
+  await expect(page.getByText("Certification Steamy")).toBeVisible();
+  const pdf = page.getByRole("link", { name: "Télécharger la certification (PDF)" });
+  await expect(pdf).toBeVisible({ timeout: 30_000 });
+  const [file] = await Promise.all([page.waitForEvent("download"), pdf.click()]);
+  expect(file.suggestedFilename()).toMatch(/\.pdf$/);
 });
