@@ -8,7 +8,7 @@ import { SectionHeader } from "@/components/ds/SectionHeader";
 import { getServerApi } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/session";
 import { features } from "@/lib/features";
-import { DIFFICULTY_LABELS, formatPrice } from "@/lib/format";
+import { toCourseCard } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
 import { certificateDownloadUrl, readContent } from "../content";
@@ -42,18 +42,7 @@ function Recommendations({ items }: { items: Schemas["Recommendation"][] }) {
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((course) => (
-          <CourseCard
-            key={course.slug}
-            course={{
-              href: routes.learner.catalogCourse(course.slug),
-              title: course.title,
-              difficulty: DIFFICULTY_LABELS[course.difficulty],
-              isFree: course.isFree ?? false,
-              priceLabel: formatPrice(course.price ?? 0),
-              color: course.category.color,
-              emoji: course.emoji || course.category.icon,
-            }}
-          />
+          <CourseCard key={course.slug} course={toCourseCard(course, routes.learner.catalogCourse(course.slug))} />
         ))}
       </div>
     </section>
