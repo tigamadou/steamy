@@ -108,6 +108,10 @@ CATALOG: dict[str, tuple[int, str]] = {
         S.HTTP_400_BAD_REQUEST,
         "La date de naissance ne correspond pas à l'âge indiqué à l'inscription.",
     ),
+    "DELETION_ALREADY_RESOLVED": (
+        S.HTTP_409_CONFLICT,
+        "Cette demande de suppression a déjà été traitée.",
+    ),
     # --- Pédagogie --------------------------------------------------------------------------
     "PAYMENT_REQUIRED": (
         S.HTTP_402_PAYMENT_REQUIRED,

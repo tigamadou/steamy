@@ -7,12 +7,13 @@ Le parent qui crée un enfant (WPD04) est l'auteur de la demande : elle est cré
 """
 
 from django.db import IntegrityError, transaction
+from django.db.models import Prefetch
 from django.utils import timezone
 
 from apps.core.audit import audit
 from libs.errors import ApiError
 
-from .models import ConsentRequest, LearnerProfile, ParentChildLink, User
+from .models import ConsentRequest, DeletionRequest, LearnerProfile, ParentChildLink, User
 from .views.profiles import age_on
 
 
@@ -28,7 +29,14 @@ def children_of(parent: User):
             "learner_profile__locality",
             "learner_profile__disability",
         )
-        .prefetch_related("learner_profile__goals")
+        .prefetch_related(
+            "learner_profile__goals",
+            Prefetch(
+                "deletion_requests",
+                queryset=DeletionRequest.objects.filter(status__in=DeletionRequest.OPEN_STATUSES),
+                to_attr="open_deletions",
+            ),
+        )
         .order_by("first_name", "id")
     )
 

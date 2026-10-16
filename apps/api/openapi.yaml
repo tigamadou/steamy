@@ -197,6 +197,109 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/accounts/children/{id}/deletion/:
+    post:
+      operationId: accounts_children_deletion_create
+      description: |-
+        WPD09 (`POST`) : compte désactivé aussitôt, anonymisé à J+30 ; valide aussi la demande de l'enfant (WD15).
+        WPD02 (`DELETE`) : « Annuler la suppression », l'enfant peut de nouveau se connecter.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildDeletionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: accounts_children_deletion_destroy
+      description: |-
+        WPD09 (`POST`) : compte désactivé aussitôt, anonymisé à J+30 ; valide aussi la demande de l'enfant (WD15).
+        WPD02 (`DELETE`) : « Annuler la suppression », l'enfant peut de nouveau se connecter.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/children/{id}/password-reset/:
     post:
       operationId: accounts_children_password_reset_create
@@ -635,6 +738,205 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/accounts/deletion-requests/:
+    get:
+      operationId: accounts_deletion_requests_list
+      description: Demandes de suppression des enfants du parent connecté (WPD01,
+        WPD09 `?demande=<id>`).
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDeletionRequestList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/deletion-requests/{id}/:
+    get:
+      operationId: accounts_deletion_requests_retrieve
+      description: Demandes de suppression des enfants du parent connecté (WPD01,
+        WPD09 `?demande=<id>`).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/deletion-requests/{id}/approve/:
+    post:
+      operationId: accounts_deletion_requests_approve_create
+      description: 'WPD09 : la demande de l''enfant est validée, son compte désactivé
+        puis anonymisé à J+30.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/deletion-requests/{id}/refuse/:
+    post:
+      operationId: accounts_deletion_requests_refuse_create
+      description: 'WPD01 : refus, notifié à l''enfant.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/me/:
     get:
       operationId: accounts_me_retrieve
@@ -693,6 +995,115 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/deletion-request/:
+    get:
+      operationId: accounts_me_deletion_request_retrieve
+      description: 'WD15 : demande en cours (« Demande envoyée à ton parent »), 404
+        sans demande.'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: accounts_me_deletion_request_create
+      description: |-
+        Suppression du compte connecté. Apprenant (WD15) : demande envoyée au parent, retirable tant qu'elle attend.
+        Parent (WPD08) : sans enfant rattaché seulement (`CHILDREN_STILL_LINKED`) ; le compte est désactivé et la
+        session fermée aussitôt.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeletionRequestCreateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: accounts_me_deletion_request_destroy
+      description: 'WD15 : l''apprenant retire sa demande tant que son parent ne l''a
+        pas validée.'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
         '401':
           content:
             application/json:
@@ -4451,6 +4862,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/referentials/deletion-reasons/:
+    get:
+      operationId: referentials_deletion_reasons_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeletionReason'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/referentials/disabilities/:
     get:
       operationId: referentials_disabilities_list
@@ -5775,10 +6208,16 @@ components:
           type: string
           format: date-time
           readOnly: true
+        deletion:
+          allOf:
+          - $ref: '#/components/schemas/ChildDeletionState'
+          nullable: true
+          readOnly: true
       required:
       - age
       - avatar
       - createdAt
+      - deletion
       - firstName
       - id
       - lastName
@@ -5825,6 +6264,44 @@ components:
       - password
       - relationship
       - username
+    ChildDeletionRequest:
+      type: object
+      description: 'WPD09 : motif obligatoire.'
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          description: Motif (référentiel `deletion-reasons`) ; facultatif pour l'apprenant
+            (WD15)
+        note:
+          type: string
+          default: ''
+          maxLength: 1000
+      required:
+      - reason
+    ChildDeletionState:
+      type: object
+      description: 'Suppression en cours : à examiner (`pending_parent`) ou programmée
+        (« Supprimé le … », annulable, D54).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/DeletionRequestStatusEnum'
+          readOnly: true
+          title: Statut
+        scheduledFor:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Anonymisation prévue le
+      required:
+      - id
+      - scheduledFor
+      - status
     ChildDetail:
       type: object
       description: 'Détail (WPD03, WPD10) : seul écran, avec la modification, où paraissent
@@ -5890,6 +6367,11 @@ components:
           type: string
           format: date-time
           readOnly: true
+        deletion:
+          allOf:
+          - $ref: '#/components/schemas/ChildDeletionState'
+          nullable: true
+          readOnly: true
         birthDate:
           type: string
           format: date
@@ -5925,6 +6407,7 @@ components:
       - avatar
       - birthDate
       - createdAt
+      - deletion
       - disability
       - firstName
       - gender
@@ -6404,6 +6887,110 @@ components:
       required:
       - date
       - seconds
+    DeletionReason:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+      required:
+      - code
+      - id
+      - label
+    DeletionRequest:
+      type: object
+      description: 'Demande de suppression ; `accountId` : le compte concerné (l''enfant,
+        pour le parent).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        accountId:
+          type: integer
+          readOnly: true
+        firstName:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/DeletionRequestStatusEnum'
+          readOnly: true
+          title: Statut
+        reason:
+          allOf:
+          - $ref: '#/components/schemas/DeletionReason'
+          readOnly: true
+          nullable: true
+        note:
+          type: string
+          readOnly: true
+          title: Précisions
+        requestedByLearner:
+          type: boolean
+          readOnly: true
+          description: Demande faite par l'apprenant lui-même (WD15), à valider par
+            le parent
+        scheduledFor:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Anonymisation prévue le
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        resolvedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - accountId
+      - createdAt
+      - firstName
+      - id
+      - note
+      - reason
+      - requestedByLearner
+      - resolvedAt
+      - scheduledFor
+      - status
+    DeletionRequestCreateRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          nullable: true
+          description: Motif (référentiel `deletion-reasons`) ; facultatif pour l'apprenant
+            (WD15)
+        note:
+          type: string
+          default: ''
+          maxLength: 1000
+    DeletionRequestStatusEnum:
+      enum:
+      - pending_parent
+      - scheduled
+      - refused
+      - cancelled
+      - done
+      type: string
+      description: |-
+        * `pending_parent` - En attente du parent
+        * `scheduled` - Programmée
+        * `refused` - Refusée par le parent
+        * `cancelled` - Annulée
+        * `done` - Effectuée
     DeliveryAddress:
       type: object
       description: 'Adresse de livraison enregistrée (WD19, WK05). `phone` : par défaut,
@@ -6705,6 +7292,7 @@ components:
       - CONSENT_REQUEST_EXPIRED
       - CONTENT_LOCKED
       - COURSE_NOT_IN_OFFER
+      - DELETION_ALREADY_RESOLVED
       - DELIVERY_ZONE_UNAVAILABLE
       - DUPLICATE_ROW
       - EMAIL_TAKEN
@@ -6775,6 +7363,7 @@ components:
         * `CONSENT_REQUEST_EXPIRED` - CONSENT_REQUEST_EXPIRED
         * `CONTENT_LOCKED` - CONTENT_LOCKED
         * `COURSE_NOT_IN_OFFER` - COURSE_NOT_IN_OFFER
+        * `DELETION_ALREADY_RESOLVED` - DELETION_ALREADY_RESOLVED
         * `DELIVERY_ZONE_UNAVAILABLE` - DELIVERY_ZONE_UNAVAILABLE
         * `DUPLICATE_ROW` - DUPLICATE_ROW
         * `EMAIL_TAKEN` - EMAIL_TAKEN
@@ -8816,6 +9405,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CourseList'
+    PaginatedDeletionRequestList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeletionRequest'
     PaginatedEnrollmentList:
       type: object
       properties:

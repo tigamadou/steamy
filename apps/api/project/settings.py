@@ -332,6 +332,7 @@ SPECTACULAR_SETTINGS = {
         "ErrorCodeEnum": "libs.errors.ERROR_CODES",
         "RoleEnum": "apps.accounts.models.User.Role",
         "UserStatusEnum": "apps.accounts.models.User.Status",
+        "DeletionRequestStatusEnum": "apps.accounts.models.DeletionRequest.Status",
         "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
         "AttemptStatusEnum": "apps.learning.models.QuizAttempt.Status",
         "QuizKindEnum": "apps.catalog.models.Quiz.Kind",
@@ -547,6 +548,10 @@ CELERY_BEAT_SCHEDULE = {
     "purge-refused-requests": {
         "task": "apps.accounts.tasks.purge_refused_requests",
         "schedule": crontab(minute=30, hour=3),
+    },
+    "anonymize-due-accounts": {
+        "task": "apps.accounts.tasks.anonymize_due_accounts",
+        "schedule": crontab(minute=45, hour=3),
     },
     # Filet de sécurité des PDF de certificats (ADR 0005 §3)
     "retry-pending-certificates": {

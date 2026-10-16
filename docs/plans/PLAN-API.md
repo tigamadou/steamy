@@ -605,11 +605,22 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] `POST events/applications/{id}/accept/` (payant → `PaymentRequest`/commande, D53), `…/refuse/`
   - [ ] `POST payments/orders/` avec `paymentRequestId` (WPD15)
   - [ ] Tests : l'apprenant ne peut pas accepter sa propre candidature
-- [ ] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions`
-  - [ ] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
-  - [ ] `CHILDREN_STILL_LINKED` (D54)
-  - [ ] Tâche `anonymize_due_accounts` (J+30, factures conservées, D40)
-  - [ ] Tests : anonymisation complète, factures intactes, identifiant libéré, annulation avant J+30, l'apprenant n'approuve pas sa propre suppression
+- [x] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions` · PR #77
+  - [x] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
+  - [x] `CHILDREN_STILL_LINKED` (D54)
+  - [x] Tâche `anonymize_due_accounts` (J+30, factures conservées, D40)
+  - [x] Tests : anonymisation complète, factures intactes, identifiant libéré, annulation avant J+30, l'apprenant n'approuve pas sa propre suppression
+  > Décisions : référentiel `DeletionReason` (`referentials/deletion-reasons/`, motif facultatif pour l'apprenant,
+  > obligatoire en WPD09). Statut `refused` ajouté (refus du parent, notifié à l'enfant) ; code
+  > `DELETION_ALREADY_RESOLVED` (409). `GET accounts/me/deletion-request/` (état de WD15) et
+  > `GET accounts/deletion-requests/` · `{id}/` (WPD09 `?demande=`). `POST children/{id}/deletion/` valide aussi la
+  > demande en attente de l'enfant ; `children/` expose `deletion` (`id`, `status`, `scheduledFor`). Le parent qui
+  > supprime son compte est désactivé et déconnecté aussitôt : l'annulation passe par le support (action d'admin à
+  > ajouter avec API-L6). Anonymisation : identifiants, nom, mot de passe, données du profil, notifications, OTP,
+  > instantanés des demandes de consentement ; la ligne `User` reste (commandes et factures). Les autres apps
+  > effacent leurs données sur le signal `account_anonymized` ; adresse de livraison, alertes de
+  > réassort et pseudonyme public sont effacés directement. Contraintes
+  > « identifiant par rôle » levées pour un compte anonymisé.
 - [ ] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo`
   - [ ] `GET accounts/children/{id}/weekly-report/?week=AAAA-Www`
   - [ ] Tâche hebdomadaire `send_weekly_reports` (D55)

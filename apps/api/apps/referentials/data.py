@@ -88,6 +88,14 @@ REFUSAL_REASONS = [
     ("autre", "Autre raison"),
 ]
 
+# WD15, WPD09 (chargés par la migration 0003)
+DELETION_REASONS = [
+    ("plus-utilise", "Le compte n'est plus utilisé"),
+    ("autre-plateforme", "Nous utilisons une autre plateforme"),
+    ("donnees", "Protection des données personnelles"),
+    ("autre", "Autre raison"),
+]
+
 # Localités du Bénin, qualifiées urbain / rural (D75) ; complétées dans l'admin
 LOCALITIES = [
     ("BJ", "Cotonou", "", "urban"),
