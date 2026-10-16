@@ -88,3 +88,45 @@ def test_empty_and_reserved_to_parents():
     assert as_user(ParentFactory()).get(URL).json() == []
     assert as_user(LearnerFactory()).get(URL).status_code == 403
     assert APIClient().get(URL).status_code == 401
+
+
+def test_payment_requests_and_event_applications_are_listed():
+    from apps.catalog.tests.factories import CourseFactory
+    from apps.events.models import EventApplication
+    from apps.events.tests.factories import SteamyEventFactory
+    from apps.payments.models import PaymentRequest
+
+    parent = ParentFactory()
+    child = child_of(parent)
+    child_client = as_user(child)
+    course = CourseFactory(paid=True, price=15000)
+    resp = child_client.post(
+        "/api/payments/payment-requests/",
+        {"kind": "course", "courseSlug": course.slug},
+        format="json",
+    )
+    request_id = resp.json()["id"]
+    event = SteamyEventFactory()
+    resp = child_client.post(f"/api/events/{event.slug}/applications/", {}, format="json")
+    application_id = resp.json()["id"]
+    # Hors liste : demande expirée, candidature déjà acceptée
+    expired = PaymentRequest.objects.get(pk=request_id)
+    PaymentRequest.objects.create(
+        requested_by=child,
+        parent=parent,
+        kind="course",
+        course=CourseFactory(paid=True),
+        amount=1,
+        last_sent_at=expired.last_sent_at,
+        expires_at=timezone.now(),
+    )
+    EventApplication.objects.create(
+        event=SteamyEventFactory(), learner=child, applied_by=parent, status="accepted"
+    )
+    body = as_user(parent).get(URL).json()
+    by_type = {action["type"]: action for action in body}
+    assert set(by_type) == {"payment_request", "event_application"}
+    assert by_type["payment_request"]["url"] == f"/parent/demandes/{request_id}"
+    assert by_type["payment_request"]["childId"] == child.pk
+    assert by_type["event_application"]["id"] == str(application_id)
+    assert by_type["event_application"]["url"] == "/parent/evenements"

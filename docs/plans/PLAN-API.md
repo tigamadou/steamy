@@ -600,17 +600,23 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `publicDisplayAllowed` ; identifiant et mot de passe ignorés. Genre, handicap et localité seulement dans le
   > détail (D6). `me/parent/` : nom et lien de parenté, ni numéro ni email (WD22). Enum `UserStatusEnum` nommé
   > dans le schéma (collision des `status`).
-- [ ] **API-L4.2** À valider · `feature/api-l4-2-a-valider` · PR #79 (partie 1)
+- [x] **API-L4.2** À valider · `feature/api-l4-2-a-valider` · PR #79
   - [x] `GET accounts/pending-actions/` (D52) : consentements et demandes de suppression
-  - [ ] `pending-actions` : demandes de paiement et candidatures (attend API-L3b.5 et L3b.6)
-  - [ ] `POST events/applications/{id}/accept/` (payant → `PaymentRequest`/commande, D53), `…/refuse/`
-  - [ ] `POST payments/orders/` avec `paymentRequestId` (WPD15)
-  - [ ] Tests : l'apprenant ne peut pas accepter sa propre candidature
+  - [x] `pending-actions` : demandes de paiement et candidatures
+  - [x] `POST events/applications/{id}/accept/` (payant → commande d'événement, D53), `…/refuse/`
+  - [x] `POST payments/orders/` avec `paymentRequestId` (WPD15)
+  - [x] Tests : l'apprenant ne peut pas accepter sa propre candidature
   > Décisions : `pending-actions/` renvoie une liste non paginée `{ type, id, childId, childFirstName,
   > childLastName, createdAt, url }`, la plus récente d'abord ; `type` ∈ `consent`, `payment_request`,
   > `event_application`, `deletion_request` (les 4 déclarés dès maintenant) ; `childId` nul pour un consentement
   > (pas encore de lien) ; `url` = route du front (`/parent/consentements/<id>`,
-  > `/parent/enfants/<id>/supprimer?demande=<id>`). Chaque type est une source de `pending_actions.SOURCES`.
+  > `/parent/enfants/<id>/supprimer?demande=<id>`, `/parent/demandes/<id>`, `/parent/evenements`). Chaque type est
+  > une source de `pending_actions.SOURCES`. Accepter un événement payant crée directement la commande d'événement
+  > du parent (`orderReference` dans la réponse, place réservée, confirmée au paiement) : pas de `PaymentRequest`
+  > intermédiaire, le parent étant déjà sur l'écran. Refus : motif facultatif, ticket rendu, enfant notifié ; code
+  > `APPLICATION_ALREADY_RESOLVED` (409). Commande avec `paymentRequestId` : type, lignes et bénéficiaire tirés de la
+  > demande (seule l'adresse d'un kit est à fournir) ; `kind` et `items` deviennent facultatifs dans ce cas ;
+  > `PAYMENT_REQUEST_CLOSED` si la demande n'est plus en attente ; payée, la demande passe à `paid`.
 - [x] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions` · PR #77
   - [x] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
   - [x] `CHILDREN_STILL_LINKED` (D54)
