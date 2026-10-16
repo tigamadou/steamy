@@ -21,10 +21,10 @@ from apps.accounts import signup as signup_service
 from apps.accounts.fields import PasswordField
 from apps.accounts.models import DeletionRequest, Gender, ParentChildLink, User
 from apps.accounts.profile import ProfileStep, profile_step
-from apps.learning.models import Enrollment
+from apps.learning.models import Enrollment, LearnerBadge, QuizAttempt
 from apps.learning.progression import Progression
-from apps.learning.serializers import EnrollmentSerializer
-from apps.learning.views import enrollment_payload
+from apps.learning.serializers import AttemptListItemSerializer, EnrollmentSerializer
+from apps.learning.views import attempt_item, enrollment_payload
 from apps.referentials.models import Disability, Relationship, SchoolGrade
 from apps.referentials.serializers import (
     AvatarSerializer,
@@ -40,6 +40,9 @@ from libs.permissions import IsLearner, IsParent
 from .deletion import ChildDeletionSerializer
 from .learner_signup import UsernameField
 from .profiles import age_on, check_birth_date, code_field, locality_field
+
+#: Tentatives affichées dans WPD03.
+RECENT_ATTEMPTS = 5
 
 # --- Lecture ------------------------------------------------------------------------------------
 
@@ -136,10 +139,17 @@ class ChildDetailSerializer(ChildSerializer):
         help_text="Progression par parcours (WPD03), la plus récente activité d'abord"
     )
 
+    recent_attempts = serializers.SerializerMethodField(
+        help_text=f"{RECENT_ATTEMPTS} dernières tentatives de quiz (WPD03, statut serveur D31)"
+    )
+    badges = serializers.SerializerMethodField(help_text="Nombre de badges obtenus (WPD03)")
+
     class Meta(ChildSerializer.Meta):
         fields = (
             *ChildSerializer.Meta.fields,
             "courses",
+            "recent_attempts",
+            "badges",
             "birth_date",
             "gender",
             "disability",
@@ -156,6 +166,16 @@ class ChildDetailSerializer(ChildSerializer):
         )
         payload = [enrollment_payload(e, Progression(e)) for e in enrollments]
         return EnrollmentSerializer(payload, many=True).data
+
+    @extend_schema_field(AttemptListItemSerializer(many=True))
+    def get_recent_attempts(self, child):
+        attempts = QuizAttempt.objects.filter(learner=child).select_related(
+            "quiz__level__project", "quiz__project", "enrollment__course"
+        )[:RECENT_ATTEMPTS]
+        return AttemptListItemSerializer([attempt_item(a) for a in attempts], many=True).data
+
+    def get_badges(self, child) -> int:
+        return LearnerBadge.objects.filter(learner=child).count()
 
 
 # --- Écriture -----------------------------------------------------------------------------------

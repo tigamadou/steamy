@@ -466,11 +466,11 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] `make openapi` committé
 
 ### API-L4 · Espace parent — 🟡 en cours
-- [ ] **API-L4.1** Enfants · `feature/api-l4-1-enfants` · PR #75
+- [x] **API-L4.1** Enfants · `feature/api-l4-1-enfants` · PR #75, #80
   - [x] `GET/POST accounts/children/` (consentement origine `parent`, D51)
   - [x] `GET/PATCH accounts/children/{id}/` (`publicDisplayAllowed` D15)
   - [x] Progression par parcours dans `GET accounts/children/{id}/` (`courses`, forme de `learning/enrollments/`) et `activeCourses` dans la liste · PR #80
-  - [ ] Tentatives récentes dans `GET accounts/children/{id}/` (attend API-L3a.2)
+  - [x] Tentatives récentes (`recentAttempts`, 5 dernières) et nombre de badges dans `GET accounts/children/{id}/` · PR #80
   - [x] `POST …/password-reset/` (§8.9), `GET accounts/me/parent/`
   - [x] Tests : parent A ne lit ni ne modifie l'enfant de B (toutes les routes)
   > Décisions : `children/` ne liste que les enfants rattachés (comptes anonymisés exclus) ; l'enfant « en attente »

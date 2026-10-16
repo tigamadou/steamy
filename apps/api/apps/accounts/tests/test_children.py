@@ -321,3 +321,40 @@ def test_parent_sees_the_progress_of_their_child(parent):
     first = next(c for c in courses if c["id"] == started.pk)
     assert first["course"]["slug"] == started.course.slug
     assert (first["missionsDone"], first["missionCount"]) == (1, 2)
+
+
+def test_parent_sees_the_recent_attempts_and_badges_of_their_child(parent):
+    from apps.catalog.models import Quiz
+    from apps.learning.models import QuizAttempt
+    from apps.learning.tests.factories import EnrollmentFactory, build_course
+
+    child = link(parent)
+    enrollment = EnrollmentFactory(learner=child, course=build_course(quizzes=True))
+    quiz = Quiz.objects.filter(level__project__course=enrollment.course).first()
+    for percentage in (40, 60, 75, 80, 90, 100):
+        QuizAttempt.objects.create(
+            learner=child,
+            enrollment=enrollment,
+            quiz=quiz,
+            score=percentage,
+            total=100,
+            percentage=percentage,
+            threshold=70,
+            status="ok" if percentage >= 70 else "ko",
+            passed=percentage >= 70,
+        )
+    other = EnrollmentFactory(course=enrollment.course)
+    QuizAttempt.objects.create(
+        learner=other.learner,
+        enrollment=other,
+        quiz=quiz,
+        score=0,
+        total=100,
+        percentage=0,
+        threshold=70,
+        status="ko",
+    )
+    body = as_user(parent).get(f"{URL}{child.pk}/").json()
+    assert [a["percentage"] for a in body["recentAttempts"]] == [100, 90, 80, 75, 60]
+    assert body["recentAttempts"][0]["status"] == "ok"
+    assert body["badges"] == 0
