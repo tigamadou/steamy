@@ -90,11 +90,13 @@ INSTALLED_APPS = [
     "apps.public",
     "apps.shop",
     "apps.learning",
+    "apps.wishlist",
     "apps.payments",
     "apps.analytics",
     "apps.notifications",
     "apps.referentials",
     "apps.classrooms",
+    "apps.impact",
     "apps.core",
 ]
 
@@ -322,6 +324,20 @@ SPECTACULAR_SETTINGS = {
         "UserStatusEnum": "apps.accounts.models.User.Status",
         "DeletionRequestStatusEnum": "apps.accounts.models.DeletionRequest.Status",
         "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
+        "AttemptStatusEnum": "apps.learning.models.QuizAttempt.Status",
+        "QuizKindEnum": "apps.catalog.models.Quiz.Kind",
+        "BadgeKindEnum": "apps.catalog.models.Badge.Kind",
+        # Impact Tracker : noms explicites, sans renommer `ToneEnum` (notifications)
+        "ToneEnum": "apps.notifications.models.Tone",
+        "PeriodKindEnum": "apps.impact.periods.KINDS",
+        "KpiStatusEnum": "apps.impact.status.STATUS_CODES",
+        "KpiToneEnum": "apps.impact.status.TONES",
+        "ImpactReportStatusEnum": "apps.impact.models.ImpactReport.Status",
+        # `source` des inscriptions garde son nom face à `KpiSourceEnum`
+        "SourceEnum": "apps.learning.models.Enrollment.Source",
+        "KpiSourceEnum": "apps.impact.models.KpiDefinition.Source",
+        "KpiUnitEnum": "apps.impact.models.KpiDefinition.Unit",
+        "KpiPeriodicityEnum": "apps.impact.models.KpiDefinition.Periodicity",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
@@ -382,8 +398,20 @@ STORAGES = {
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
+    # Documents générés (certificats, factures) : jamais publics (ADR 0005)
+    "private": {
+        "BACKEND": os.getenv(
+            "PRIVATE_FILE_STORAGE",
+            "apps.core.storage.PrivateFileSystemStorage"
+            if os.getenv("DEFAULT_FILE_STORAGE", "").endswith("FileSystemStorage")
+            else "apps.core.storage.PrivateMediaStorage",
+        ),
+    },
 }
 AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "http://rustfs:9000")
+# Point d'accès joignable du navigateur, pour signer les URL de téléchargement des documents privés (ADR 0005, P5) ;
+# vide : signature pour `AWS_S3_ENDPOINT_URL`
+AWS_S3_PUBLIC_ENDPOINT_URL = os.getenv("AWS_S3_PUBLIC_ENDPOINT_URL", "")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
@@ -480,6 +508,16 @@ CELERY_BEAT_SCHEDULE = {
     "anonymize-due-accounts": {
         "task": "apps.accounts.tasks.anonymize_due_accounts",
         "schedule": crontab(minute=45, hour=3),
+    },
+    # Filet de sécurité des PDF de certificats (ADR 0005 §3)
+    "retry-pending-certificates": {
+        "task": "apps.learning.tasks.retry_pending_certificates",
+        "schedule": crontab(minute="*/10"),
+    },
+    # Impact Tracker : agrégats quotidiens puis KPI `auto` (D75)
+    "aggregate-daily-stats": {
+        "task": "apps.impact.tasks.aggregate_daily_stats",
+        "schedule": crontab(minute=0, hour=2),
     },
 }
 # optional default task time limits

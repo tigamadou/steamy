@@ -17,6 +17,7 @@ from apps.accounts.models import (
     LearnerProfile,
     ParentChildLink,
     ParentProfile,
+    PublicProfileReview,
     TeacherProfile,
     User,
 )
@@ -25,6 +26,9 @@ from apps.classrooms.invitations import send_invitation
 from apps.classrooms.models import School, TeacherInvitation
 from apps.core.groups import CONTENT, FINANCE, SUPER_ADMIN, SUPPORT
 from apps.events.models import SteamyEvent
+from apps.impact import services as impact
+from apps.impact.models import KpiDefinition, KpiValue
+from apps.impact.periods import QUARTER, Period
 from apps.notifications.models import Category, Notification, Tone
 from apps.referentials.models import (
     Avatar,
@@ -215,17 +219,19 @@ def seed_classrooms(accounts: dict[str, User]) -> None:
 
 
 CATEGORIES = [
-    # slug, libellé, couleur (tokens --cat-* du design system), icône
-    ("robotique", "Robotique", "#5B3FE0", "🤖"),
-    ("electronique", "Électronique", "#0EA5E9", "⚡"),
-    ("code", "Code", "#EC4899", "💻"),
-    ("ia", "IA", "#14B8A6", "🧠"),
-    ("mecanique", "Mécanique", "#F59E0B", "⚙️"),
-    ("energie", "Énergie", "#84CC16", "🔋"),  # sans parcours : état vide de WL06
+    # slug, libellé, couleur (tokens --cat-* du design system), icône, objectifs liés (recommandations, API-L3a.5)
+    ("robotique", "Robotique", "#5B3FE0", "🤖", ["robots", "challenges", "bricoler"]),
+    ("electronique", "Électronique", "#0EA5E9", "⚡", ["electronique", "domotique"]),
+    ("code", "Code", "#EC4899", "💻", ["coder", "jeu", "creativite"]),
+    ("ia", "IA", "#14B8A6", "🧠", ["ia"]),
+    ("mecanique", "Mécanique", "#F59E0B", "⚙️", ["bricoler", "robots"]),
+    ("energie", "Énergie", "#84CC16", "🔋", ["domotique"]),  # sans parcours : état vide de WL06
 ]
 
 #: Parcours court du parcours Playwright P1 (lot 3) : Léa y est inscrite sans progression, remise à zéro à chaque seed.
 SHORT_COURSE = "premiers-pas-zeti"
+#: Délai entre deux essais d'une sommative ratée dans la stack e2e (au lieu de 10 min).
+E2E_SUMMATIVE_COOLDOWN = 5
 #: Vidéo Vimeo de démonstration (publique, ADR 0004 point V4 : jamais une vidéo de production).
 DEMO_VIMEO_ID = "76979871"
 
@@ -363,10 +369,11 @@ COURSES = [
 
 def seed_catalog() -> None:
     categories = {}
-    for order, (slug, label, color, icon) in enumerate(CATEGORIES):
+    for order, (slug, label, color, icon, goals) in enumerate(CATEGORIES):
         categories[slug], _ = catalog.Category.objects.update_or_create(
             slug=slug, defaults={"label": label, "color": color, "icon": icon, "order": order}
         )
+        categories[slug].goals.set(Goal.objects.filter(code__in=goals))
     for slug, title, category, difficulty, price, emoji, featured, status, projects in COURSES:
         course, _ = catalog.Course.objects.update_or_create(
             slug=slug,
@@ -430,6 +437,49 @@ def seed_catalog() -> None:
                             ],
                         },
                     )
+                seed_quiz(catalog.Quiz.Kind.FORMATIVE, level=level)
+                catalog.Badge.objects.update_or_create(
+                    level=level, defaults={"kind": "level", "label": level_title, "icon": "🏅"}
+                )
+            seed_quiz(catalog.Quiz.Kind.SUMMATIVE, project=project)
+            catalog.Badge.objects.update_or_create(
+                project=project, defaults={"kind": "project", "label": project_title, "icon": "🏆"}
+            )
+        catalog.Badge.objects.update_or_create(
+            course=course, defaults={"kind": "course", "label": f"Diplômé · {title}", "icon": "🎓"}
+        )
+
+
+def seed_quiz(kind: str, level=None, project=None) -> None:
+    """
+    Quiz de deux questions à deux réponses (la première est la bonne) : formative de chaque niveau, sommative de
+    chaque projet (S2). Chaque question renvoie vers une mission à revoir (D32).
+    """
+    target = level or project
+    quiz, _ = catalog.Quiz.objects.update_or_create(
+        level=level, project=project, defaults={"kind": kind}
+    )
+    missions = list(
+        catalog.Mission.objects.filter(
+            **({"level": level} if level else {"level__project": project})
+        ).order_by("level__order", "order")
+    )
+    for order, mission in enumerate([missions[0], missions[-1]]):
+        question, _ = catalog.Question.objects.update_or_create(
+            quiz=quiz,
+            order=order,
+            defaults={
+                "text": f"{target.title} : qu'as-tu retenu de « {mission.title} » ?",
+                "concept": mission.title,
+                "remediation_mission": mission,
+            },
+        )
+        for c_order, (text, correct) in enumerate(
+            [("L'idée vue dans la mission", True), ("Une idée qui n'y figure pas", False)]
+        ):
+            catalog.Choice.objects.update_or_create(
+                question=question, order=c_order, defaults={"text": text, "is_correct": correct}
+            )
 
 
 #: Événements : slug, titre, emoji, couleur, décalage en jours depuis aujourd'hui, ville, lieu, public, prix, places,
@@ -578,8 +628,52 @@ def seed_kits() -> None:
         catalog.Course.objects.filter(slug__in=required_by).update(required_kit=kit)
 
 
-#: Inscriptions de Léa : parcours, nombre de missions faites (None : toutes). Le parcours court de P1 repart de
-#: zéro à chaque seed, pour rejouer le parcours Playwright.
+def seed_backoffice(accounts: dict[str, User]) -> None:
+    """WAD08 : le pseudonyme public de Léa attend la modération du support (D15)."""
+    PublicProfileReview.objects.update_or_create(
+        learner=accounts["lea"],
+        pseudonym="LéaBot",
+        defaults={
+            "avatar": Avatar.objects.get(code="hibou"),
+            "status": PublicProfileReview.Status.PENDING,
+            "reviewed_by": None,
+            "reviewed_at": None,
+        },
+    )
+
+
+#: Saisie manuelle du trimestre en cours (WAD05) : quelques indicateurs restent à renseigner.
+IMPACT_MANUAL = {
+    "fin_montant": 1951472,
+    "fin_hors": "oui",
+    "fin_first": "oui",
+    "fin_who": "OIF",
+    "prod": "non",
+    "prod_vuln": "non",
+    "nps": 10,
+    "emp": 5,
+    "emp_f": 2,
+}
+
+
+def seed_impact(accounts: dict[str, User]) -> None:
+    """Impact Tracker : KPI `auto` calculés sur le jeu D2 et saisie manuelle du trimestre en cours (brouillon)."""
+    impact.aggregate_daily_stats(timezone.localdate())
+    impact.compute_kpis(timezone.localdate())
+    quarter = Period.current(QUARTER).key
+    for code, value in IMPACT_MANUAL.items():
+        kpi = KpiDefinition.objects.get(code=code)
+        number, text = (value, "") if kpi.is_numeric else (None, value)
+        KpiValue.objects.update_or_create(
+            kpi=kpi,
+            period=quarter,
+            defaults={"number": number, "text": text, "entered_by": accounts[FINANCE]},
+        )
+
+
+#: Inscriptions de Léa : parcours, nombre de missions faites (None : toutes). Les quiz suivant des missions faites
+#: sont réussis ; « Découverte de la robotique » montre en plus une tentative `ko` puis `warn` avant la réussite
+#: (WD07). Le parcours court de P1 repart de zéro à chaque seed, pour rejouer le parcours Playwright.
 LEA_ENROLLMENTS = [
     ("decouverte-robotique", 3),  # en cours : niveau 1.1 fait, niveau 1.2 commencé
     ("initiation-scratch", None),  # terminé
@@ -587,11 +681,45 @@ LEA_ENROLLMENTS = [
 ]
 
 
+#: Barème de points et paliers de rang de DÉMONSTRATION (C8 : les valeurs réelles restent à fixer par l'équipe dans
+#: l'admin). Saisis seulement s'ils sont vides, pour ne pas écraser un réglage fait à la main.
+DEMO_POINTS_SCALE = {"mission": 10, "formative": 20, "summative": 50, "course": 100}
+DEMO_RANK_THRESHOLDS = [
+    {"rank": "Explorateur", "points": 0},
+    {"rank": "Bricoleur", "points": 100},
+    {"rank": "Inventeur", "points": 300},
+    {"rank": "Ingénieur", "points": 600},
+    {"rank": "Maître Steamy", "points": 1000},
+]
+#: « Mes souhaits » de Léa (WW01) : un parcours à kit et un parcours payant
+LEA_WISHLIST = ["robot-bluetooth", "capteurs-electroniques"]
+#: Secondes de vidéo de Léa, d'aujourd'hui (0) aux jours précédents : un streak de 5 jours (WD01, WD21).
+LEA_ACTIVITY = [600, 1200, 900, 300, 1500]
+
+
 def seed_learning(accounts: dict[str, User]) -> None:
-    from apps.learning.models import Enrollment, MissionProgress
+    from apps.core.models import PlatformSettings
+    from apps.learning.certification import complete_if_done
+    from apps.learning.gamification import award_badge, award_points, badge_of, streak_days
+    from apps.learning.models import (
+        Enrollment,
+        LearnerBadge,
+        LearningActivity,
+        MissionProgress,
+        PointsEntry,
+    )
     from apps.learning.progression import Progression
 
+    platform = PlatformSettings.load()
+    platform.points_scale = platform.points_scale or DEMO_POINTS_SCALE
+    platform.rank_thresholds = platform.rank_thresholds or DEMO_RANK_THRESHOLDS
+    platform.save()
+
     lea = accounts["lea"]
+    PointsEntry.objects.filter(learner=lea).delete()
+    LearnerBadge.objects.filter(learner=lea).delete()
+    LearningActivity.objects.filter(learner=lea).delete()
+    LearnerProfile.objects.filter(user=lea).update(points=0)
     for slug, done in LEA_ENROLLMENTS:
         course = catalog.Course.objects.get(slug=slug)
         enrollment, _ = Enrollment.objects.update_or_create(
@@ -608,17 +736,94 @@ def seed_learning(accounts: dict[str, User]) -> None:
         ).delete()
         for mission in done_missions:
             MissionProgress.objects.get_or_create(enrollment=enrollment, mission=mission)
+        enrollment.attempts.all().delete()
+        progression = Progression(enrollment)
+        for step in progression.steps:
+            if step.type == "quiz" and _quiz_reached(progression, step):
+                quiz = catalog.Quiz.objects.get(pk=step.id)
+                if slug == "decouverte-robotique":
+                    _attempt(enrollment, quiz, right=0)
+                    _attempt(enrollment, quiz, right=1)
+                _attempt(enrollment, quiz, right=2)
+                progression = Progression(enrollment)
+        for mission in done_missions:
+            award_points(
+                lea, "mission", f"mission:{mission.id}", f"Mission terminée : {mission.title}"
+            )
+        for attempt in enrollment.attempts.filter(passed=True).select_related("quiz"):
+            quiz = attempt.quiz
+            attempt.points_earned = award_points(
+                lea, quiz.kind, f"quiz:{quiz.id}", f"Quiz réussi : {quiz}"
+            )
+            attempt.save(update_fields=["points_earned"])
+            award_badge(lea, badge_of(quiz.level or quiz.project))
         enrollment.progress_pct = Progression(enrollment).progress_pct
         enrollment.last_activity_at = timezone.now() if done_missions else None
+        enrollment.status, enrollment.completed_at = Enrollment.Status.ACTIVE, None
         enrollment.save()
+        # Parcours fini : terminé, points et badge du parcours, certificat (gardé d'un seed à l'autre) et ticket
+        complete_if_done(enrollment)
+    from apps.wishlist.models import WishlistItem
+
+    for slug in LEA_WISHLIST:
+        WishlistItem.objects.get_or_create(
+            learner=lea, course=catalog.Course.objects.get(slug=slug)
+        )
+    today = timezone.localdate()
+    for days_ago, seconds in enumerate(LEA_ACTIVITY):
+        LearningActivity.objects.create(
+            learner=lea, date=today - datetime.timedelta(days=days_ago), seconds=seconds
+        )
+    LearnerProfile.objects.filter(user=lea).update(streak_days=streak_days(lea))
+
+
+def _quiz_reached(progression, step) -> bool:
+    """Quiz dont toutes les étapes précédentes sont faites (ses missions comprises)."""
+    index = progression.steps.index(step)
+    return all(progression.is_done(s) for s in progression.steps[:index])
+
+
+def _attempt(enrollment, quiz, right: int) -> None:
+    from apps.learning.models import QuizAttempt
+    from apps.learning.services import attempt_status
+
+    status = attempt_status(right, 2, quiz.pass_threshold)
+    QuizAttempt.objects.create(
+        learner=enrollment.learner,
+        enrollment=enrollment,
+        quiz=quiz,
+        results=[
+            {"question_id": q.id, "correct": i < right}
+            for i, q in enumerate(quiz.questions.order_by("order"))
+        ],
+        score=right,
+        total=2,
+        percentage=right * 50,
+        threshold=quiz.pass_threshold,
+        status=status,
+        passed=status == QuizAttempt.Status.OK,
+        duration_sec=60,
+        failed_concepts=[q.concept for q in quiz.questions.order_by("order")[right:]],
+    )
+
+
+def seed_e2e() -> None:
+    """Réglages des parcours Playwright (`seed_demo --e2e`) : délai d'une sommative ratée de 5 s (P1, D32)."""
+    from apps.core.models import PlatformSettings
+
+    settings_ = PlatformSettings.load()
+    settings_.summative_retry_cooldown_seconds = E2E_SUMMATIVE_COOLDOWN
+    settings_.save()
 
 
 def seed_all() -> dict[str, User]:
     accounts = seed_accounts()
+    seed_backoffice(accounts)
     seed_classrooms(accounts)
     seed_notifications(accounts)
     seed_catalog()
     seed_events()
     seed_kits()
     seed_learning(accounts)
+    seed_impact(accounts)
     return accounts
