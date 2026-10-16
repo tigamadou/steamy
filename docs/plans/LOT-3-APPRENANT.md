@@ -88,7 +88,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3
   - [ ] WD21 progression (`WeeklyActivityBars`, maîtrise par catégorie, recommandations)
   - [ ] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
   - [ ] Tests unitaires : statut issu du serveur affiché tel quel (D31)
-- [ ] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres` · PR #PRNUM
+- [ ] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres` · PR #99
   - [x] WD13 profil (hub de `SettingsRow`, identifiant en lecture seule)
   - [x] WD17 modification du profil (`ProfileForm`, `AvatarPicker`, `GoalChip`)
   - [x] WD18 mot de passe
