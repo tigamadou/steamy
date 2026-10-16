@@ -131,6 +131,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > sous-indicateurs (`baseCode`) s'affichent en carte d'inclusion (anneaux, base, autres indicateurs du groupe), les
   > autres en liste. Les séries omettent les périodes sans valeur. Indicateur inconnu → 404 dans le shell
   > (`backoffice/not-found.tsx`). La période est aussi proposée sur WAD03 et conservée entre WAD02 et WAD03.
+  > `DataTable` (6.6) : zone défilante focalisable et nommée, relevée par axe à 360 px sur WAD03.
 - [ ] **6.9** Rapport trimestriel, saisie manuelle, exports · `feature/lot6-impact-rapport` (requiert 6.8, API-L6.4)
   - [ ] WAD04 (Next.js) `/backoffice/impact/rapports/[periode]` : en-tête, `DataTable`, exports CSV / PDF, « Soumettre » avec modale de confirmation et verrouillage
   - [ ] Redirection `/backoffice/impact/rapports` vers le trimestre courant
