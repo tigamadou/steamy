@@ -27,6 +27,8 @@ export function ScrollRegion({ labelledBy, className, children }: ScrollRegionPr
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(node);
+    // Le contenu (le tableau) peut changer de largeur sans que la boîte change de taille
+    if (node.firstElementChild) observer.observe(node.firstElementChild);
     return () => observer.disconnect();
   }, []);
 
