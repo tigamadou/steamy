@@ -8010,6 +8010,7 @@ components:
       - REPORT_LOCKED
       - RESET_TOKEN_INVALID
       - RESUME_CODE_INVALID
+      - SCHOOL_OFFER_EXPIRED
       - SERVER_ERROR
       - SIGNUP_EXPIRED
       - THROTTLED
@@ -8081,6 +8082,7 @@ components:
         * `REPORT_LOCKED` - REPORT_LOCKED
         * `RESET_TOKEN_INVALID` - RESET_TOKEN_INVALID
         * `RESUME_CODE_INVALID` - RESUME_CODE_INVALID
+        * `SCHOOL_OFFER_EXPIRED` - SCHOOL_OFFER_EXPIRED
         * `SERVER_ERROR` - SERVER_ERROR
         * `SIGNUP_EXPIRED` - SIGNUP_EXPIRED
         * `THROTTLED` - THROTTLED
@@ -11816,6 +11818,11 @@ components:
           readOnly: true
           nullable: true
           title: Offre valable jusqu'au
+        offerExpired:
+          type: boolean
+          readOnly: true
+          description: 'Offre échue : création de classes et ajout d''élèves bloqués
+            (`SCHOOL_OFFER_EXPIRED`)'
         learnerQuota:
           type: integer
           readOnly: true
@@ -11853,6 +11860,7 @@ components:
       - learnersUsed
       - name
       - offer
+      - offerExpired
       - validUntil
     SchoolGrade:
       type: object

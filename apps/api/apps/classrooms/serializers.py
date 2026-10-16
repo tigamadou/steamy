@@ -12,6 +12,7 @@ from apps.catalog.models import Course, Level, Mission, Project
 from apps.catalog.serializers import CategorySummarySerializer
 from apps.referentials.models import SchoolGrade
 from apps.referentials.serializers import AvatarSerializer, SchoolGradeSerializer
+from libs.errors import ApiError
 
 from . import quotas
 from .models import Classroom, ClassroomMembership, School, validate_color
@@ -34,6 +35,9 @@ class SchoolSerializer(serializers.ModelSerializer):
     learners_left = serializers.SerializerMethodField()
     classrooms_used = serializers.SerializerMethodField()
     classrooms_left = serializers.SerializerMethodField()
+    offer_expired = serializers.SerializerMethodField(
+        help_text="Offre échue : création de classes et ajout d'élèves bloqués (`SCHOOL_OFFER_EXPIRED`)"
+    )
     courses = ClassroomCourseSerializer(many=True, read_only=True)
 
     class Meta:
@@ -44,6 +48,7 @@ class SchoolSerializer(serializers.ModelSerializer):
             "country",
             "offer",
             "valid_until",
+            "offer_expired",
             "learner_quota",
             "learners_used",
             "learners_left",
@@ -53,6 +58,13 @@ class SchoolSerializer(serializers.ModelSerializer):
             "courses",
         )
         read_only_fields = fields
+
+    def get_offer_expired(self, school) -> bool:
+        try:
+            quotas.check_offer(school)
+        except ApiError:
+            return True
+        return False
 
     def get_learners_used(self, school) -> int:
         return quotas.learners_used(school)

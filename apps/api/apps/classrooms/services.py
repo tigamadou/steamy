@@ -58,6 +58,7 @@ def create_classroom(teacher, *, name, course, school_grade=None, color=None) ->
     school = teacher_school(teacher)
     with transaction.atomic():
         school = quotas.lock_school(school)
+        quotas.check_offer(school)
         _check_course(school, course)
         _check_name(teacher, name)
         quotas.check_classroom_quota(school)

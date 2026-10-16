@@ -171,6 +171,10 @@ CATALOG: dict[str, tuple[int, str]] = {
         S.HTTP_409_CONFLICT,
         "Le nombre maximal d'élèves de votre offre est atteint.",
     ),
+    "SCHOOL_OFFER_EXPIRED": (
+        S.HTTP_403_FORBIDDEN,
+        "L'offre de votre école a expiré : contactez l'équipe Steamy pour la renouveler.",
+    ),
     "COURSE_NOT_IN_OFFER": (
         S.HTTP_400_BAD_REQUEST,
         "Ce parcours ne fait pas partie de votre offre.",
