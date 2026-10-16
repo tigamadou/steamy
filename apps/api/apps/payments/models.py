@@ -7,9 +7,10 @@ User = settings.AUTH_USER_MODEL
 
 
 class PaymentProvider(models.TextChoices):
-    KKIA = "kkiapay", "Kkiapay"
+    """Prestataires de `payments.providers` (ADR 0003)."""
+
+    FAKE = "fake", "Faux prestataire"
     FEDA = "fedapay", "FedaPay"
-    # add more providers as needed
 
 
 class Order(models.Model):

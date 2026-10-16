@@ -1,3 +1,4 @@
+import json
 import logging.config
 import os
 import sys
@@ -348,9 +349,27 @@ CORS_ALLOWED_ORIGINS = [o for o in os.getenv("CORS_ALLOWED_ORIGINS", WEB_URL).sp
 # Origines autorisées à envoyer des requêtes protégées par CSRF (le front est sur un autre sous-domaine)
 CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", WEB_URL).split(",") if o]
 
-# Payements
-PAYMENTS_KKIAPAY_SECRET = os.getenv("PAYMENTS_KKIAPAY_SECRET", "")
-PAYMENTS_FEDAPAY_SECRET = os.getenv("PAYMENTS_FEDAPAY_SECRET", "")
+# Paiement Mobile Money (S9, ADR 0003) : faux prestataire pilotable en local, en CI et dans les e2e, FedaPay en
+# staging (bac à sable) et en production. Le faux prestataire refuse de fonctionner si DEPLOYED.
+PAYMENT_PROVIDER = os.getenv("PAYMENT_PROVIDER", "fedapay" if DEPLOYED else "fake")
+# Délai (secondes) avant que le faux prestataire poste son webhook : le temps de voir l'écran d'attente (WA04)
+FAKE_PAYMENT_DELAY = int(os.getenv("FAKE_PAYMENT_DELAY", "3"))
+FEDAPAY_SECRET_KEY = os.getenv("FEDAPAY_SECRET_KEY", "")
+FEDAPAY_WEBHOOK_SECRET = os.getenv("FEDAPAY_WEBHOOK_SECRET", "")
+FEDAPAY_ENVIRONMENT = os.getenv("FEDAPAY_ENVIRONMENT", "sandbox")
+# Page de retour du mode redirection : inutilisée par le débit direct, mais exigée par FedaPay
+FEDAPAY_CALLBACK_URL = os.getenv("FEDAPAY_CALLBACK_URL", WEB_URL)
+# Mode de débit direct FedaPay (`POST /v1/{mode}`) par « PAYS:réseau » (référentiel PaymentNetwork, D76). À
+# confirmer dans le bac à sable, Celtiis surtout (ADR 0003, inconnue 1) ; surchargeable en JSON.
+FEDAPAY_MODES = json.loads(
+    os.getenv(
+        "FEDAPAY_MODES",
+        '{"BJ:mtn": "mtn_open", "BJ:moov": "moov", "BJ:celtiis": "sbin", '
+        '"TG:moov": "moov_tg", "CI:mtn": "mtn_ci"}',
+    )
+)
+# Identifiants FedaPay des devises, quand une notification ne donne que `currency_id`
+FEDAPAY_CURRENCY_IDS = json.loads(os.getenv("FEDAPAY_CURRENCY_IDS", '{"1": "XOF"}'))
 
 # SMS (S10, ADR 0002) : faux fournisseur (lisible dans Mailpit) en local et en CI, Twilio en staging et production.
 # Le faux fournisseur refuse de fonctionner si DEPLOYED.

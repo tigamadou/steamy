@@ -10,6 +10,6 @@ router.register(r"payments", PaymentViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
-    # webhook e.g. /api/payments/webhook/kkiapay/
+    # Notifications des prestataires : /api/payments/webhook/fedapay/ (et fake hors déploiement)
     path("webhook/<str:provider_name>/", provider_webhook, name="payments-webhook"),
 ]

@@ -2,6 +2,7 @@
 import json
 import logging
 
+from django.core.exceptions import ImproperlyConfigured
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
@@ -13,7 +14,9 @@ from rest_framework.throttling import AnonRateThrottle
 from libs.scoping import OwnedByRequestUserMixin
 
 from .models import Order, Payment
+from .providers import PROVIDERS, get_provider
 from .serializers import OrderSerializer, PaymentSerializer
+from .utils import WebhookRejected, handle_payment_event
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +42,9 @@ class WebhookRateThrottle(AnonRateThrottle):
 
 
 @extend_schema(
-    summary="Webhook des prestataires de paiement (appelé par KKiaPay / FedaPay, pas par le front)",
+    summary="Webhook des prestataires de paiement (appelé par le prestataire, pas par le front)",
     parameters=[
-        OpenApiParameter("provider_name", str, OpenApiParameter.PATH, enum=["kkiapay", "fedapay"])
+        OpenApiParameter("provider_name", str, OpenApiParameter.PATH, enum=sorted(PROVIDERS))
     ],
     request=OpenApiTypes.OBJECT,
     responses={
@@ -56,28 +59,33 @@ class WebhookRateThrottle(AnonRateThrottle):
 @throttle_classes([WebhookRateThrottle])
 def provider_webhook(request, provider_name: str):
     """
-    Generic webhook entrypoint for external providers.
-    - provider_name: "kkiapay" or "fedapay"
-    The request.body should be validated by provider-specific verification code.
+    Point d'entrée des notifications des prestataires (S9, ADR 0003). La signature est vérifiée **avant** toute
+    lecture du contenu ; le prestataire normalise ensuite la notification (`parse_event`).
     """
     # Réponses volontairement neutres (S5) : aucun détail n'est renvoyé à l'appelant, la cause
     # est journalisée côté serveur.
-    from .utils import WebhookRejected, handle_provider_event, verify_provider_webhook
-
     rejected = Response({"ok": False}, status=status.HTTP_400_BAD_REQUEST)
-    if not verify_provider_webhook(provider_name, request):
+    try:
+        provider = get_provider(provider_name)
+    except ImproperlyConfigured:
+        logger.warning("Webhook %s : prestataire inconnu ou non configuré", provider_name)
+        return rejected
+    if not provider.verify_webhook(request):
         logger.warning("Webhook %s : signature invalide", provider_name)
         return rejected
     try:
         data = json.loads(request.body)
-    except (ValueError, UnicodeDecodeError):
-        logger.warning("Webhook %s : corps illisible", provider_name)
+        if not isinstance(data, dict):
+            raise ValueError("corps qui n'est pas un objet")
+        event = provider.parse_event(data)
+    except (ValueError, UnicodeDecodeError) as exc:
+        logger.warning("Webhook %s : notification illisible (%s)", provider_name, exc)
         return rejected
-    if not isinstance(data, dict):
-        return rejected
+    if event is None:
+        return Response({"ok": True})  # événement sans rapport avec un paiement
 
     try:
-        handle_provider_event(provider_name, data)
+        handle_payment_event(provider.name, event)
     except WebhookRejected as exc:
         logger.warning("Webhook %s refusé : %s", provider_name, exc)
         return rejected
