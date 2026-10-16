@@ -76,7 +76,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 après API-L5 ; critères de fi
   - [ ] `RefundAdmin` (Finance : création depuis un paiement réussi, action *traiter* avec double confirmation) et `InvoiceAdmin` (lecture, téléchargement)
   - [ ] Tests : aucune voie de l'admin ne passe une commande à `paid` ; transitions de livraison non monotones refusées ; révocation d'un code utilisé refusée
   - [ ] Tests : Support sans `payload` ; Contenu sans accès aux paiements ; agrégats égaux à un calcul de référence sur D2
-- [x] **6.5** Steamy Events et réglages · `feature/lot6-events-reglages` · PR #PR65 (requiert 6.1, API-L3b)
+- [x] **6.5** Steamy Events et réglages · `feature/lot6-events-reglages` · PR #115 (requiert 6.1, API-L3b)
   - [x] WAD12 Événements (admin Django) : `SteamyEventAdmin` (Contenu)
   - [x] WAD12 Candidatures (admin Django) : `EventApplicationAdmin` avec statut en lecture seule et action unique *refus exceptionnel* (motif obligatoire, notifications, `Refund` si payée)
   - [x] WAD14 Réglages (admin Django) : `PlatformSettingsAdmin` singleton (bornes validées, cache invalidé)
