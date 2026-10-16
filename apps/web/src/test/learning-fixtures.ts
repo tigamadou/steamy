@@ -215,3 +215,65 @@ export function failure(status: number, code?: Schemas["ErrorCodeEnum"]) {
     response: new Response(null, { status }),
   };
 }
+
+export function quizDetail(overrides: Partial<Schemas["QuizDetail"]> = {}): Schemas["QuizDetail"] {
+  return {
+    id: 201,
+    kind: "formative",
+    title: "Quiz servo",
+    threshold: 70,
+    timeLimitSec: null,
+    questionCount: 2,
+    state: "available",
+    retryInSec: 0,
+    course: { slug: "robot-bluetooth", title: "Construis ton robot Bluetooth" },
+    project: { id: 2, order: 1, title: "Capteurs & moteurs" },
+    level: { id: 21, order: 0, title: "Servo" },
+    questions: [
+      { id: 1, order: 0, text: "Quel composant fait tourner les roues ?", choices: [{ id: 11, text: "Le moteur" }, { id: 12, text: "Le buzzer" }] },
+      { id: 2, order: 1, text: "Que mesure un capteur infrarouge ?", choices: [{ id: 21, text: "La distance" }, { id: 22, text: "Le son" }] },
+    ],
+    ...overrides,
+  };
+}
+
+export function attemptDetail(overrides: Partial<Schemas["AttemptDetail"]> = {}): Schemas["AttemptDetail"] {
+  return {
+    id: 9,
+    quiz: { id: 201, kind: "formative", title: "Quiz servo", courseSlug: "robot-bluetooth", projectId: 2, levelId: 21 },
+    score: 2,
+    total: 2,
+    percentage: 100,
+    threshold: 70,
+    status: "ok",
+    passed: true,
+    durationSec: 40,
+    pointsEarned: 20,
+    createdAt: "2026-10-15T10:00:00Z",
+    badge: { id: 3, kind: "level", label: "Maître du servo", icon: "⚙️", description: "Niveau Servo validé" },
+    failedConcepts: [],
+    remediation: [],
+    questions: [
+      { questionId: 1, text: "Quel composant fait tourner les roues ?", concept: "Moteurs", correct: true, chosenChoiceId: 11, remediationMissionId: null },
+      { questionId: 2, text: "Que mesure un capteur infrarouge ?", concept: "Capteurs", correct: true, chosenChoiceId: 21, remediationMissionId: null },
+    ],
+    retryInSec: 0,
+    next: { type: "mission", id: 15, title: "Capteurs avancés", courseSlug: "robot-bluetooth", projectId: 2, levelId: 22, quizKind: null },
+    ...overrides,
+  };
+}
+
+export function learnerBadge(overrides: Partial<Schemas["LearnerBadge"]> = {}): Schemas["LearnerBadge"] {
+  return {
+    id: 3,
+    kind: "level",
+    label: "Maître du servo",
+    icon: "⚙️",
+    description: "Niveau Servo validé",
+    awardedAt: "2026-10-15T10:00:00Z",
+    course: { slug: "robot-bluetooth", title: "Construis ton robot Bluetooth" },
+    projectId: 2,
+    levelId: 21,
+    ...overrides,
+  };
+}

@@ -99,14 +99,14 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WJ01` | Détail projet | 3 | Projet → niveaux, accessibilité | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WJ02` | Intro niveau | 3 | Niveau → missions, vidéo factice | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WJ03` | Contenu mission | 3 | Mission ouverte, « Marquer comme terminée » → étape suivante de l'API, mission verrouillée → état dédié | `apps/web/e2e/apprenant-parcours.spec.ts` |
-| `WJ04` | Évaluation formative (≥ 70 %) | 3 |  |  |
-| `WJ05` | Revue des résultats | 3 |  |  |
-| `WJ06` | Badge de niveau débloqué | 3 |  |  |
+| `WJ04` | Évaluation formative (≥ 70 %) | 3 | P1 : formative, seuil de l'API, envoi groupé | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
+| `WJ05` | Revue des résultats | 3 | P1 : résultat réussi, badge | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
+| `WJ06` | Badge de niveau débloqué | 3 | P1 : badge de niveau plein écran, étape suivante de l'API | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WJ07` | Certification & fin de parcours | 3 |  |  |
-| `WJ08` | Échec d'évaluation | 3 |  |  |
+| `WJ08` | Échec d'évaluation | 3 | P1 : sommative ratée, concepts à revoir, compte à rebours | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WJ09` | Parcours incomplet | 3 |  |  |
-| `WJ10` | Évaluation sommative (≥ 80 %) | 3 |  |  |
-| `WJ11` | Projet validé + badge de projet | 3 |  |  |
+| `WJ10` | Évaluation sommative (≥ 80 %) | 3 | P1 : sommative ratée puis réussie après le délai | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
+| `WJ11` | Projet validé + badge de projet | 3 | P1 : badge de projet, lien vers la certification | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WPD01` | Accueil parent | 4 |  |  |
 | `WPD02` | Mes enfants | 4 |  |  |
 | `WPD03` | Détail enfant | 4 |  |  |

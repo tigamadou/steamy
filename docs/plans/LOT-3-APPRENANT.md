@@ -15,7 +15,7 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
+Statut : 🟡 en cours · Prochaine tâche : 3.3c, 3.4 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
 
 ### Valeur pédagogique (API-L3a) — 🟡 en cours
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
@@ -67,17 +67,17 @@ Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3
   - [x] `VimeoPlayer` (composant livré en 3.2 ; `@vimeo/player` épinglé, chargement différé, suivi `learning/activity/`, repli en cas d'erreur, CSP `frame-src`)
   - [x] Tests unitaires : `MissionItem` verrouillé non activable, `next` respecté, `VimeoPlayer` avec faux `Player`
   - [x] Parcours Playwright : accès direct à une mission verrouillée → `LockedContentState` ; `player.vimeo.com` intercepté
-- [ ] **3.3b** Quiz, résultats et badges (requiert API-L3a) · `feature/lot3-quiz`
-  - [ ] WJ04 quiz formatif
-  - [ ] WJ10 quiz sommatif
-  - [ ] WJ05 résultat formatif
-  - [ ] WJ08 résultat sommatif (`RetryCountdown`)
-  - [ ] WJ06 badge de niveau (plein écran)
-  - [ ] WJ11 badge de projet (plein écran)
-  - [ ] Composants `Quiz`, `QuizResult`, `QuestionReview`, `RetryCountdown`, `Medal`
-  - [ ] Brouillon des réponses en `sessionStorage`, envoi unique, protection contre la double soumission
-  - [ ] Tests unitaires : seuil affiché = seuil de l'API, compte à rebours, aucune bonne réponse dans le DOM avant soumission
-  - [ ] Parcours Playwright P1
+- [x] **3.3b** Quiz, résultats et badges (requiert API-L3a) · `feature/lot3-quiz` · PR #95
+  - [x] `WJ04` quiz formatif
+  - [x] `WJ10` quiz sommatif
+  - [x] `WJ05` résultat formatif
+  - [x] `WJ08` résultat sommatif (`RetryCountdown`)
+  - [x] `WJ06` badge de niveau (plein écran)
+  - [x] `WJ11` badge de projet (plein écran)
+  - [x] Composants `Quiz`, `QuizResult`, `QuestionReview`, `RetryCountdown`, `Medal`
+  - [x] Brouillon des réponses en `sessionStorage`, envoi unique, protection contre la double soumission
+  - [x] Tests unitaires : seuil affiché = seuil de l'API, compte à rebours, aucune bonne réponse dans le DOM avant soumission
+  - [x] Parcours Playwright P1 (jusqu'à WJ11 ; WJ07 et le PDF sont ajoutés en 3.3c)
 - [ ] **3.3c** Certification (requiert API-L3a ; ticket via API-L3b) · `feature/lot3-certification`
   - [ ] WJ07 certification obtenue (PDF avec état « Préparation… », ticket derrière le drapeau `events`)
   - [ ] WJ09 certification non obtenue (projets ou missions restants)
