@@ -147,7 +147,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WAD01` | Vue d'ensemble | 6 | Support : chiffres et échéance du serveur, sans lien vers l'Impact Tracker ; « Consentements en attente » → liste Django filtrée | `apps/web/e2e/backoffice.spec.ts` |
 | `WAD02` | Impact Tracker · dashboard KPI | 6 | Finance : période Mois → Trimestre dans l'URL, valeurs relues côté serveur, rechargement ; sans tuile « Activer la collecte » | `apps/web/e2e/impact-tracker.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
 | `WAD03` | Impact Tracker · détail indicateur | 6 | Finance ouvre un indicateur depuis WAD02 (période conservée) : définition serveur, historique ; fil d'Ariane ; code inconnu → 404 | `apps/web/e2e/impact-tracker.spec.ts` |
-| `WAD04` | Impact Tracker · rapport trimestriel | 6 | Finance : WAD02 → trimestre en cours ; relecture après saisie, soumission confirmée, rapport verrouillé « Soumis » (export CSV à venir) | `apps/web/e2e/impact-rapport.spec.ts` |
+| `WAD04` | Impact Tracker · rapport trimestriel | 6 | Finance : WAD02 → trimestre en cours ; relecture après saisie, export CSV téléchargé, soumission confirmée, rapport verrouillé « Soumis » | `apps/web/e2e/impact-rapport.spec.ts` |
 | `WAD05` | Impact Tracker · saisie manuelle | 6 | Finance : brouillon, validation (vides signalés puis saisie complète), lecture seule après soumission ; Support refusé | `apps/web/e2e/impact-rapport.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
 | `WAD06` | Utilisateurs | 6 |  |  |
 | `WAD07` | Détail utilisateur | 6 |  |  |

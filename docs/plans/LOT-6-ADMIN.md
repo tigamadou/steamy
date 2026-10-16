@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API) ; exports de 6.9 après leurs endpoints (API-L6.4) · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : 6.3 à 6.5 (admin Django) ; 6.2 après API-L5 · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -133,26 +133,26 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > (`backoffice/not-found.tsx`). La période est aussi proposée sur WAD03 et conservée entre WAD02 et WAD03.
   > `DataTable` (6.6) : zone défilante nommée par la légende du tableau, focalisable seulement quand son contenu
   > déborde (`ScrollRegion`, #103), relevée par axe à 360 px sur WAD03.
-  > Reprise : 6.7 (#93), 6.8 (#100) et leurs suites de relecture (#103) fusionnées ; 6.9 livrée sans exports
-  > (PR #106). Reste : les exports CSV / PDF de 6.9, dès que leurs endpoints existent (API-L6.4).
-- [ ] **6.9** Rapport trimestriel, saisie manuelle, exports · `feature/lot6-impact-rapport` · PR #106 (requiert 6.8, API-L6.4)
-  - [ ] WAD04 (Next.js) `/backoffice/impact/rapports/[periode]` : en-tête, `DataTable`, exports CSV / PDF, « Soumettre » avec modale de confirmation et verrouillage
+  > Reprise : 6.7 (#93), 6.8 (#100), 6.9 (#106) et leurs suites fusionnées ; exports de 6.9 en PR #PRF (API : #110).
+  > Suite : 6.3 à 6.5 (admin Django), 6.2 après API-L5.
+- [x] **6.9** Rapport trimestriel, saisie manuelle, exports · `feature/lot6-impact-rapport` · PR #106, puis `feature/lot6-impact-exports` · PR #PRF (requiert 6.8, API-L6.4)
+  - [x] WAD04 (Next.js) `/backoffice/impact/rapports/[periode]` : en-tête, `DataTable`, exports CSV / PDF, « Soumettre » avec modale de confirmation et verrouillage
     - [x] En-tête (trimestre, statut, complétude, échéances), `DataTable` des lignes serveur, « Soumettre » avec confirmation et verrouillage
-    - [ ] « Exporter CSV » / « Exporter PDF » : endpoints d'export absents d'API-L6.4
+    - [x] « Exporter CSV » / « Exporter PDF » (PR #PRF, endpoints d'API-L6.4 livrés par PR #110)
   - [x] Redirection `/backoffice/impact/rapports` vers le trimestre courant
   - [x] WAD05 (Next.js) `…/[periode]/saisie` : groupes, champs typés selon `unit`, « Enregistrer le brouillon », « Valider la saisie », lecture seule si soumis (D74)
-  - [ ] Exports asynchrones : `POST …/exports/`, interrogation de `backoffice/exports/{id}/` jusqu'à `ready`, lien présigné, notification, PDF par WeasyPrint
+  - [x] Exports asynchrones : `POST …/exports/`, interrogation de `backoffice/exports/{id}/` jusqu'à `ready`, lien présigné, notification, PDF par WeasyPrint
   - [x] Gestion des erreurs `REPORT_LOCKED`, `VALIDATION_ERROR` par champ, `PERMISSION_DENIED`, `OTP_REQUIRED`
-  - [ ] Tests pytest (API-L6) : soumission idempotente, `REPORT_LOCKED`, export d'autrui refusé, CSV identique à WAD04
+  - [x] Tests pytest (API-L6) : soumission idempotente, `REPORT_LOCKED`, export d'autrui refusé, CSV identique à WAD04
     - [x] Soumission idempotente et `REPORT_LOCKED` (`apps/impact/tests/test_reports.py`, API-L6.4)
-    - [ ] Export d'autrui refusé, CSV identique à WAD04 : avec les exports
-  - [ ] Playwright (parcours critique) : Finance via WAD15 (TOTP de développement), brouillon WAD05, validation, export CSV WAD04, soumission, champs en lecture seule ; Support sur la même URL = accès refusé
+    - [x] Export d'autrui refusé, CSV identique à WAD04 (`apps/impact/tests/test_exports.py`, PR #110)
+  - [x] Playwright (parcours critique) : Finance via WAD15 (TOTP de développement), brouillon WAD05, validation, export CSV WAD04, soumission, champs en lecture seule ; Support sur la même URL = accès refusé
     - [x] Tout le parcours sauf l'export CSV (`e2e/impact-rapport.spec.ts`, refus de Support dans `e2e/backoffice.spec.ts`)
-    - [ ] Export CSV : avec les exports
+    - [x] Export CSV téléchargé et vérifié (en-tête, lignes) dans `e2e/impact-rapport.spec.ts` (PR #PRF)
   - [ ] Confirmation produit du comportement de « Valider la saisie » (point ouvert)
-  > Notes : les exports CSV / PDF (`POST …/exports/`, `backoffice/exports/{id}/`, modèle `ReportExport`, tâche
-  > `generate_report_export`) ne sont pas encore livrés par API-L6.4 (reprise prévue après API-L3a.4) : pas de bouton
-  > d'export tant que l'endpoint manque. « Valider la saisie » (hypothèse de travail, sans champ serveur) : enregistre,
+  > Notes : exports (PR #PRF) : « Exporter CSV / PDF » demande l'export, interroge son état toutes les 2 s (2 min au
+  > plus), puis annonce le lien de téléchargement (redirection de l'API vers une URL présignée) ; pas de notification
+  > au personnel, sans centre de notifications. « Valider la saisie » (hypothèse de travail, sans champ serveur) : enregistre,
   > puis signale chaque indicateur manuel encore vide ; « Soumettre » ne l'exige pas (l'API ne l'impose pas) mais la
   > modale annonce les indicateurs manquants. Carte « Indicateurs non collectés » omise (SPEC-ECRANS-3 mise à jour) :
   > les institutions sont calculées (D75). WAD01 : « Ouvrir le rapport » ajouté, réservé comme l'Impact Tracker à
