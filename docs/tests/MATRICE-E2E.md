@@ -18,7 +18,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WL04` | Nouveau mot de passe | 2 | Nouveau mot de passe, rechargement → WL02, sessions fermées | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL05` | Réinitialisé ✓ | 2 | Réinitialisé puis connexion | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL06` | Projets & Parcours | 1 | Filtre par catégorie dans l'URL (rechargement), catégorie vide, sans brouillon | `apps/web/e2e/decouverte.spec.ts` |
-| `WL07` | Boutique de kits | 1 | Vitrine : prix, « Épuisé », sans lien ni panier ; filtre dans l'URL ; catégorie vide | `apps/web/e2e/evenements-boutique.spec.ts` |
+| `WL07` | Boutique de kits | 1 | Prix, « Épuisé », fiches liées, « Ajouter » si en stock ; filtre dans l'URL ; catégorie vide | `apps/web/e2e/evenements-boutique.spec.ts` |
 | `WL08` | Ateliers | 1 |  |  |
 | `WL09` | Pages légales | 1 | Pied de page → CGU#consentement-parental ; onglets adressables par URL | `apps/web/e2e/editorial.spec.ts` |
 | `WL10` | À propos | 1 | Mission, chiffres, équipe, bandeau d'inscription | `apps/web/e2e/editorial.spec.ts` |
@@ -133,17 +133,17 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WT10` | Détail parcours encadré | 5 |  |  |
 | `WT11` | Aide & support | 5 |  |  |
 | `WT12` | Notifications | 5 |  |  |
-| `WK01` | Catalogue kits | 3 |  |  |
-| `WK02` | Détail kit | 3 |  |  |
-| `WK03` | Panier | 3 |  |  |
+| `WK01` | Catalogue kits | 3 | Boutique dans le shell (h1 du header), cartes vers la fiche, « Ajouter » → toast ; WL07 invité : « Ajouter » seulement si en stock | `apps/web/e2e/boutique-panier.spec.ts`, `apps/web/e2e/evenements-boutique.spec.ts` |
+| `WK02` | Détail kit | 3 | Fiche dans le shell, parcours compatibles → WC05, délais par zone lus dans l'API, « Acheter maintenant » → WK03 | `apps/web/e2e/boutique-panier.spec.ts` |
+| `WK03` | Panier | 3 | P5 (partie panier) : panier serveur, quantité, retrait, survit à une reconnexion ; panier invité fusionné à la connexion (W16 `?next=`) ; « Commander » invité → WK04 ; panier public → panier de l'apprenant | `apps/web/e2e/boutique-panier.spec.ts` |
 | `WK04` | Informations invité | 3 |  |  |
 | `WK05` | Livraison | 3 |  |  |
 | `WK06` | Paiement | 3 |  |  |
 | `WK07` | Confirmation & suivi | 3 |  |  |
 | `WK08` | Paiement par le parent | 3 |  |  |
 | `WK09` | Paiement échoué | 3 |  |  |
-| `WK10` | Panier vide | 3 |  |  |
-| `WK11` | Stock épuisé | 3 |  |  |
+| `WK10` | Panier vide | 3 | Apprenant neuf et invité : « Voir les kits », délais par zone | `apps/web/e2e/boutique-panier.spec.ts` |
+| `WK11` | Stock épuisé | 3 | Invité : « Indisponible », alerte par SMS (`PhoneInput`), kits similaires ; apprenant : alerte dans l'application sans champ téléphone (D30) | `apps/web/e2e/boutique-panier.spec.ts` |
 | `WAD01` | Vue d'ensemble | 6 | Support : chiffres et échéance du serveur, sans lien vers l'Impact Tracker ; « Consentements en attente » → liste Django filtrée | `apps/web/e2e/backoffice.spec.ts` |
 | `WAD02` | Impact Tracker · dashboard KPI | 6 | Finance : période Mois → Trimestre dans l'URL, valeurs relues côté serveur, rechargement ; sans tuile « Activer la collecte » | `apps/web/e2e/impact-tracker.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
 | `WAD03` | Impact Tracker · détail indicateur | 6 | Finance ouvre un indicateur depuis WAD02 (période conservée) : définition serveur, historique ; fil d'Ariane ; code inconnu → 404 | `apps/web/e2e/impact-tracker.spec.ts` |

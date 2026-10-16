@@ -35,8 +35,8 @@ const SECTIONS: Array<[prefix: string, section: LearnerSection]> = [
   [l.profile, { active: "profile", title: "Profil" }],
   [l.courses, { active: "courses", title: "Mes parcours" }],
   [l.catalog, { active: "catalog", title: "Catalogue" }],
-  ["/apprenant/boutique/panier", { active: "catalog", title: "Mon panier" }],
-  ["/apprenant/boutique", { active: "catalog", title: "Boutique de kits" }],
+  [l.cart, { active: "catalog", title: "Mon panier" }],
+  [l.shop, { active: "catalog", title: "Boutique de kits" }],
   [l.wishlist, { active: "wishlist", title: "Mes souhaits" }],
 ];
 
