@@ -70,3 +70,9 @@ export function formatRelative(isoInstant: string, now: Date = new Date()): stri
   if (days < 7) return `il y a ${days} j`;
   return LONG_DATE.format(date);
 }
+
+/** Instant au fuseau de la plateforme, jour et heure : « 17 octobre 2026 à 09:30 » (relance de WA02). */
+export function formatInstantTime(isoInstant: string): string {
+  const date = new Date(isoInstant);
+  return `${LONG_DATE.format(date)} à ${TIME.format(date)}`;
+}
