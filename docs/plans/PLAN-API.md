@@ -653,10 +653,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > encore ouvertes ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
   > ajout du **Mobile Money préféré** (`ParentProfile.mobileMoney` `{ country, network, phone }`, réseau activé du
   > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
-  > Reprise : PR en chaîne #75 → #77 → #78 → #79 → #80 → #102 (fusion dans cet ordre). Branche de suivi
-  > `feature/api-l4-suivi-revue` poussée, sans PR : points de la relecture et D53/D55 ; à fusionner avec
-  > `development` une fois #102 fusionnée, puis PR. Restent les
-  > critères de fin d'API-L4 (seed enrichi).
+  > Reprise : chaîne #75 → #77 → #78 → #79 → #80 → #102 fusionnée ; suites de la relecture dans une PR de suivi
+  > (`feature/api-l4-suivi-revue`). Restent les critères de fin d'API-L4 (seed enrichi) et l'action d'admin pour
+  > annuler la suppression d'un compte parent.
 - [ ] **Critères de fin d'API-L4**
   - [ ] Un `childId` étranger → 404 partout
   - [ ] `Notification.url` pointe vers les routes front des plans
