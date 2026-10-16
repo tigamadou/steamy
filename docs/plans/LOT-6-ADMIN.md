@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 6.3 à 6.5 (admin Django) ; 6.2 après API-L5 · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : 6.2 après API-L5 ; critères de fin du lot · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -76,15 +76,23 @@ Statut : 🟡 en cours · Prochaine tâche : 6.3 à 6.5 (admin Django) ; 6.2 apr
   - [ ] `RefundAdmin` (Finance : création depuis un paiement réussi, action *traiter* avec double confirmation) et `InvoiceAdmin` (lecture, téléchargement)
   - [ ] Tests : aucune voie de l'admin ne passe une commande à `paid` ; transitions de livraison non monotones refusées ; révocation d'un code utilisé refusée
   - [ ] Tests : Support sans `payload` ; Contenu sans accès aux paiements ; agrégats égaux à un calcul de référence sur D2
-- [ ] **6.5** Steamy Events et réglages · `feature/lot6-events-reglages` (requiert 6.1, API-L3b)
-  - [ ] WAD12 Événements (admin Django) : `SteamyEventAdmin` (Contenu)
-  - [ ] WAD12 Candidatures (admin Django) : `EventApplicationAdmin` avec statut en lecture seule et action unique *refus exceptionnel* (motif obligatoire, notifications, `Refund` si payée)
-  - [ ] WAD14 Réglages (admin Django) : `PlatformSettingsAdmin` singleton (bornes validées, cache invalidé)
-  - [ ] WAD14 `PaymentNetworkAdmin` (réseaux par pays, Celtiis, invalidation du cache de `referentials/payment-networks/`)
-  - [ ] WAD14 `AnnouncementAdmin` (action *diffuser* via Celery, D7) et référentiels
-  - [ ] Journal d'audit (`core/auditlog/`) en lecture seule
-  - [ ] Tests : aucune action ne fait passer une candidature à `accepted` (S3, C3) ; refus exceptionnel d'une candidature payée crée un `Refund`
-  - [ ] Tests : singleton non dupliquable ; réseau désactivé retiré de l'endpoint public ; seuil hors bornes refusé
+- [x] **6.5** Steamy Events et réglages · `feature/lot6-events-reglages` · PR #PR65 (requiert 6.1, API-L3b)
+  - [x] WAD12 Événements (admin Django) : `SteamyEventAdmin` (Contenu)
+  - [x] WAD12 Candidatures (admin Django) : `EventApplicationAdmin` avec statut en lecture seule et action unique *refus exceptionnel* (motif obligatoire, notifications, `Refund` si payée)
+  - [x] WAD14 Réglages (admin Django) : `PlatformSettingsAdmin` singleton (bornes validées, cache invalidé)
+  - [x] WAD14 `PaymentNetworkAdmin` (réseaux par pays, Celtiis, invalidation du cache de `referentials/payment-networks/`)
+  - [x] WAD14 `AnnouncementAdmin` (action *diffuser* via Celery, D7) et référentiels
+  - [x] Journal d'audit (`core/auditlog/`) en lecture seule
+  - [x] Tests : aucune action ne fait passer une candidature à `accepted` (S3, C3) ; refus exceptionnel d'une candidature payée crée un `Refund`
+  - [x] Tests : singleton non dupliquable ; réseau désactivé retiré de l'endpoint public ; seuil hors bornes refusé
+  > Notes : réglages, réseaux Mobile Money (Celtiis compris), annonces et journal d'audit livrés par API-L6.3 (PR #63),
+  > avec leurs tests (`core/tests/test_reglages.py`) ; aucun cache serveur à invalider (`PlatformSettings.load()` relit
+  > la base, cache HTTP d'une heure des référentiels). Cette étape ajoute WAD12 : colonnes de l'événement (lieu, places
+  > restantes, accès, fin des candidatures) ; candidatures en lecture seule avec âge, décision du parent et paiement ;
+  > permission `refuse_application` (migration `events.0004`) et action « Refus exceptionnel » (Support, motif
+  > obligatoire) : candidature annulée, place et ticket rendus, enfant et parent prévenus, `Refund` à traiter par la
+  > Finance si elle était payée, `AuditLog`. Écart : « mode maintenance » et « inscriptions ouvertes » (WAD14) restent
+  > hors réglages, leur comportement d'API n'étant pas spécifié (décision d'API-L6.3, à trancher par le produit).
 - [x] **6.6** Socle Next.js du back-office · `feature/lot6-backoffice-shell` · PR #62 (requiert 6.1 ; outillage du lot 1, étape 1.0)
   - [x] Layout serveur `(backoffice)/backoffice/` : garde (`accounts/me/`, staff, `otpVerified`), redirection vers `<API_URL>/admin/login/?next=…`, métadonnées `noindex`
   - [x] Revérification du groupe par page et route `/backoffice/acces-refuse`
