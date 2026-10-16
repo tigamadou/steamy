@@ -93,7 +93,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6 (après API-L3b) · Prérequis 
   - [x] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
   - [x] Tests unitaires : statut issu du serveur affiché tel quel (D31)
   - [x] Parcours Playwright : filtre dans l'URL, détail, apprenant sans quiz, progression
-- [x] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres` · PR #99 ; suite `feature/lot3-profil-suite` · PR #PRSUITE
+- [x] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres` · PR #99 ; suite `feature/lot3-profil-suite` · PR #118
   - [x] `WD13` profil (hub de `SettingsRow`, identifiant en lecture seule)
   - [x] `WD17` modification du profil (`ProfileForm`, `AvatarPicker`, `GoalChip`)
   - [x] `WD18` mot de passe
