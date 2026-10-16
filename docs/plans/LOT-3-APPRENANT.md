@@ -40,20 +40,21 @@ Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3
   - [ ] Composants `NotifItem`, `ResumeCard`
   - [ ] Tests unitaires : WD01 sans points, notification lue au clic, toggle email désactivé sans adresse
   - [ ] Parcours Playwright : « Tout marquer comme lu » met le compteur du shell à 0
-- [ ] **3.2** Catalogue, fiche parcours et souhaits (requiert API-L1, API-L3a) · `feature/lot3-catalogue-souhaits`
-  - [ ] WC01 catalogue (filtres catégorie × difficulté × prix + tri + `q` dans l'URL)
-  - [ ] WC02 filtres actifs (`ActiveFilterBar`)
-  - [ ] WC02b état ouvert des menus déroulants
-  - [ ] WC03 aucun résultat (« Effacer les filtres »)
-  - [ ] WC04 fiche parcours (`CourseHero`, `Curriculum`, `EnrollCard` sticky, `VimeoPlayer` bande-annonce)
-  - [ ] WC05 fiche parcours avec kit ou payant (`KitMiniCard`, CTA derrière le drapeau `unlock`)
-  - [ ] WW01 souhaits
-  - [ ] WW02 souhaits vides
-  - [ ] WW03 retrait optimiste avec `Toast` d'annulation
-  - [ ] Composants `CourseCard` (cœur distinct), `ActiveFilterBar`, `DropdownMenu`, `useUndoableAction`
-  - [ ] Inscription `POST learning/enrollments/` et gestion de `PAYMENT_REQUIRED`, `KIT_CODE_REQUIRED`
-  - [ ] Tests unitaires : filtres ↔ URL, carte « Gratuit », pas de prix de parcours sur un parcours avec kit
-  - [ ] Parcours Playwright « souhaits » : ajouter depuis WC01, retirer depuis WW01, annuler, recharger
+- [x] **3.2** Catalogue, fiche parcours et souhaits (requiert API-L1, API-L3a) · `feature/lot3-catalogue-souhaits` · PR #98
+  - [x] `WC01` catalogue (filtres catégorie × difficulté × prix + tri + `q` dans l'URL)
+  - [x] `WC02` filtres actifs (`ActiveFilterBar`)
+  - [x] `WC02b` état ouvert des menus déroulants
+  - [x] `WC03` aucun résultat (« Effacer les filtres »)
+  - [x] `WC04` fiche parcours (`CourseHero`, `Curriculum`, `EnrollCard` sticky, `VimeoPlayer` bande-annonce)
+  - [x] `WC05` fiche parcours avec kit ou payant (`KitMiniCard`, CTA derrière le drapeau `unlock`)
+  - [x] `WW01` souhaits
+  - [x] `WW02` souhaits vides
+  - [x] `WW03` retrait optimiste avec `Toast` d'annulation
+  - [x] Composants `CourseCard` (cœur distinct), `ActiveFilterBar`, `DropdownMenu`, `useUndoableAction`
+  - [x] Inscription `POST learning/enrollments/` et gestion de `PAYMENT_REQUIRED`, `KIT_CODE_REQUIRED`
+  - [x] Tests unitaires : filtres ↔ URL, carte « Gratuit », pas de prix de parcours sur un parcours avec kit
+  - [x] Parcours Playwright « souhaits » : ajouter depuis WC01, retirer depuis WW01, annuler, recharger
+  - [ ] ~~Bande-annonce lue en e2e~~ : reporté, le jeu de démo n'a aucun `trailerVimeoId` (à ajouter au seed, côté API ; ADR 0004 V2/V4 non tranchés) ; lecteur couvert en unitaire avec un faux `Player`, absence de contact avec `player.vimeo.com` et CSP vérifiées en e2e
 - [ ] **3.3a** Mes parcours, arbre et missions (requiert API-L3a, maquette WD23 validée, offre Vimeo) · `feature/lot3-mes-parcours-missions`
   - [x] Conception de la maquette WD23 dans `design/screens-apprenant-a-concevoir-web.jsx`, validée (C18)
   - [ ] WD23 mes parcours (onglets En cours / Terminés, `EnrolledCourseCard`)
@@ -63,7 +64,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3
   - [ ] WJ02 niveau
   - [ ] WJ03 mission (`MissionBlocks`, « Marquer comme terminée », navigation vers `next`)
   - [ ] Composants `ProjectAccordion`, `MissionItem`, `TeacherCommentCard`, `LockedContentState`
-  - [ ] `VimeoPlayer` (`@vimeo/player` épinglé, chargement différé, suivi `learning/activity/`, repli en cas d'erreur, CSP `frame-src`)
+  - [ ] `VimeoPlayer` (`@vimeo/player` épinglé, chargement différé, suivi `learning/activity/`, repli en cas d'erreur, CSP `frame-src`) — composant, `@vimeo/player` 2.30.4 et CSP livrés en 3.2 (PR #98) ; reste le branchement de `onProgress` sur `learning/activity/`
   - [ ] Tests unitaires : `MissionItem` verrouillé non activable, `next` respecté, `VimeoPlayer` avec faux `Player`
   - [ ] Parcours Playwright : accès direct à une mission verrouillée → `LockedContentState` ; `player.vimeo.com` intercepté
 - [ ] **3.3b** Quiz, résultats et badges (requiert API-L3a) · `feature/lot3-quiz`
