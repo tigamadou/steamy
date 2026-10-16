@@ -3,17 +3,34 @@ Saisie du catalogue par le groupe Contenu (S5, D71). L'ordre des catégories, pr
 par glisser-déposer (`order`, django-admin-sortable2). Écran détaillé WAD09 : lot 6.3.
 """
 
-from adminsortable2.admin import SortableAdminBase, SortableAdminMixin, SortableTabularInline
+from adminsortable2.admin import (
+    CustomInlineFormSet,
+    SortableAdminBase,
+    SortableAdminMixin,
+    SortableTabularInline,
+)
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from django.db.models import Count
 
-from .models import Category, Course, Level, Mission, Project
+from .models import (
+    Badge,
+    Category,
+    Choice,
+    Course,
+    Level,
+    Mission,
+    Project,
+    Question,
+    Quiz,
+)
 
 
 @admin.register(Category)
 class CategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
     list_display = ("label", "slug", "icon", "color", "course_count")
     prepopulated_fields = {"slug": ("label",)}
+    filter_horizontal = ("goals",)
 
     def get_queryset(self, request):
         return (
@@ -77,3 +94,59 @@ class MissionAdmin(admin.ModelAdmin):
     list_display = ("title", "level", "order", "duration_min")
     list_filter = ("level__project__course",)
     search_fields = ("title", "level__title")
+
+
+class QuestionInline(SortableTabularInline):
+    model = Question
+    fields = ("order", "text", "concept", "remediation_mission", "weight")
+    extra = 0
+    show_change_link = True
+    autocomplete_fields = ("remediation_mission",)
+
+
+@admin.register(Quiz)
+class QuizAdmin(SortableAdminBase, admin.ModelAdmin):
+    """Formative (niveau) ou sommative (projet) ; les réponses se saisissent sur chaque question."""
+
+    list_display = ("__str__", "kind", "level", "project", "threshold")
+    list_filter = ("kind",)
+    search_fields = ("title", "level__title", "project__title")
+    autocomplete_fields = ("level", "project")
+    inlines = [QuestionInline]
+
+
+class SingleCorrectChoiceFormSet(CustomInlineFormSet):
+    """Question à choix unique : exactement une bonne réponse."""
+
+    def clean(self):
+        super().clean()
+        kept = [
+            form.cleaned_data
+            for form in self.forms
+            if form.cleaned_data and not form.cleaned_data.get("DELETE")
+        ]
+        if sum(1 for data in kept if data.get("is_correct")) != 1:
+            raise ValidationError("Cochez exactement une bonne réponse.")
+
+
+class ChoiceInline(SortableTabularInline):
+    model = Choice
+    formset = SingleCorrectChoiceFormSet
+    fields = ("order", "text", "is_correct")
+    extra = 0
+
+
+@admin.register(Question)
+class QuestionAdmin(SortableAdminBase, admin.ModelAdmin):
+    list_display = ("__str__", "quiz", "concept", "order")
+    search_fields = ("text", "concept")
+    autocomplete_fields = ("quiz", "remediation_mission")
+    inlines = [ChoiceInline]
+
+
+@admin.register(Badge)
+class BadgeAdmin(admin.ModelAdmin):
+    list_display = ("label", "icon", "kind", "level", "project", "course")
+    list_filter = ("kind",)
+    search_fields = ("label",)
+    autocomplete_fields = ("level", "project", "course")

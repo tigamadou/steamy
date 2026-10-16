@@ -11,9 +11,15 @@ class CountryAdmin(admin.ModelAdmin):
 
 @admin.register(models.PaymentNetwork)
 class PaymentNetworkAdmin(admin.ModelAdmin):
+    """
+    Réseaux Mobile Money par pays, Celtiis compris (WAD14, D76). Un réseau désactivé disparaît aussitôt de
+    `referentials/payment-networks/` (lu à chaque requête ; cache HTTP public d'une heure au plus).
+    """
+
     list_display = ("label", "country", "code", "enabled", "active", "order")
     list_editable = ("enabled", "active", "order")
     list_filter = ("country", "enabled")
+    search_fields = ("label", "code")
 
 
 @admin.register(models.Locality)

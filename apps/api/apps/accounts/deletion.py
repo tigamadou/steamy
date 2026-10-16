@@ -27,6 +27,7 @@ from .models import (
     DeletionRequest,
     OtpChallenge,
     PasswordResetToken,
+    PublicProfileReview,
     SignupSession,
     User,
 )
@@ -189,6 +190,7 @@ def anonymize(user: User) -> None:
     OtpChallenge.objects.filter(user=user).delete()
     PasswordResetToken.objects.filter(user=user).delete()
     SignupSession.objects.filter(learner=user).delete()
+    PublicProfileReview.objects.filter(learner=user).delete()
     Notification.objects.filter(user=user).delete()
     DeletionRequest.objects.filter(user=user).update(note="")
 
