@@ -85,7 +85,7 @@ Statut : 🟡 en cours · Prochaine tâche : validation de la maquette de `WPD15
   - [ ] `WL23` dans le shell parent (`EventRow`, `EventDetail` du lot 1)
   - [ ] `WPD12` Inscrire un enfant (`EventSignupForm` : enfants actifs, motivation, récapitulatif + `PaymentForm` si payant)
   - [ ] Branchement API : `events/`, `events/{slug}/`, `events/applications/` (`accept/`, `refuse/`), `events/{slug}/applications/`, `payments/orders/` `kind: "event"`
-  - [ ] Règles : événement payant accepté vers `WPD15`, `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés, ticket Steamy Events gratuit avec accord requis, prix serveur
+  - [ ] Règles : événement payant accepté → paiement de la commande d'événement (`orderReference`, D53 amendé), `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés, ticket Steamy Events gratuit avec accord requis, prix serveur
   - [ ] Tests unitaires : `EventApplicationRow` par statut, `EventSignupForm` gratuit / payant, enfants non actifs exclus
   - [ ] Playwright : accord à un événement payant (`WD11`, `WPD06`, `WPD15`, paiement, « acceptée » en `WD10`)
   - [ ] Playwright : inscription directe par le parent (`WPD12`) à un événement payant
@@ -279,7 +279,7 @@ dans la table des liens de notification (`WPD14`) au fur et à mesure.
 | Écrans | `WPD06`, `WL23` dans le shell parent, `WPD12` |
 | Composants | `EventRow`, `EventDetail` (lot 1), `EventApplicationRow` (événement, enfant, statut, Accepter / Refuser), `RefuseApplicationDialog` (motif facultatif), `EventSignupForm` (`<select>` des enfants actifs, motivation, récapitulatif + `PaymentForm` si payant) |
 | API | `GET events/` · `GET events/{slug}/` · `GET events/applications/` · `POST events/applications/{id}/accept/` (payant → demande de paiement) · `POST …/refuse/` · `POST events/{slug}/applications/` `{ childId, motivation? }` · `POST payments/orders/` `{ kind: "event", … }` (§7.5, §7.6) |
-| Règles | Accepter un événement payant → `WPD15` ; la candidature n'est acceptée qu'au paiement (D53, S8). Pas de sélection par Steamy : l'accord (et le paiement) **confirme** l'inscription dans la limite des places (C3) ; `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés. Ticket Steamy Events : candidature gratuite, accord toujours requis (C12). Prix serveur |
+| Règles | Accepter un événement payant → paiement de la commande d'événement créée par l'API (`orderReference`, formulaire de `WPD15`, sans demande de paiement) ; la candidature n'est acceptée qu'au paiement (D53 amendé le 2026-10-16, S8). Pas de sélection par Steamy : l'accord (et le paiement) **confirme** l'inscription dans la limite des places (C3) ; `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés. Ticket Steamy Events : candidature gratuite, accord toujours requis (C12). Prix serveur |
 | Tests unitaires | `EventApplicationRow` pour chaque statut ; `EventSignupForm` gratuit / payant ; enfants non actifs exclus |
 | Playwright | **Accord événement payant** : l'enfant candidate (`WD11`) → le parent accepte dans `WPD06` → `WPD15` → paiement → la candidature passe à « acceptée » côté enfant (`WD10`). Inscription directe par le parent (`WPD12`) à un événement payant |
 | Recette | Refus notifié à l'enfant ; un événement complet ne peut plus être payé |

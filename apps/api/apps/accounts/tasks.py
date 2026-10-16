@@ -8,6 +8,7 @@ from django.utils import timezone
 from apps.core.models import PlatformSettings
 from apps.notifications.sms import queue_sms
 
+from . import deletion, weekly_report
 from .consent import RETENTION
 from .models import ConsentRequest, OtpChallenge, User
 from .otp import code_text
@@ -44,6 +45,18 @@ def purge_refused_requests() -> int:
         status__in=closed, resolved_at__lte=timezone.now() - RETENTION
     ).delete()
     return deleted
+
+
+@shared_task
+def anonymize_due_accounts() -> int:
+    """Suppressions programmées arrivées à J+30 : comptes anonymisés, factures conservées (D40, D54)."""
+    return deletion.anonymize_due()
+
+
+@shared_task
+def send_weekly_reports() -> int:
+    """Chaque lundi : rapport de la semaine écoulée pour chaque enfant actif, dans l'app et par email (D55)."""
+    return weekly_report.send_weekly_reports()
 
 
 @shared_task(autoretry_for=(OSError,), retry_backoff=True, max_retries=5)

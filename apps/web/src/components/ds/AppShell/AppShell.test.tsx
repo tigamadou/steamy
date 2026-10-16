@@ -129,6 +129,38 @@ describe("AppShell", () => {
     await user.click(screen.getByRole("button", { name: "Déconnexion" }));
     expect(menu).toHaveAttribute("aria-expanded", "false");
   });
+
+  it("sous 768 px, le tiroir ouvert est une boîte modale : reste de la page inerte, Tab bouclé", async () => {
+    const user = userEvent.setup();
+    const { container } = renderShell();
+    const menu = screen.getByRole("button", { name: "Ouvrir le menu" });
+    await user.click(menu);
+    const drawer = screen.getByRole("dialog", { name: "Menu" });
+    expect(drawer).toHaveAttribute("aria-modal", "true");
+    expect(container.querySelector("[inert]")).toContainElement(screen.getByRole("main"));
+    const logo = screen.getByRole("link", { name: "Steamy" });
+    const logout = screen.getByRole("button", { name: "Déconnexion" });
+    expect(logo).toHaveFocus();
+    await user.keyboard("{Shift>}{Tab}{/Shift}");
+    expect(logout).toHaveFocus();
+    await user.keyboard("{Tab}");
+    expect(logo).toHaveFocus();
+    await user.keyboard("{Tab}");
+    expect(logo).not.toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(container.querySelector("[inert]")).toBeNull();
+  });
+
+  it("WD16 depuis le tiroir : le focus passe au bouton de menu avant l'ouverture de la modale", async () => {
+    const user = userEvent.setup();
+    const { onLogout } = renderShell();
+    const menu = screen.getByRole("button", { name: "Ouvrir le menu" });
+    await user.click(menu);
+    await user.click(screen.getByRole("button", { name: "Déconnexion" }));
+    expect(onLogout).toHaveBeenCalledOnce();
+    expect(menu).toHaveFocus();
+  });
 });
 
 describe("NotificationBell", () => {

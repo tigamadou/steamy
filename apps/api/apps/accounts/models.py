@@ -140,13 +140,14 @@ class User(AbstractBaseUser, PermissionsMixin):
                 condition=Q(phone__isnull=True) | Q(phone__regex=E164_REGEX),
                 name="accounts_user_phone_e164",
             ),
-            # Identifiant propre à chaque rôle (S4) ; rôle nul ⇔ personnel (D71)
+            # Identifiant propre à chaque rôle (S4) ; rôle nul ⇔ personnel (D71). Un compte anonymisé n'en a
+            # plus : l'identifiant est libéré (D40).
             models.CheckConstraint(
-                condition=~Q(role="learner") | Q(username__isnull=False),
+                condition=~Q(role="learner") | Q(username__isnull=False) | Q(status="anonymized"),
                 name="accounts_user_learner_has_username",
             ),
             models.CheckConstraint(
-                condition=~Q(role="parent") | Q(phone__isnull=False),
+                condition=~Q(role="parent") | Q(phone__isnull=False) | Q(status="anonymized"),
                 name="accounts_user_parent_has_phone",
             ),
             models.CheckConstraint(
@@ -310,6 +311,17 @@ class ParentProfile(TimestampedModel):
     #: WP09 « Nombre d'enfants à inscrire ».
     children_to_enroll = models.PositiveSmallIntegerField(
         _("enfants à inscrire"), null=True, blank=True
+    )
+    #: Mobile Money préféré (WPD08), prérempli au paiement (WPD15, WK06). Le pays est celui du réseau.
+    mobile_money_network = models.ForeignKey(
+        "referentials.PaymentNetwork",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    mobile_money_phone = models.CharField(
+        _("numéro Mobile Money"), max_length=16, null=True, blank=True
     )
 
     class Meta:
@@ -529,6 +541,58 @@ class PasswordResetToken(TimestampedModel):
         return f"Réinitialisation de {self.user}"
 
 
+class DeletionRequest(TimestampedModel):
+    """
+    Suppression d'un compte (D40, D54). L'apprenant la demande (WD15) et son parent la valide ; le parent supprime
+    aussi un enfant de lui-même (WPD09), ou son propre compte s'il n'a plus d'enfant rattaché. Programmée : le compte
+    est désactivé aussitôt, puis anonymisé à `scheduled_for` (J+30, `anonymize_due_accounts`) ; annulable d'ici là.
+    """
+
+    class Status(models.TextChoices):
+        PENDING_PARENT = "pending_parent", "En attente du parent"
+        SCHEDULED = "scheduled", "Programmée"
+        REFUSED = "refused", "Refusée par le parent"
+        CANCELLED = "cancelled", "Annulée"
+        DONE = "done", "Effectuée"
+
+    #: Statuts d'une demande encore ouverte : une seule par compte.
+    OPEN_STATUSES = (Status.PENDING_PARENT, Status.SCHEDULED)
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="deletion_requests")
+    requested_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    status = models.CharField(_("statut"), max_length=16, choices=Status.choices)
+    reason = models.ForeignKey(
+        "referentials.DeletionReason",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    note = models.TextField(_("précisions"), blank=True)
+    scheduled_for = models.DateTimeField(_("anonymisation prévue le"), null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("demande de suppression")
+        verbose_name_plural = _("demandes de suppression")
+        ordering = ["-created_at"]
+        permissions = [
+            ("cancel_deletion", "Peut annuler une suppression programmée (support)"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user"],
+                condition=Q(status__in=["pending_parent", "scheduled"]),
+                name="accounts_deletion_one_open_per_user",
+            ),
+        ]
+
+    def __str__(self):
+        return f"Suppression de {self.user} ({self.status})"
+
+
 class StaffMember(User):
     """Membres du personnel (WAD13), gérés par le Super-admin seul : groupes, appareil TOTP, garde-fous."""
 
@@ -584,3 +648,27 @@ class PublicProfileReview(TimestampedModel):
 
     def __str__(self):
         return f"{self.pseudonym} ({self.get_status_display().lower()})"
+
+
+class WeeklyReportSent(models.Model):
+    """
+    Rapport hebdomadaire déjà notifié (D55) : une ligne par parent, enfant et semaine ISO. La contrainte d'unicité
+    rend `send_weekly_reports` relançable, même lancé deux fois en même temps.
+    """
+
+    parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    child = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    week = models.CharField(_("semaine"), max_length=8, help_text="AAAA-Www")
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("rapport hebdomadaire envoyé")
+        verbose_name_plural = _("rapports hebdomadaires envoyés")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["parent", "child", "week"], name="accounts_weekly_report_once"
+            ),
+        ]
+
+    def __str__(self):
+        return f"Rapport {self.week} de {self.child} à {self.parent}"

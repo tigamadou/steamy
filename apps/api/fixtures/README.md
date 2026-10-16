@@ -14,6 +14,7 @@ Mot de passe de tous les comptes : **`Steamy2026`**.
 | Persona | Connexion | Identifiant | Remarque |
 | --- | --- | --- | --- |
 | Apprenante | W16 (`/connexion`) | `lea.adjovi` | Léa Adjovi, 4ᵉ, Cotonou ; profil complet |
+| Apprenant | W16 | `noe.adjovi` | Noé Adjovi, 11 ans, créé par Marie ; profil à compléter (W11-W14) |
 | Parent | W16 | `+229 01 90 00 00 01` (ou `0190000001`) | Marie Adjovi ; email de contact `marie.adjovi@steamy.test` |
 | Enseignant | W16 | `koffi.adekambi@steamy.test` | M. Koffi Adékambi |
 | Personnel · Super-admin | admin Django (`/admin/`, WAD15) | `superadmin@steamy.test` | Groupe Super-admin (pas `is_superuser`, réservé au compte de secours) |
@@ -21,9 +22,12 @@ Mot de passe de tous les comptes : **`Steamy2026`**.
 | Personnel · Support | admin Django | `support@steamy.test` | |
 | Personnel · Finance | admin Django | `finance@steamy.test` | |
 
-Marie est le parent de Léa (lien parent ↔ enfant, consentement donné). M. Adékambi est rattaché au
-« Collège Steamy de Cotonou ». Le pseudonyme public de Léa (« LéaBot ») attend la modération du support (WAD08,
-D15).
+Marie est le parent de Léa (lien parent ↔ enfant, consentement donné) et de **Noé** (`noe.adjovi`, 11 ans), qu'elle a
+créé elle-même (WPD04) : Noé n'a pas encore complété son profil (W11-W14) et a demandé la suppression de son compte
+(WD15, en attente de Marie). « À valider » de Marie compte donc trois demandes : la suppression de Noé, la demande de
+paiement de Léa et sa candidature à un événement. Mobile Money préféré de Marie : MTN, `+229 01 90 00 00 01`. M.
+Adékambi est rattaché au « Collège Steamy de Cotonou ». Le pseudonyme public de Léa (« LéaBot ») attend la modération
+du support (WAD08, D15).
 
 ## Parcours de Léa (API-L3a)
 
@@ -42,6 +46,17 @@ et paliers **de démonstration**, saisis s'ils sont vides), un streak de 5 jours
 
 `make e2e` lance `seed_demo --e2e`, qui ramène le délai entre deux essais d'une sommative ratée à 5 secondes (10 min
 sinon, D32).
+
+## Commerce (API-L3b)
+
+- Zones de livraison du Bénin : « Cotonou et Abomey-Calavi » (1 000 FCFA, 24 à 48 h), « Porto-Novo » (1 500 FCFA),
+  « Reste du Bénin » (2 500 FCFA) ; adresse de livraison enregistrée pour Marie.
+- Une commande de kit payée par Marie pour Léa, expédiée, avec son **Kit Code** (visible de Marie dans la commande)
+  et son reçu PDF.
+- Une demande de paiement de Léa à Marie pour un parcours payant, en attente (lien SMS dans Mailpit).
+- Une candidature de Léa à un événement payant, en attente de l'accord de Marie (le ticket de Léa la rend gratuite).
+- Paiement en local : faux prestataire, **pilotable par le numéro** (`…01` succès, `…02` échec, `…03` reste en
+  attente) ; `manage.py simulate_payment <référence> success|failed` et `manage.py pay_payment_request <id>`.
 
 ## Invitation enseignant en attente
 

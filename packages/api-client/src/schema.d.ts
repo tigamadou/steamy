@@ -4,6 +4,100 @@
  */
 
 export interface paths {
+    "/api/accounts/children/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WPD01, WPD02 : les enfants, par prénom. */
+        get: operations["accounts_children_list"];
+        put?: never;
+        /** @description WPD04 : compte actif, consentement d'origine `parent` créé accepté (D51). */
+        post: operations["accounts_children_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/children/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WPD03, WPD10. */
+        get: operations["accounts_children_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description WPD10 : profil de l'enfant, et opt-in à l'affichage public (D15). */
+        patch: operations["accounts_children_partial_update"];
+        trace?: never;
+    };
+    "/api/accounts/children/{id}/deletion/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description WPD09 (`POST`) : compte désactivé aussitôt, anonymisé à J+30 ; valide aussi la demande de l'enfant (WD15).
+         *     WPD02 (`DELETE`) : « Annuler la suppression », l'enfant peut de nouveau se connecter.
+         */
+        post: operations["accounts_children_deletion_create"];
+        /**
+         * @description WPD09 (`POST`) : compte désactivé aussitôt, anonymisé à J+30 ; valide aussi la demande de l'enfant (WD15).
+         *     WPD02 (`DELETE`) : « Annuler la suppression », l'enfant peut de nouveau se connecter.
+         */
+        delete: operations["accounts_children_deletion_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/children/{id}/password-reset/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WPD03 « Réinitialiser le mot de passe » (D26, §8.9) : l'ancien ne permet plus de se connecter. */
+        post: operations["accounts_children_password_reset_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/children/{id}/weekly-report/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WPD11 : semaine ISO (`?week=AAAA-Www`), navigation vers les semaines précédentes (D55). */
+        get: operations["accounts_children_weekly_report_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/accounts/consent-requests/": {
         parameters: {
             query?: never;
@@ -127,6 +221,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/accounts/deletion-requests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Demandes de suppression des enfants du parent connecté (WPD01, WPD09 `?demande=<id>`). */
+        get: operations["accounts_deletion_requests_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/deletion-requests/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Demandes de suppression des enfants du parent connecté (WPD01, WPD09 `?demande=<id>`). */
+        get: operations["accounts_deletion_requests_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/deletion-requests/{id}/approve/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WPD09 : la demande de l'enfant est validée, son compte désactivé puis anonymisé à J+30. */
+        post: operations["accounts_deletion_requests_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/deletion-requests/{id}/refuse/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WPD01 : refus, notifié à l'enfant. */
+        post: operations["accounts_deletion_requests_refuse_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/accounts/me/": {
         parameters: {
             query?: never;
@@ -142,6 +304,47 @@ export interface paths {
         head?: never;
         /** @description WD17, WPD08, WT08 : prénom et nom. Identifiants, rôle et statut ne se modifient pas ici (C12, S1). */
         patch: operations["accounts_me_partial_update"];
+        trace?: never;
+    };
+    "/api/accounts/me/deletion-request/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WD15 : demande en cours (« Demande envoyée à ton parent »), 404 sans demande. */
+        get: operations["accounts_me_deletion_request_retrieve"];
+        put?: never;
+        /**
+         * @description Suppression du compte connecté. Apprenant (WD15) : demande envoyée au parent, retirable tant qu'elle attend.
+         *     Parent (WPD08) : sans enfant rattaché seulement (`CHILDREN_STILL_LINKED`) ; le compte est désactivé et la
+         *     session fermée aussitôt.
+         */
+        post: operations["accounts_me_deletion_request_create"];
+        /** @description WD15 : l'apprenant retire sa demande tant que son parent ne l'a pas validée. */
+        delete: operations["accounts_me_deletion_request_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/me/delivery-address/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `accounts/me/delivery-address/` (WD19, WK05) : adresse proposée par défaut à la commande. */
+        get: operations["accounts_me_delivery_address_retrieve"];
+        /** @description `accounts/me/delivery-address/` (WD19, WK05) : adresse proposée par défaut à la commande. */
+        put: operations["accounts_me_delivery_address_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/accounts/me/email/": {
@@ -183,6 +386,22 @@ export interface paths {
         patch: operations["accounts_me_learner_profile_partial_update"];
         trace?: never;
     };
+    "/api/accounts/me/parent/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["accounts_me_parent_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/accounts/me/parent-profile/": {
         parameters: {
             query?: never;
@@ -190,7 +409,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** @description WPD08 : profil du parent connecté. */
+        get: operations["accounts_me_parent_profile_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -211,6 +431,57 @@ export interface paths {
         put?: never;
         /** @description Changement de mot de passe (WD18, WPD08, WT08). La session en cours reste ouverte. */
         post: operations["accounts_me_password_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/me/phone-change/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Envoie un code au nouveau numéro ; le renvoi passe par `auth/otp/resend/`. */
+        post: operations["accounts_me_phone_change_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/me/phone-change/verify/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Code valide : le numéro de connexion est remplacé. */
+        post: operations["accounts_me_phone_change_verify_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/pending-actions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WPD01 « À valider » : toutes les demandes en attente, la plus récente d'abord (liste non paginée). */
+        get: operations["accounts_pending_actions_list"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -716,6 +987,99 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/events/{slug}/applications/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `POST events/{slug}/applications/` (WD11, WPD12). Apprenant : candidature en attente de son parent. Parent
+         *     (`childId` d'un de ses enfants) : accord immédiat ; payant et sans ticket → place réservée et `orderReference`
+         *     à payer par `POST payments/orders/{reference}/payments/`. Codes : `EVENT_CLOSED`, `EVENT_FULL`,
+         *     `ALREADY_APPLIED`.
+         */
+        post: operations["events_applications_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events/applications/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `GET events/applications/` (WD10, WPD06) : les siennes (apprenant), celles de ses enfants (parent). */
+        get: operations["events_applications_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events/applications/{id}/accept/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `POST events/applications/{id}/accept/` (WPD06, D53) : gratuit ou ticket → confirmée ; payant → place réservée
+         *     et commande d'événement (`orderReference`) à payer par le parent. L'apprenant ne décide jamais (S8).
+         */
+        post: operations["events_applications_accept_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events/applications/{id}/refuse/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `POST events/applications/{id}/refuse/` (WPD06) : motif facultatif, l'enfant est prévenu. */
+        post: operations["events_applications_refuse_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events/tickets/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `GET events/tickets/` (WJ07, WD10, WD11) : tickets de l'apprenant, utilisés ou non. */
+        get: operations["events_tickets_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health/": {
         parameters: {
             query?: never;
@@ -1125,6 +1489,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/payments/kit-codes/redeem/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `POST payments/kit-codes/redeem/` (WA01, WA06) : l'apprenant saisit le code de la notice et choisit le parcours ;
+         *     le code est consommé et l'inscription créée (`source=kit_code`). Déjà inscrit : 200, code non consommé.
+         */
+        post: operations["payments_kit_codes_redeem_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/payments/orders/": {
         parameters: {
             query?: never;
@@ -1133,21 +1517,27 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         * Commandes du parent (payeur) ou de l'apprenant (bénéficiaire)
+         * @description Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+         *     (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+         *     d'autrui répond 404.
          */
         get: operations["payments_orders_list"];
         put?: never;
-        post?: never;
+        /**
+         * Créer une commande : prix, frais et total calculés par le serveur (parent ou invité)
+         * @description Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+         *     (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+         *     d'autrui répond 404.
+         */
+        post: operations["payments_orders_create"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/payments/orders/{id}/": {
+    "/api/payments/orders/{reference}/": {
         parameters: {
             query?: never;
             header?: never;
@@ -1155,10 +1545,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         * Commande par sa référence (payeur, bénéficiaire, ou invité avec X-Guest-Token)
+         * @description Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+         *     (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+         *     d'autrui répond 404.
          */
         get: operations["payments_orders_retrieve"];
         put?: never;
@@ -1169,7 +1559,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/payments/payments/": {
+    "/api/payments/orders/{reference}/invoice/": {
         parameters: {
             query?: never;
             header?: never;
@@ -1177,14 +1567,145 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         * Télécharger la facture (payeur seulement, ou invité avec X-Guest-Token)
+         * @description Réservée au payeur (C12) : l'apprenant bénéficiaire n'y a pas accès (404). PDF pas prêt → 409
+         *     `PDF_NOT_READY` ; sinon redirection vers une URL présignée de 5 minutes (ADR 0005 §6).
          */
-        get: operations["payments_payments_list"];
+        get: operations["payments_orders_invoice_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/orders/{reference}/payments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Payer une commande par Mobile Money (parent payeur, ou invité avec X-Guest-Token)
+         * @description Initie le débit (USSD push, sans redirection). La réponse donne le paiement `pending` (ou `failed` si le
+         *     prestataire refuse) ; son issue se lit ensuite sur `GET payments/payments/{id}/`. Aussi pour reprendre une
+         *     commande en attente après un échec.
+         */
+        post: operations["payments_orders_payments_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/payment-requests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Demandes de paiement : les siennes (apprenant), celles de ses enfants (parent)
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        get: operations["payments_payment_requests_list"];
+        put?: never;
+        /**
+         * Demander à son parent de payer un parcours ou des kits (apprenant)
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        post: operations["payments_payment_requests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/payment-requests/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Une demande de paiement
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        get: operations["payments_payment_requests_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/payment-requests/{id}/cancel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Annuler sa demande (apprenant)
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        post: operations["payments_payment_requests_cancel_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/payment-requests/{id}/decline/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refuser la demande de son enfant (parent)
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        post: operations["payments_payment_requests_decline_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/payment-requests/{id}/resend/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Relancer son parent (3 envois au plus, espacés de 24 h)
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        post: operations["payments_payment_requests_resend_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1199,10 +1720,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         * État d'un paiement (payeur, ou invité avec X-Guest-Token)
+         * @description Paiement lisible par le payeur de la commande seulement ; l'apprenant n'y a pas accès (C12).
          */
         get: operations["payments_payments_retrieve"];
         put?: never;
@@ -1223,10 +1742,9 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Webhook des prestataires de paiement (appelé par KKiaPay / FedaPay, pas par le front)
-         * @description Generic webhook entrypoint for external providers.
-         *     - provider_name: "kkiapay" or "fedapay"
-         *     The request.body should be validated by provider-specific verification code.
+         * Webhook des prestataires de paiement (appelé par le prestataire, pas par le front)
+         * @description Point d'entrée des notifications des prestataires (S9, ADR 0003). La signature est vérifiée **avant** toute
+         *     lecture du contenu ; le prestataire normalise ensuite la notification (`parse_event`).
          */
         post: operations["payments_webhook_create"];
         delete?: never;
@@ -1310,6 +1828,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["referentials_countries_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/referentials/deletion-reasons/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["referentials_deletion_reasons_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1431,6 +1965,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/shop/cart/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Panier côté serveur (D38) ; celui d'un invité reste dans le navigateur et part avec la commande. */
+        get: operations["shop_cart_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shop/cart/items/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ajouter un kit au panier (ajoute à la quantité déjà présente) */
+        post: operations["shop_cart_items_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shop/cart/items/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["shop_cart_items_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["shop_cart_items_partial_update"];
+        trace?: never;
+    };
+    "/api/shop/delivery-zones/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Zones de livraison actives, avec leurs frais et leur délai (D38, WK05). Non paginées. */
+        get: operations["shop_delivery_zones_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/shop/kits/": {
         parameters: {
             query?: never;
@@ -1459,6 +2060,28 @@ export interface paths {
         get: operations["shop_kits_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shop/kits/{slug}/restock-alerts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Être prévenu du retour en stock d'un kit (WK11)
+         * @description Invité : `{ phone }`, un seul SMS (D38). Parent connecté : SMS sur le numéro du compte, sans corps.
+         *     Apprenant : notification dans l'application, jamais de téléphone (D30). Réponse identique si la demande
+         *     existait déjà.
+         */
+        post: operations["shop_kits_restock_alerts_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1519,6 +2142,53 @@ export interface components {
             questionId: number;
             choiceId: number;
         };
+        /** @description Candidature (WD10, WPD06) ; `orderReference` : commande à payer ou payée (événement payant). */
+        Application: {
+            readonly id: number;
+            readonly event: components["schemas"]["EventSummary"];
+            readonly learner: components["schemas"]["LearnerSummary"];
+            /** Statut */
+            readonly status: components["schemas"]["ApplicationStatusEnum"];
+            readonly motivation: string;
+            /** Niveau déclaré */
+            readonly selfLevel: components["schemas"]["DifficultyEnum"];
+            readonly ticketUsed: boolean;
+            /**
+             * Décision du parent
+             * Format: date-time
+             */
+            readonly parentDecidedAt: string | null;
+            /** Motif de refus */
+            readonly refusalReason: string;
+            readonly orderReference: string | null;
+            /**
+             * Déposée le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+        };
+        /** @description Apprenant : `{motivation, selfLevel}`. Parent : `{childId, motivation?}` (WPD12, accord immédiat). */
+        ApplicationCreateRequest: {
+            /** @description Parent : l'enfant inscrit */
+            childId?: number;
+            /** @default  */
+            motivation: string;
+            /** @default  */
+            selfLevel: components["schemas"]["DifficultyEnum"] | components["schemas"]["BlankEnum"];
+        };
+        ApplicationRefuseRequest: {
+            /** @default  */
+            reason: string;
+        };
+        /**
+         * @description * `pending_parent` - En attente du parent
+         *     * `pending_payment` - En attente du paiement
+         *     * `accepted` - Inscription confirmée
+         *     * `refused` - Refusée
+         *     * `cancelled` - Annulée
+         * @enum {string}
+         */
+        ApplicationStatusEnum: "pending_parent" | "pending_payment" | "accepted" | "refused" | "cancelled";
         /**
          * @description * `urban` - Urbaine
          *     * `rural` - Rurale
@@ -1611,6 +2281,32 @@ export interface components {
          * @enum {string}
          */
         BadgeKindEnum: "level" | "project" | "course";
+        Beneficiary: {
+            id: number;
+            firstName: string;
+        };
+        /** @enum {unknown} */
+        BlankEnum: "";
+        /** @description Panier (WK03, WK10) : prix courants des kits ; le total définitif est celui de la commande. */
+        Cart: {
+            items: components["schemas"]["CartItem"][];
+            /** @description Nombre d'articles (somme des quantités) */
+            count: number;
+            /** @description Somme des lignes, hors livraison (FCFA) */
+            subtotal: number;
+        };
+        CartItem: {
+            readonly id: number;
+            readonly kit: components["schemas"]["Kit"];
+            /** Quantité */
+            readonly quantity: number;
+            readonly total: number;
+        };
+        CartItemCreateRequest: {
+            kitSlug: string;
+            /** @default 1 */
+            quantity: number;
+        };
         Category: {
             slug: string;
             /** Libellé */
@@ -1688,6 +2384,108 @@ export interface components {
             certificate: components["schemas"]["Certificate"] | null;
             /** @description Ticket Steamy Events offert à la certification */
             eventTicket: boolean;
+        };
+        /** @description Ligne d'un enfant (WPD01, WPD02) : rien de sensible (genre, handicap, localité) hors du détail. */
+        Child: {
+            readonly id: number;
+            /** Prénom */
+            readonly firstName: string;
+            /** Nom */
+            readonly lastName: string;
+            /** Identifiant */
+            readonly username: string | null;
+            /** Statut */
+            readonly status: components["schemas"]["UserStatusEnum"];
+            readonly age: number | null;
+            readonly relationship: components["schemas"]["Relationship"];
+            readonly avatar: components["schemas"]["Avatar"] | null;
+            readonly schoolGrade: components["schemas"]["SchoolGrade"] | null;
+            readonly points: number;
+            readonly streakDays: number;
+            readonly rank: string;
+            /** @description Étape de profil que l'enfant doit encore compléter (W11-W14), null si complet */
+            readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
+            /** Format: date-time */
+            readonly createdAt: string;
+            readonly deletion: components["schemas"]["ChildDeletionState"] | null;
+            /** @description Parcours en cours (WPD01, stat « Parcours en cours ») */
+            readonly activeCourses: number;
+        };
+        /** @description WPD04 : le parent crée le compte et choisit le mot de passe initial. */
+        ChildCreateRequest: {
+            firstName: string;
+            lastName: string;
+            /**
+             * Format: date
+             * @description 10 à 17 ans (D23)
+             */
+            birthDate: string;
+            /** @description Lien de parenté (référentiel `relationships`) */
+            relationship: string;
+            username: string;
+            password: string;
+        };
+        /** @description WPD09 : motif obligatoire. */
+        ChildDeletionRequest: {
+            /** @description Motif (référentiel `deletion-reasons`) ; facultatif pour l'apprenant (WD15) */
+            reason: string;
+            /** @default  */
+            note: string;
+        };
+        /** @description Suppression en cours : à examiner (`pending_parent`) ou programmée (« Supprimé le … », annulable, D54). */
+        ChildDeletionState: {
+            readonly id: number;
+            /** Statut */
+            readonly status: components["schemas"]["DeletionRequestStatusEnum"];
+            /**
+             * Anonymisation prévue le
+             * Format: date-time
+             */
+            readonly scheduledFor: string | null;
+        };
+        /** @description Détail (WPD03, WPD10) : seul écran, avec la modification, où paraissent genre, handicap et localité (D6). */
+        ChildDetail: {
+            readonly id: number;
+            /** Prénom */
+            readonly firstName: string;
+            /** Nom */
+            readonly lastName: string;
+            /** Identifiant */
+            readonly username: string | null;
+            /** Statut */
+            readonly status: components["schemas"]["UserStatusEnum"];
+            readonly age: number | null;
+            readonly relationship: components["schemas"]["Relationship"];
+            readonly avatar: components["schemas"]["Avatar"] | null;
+            readonly schoolGrade: components["schemas"]["SchoolGrade"] | null;
+            readonly points: number;
+            readonly streakDays: number;
+            readonly rank: string;
+            /** @description Étape de profil que l'enfant doit encore compléter (W11-W14), null si complet */
+            readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
+            /** Format: date-time */
+            readonly createdAt: string;
+            readonly deletion: components["schemas"]["ChildDeletionState"] | null;
+            /** @description Parcours en cours (WPD01, stat « Parcours en cours ») */
+            readonly activeCourses: number;
+            /** @description Progression par parcours (WPD03), la plus récente activité d'abord */
+            readonly courses: components["schemas"]["Enrollment"][];
+            /** @description 5 dernières tentatives de quiz (WPD03, statut serveur D31) */
+            readonly recentAttempts: components["schemas"]["AttemptListItem"][];
+            /** @description Nombre de badges obtenus (WPD03) */
+            readonly badges: number;
+            /** Format: date */
+            readonly birthDate: string;
+            readonly gender: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            readonly disability: components["schemas"]["Disability"] | null;
+            readonly locality: components["schemas"]["Locality"] | null;
+            readonly goals: components["schemas"]["Goal"][];
+            /** @description Opt-in parental à l'affichage public (pseudonyme et avatar, D15) */
+            readonly publicDisplayAllowed: boolean;
+        };
+        ChildPasswordResetRequest: {
+            /** @description Nouveau mot de passe, à communiquer à l'enfant (D26) */
+            password: string;
         };
         /** @description Réponse proposée, sans le corrigé. */
         Choice: {
@@ -1840,6 +2638,10 @@ export interface components {
             slug: string;
             title: string;
         };
+        CourseSummary: {
+            slug: string;
+            title: string;
+        };
         CsrfToken: {
             csrfToken: string;
         };
@@ -1860,6 +2662,117 @@ export interface components {
             /** Format: date */
             date: string;
             seconds: number;
+        };
+        DeletionReason: {
+            readonly id: number;
+            code: string;
+            /** Libellé */
+            label: string;
+        };
+        /** @description Demande de suppression ; `accountId` : le compte concerné (l'enfant, pour le parent). */
+        DeletionRequest: {
+            readonly id: number;
+            readonly accountId: number;
+            readonly firstName: string;
+            /** Statut */
+            readonly status: components["schemas"]["DeletionRequestStatusEnum"];
+            readonly reason: components["schemas"]["DeletionReason"] | null;
+            /** Précisions */
+            readonly note: string;
+            /** @description Demande faite par l'apprenant lui-même (WD15), à valider par le parent */
+            readonly requestedByLearner: boolean;
+            /**
+             * Anonymisation prévue le
+             * Format: date-time
+             */
+            readonly scheduledFor: string | null;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly resolvedAt: string | null;
+        };
+        DeletionRequestCreateRequest: {
+            /** @description Motif (référentiel `deletion-reasons`) ; facultatif pour l'apprenant (WD15) */
+            reason?: string | null;
+            /** @default  */
+            note: string;
+        };
+        /**
+         * @description * `pending_parent` - En attente du parent
+         *     * `scheduled` - Programmée
+         *     * `refused` - Refusée par le parent
+         *     * `cancelled` - Annulée
+         *     * `done` - Effectuée
+         * @enum {string}
+         */
+        DeletionRequestStatusEnum: "pending_parent" | "scheduled" | "refused" | "cancelled" | "done";
+        /** @description Adresse de livraison enregistrée (WD19, WK05). `phone` : par défaut, celui du compte. */
+        DeliveryAddress: {
+            zoneId: number;
+            readonly zone: components["schemas"]["DeliveryZone"];
+            /** Destinataire */
+            recipientName: string;
+            phone?: string;
+            /** Ville */
+            city: string;
+            /** Quartier */
+            district?: string;
+            /** Adresse */
+            addressLine: string;
+        };
+        DeliveryAddressInputRequest: {
+            /** @description Zone de `GET shop/delivery-zones/` */
+            zoneId: number;
+            recipientName: string;
+            /** @description Par défaut, celui du payeur */
+            phone?: string;
+            city: string;
+            /** @default  */
+            district: string;
+            /** @description Rue, repère, indications */
+            addressLine: string;
+        };
+        /** @description Adresse de livraison enregistrée (WD19, WK05). `phone` : par défaut, celui du compte. */
+        DeliveryAddressRequest: {
+            zoneId: number;
+            /** Destinataire */
+            recipientName: string;
+            phone?: string;
+            /** Ville */
+            city: string;
+            /** Quartier */
+            district?: string;
+            /** Adresse */
+            addressLine: string;
+        };
+        DeliveryZone: {
+            readonly id: number;
+            readonly country: string;
+            /**
+             * Nom
+             * @description « Cotonou et Calavi »
+             */
+            readonly name: string;
+            /** Frais de livraison (FCFA) */
+            readonly fee: number;
+            /**
+             * Délai annoncé
+             * @description « 2 à 3 jours »
+             */
+            readonly delayLabel: string;
+        };
+        DeliveryZoneSummary: {
+            readonly id: number;
+            /**
+             * Nom
+             * @description « Cotonou et Calavi »
+             */
+            readonly name: string;
+            /**
+             * Délai annoncé
+             * @description « 2 à 3 jours »
+             */
+            readonly delayLabel: string;
         };
         /**
          * @description * `beginner` - Débutant
@@ -1923,6 +2836,7 @@ export interface components {
          *     * `AGE_OUT_OF_RANGE` - AGE_OUT_OF_RANGE
          *     * `ALREADY_APPLIED` - ALREADY_APPLIED
          *     * `ALREADY_IN_CLASSROOM` - ALREADY_IN_CLASSROOM
+         *     * `APPLICATION_ALREADY_RESOLVED` - APPLICATION_ALREADY_RESOLVED
          *     * `BIRTHDATE_AGE_MISMATCH` - BIRTHDATE_AGE_MISMATCH
          *     * `CHILDREN_STILL_LINKED` - CHILDREN_STILL_LINKED
          *     * `CLASSROOM_NAME_TAKEN` - CLASSROOM_NAME_TAKEN
@@ -1933,6 +2847,7 @@ export interface components {
          *     * `CONSENT_REQUEST_EXPIRED` - CONSENT_REQUEST_EXPIRED
          *     * `CONTENT_LOCKED` - CONTENT_LOCKED
          *     * `COURSE_NOT_IN_OFFER` - COURSE_NOT_IN_OFFER
+         *     * `DELETION_ALREADY_RESOLVED` - DELETION_ALREADY_RESOLVED
          *     * `DELIVERY_ZONE_UNAVAILABLE` - DELIVERY_ZONE_UNAVAILABLE
          *     * `DUPLICATE_ROW` - DUPLICATE_ROW
          *     * `EMAIL_TAKEN` - EMAIL_TAKEN
@@ -1968,6 +2883,7 @@ export interface components {
          *     * `PASSWORD_RESET_BY_PARENT` - PASSWORD_RESET_BY_PARENT
          *     * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
          *     * `PAYMENT_FAILED` - PAYMENT_FAILED
+         *     * `PAYMENT_REQUEST_CLOSED` - PAYMENT_REQUEST_CLOSED
          *     * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
          *     * `PDF_NOT_READY` - PDF_NOT_READY
          *     * `PERMISSION_DENIED` - PERMISSION_DENIED
@@ -1986,7 +2902,29 @@ export interface components {
          *     * `VALIDATION_ERROR` - VALIDATION_ERROR
          * @enum {string}
          */
-        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "APPLICATION_ALREADY_RESOLVED" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELETION_ALREADY_RESOLVED" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUEST_CLOSED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        EventSummary: {
+            readonly slug: string;
+            /** Titre */
+            readonly title: string;
+            readonly emoji: string;
+            /** Couleur */
+            readonly color: string;
+            /**
+             * Début
+             * Format: date-time
+             */
+            readonly startsAt: string;
+            /** Ville */
+            readonly city: string;
+            /** En ligne */
+            readonly online: boolean;
+            /**
+             * Prix (FCFA)
+             * @description 0 = gratuit
+             */
+            readonly price: number;
+        };
         FieldError: {
             code: string;
             message: string;
@@ -2004,6 +2942,12 @@ export interface components {
             /** Libellé */
             label: string;
             emoji?: string;
+        };
+        GuestInputRequest: {
+            firstName: string;
+            lastName: string;
+            /** @description Reçoit le lien de suivi de la commande */
+            phone: string;
         };
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
@@ -2063,6 +3007,10 @@ export interface components {
          * @enum {string}
          */
         ImpactReportStatusEnum: "draft" | "submitted";
+        InvoiceSummary: {
+            number: string;
+            pdfStatus: components["schemas"]["PdfStatusEnum"];
+        };
         Kit: {
             slug: string;
             /** Nom */
@@ -2078,6 +3026,23 @@ export interface components {
             images?: unknown;
             /** @description En stock (le stock exact reste interne) */
             readonly available: boolean;
+        };
+        KitCode: {
+            readonly code: string;
+            readonly kitSlug: string;
+            readonly redeemed: boolean;
+        };
+        KitCodeRedeemRequest: {
+            /** @description STEAMY-XXXX-XXXX, casse et tirets indifférents */
+            code: string;
+            /** @description Parcours à débloquer */
+            courseSlug: string;
+        };
+        KitCodeRedeemed: {
+            courseSlug: string;
+            courseTitle: string;
+            /** @description Faux si l'apprenant était déjà inscrit (code non consommé) */
+            created: boolean;
         };
         KitDetail: {
             slug: string;
@@ -2279,6 +3244,10 @@ export interface components {
             expiresAt: string;
             consentRequest: components["schemas"]["ConsentRequestState"] | null;
         };
+        LearnerSummary: {
+            id: number;
+            firstName: string;
+        };
         /** @description Niveau (WJ02) : introduction vidéo (identifiant et hachage, ADR 0004) et missions. */
         LevelDetail: {
             id: number;
@@ -2348,7 +3317,7 @@ export interface components {
             /** Rôle */
             readonly role: (components["schemas"]["RoleEnum"] | components["schemas"]["NullEnum"]) | null;
             /** Statut */
-            readonly status: components["schemas"]["MeStatusEnum"];
+            readonly status: components["schemas"]["UserStatusEnum"];
             /** Identifiant */
             readonly username: string | null;
             /** Téléphone */
@@ -2377,15 +3346,6 @@ export interface components {
             /** @description Compteurs du shell de l'apprenant (parcours, certificats, badges), null pour les autres rôles */
             readonly counters: components["schemas"]["LearnerCounters"] | null;
         };
-        /**
-         * @description * `pending` - En attente de consentement
-         *     * `active` - Actif
-         *     * `suspended` - Suspendu
-         *     * `deactivated` - Désactivé
-         *     * `anonymized` - Anonymisé
-         * @enum {string}
-         */
-        MeStatusEnum: "pending" | "active" | "suspended" | "deactivated" | "anonymized";
         MissionBlock: {
             type: components["schemas"]["MissionBlockTypeEnum"];
             text?: string;
@@ -2443,6 +3403,36 @@ export interface components {
             /** Icône */
             icon?: string;
         };
+        /** @description Mobile Money préféré (WPD08) : pays, réseau activé de ce pays (D76) et numéro de ce pays. */
+        MobileMoney: {
+            /**
+             * Code ISO
+             * @description Code ISO
+             */
+            country: string;
+            /** @description Code du réseau (`payment-networks`) */
+            network: string;
+            phone: string;
+        };
+        /** @description Mobile Money préféré (WPD08) : pays, réseau activé de ce pays (D76) et numéro de ce pays. */
+        MobileMoneyRequest: {
+            /**
+             * Code ISO
+             * @description Code ISO
+             */
+            country: string;
+            /** @description Code du réseau (`payment-networks`) */
+            network: string;
+            phone: string;
+        };
+        /** @description Le parent vu par l'apprenant (WD22) : nom et lien de parenté, ni numéro ni email. */
+        MyParent: {
+            firstName: string;
+            lastName: string;
+            relationship: components["schemas"]["Relationship"];
+            /** Format: date-time */
+            linkedAt: string;
+        };
         /** @description Étape suivante : mission ou quiz à faire, ou certification quand tout le parcours est fait. */
         NextStep: {
             type: components["schemas"]["NextStepTypeEnum"];
@@ -2479,29 +3469,164 @@ export interface components {
         };
         /** @enum {unknown} */
         NullEnum: null;
+        /**
+         * @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison, les Kit Codes (C10) et la facture
+         *     (C12, `GET …/invoice/` quand `pdfStatus` vaut `ready`).
+         */
         Order: {
-            readonly id: number;
+            /** Référence */
             readonly reference: string;
-            readonly user: number;
-            /** Format: decimal */
-            readonly total: string;
+            /** Type */
+            readonly kind: components["schemas"]["OrderKindEnum"];
+            /** Statut */
+            readonly status: components["schemas"]["OrderStatusEnum"];
+            /** Livraison */
+            readonly shippingStatus: components["schemas"]["ShippingStatusEnum"];
+            /** Sous-total (FCFA) */
+            readonly subtotal: number;
+            /** Frais de livraison (FCFA) */
+            readonly shippingFee: number;
+            /** Total (FCFA) */
+            readonly total: number;
+            /** Devise */
             readonly currency: string;
-            readonly paid: boolean;
-            /** Format: date-time */
-            readonly createdAt: string;
             readonly items: components["schemas"]["OrderItem"][];
+            readonly beneficiary: components["schemas"]["Beneficiary"] | null;
+            readonly deliveryZone: components["schemas"]["DeliveryZoneSummary"];
+            /**
+             * Expire le
+             * Format: date-time
+             */
+            readonly expiresAt: string;
+            /**
+             * Payée le
+             * Format: date-time
+             */
+            readonly paidAt: string | null;
+            /**
+             * Créée le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+            readonly deliveryAddress: components["schemas"]["OrderDeliveryAddress"] | null;
+            readonly kitCodes: components["schemas"]["KitCode"][];
+            readonly invoice: components["schemas"]["InvoiceSummary"] | null;
+        };
+        /**
+         * @description * `course` - course
+         *     * `kit` - kit
+         * @enum {string}
+         */
+        OrderCreateKindEnum: "course" | "kit";
+        /**
+         * @description `kind=course` : un parcours payant pour un enfant du parent (`beneficiaryId`). `kind=kit` : des kits livrés
+         *     (`deliveryAddress`), pour le parent (bénéficiaire facultatif) ou pour un invité (`guest`, sans compte, D12).
+         *     Les commandes d'événement naissent de la candidature (API-L3b.6). `paymentRequestId` (WPD15) : la commande
+         *     règle la demande de l'enfant ; type, lignes et bénéficiaire viennent alors de la demande, seule l'adresse de
+         *     livraison d'un kit est à fournir.
+         */
+        OrderCreateRequest: {
+            kind?: components["schemas"]["OrderCreateKindEnum"];
+            items?: components["schemas"]["OrderItemInputRequest"][];
+            /** @description Demande de paiement de l'enfant réglée par cette commande (WPD15) */
+            paymentRequestId?: number;
+            /** @description Enfant du parent */
+            beneficiaryId?: number;
+            /** @description Achat de kit sans compte */
+            guest?: components["schemas"]["GuestInputRequest"];
+            deliveryAddress?: components["schemas"]["DeliveryAddressInputRequest"];
+        };
+        /**
+         * @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison, les Kit Codes (C10) et la facture
+         *     (C12, `GET …/invoice/` quand `pdfStatus` vaut `ready`).
+         */
+        OrderCreated: {
+            /** Référence */
+            readonly reference: string;
+            /** Type */
+            readonly kind: components["schemas"]["OrderKindEnum"];
+            /** Statut */
+            readonly status: components["schemas"]["OrderStatusEnum"];
+            /** Livraison */
+            readonly shippingStatus: components["schemas"]["ShippingStatusEnum"];
+            /** Sous-total (FCFA) */
+            readonly subtotal: number;
+            /** Frais de livraison (FCFA) */
+            readonly shippingFee: number;
+            /** Total (FCFA) */
+            readonly total: number;
+            /** Devise */
+            readonly currency: string;
+            readonly items: components["schemas"]["OrderItem"][];
+            readonly beneficiary: components["schemas"]["Beneficiary"] | null;
+            readonly deliveryZone: components["schemas"]["DeliveryZoneSummary"];
+            /**
+             * Expire le
+             * Format: date-time
+             */
+            readonly expiresAt: string;
+            /**
+             * Payée le
+             * Format: date-time
+             */
+            readonly paidAt: string | null;
+            /**
+             * Créée le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+            readonly deliveryAddress: components["schemas"]["OrderDeliveryAddress"] | null;
+            readonly kitCodes: components["schemas"]["KitCode"][];
+            readonly invoice: components["schemas"]["InvoiceSummary"] | null;
+            /** @description Invité seulement, remis une seule fois : à renvoyer dans l'en-tête X-Guest-Token */
+            readonly guestToken: string | null;
+        };
+        OrderDeliveryAddress: {
+            recipientName: string;
+            phone: string;
+            country: string;
+            zone: string;
+            city: string;
+            district: string;
+            addressLine: string;
         };
         OrderItem: {
             readonly id: number;
+            /** Libellé */
             readonly title: string;
-            readonly contentType: string | null;
-            readonly objectId: string | null;
-            /** Format: decimal */
-            readonly unitPrice: string;
+            readonly courseSlug: string;
+            readonly kitSlug: string;
+            readonly eventSlug: string;
+            /** Prix unitaire (FCFA) */
+            readonly unitPrice: number;
+            /** Quantité */
             readonly quantity: number;
-            /** Format: decimal */
-            readonly total: string;
+            /** Total (FCFA) */
+            readonly total: number;
         };
+        OrderItemInputRequest: {
+            /** @description Commande de parcours */
+            courseSlug?: string;
+            /** @description Commande de kit */
+            kitSlug?: string;
+            /** @default 1 */
+            quantity: number;
+        };
+        /**
+         * @description * `course` - Parcours
+         *     * `kit` - Kit
+         *     * `event` - Événement
+         * @enum {string}
+         */
+        OrderKindEnum: "course" | "kit" | "event";
+        /**
+         * @description * `pending` - En attente de paiement
+         *     * `paid` - Payée
+         *     * `cancelled` - Annulée
+         *     * `refunded` - Remboursée
+         * @enum {string}
+         */
+        OrderStatusEnum: "pending" | "paid" | "cancelled" | "refunded";
         /**
          * @description * `learner` - Apprenant
          *     * `parent` - Parent
@@ -2547,6 +3672,21 @@ export interface components {
             /** Format: double */
             completionRate: number | null;
         };
+        PaginatedApplicationList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["Application"][];
+        };
         PaginatedAttemptListItemList: {
             /** @example 123 */
             count?: number;
@@ -2586,6 +3726,21 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Certificate"][];
         };
+        PaginatedChildList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["Child"][];
+        };
         PaginatedConsentRequestList: {
             /** @example 123 */
             count?: number;
@@ -2615,6 +3770,21 @@ export interface components {
              */
             previous?: string | null;
             results?: components["schemas"]["CourseList"][];
+        };
+        PaginatedDeletionRequestList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["DeletionRequest"][];
         };
         PaginatedEnrollmentList: {
             /** @example 123 */
@@ -2691,7 +3861,7 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Order"][];
         };
-        PaginatedPaymentList: {
+        PaginatedPaymentRequestList: {
             /** @example 123 */
             count?: number;
             /**
@@ -2704,7 +3874,7 @@ export interface components {
              * @example http://api.example.org/accounts/?page=2
              */
             previous?: string | null;
-            results?: components["schemas"]["Payment"][];
+            results?: components["schemas"]["PaymentRequest"][];
         };
         PaginatedSteamyEventList: {
             /** @example 123 */
@@ -2750,6 +3920,7 @@ export interface components {
             /** Enfants à inscrire */
             readonly childrenToEnroll: number | null;
             readonly goalsForChildren: components["schemas"]["Goal"][];
+            readonly mobileMoney: components["schemas"]["MobileMoney"] | null;
             /** @description Étape de profil restante, null si le profil est complet */
             readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
         };
@@ -2778,6 +3949,25 @@ export interface components {
         PasswordResetRequestRequest: {
             /** @description Numéro du parent ou email de l'enseignant (C7) */
             identifier: string;
+        };
+        PatchedCartItemUpdateRequest: {
+            quantity?: number;
+        };
+        /** @description WPD10. L'identifiant ne se modifie pas (C12) ; le mot de passe passe par `password-reset/` (D26). */
+        PatchedChildUpdateRequest: {
+            firstName?: string;
+            lastName?: string;
+            /**
+             * Format: date
+             * @description Cohérente avec l'âge déclaré (D23)
+             */
+            birthDate?: string;
+            schoolGrade?: string;
+            /** @description `id` de la localité */
+            locality?: number;
+            gender?: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            disability?: string | null;
+            publicDisplayAllowed?: boolean;
         };
         PatchedLearnerProfileUpdateRequest: {
             /**
@@ -2817,6 +4007,8 @@ export interface components {
             childrenToEnroll?: number;
             /** @description Au moins un objectif (WP09) */
             goalsForChildren?: string[];
+            /** @description Mobile Money préféré ; null pour l'effacer */
+            mobileMoney?: components["schemas"]["MobileMoneyRequest"] | null;
         };
         PatchedPreferencesUpdateRequest: {
             categories?: components["schemas"]["CategoryPreferenceRequest"][];
@@ -2824,17 +4016,41 @@ export interface components {
         PatchedValuesInputRequest: {
             values?: components["schemas"]["ValueEntryRequest"][];
         };
+        /** @description État d'un paiement (WA04, WA05, WA07, WK09), interrogé jusqu'à `succeeded` ou `failed`. */
         Payment: {
             readonly id: number;
-            readonly order: number;
-            readonly provider: components["schemas"]["ProviderEnum"];
-            readonly providerTransactionId: string | null;
-            /** Format: decimal */
-            readonly amount: string;
+            readonly orderReference: string;
+            /** Statut */
+            readonly status: components["schemas"]["PaymentStatusEnum"];
+            /** Pays */
+            readonly country: string;
+            /** Réseau */
+            readonly network: string;
+            readonly msisdnMasked: string;
+            /** Montant (FCFA) */
+            readonly amount: number;
+            /** Devise */
             readonly currency: string;
-            readonly success: boolean;
+            /** Code d'échec */
+            readonly failureCode: string;
+            /** Raison de l'échec */
+            readonly failureReason: string;
             /** Format: date-time */
             readonly createdAt: string;
+            /**
+             * Confirmé le
+             * Format: date-time
+             */
+            readonly confirmedAt: string | null;
+        };
+        /** @description Mobile Money uniquement : pays, réseau (référentiel `payment-networks`) et numéro du payeur (D76). */
+        PaymentCreateRequest: {
+            /** @description Code ISO (BJ) */
+            country: string;
+            /** @description Code du réseau (mtn, moov, celtiis…) */
+            network: string;
+            /** @description Numéro Mobile Money qui validera le paiement */
+            msisdn: string;
         };
         PaymentNetwork: {
             readonly id: number;
@@ -2844,6 +4060,66 @@ export interface components {
             /** @description Code ISO du pays */
             country: string;
         };
+        /** @description Demande vue par l'enfant (WA02, WK08) et par son parent (WPD01, WPD15). */
+        PaymentRequest: {
+            readonly id: number;
+            /** Type */
+            readonly kind: components["schemas"]["OrderKindEnum"];
+            /** Statut */
+            readonly status: components["schemas"]["PaymentStatusEnum"];
+            readonly course: components["schemas"]["CourseSummary"] | null;
+            readonly items: components["schemas"]["PaymentRequestItem"][];
+            /**
+             * Montant (FCFA)
+             * @description Hors frais de livraison
+             */
+            readonly amount: number;
+            readonly learner: components["schemas"]["Beneficiary"];
+            readonly parentFirstName: string;
+            /**
+             * Créée le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+            /**
+             * Expire le
+             * Format: date-time
+             */
+            readonly expiresAt: string;
+            /**
+             * Dernier envoi
+             * Format: date-time
+             */
+            readonly lastSentAt: string;
+            /** Format: date-time */
+            readonly nextResendAt: string | null;
+            /**
+             * Traitée le
+             * Format: date-time
+             */
+            readonly decidedAt: string | null;
+            readonly orderReference: string | null;
+        };
+        /** @description `kind=course` : `courseSlug`. `kind=kit` : `items` (souvent le panier). Montant recalculé par le serveur. */
+        PaymentRequestCreateRequest: {
+            kind: components["schemas"]["OrderCreateKindEnum"];
+            courseSlug?: string;
+            items?: components["schemas"]["OrderItemInputRequest"][];
+        };
+        PaymentRequestItem: {
+            kitSlug: string;
+            title: string;
+            unitPrice: number;
+            quantity: number;
+        };
+        /**
+         * @description * `initiated` - Initié
+         *     * `pending` - En attente de validation
+         *     * `succeeded` - Réussi
+         *     * `failed` - Échoué
+         * @enum {string}
+         */
+        PaymentStatusEnum: "initiated" | "pending" | "succeeded" | "failed";
         /**
          * @description * `pending` - En préparation
          *     * `ready` - Prêt
@@ -2851,6 +4127,27 @@ export interface components {
          * @enum {string}
          */
         PdfStatusEnum: "pending" | "ready" | "failed";
+        PendingAction: {
+            type: components["schemas"]["PendingActionTypeEnum"];
+            /** @description Identifiant de la demande, dans son type */
+            id: string;
+            /** @description Enfant rattaché ; null pour un consentement (pas encore de lien) */
+            childId: number | null;
+            childFirstName: string;
+            childLastName: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description Route du front où traiter la demande */
+            url: string;
+        };
+        /**
+         * @description * `consent` - Consentement (WPD05)
+         *     * `payment_request` - Demande de paiement (WPD15)
+         *     * `event_application` - Candidature à un événement (WPD06)
+         *     * `deletion_request` - Demande de suppression (WPD09)
+         * @enum {string}
+         */
+        PendingActionTypeEnum: "consent" | "payment_request" | "event_application" | "deletion_request";
         Period: {
             /** @description 2026-01, 2026-t1 ou 2026 */
             key: string;
@@ -2865,6 +4162,12 @@ export interface components {
              * @description Dernier jour (inclus)
              */
             end: string;
+        };
+        PhoneChangeRequest: {
+            /** @description Nouveau numéro, saisi librement ; normalisé en E.164 */
+            phone: string;
+            /** @description Mot de passe actuel */
+            password: string;
         };
         Preferences: {
             /**
@@ -2936,12 +4239,6 @@ export interface components {
             materials?: unknown;
             readonly levels: components["schemas"]["LevelSummary"][];
         };
-        /**
-         * @description * `kkiapay` - Kkiapay
-         *     * `fedapay` - FedaPay
-         * @enum {string}
-         */
-        ProviderEnum: "kkiapay" | "fedapay";
         Question: {
             id: number;
             order: number;
@@ -3130,6 +4427,13 @@ export interface components {
         ResetToken: {
             resetToken: string;
         };
+        RestockAlertAck: {
+            ok: boolean;
+        };
+        RestockAlertRequest: {
+            /** @description Invité seulement : un connecté est prévenu sur son compte */
+            phone?: string;
+        };
         ResumeRequest: {
             username: string;
             resumeCode: string;
@@ -3153,6 +4457,13 @@ export interface components {
             /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
             value: (number | boolean | string) | null;
         };
+        /**
+         * @description * `preparing` - En préparation
+         *     * `shipped` - Expédiée
+         *     * `delivered` - Livrée
+         * @enum {string}
+         */
+        ShippingStatusEnum: "preparing" | "shipped" | "delivered";
         /**
          * @description * `free` - Parcours gratuit
          *     * `order` - Commande
@@ -3291,6 +4602,19 @@ export interface components {
             /** Format: date-time */
             expiresAt: string;
         };
+        /** @description Ticket Steamy Events offert à la certification (D33), utilisable une fois (C12). */
+        Ticket: {
+            readonly id: number;
+            readonly courseSlug: string;
+            readonly courseTitle: string;
+            /**
+             * Offert le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+            readonly used: boolean;
+            readonly usedFor: components["schemas"]["EventSummary"] | null;
+        };
         Todo: {
             /** @description consents_pending (d'autres types suivront avec API-L3b) */
             kind: string;
@@ -3383,6 +4707,15 @@ export interface components {
         UnreadCount: {
             count: number;
         };
+        /**
+         * @description * `pending` - En attente de consentement
+         *     * `active` - Actif
+         *     * `suspended` - Suspendu
+         *     * `deactivated` - Désactivé
+         *     * `anonymized` - Anonymisé
+         * @enum {string}
+         */
+        UserStatusEnum: "pending" | "active" | "suspended" | "deactivated" | "anonymized";
         UsernameAvailabilityResponse: {
             available: boolean;
         };
@@ -3398,6 +4731,37 @@ export interface components {
         WebhookNack: {
             ok: boolean;
         };
+        WeeklyReport: {
+            /** @description Semaine ISO `AAAA-Www` */
+            week: string;
+            /**
+             * Format: date
+             * @description Lundi
+             */
+            startDate: string;
+            /**
+             * Format: date
+             * @description Dimanche
+             */
+            endDate: string;
+            /** @description Null pour la première semaine acceptée (2000-W01) */
+            previousWeek: string | null;
+            /** @description Null pour la semaine en cours */
+            nextWeek: string | null;
+            /** @description Temps d'apprentissage (journal, D55) */
+            seconds: number;
+            missionsCompleted: number;
+            quizzesPassed: number;
+            /** @description 7 jours, du lundi au dimanche */
+            days: components["schemas"]["DaySeconds"][];
+            /** @description Progression actuelle par parcours */
+            courses: components["schemas"]["Enrollment"][];
+            /**
+             * Format: email
+             * @description Adresse où le rapport est envoyé chaque semaine, null sans email
+             */
+            email: string | null;
+        };
         WishlistItem: {
             course: components["schemas"]["CourseList"];
             /** Format: date-time */
@@ -3412,6 +4776,464 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    accounts_children_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedChildList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChildCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChildDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChildDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedChildUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChildDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_deletion_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChildDeletionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChildDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_deletion_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_password_reset_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChildPasswordResetRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_weekly_report_retrieve: {
+        parameters: {
+            query?: {
+                /** @description `AAAA-Www` ; par défaut, la semaine en cours */
+                week?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WeeklyReport"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_consent_requests_list: {
         parameters: {
             query?: {
@@ -3843,6 +5665,229 @@ export interface operations {
             };
         };
     };
+    accounts_deletion_requests_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedDeletionRequestList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_deletion_requests_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionRequest"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_deletion_requests_approve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_deletion_requests_refuse_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_me_retrieve: {
         parameters: {
             query?: never;
@@ -3905,6 +5950,244 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_deletion_request_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionRequest"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_deletion_request_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["DeletionRequestCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_deletion_request_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_delivery_address_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryAddress"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_delivery_address_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeliveryAddressRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryAddress"];
                 };
             };
             400: {
@@ -4093,6 +6376,92 @@ export interface operations {
             };
         };
     };
+    accounts_me_parent_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyParent"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_parent_profile_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParentProfile"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_me_parent_profile_partial_update: {
         parameters: {
             query?: never;
@@ -4174,6 +6543,159 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_phone_change_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PhoneChangeRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OtpChallenge"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_phone_change_verify_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpVerifyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_pending_actions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PendingAction"][];
                 };
             };
             401: {
@@ -5567,6 +8089,297 @@ export interface operations {
             };
         };
     };
+    events_applications_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ApplicationCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Application"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    events_applications_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedApplicationList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    events_applications_accept_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Application"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    events_applications_refuse_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ApplicationRefuseRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Application"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    events_tickets_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ticket"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     health_retrieve: {
         parameters: {
             query?: never;
@@ -6872,6 +9685,69 @@ export interface operations {
             };
         };
     };
+    payments_kit_codes_redeem_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KitCodeRedeemRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KitCodeRedeemed"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KitCodeRedeemed"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     payments_orders_list: {
         parameters: {
             query?: {
@@ -6883,6 +9759,13 @@ export interface operations {
                 pageSize?: number;
                 /** @description A search term. */
                 search?: string;
+                /**
+                 * @description * `pending` - En attente de paiement
+                 *     * `paid` - Payée
+                 *     * `cancelled` - Annulée
+                 *     * `refunded` - Remboursée
+                 */
+                status?: "pending" | "paid" | "cancelled" | "refunded";
             };
             header?: never;
             path?: never;
@@ -6924,13 +9807,62 @@ export interface operations {
             };
         };
     };
-    payments_orders_retrieve: {
+    payments_orders_create: {
         parameters: {
             query?: never;
             header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["OrderCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderCreated"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_orders_retrieve: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Jeton d'une commande invitée, remis à sa création (C10) */
+                "X-Guest-Token"?: string;
+            };
             path: {
-                /** @description A unique integer value identifying this order. */
-                id: number;
+                reference: string;
             };
             cookie?: never;
         };
@@ -6942,6 +9874,281 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Order"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_orders_invoice_retrieve: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Jeton d'une commande invitée, remis à sa création (C10) */
+                "X-Guest-Token"?: string;
+            };
+            path: {
+                reference: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Fichier PDF */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Redirection vers l'URL présignée (5 min) */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_orders_payments_create: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Jeton d'une commande invitée, remis à sa création (C10) */
+                "X-Guest-Token"?: string;
+            };
+            path: {
+                reference: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payment_requests_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /** @description A search term. */
+                search?: string;
+                /**
+                 * @description * `pending` - En attente du parent
+                 *     * `paid` - Payée
+                 *     * `declined` - Refusée
+                 *     * `expired` - Expirée
+                 *     * `cancelled` - Annulée
+                 */
+                status?: "pending" | "paid" | "declined" | "expired" | "cancelled";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedPaymentRequestList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payment_requests_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentRequestCreateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequest"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payment_requests_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this demande de paiement. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequest"];
                 };
             };
             401: {
@@ -6978,20 +10185,14 @@ export interface operations {
             };
         };
     };
-    payments_payments_list: {
+    payments_payment_requests_cancel_create: {
         parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
+            query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /** @description A unique integer value identifying this demande de paiement. */
+                id: number;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -7001,7 +10202,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedPaymentList"];
+                    "application/json": components["schemas"]["PaymentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             401: {
@@ -7013,6 +10222,138 @@ export interface operations {
                 };
             };
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payment_requests_decline_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this demande de paiement. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payment_requests_resend_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this demande de paiement. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7033,9 +10374,12 @@ export interface operations {
     payments_payments_retrieve: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Jeton d'une commande invitée, remis à sa création (C10) */
+                "X-Guest-Token"?: string;
+            };
             path: {
-                /** @description A unique integer value identifying this payment. */
+                /** @description A unique integer value identifying this paiement. */
                 id: number;
             };
             cookie?: never;
@@ -7048,22 +10392,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Payment"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
                 };
             };
             404: {
@@ -7089,7 +10417,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                provider_name: "fedapay" | "kkiapay";
+                provider_name: "fake" | "fedapay";
             };
             cookie?: never;
         };
@@ -7338,6 +10666,33 @@ export interface operations {
             };
         };
     };
+    referentials_deletion_reasons_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionReason"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     referentials_disabilities_list: {
         parameters: {
             query?: never;
@@ -7533,6 +10888,251 @@ export interface operations {
             };
         };
     };
+    shop_cart_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cart"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_cart_items_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CartItemCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cart"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_cart_items_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_cart_items_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCartItemUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cart"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_delivery_zones_list: {
+        parameters: {
+            query?: {
+                /** @description Code ISO du pays (BJ) */
+                country?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryZone"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     shop_kits_list: {
         parameters: {
             query?: {
@@ -7584,6 +11184,63 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KitDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_kits_restock_alerts_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RestockAlertRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestockAlertAck"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             404: {

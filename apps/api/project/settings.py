@@ -1,3 +1,4 @@
+import json
 import logging.config
 import os
 import sys
@@ -293,6 +294,15 @@ REST_FRAMEWORK = {
         "invitation": os.getenv("THROTTLE_INVITATION", "20/min"),
         "password-reset": os.getenv("THROTTLE_PASSWORD_RESET", "5/hour"),
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
+        # Création de commande (réserve du stock) : par utilisateur, ou par IP pour un invité
+        "orders": os.getenv("THROTTLE_ORDERS", "30/hour"),
+        # Initiation d'un paiement (chaque essai sollicite le téléphone du payeur)
+        "payments": os.getenv("THROTTLE_PAYMENTS", "20/hour"),
+        # Kit Codes (D35) : par apprenant et par IP
+        "kit-code": os.getenv("THROTTLE_KIT_CODE", "10/hour"),
+        "kit-code-ip": os.getenv("THROTTLE_KIT_CODE_IP", "30/hour"),
+        # Alerte de réassort (un SMS par demande) : par IP pour un invité
+        "restock-alert": os.getenv("THROTTLE_RESTOCK_ALERT", "10/hour"),
         # Formulaires publics (devis, newsletter, contact) : par IP
         "public-form": os.getenv("THROTTLE_PUBLIC_FORM", "10/hour"),
     },
@@ -321,6 +331,8 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "ErrorCodeEnum": "libs.errors.ERROR_CODES",
         "RoleEnum": "apps.accounts.models.User.Role",
+        "UserStatusEnum": "apps.accounts.models.User.Status",
+        "DeletionRequestStatusEnum": "apps.accounts.models.DeletionRequest.Status",
         "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
         "AttemptStatusEnum": "apps.learning.models.QuizAttempt.Status",
         "QuizKindEnum": "apps.catalog.models.Quiz.Kind",
@@ -336,6 +348,10 @@ SPECTACULAR_SETTINGS = {
         "KpiSourceEnum": "apps.impact.models.KpiDefinition.Source",
         "KpiUnitEnum": "apps.impact.models.KpiDefinition.Unit",
         "KpiPeriodicityEnum": "apps.impact.models.KpiDefinition.Periodicity",
+        "DifficultyEnum": "apps.catalog.models.Course.Difficulty",
+        "OrderKindEnum": "apps.payments.models.Order.Kind",
+        "OrderCreateKindEnum": "apps.payments.serializers.ORDER_CREATE_KINDS",
+        "OrderStatusEnum": "apps.payments.models.Order.Status",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }
@@ -348,9 +364,39 @@ CORS_ALLOWED_ORIGINS = [o for o in os.getenv("CORS_ALLOWED_ORIGINS", WEB_URL).sp
 # Origines autorisées à envoyer des requêtes protégées par CSRF (le front est sur un autre sous-domaine)
 CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", WEB_URL).split(",") if o]
 
-# Payements
-PAYMENTS_KKIAPAY_SECRET = os.getenv("PAYMENTS_KKIAPAY_SECRET", "")
-PAYMENTS_FEDAPAY_SECRET = os.getenv("PAYMENTS_FEDAPAY_SECRET", "")
+# Paiement Mobile Money (S9, ADR 0003) : faux prestataire pilotable en local, en CI et dans les e2e, FedaPay en
+# staging (bac à sable) et en production. Le faux prestataire refuse de fonctionner si DEPLOYED.
+PAYMENT_PROVIDER = os.getenv("PAYMENT_PROVIDER", "fedapay" if DEPLOYED else "fake")
+# Durée de vie d'une commande non payée, et de son stock réservé (D38)
+ORDER_TTL_MINUTES = int(os.getenv("ORDER_TTL_MINUTES", "30"))
+# Délai (secondes) avant que le faux prestataire poste son webhook : le temps de voir l'écran d'attente (WA04)
+FAKE_PAYMENT_DELAY = int(os.getenv("FAKE_PAYMENT_DELAY", "3"))
+FEDAPAY_SECRET_KEY = os.getenv("FEDAPAY_SECRET_KEY", "")
+FEDAPAY_WEBHOOK_SECRET = os.getenv("FEDAPAY_WEBHOOK_SECRET", "")
+FEDAPAY_ENVIRONMENT = os.getenv("FEDAPAY_ENVIRONMENT", "sandbox")
+# Page de retour du mode redirection : inutilisée par le débit direct, mais exigée par FedaPay
+FEDAPAY_CALLBACK_URL = os.getenv("FEDAPAY_CALLBACK_URL", WEB_URL)
+# Mode de débit direct FedaPay (`POST /v1/{mode}`) par « PAYS:réseau » (référentiel PaymentNetwork, D76). À
+# confirmer dans le bac à sable, Celtiis surtout (ADR 0003, inconnue 1) ; surchargeable en JSON.
+FEDAPAY_MODES = json.loads(
+    os.getenv(
+        "FEDAPAY_MODES",
+        '{"BJ:mtn": "mtn_open", "BJ:moov": "moov", "BJ:celtiis": "sbin", '
+        '"TG:moov": "moov_tg", "CI:mtn": "mtn_ci"}',
+    )
+)
+# Factures (ADR 0005) : le format légal attend la comptabilité (P1 facture normalisée MECeF, P2 TVA). Tout ce qui a
+# une valeur légale est réglé ici, jamais inventé dans le code ; par défaut, un « reçu » non fiscal sans TVA.
+INVOICE_PROVISIONAL = os.getenv("INVOICE_PROVISIONAL", "true").lower() == "true"
+# Vendeur imprimé (seuls les champs renseignés) : {"name", "address", "tax_id" (IFU), "registration" (RCCM), …}
+INVOICE_SELLER = json.loads(os.getenv("INVOICE_SELLER", '{"name": "Steamy"}'))
+# Taux de TVA en % (vide : aucune ventilation) et prix catalogue TTC ou HT
+INVOICE_VAT_RATE = float(os.getenv("INVOICE_VAT_RATE")) if os.getenv("INVOICE_VAT_RATE") else None
+INVOICE_PRICES_INCLUDE_VAT = os.getenv("INVOICE_PRICES_INCLUDE_VAT", "true").lower() == "true"
+# Mentions légales supplémentaires (liste JSON de lignes)
+INVOICE_MENTIONS = json.loads(os.getenv("INVOICE_MENTIONS", "[]"))
+# Identifiants FedaPay des devises, quand une notification ne donne que `currency_id`
+FEDAPAY_CURRENCY_IDS = json.loads(os.getenv("FEDAPAY_CURRENCY_IDS", '{"1": "XOF"}'))
 
 # SMS (S10, ADR 0002) : faux fournisseur (lisible dans Mailpit) en local et en CI, Twilio en staging et production.
 # Le faux fournisseur refuse de fonctionner si DEPLOYED.
@@ -503,6 +549,14 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.accounts.tasks.purge_refused_requests",
         "schedule": crontab(minute=30, hour=3),
     },
+    "anonymize-due-accounts": {
+        "task": "apps.accounts.tasks.anonymize_due_accounts",
+        "schedule": crontab(minute=45, hour=3),
+    },
+    "send-weekly-reports": {
+        "task": "apps.accounts.tasks.send_weekly_reports",
+        "schedule": crontab(minute=0, hour=7, day_of_week=1),
+    },
     # Filet de sécurité des PDF de certificats (ADR 0005 §3)
     "retry-pending-certificates": {
         "task": "apps.learning.tasks.retry_pending_certificates",
@@ -512,6 +566,22 @@ CELERY_BEAT_SCHEDULE = {
     "aggregate-daily-stats": {
         "task": "apps.impact.tasks.aggregate_daily_stats",
         "schedule": crontab(minute=0, hour=2),
+    },
+    "release-expired-reservations": {
+        "task": "apps.payments.tasks.release_expired_reservations",
+        "schedule": crontab(minute="*/5"),
+    },
+    "reconcile-pending-payments": {
+        "task": "apps.payments.tasks.reconcile_pending_payments",
+        "schedule": crontab(minute="*/5"),
+    },
+    "retry-pending-invoices": {
+        "task": "apps.payments.tasks.retry_pending_invoices",
+        "schedule": crontab(minute="*/10"),
+    },
+    "expire-payment-requests": {
+        "task": "apps.payments.tasks.expire_payment_requests",
+        "schedule": crontab(minute=45),
     },
 }
 # optional default task time limits

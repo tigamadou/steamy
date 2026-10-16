@@ -116,7 +116,7 @@ Dans **Settings → Environments**, créer `staging` et `production`. Sur `produ
 | `WASABI_ACCESS_KEY_ID` / `WASABI_SECRET_ACCESS_KEY` | Clé Wasabi de l'étape 3 |
 | `GHCR_PULL_TOKEN` | Token GitHub (classic) avec le seul scope `read:packages` |
 | `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | SMTP (optionnel) |
-| `PAYMENTS_KKIAPAY_SECRET` / `PAYMENTS_FEDAPAY_SECRET` | Paiements, en sandbox pour staging (optionnel) |
+| `FEDAPAY_SECRET_KEY` / `FEDAPAY_WEBHOOK_SECRET` | Paiements ([ADR 0003](../adr/0003-prestataire-paiement.md)) : tableau de bord FedaPay → *Clés API* et *Webhooks* (URL `https://<api>/api/payments/webhook/fedapay/`). Staging : clés du **bac à sable**. Sans elles, aucun paiement ne peut être initié |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | SMS ([ADR 0002](../adr/0002-fournisseur-sms.md)) : console Twilio → *Account Info*. Staging : identifiants **de test** (aucun SMS réel). Production : compte avec plafond de dépense et alerte de solde. Sans eux, l'OTP et les liens de consentement ne partent pas |
 
 > ⚠️ Changer `RUSTFS_*` après le premier déploiement redémarre RustFS avec les nouveaux identifiants
