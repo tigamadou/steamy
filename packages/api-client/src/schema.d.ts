@@ -391,7 +391,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** @description WPD08 : profil du parent connecté. */
+        get: operations["accounts_me_parent_profile_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -412,6 +413,40 @@ export interface paths {
         put?: never;
         /** @description Changement de mot de passe (WD18, WPD08, WT08). La session en cours reste ouverte. */
         post: operations["accounts_me_password_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/me/phone-change/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Envoie un code au nouveau numéro ; le renvoi passe par `auth/otp/resend/`. */
+        post: operations["accounts_me_phone_change_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/me/phone-change/verify/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Code valide : le numéro de connexion est remplacé. */
+        post: operations["accounts_me_phone_change_verify_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3281,6 +3316,28 @@ export interface components {
             /** Icône */
             icon?: string;
         };
+        /** @description Mobile Money préféré (WPD08) : pays, réseau activé de ce pays (D76) et numéro de ce pays. */
+        MobileMoney: {
+            /**
+             * Code ISO
+             * @description Code ISO
+             */
+            country: string;
+            /** @description Code du réseau (`payment-networks`) */
+            network: string;
+            phone: string;
+        };
+        /** @description Mobile Money préféré (WPD08) : pays, réseau activé de ce pays (D76) et numéro de ce pays. */
+        MobileMoneyRequest: {
+            /**
+             * Code ISO
+             * @description Code ISO
+             */
+            country: string;
+            /** @description Code du réseau (`payment-networks`) */
+            network: string;
+            phone: string;
+        };
         /** @description Le parent vu par l'apprenant (WD22) : nom et lien de parenté, ni numéro ni email. */
         MyParent: {
             firstName: string;
@@ -3772,6 +3829,7 @@ export interface components {
             /** Enfants à inscrire */
             readonly childrenToEnroll: number | null;
             readonly goalsForChildren: components["schemas"]["Goal"][];
+            readonly mobileMoney: components["schemas"]["MobileMoney"] | null;
             /** @description Étape de profil restante, null si le profil est complet */
             readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
         };
@@ -3858,6 +3916,8 @@ export interface components {
             childrenToEnroll?: number;
             /** @description Au moins un objectif (WP09) */
             goalsForChildren?: string[];
+            /** @description Mobile Money préféré ; null pour l'effacer */
+            mobileMoney?: components["schemas"]["MobileMoneyRequest"] | null;
         };
         PatchedPreferencesUpdateRequest: {
             categories?: components["schemas"]["CategoryPreferenceRequest"][];
@@ -3990,6 +4050,12 @@ export interface components {
              * @description Dernier jour (inclus)
              */
             end: string;
+        };
+        PhoneChangeRequest: {
+            /** @description Nouveau numéro, saisi librement ; normalisé en E.164 */
+            phone: string;
+            /** @description Mot de passe actuel */
+            password: string;
         };
         Preferences: {
             /**
@@ -6111,6 +6177,49 @@ export interface operations {
             };
         };
     };
+    accounts_me_parent_profile_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParentProfile"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_me_parent_profile_partial_update: {
         parameters: {
             query?: never;
@@ -6185,6 +6294,116 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_phone_change_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PhoneChangeRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OtpChallenge"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_phone_change_verify_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpVerifyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
             };
             400: {
                 headers: {
