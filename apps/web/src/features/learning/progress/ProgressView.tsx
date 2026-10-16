@@ -7,7 +7,7 @@ import { StatPill } from "@/components/ds/StatPill";
 import { WeeklyActivityBars, type ActivityDay } from "@/components/ds/WeeklyActivityBars";
 import { getServerApi } from "@/lib/api";
 
-import { formatMinutes } from "../format";
+import { formatMinutes } from "@/lib/format";
 import { Recommendations } from "../Recommendations";
 
 const TZ = "Africa/Porto-Novo";
