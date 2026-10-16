@@ -113,7 +113,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > Super-admin. Échéance du rapport : 15 jours après la fin du trimestre (hypothèse d'API-L6.4).
   > Contraste : le texte secondaire des primitives de 6.6 passe de `ink-500` (4,44:1 sur blanc) à `ink-600`, relevé par
   > axe une fois les données affichées.
-- [ ] **6.8** Impact Tracker : tableau de bord et détail · `feature/lot6-impact-kpi` · PR #PR68 (requiert 6.6, API-L6.4)
+- [ ] **6.8** Impact Tracker : tableau de bord et détail · `feature/lot6-impact-kpi` · PR #100 (requiert 6.6, API-L6.4)
   - [x] Vérifier les prérequis `API-L6` : 30 `KpiDefinition` en 8 groupes, calcul nocturne, statut D73, KPI d'inclusion, « Nouvelles institutions »
   - [ ] WAD02 (Next.js) `/backoffice/impact?periode=` : boutons vers WAD05 et WAD04, légende des sources, `SegmentedControl` synchronisé avec l'URL, KPI principaux, cartes démographiques, groupes de KPI (`Sparkline`, `KpiStatusBadge`)
     - [x] Légende des sources, `SegmentedControl` synchronisé avec l'URL, KPI principaux, cartes démographiques, groupes de KPI
