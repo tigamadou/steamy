@@ -117,7 +117,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   - [x] Vérifier les prérequis `API-L6` : 30 `KpiDefinition` en 8 groupes, calcul nocturne, statut D73, KPI d'inclusion, « Nouvelles institutions »
   - [x] WAD02 (Next.js) `/backoffice/impact?periode=` : boutons vers WAD05 et WAD04, légende des sources, `SegmentedControl` synchronisé avec l'URL, KPI principaux, cartes démographiques, groupes de KPI (`Sparkline`, `KpiStatusBadge`)
     - [x] Légende des sources, `SegmentedControl` synchronisé avec l'URL, KPI principaux, cartes démographiques, groupes de KPI
-    - [x] Boutons « Saisie manuelle » (WAD05) et « Rapport trimestriel » (WAD04) : livrés avec leurs pages, étape 6.9 (PR #PR69)
+    - [x] Boutons « Saisie manuelle » (WAD05) et « Rapport trimestriel » (WAD04) : livrés avec leurs pages, étape 6.9 (PR #106)
   - [x] WAD03 (Next.js) `/backoffice/impact/indicateurs/[code]` : statut, valeur, cible, taux d'atteinte, `BarChart` par période, historique, composition (`DonutChart`), définition serveur
   - [x] Branchement API : `backoffice/kpis/?period=` et `kpis/{code}/` ; pas de recalcul du statut côté front ni de tuiles « Activer / Configurer la collecte » (D75)
   - [x] Tests pytest (API-L6) : valeurs de référence de chaque KPI `auto` sur un jeu de test dédié (D2 non chargé par les tests), table de vérité de `kpiStatus`, bornes de période
@@ -134,8 +134,8 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > `DataTable` (6.6) : zone défilante nommée par la légende du tableau, focalisable seulement quand son contenu
   > déborde (`ScrollRegion`, #103), relevée par axe à 360 px sur WAD03.
   > Reprise : 6.7 (#93), 6.8 (#100) et leurs suites de relecture (#103) fusionnées ; 6.9 livrée sans exports
-  > (PR #PR69). Reste : les exports CSV / PDF de 6.9, dès que leurs endpoints existent (API-L6.4).
-- [ ] **6.9** Rapport trimestriel, saisie manuelle, exports · `feature/lot6-impact-rapport` · PR #PR69 (requiert 6.8, API-L6.4)
+  > (PR #106). Reste : les exports CSV / PDF de 6.9, dès que leurs endpoints existent (API-L6.4).
+- [ ] **6.9** Rapport trimestriel, saisie manuelle, exports · `feature/lot6-impact-rapport` · PR #106 (requiert 6.8, API-L6.4)
   - [ ] WAD04 (Next.js) `/backoffice/impact/rapports/[periode]` : en-tête, `DataTable`, exports CSV / PDF, « Soumettre » avec modale de confirmation et verrouillage
     - [x] En-tête (trimestre, statut, complétude, échéances), `DataTable` des lignes serveur, « Soumettre » avec confirmation et verrouillage
     - [ ] « Exporter CSV » / « Exporter PDF » : endpoints d'export absents d'API-L6.4

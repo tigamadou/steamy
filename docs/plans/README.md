@@ -67,7 +67,7 @@ plan.
 | [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | 🟡 en cours | 3.0 shell (PR #92) | 3.1 accueil et notifications |
 | [LOT-4-PARENT](LOT-4-PARENT.md) | 🟡 en cours | 4.0 maquette de WPD15 et des états manquants dessinée (PR #72), validation C18 en attente | Validation C18 de WPD15 ; 4.1 après API-L4 |
 | [LOT-5-ENSEIGNANT](LOT-5-ENSEIGNANT.md) | ⬜ à faire | — | 5.1 (après API-L5) |
-| [LOT-6-ADMIN](LOT-6-ADMIN.md) | 🟡 en cours | 6.1 (PR #38) · 6.6 (PR #62) · 6.7 (PR #93) · 6.8 (PR #100) · 6.9 sans exports (PR #PR69) | 6.2 à 6.5 après leurs étapes d'API ; exports de 6.9 après leurs endpoints |
+| [LOT-6-ADMIN](LOT-6-ADMIN.md) | 🟡 en cours | 6.1 (PR #38) · 6.6 (PR #62) · 6.7 (PR #93) · 6.8 (PR #100) · 6.9 sans exports (PR #106) | 6.2 à 6.5 après leurs étapes d'API ; exports de 6.9 après leurs endpoints |
 
 ## Suivi d'exécution
 
