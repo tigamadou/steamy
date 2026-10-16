@@ -355,6 +355,59 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/accounts/children/{id}/weekly-report/:
+    get:
+      operationId: accounts_children_weekly_report_retrieve
+      description: 'WPD11 : semaine ISO (`?week=AAAA-Www`), navigation vers les semaines
+        précédentes (D55).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: query
+        name: week
+        schema:
+          type: string
+          minLength: 1
+        description: '`AAAA-Www` ; par défaut, la semaine en cours'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyReport'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/consent-requests/:
     get:
       operationId: accounts_consent_requests_list
@@ -11843,6 +11896,61 @@ components:
           type: boolean
       required:
       - ok
+    WeeklyReport:
+      type: object
+      properties:
+        week:
+          type: string
+          description: Semaine ISO `AAAA-Www`
+        startDate:
+          type: string
+          format: date
+          description: Lundi
+        endDate:
+          type: string
+          format: date
+          description: Dimanche
+        previousWeek:
+          type: string
+        nextWeek:
+          type: string
+          nullable: true
+          description: Null pour la semaine en cours
+        seconds:
+          type: integer
+          description: Temps d'apprentissage (journal, D55)
+        missionsCompleted:
+          type: integer
+        quizzesPassed:
+          type: integer
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/DaySeconds'
+          description: 7 jours, du lundi au dimanche
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Enrollment'
+          description: Progression actuelle par parcours
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Adresse où le rapport est envoyé chaque semaine, null sans
+            email
+      required:
+      - courses
+      - days
+      - email
+      - endDate
+      - missionsCompleted
+      - nextWeek
+      - previousWeek
+      - quizzesPassed
+      - seconds
+      - startDate
+      - week
     WishlistItem:
       type: object
       properties:

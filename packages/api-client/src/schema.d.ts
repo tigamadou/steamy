@@ -81,6 +81,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/accounts/children/{id}/weekly-report/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WPD11 : semaine ISO (`?week=AAAA-Www`), navigation vers les semaines précédentes (D55). */
+        get: operations["accounts_children_weekly_report_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/accounts/consent-requests/": {
         parameters: {
             query?: never;
@@ -4713,6 +4730,36 @@ export interface components {
         WebhookNack: {
             ok: boolean;
         };
+        WeeklyReport: {
+            /** @description Semaine ISO `AAAA-Www` */
+            week: string;
+            /**
+             * Format: date
+             * @description Lundi
+             */
+            startDate: string;
+            /**
+             * Format: date
+             * @description Dimanche
+             */
+            endDate: string;
+            previousWeek: string;
+            /** @description Null pour la semaine en cours */
+            nextWeek: string | null;
+            /** @description Temps d'apprentissage (journal, D55) */
+            seconds: number;
+            missionsCompleted: number;
+            quizzesPassed: number;
+            /** @description 7 jours, du lundi au dimanche */
+            days: components["schemas"]["DaySeconds"][];
+            /** @description Progression actuelle par parcours */
+            courses: components["schemas"]["Enrollment"][];
+            /**
+             * Format: email
+             * @description Adresse où le rapport est envoyé chaque semaine, null sans email
+             */
+            email: string | null;
+        };
         WishlistItem: {
             course: components["schemas"]["CourseList"];
             /** Format: date-time */
@@ -5093,6 +5140,62 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_weekly_report_retrieve: {
+        parameters: {
+            query?: {
+                /** @description `AAAA-Www` ; par défaut, la semaine en cours */
+                week?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WeeklyReport"];
                 };
             };
             401: {

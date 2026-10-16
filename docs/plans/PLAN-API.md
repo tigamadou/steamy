@@ -634,9 +634,14 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > effacent leurs données sur le signal `account_anonymized` ; adresse de livraison, alertes de
   > réassort et pseudonyme public sont effacés directement. Contraintes
   > « identifiant par rôle » levées pour un compte anonymisé.
-- [ ] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo`
-  - [ ] `GET accounts/children/{id}/weekly-report/?week=AAAA-Www`
-  - [ ] Tâche hebdomadaire `send_weekly_reports` (D55)
+- [x] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo` · PR #102
+  - [x] `GET accounts/children/{id}/weekly-report/?week=AAAA-Www`
+  - [x] Tâche hebdomadaire `send_weekly_reports` (D55)
+  > Décisions : semaine ISO, lundi → dimanche au fuseau du Bénin ; réponse `{ week, startDate, endDate,
+  > previousWeek, nextWeek (null pour la semaine en cours), seconds, missionsCompleted, quizzesPassed, days[7],
+  > courses, email }` ; `week` invalide → `fields.week` `INVALID`. Le lundi à 7 h, une notification
+  > « Progression » par enfant actif pour la semaine écoulée (`/parent/enfants/<id>/rapport?semaine=AAAA-Www`) ;
+  > l'email part si le parent a une adresse et n'a pas coupé l'email « Progression » (`notify`).
 - [x] **API-L4.5** Changement de téléphone · `feature/api-l4-5-changement-telephone` · PR #78
   - [x] `POST accounts/me/phone-change/`, `…/verify/` (OTP sur le nouveau numéro)
   - [x] Préférences parent
@@ -646,7 +651,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > reçues ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
   > ajout du **Mobile Money préféré** (`ParentProfile.mobileMoney` `{ country, network, phone }`, réseau activé du
   > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
-  > Reprise : PR en chaîne #75 → #77 → #78 → #79 → #80 (fusion dans cet ordre), puis L4.4. Restent les
+  > Reprise : PR en chaîne #75 → #77 → #78 → #79 → #80 → #102 (fusion dans cet ordre). Restent les
   > critères de fin d'API-L4 (seed enrichi).
 - [ ] **Critères de fin d'API-L4**
   - [ ] Un `childId` étranger → 404 partout
