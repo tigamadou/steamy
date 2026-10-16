@@ -2,8 +2,9 @@ import type { Schemas } from "@steamy/api-client";
 
 import { Button } from "@/components/ds/Button";
 import { ProgressBar } from "@/components/ds/ProgressBar";
+import { formatMinutes } from "@/lib/format";
 
-import { formatMinutes, position } from "./format";
+import { position } from "./format";
 import { nextStepHref, nextStepLabel } from "./next-step";
 import { remainingMinutes } from "./tree";
 
