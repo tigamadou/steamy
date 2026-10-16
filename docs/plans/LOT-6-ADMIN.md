@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API), 6.8 puis 6.9 · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API), 6.9 (après 6.8) · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -113,14 +113,24 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > Super-admin. Échéance du rapport : 15 jours après la fin du trimestre (hypothèse d'API-L6.4).
   > Contraste : le texte secondaire des primitives de 6.6 passe de `ink-500` (4,44:1 sur blanc) à `ink-600`, relevé par
   > axe une fois les données affichées.
-- [ ] **6.8** Impact Tracker : tableau de bord et détail · `feature/lot6-impact-kpi` (requiert 6.6, API-L6.4)
-  - [ ] Vérifier les prérequis `API-L6` : 30 `KpiDefinition` en 8 groupes, calcul nocturne, statut D73, KPI d'inclusion, « Nouvelles institutions »
+- [ ] **6.8** Impact Tracker : tableau de bord et détail · `feature/lot6-impact-kpi` · PR #PR68 (requiert 6.6, API-L6.4)
+  - [x] Vérifier les prérequis `API-L6` : 30 `KpiDefinition` en 8 groupes, calcul nocturne, statut D73, KPI d'inclusion, « Nouvelles institutions »
   - [ ] WAD02 (Next.js) `/backoffice/impact?periode=` : boutons vers WAD05 et WAD04, légende des sources, `SegmentedControl` synchronisé avec l'URL, KPI principaux, cartes démographiques, groupes de KPI (`Sparkline`, `KpiStatusBadge`)
-  - [ ] WAD03 (Next.js) `/backoffice/impact/indicateurs/[code]` : statut, valeur, cible, taux d'atteinte, `BarChart` par période, historique, composition (`DonutChart`), définition serveur
-  - [ ] Branchement API : `backoffice/kpis/?period=` et `kpis/{code}/` ; pas de recalcul du statut côté front ni de tuiles « Activer / Configurer la collecte » (D75)
-  - [ ] Tests pytest (API-L6) : valeurs de référence de chaque KPI `auto` sur D2, table de vérité de `kpiStatus`, bornes de période
-  - [ ] Tests Vitest : rendu de chaque statut
-  - [ ] Playwright : Finance change de période et ouvre un indicateur
+    - [x] Légende des sources, `SegmentedControl` synchronisé avec l'URL, KPI principaux, cartes démographiques, groupes de KPI
+    - [ ] Boutons « Saisie manuelle » (WAD05) et « Rapport trimestriel » (WAD04) : avec leurs pages, étape 6.9
+  - [x] WAD03 (Next.js) `/backoffice/impact/indicateurs/[code]` : statut, valeur, cible, taux d'atteinte, `BarChart` par période, historique, composition (`DonutChart`), définition serveur
+  - [x] Branchement API : `backoffice/kpis/?period=` et `kpis/{code}/` ; pas de recalcul du statut côté front ni de tuiles « Activer / Configurer la collecte » (D75)
+  - [x] Tests pytest (API-L6) : valeurs de référence de chaque KPI `auto` sur D2, table de vérité de `kpiStatus`, bornes de période
+  - [x] Tests Vitest : rendu de chaque statut
+  - [x] Playwright : Finance change de période et ouvre un indicateur
+  > Notes : prérequis vérifiés dans API-L6.4 (`apps/impact/definitions.py`, migration `0002`, tâche nocturne
+  > `aggregate_daily_stats`, `status.py`, tests `test_compute.py` et `test_periods_status.py`) ; les valeurs de
+  > référence y sont calculées sur un jeu de test dédié, pas sur D2. `make seed` ne lance pas le calcul : en
+  > développement et en e2e, les KPI `auto` restent « En attente » jusqu'à la tâche nocturne. Les boutons vers WAD04
+  > et WAD05 ne pointent pas vers des pages absentes : ils arrivent en 6.9. Groupes : ceux qui portent des
+  > sous-indicateurs (`baseCode`) s'affichent en carte d'inclusion (anneaux, base, autres indicateurs du groupe), les
+  > autres en liste. Les séries omettent les périodes sans valeur. Indicateur inconnu → 404 dans le shell
+  > (`backoffice/not-found.tsx`). La période est aussi proposée sur WAD03 et conservée entre WAD02 et WAD03.
 - [ ] **6.9** Rapport trimestriel, saisie manuelle, exports · `feature/lot6-impact-rapport` (requiert 6.8, API-L6.4)
   - [ ] WAD04 (Next.js) `/backoffice/impact/rapports/[periode]` : en-tête, `DataTable`, exports CSV / PDF, « Soumettre » avec modale de confirmation et verrouillage
   - [ ] Redirection `/backoffice/impact/rapports` vers le trimestre courant

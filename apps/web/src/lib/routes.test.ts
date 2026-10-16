@@ -8,6 +8,7 @@ describe("routes", () => {
     expect(routes.event("atelier")).toBe("/evenements/atelier");
     expect(routes.article("premier-robot")).toBe("/blog/premier-robot");
     expect(routes.legal("cgu")).toBe("/legal/cgu");
+    expect(routes.backoffice.kpi("na_f")).toBe("/backoffice/impact/indicateurs/na_f");
   });
 
   it("présélectionne le sujet du formulaire de contact", () => {

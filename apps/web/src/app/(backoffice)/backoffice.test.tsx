@@ -4,6 +4,7 @@ import type { ReactElement, ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BackofficeGate } from "@/components/backoffice/BackofficeGate";
+import { DASHBOARD, DETAIL } from "@/test/impact-fixtures";
 
 const requireGroups = vi.fn();
 const requireStaff = vi.fn();
@@ -13,7 +14,13 @@ const apiGet = vi.fn();
 vi.mock("@/lib/backoffice/guard", () => ({ requireGroups, requireStaff, publicApiUrl }));
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET: apiGet }) }));
 vi.mock("@/components/backoffice/BackofficeGate", () => ({ BackofficeGate: () => null }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ back }), usePathname: () => "/backoffice" }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ back }),
+  usePathname: () => "/backoffice",
+  notFound: () => {
+    throw new Error("notFound");
+  },
+}));
 
 const OVERVIEW = {
   period: { key: "2026-10", label: "Octobre 2026", start: "2026-10-01", end: "2026-10-31" },
@@ -85,11 +92,35 @@ describe("pages du back-office", () => {
     await expect(Page()).rejects.toThrow("réponse inattendue de l'API (500)");
   });
 
-  it("l'Impact Tracker revérifie le groupe Finance ou Super-admin", async () => {
+  it("WAD02 revérifie le groupe Finance ou Super-admin et lit les KPI de la période de l'URL", async () => {
+    apiGet.mockResolvedValue({ data: DASHBOARD, response: new Response(null, { status: 200 }) });
     const { default: Page } = await import("./backoffice/impact/page");
-    render(await Page());
+    render(await Page({ searchParams: Promise.resolve({ periode: "trimestre" }) } as never));
     expect(requireGroups).toHaveBeenCalledWith(["Finance", "Super-admin"]);
+    expect(apiGet).toHaveBeenCalledWith("/api/backoffice/kpis/", { params: { query: { period: "quarter" } } });
     expect(screen.getByRole("heading", { level: 1, name: "Impact Tracker" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Trimestre" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("region", { name: "Ventes réalisées" })).toBeInTheDocument();
+  });
+
+  it("WAD03 lit l'indicateur demandé pour la période de l'URL", async () => {
+    apiGet.mockResolvedValue({ data: DETAIL, response: new Response(null, { status: 200 }) });
+    const { default: Page } = await import("./backoffice/impact/indicateurs/[code]/page");
+    render(await Page({ params: Promise.resolve({ code: "na" }), searchParams: Promise.resolve({}) } as never));
+    expect(requireGroups).toHaveBeenCalledWith(["Finance", "Super-admin"]);
+    expect(apiGet).toHaveBeenCalledWith("/api/backoffice/kpis/{code}/", {
+      params: { path: { code: "na" }, query: { period: "month" } },
+    });
+    expect(screen.getByRole("heading", { level: 1, name: "Détail de l'indicateur" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Définition" })).toBeInTheDocument();
+  });
+
+  it("WAD03 traite un indicateur inconnu en 404", async () => {
+    apiGet.mockResolvedValue({ error: { code: "NOT_FOUND" }, response: new Response(null, { status: 404 }) });
+    const { default: Page } = await import("./backoffice/impact/indicateurs/[code]/page");
+    await expect(
+      Page({ params: Promise.resolve({ code: "inconnu" }), searchParams: Promise.resolve({}) } as never),
+    ).rejects.toThrow("notFound");
   });
 
   it("l'accès refusé rappelle le groupe et ramène à la vue d'ensemble", async () => {
@@ -114,6 +145,13 @@ describe("états du back-office", () => {
     render(<Loading />);
     expect(screen.getByRole("status")).toHaveAttribute("aria-busy", "true");
     expect(screen.getByText("Chargement en cours…")).toBeInTheDocument();
+  });
+
+  it("la page introuvable reste dans le shell et ramène à la vue d'ensemble", async () => {
+    const { default: NotFound } = await import("./backoffice/not-found");
+    render(<NotFound />);
+    expect(screen.getByRole("heading", { level: 1, name: "Page introuvable" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Retour à la vue d'ensemble" })).toHaveAttribute("href", "/backoffice");
   });
 
   it("l'erreur affiche WX02 au registre neutre, avec retour et nouvel essai", async () => {

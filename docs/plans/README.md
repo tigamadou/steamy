@@ -67,7 +67,7 @@ plan.
 | [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | ⬜ à faire | — | 3.0 (après API-1 et API-L3a) |
 | [LOT-4-PARENT](LOT-4-PARENT.md) | 🟡 en cours | 4.0 maquette de WPD15 et des états manquants dessinée (PR #72), validation C18 en attente | Validation C18 de WPD15 ; 4.1 après API-L4 |
 | [LOT-5-ENSEIGNANT](LOT-5-ENSEIGNANT.md) | ⬜ à faire | — | 5.1 (après API-L5) |
-| [LOT-6-ADMIN](LOT-6-ADMIN.md) | 🟡 en cours | 6.1 (PR #38) · 6.6 (PR #62) · 6.7 (PR #93) | 6.2 à 6.5 après leurs étapes d'API ; 6.8 puis 6.9 |
+| [LOT-6-ADMIN](LOT-6-ADMIN.md) | 🟡 en cours | 6.1 (PR #38) · 6.6 (PR #62) · 6.7 (PR #93) · 6.8 (PR #PR68) | 6.2 à 6.5 après leurs étapes d'API ; 6.9 après 6.8 |
 
 ## Suivi d'exécution
 
