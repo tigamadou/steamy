@@ -8,15 +8,16 @@ par email s'il a renseigné une adresse et n'a pas coupé la catégorie « Progr
 import re
 from datetime import date, timedelta
 
+from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ErrorDetail, ValidationError
 
 from apps.learning.models import LearningActivity, MissionProgress, QuizAttempt
-from apps.notifications.models import Category, Notification
+from apps.notifications.models import Category
 from apps.notifications.services import notify
 
 from .children import children_of
-from .models import User
+from .models import User, WeeklyReportSent
 
 WEEK_REGEX = re.compile(r"^(\d{4})-W(\d{2})$")
 #: Années acceptées : au-delà, la semaine précédente ou suivante sortirait des dates représentables.
@@ -53,11 +54,12 @@ def report(child: User, monday: date) -> dict:
     days = [monday + timedelta(days=n) for n in range(7)]
     current = timezone.localdate()
     current_monday = current - timedelta(days=current.weekday())
+    previous = monday - timedelta(days=7)
     return {
         "week": week_code(monday),
         "start_date": monday,
         "end_date": sunday,
-        "previous_week": week_code(monday - timedelta(days=7)),
+        "previous_week": week_code(previous) if previous.isocalendar()[0] >= MIN_YEAR else None,
         "next_week": week_code(monday + timedelta(days=7)) if monday < current_monday else None,
         "seconds": sum(seconds.values()),
         "missions_completed": MissionProgress.objects.filter(
@@ -78,7 +80,8 @@ def report(child: User, monday: date) -> dict:
 def send_weekly_reports() -> int:
     """
     Chaque lundi : une notification par enfant actif pour la semaine écoulée (email selon la préférence).
-    Relançable : un rapport déjà notifié pour ce parent, cet enfant et cette semaine n'est pas renvoyé.
+    Relançable, y compris en parallèle : chaque (parent, enfant, semaine) est réservé dans `WeeklyReportSent`
+    (contrainte d'unicité) dans la même transaction que la notification ; un rapport réservé n'est pas renvoyé.
     """
     today = timezone.localdate()
     monday = today - timedelta(days=today.weekday() + 7)
@@ -87,19 +90,22 @@ def send_weekly_reports() -> int:
     parents = User.objects.filter(role=User.Role.PARENT, status=User.Status.ACTIVE)
     for parent in parents.filter(children_links__isnull=False).distinct():
         for child in children_of(parent).filter(status=User.Status.ACTIVE):
-            url = f"/parent/enfants/{child.pk}/rapport?semaine={code}"
-            if Notification.objects.filter(user=parent, type="weekly_report", url=url).exists():
-                continue
-            data = report(child, monday)
-            minutes = data["seconds"] // 60
-            notify(
-                parent,
-                Category.PROGRESS,
-                "weekly_report",
-                f"Semaine de {child.first_name} : {minutes} min d'apprentissage",
-                f"{data['missions_completed']} mission(s) terminée(s), "
-                f"{data['quizzes_passed']} quiz réussi(s).",
-                url=url,
-            )
+            with transaction.atomic():
+                _, created = WeeklyReportSent.objects.get_or_create(
+                    parent=parent, child=child, week=code
+                )
+                if not created:
+                    continue
+                data = report(child, monday)
+                minutes = data["seconds"] // 60
+                notify(
+                    parent,
+                    Category.PROGRESS,
+                    "weekly_report",
+                    f"Semaine de {child.first_name} : {minutes} min d'apprentissage",
+                    f"{data['missions_completed']} mission(s) terminée(s), "
+                    f"{data['quizzes_passed']} quiz réussi(s).",
+                    url=f"/parent/enfants/{child.pk}/rapport?semaine={code}",
+                )
             sent += 1
     return sent

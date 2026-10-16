@@ -578,6 +578,9 @@ class DeletionRequest(TimestampedModel):
         verbose_name = _("demande de suppression")
         verbose_name_plural = _("demandes de suppression")
         ordering = ["-created_at"]
+        permissions = [
+            ("cancel_deletion", "Peut annuler une suppression programmée (support)"),
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=["user"],
@@ -645,3 +648,27 @@ class PublicProfileReview(TimestampedModel):
 
     def __str__(self):
         return f"{self.pseudonym} ({self.get_status_display().lower()})"
+
+
+class WeeklyReportSent(models.Model):
+    """
+    Rapport hebdomadaire déjà notifié (D55) : une ligne par parent, enfant et semaine ISO. La contrainte d'unicité
+    rend `send_weekly_reports` relançable, même lancé deux fois en même temps.
+    """
+
+    parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    child = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    week = models.CharField(_("semaine"), max_length=8, help_text="AAAA-Www")
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("rapport hebdomadaire envoyé")
+        verbose_name_plural = _("rapports hebdomadaires envoyés")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["parent", "child", "week"], name="accounts_weekly_report_once"
+            ),
+        ]
+
+    def __str__(self):
+        return f"Rapport {self.week} de {self.child} à {self.parent}"

@@ -20,6 +20,8 @@ export type WXStateProps = {
   /** Version réduite, dans le flux d'une page (grille en erreur) plutôt qu'en plein écran. */
   compact?: boolean;
   className?: string;
+  /** `ink` : variante monochrome du back-office (kicker et mascotte en encre). */
+  tone?: "brand" | "ink";
 };
 
 // Carte d'état centrée (design/screens-states-web.jsx, WXState) : mascotte dans un cercle, titre, corps, actions.
@@ -34,6 +36,7 @@ export function WXState({
   headingLevel = 1,
   compact,
   className,
+  tone = "brand",
 }: WXStateProps) {
   const Heading = headingLevel === 1 ? "h1" : "h2";
   return (
@@ -56,7 +59,12 @@ export function WXState({
             compact ? "size-32" : "size-40 sm:size-50",
           )}
         >
-          <Mascot pose={pose} size={compact ? 100 : 128} className={compact ? undefined : "sm:w-40 sm:h-auto"} />
+          <Mascot
+            pose={pose}
+            size={compact ? 100 : 128}
+            hue={tone === "ink" ? "var(--ink-700)" : undefined}
+            className={compact ? undefined : "sm:w-40 sm:h-auto"}
+          />
           {emoji && (
             <span aria-hidden className={cx("absolute right-1.5 bottom-1.5", compact ? "text-3xl" : "text-[42px]")}>
               {emoji}
@@ -65,7 +73,14 @@ export function WXState({
         </div>
         <div>
           {kicker && (
-            <p className="mb-2 text-[13px] font-black tracking-[0.08em] text-primary-600 uppercase">{kicker}</p>
+            <p
+              className={cx(
+                "mb-2 text-[13px] font-black tracking-[0.08em] uppercase",
+                tone === "ink" ? "text-ink-700" : "text-primary-600",
+              )}
+            >
+              {kicker}
+            </p>
           )}
           <Heading
             id={titleId}

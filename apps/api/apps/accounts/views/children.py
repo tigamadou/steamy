@@ -251,7 +251,9 @@ class WeeklyReportSerializer(serializers.Serializer):
     week = serializers.CharField(help_text="Semaine ISO `AAAA-Www`")
     start_date = serializers.DateField(help_text="Lundi")
     end_date = serializers.DateField(help_text="Dimanche")
-    previous_week = serializers.CharField()
+    previous_week = serializers.CharField(
+        allow_null=True, help_text="Null pour la première semaine acceptée (2000-W01)"
+    )
     next_week = serializers.CharField(allow_null=True, help_text="Null pour la semaine en cours")
     seconds = serializers.IntegerField(help_text="Temps d'apprentissage (journal, D55)")
     missions_completed = serializers.IntegerField()
