@@ -1142,6 +1142,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/payments/kit-codes/redeem/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `POST payments/kit-codes/redeem/` (WA01, WA06) : l'apprenant saisit le code de la notice et choisit le parcours ;
+         *     le code est consommé et l'inscription créée (`source=kit_code`). Déjà inscrit : 200, code non consommé.
+         */
+        post: operations["payments_kit_codes_redeem_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/payments/orders/": {
         parameters: {
             query?: never;
@@ -2286,6 +2306,23 @@ export interface components {
             /** @description En stock (le stock exact reste interne) */
             readonly available: boolean;
         };
+        KitCode: {
+            readonly code: string;
+            readonly kitSlug: string;
+            readonly redeemed: boolean;
+        };
+        KitCodeRedeemRequest: {
+            /** @description STEAMY-XXXX-XXXX, casse et tirets indifférents */
+            code: string;
+            /** @description Parcours à débloquer */
+            courseSlug: string;
+        };
+        KitCodeRedeemed: {
+            courseSlug: string;
+            courseTitle: string;
+            /** @description Faux si l'apprenant était déjà inscrit (code non consommé) */
+            created: boolean;
+        };
         KitDetail: {
             slug: string;
             /** Nom */
@@ -2686,7 +2723,7 @@ export interface components {
         };
         /** @enum {unknown} */
         NullEnum: null;
-        /** @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison. */
+        /** @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison et les Kit Codes (C10). */
         Order: {
             /** Référence */
             readonly reference: string;
@@ -2723,6 +2760,7 @@ export interface components {
              */
             readonly createdAt: string;
             readonly deliveryAddress: components["schemas"]["OrderDeliveryAddress"] | null;
+            readonly kitCodes: components["schemas"]["KitCode"][];
         };
         /**
          * @description * `course` - course
@@ -2744,7 +2782,7 @@ export interface components {
             guest?: components["schemas"]["GuestInputRequest"];
             deliveryAddress?: components["schemas"]["DeliveryAddressInputRequest"];
         };
-        /** @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison. */
+        /** @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison et les Kit Codes (C10). */
         OrderCreated: {
             /** Référence */
             readonly reference: string;
@@ -2781,6 +2819,7 @@ export interface components {
              */
             readonly createdAt: string;
             readonly deliveryAddress: components["schemas"]["OrderDeliveryAddress"] | null;
+            readonly kitCodes: components["schemas"]["KitCode"][];
             /** @description Invité seulement, remis une seule fois : à renvoyer dans l'en-tête X-Guest-Token */
             readonly guestToken: string | null;
         };
@@ -7255,6 +7294,69 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UnreadCount"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_kit_codes_redeem_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KitCodeRedeemRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KitCodeRedeemed"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KitCodeRedeemed"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             401: {

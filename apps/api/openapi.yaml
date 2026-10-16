@@ -3075,6 +3075,59 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/payments/kit-codes/redeem/:
+    post:
+      operationId: payments_kit_codes_redeem_create
+      description: |-
+        `POST payments/kit-codes/redeem/` (WA01, WA06) : l'apprenant saisit le code de la notice et choisit le parcours ;
+        le code est consommé et l'inscription créée (`source=kit_code`). Déjà inscrit : 200, code non consommé.
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KitCodeRedeemRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KitCodeRedeemed'
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KitCodeRedeemed'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/payments/orders/:
     get:
       operationId: payments_orders_list
@@ -5820,6 +5873,52 @@ components:
       - name
       - price
       - slug
+    KitCode:
+      type: object
+      properties:
+        code:
+          type: string
+          readOnly: true
+        kitSlug:
+          type: string
+          readOnly: true
+        redeemed:
+          type: boolean
+          readOnly: true
+      required:
+      - code
+      - kitSlug
+      - redeemed
+    KitCodeRedeemRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          description: STEAMY-XXXX-XXXX, casse et tirets indifférents
+          maxLength: 32
+        courseSlug:
+          type: string
+          minLength: 1
+          description: Parcours à débloquer
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - code
+      - courseSlug
+    KitCodeRedeemed:
+      type: object
+      properties:
+        courseSlug:
+          type: string
+        courseTitle:
+          type: string
+        created:
+          type: boolean
+          description: Faux si l'apprenant était déjà inscrit (code non consommé)
+      required:
+      - courseSlug
+      - courseTitle
+      - created
     KitDetail:
       type: object
       properties:
@@ -6861,7 +6960,7 @@ components:
     Order:
       type: object
       description: 'Commande vue par son payeur (parent ou invité) : avec l''adresse
-        de livraison.'
+        de livraison et les Kit Codes (C10).'
       properties:
         reference:
           type: string
@@ -6933,6 +7032,11 @@ components:
           - $ref: '#/components/schemas/OrderDeliveryAddress'
           readOnly: true
           nullable: true
+        kitCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/KitCode'
+          readOnly: true
       required:
       - beneficiary
       - createdAt
@@ -6942,6 +7046,7 @@ components:
       - expiresAt
       - items
       - kind
+      - kitCodes
       - paidAt
       - reference
       - shippingFee
@@ -6985,7 +7090,7 @@ components:
     OrderCreated:
       type: object
       description: 'Commande vue par son payeur (parent ou invité) : avec l''adresse
-        de livraison.'
+        de livraison et les Kit Codes (C10).'
       properties:
         reference:
           type: string
@@ -7057,6 +7162,11 @@ components:
           - $ref: '#/components/schemas/OrderDeliveryAddress'
           readOnly: true
           nullable: true
+        kitCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/KitCode'
+          readOnly: true
         guestToken:
           type: string
           readOnly: true
@@ -7073,6 +7183,7 @@ components:
       - guestToken
       - items
       - kind
+      - kitCodes
       - paidAt
       - reference
       - shippingFee

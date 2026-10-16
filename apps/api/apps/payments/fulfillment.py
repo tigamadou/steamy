@@ -1,7 +1,8 @@
 """
 Exécution post-paiement (§4.3, D36, D37, C3, C17) : **une seule fois**, dans la transaction du webhook qui verrouille
-la commande. Elle marque la commande payée, confirme le stock, inscrit le bénéficiaire, vide le panier et prévient
-le payeur et le bénéficiaire. Les Kit Codes (L3b.4), les candidatures (L3b.6) et la facture (L3b.2b) s'y ajoutent.
+la commande. Elle marque la commande payée, confirme le stock, inscrit le bénéficiaire, génère les Kit Codes des
+kits, vide le panier et prévient le payeur et le bénéficiaire. Les candidatures (L3b.6) et la facture (L3b.2b) s'y
+ajoutent.
 
 Paiement reçu sur une commande expirée (C17) : honoré si le stock est encore disponible, sinon remboursé. Un second
 paiement réussi sur une commande déjà payée est remboursé.
@@ -17,6 +18,7 @@ from apps.core.audit import audit
 from apps.learning.models import Enrollment
 from apps.shop.models import CartItem, Kit, StockReservation
 
+from .kit_codes import generate_codes
 from .models import Order, Payment, Refund
 from .providers import PaymentProviderError, RefundOutcome, get_provider
 
@@ -61,6 +63,8 @@ def fulfill(order: Order) -> None:
             Enrollment.objects.get_or_create(
                 learner=learner, course=item.course, defaults={"source": Enrollment.Source.ORDER}
             )
+        if item.kit_id:
+            generate_codes(item)
     kit_ids = [item.kit_id for item in items if item.kit_id]
     if kit_ids and order.payer_id:
         CartItem.objects.filter(cart__user_id=order.payer_id, kit_id__in=kit_ids).delete()

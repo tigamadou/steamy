@@ -298,6 +298,9 @@ REST_FRAMEWORK = {
         "orders": os.getenv("THROTTLE_ORDERS", "30/hour"),
         # Initiation d'un paiement (chaque essai sollicite le téléphone du payeur)
         "payments": os.getenv("THROTTLE_PAYMENTS", "20/hour"),
+        # Kit Codes (D35) : par apprenant et par IP
+        "kit-code": os.getenv("THROTTLE_KIT_CODE", "10/hour"),
+        "kit-code-ip": os.getenv("THROTTLE_KIT_CODE_IP", "30/hour"),
         # Alerte de réassort (un SMS par demande) : par IP pour un invité
         "restock-alert": os.getenv("THROTTLE_RESTOCK_ALERT", "10/hour"),
         # Formulaires publics (devis, newsletter, contact) : par IP

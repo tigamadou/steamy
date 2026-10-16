@@ -15,19 +15,25 @@ from rest_framework import mixins, permissions, serializers, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle
+from rest_framework.throttling import AnonRateThrottle, ScopedRateThrottle, SimpleRateThrottle
+from rest_framework.views import APIView
 
+from apps.catalog.models import Course
 from apps.notifications.sms import queue_sms
 from libs.authentication import enforce_csrf
 from libs.errors import ApiError
+from libs.permissions import IsLearner
 
 from .checkout import initiate_payment
 from .fulfillment import guest_tracking_url
+from .kit_codes import redeem
 from .models import Order, Payment
 from .orders import GUEST_TOKEN_HEADER, create_order, order_for_guest
 from .providers import PROVIDERS, get_provider
 from .serializers import (
     BeneficiaryOrderSerializer,
+    KitCodeRedeemedSerializer,
+    KitCodeRedeemSerializer,
     OrderCreatedSerializer,
     OrderCreateSerializer,
     OrderSerializer,
@@ -297,3 +303,48 @@ def provider_webhook(request, provider_name: str):
         return rejected
 
     return Response({"ok": True})
+
+
+# --- Kit Codes -----------------------------------------------------------------------------------
+
+
+class KitCodeUserThrottle(ScopedRateThrottle):
+    """Essais de Kit Code par apprenant (D35)."""
+
+    scope_attr = "kit_code_scope"
+
+
+class KitCodeIpThrottle(SimpleRateThrottle):
+    """Essais de Kit Code par adresse IP, tous comptes confondus (D35)."""
+
+    scope = "kit-code-ip"
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}
+
+
+class KitCodeRedeemView(APIView):
+    """
+    `POST payments/kit-codes/redeem/` (WA01, WA06) : l'apprenant saisit le code de la notice et choisit le parcours ;
+    le code est consommé et l'inscription créée (`source=kit_code`). Déjà inscrit : 200, code non consommé.
+    """
+
+    permission_classes = [IsLearner]
+    throttle_classes = [KitCodeUserThrottle, KitCodeIpThrottle]
+    kit_code_scope = "kit-code"
+
+    @extend_schema(
+        request=KitCodeRedeemSerializer,
+        responses={201: KitCodeRedeemedSerializer, 200: KitCodeRedeemedSerializer},
+    )
+    def post(self, request):
+        data = KitCodeRedeemSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        course = Course.objects.filter(
+            slug=data.validated_data["course_slug"], status=Course.Status.PUBLISHED
+        ).first()
+        if course is None:
+            raise ApiError("NOT_FOUND", fields={"courseSlug": "NOT_FOUND"})
+        _, created = redeem(request.user, data.validated_data["code"], course)
+        body = {"course_slug": course.slug, "course_title": course.title, "created": created}
+        return Response(body, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)

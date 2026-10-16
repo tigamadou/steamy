@@ -245,3 +245,58 @@ class Refund(models.Model):
 
     def __str__(self):
         return f"Remboursement {self.amount} FCFA · {self.payment}"
+
+
+#: Format d'un Kit Code (D35) : `STEAMY-XXXX-XXXX`, 8 caractères Crockford base32
+KIT_CODE_PREFIX = "STEAMY"
+
+
+def new_kit_code() -> str:
+    body = "".join(secrets.choice(CROCKFORD) for _ in range(8))
+    return f"{KIT_CODE_PREFIX}-{body[:4]}-{body[4:]}"
+
+
+class KitCode(models.Model):
+    """
+    Code imprimé sur la notice d'un kit (D35, D36) : débloque gratuitement un parcours compatible, une seule fois.
+    Généré à l'exécution post-paiement d'une commande de kit ; visible du payeur seul.
+    """
+
+    code = models.CharField(_("code"), max_length=20, unique=True, default=new_kit_code)
+    kit = models.ForeignKey("shop.Kit", models.PROTECT, related_name="codes", verbose_name=_("kit"))
+    order_item = models.ForeignKey(
+        OrderItem,
+        models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="kit_codes",
+        verbose_name=_("ligne de commande"),
+    )
+    redeemed_by = models.ForeignKey(
+        User,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("utilisé par"),
+    )
+    redeemed_course = models.ForeignKey(
+        "catalog.Course",
+        models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("parcours débloqué"),
+    )
+    redeemed_at = models.DateTimeField(_("utilisé le"), null=True, blank=True)
+    revoked_at = models.DateTimeField(_("révoqué le"), null=True, blank=True)
+    created_at = models.DateTimeField(_("créé le"), auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]
+        verbose_name = _("Kit Code")
+        verbose_name_plural = _("Kit Codes")
+        permissions = [("revoke_kitcode", "Peut révoquer un Kit Code")]
+
+    def __str__(self):
+        return self.code
