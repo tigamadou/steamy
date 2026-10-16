@@ -587,11 +587,12 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > une candidature de Léa à un événement payant (en attente de Marie, couverte par son ticket). Le kit en rupture
   > existait déjà (L1.5). Reste ouvert : la validation du format des factures par la comptabilité (L3b.0a, P1/P2).
 
-### API-L4 · Espace parent — 🟡 en cours
-- [ ] **API-L4.1** Enfants · `feature/api-l4-1-enfants` · PR #75
+### API-L4 · Espace parent — ✅ terminé
+- [x] **API-L4.1** Enfants · `feature/api-l4-1-enfants` · PR #75, #80
   - [x] `GET/POST accounts/children/` (consentement origine `parent`, D51)
   - [x] `GET/PATCH accounts/children/{id}/` (`publicDisplayAllowed` D15)
-  - [ ] Progression par parcours et tentatives récentes dans `GET accounts/children/{id}/` (attend API-L3a.1 et L3a.2)
+  - [x] Progression par parcours dans `GET accounts/children/{id}/` (`courses`, forme de `learning/enrollments/`) et `activeCourses` dans la liste · PR #80
+  - [x] Tentatives récentes (`recentAttempts`, 5 dernières) et nombre de badges dans `GET accounts/children/{id}/` · PR #80
   - [x] `POST …/password-reset/` (§8.9), `GET accounts/me/parent/`
   - [x] Tests : parent A ne lit ni ne modifie l'enfant de B (toutes les routes)
   > Décisions : `children/` ne liste que les enfants rattachés (comptes anonymisés exclus) ; l'enfant « en attente »
@@ -600,11 +601,23 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `publicDisplayAllowed` ; identifiant et mot de passe ignorés. Genre, handicap et localité seulement dans le
   > détail (D6). `me/parent/` : nom et lien de parenté, ni numéro ni email (WD22). Enum `UserStatusEnum` nommé
   > dans le schéma (collision des `status`).
-- [ ] **API-L4.2** À valider · `feature/api-l4-2-a-valider`
-  - [ ] `GET accounts/pending-actions/` (D52)
-  - [ ] `POST events/applications/{id}/accept/` (payant → `PaymentRequest`/commande, D53), `…/refuse/`
-  - [ ] `POST payments/orders/` avec `paymentRequestId` (WPD15)
-  - [ ] Tests : l'apprenant ne peut pas accepter sa propre candidature
+- [x] **API-L4.2** À valider · `feature/api-l4-2-a-valider` · PR #79
+  - [x] `GET accounts/pending-actions/` (D52) : consentements et demandes de suppression
+  - [x] `pending-actions` : demandes de paiement et candidatures
+  - [x] `POST events/applications/{id}/accept/` (payant → commande d'événement, D53), `…/refuse/`
+  - [x] `POST payments/orders/` avec `paymentRequestId` (WPD15)
+  - [x] Tests : l'apprenant ne peut pas accepter sa propre candidature
+  > Décisions : `pending-actions/` renvoie une liste non paginée `{ type, id, childId, childFirstName,
+  > childLastName, createdAt, url }`, la plus récente d'abord ; `type` ∈ `consent`, `payment_request`,
+  > `event_application`, `deletion_request` (les 4 déclarés dès maintenant) ; `childId` nul pour un consentement
+  > (pas encore de lien) ; `url` = route du front (`/parent/consentements/<id>`,
+  > `/parent/enfants/<id>/supprimer?demande=<id>`, `/parent/demandes/<id>`, `/parent/evenements?candidature=<id>`). Chaque type est
+  > une source de `pending_actions.SOURCES`. Accepter un événement payant crée directement la commande d'événement
+  > du parent (`orderReference` dans la réponse, place réservée, confirmée au paiement) : pas de `PaymentRequest`
+  > intermédiaire, le parent étant déjà sur l’écran (D53 amendé le 2026-10-16). Refus : motif facultatif, ticket rendu, enfant notifié ; code
+  > `APPLICATION_ALREADY_RESOLVED` (409). Commande avec `paymentRequestId` : type, lignes et bénéficiaire tirés de la
+  > demande (seule l'adresse d'un kit est à fournir) ; `kind` et `items` deviennent facultatifs dans ce cas ;
+  > `PAYMENT_REQUEST_CLOSED` si la demande n'est plus en attente ; payée, la demande passe à `paid`.
 - [x] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions` · PR #77
   - [x] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
   - [x] `CHILDREN_STILL_LINKED` (D54)
@@ -621,22 +634,34 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > effacent leurs données sur le signal `account_anonymized` ; adresse de livraison, alertes de
   > réassort et pseudonyme public sont effacés directement. Contraintes
   > « identifiant par rôle » levées pour un compte anonymisé.
-- [ ] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo`
-  - [ ] `GET accounts/children/{id}/weekly-report/?week=AAAA-Www`
-  - [ ] Tâche hebdomadaire `send_weekly_reports` (D55)
+- [x] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo` · PR #102
+  - [x] `GET accounts/children/{id}/weekly-report/?week=AAAA-Www`
+  - [x] Tâche hebdomadaire `send_weekly_reports` (D55)
+  > Décisions : semaine ISO, lundi → dimanche au fuseau du Bénin ; réponse `{ week, startDate, endDate,
+  > previousWeek, nextWeek (null pour la semaine en cours), seconds, missionsCompleted, quizzesPassed, days[7],
+  > courses, email }` ; `week` invalide → `fields.week` `INVALID`. Le lundi à 7 h, une notification
+  > « Progression » par enfant actif pour la semaine écoulée (`/parent/enfants/<id>/rapport?semaine=AAAA-Www`) ;
+  > l'email part si le parent a une adresse et n'a pas coupé l'email « Progression » (`notify`) ; relançable
+  > sans doublon (une notification par parent, enfant et semaine). **Un email par enfant** (D55 précisé le
+  > 2026-10-16). Années acceptées : 2000 à 9998.
 - [x] **API-L4.5** Changement de téléphone · `feature/api-l4-5-changement-telephone` · PR #78
   - [x] `POST accounts/me/phone-change/`, `…/verify/` (OTP sur le nouveau numéro)
   - [x] Préférences parent
   > Décisions : `phone-change/` `{ phone, password }` exige le mot de passe actuel (`INVALID_CREDENTIALS`) ;
   > `PHONE_TAKEN` (409) si le numéro est déjà pris, `PHONE_INVALID` si c'est le même ; renvoi par
   > `auth/otp/resend/`. Le code validé remplace le numéro de connexion et suit dans les demandes de consentement
-  > reçues ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
+  > encore ouvertes ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
   > ajout du **Mobile Money préféré** (`ParentProfile.mobileMoney` `{ country, network, phone }`, réseau activé du
   > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
-- [ ] **Critères de fin d'API-L4**
-  - [ ] Un `childId` étranger → 404 partout
-  - [ ] `Notification.url` pointe vers les routes front des plans
-  - [ ] Seed enrichi, `make openapi` committé
+  > Suites : relecture (#104) ; fin d'API-L4 (PR #107) : jeu de démonstration, annulation d'une suppression par le
+  > support (admin `DeletionRequest`, permission `cancel_deletion`, Super-admin et Support ; un compte réactivé à la
+  > main n'est jamais anonymisé, sa demande annulée et journalisée ; un compte suspendu l'est), rapport hebdomadaire
+  > réservé dans `WeeklyReportSent` (contrainte d'unicité ; la migration réserve les rapports déjà notifiés),
+  > `previousWeek` nullable, nul à la borne de 2000.
+- [x] **Critères de fin d'API-L4** · PR #107
+  - [x] Un `childId` étranger → 404 partout
+  - [x] `Notification.url` pointe vers les routes front des plans
+  - [x] Seed enrichi, `make openapi` committé
 
 ### API-L5 · Enseignant et classes — ⬜ à faire
 - [ ] **API-L5.1** Classes · `feature/api-l5-1-classes`

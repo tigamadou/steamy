@@ -6,6 +6,8 @@ Admin des comptes (API-L6.2) : WAD06-WAD07 (utilisateurs), WAD08 (consentements,
   actions *suspendre*, *désactiver*, *réactiver* (motif obligatoire, journalisé).
 - Le personnel, ses groupes et son TOTP sont gérés par le seul Super-admin (`StaffMemberAdmin`).
 - Consentements en suivi seul (D70) : ni ajout, ni modification, ni suppression ; actions *relancer* et *litige*.
+- Suppressions de compte en suivi seul (D40, D54) ; action *annuler la suppression* (motif obligatoire, journalisé) :
+  seule voie pour un parent qui a supprimé son propre compte, désactivé aussitôt.
 """
 
 from django import forms
@@ -24,8 +26,10 @@ from libs.phone import normalize_phone
 
 from . import backoffice
 from .consent import effective_status
+from .deletion import cancel_by_support
 from .models import (
     ConsentRequest,
+    DeletionRequest,
     LearnerProfile,
     ParentChildLink,
     ParentProfile,
@@ -291,6 +295,70 @@ class ConsentRequestAdmin(ReadOnlyAdmin):
             title="Marquer en litige",
             intro="La demande reste à trancher par le parent ; la note est visible du support.",
             submit_label="Enregistrer le litige",
+            apply=apply,
+        )
+
+
+@admin.register(DeletionRequest)
+class DeletionRequestAdmin(ReadOnlyAdmin):
+    """Suppressions programmées ou en attente du parent (D40, D54) : le support les suit et peut les annuler."""
+
+    list_display = ("user", "status", "requested_by", "reason", "scheduled_for", "created_at")
+    list_filter = ("status",)
+    search_fields = ("user__username", "user__phone", "user__last_name")
+    fields = (
+        "user",
+        "requested_by",
+        "status",
+        "reason",
+        "note",
+        "scheduled_for",
+        "resolved_at",
+        "created_at",
+    )
+    readonly_fields = fields
+    actions = ["cancel"]
+
+    def has_cancel_deletion_permission(self, request):
+        return request.user.has_perm("accounts.cancel_deletion")
+
+    @admin.action(description="Annuler la suppression", permissions=["cancel_deletion"])
+    def cancel(self, request, queryset):
+        def apply(data):
+            cancelled = sum(
+                cancel_by_support(deletion, data["reason"], request) for deletion in queryset
+            )
+            self.message_user(
+                request,
+                ngettext(
+                    "%d suppression annulée, compte réactivé.",
+                    "%d suppressions annulées, comptes réactivés.",
+                    cancelled,
+                )
+                % cancelled,
+                messages.SUCCESS,
+            )
+            skipped = queryset.count() - cancelled
+            if skipped:
+                self.message_user(
+                    request,
+                    ngettext(
+                        "%d demande ignorée (déjà close).",
+                        "%d demandes ignorées (déjà closes).",
+                        skipped,
+                    )
+                    % skipped,
+                    messages.WARNING,
+                )
+
+        return form_action(
+            self,
+            request,
+            queryset,
+            ReasonForm,
+            title="Annuler des suppressions",
+            intro="Le compte est réactivé et l'anonymisation n'aura pas lieu. Le motif est journalisé.",
+            submit_label="Annuler la suppression",
             apply=apply,
         )
 

@@ -15,13 +15,13 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 3.2 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
+Statut : 🟡 en cours · Prochaine tâche : 3.6 (après API-L3b) · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
 
 ### Valeur pédagogique (API-L3a) — 🟡 en cours
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
   - [x] `AppShell` (props de §5.5, sidebar repliable en tiroir sous 768 px)
   - [x] `NavItem`, `NotificationBell`, `HeaderSearch`
-  - [x] WD16 `LogoutModal`
+  - [x] `WD16` `LogoutModal`
   - [x] Config `learnerNav` et table unique `active` dérivée de l'URL
   - [x] Promotions au DS : `SectionHeader`, `StatPill`, `ProgressBar`, `QuickActionTile`, `SettingsRow`, `Toggle`
   - [x] Layout `apprenant/layout.tsx` (garde de rôle `learner`) et layout `(shell)`, drapeaux `src/lib/features.ts`
@@ -30,64 +30,66 @@ Statut : 🟡 en cours · Prochaine tâche : 3.2 · Prérequis : API-1 et API-L3
   - [x] Parcours Playwright : apprenant → shell ; parent sur `/apprenant` → redirection ; non connecté → `/connexion?next=` puis retour
   - [x] Recette : aucune donnée en dur, aucun `title="Bientôt"`, rendu 360 px, squelette du shell pendant le chargement
 - [x] **3.1** Accueil, notifications et aide (requiert API-L3a) · `feature/lot3-accueil-notifications` · PR #101
-  - [x] WD01 tableau de bord avec reprise (`StatPill` Streak, Points, Rang masqués si `null`)
-  - [x] WD02 tableau de bord sans reprise (catalogue `prix=gratuit`)
-  - [x] WD03 `loading.tsx` fidèle à WD01
-  - [x] WD04 notifications (onglets Toutes / Non lues, lecture au clic, « Tout marquer comme lu »)
-  - [x] WD05 notifications vides
-  - [x] WD06 préférences de notification
-  - [x] WD12 aide (FAQ statique, recherche locale, lien WL24)
+  - [x] `WD01` tableau de bord avec reprise (`StatPill` Streak, Points, Rang masqués si `null`)
+  - [x] `WD02` tableau de bord sans reprise (catalogue `prix=gratuit`)
+  - [x] `WD03` `loading.tsx` fidèle à WD01
+  - [x] `WD04` notifications (onglets Toutes / Non lues, lecture au clic, « Tout marquer comme lu »)
+  - [x] `WD05` notifications vides
+  - [x] `WD06` préférences de notification
+  - [x] `WD12` aide (FAQ statique, recherche locale, lien WL24)
   - [x] Composants `NotifItem`, `ResumeCard`
   - [x] Tests unitaires : WD01 sans points, notification lue au clic, toggle email désactivé sans adresse
   - [x] Parcours Playwright : « Tout marquer comme lu » met le compteur du shell à 0
-- [ ] **3.2** Catalogue, fiche parcours et souhaits (requiert API-L1, API-L3a) · `feature/lot3-catalogue-souhaits`
-  - [ ] WC01 catalogue (filtres catégorie × difficulté × prix + tri + `q` dans l'URL)
-  - [ ] WC02 filtres actifs (`ActiveFilterBar`)
-  - [ ] WC02b état ouvert des menus déroulants
-  - [ ] WC03 aucun résultat (« Effacer les filtres »)
-  - [ ] WC04 fiche parcours (`CourseHero`, `Curriculum`, `EnrollCard` sticky, `VimeoPlayer` bande-annonce)
-  - [ ] WC05 fiche parcours avec kit ou payant (`KitMiniCard`, CTA derrière le drapeau `unlock`)
-  - [ ] WW01 souhaits
-  - [ ] WW02 souhaits vides
-  - [ ] WW03 retrait optimiste avec `Toast` d'annulation
-  - [ ] Composants `CourseCard` (cœur distinct), `ActiveFilterBar`, `DropdownMenu`, `useUndoableAction`
-  - [ ] Inscription `POST learning/enrollments/` et gestion de `PAYMENT_REQUIRED`, `KIT_CODE_REQUIRED`
-  - [ ] Tests unitaires : filtres ↔ URL, carte « Gratuit », pas de prix de parcours sur un parcours avec kit
-  - [ ] Parcours Playwright « souhaits » : ajouter depuis WC01, retirer depuis WW01, annuler, recharger
-- [ ] **3.3a** Mes parcours, arbre et missions (requiert API-L3a, maquette WD23 validée, offre Vimeo) · `feature/lot3-mes-parcours-missions`
+- [x] **3.2** Catalogue, fiche parcours et souhaits (requiert API-L1, API-L3a) · `feature/lot3-catalogue-souhaits` · PR #98
+  - [x] `WC01` catalogue (filtres catégorie × difficulté × prix + tri + `q` dans l'URL)
+  - [x] `WC02` filtres actifs (`ActiveFilterBar`)
+  - [x] `WC02b` état ouvert des menus déroulants
+  - [x] `WC03` aucun résultat (« Effacer les filtres »)
+  - [x] `WC04` fiche parcours (`CourseHero`, `Curriculum`, `EnrollCard` sticky, `VimeoPlayer` bande-annonce)
+  - [x] `WC05` fiche parcours avec kit ou payant (`KitMiniCard`, CTA derrière le drapeau `unlock`)
+  - [x] `WW01` souhaits
+  - [x] `WW02` souhaits vides
+  - [x] `WW03` retrait optimiste avec `Toast` d'annulation
+  - [x] Composants `CourseCard` (cœur distinct), `ActiveFilterBar`, `DropdownMenu`, `useUndoableAction`
+  - [x] Inscription `POST learning/enrollments/` et gestion de `PAYMENT_REQUIRED`, `KIT_CODE_REQUIRED`
+  - [x] Tests unitaires : filtres ↔ URL, carte « Gratuit », pas de prix de parcours sur un parcours avec kit
+  - [x] Parcours Playwright « souhaits » : ajouter depuis WC01, retirer depuis WW01, annuler, recharger
+  - [ ] ~~Bande-annonce lue en e2e~~ : reporté, le jeu de démo n'a aucun `trailerVimeoId` (à ajouter au seed, côté API ; ADR 0004 V2/V4 non tranchés) ; lecteur couvert en unitaire avec un faux `Player`, absence de contact avec `player.vimeo.com` et CSP vérifiées en e2e
+- [x] **3.3a** Mes parcours, arbre et missions (requiert API-L3a, maquette WD23 validée, offre Vimeo) · `feature/lot3-mes-parcours-missions` · PR #94
   - [x] Conception de la maquette WD23 dans `design/screens-apprenant-a-concevoir-web.jsx`, validée (C18)
-  - [ ] WD23 mes parcours (onglets En cours / Terminés, `EnrolledCourseCard`)
-  - [ ] WC06a arbre du parcours
-  - [ ] WC06b projet déplié (`?projet=`)
-  - [ ] WJ01 projet
-  - [ ] WJ02 niveau
-  - [ ] WJ03 mission (`MissionBlocks`, « Marquer comme terminée », navigation vers `next`)
-  - [ ] Composants `ProjectAccordion`, `MissionItem`, `TeacherCommentCard`, `LockedContentState`
-  - [ ] `VimeoPlayer` (`@vimeo/player` épinglé, chargement différé, suivi `learning/activity/`, repli en cas d'erreur, CSP `frame-src`)
-  - [ ] Tests unitaires : `MissionItem` verrouillé non activable, `next` respecté, `VimeoPlayer` avec faux `Player`
-  - [ ] Parcours Playwright : accès direct à une mission verrouillée → `LockedContentState` ; `player.vimeo.com` intercepté
-- [ ] **3.3b** Quiz, résultats et badges (requiert API-L3a) · `feature/lot3-quiz`
-  - [ ] WJ04 quiz formatif
-  - [ ] WJ10 quiz sommatif
-  - [ ] WJ05 résultat formatif
-  - [ ] WJ08 résultat sommatif (`RetryCountdown`)
-  - [ ] WJ06 badge de niveau (plein écran)
-  - [ ] WJ11 badge de projet (plein écran)
-  - [ ] Composants `Quiz`, `QuizResult`, `QuestionReview`, `RetryCountdown`, `Medal`
-  - [ ] Brouillon des réponses en `sessionStorage`, envoi unique, protection contre la double soumission
-  - [ ] Tests unitaires : seuil affiché = seuil de l'API, compte à rebours, aucune bonne réponse dans le DOM avant soumission
-  - [ ] Parcours Playwright P1
-- [ ] **3.3c** Certification (requiert API-L3a ; ticket via API-L3b) · `feature/lot3-certification`
-  - [ ] WJ07 certification obtenue (PDF avec état « Préparation… », ticket derrière le drapeau `events`)
-  - [ ] WJ09 certification non obtenue (projets ou missions restants)
-  - [ ] Test unitaire `CertificateView` : réponse d'API affichée telle quelle
-- [ ] **3.4** Tentatives et progression (requiert API-L3a) · `feature/lot3-tentatives-progression`
-  - [ ] WD07 liste des tentatives (bandeau, filtres et tri dans l'URL)
-  - [ ] WD09 liste vide (renvoi vers WD23)
-  - [ ] WD08 détail d'une tentative (corrigé, concepts, `RetryCountdown`)
-  - [ ] WD21 progression (`WeeklyActivityBars`, maîtrise par catégorie, recommandations)
-  - [ ] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
-  - [ ] Tests unitaires : statut issu du serveur affiché tel quel (D31)
+  - [x] `WD23` mes parcours (onglets En cours / Terminés, `EnrolledCourseCard`)
+  - [x] `WC06a` arbre du parcours
+  - [x] `WC06b` projet déplié (`?projet=`)
+  - [x] `WJ01` projet
+  - [x] `WJ02` niveau
+  - [x] `WJ03` mission (`MissionBlocks`, « Marquer comme terminée », navigation vers `next`)
+  - [x] Composants `ProjectAccordion`, `MissionItem`, `TeacherCommentCard` (carte absente tant que `classrooms/comments/` n'existe pas, API-L5), `LockedContentState`
+  - [x] `VimeoPlayer` (composant livré en 3.2 ; `@vimeo/player` épinglé, chargement différé, suivi `learning/activity/`, repli en cas d'erreur, CSP `frame-src`)
+  - [x] Tests unitaires : `MissionItem` verrouillé non activable, `next` respecté, `VimeoPlayer` avec faux `Player`
+  - [x] Parcours Playwright : accès direct à une mission verrouillée → `LockedContentState` ; `player.vimeo.com` intercepté
+- [x] **3.3b** Quiz, résultats et badges (requiert API-L3a) · `feature/lot3-quiz` · PR #95
+  - [x] `WJ04` quiz formatif
+  - [x] `WJ10` quiz sommatif
+  - [x] `WJ05` résultat formatif
+  - [x] `WJ08` résultat sommatif (`RetryCountdown`)
+  - [x] `WJ06` badge de niveau (plein écran)
+  - [x] `WJ11` badge de projet (plein écran)
+  - [x] Composants `Quiz`, `QuizResult`, `QuestionReview`, `RetryCountdown`, `Medal`
+  - [x] Brouillon des réponses en `sessionStorage`, envoi unique, protection contre la double soumission
+  - [x] Tests unitaires : seuil affiché = seuil de l'API, compte à rebours, aucune bonne réponse dans le DOM avant soumission
+  - [x] Parcours Playwright P1 (WJ07 et le PDF ajoutés en 3.3c)
+- [x] **3.3c** Certification (requiert API-L3a ; ticket via API-L3b) · `feature/lot3-certification` · PR #96
+  - [x] `WJ07` certification obtenue (PDF avec état « Préparation… », ticket derrière le drapeau `events` jusqu'à 3.8)
+  - [x] `WJ09` certification non obtenue (projets ou missions restants)
+  - [x] Test unitaire `CertificateView` : réponse d'API affichée telle quelle
+- [x] **3.4** Tentatives et progression (requiert API-L3a) · `feature/lot3-tentatives-progression` · PR #97
+  - [x] `WD07` liste des tentatives (bandeau, filtres dans l'URL ; tri : ordre de l'API, sans paramètre de tri)
+  - [x] `WD09` liste vide (renvoi vers WD23)
+  - [x] `WD08` détail d'une tentative (corrigé, concepts, `RetryCountdown`)
+  - [x] `WD21` progression (`WeeklyActivityBars`, maîtrise par catégorie, recommandations)
+  - [x] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
+  - [x] Tests unitaires : statut issu du serveur affiché tel quel (D31)
+  - [x] Parcours Playwright : filtre dans l'URL, détail, apprenant sans quiz, progression
 - [ ] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres`
   - [ ] WD13 profil (hub de `SettingsRow`, identifiant en lecture seule)
   - [ ] WD17 modification du profil (`ProfileForm`, `AvatarPicker`, `GoalChip`)

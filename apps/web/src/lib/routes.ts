@@ -79,6 +79,10 @@ export const routes = {
     /** Catalogue filtré par une recherche (`q`, recherche du header). */
     catalogSearch: (q: string) => `/apprenant/catalogue?q=${encodeURIComponent(q)}`,
     catalogCourse: (slug: string) => `/apprenant/catalogue/${slug}`,
+    /** WA01 · saisie du Kit Code (3.6, derrière le drapeau `unlock`). */
+    kitCode: (slug: string) => `/apprenant/catalogue/${slug}/kit-code`,
+    /** Demande de déblocage au parent (3.6, derrière le drapeau `unlock`), qui mène ensuite à WA02. */
+    parentRequest: (slug: string) => `/apprenant/catalogue/${slug}/demande`,
     wishlist: "/apprenant/souhaits",
     profile: "/apprenant/profil",
     editProfile: "/apprenant/profil/modifier",
@@ -94,6 +98,9 @@ export const routes = {
     home: "/backoffice",
     impact: "/backoffice/impact",
     kpi: (code: string) => `/backoffice/impact/indicateurs/${encodeURIComponent(code)}`,
+    reports: "/backoffice/impact/rapports",
+    report: (period: string) => `/backoffice/impact/rapports/${encodeURIComponent(period)}`,
+    reportEntry: (period: string) => `/backoffice/impact/rapports/${encodeURIComponent(period)}/saisie`,
     accessDenied: "/backoffice/acces-refuse",
   },
 } as const;

@@ -553,6 +553,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.accounts.tasks.anonymize_due_accounts",
         "schedule": crontab(minute=45, hour=3),
     },
+    "send-weekly-reports": {
+        "task": "apps.accounts.tasks.send_weekly_reports",
+        "schedule": crontab(minute=0, hour=7, day_of_week=1),
+    },
     # Filet de sécurité des PDF de certificats (ADR 0005 §3)
     "retry-pending-certificates": {
         "task": "apps.learning.tasks.retry_pending_certificates",

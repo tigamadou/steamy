@@ -50,7 +50,7 @@ export function Mascot({ pose = "idle", size = 120, hue, className }: MascotProp
       aria-hidden
       focusable="false"
       data-pose={pose}
-      className={cx("block [--mascot-hue:var(--primary-500)]", className)}
+      className={cx("block", !hue && "[--mascot-hue:var(--primary-500)]", className)}
       style={style}
     >
       {/* Antenne */}

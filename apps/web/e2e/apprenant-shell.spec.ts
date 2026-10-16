@@ -79,6 +79,9 @@ test("à 360 px, la navigation est un tiroir qui se ferme par Échap", async ({ 
   const menu = page.getByRole("button", { name: "Ouvrir le menu" });
   await openShellMenu(page);
   await expect(nav).toBeVisible();
+  // Tiroir modal : le reste de la page est inerte
+  await expect(page.getByRole("dialog", { name: "Menu" })).toBeVisible();
+  await expect(page.locator("[inert] main#contenu")).toHaveCount(1);
   await page.keyboard.press("Escape");
   await expect(nav).toBeHidden();
   await expect(menu).toBeFocused();
