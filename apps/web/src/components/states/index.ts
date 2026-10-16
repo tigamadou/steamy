@@ -9,5 +9,6 @@ export {
   OfflineState,
   type ErrorStateProps,
   type OfflineStateProps,
+  type StateTone,
 } from "./presets";
 export { WXLoading, WXState, type WXLoadingProps, type WXStateProps } from "./WXState";

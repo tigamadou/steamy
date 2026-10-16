@@ -1,12 +1,14 @@
 import type { Schemas } from "@steamy/api-client";
 import Link from "next/link";
 
+import { Button } from "@/components/ds/Button";
 import { Icon, type IconName } from "@/components/ds/Icon";
 import { adminPathUrl } from "@/lib/backoffice/access";
 import { formatKpiValue, formatShortDate } from "@/lib/backoffice/format";
 import { cx } from "@/lib/cx";
 import { routes } from "@/lib/routes";
 
+import { CompletenessBar } from "./CompletenessBar";
 import { DeadlineTracker, type DeadlineStep } from "./DeadlineTracker";
 import { KpiStatusBadge } from "./KpiStatusBadge";
 import { SectionHead } from "./SectionHead";
@@ -88,7 +90,7 @@ export function Overview({ overview, apiUrl, canOpenImpact }: OverviewProps) {
       </div>
 
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1.3fr_1fr]">
-        <ReportCard report={report} />
+        <ReportCard report={report} canOpen={canOpenImpact} />
         <TodoCard todo={todo} apiUrl={apiUrl} />
       </div>
     </div>
@@ -101,7 +103,7 @@ function nextDeadline(report: Report): string {
 }
 
 /** Étapes du rapport : saisie des indicateurs manuels, puis soumission avant l'échéance (D74). */
-export function reportSteps(report: Report): DeadlineStep[] {
+export function reportSteps(report: Pick<Report, "status" | "entered" | "total" | "dueDate">): DeadlineStep[] {
   const submitted = report.status === "submitted";
   const complete = report.entered >= report.total;
   return [
@@ -118,35 +120,29 @@ export function reportSteps(report: Report): DeadlineStep[] {
   ];
 }
 
-function ReportCard({ report }: { report: Report }) {
+function ReportCard({ report, canOpen }: { report: Report; canOpen: boolean }) {
   const status = REPORT_STATUS[report.status];
-  const percent = report.total > 0 ? Math.round((100 * report.entered) / report.total) : 0;
-  // Lien « Ouvrir le rapport » (WAD04) : livré avec la page du rapport, étape 6.9
   return (
     <section aria-labelledby="overview-report" className={CARD}>
       <SectionHead
         id="overview-report"
         title="Rapport d'impact · prochaine échéance"
         sub={`Trimestre ${report.label} · ${report.entered}/${report.total} indicateurs manuels renseignés`}
-        right={<StatusBadge tone={status.tone}>{status.label}</StatusBadge>}
+        right={
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
+            {canOpen && (
+              <Button href={routes.backoffice.report(report.period)} variant="ink" size="sm">
+                Ouvrir le rapport
+              </Button>
+            )}
+          </div>
+        }
       />
       <div className="px-1.5 pt-2.5 pb-4">
         <DeadlineTracker label={`Échéances du rapport ${report.label}`} steps={reportSteps(report)} />
       </div>
-      <div className="flex items-center justify-between text-xs font-extrabold text-ink-700">
-        <span id="overview-completeness">Complétude du rapport</span>
-        <span>{percent} %</span>
-      </div>
-      <div
-        role="progressbar"
-        aria-labelledby="overview-completeness"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={percent}
-        className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink-100"
-      >
-        <div className="h-full rounded-full bg-ink-900" style={{ width: `${percent}%` }} />
-      </div>
+      <CompletenessBar entered={report.entered} total={report.total} />
     </section>
   );
 }

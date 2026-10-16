@@ -379,7 +379,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** @description WD13, WD17 : profil courant, pour l'afficher et préremplir le formulaire. */
+        get: operations["accounts_me_learner_profile_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5209,7 +5210,8 @@ export interface components {
              * @description Dimanche
              */
             endDate: string;
-            previousWeek: string;
+            /** @description Null pour la première semaine acceptée (2000-W01) */
+            previousWeek: string | null;
             /** @description Null pour la semaine en cours */
             nextWeek: string | null;
             /** @description Temps d'apprentissage (journal, D55) */
@@ -6718,6 +6720,49 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_learner_profile_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnerProfile"];
                 };
             };
             401: {
