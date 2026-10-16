@@ -142,6 +142,10 @@ describe("EnrollCard · WC05", () => {
       "href",
       "/apprenant/catalogue/robot-bluetooth/kit-code",
     );
+    expect(screen.getByRole("link", { name: /Voir le kit/ })).toHaveAttribute(
+      "href",
+      `/apprenant/boutique/${KIT_DETAIL.slug}`,
+    );
     expect(screen.queryByText(/h de contenu|Certificat/)).not.toBeInTheDocument();
   });
 

@@ -15,7 +15,7 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 3.7a à 3.8 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
+Statut : 🟡 en cours · Prochaine tâche : 3.7b, 3.7c, 3.8 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
 
 ### Valeur pédagogique (API-L3a) — 🟡 en cours
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
@@ -129,15 +129,22 @@ Statut : 🟡 en cours · Prochaine tâche : 3.7a à 3.8 · Prérequis : API-1 e
   > `PaymentStatusEnum`, à fixer dans `ENUM_NAME_OVERRIDES`), le front rétablit le type ; `Order.deliveryZone` n'est pas
   > `nullable` dans le schéma alors qu'il vaut `null` pour un parcours. Filtre « Échouées » de WD14 remplacé par
   > « Annulées » : une commande n'a pas de statut d'échec (D37, statuts `pending`, `paid`, `cancelled`, `refunded`).
-- [ ] **3.7a** Boutique : catalogue, détail et panier (requiert API-L3b) · `feature/lot3-boutique-catalogue-panier`
-  - [ ] WK01 catalogue de la boutique (connecté ; `/boutique` invité = WL07)
-  - [ ] WK02 détail d'un kit
-  - [ ] WK11 kit en rupture (alerte de réassort)
-  - [ ] WK03 panier
-  - [ ] WK10 panier vide
-  - [ ] Composants `WKGallery`, `WKQtyStepper`, `WKCartRow`, `WKSummaryRow`, `RestockAlertForm`, `useCart`
-  - [ ] Panier invité en `localStorage`, panier connecté côté serveur, `mergeGuestCart()` au retour de W16, activation du panier dans `WKKitCard`
-  - [ ] Parcours Playwright P5
+- [x] **3.7a** Boutique : catalogue, détail et panier (requiert API-L3b) · `feature/lot3-boutique-catalogue-panier` · PR #117
+  - [x] `WK01` catalogue de la boutique (connecté ; `/boutique` invité = WL07)
+  - [x] `WK02` détail d'un kit
+  - [x] `WK11` kit en rupture (alerte de réassort)
+  - [x] `WK03` panier
+  - [x] `WK10` panier vide
+  - [x] Composants `WKGallery`, `WKQtyStepper`, `WKCartRow`, `WKSummaryRow`, `RestockAlertForm`, `useCart`
+  - [x] Panier invité en `localStorage`, panier connecté côté serveur, `mergeGuestCart()` au retour de W16, activation du panier dans `WKKitCard`
+  - [x] Parcours Playwright P5, partie panier (WK01 → WK03, reconnexion, fusion du panier invité) ; la fin (WK08) est livrée avec 3.7c
+  - [ ] ~~« Plus que n » et `WKQtyStepper` borné par le stock~~ : l'API n'expose que `available` (stock exact interne) ; la borne est celle du serveur à l'enregistrement (`MAX_QUANTITY`) et `OUT_OF_STOCK` à la commande. Champ à ajouter à `shop/kits/` et `shop/cart/` (signalé)
+  - [ ] ~~Tri de WK01~~ : `shop/kits/` n'a pas de paramètre d'ordre (signalé)
+  > Écarts assumés : « Acheter maintenant » ajoute le kit puis ouvre le panier, sans retirer les autres articles ; le
+  > sous-total du panier invité est la somme des prix unitaires relus dans l'API (aucun endpoint de devis anonyme), le
+  > total fait foi à WK06 ; le schéma OpenAPI de `DELETE shop/cart/items/{id}/` annonce un 204 alors que l'API renvoie
+  > le panier (le front relit le panier sans corps). « Demander à mon parent » est un rappel (`onRequestParent`) que
+  > 3.7c branche ; sans lui, le bouton est absent.
 - [ ] **3.7b** Checkout invité, D12 (requiert API-L3b) · `feature/lot3-boutique-checkout-invite`
   - [ ] WK04 coordonnées de l'invité
   - [ ] WK05 livraison (`AddressForm`, zones `shop/delivery-zones/`)
