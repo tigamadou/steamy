@@ -333,6 +333,7 @@ SPECTACULAR_SETTINGS = {
         "RoleEnum": "apps.accounts.models.User.Role",
         "ConsentStatusEnum": "apps.accounts.models.ConsentRequest.Status",
         "MembershipStatusEnum": "apps.classrooms.models.ClassroomMembership.Status",
+        "ApplicationStatusEnum": "apps.events.models.EventApplication.Status",
         "UserStatusEnum": "apps.accounts.models.User.Status",
         "DeletionRequestStatusEnum": "apps.accounts.models.DeletionRequest.Status",
         "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",

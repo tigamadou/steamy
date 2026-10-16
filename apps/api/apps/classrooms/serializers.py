@@ -11,6 +11,8 @@ from apps.accounts.fields import PhoneField
 from apps.accounts.models import ConsentRequest
 from apps.catalog.models import Course, Level, Mission, Project
 from apps.catalog.serializers import CategorySummarySerializer
+from apps.events.models import EventApplication
+from apps.events.serializers import EventSummarySerializer
 from apps.referentials.models import Relationship, SchoolGrade
 from apps.referentials.serializers import AvatarSerializer, SchoolGradeSerializer
 from libs.errors import ApiError
@@ -322,3 +324,28 @@ class ImportErrorSerializer(serializers.Serializer):
 class ImportResultSerializer(serializers.Serializer):
     created = MemberSerializer(many=True)
     errors = ImportErrorSerializer(many=True)
+
+
+# --- Candidatures des élèves aux Steamy Events (WT09, API-L5.5) -----------------------------------
+
+
+class EventApplicationQuerySerializer(serializers.Serializer):
+    # Paramètres d'URL : noms en camelCase, comme le reste de l'API
+    classroomId = serializers.IntegerField(required=False)
+    event = serializers.SlugField(required=False, help_text="Slug de l'événement")
+
+
+class ApplicationClassroomSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+
+
+class ClassroomEventApplicationSerializer(serializers.Serializer):
+    """Candidature d'un élève vue par son enseignant : statut seulement, ni motivation ni paiement (S8, D64)."""
+
+    id = serializers.IntegerField()
+    status = serializers.ChoiceField(choices=EventApplication.Status.choices)
+    event = EventSummarySerializer()
+    learner = MemberLearnerSerializer()
+    classroom = ApplicationClassroomSerializer(source="classroom_ref")
+    created_at = serializers.DateTimeField()

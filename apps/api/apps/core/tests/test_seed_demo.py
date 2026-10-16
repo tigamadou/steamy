@@ -324,5 +324,8 @@ def test_seed_demo_fills_koffis_classrooms_with_learners_and_invitations(sms):
     assert statuses == sorted(status for *_, status in INVITATIONS)
     assert ConsentRequest.objects.filter(origin="teacher").count() == len(INVITATIONS)
     assert User.objects.get(phone=KPADE_PHONE).children_links.count() == 2
+    from apps.events.models import EventProposal
+
+    assert EventProposal.objects.get().classroom.name == "4e B · Robotique"
     # SMS de l'invitation en attente (faux fournisseur, lisible dans Mailpit)
     assert "/consentement/" in sms.last(INVITATIONS[0][2])

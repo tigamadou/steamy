@@ -3238,6 +3238,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/classrooms/event-applications/:
+    get:
+      operationId: classrooms_event_applications_list
+      description: |-
+        WT09 « Candidatures de mes élèves » : candidatures des élèves actifs des classes de l'enseignant, en lecture
+        seule (chaque élève candidate seul, son parent décide, S8, C3). Filtres `classroomId`, `event`. Paginé.
+      parameters:
+      - in: query
+        name: classroomId
+        schema:
+          type: integer
+      - in: query
+        name: event
+        schema:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        description: Slug de l'événement
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedClassroomEventApplicationList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/classrooms/school/:
     get:
       operationId: classrooms_school_retrieve
@@ -3422,6 +3481,65 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Application'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/events/{slug}/proposals/:
+    post:
+      operationId: events_proposals_create
+      description: |-
+        WT09 « Proposer à une classe » : notifie les élèves actifs et leurs parents (notification seulement, S8).
+        `EVENT_ALREADY_PROPOSED` si la classe l'a déjà reçu, `EVENT_CLOSED` après la fin des candidatures.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposalRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proposal'
           description: ''
         '400':
           content:
@@ -6551,6 +6669,16 @@ components:
       - selfLevel
       - status
       - ticketUsed
+    ApplicationClassroom:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+      - id
+      - name
     ApplicationCreateRequest:
       type: object
       description: 'Apprenant : `{motivation, selfLevel}`. Parent : `{childId, motivation?}`
@@ -7472,6 +7600,31 @@ components:
       - emoji
       - slug
       - title
+    ClassroomEventApplication:
+      type: object
+      description: 'Candidature d''un élève vue par son enseignant : statut seulement,
+        ni motivation ni paiement (S8, D64).'
+      properties:
+        id:
+          type: integer
+        status:
+          $ref: '#/components/schemas/ApplicationStatusEnum'
+        event:
+          $ref: '#/components/schemas/EventSummary'
+        learner:
+          $ref: '#/components/schemas/MemberLearner'
+        classroom:
+          $ref: '#/components/schemas/ApplicationClassroom'
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - classroom
+      - createdAt
+      - event
+      - id
+      - learner
+      - status
     ClassroomWriteRequest:
       type: object
       description: 'WT13 : nom*, parcours* (de l''offre), niveau scolaire facultatif,
@@ -10760,6 +10913,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Child'
+    PaginatedClassroomEventApplicationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassroomEventApplication'
     PaginatedClassroomList:
       type: object
       properties:
@@ -11888,6 +12061,36 @@ components:
       required:
       - levels
       - title
+    Proposal:
+      type: object
+      properties:
+        id:
+          type: integer
+        event:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        classroomId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        notifiedCount:
+          type: integer
+          description: Élèves actifs et parents notifiés
+      required:
+      - classroomId
+      - createdAt
+      - event
+      - id
+      - notifiedCount
+    ProposalRequestRequest:
+      type: object
+      properties:
+        classroomId:
+          type: integer
+          description: Une classe de l'enseignant connecté
+      required:
+      - classroomId
     Question:
       type: object
       properties:

@@ -186,3 +186,38 @@ class EventApplication(models.Model):
 
     def __str__(self):
         return f"{self.learner} → {self.event}"
+
+
+class EventProposal(models.Model):
+    """
+    Proposition d'un événement à une classe par son enseignant (WT09) : **notification seulement** des élèves actifs et
+    de leurs parents. Chaque élève candidate ensuite seul, avec l'accord de son parent (S8, C3). Unique par couple.
+    """
+
+    event = models.ForeignKey(
+        SteamyEvent, on_delete=models.CASCADE, related_name="proposals", verbose_name=_("événement")
+    )
+    classroom = models.ForeignKey(
+        "classrooms.Classroom",
+        on_delete=models.CASCADE,
+        related_name="event_proposals",
+        verbose_name=_("classe"),
+    )
+    teacher = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="+",
+        verbose_name=_("enseignant"),
+    )
+    created_at = models.DateTimeField(_("proposé le"), auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("proposition à une classe")
+        verbose_name_plural = _("propositions aux classes")
+        constraints = [
+            models.UniqueConstraint(fields=["event", "classroom"], name="event_proposal_unique"),
+        ]
+
+    def __str__(self):
+        return f"{self.event} → {self.classroom}"

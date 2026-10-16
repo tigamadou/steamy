@@ -712,9 +712,16 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] Tests : aucun champ sensible dans les réponses enseignant (clés JSON)
 - [ ] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage`
   - [ ] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
-- [ ] **API-L5.5** Événements de classe · `feature/api-l5-5-evenements-classe`
-  - [ ] `EventProposal` ; `POST events/{slug}/proposals/` (`EVENT_ALREADY_PROPOSED`)
-  - [ ] `GET classrooms/event-applications/` (lecture seule)
+- [x] **API-L5.5** Événements de classe · `feature/api-l5-5-evenements-classe` · PR #84
+  - [x] `EventProposal` ; `POST events/{slug}/proposals/` (`EVENT_ALREADY_PROPOSED`)
+  - [x] Seed D2 : « Défi robots » déjà proposé à la classe « 4e B »
+  - [x] `GET classrooms/event-applications/` (lecture seule, `?classroomId=&event=`)
+  > Décisions : `{ classroomId }` d'une classe active de l'enseignant (sinon 404, `fields.classroomId`) ; événement
+  > publié, candidatures ouvertes (sinon `EVENT_CLOSED`) ; réponse `{ id, event, classroomId, createdAt,
+  > notifiedCount }`. Notifiés : élèves actifs (tutoiement, `/apprenant/evenements/<slug>`) et leurs parents
+  > (`/parent/evenements`), catégorie Steamy Events. `event-applications` : candidatures des élèves actifs des classes
+  > actives de l'enseignant (statut, événement, élève, classe), sans motivation ni paiement. Migration
+  > `events/0004_propositions` (après `0003_candidatures`).
 - [ ] **Critères de fin d'API-L5**
   - [ ] Un enseignant ne peut pas créer de contenu (S5)
   - [ ] Seed enrichi, `make openapi` committé
