@@ -90,16 +90,22 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6 (après API-L3b) · Prérequis 
   - [x] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
   - [x] Tests unitaires : statut issu du serveur affiché tel quel (D31)
   - [x] Parcours Playwright : filtre dans l'URL, détail, apprenant sans quiz, progression
-- [ ] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres`
-  - [ ] WD13 profil (hub de `SettingsRow`, identifiant en lecture seule)
-  - [ ] WD17 modification du profil (`ProfileForm`, `AvatarPicker`, `GoalChip`)
-  - [ ] WD18 mot de passe
+- [ ] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres` · PR #99
+  - [x] `WD13` profil (hub de `SettingsRow`, identifiant en lecture seule)
+  - [x] `WD17` modification du profil (`ProfileForm`, `AvatarPicker`, `GoalChip`)
+  - [x] `WD18` mot de passe
   - [ ] WD19 adresse de livraison (`AddressForm`)
   - [ ] WD22 parent
   - [ ] WD15 suppression du compte (texte D40, annulation tant que `pending_parent`)
-  - [ ] Composants `Section`, `InfoCard`, `ProfileForm`, `AddressForm`
-  - [ ] Tests unitaires : erreurs de champ issues de `fields`
-  - [ ] Parcours Playwright : modifier le profil puis recharger
+  - [x] Composants `Section`, `InfoCard`, `ProfileForm`, `AddressForm`
+  - [x] Lecture du profil : `GET accounts/me/learner-profile/` ajouté à l'API (absent d'API-L2.5, requis pour préremplir WD17)
+  - [x] Tests unitaires : erreurs de champ issues de `fields`
+  - [x] Parcours Playwright : modifier le profil puis recharger
+  > Reprise : WD19, WD22 et WD15 attendent leurs endpoints, absents de `development` au 2026-10-16 :
+  > `accounts/me/delivery-address/` (API-L3b.3), `accounts/me/parent/` (API-L4.1), `accounts/me/deletion-request/`
+  > (API-L4.3). Leurs lignes du hub WD13 existent derrière les drapeaux `deliveryAddress`, `parentInfo` et
+  > `accountDeletion` de `src/lib/features.ts` (et `orders` pour WD14, étape 3.6) : livrer l'écran, passer le drapeau
+  > à `true`, puis le retirer. `AddressForm` (DS) est prêt pour WD19 : zones fournies par l'appelant.
 
 ### Commerce (API-L3b) — ⬜ à faire
 - [ ] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage`

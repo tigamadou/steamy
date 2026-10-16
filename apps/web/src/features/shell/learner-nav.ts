@@ -30,6 +30,8 @@ const SECTIONS: Array<[prefix: string, section: LearnerSection]> = [
   [l.progress, { active: "profile", title: "Ma progression" }],
   [l.orders, { active: "profile", title: "Mes commandes" }],
   [l.parent, { active: "profile", title: "Mon parent" }],
+  [l.editProfile, { active: "profile", title: "Modifier mon profil" }],
+  [l.password, { active: "profile", title: "Mot de passe" }],
   [l.profile, { active: "profile", title: "Profil" }],
   [l.courses, { active: "courses", title: "Mes parcours" }],
   [l.catalog, { active: "catalog", title: "Catalogue" }],
