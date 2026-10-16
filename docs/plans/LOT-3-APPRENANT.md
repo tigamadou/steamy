@@ -101,21 +101,6 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6 (après API-L3b) · Prérequis 
   - [ ] Tests unitaires : erreurs de champ issues de `fields`
   - [ ] Parcours Playwright : modifier le profil puis recharger
 
-> Reprise : relecture de la session racine (#92 fusionnée) ; corrections restantes avant nouvelle relecture :
-> - #98 (3.2) : `VimeoFrame` sans `player.destroy()` sur l'iframe gérée par React (`off`/`unload`, test démontage) ;
->   focus déplacé au retrait d'un souhait et minuteur « Annuler » suspendu au focus et au survol (WCAG 2.4.3, 2.2.1) ;
->   non bloquants : `DropdownMenu` (focus, Espace), `KIT_CODE_LABEL` dans `course-detail`, double clic du cœur,
->   dégradation si souhaits, inscriptions ou kit en panne.
-> - #101 (3.1) : e2e WD03 sans préchargement ; `toCourseCard(course, href)` aligné sur #98 (D36) ; `CourseGrid` avec
->   paramètre de lien au lieu de la copie ; `CourseGridSkeleton` réutilisé ; PATCH des préférences sérialisés.
-> - #95 (3.3b) : P1 rejouable au retry (apprenant neuf par passage) ; filtre sur les éléments visibles déjà fait.
-> - #96, #97 : reformuler les commits de fusion 3921496 et c724d74 (lignes « # Conflicts: »), puis `push --force-with-lease`.
-> - #97 : liste des tentatives ciblée par son nom accessible, fait.
-> - Suivi de #92 (nouvelle PR) : tiroir de l'AppShell sous 768 px en `role="dialog"` + `aria-modal`, reste en `inert`,
->   focus rendu au bouton du menu après WD16.
-> - Worktrees des sous-agents 3.1 (`agent-a480bbe037fc30256`) et 3.2 (`agent-a560f2303bbd5e216`) arrêtés en cours de
->   correction : vérifier les changements non commités avant de reprendre.
-
 ### Commerce (API-L3b) — ⬜ à faire
 - [ ] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage`
   - [ ] WA01 saisie du Kit Code (`KitCodeInput`)
