@@ -9,6 +9,7 @@ facultatifs (D6).
 from datetime import date
 
 from django.db import transaction
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_field
 from rest_framework import serializers
 from rest_framework.response import Response
@@ -41,10 +42,12 @@ def check_birth_date(value: date, profile: LearnerProfile | None = None) -> date
     10 à 17 ans aujourd'hui et, pour un profil existant, l'âge qu'avait l'enfant à l'inscription est celui qu'il a
     déclaré (D23).
     """
-    if not MIN_AGE <= age_on(value, date.today()) <= MAX_AGE:
+    # Dates du Bénin (C16) : en UTC, la nuit, la date n'est pas la même
+    if not MIN_AGE <= age_on(value, timezone.localdate()) <= MAX_AGE:
         raise serializers.ValidationError(message_for("AGE_OUT_OF_RANGE"), code="AGE_OUT_OF_RANGE")
     declared = profile.declared_age if profile else None
-    if declared is not None and age_on(value, profile.user.date_joined.date()) != declared:
+    signed_up = timezone.localdate(profile.user.date_joined) if profile else None
+    if declared is not None and age_on(value, signed_up) != declared:
         raise serializers.ValidationError(
             message_for("BIRTHDATE_AGE_MISMATCH"), code="BIRTHDATE_AGE_MISMATCH"
         )

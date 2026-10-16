@@ -5,9 +5,8 @@ connecté (WD22). Règles : `apps/accounts/children.py`.
 Toute route `children/{id}/` passe par le lien parent ↔ enfant du parent connecté : un `id` étranger → 404.
 """
 
-from datetime import date
-
 from django.db import transaction
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_field
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
@@ -77,7 +76,7 @@ class ChildSerializer(serializers.ModelSerializer):
     def get_age(self, child) -> int | None:
         profile = child.learner_profile
         if profile.birth_date:
-            return age_on(profile.birth_date, date.today())
+            return age_on(profile.birth_date, timezone.localdate())
         return profile.declared_age
 
     @extend_schema_field(serializers.ChoiceField(choices=ProfileStep.choices, allow_null=True))
