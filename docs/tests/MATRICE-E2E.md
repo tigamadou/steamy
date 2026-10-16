@@ -155,9 +155,9 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WAD09` | Contenu / Parcours | 6 | Contenu via WAD15 : liste (accès, kit, inscrits), arbre par pages chaînées (fil d'Ariane, aperçu Vimeo), statut en lecture seule, « Publier » | `apps/web/e2e/admin-contenu.spec.ts` |
 | `WAD10` | Boutique & commandes | 6 |  |  |
 | `WAD11` | Paiements Mobile Money | 6 |  |  |
-| `WAD12` | Steamy Events (modération) | 6 |  |  |
+| `WAD12` | Steamy Events (modération) | 6 | Super-admin : événements (places, accès, fin des candidatures), candidatures (âge, paiement) sans action de confirmation | `apps/web/e2e/admin-evenements-reglages.spec.ts` |
 | `WAD13` | Équipe & rôles (RBAC) | 6 |  |  |
-| `WAD14` | Paramètres généraux | 6 |  |  |
+| `WAD14` | Paramètres généraux | 6 | Super-admin : la liste ouvre l'unique fiche de réglages ; réseaux par pays (Celtiis) ; annonce diffusable | `apps/web/e2e/admin-evenements-reglages.spec.ts` |
 | `WAD15` | Connexion admin (2FA) | 6 | Connexion du personnel par TOTP, code faux refusé, index de l'admin ; anonyme et parent renvoyés depuis `/backoffice` avec retour à la page demandée | `apps/web/e2e/admin-connexion.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
 | `WX01` | Hors ligne | 1 | Hors ligne → page recouverte, « Réessayer » sans réseau, retour du réseau → rétablie | `apps/web/e2e/socle-public.spec.ts` |
 | `WX02` | Erreur réseau | 1 |  |  |
