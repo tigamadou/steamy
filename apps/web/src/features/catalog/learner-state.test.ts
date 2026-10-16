@@ -25,8 +25,20 @@ describe("état personnel de l'apprenant sur le catalogue", () => {
         ? ok({ results: [{ course: course({ slug: "robot" }), addedAt: "" }] })
         : ok({ results: [{ course: course({ slug: "scratch" }), progressPct: 40 }] }),
     );
-    expect(await getLearnerCourseState()).toEqual({ wished: ["robot"], progress: { scratch: 40 } });
+    expect(await getLearnerCourseState()).toEqual({ wished: ["robot"], progress: { scratch: 40 }, degraded: false });
     expect(GET).toHaveBeenCalledWith("/api/wishlist/", { params: { query: { page: 1, pageSize: 100, sort: "recent" } } });
+  });
+
+  it("souhaits ou inscriptions en panne : état vide et écran dégradé, sans échec", async () => {
+    const down = { error: { code: "SERVER_ERROR", message: "Panne" }, response: new Response(null, { status: 500 }) };
+    GET.mockReset().mockImplementation(async (path: string) =>
+      path === "/api/wishlist/" ? down : ok({ results: [{ course: course({ slug: "scratch" }), progressPct: 40 }] }),
+    );
+    expect(await getLearnerCourseState()).toEqual({ wished: [], progress: { scratch: 40 }, degraded: true });
+    GET.mockReset().mockImplementation(async (path: string) =>
+      path === "/api/wishlist/" ? ok({ results: [{ course: course({ slug: "robot" }), addedAt: "" }] }) : down,
+    );
+    expect(await getLearnerCourseState()).toEqual({ wished: ["robot"], progress: {}, degraded: true });
   });
 
   it("une lecture en échec remonte une erreur (limite d'erreur de la page)", async () => {

@@ -40,6 +40,7 @@ export function DonutChart({
   const r = (size - thickness) / 2;
   const c = 2 * Math.PI * r;
   const center = size / 2;
+  const text = display ?? percent;
 
   return (
     <figure className="m-0">
@@ -69,11 +70,11 @@ export function DonutChart({
           y={caption ? center - 4 : center}
           textAnchor="middle"
           dominantBaseline="central"
-          fontSize={size * 0.24}
+          fontSize={size * (text.length > 4 ? 0.19 : 0.24)}
           fontWeight={900}
           fill="var(--ink-900)"
         >
-          {display ?? percent}
+          {text}
         </text>
         {caption && (
           <text
@@ -83,7 +84,7 @@ export function DonutChart({
             dominantBaseline="central"
             fontSize={10}
             fontWeight={700}
-            fill="var(--ink-500)"
+            fill="var(--ink-600)"
           >
             {caption}
           </text>

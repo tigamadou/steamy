@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { Accordion, Badge, Breadcrumb, Button, Icon, SkeletonBlock } from "@/components/ds";
 import { catalogHref } from "@/lib/catalog-filters";
-import { DIFFICULTY_LABELS, formatPrice } from "@/lib/format";
+import { DIFFICULTY_LABELS, formatPrice, KIT_CODE_LABEL } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
 import { WLJoinBanner } from "./sections";
@@ -33,7 +33,8 @@ function counts(course: Course) {
 
 const PLURALS: Record<string, string> = { projet: "projets", niveau: "niveaux", mission: "missions" };
 
-function plural(n: number, word: keyof typeof PLURALS) {
+/** « 1 projet », « 3 missions ». */
+export function plural(n: number, word: keyof typeof PLURALS) {
   return `${n} ${n > 1 ? PLURALS[word] : word}`;
 }
 
@@ -71,7 +72,7 @@ export function CourseHero({ course }: { course: Course }) {
         </ul>
         <div>
           {offer === "kit" ? (
-            <Badge tone="amber">📦 Avec le Kit Code</Badge>
+            <Badge tone="amber">📦 {KIT_CODE_LABEL}</Badge>
           ) : offer === "free" ? (
             <Badge tone="success">Gratuit</Badge>
           ) : (

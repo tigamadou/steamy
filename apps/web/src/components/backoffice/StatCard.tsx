@@ -9,7 +9,7 @@ export type DeltaTone = "success" | "error" | "neutral";
 const DELTA = {
   success: { className: "text-success-700", arrow: "▲", text: "En hausse" },
   error: { className: "text-error-600", arrow: "▼", text: "En baisse" },
-  neutral: { className: "text-ink-500", arrow: "•", text: "Stable" },
+  neutral: { className: "text-ink-600", arrow: "•", text: "Stable" },
 } as const;
 
 export type StatCardProps = {
@@ -35,9 +35,9 @@ export function StatCard({ label, value, sub, delta, deltaTone = "neutral", spar
       className="flex min-w-0 flex-col gap-2.5 rounded-[14px] border border-ink-100 bg-surface px-4.5 py-4"
     >
       <div className="flex items-center justify-between gap-2">
-        <h3 className="m-0 text-[11px] font-extrabold uppercase tracking-[.05em] text-ink-500">{label}</h3>
+        <h3 className="m-0 text-[11px] font-extrabold uppercase tracking-[.05em] text-ink-600">{label}</h3>
         {icon && (
-          <span aria-hidden className="flex shrink-0 text-ink-500">
+          <span aria-hidden className="flex shrink-0 text-ink-600">
             {icon}
           </span>
         )}
@@ -45,7 +45,7 @@ export function StatCard({ label, value, sub, delta, deltaTone = "neutral", spar
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="m-0 text-[28px] font-black leading-none tracking-[-.02em] text-ink-900">{value ?? "—"}</p>
-          {sub && <p className="m-0 mt-1.25 text-xs font-semibold text-ink-500">{sub}</p>}
+          {sub && <p className="m-0 mt-1.25 text-xs font-semibold text-ink-600">{sub}</p>}
         </div>
         {spark && spark.length > 0 && (
           <Sparkline data={spark} label={`Tendance · ${label}`} color={sparkColor} width={84} height={32} />
