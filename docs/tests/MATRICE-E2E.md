@@ -102,9 +102,9 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WJ04` | Évaluation formative (≥ 70 %) | 3 | P1 : formative, seuil de l'API, envoi groupé | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WJ05` | Revue des résultats | 3 | P1 : résultat réussi, badge | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WJ06` | Badge de niveau débloqué | 3 | P1 : badge de niveau plein écran, étape suivante de l'API | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
-| `WJ07` | Certification & fin de parcours | 3 |  |  |
+| `WJ07` | Certification & fin de parcours | 3 | Certificat de l'API, PDF préparé puis téléchargé ; fin de P1 | `apps/web/e2e/apprenant-certification.spec.ts`, `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WJ08` | Échec d'évaluation | 3 | P1 : sommative ratée, concepts à revoir, compte à rebours | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
-| `WJ09` | Parcours incomplet | 3 |  |  |
+| `WJ09` | Parcours incomplet | 3 | Reste à faire, reprise, aucune mention du parent | `apps/web/e2e/apprenant-certification.spec.ts` |
 | `WJ10` | Évaluation sommative (≥ 80 %) | 3 | P1 : sommative ratée puis réussie après le délai | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WJ11` | Projet validé + badge de projet | 3 | P1 : badge de projet, lien vers la certification | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WPD01` | Accueil parent | 4 |  |  |

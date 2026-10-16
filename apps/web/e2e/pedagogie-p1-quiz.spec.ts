@@ -4,10 +4,11 @@ import { expect, test, type Page } from "@playwright/test";
 import { decideConsent, uniquePhone } from "./support/api";
 import { completeLearnerProfile, sendConsentRequest, startLearnerSignup } from "./support/signup";
 
-// LOT-3 §8.2 · P1 (étapes 3.3a et 3.3b) : un apprenant créé pour le test suit le parcours gratuit court du jeu D2 (1 projet, 1 niveau,
-// 2 missions, formative et sommative de 2 questions), réussit la formative, rate la sommative, attend le délai
-// court de la stack e2e (`seed_demo --e2e`), puis la réussit. Les bonnes réponses sont celles du jeu D2 (la
-// première), jamais lues dans la page. L'apprenant est neuf à chaque passage : le parcours est rejouable (retry).
+// LOT-3 §8.2 · P1 (étapes 3.3a à 3.3c) : un apprenant créé pour le test suit le parcours gratuit court du jeu D2
+// (1 projet, 1 niveau, 2 missions, formative et sommative de 2 questions), réussit la formative, rate la sommative,
+// attend le délai court de la stack e2e (`seed_demo --e2e`), puis la réussit, et télécharge sa certification. Les
+// bonnes réponses sont celles du jeu D2 (la première), jamais lues dans la page. L'apprenant est neuf à chaque
+// passage : le parcours est rejouable (retry).
 
 const COURSE = "premiers-pas-zeti";
 const RIGHT = "L'idée vue dans la mission";
@@ -28,7 +29,7 @@ async function answerQuiz(page: Page, choice: string) {
   await page.getByRole("button", { name: /Envoyer mes réponses/ }).click();
 }
 
-test("P1 : missions, formative réussie, sommative ratée puis réussie après le délai, badges", async ({
+test("P1 : missions, formative réussie, sommative ratée puis réussie après le délai, badges, certification", async ({
   page,
 }) => {
   test.setTimeout(180_000);
@@ -95,8 +96,13 @@ test("P1 : missions, formative réussie, sommative ratée puis réussie après l
   await page.getByRole("link", { name: "Voir mon badge" }).click();
   await expect(page).toHaveURL(/\/projets\/\d+\/badge\?tentative=\d+$/);
   await expect(page.getByRole("heading", { level: 1, name: "Projet validé !" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Voir ma certification" })).toHaveAttribute(
-    "href",
-    `/apprenant/parcours/${COURSE}/certification`,
-  );
+  await page.getByRole("link", { name: "Voir ma certification" }).click();
+
+  // WJ07 → PDF (généré par le worker, D33)
+  await expect(page).toHaveURL(`/apprenant/parcours/${COURSE}/certification`);
+  await expect(page.getByText("Certification Steamy")).toBeVisible();
+  const pdf = page.getByRole("link", { name: "Télécharger la certification (PDF)" });
+  await expect(pdf).toBeVisible({ timeout: 30_000 });
+  const [file] = await Promise.all([page.waitForEvent("download"), pdf.click()]);
+  expect(file.suggestedFilename()).toMatch(/\.pdf$/);
 });
