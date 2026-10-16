@@ -23,7 +23,7 @@ from apps.accounts.models import (
     User,
 )
 from apps.catalog import models as catalog
-from apps.classrooms.demo import seed_classes
+from apps.classrooms.demo import seed_classes, seed_members
 from apps.classrooms.invitations import send_invitation
 from apps.classrooms.models import School, TeacherInvitation
 from apps.core.groups import CONTENT, FINANCE, SUPER_ADMIN, SUPPORT
@@ -831,5 +831,6 @@ def seed_all() -> dict[str, User]:
     seed_impact(accounts)
     seed_commerce(accounts)
     accounts["noe"] = seed_parent_space(accounts, DEMO_PASSWORD)
-    seed_classes(School.objects.get(name=SCHOOL_NAME), accounts["koffi"])
+    classrooms = seed_classes(School.objects.get(name=SCHOOL_NAME), accounts["koffi"])
+    seed_members(classrooms, accounts["koffi"], accounts["lea"], DEMO_PASSWORD)
     return accounts

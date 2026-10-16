@@ -3,7 +3,7 @@ Domaine `accounts` : décision du parent sur les demandes de consentement (WP01 
 WP12). Règles : `apps/accounts/consent.py`.
 """
 
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_field
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
@@ -19,7 +19,12 @@ from libs.errors import ApiError
 from libs.permissions import IsParent
 from libs.phone import mask_phone
 
-from .learner_signup import ConsentRequestStateSerializer, LearnerConsentRequestSerializer
+from ..fields import PasswordField
+from .learner_signup import (
+    ConsentRequestStateSerializer,
+    LearnerConsentRequestSerializer,
+    UsernameField,
+)
 from .session import enforce_csrf
 
 
@@ -35,6 +40,15 @@ class ConsentPreviewSerializer(serializers.Serializer):
     parent_phone_masked = serializers.CharField()
 
 
+class ConsentClassroomSerializer(serializers.Serializer):
+    """Classe d'une invitation d'enseignant (WPD05, D60) : ce que le parent accepte."""
+
+    name = serializers.CharField()
+    teacher_name = serializers.CharField()
+    school_name = serializers.CharField()
+    course_title = serializers.CharField()
+
+
 class ConsentRequestSerializer(serializers.ModelSerializer):
     """Demande vue par le parent (WP04, WP05) : seulement ce qui existe à ce stade (D20)."""
 
@@ -45,12 +59,16 @@ class ConsentRequestSerializer(serializers.ModelSerializer):
     age = serializers.SerializerMethodField()
     relationship = RelationshipSerializer(read_only=True)
     refusal_reason = RefusalReasonSerializer(read_only=True, allow_null=True)
+    classroom = serializers.SerializerMethodField(
+        help_text="Invitation d'un enseignant (origine `teacher`) : la classe proposée"
+    )
 
     class Meta:
         model = ConsentRequest
         fields = (
             "id",
             "origin",
+            "classroom",
             "status",
             "first_name",
             "last_name",
@@ -83,6 +101,32 @@ class ConsentRequestSerializer(serializers.ModelSerializer):
 
     def get_age(self, consent) -> int | None:
         return self._subject(consent, "age")
+
+    @extend_schema_field(ConsentClassroomSerializer(allow_null=True))
+    def get_classroom(self, consent):
+        membership = getattr(consent, "classroom_membership", None)
+        if membership is None:
+            return None
+        classroom = membership.classroom
+        return ConsentClassroomSerializer(
+            {
+                "name": classroom.name,
+                "teacher_name": f"{classroom.teacher.first_name} {classroom.teacher.last_name}",
+                "school_name": classroom.school.name,
+                "course_title": classroom.course.title,
+            }
+        ).data
+
+
+class AcceptSerializer(serializers.Serializer):
+    """
+    Invitation d'un enseignant seulement (C11) : `{ username, password }` crée le compte de l'enfant, ou `{ learnerId }`
+    rattache un enfant déjà lié au parent. Ignoré pour les autres origines.
+    """
+
+    username = UsernameField(required=False)
+    password = PasswordField(required=False)
+    learner_id = serializers.IntegerField(required=False)
 
 
 class RefuseSerializer(serializers.Serializer):
@@ -138,11 +182,17 @@ class ConsentRequestViewSet(
         page = self.paginate_queryset(queryset)
         return self.get_paginated_response(self.get_serializer(page, many=True).data)
 
-    @extend_schema(request=None, responses=ConsentRequestSerializer)
+    @extend_schema(request=AcceptSerializer, responses=ConsentRequestSerializer)
     @action(detail=True, methods=["post"])
     def accept(self, request, pk=None):
-        """WP05 « Accepter » → WP06 : l'enfant est rattaché au parent et peut choisir son mot de passe (W10)."""
-        consent = service.accept(pk, request.user, request=request)
+        """
+        WP05 « Accepter » → WP06 : l'enfant est rattaché au parent et peut choisir son mot de passe (W10). Invitation
+        d'un enseignant (WPD05) : le parent crée l'identifiant de l'enfant ou rattache un enfant existant, puis
+        l'élève rejoint la classe (D60, C11).
+        """
+        serializer = AcceptSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        consent = service.accept(pk, request.user, request=request, data=serializer.validated_data)
         return Response(self.get_serializer(consent).data)
 
     @extend_schema(request=RefuseSerializer, responses=ConsentRequestSerializer)

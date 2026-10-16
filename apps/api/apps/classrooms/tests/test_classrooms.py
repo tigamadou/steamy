@@ -12,6 +12,7 @@ from apps.accounts.tests.factories import LearnerFactory, ParentFactory, Teacher
 from apps.catalog.tests.factories import CourseFactory, MissionFactory
 from apps.classrooms import services
 from apps.classrooms.models import Classroom, ClassroomMembership
+from apps.classrooms.serializers import MemberSerializer
 from apps.core.tests.staff import verified_client
 from apps.referentials.models import Avatar
 
@@ -334,7 +335,7 @@ def test_members_show_learners_and_invitations_without_sensitive_data(api, teach
 
     body = api.get(f"{URL}{classroom.pk}/members/").json()
 
-    assert body["count"] == 5
+    assert body["count"] == 4  # retirés et invitations purgées (C9) exclus
     rows = {row["id"]: row for row in body["results"]}
     row = rows[active.pk]
     assert set(row) == {
@@ -358,7 +359,9 @@ def test_members_show_learners_and_invitations_without_sensitive_data(api, teach
     assert rows[pending.pk]["invitationExpiresAt"] is not None
     assert rows[refused.pk]["invitationStatus"] == "refused"
     assert rows[refused.pk]["invitationExpiresAt"] is None
-    assert (rows[orphan.pk]["firstName"], rows[orphan.pk]["invitationStatus"]) == ("", None)
+    assert orphan.pk not in rows
+    orphan_row = MemberSerializer(orphan).data
+    assert (orphan_row["first_name"], orphan_row["invitation_status"]) == ("", None)
     assert "+229" not in str(body)
 
 

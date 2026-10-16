@@ -553,8 +553,10 @@ paths:
   /api/accounts/consent-requests/{id}/accept/:
     post:
       operationId: accounts_consent_requests_accept_create
-      description: 'WP05 « Accepter » → WP06 : l''enfant est rattaché au parent et
-        peut choisir son mot de passe (W10).'
+      description: |-
+        WP05 « Accepter » → WP06 : l'enfant est rattaché au parent et peut choisir son mot de passe (W10). Invitation
+        d'un enseignant (WPD05) : le parent crée l'identifiant de l'enfant ou rattache un enfant existant, puis
+        l'élève rejoint la classe (D60, C11).
       parameters:
       - in: path
         name: id
@@ -564,6 +566,11 @@ paths:
         required: true
       tags:
       - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptRequest'
       security:
       - cookieAuth: []
       responses:
@@ -2898,6 +2905,130 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Classroom'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/{id}/invitations/:
+    post:
+      operationId: classrooms_invitations_create
+      description: |-
+        WT06 onglet Individuel : demande de consentement d'origine enseignant, SMS au parent (D60).
+        `LEARNER_QUOTA_EXCEEDED` (invitations en attente comprises, C19), `ALREADY_IN_CLASSROOM`, `CONSENT_COOLDOWN`,
+        `INVITATION_DAILY_LIMIT`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - classrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/{id}/invitations/import/:
+    post:
+      operationId: classrooms_invitations_import_create
+      description: |-
+        WT06 onglet Import par lot (C19) : import partiel. Les lignes valides partent dans la limite du quota ; les
+        autres reviennent avec leur numéro et leur code (`DUPLICATE_ROW`, `MALFORMED_ROW`, `PHONE_INVALID`,
+        `ALREADY_IN_CLASSROOM`, `LEARNER_QUOTA_EXCEEDED`…). Plus de 200 lignes : `IMPORT_TOO_LARGE`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - classrooms
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImportRequestRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportRequestRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportResult'
           description: ''
         '400':
           content:
@@ -6337,6 +6468,22 @@ paths:
           description: ''
 components:
   schemas:
+    AcceptRequest:
+      type: object
+      description: |-
+        Invitation d'un enseignant seulement (C11) : `{ username, password }` crée le compte de l'enfant, ou `{ learnerId }`
+        rattache un enfant déjà lié au parent. Ignoré pour les autres origines.
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+        learnerId:
+          type: integer
     Activity:
       type: object
       properties:
@@ -7404,6 +7551,24 @@ components:
       - code
       - label
       - value
+    ConsentClassroom:
+      type: object
+      description: 'Classe d''une invitation d''enseignant (WPD05, D60) : ce que le
+        parent accepte.'
+      properties:
+        name:
+          type: string
+        teacherName:
+          type: string
+        schoolName:
+          type: string
+        courseTitle:
+          type: string
+      required:
+      - courseTitle
+      - name
+      - schoolName
+      - teacherName
     ConsentPreview:
       type: object
       description: 'Ce que montre le lien SMS avant toute connexion : le numéro masqué,
@@ -7426,6 +7591,13 @@ components:
           - $ref: '#/components/schemas/OriginEnum'
           readOnly: true
           title: Origine
+        classroom:
+          allOf:
+          - $ref: '#/components/schemas/ConsentClassroom'
+          nullable: true
+          readOnly: true
+          description: 'Invitation d''un enseignant (origine `teacher`) : la classe
+            proposée'
         status:
           type: string
           readOnly: true
@@ -7471,6 +7643,7 @@ components:
           title: Précisions du refus
       required:
       - age
+      - classroom
       - createdAt
       - expiresAt
       - firstName
@@ -8240,8 +8413,10 @@ components:
       - EVENT_ALREADY_PROPOSED
       - EVENT_CLOSED
       - EVENT_FULL
+      - IMPORT_INVALID_FILE
       - IMPORT_TOO_LARGE
       - INVALID_CREDENTIALS
+      - INVITATION_DAILY_LIMIT
       - INVITATION_INVALID
       - KIT_CODE_ALREADY_USED
       - KIT_CODE_INVALID
@@ -8313,8 +8488,10 @@ components:
         * `EVENT_ALREADY_PROPOSED` - EVENT_ALREADY_PROPOSED
         * `EVENT_CLOSED` - EVENT_CLOSED
         * `EVENT_FULL` - EVENT_FULL
+        * `IMPORT_INVALID_FILE` - IMPORT_INVALID_FILE
         * `IMPORT_TOO_LARGE` - IMPORT_TOO_LARGE
         * `INVALID_CREDENTIALS` - INVALID_CREDENTIALS
+        * `INVITATION_DAILY_LIMIT` - INVITATION_DAILY_LIMIT
         * `INVITATION_INVALID` - INVITATION_INVALID
         * `KIT_CODE_ALREADY_USED` - KIT_CODE_ALREADY_USED
         * `KIT_CODE_INVALID` - KIT_CODE_INVALID
@@ -8601,6 +8778,125 @@ components:
       description: |-
         * `draft` - Brouillon
         * `submitted` - Soumis
+    ImportError:
+      type: object
+      properties:
+        line:
+          type: integer
+        code:
+          $ref: '#/components/schemas/ImportErrorCodeEnum'
+        message:
+          type: string
+        data:
+          allOf:
+          - $ref: '#/components/schemas/ImportRowData'
+          description: Valeurs lues, pour corriger la ligne en place
+      required:
+      - code
+      - data
+      - line
+      - message
+    ImportErrorCodeEnum:
+      enum:
+      - DUPLICATE_ROW
+      - MALFORMED_ROW
+      - PHONE_INVALID
+      - ALREADY_IN_CLASSROOM
+      - LEARNER_QUOTA_EXCEEDED
+      - CONSENT_COOLDOWN
+      - INVITATION_DAILY_LIMIT
+      type: string
+      description: |-
+        * `DUPLICATE_ROW` - DUPLICATE_ROW
+        * `MALFORMED_ROW` - MALFORMED_ROW
+        * `PHONE_INVALID` - PHONE_INVALID
+        * `ALREADY_IN_CLASSROOM` - ALREADY_IN_CLASSROOM
+        * `LEARNER_QUOTA_EXCEEDED` - LEARNER_QUOTA_EXCEEDED
+        * `CONSENT_COOLDOWN` - CONSENT_COOLDOWN
+        * `INVITATION_DAILY_LIMIT` - INVITATION_DAILY_LIMIT
+    ImportRequestRequest:
+      type: object
+      description: Un fichier CSV ou Excel (.xlsx, 1 Mo, 200 lignes) **ou** des lignes
+        (liste collée, lignes corrigées).
+      properties:
+        file:
+          type: string
+          format: binary
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportRowRequest'
+    ImportResult:
+      type: object
+      properties:
+        created:
+          type: array
+          items:
+            $ref: '#/components/schemas/Member'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportError'
+      required:
+      - created
+      - errors
+    ImportRowData:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        parentPhone:
+          type: string
+        relationship:
+          type: string
+    ImportRowRequest:
+      type: object
+      description: Ligne saisie ou corrigée dans le front ; `line` garde son numéro
+        d'origine dans le rapport.
+      properties:
+        line:
+          type: integer
+          minimum: 1
+        firstName:
+          type: string
+          default: ''
+        lastName:
+          type: string
+          default: ''
+        parentPhone:
+          type: string
+          default: ''
+        relationship:
+          type: string
+          default: ''
+    InvitationRequest:
+      type: object
+      description: 'WT06 onglet Individuel : l''élève n''a pas de téléphone (D30),
+        seul son parent est contacté.'
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        parentPhone:
+          type: string
+          minLength: 1
+          maxLength: 32
+        relationship:
+          type: string
+          minLength: 1
+          description: Code du référentiel `relationships`
+      required:
+      - firstName
+      - lastName
+      - parentPhone
+      - relationship
     InvoiceSummary:
       type: object
       properties:

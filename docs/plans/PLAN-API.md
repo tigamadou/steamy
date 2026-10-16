@@ -681,12 +681,31 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`CourseSummary` est pris par `payments`).
   > Offre échue (C21, 2026-10-16) : école bloquée, `SCHOOL_OFFER_EXPIRED` (403) à la création d'une classe ;
   > `classrooms/school/` expose `offerExpired`.
-- [ ] **API-L5.2** Invitations · `feature/api-l5-2-invitations`
-  - [ ] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
-  - [ ] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; `Enrollment` `source=classroom` (D62)
-  - [ ] `POST …/invitations/import/` (C19 : CSV/Excel, 200 lignes, 1 Mo, import partiel, codes d'erreur par ligne)
-  - [ ] SMS par Celery, plafond par enseignant et par jour
-  - [ ] Tests : invitation non acceptée → aucun accès au parcours
+- [x] **API-L5.2** Invitations · `feature/api-l5-2-invitations` · PR #81
+  - [x] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
+  - [x] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; l'élève devient membre actif, l'enseignant est notifié
+  - [x] `Enrollment` `source=classroom` à l'adhésion (D62), sans paiement ; une inscription antérieure au même parcours est gardée
+  - [x] `POST …/invitations/import/` (C19 : CSV/Excel, 200 lignes, 1 Mo, import partiel, codes d'erreur par ligne)
+  - [x] SMS par Celery, plafond par enseignant et par jour
+  - [x] Refus et expiration : place libérée, enseignant notifié (WT04, WT12)
+  - [x] Seed D2 : élèves actifs (Léa, Yao, Sèna) et invitations en attente, refusée et expirée
+  - [x] Tests : invitation non acceptée → aucun accès au parcours
+  > Décisions : import en fichier (`multipart`, champ `file`) **ou** en lignes JSON (`rows`, liste collée et lignes
+  > corrigées, `line` facultatif pour garder le numéro d'origine) ; réponse `{created[], errors[{line, code, message,
+  > data}]}`. Codes par ligne en plus de C19 : `CONSENT_COOLDOWN` (refus de ce parent depuis moins de 30 jours, C9)
+  > et `INVITATION_DAILY_LIMIT` (`CLASSROOM_INVITATIONS_PER_DAY`, 300 par défaut) ; fichier illisible :
+  > `IMPORT_INVALID_FILE`. Doublon dans la classe : même prénom et nom pour le même numéro de parent, invitation en
+  > attente ou élève actif (`ALREADY_IN_CLASSROOM`). Le compte créé par le parent est actif ; l'enfant complète son
+  > profil à la première connexion (comme D51). `GET accounts/consent-requests/{id}/` expose `classroom` (classe,
+  > enseignant, école, parcours) pour WPD05. Pas de plafond OTP par IP pour ces SMS : le plafond par enseignant le
+  > remplace. Pas de champ `classroom` sur `Enrollment` (pas de migration `learning`) : la classe se retrouve par
+  > `ClassroomMembership` ; l'inscription reste après un retrait de la classe (progression conservée).
+  > Relecture (#81) : CSV illisible (octet NUL, champ démesuré) → `IMPORT_INVALID_FILE` ; Excel lu en flux et borné
+  > (8 colonnes, arrêt à 202 lignes non vides ou 5 000 lignes parcourues → `IMPORT_TOO_LARGE`), XML lu par
+  > `defusedxml` ; `rows` limité à 200 ; noms comparés sans accents ; plafond par numéro de parent
+  > (`CLASSROOM_INVITATIONS_PER_PHONE_PER_DAY`, 5, code `INVITATION_DAILY_LIMIT`) ; `join_classroom` : invitation
+  > retirée, classe archivée ou membre déjà actif → `CONSENT_REQUEST_EXPIRED`, identifiant pris en concurrence →
+  > `USERNAME_TAKEN`. Offre échue (C21) : invitation, import et acceptation par le parent → `SCHOOL_OFFER_EXPIRED`.
 - [ ] **API-L5.3** Suivi · `feature/api-l5-3-suivi`
   - [ ] `GET classrooms/dashboard/`
   - [ ] `GET classrooms/learners/{id}/?classroomId=` (serializer sans handicap, localité, date de naissance, téléphone, D64)

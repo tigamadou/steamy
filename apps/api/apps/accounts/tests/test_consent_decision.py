@@ -143,6 +143,7 @@ def test_detail_shows_only_what_exists_at_this_stage(sms, parent):
     assert set(body) == {
         "id",
         "origin",
+        "classroom",
         "status",
         "firstName",
         "lastName",
@@ -164,6 +165,7 @@ def test_detail_shows_only_what_exists_at_this_stage(sms, parent):
     assert body["relationship"]["code"] == "pere"
     assert body["relationship"]["parentLabel"] == "Vous êtes son père"
     assert body["status"] == "pending" and body["origin"] == "learner"
+    assert body["classroom"] is None
 
 
 def test_list_filters_by_effective_status(sms, parent):

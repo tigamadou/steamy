@@ -145,7 +145,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description WP05 « Accepter » → WP06 : l'enfant est rattaché au parent et peut choisir son mot de passe (W10). */
+        /**
+         * @description WP05 « Accepter » → WP06 : l'enfant est rattaché au parent et peut choisir son mot de passe (W10). Invitation
+         *     d'un enseignant (WPD05) : le parent crée l'identifiant de l'enfant ou rattache un enfant existant, puis
+         *     l'élève rejoint la classe (D60, C11).
+         */
         post: operations["accounts_consent_requests_accept_create"];
         delete?: never;
         options?: never;
@@ -967,6 +971,48 @@ export interface paths {
         head?: never;
         /** @description WT13 en édition : le parcours est figé dès que la classe a eu un membre. */
         patch: operations["classrooms_partial_update"];
+        trace?: never;
+    };
+    "/api/classrooms/{id}/invitations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description WT06 onglet Individuel : demande de consentement d'origine enseignant, SMS au parent (D60).
+         *     `LEARNER_QUOTA_EXCEEDED` (invitations en attente comprises, C19), `ALREADY_IN_CLASSROOM`, `CONSENT_COOLDOWN`,
+         *     `INVITATION_DAILY_LIMIT`.
+         */
+        post: operations["classrooms_invitations_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/{id}/invitations/import/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description WT06 onglet Import par lot (C19) : import partiel. Les lignes valides partent dans la limite du quota ; les
+         *     autres reviennent avec leur numéro et leur code (`DUPLICATE_ROW`, `MALFORMED_ROW`, `PHONE_INVALID`,
+         *     `ALREADY_IN_CLASSROOM`, `LEARNER_QUOTA_EXCEEDED`…). Plus de 200 lignes : `IMPORT_TOO_LARGE`.
+         */
+        post: operations["classrooms_invitations_import_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/classrooms/{id}/members/": {
@@ -2248,6 +2294,15 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * @description Invitation d'un enseignant seulement (C11) : `{ username, password }` crée le compte de l'enfant, ou `{ learnerId }`
+         *     rattache un enfant déjà lié au parent. Ignoré pour les autres origines.
+         */
+        AcceptRequest: {
+            username?: string;
+            password?: string;
+            learnerId?: number;
+        };
         Activity: {
             /** @description Secondes retenues après plafonnement */
             secondsCounted: number;
@@ -2659,6 +2714,13 @@ export interface components {
             /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
             value: (number | boolean | string) | null;
         };
+        /** @description Classe d'une invitation d'enseignant (WPD05, D60) : ce que le parent accepte. */
+        ConsentClassroom: {
+            name: string;
+            teacherName: string;
+            schoolName: string;
+            courseTitle: string;
+        };
         /** @description Ce que montre le lien SMS avant toute connexion : le numéro masqué, rien de l'enfant. */
         ConsentPreview: {
             parentPhoneMasked: string;
@@ -2668,6 +2730,8 @@ export interface components {
             readonly id: number;
             /** Origine */
             readonly origin: components["schemas"]["OriginEnum"];
+            /** @description Invitation d'un enseignant (origine `teacher`) : la classe proposée */
+            readonly classroom: components["schemas"]["ConsentClassroom"] | null;
             readonly status: string;
             readonly firstName: string;
             readonly lastName: string;
@@ -3015,8 +3079,10 @@ export interface components {
          *     * `EVENT_ALREADY_PROPOSED` - EVENT_ALREADY_PROPOSED
          *     * `EVENT_CLOSED` - EVENT_CLOSED
          *     * `EVENT_FULL` - EVENT_FULL
+         *     * `IMPORT_INVALID_FILE` - IMPORT_INVALID_FILE
          *     * `IMPORT_TOO_LARGE` - IMPORT_TOO_LARGE
          *     * `INVALID_CREDENTIALS` - INVALID_CREDENTIALS
+         *     * `INVITATION_DAILY_LIMIT` - INVITATION_DAILY_LIMIT
          *     * `INVITATION_INVALID` - INVITATION_INVALID
          *     * `KIT_CODE_ALREADY_USED` - KIT_CODE_ALREADY_USED
          *     * `KIT_CODE_INVALID` - KIT_CODE_INVALID
@@ -3064,7 +3130,7 @@ export interface components {
          *     * `VALIDATION_ERROR` - VALIDATION_ERROR
          * @enum {string}
          */
-        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "APPLICATION_ALREADY_RESOLVED" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELETION_ALREADY_RESOLVED" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUEST_CLOSED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SCHOOL_OFFER_EXPIRED" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "APPLICATION_ALREADY_RESOLVED" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELETION_ALREADY_RESOLVED" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_INVALID_FILE" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_DAILY_LIMIT" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUEST_CLOSED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SCHOOL_OFFER_EXPIRED" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
         EventSummary: {
             readonly slug: string;
             /** Titre */
@@ -3169,6 +3235,60 @@ export interface components {
          * @enum {string}
          */
         ImpactReportStatusEnum: "draft" | "submitted";
+        ImportError: {
+            line: number;
+            code: components["schemas"]["ImportErrorCodeEnum"];
+            message: string;
+            /** @description Valeurs lues, pour corriger la ligne en place */
+            data: components["schemas"]["ImportRowData"];
+        };
+        /**
+         * @description * `DUPLICATE_ROW` - DUPLICATE_ROW
+         *     * `MALFORMED_ROW` - MALFORMED_ROW
+         *     * `PHONE_INVALID` - PHONE_INVALID
+         *     * `ALREADY_IN_CLASSROOM` - ALREADY_IN_CLASSROOM
+         *     * `LEARNER_QUOTA_EXCEEDED` - LEARNER_QUOTA_EXCEEDED
+         *     * `CONSENT_COOLDOWN` - CONSENT_COOLDOWN
+         *     * `INVITATION_DAILY_LIMIT` - INVITATION_DAILY_LIMIT
+         * @enum {string}
+         */
+        ImportErrorCodeEnum: "DUPLICATE_ROW" | "MALFORMED_ROW" | "PHONE_INVALID" | "ALREADY_IN_CLASSROOM" | "LEARNER_QUOTA_EXCEEDED" | "CONSENT_COOLDOWN" | "INVITATION_DAILY_LIMIT";
+        /** @description Un fichier CSV ou Excel (.xlsx, 1 Mo, 200 lignes) **ou** des lignes (liste collée, lignes corrigées). */
+        ImportRequestRequest: {
+            /** Format: binary */
+            file?: string;
+            rows?: components["schemas"]["ImportRowRequest"][];
+        };
+        ImportResult: {
+            created: components["schemas"]["Member"][];
+            errors: components["schemas"]["ImportError"][];
+        };
+        ImportRowData: {
+            firstName?: string;
+            lastName?: string;
+            parentPhone?: string;
+            relationship?: string;
+        };
+        /** @description Ligne saisie ou corrigée dans le front ; `line` garde son numéro d'origine dans le rapport. */
+        ImportRowRequest: {
+            line?: number;
+            /** @default  */
+            firstName: string;
+            /** @default  */
+            lastName: string;
+            /** @default  */
+            parentPhone: string;
+            /** @default  */
+            relationship: string;
+        };
+        /** @description WT06 onglet Individuel : l'élève n'a pas de téléphone (D30), seul son parent est contacté. */
+        InvitationRequest: {
+            firstName: string;
+            lastName: string;
+            parentPhone: string;
+            /** @description Code du référentiel `relationships` */
+            relationship: string;
+        };
         InvoiceSummary: {
             number: string;
             pdfStatus: components["schemas"]["PdfStatusEnum"];
@@ -5739,7 +5859,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AcceptRequest"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -8486,6 +8610,137 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Classroom"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_invitations_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Member"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_invitations_import_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": components["schemas"]["ImportRequestRequest"];
+                "application/json": components["schemas"]["ImportRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportResult"];
                 };
             };
             400: {
