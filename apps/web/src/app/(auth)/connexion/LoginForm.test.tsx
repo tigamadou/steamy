@@ -40,7 +40,8 @@ describe("LoginForm (W16)", () => {
     expect(await screen.findAllByText("Saisis ton identifiant ou ton numéro.")).not.toHaveLength(0);
     expect(screen.getAllByText("Saisis ton mot de passe.")).not.toHaveLength(0);
     expect(login).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveFocus();
+    // Le récapitulatif reçoit le focus dans un effet, juste après l'affichage
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveFocus());
   });
 
   it("connecte avec le numéro normalisé et va vers l'espace du rôle", async () => {
