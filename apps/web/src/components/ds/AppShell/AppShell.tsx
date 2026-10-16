@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { flushSync } from "react-dom";
 
 import { cx } from "@/lib/cx";
 
@@ -62,6 +63,12 @@ export function AppShell({
   const menuButton = useRef<HTMLButtonElement>(null);
   const drawer = useRef<HTMLElement>(null);
   const close = () => setOpen(false);
+  // Ferme le tiroir et rend le focus au bouton de menu : la fermeture est appliquée tout de suite, car le bouton
+  // est dans la partie `inert` de la page tant que le tiroir est ouvert (un focus y serait ignoré).
+  const closeToMenu = () => {
+    flushSync(() => setOpen(false));
+    menuButton.current?.focus();
+  };
 
   // Tiroir (sous 768 px, seul cas où il s'ouvre) : boîte modale. Focus sur sa première entrée, Tab et Maj+Tab
   // restent dans le tiroir, Échap le ferme et rend le focus au bouton de menu ; le reste de la page est inerte.
@@ -71,8 +78,7 @@ export function AppShell({
     box.querySelector<HTMLElement>("a, button")?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setOpen(false);
-        menuButton.current?.focus();
+        closeToMenu();
         return;
       }
       if (event.key !== "Tab") return;
@@ -93,10 +99,7 @@ export function AppShell({
 
   // Déconnexion depuis le tiroir : il se ferme et le focus passe au bouton de menu, que la modale WD16 lui rendra.
   const requestLogout = () => {
-    if (open) {
-      close();
-      menuButton.current?.focus();
-    }
+    if (open) closeToMenu();
     onLogout();
   };
 
@@ -132,10 +135,7 @@ export function AppShell({
           </Link>
           <button
             type="button"
-            onClick={() => {
-              close();
-              menuButton.current?.focus();
-            }}
+            onClick={closeToMenu}
             className="flex size-10 cursor-pointer items-center justify-center rounded-md text-ink-700 hover:bg-ink-100 focus-visible:outline-3 focus-visible:outline-primary-500 md:hidden"
           >
             <Icon name="x" size={20} title="Fermer le menu" />
