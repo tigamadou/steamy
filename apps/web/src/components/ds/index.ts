@@ -25,6 +25,7 @@ export * from "./Loader";
 export * from "./KitMiniCard";
 export * from "./Logo";
 export * from "./Mascot";
+export * from "./MissionItem";
 export * from "./Modal";
 export * from "./NewPasswordFields";
 export * from "./NumberStepper";

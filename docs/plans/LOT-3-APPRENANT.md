@@ -21,7 +21,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
   - [x] `AppShell` (props de §5.5, sidebar repliable en tiroir sous 768 px)
   - [x] `NavItem`, `NotificationBell`, `HeaderSearch`
-  - [x] WD16 `LogoutModal`
+  - [x] `WD16` `LogoutModal`
   - [x] Config `learnerNav` et table unique `active` dérivée de l'URL
   - [x] Promotions au DS : `SectionHeader`, `StatPill`, `ProgressBar`, `QuickActionTile`, `SettingsRow`, `Toggle`
   - [x] Layout `apprenant/layout.tsx` (garde de rôle `learner`) et layout `(shell)`, drapeaux `src/lib/features.ts`
@@ -55,18 +55,18 @@ Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3
   - [x] Tests unitaires : filtres ↔ URL, carte « Gratuit », pas de prix de parcours sur un parcours avec kit
   - [x] Parcours Playwright « souhaits » : ajouter depuis WC01, retirer depuis WW01, annuler, recharger
   - [ ] ~~Bande-annonce lue en e2e~~ : reporté, le jeu de démo n'a aucun `trailerVimeoId` (à ajouter au seed, côté API ; ADR 0004 V2/V4 non tranchés) ; lecteur couvert en unitaire avec un faux `Player`, absence de contact avec `player.vimeo.com` et CSP vérifiées en e2e
-- [ ] **3.3a** Mes parcours, arbre et missions (requiert API-L3a, maquette WD23 validée, offre Vimeo) · `feature/lot3-mes-parcours-missions`
+- [x] **3.3a** Mes parcours, arbre et missions (requiert API-L3a, maquette WD23 validée, offre Vimeo) · `feature/lot3-mes-parcours-missions` · PR #94
   - [x] Conception de la maquette WD23 dans `design/screens-apprenant-a-concevoir-web.jsx`, validée (C18)
-  - [ ] WD23 mes parcours (onglets En cours / Terminés, `EnrolledCourseCard`)
-  - [ ] WC06a arbre du parcours
-  - [ ] WC06b projet déplié (`?projet=`)
-  - [ ] WJ01 projet
-  - [ ] WJ02 niveau
-  - [ ] WJ03 mission (`MissionBlocks`, « Marquer comme terminée », navigation vers `next`)
-  - [ ] Composants `ProjectAccordion`, `MissionItem`, `TeacherCommentCard`, `LockedContentState`
-  - [ ] `VimeoPlayer` (`@vimeo/player` épinglé, chargement différé, suivi `learning/activity/`, repli en cas d'erreur, CSP `frame-src`) — composant, `@vimeo/player` 2.30.4 et CSP livrés en 3.2 (PR #98) ; reste le branchement de `onProgress` sur `learning/activity/`
-  - [ ] Tests unitaires : `MissionItem` verrouillé non activable, `next` respecté, `VimeoPlayer` avec faux `Player`
-  - [ ] Parcours Playwright : accès direct à une mission verrouillée → `LockedContentState` ; `player.vimeo.com` intercepté
+  - [x] `WD23` mes parcours (onglets En cours / Terminés, `EnrolledCourseCard`)
+  - [x] `WC06a` arbre du parcours
+  - [x] `WC06b` projet déplié (`?projet=`)
+  - [x] `WJ01` projet
+  - [x] `WJ02` niveau
+  - [x] `WJ03` mission (`MissionBlocks`, « Marquer comme terminée », navigation vers `next`)
+  - [x] Composants `ProjectAccordion`, `MissionItem`, `TeacherCommentCard` (carte absente tant que `classrooms/comments/` n'existe pas, API-L5), `LockedContentState`
+  - [x] `VimeoPlayer` (composant livré en 3.2 ; `@vimeo/player` épinglé, chargement différé, suivi `learning/activity/`, repli en cas d'erreur, CSP `frame-src`)
+  - [x] Tests unitaires : `MissionItem` verrouillé non activable, `next` respecté, `VimeoPlayer` avec faux `Player`
+  - [x] Parcours Playwright : accès direct à une mission verrouillée → `LockedContentState` ; `player.vimeo.com` intercepté
 - [ ] **3.3b** Quiz, résultats et badges (requiert API-L3a) · `feature/lot3-quiz`
   - [ ] WJ04 quiz formatif
   - [ ] WJ10 quiz sommatif
