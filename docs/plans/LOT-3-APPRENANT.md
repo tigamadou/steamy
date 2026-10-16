@@ -83,10 +83,10 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6 (après API-L3b) · Prérequis 
   - [x] `WJ09` certification non obtenue (projets ou missions restants)
   - [x] Test unitaire `CertificateView` : réponse d'API affichée telle quelle
 - [x] **3.4** Tentatives et progression (requiert API-L3a) · `feature/lot3-tentatives-progression` · PR #97
-  - [x] WD07 liste des tentatives (bandeau, filtres dans l'URL ; tri : ordre de l'API, sans paramètre de tri)
-  - [x] WD09 liste vide (renvoi vers WD23)
-  - [x] WD08 détail d'une tentative (corrigé, concepts, `RetryCountdown`)
-  - [x] WD21 progression (`WeeklyActivityBars`, maîtrise par catégorie, recommandations)
+  - [x] `WD07` liste des tentatives (bandeau, filtres dans l'URL ; tri : ordre de l'API, sans paramètre de tri)
+  - [x] `WD09` liste vide (renvoi vers WD23)
+  - [x] `WD08` détail d'une tentative (corrigé, concepts, `RetryCountdown`)
+  - [x] `WD21` progression (`WeeklyActivityBars`, maîtrise par catégorie, recommandations)
   - [x] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
   - [x] Tests unitaires : statut issu du serveur affiché tel quel (D31)
   - [x] Parcours Playwright : filtre dans l'URL, détail, apprenant sans quiz, progression
