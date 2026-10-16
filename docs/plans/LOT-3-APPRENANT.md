@@ -380,7 +380,7 @@ kit) ; Playwright « souhaits » : ajouter depuis WC01, retirer depuis WW01, ann
 | WJ03 | `…/missions/[missionId]` | Étapes, `VimeoPlayer` + blocs (texte, média, astuce), suivi de visionnage (§6), « Marquer comme terminée » → `POST learning/missions/{id}/complete/`, puis navigation vers la `next` renvoyée par l'API (mission suivante ou quiz) |
 
 **Composants** : `EnrolledCourseCard`, `ProjectAccordion`, `MissionItem` (DS : `todo`/`current`/`done`/`locked`),
-`MissionBlocks`, `TeacherCommentCard`, `Breadcrumb` (« Mes parcours › … »), `LockedContentState`.
+`MissionBlocks`, `Breadcrumb` (« Mes parcours › … »), `LockedContentState`.
 
 **API** : `GET learning/enrollments/`, `GET learning/enrollments/{slug}/tree/`, `GET learning/projects|levels|missions/{id}/`,
 `POST learning/missions/{id}/complete/`, `POST learning/activity/`, `GET classrooms/comments/` (lecture ; si l'endpoint

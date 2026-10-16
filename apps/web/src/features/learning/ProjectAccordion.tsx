@@ -79,7 +79,7 @@ export function ProjectAccordion({ courseSlug, project, next, expanded }: Projec
     >
       <h3 id={`projet-${project.id}`} className="m-0">
         {locked ? (
-          <div aria-disabled className={cx(headClasses, "cursor-not-allowed")}>
+          <div className={cx(headClasses, "cursor-not-allowed")}>
             {head}
           </div>
         ) : (

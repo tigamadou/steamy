@@ -36,7 +36,13 @@ const PAGE_LINK =
  */
 export function NotificationList({ tab, page, items: initialItems, unreadCount, hasNext }: NotificationListProps) {
   // Nouvelle page ou nouvel onglet : le focus passe à la liste
-  const list = useFocusOnChange<HTMLUListElement>(`${tab}-${page}`);
+  const list = useFocusOnChange<HTMLUListElement>("notifications", `${tab}-${page}`);
+  // Toast fermé alors qu'il avait le focus : le focus passe au contenu principal, pas à `body` (WCAG 2.4.3)
+  const closeToast = () => {
+    const hadFocus = document.activeElement?.closest("[data-toast]") != null;
+    setToast(null);
+    if (hadFocus) document.getElementById("contenu")?.focus();
+  };
   const router = useRouter();
   const [items, setItems] = useState(initialItems);
   const [unread, setUnread] = useState(unreadCount);
@@ -153,7 +159,7 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
         </nav>
       )}
 
-      {toast && <Toast tone={toast.tone} title={toast.text} onClose={() => setToast(null)} />}
+      {toast && <Toast tone={toast.tone} title={toast.text} onClose={closeToast} />}
     </div>
   );
 }
