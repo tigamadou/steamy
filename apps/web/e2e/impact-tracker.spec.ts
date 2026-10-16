@@ -45,7 +45,7 @@ test("6.8 Finance change de période sur WAD02 puis ouvre un indicateur (WAD03)"
     .click();
   await expect(page).toHaveURL(`${BASE_URL}/backoffice/impact/indicateurs/ventes?periode=trimestre`);
   await expect(page.getByRole("heading", { level: 1, name: "Détail de l'indicateur" })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Ventes réalisées" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Ventes réalisées", exact: true })).toBeVisible();
   const definition = page.getByRole("region", { name: "Définition" });
   await expect(definition.getByText("Montant des commandes payées dans la période (FCFA)")).toBeVisible();
   await expect(definition.getByText("Mensuelle")).toBeVisible();
