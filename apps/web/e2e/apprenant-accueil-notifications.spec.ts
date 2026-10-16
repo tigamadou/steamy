@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { decideConsent, uniquePhone } from "./support/api";
 import { DEMO } from "./support/demo";
-import { loginAs, openShellMenu } from "./support/session";
+import { loginAs } from "./support/session";
 import { completeLearnerProfile, sendConsentRequest, startLearnerSignup } from "./support/signup";
 
 // LOT-3 étape 3.1 · accueil (WD01-WD03), notifications (WD04-WD06) et aide (WD12) de l'apprenant.
@@ -35,25 +35,16 @@ test("WD01 : Léa reprend son parcours, voit ses statistiques et ses raccourcis"
   await axe(page);
 });
 
-test("WD03 : le squelette de l'accueil s'affiche pendant la lecture du tableau de bord", async ({ page }) => {
+test("WD03 : le squelette de l'accueil est envoyé avant le tableau de bord, puis remplacé", async ({ page }) => {
   await loginAs(page, "learner");
-  // Données de l'accueil retardées (préchargement compris : le lien « Accueil » est visible dès le chargement sur
-  // bureau) : le squelette (loading.tsx) reste visible le temps de la lecture
-  await page.route(
-    (url) => url.pathname === "/apprenant",
-    async (route) => {
-      const headers = route.request().headers();
-      // Préchargement retenu plus longtemps : il est encore en cours au moment du clic
-      const delay = headers["next-router-prefetch"] ? 5000 : headers["rsc"] ? 1500 : 0;
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      await route.continue();
-    },
-  );
-  await page.goto("/apprenant/aide");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Aide & Support");
-  await openShellMenu(page);
-  await page.getByRole("navigation", { name: "Navigation de ton espace" }).getByRole("link", { name: "Accueil" }).click();
-  await expect(page.getByRole("status", { name: "Chargement de ton tableau de bord…" })).toBeVisible();
+  // Rendu en flux : le squelette (loading.tsx) part dans le HTML avant les données du tableau de bord. Vérifié sur
+  // la réponse elle-même, le temps d'affichage dans le navigateur dépendant du préchargement du routeur.
+  const html = await (await page.request.get("/apprenant")).text();
+  const skeleton = html.indexOf('aria-label="Chargement de ton tableau de bord…"');
+  expect(skeleton).toBeGreaterThan(-1);
+  expect(html.indexOf('aria-label="Tes statistiques"')).toBeGreaterThan(skeleton);
+
+  await page.goto("/apprenant");
   await expect(page.getByRole("region", { name: "Tes statistiques" })).toBeVisible();
   await expect(page.getByRole("status", { name: "Chargement de ton tableau de bord…" })).toHaveCount(0);
 });

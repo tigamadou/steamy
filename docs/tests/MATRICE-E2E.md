@@ -59,7 +59,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WP12` | Refus envoyé (terminal) | 2 | Refus envoyé, W18 côté enfant | `apps/web/e2e/decision-parent.spec.ts` |
 | `WD01` | Accueil | 3 | Reprise du parcours → mission, pastilles Streak/Points/Rang (API), raccourcis sans Steamy Events, « Pour toi » | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
 | `WD02` | Accueil nouvel utilisateur | 3 | Nouvel apprenant : bienvenue, catalogue `prix=gratuit`, suggestions gratuites | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
-| `WD03` | Chargement | 3 | Squelette de l'accueil pendant la lecture (navigation retardée) | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD03` | Chargement | 3 | Squelette de l'accueil envoyé en flux avant le tableau de bord, puis remplacé | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
 | `WD04` | Notifications · liste | 3 | Onglets dans l'URL, clic = lue + navigation, « Tout marquer comme lu » → cloche du shell à 0 | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
 | `WD05` | Notifications · vide | 3 | Nouvel apprenant sans notification → « Régler les notifications » | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
 | `WD06` | Notifications · paramètres | 3 | In-app verrouillé, email désactivé sans adresse, ni SMS ni push | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
