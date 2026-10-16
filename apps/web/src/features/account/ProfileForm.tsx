@@ -205,7 +205,7 @@ export function ProfileForm({ profile }: { profile: LearnerProfile }) {
         <Field
           label="Email"
           id={FIELD_IDS.email}
-          hint="Facultatif : pour tes factures et les nouvelles de Steamy."
+          hint="Facultatif : pour recevoir tes notifications par email."
           error={state.fields.email}
         >
           <Input
