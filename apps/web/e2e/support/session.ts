@@ -32,3 +32,25 @@ export async function loginViaApi(page: Page, identifier: string, password: stri
 export function loginAs(page: Page, role: DemoRole): Promise<void> {
   return loginViaApi(page, DEMO[role].identifier);
 }
+
+/** Ouvre le tiroir de navigation du shell quand il est replié (écran de moins de 768 px). */
+export async function openShellMenu(page: Page): Promise<void> {
+  // Masqué (display: none) au-dessus de 768 px : recherché aussi parmi les éléments cachés
+  const menu = page.getByRole("button", { name: "Ouvrir le menu", includeHidden: true });
+  await menu.waitFor({ state: "attached" });
+  // Un clic arrivé avant l'hydratation serait perdu (ou rejoué après coup) : on attend que React ait pris la main
+  await page.waitForFunction(() => {
+    const button = document.querySelector("button[aria-controls][aria-expanded]");
+    return button !== null && Object.keys(button).some((key) => key.startsWith("__reactFiber"));
+  });
+  if (!(await menu.isVisible())) return;
+  await menu.click();
+  await expect(menu).toHaveAttribute("aria-expanded", "true");
+}
+
+/** Déconnexion depuis le shell applicatif : « Déconnexion » puis confirmation dans la modale WD16. */
+export async function logoutFromShell(page: Page): Promise<void> {
+  await openShellMenu(page);
+  await page.getByRole("button", { name: "Déconnexion" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Se déconnecter" }).click();
+}
