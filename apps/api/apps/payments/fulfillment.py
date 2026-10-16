@@ -2,7 +2,7 @@
 Exécution post-paiement (§4.3, D36, D37, C3, C17) : **une seule fois**, dans la transaction du webhook qui verrouille
 la commande. Elle marque la commande payée, confirme le stock, inscrit le bénéficiaire, génère les Kit Codes des
 kits, règle la demande de l'enfant, émet la facture (PDF asynchrone), vide le panier et prévient le payeur et le
-bénéficiaire. Les candidatures (L3b.6) s'y ajoutent.
+bénéficiaire, et confirme la candidature d'un événement payant (C3).
 
 Paiement reçu sur une commande expirée (C17) : honoré si le stock est encore disponible, sinon remboursé. Un second
 paiement réussi sur une commande déjà payée est remboursé.
@@ -15,6 +15,8 @@ from django.db.models import F
 from django.utils import timezone
 
 from apps.core.audit import audit
+from apps.events.applications import confirm as confirm_application
+from apps.events.applications import reacquire_seat
 from apps.learning.models import Enrollment
 from apps.shop.models import CartItem, Kit, StockReservation
 
@@ -35,13 +37,13 @@ def settle(order: Order, payment: Payment) -> None:
         fulfill(order, payment)
         audit("payment.late_honored", target=order, data={"payment": payment.pk})
     elif order.status == Order.Status.CANCELLED:
-        refund(payment, "Commande expirée et kit plus disponible (C17).")
+        refund(payment, "Commande expirée et kit ou place plus disponible (C17).")
         order.status = Order.Status.REFUNDED
         order.save(update_fields=["status", "updated_at"])
         tell_payer(
             order,
             "Paiement remboursé",
-            f"La commande {order.reference} avait expiré et le kit n'est plus disponible : "
+            f"La commande {order.reference} avait expiré et n'est plus disponible : "
             "votre paiement est remboursé.",
             tone="warning",
         )
@@ -59,7 +61,7 @@ def fulfill(order: Order, payment: Payment) -> None:
         order_item__order=order, confirmed_at__isnull=True, released_at__isnull=True
     ).update(confirmed_at=now)
 
-    items = list(order.items.select_related("course", "kit"))
+    items = list(order.items.select_related("course", "kit", "event_application__event"))
     learner = order.beneficiary
     for item in items:
         if item.course_id and learner is not None:
@@ -68,6 +70,8 @@ def fulfill(order: Order, payment: Payment) -> None:
             )
         if item.kit_id:
             generate_codes(item)
+        if item.event_application_id:
+            confirm_application(item.event_application)
     mark_paid(order)
     kit_ids = [item.kit_id for item in items if item.kit_id]
     if kit_ids and order.payer_id:
@@ -84,7 +88,12 @@ def fulfill(order: Order, payment: Payment) -> None:
 
 
 def reacquire_stock(order: Order) -> bool:
-    """Commande annulée à l'expiration : reprend son stock s'il est encore disponible (tout ou rien)."""
+    """Commande annulée à l'expiration : reprend sa place ou son stock s'ils sont encore disponibles (tout ou rien)."""
+    for item in order.items.filter(event_application__isnull=False).select_related(
+        "event_application"
+    ):
+        if not reacquire_seat(item.event_application):
+            return False
     reservations = list(
         StockReservation.objects.select_for_update()
         .filter(order_item__order=order, released_at__isnull=False)

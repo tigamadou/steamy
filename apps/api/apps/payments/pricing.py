@@ -15,6 +15,7 @@ class Line:
     course: object = None
     kit: object = None
     event: object = None
+    event_application: object = None
 
     @property
     def total(self) -> int:
@@ -41,6 +42,13 @@ def course_line(course) -> Line:
 
 def kit_line(kit, quantity: int) -> Line:
     return Line(title=kit.name, unit_price=kit.price, quantity=quantity, kit=kit)
+
+
+def event_line(application) -> Line:
+    event = application.event
+    return Line(
+        title=event.title, unit_price=event.price, event=event, event_application=application
+    )
 
 
 def quote(lines: list[Line], delivery_zone=None) -> Quote:

@@ -346,6 +346,7 @@ SPECTACULAR_SETTINGS = {
         "KpiSourceEnum": "apps.impact.models.KpiDefinition.Source",
         "KpiUnitEnum": "apps.impact.models.KpiDefinition.Unit",
         "KpiPeriodicityEnum": "apps.impact.models.KpiDefinition.Periodicity",
+        "DifficultyEnum": "apps.catalog.models.Course.Difficulty",
         "OrderKindEnum": "apps.payments.models.Order.Kind",
         "OrderCreateKindEnum": "apps.payments.serializers.ORDER_CREATE_KINDS",
         "OrderStatusEnum": "apps.payments.models.Order.Status",
