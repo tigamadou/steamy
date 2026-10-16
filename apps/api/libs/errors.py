@@ -123,6 +123,10 @@ CATALOG: dict[str, tuple[int, str]] = {
     ),
     "CONTENT_LOCKED": (S.HTTP_403_FORBIDDEN, "Termine d'abord les étapes précédentes."),
     "NOT_ENROLLED": (S.HTTP_403_FORBIDDEN, "Inscris-toi d'abord à ce parcours."),
+    "PDF_NOT_READY": (
+        S.HTTP_409_CONFLICT,
+        "Le document est en cours de préparation. Réessaie dans quelques instants.",
+    ),
     "QUIZ_COOLDOWN": (
         S.HTTP_429_TOO_MANY_REQUESTS,
         "Revois les missions conseillées : tu pourras réessayer dans quelques minutes.",

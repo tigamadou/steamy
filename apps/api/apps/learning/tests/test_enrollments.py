@@ -136,6 +136,7 @@ def test_completed_course_points_to_certification(client, learner):
         "courseSlug": course.slug,
         "projectId": None,
         "levelId": None,
+        "quizKind": None,
     }
     assert item["currentProject"] is None and item["currentLevel"] is None
 
