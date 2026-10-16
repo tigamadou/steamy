@@ -49,6 +49,11 @@ describe("CourseCard", () => {
     expect(onFav).toHaveBeenCalledOnce();
   });
 
+  it("affiche la progression d'un parcours suivi", () => {
+    render(<CourseCard course={{ ...PAID, progress: 35 }} />);
+    expect(screen.getByRole("progressbar", { name: "Ta progression" })).toHaveAttribute("aria-valuenow", "35");
+  });
+
   it("prend la couleur robotique par défaut", () => {
     const { container } = render(<CourseCard course={{ ...PAID, color: undefined, emoji: undefined }} />);
     const media = container.querySelector<HTMLElement>("article > div");

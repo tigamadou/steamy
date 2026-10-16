@@ -118,12 +118,15 @@ export function CatalogPagination({
   page,
   hasNext,
   base = routes.courses,
+  hrefOf = (target) => listHref(base, { category, page: target }),
 }: {
   category?: string;
   page: number;
   hasNext: boolean;
   /** Liste paginée : catalogue des parcours (défaut) ou boutique. */
   base?: string;
+  /** URL d'une page, quand la liste porte d'autres filtres (catalogue de l'apprenant). */
+  hrefOf?: (page: number) => string;
 }) {
   if (page === 1 && !hasNext) {
     return null;
@@ -133,7 +136,7 @@ export function CatalogPagination({
   return (
     <nav aria-label="Pagination" className="mt-8 flex items-center justify-center gap-3">
       {page > 1 && (
-        <Link href={listHref(base, { category, page: page - 1 })} className={link} rel="prev">
+        <Link href={hrefOf(page - 1)} className={link} rel="prev">
           <Icon name="arrow-left" size={16} strokeWidth={2.5} />
           Précédent
         </Link>
@@ -142,7 +145,7 @@ export function CatalogPagination({
         Page {page}
       </p>
       {hasNext && (
-        <Link href={listHref(base, { category, page: page + 1 })} className={link} rel="next">
+        <Link href={hrefOf(page + 1)} className={link} rel="next">
           Suivant
           <Icon name="arrow-right" size={16} strokeWidth={2.5} />
         </Link>

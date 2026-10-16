@@ -1,4 +1,4 @@
-import type { Schemas } from "@steamy/api-client";
+import type { paths, Schemas } from "@steamy/api-client";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { getPublicApi } from "./api-public";
@@ -19,24 +19,17 @@ export async function getCategories(): Promise<Schemas["Category"][]> {
   return unwrap(await getPublicApi().GET("/api/catalog/categories/"));
 }
 
-export async function getCourses({
-  category,
-  featured,
-  page = 1,
-  pageSize = COURSES_PAGE_SIZE,
-}: {
-  category?: string;
-  featured?: boolean;
-  page?: number;
-  pageSize?: number;
-}): Promise<CoursePage> {
+export type CourseQuery = NonNullable<paths["/api/catalog/courses/"]["get"]["parameters"]["query"]>;
+
+/** Parcours publiés, filtrés et triés (WL06, WC01) : la réponse ne dépend pas du visiteur, elle est mise en cache. */
+export async function getCourses({ page = 1, pageSize = COURSES_PAGE_SIZE, ...filters }: CourseQuery): Promise<CoursePage> {
   "use cache";
   cacheLife("minutes");
   cacheTag("catalog");
   try {
     const data = unwrap(
       await getPublicApi().GET("/api/catalog/courses/", {
-        params: { query: { category, featured, page, pageSize } },
+        params: { query: { ...filters, page, pageSize } },
       }),
     );
     return { count: data.count ?? 0, results: data.results ?? [], hasNext: !!data.next };

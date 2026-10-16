@@ -68,6 +68,10 @@ export const routes = {
     /** Catalogue filtré par une recherche (`q`, recherche du header). */
     catalogSearch: (q: string) => `/apprenant/catalogue?q=${encodeURIComponent(q)}`,
     catalogCourse: (slug: string) => `/apprenant/catalogue/${slug}`,
+    /** WA01 · saisie du Kit Code (3.6, derrière le drapeau `unlock`). */
+    kitCode: (slug: string) => `/apprenant/catalogue/${slug}/kit-code`,
+    /** Demande de déblocage au parent (3.6, derrière le drapeau `unlock`), qui mène ensuite à WA02. */
+    parentRequest: (slug: string) => `/apprenant/catalogue/${slug}/demande`,
     wishlist: "/apprenant/souhaits",
     profile: "/apprenant/profil",
     editProfile: "/apprenant/profil/modifier",

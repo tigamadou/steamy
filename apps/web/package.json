@@ -18,6 +18,7 @@
     "@mdx-js/react": "^3.1.1",
     "@next/mdx": "16.4.0",
     "@steamy/api-client": "workspace:*",
+    "@vimeo/player": "2.30.4",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"

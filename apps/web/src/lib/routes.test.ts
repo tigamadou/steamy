@@ -38,6 +38,8 @@ describe("routes", () => {
     expect(l.certification("robot")).toBe("/apprenant/parcours/robot/certification");
     expect(l.catalogSearch("robot & co")).toBe("/apprenant/catalogue?q=robot%20%26%20co");
     expect(l.catalogCourse("robot")).toBe("/apprenant/catalogue/robot");
+    expect(l.kitCode("robot")).toBe("/apprenant/catalogue/robot/kit-code");
+    expect(l.parentRequest("robot")).toBe("/apprenant/catalogue/robot/demande");
   });
 });
 

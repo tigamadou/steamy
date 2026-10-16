@@ -90,16 +90,20 @@ export function NotFoundState({
   title,
   body,
   action = { label: STATE_ACTIONS.home, href: routes.home },
+  headingLevel,
 }: {
   register?: Register;
   title?: string;
   body?: string;
   action?: { label: string; href: string };
+  /** 2 dans un shell applicatif, dont le h1 est le titre du header. */
+  headingLevel?: 1 | 2;
 }) {
   const text = STATE_MESSAGES.notFound[register];
   return (
     <WXState
       pose="sad"
+      headingLevel={headingLevel}
       kicker="Erreur 404"
       title={title ?? text.title}
       body={<p className="m-0">{body ?? text.body}</p>}
