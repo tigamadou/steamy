@@ -76,5 +76,9 @@ class RelationshipListView(ReferentialListView):
     serializer_class = serializers.RelationshipSerializer
 
 
+class DeletionReasonListView(ReferentialListView):
+    serializer_class = serializers.DeletionReasonSerializer
+
+
 class RefusalReasonListView(ReferentialListView):
     serializer_class = serializers.RefusalReasonSerializer

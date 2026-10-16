@@ -13,10 +13,10 @@ paiement `WA03`, états `WA04`/`WA05`/`WA07`, suivi `WK07`).
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 4.0 Conception de `WPD15` · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
+Statut : 🟡 en cours · Prochaine tâche : validation de la maquette de `WPD15` (C18), puis 4.1 après `API-L4` · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
 
-### Lot 4 · Espace parent — ⬜ à faire
-- [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15`
+### Lot 4 · Espace parent — 🟡 en cours
+- [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15` · PR #72
   - [x] Créer `design/screens-parent-a-concevoir-web.jsx` (même design system) et l'ajouter à `App.html`
   - [x] Concevoir `WPD15` en 3 variantes d'objet : parcours, kit (adresse + zone + frais), événement
   - [x] Concevoir les 8 états de `WPD15` : en attente, attente de confirmation, payée, échec, refusée, expirée, annulée par l'enfant, kit en rupture
@@ -26,6 +26,7 @@ Statut : ⬜ à faire · Prochaine tâche : 4.0 Conception de `WPD15` · Préreq
   - [x] Concevoir la modale de refus d'une candidature (`WPD06`)
   - [x] Respecter les contraintes : `WA03` (C1 magenta), carte enfant de `WPD05`, montants serveur, mention « Paiement sécurisé · aucune carte bancaire », mobile 360 px d'abord
   - [x] Recette : toutes variantes et tous états dessinés, aucun prix, réseau ou délai en dur, vouvoiement
+  - [x] Compléter d'après §5.11 : kit requis (parcours), adresse de kit modifiée (frais recalculés), mobile 360 du kit et de l'attente de confirmation, âge sur `WPD05` (D20), état « déjà traitée » de `WPD05`, « Payer » en magenta (C1)
   - [ ] Maquette validée par le produit (C18) avant 4.4
 - [ ] **4.1** Socle parent, accueil et notifications · `feature/lot4-accueil` (requiert API-L4)
   - [ ] Layout `(parent)` : contrôle du rôle côté serveur, redirection vers `/connexion?next=`, `loading.tsx`, `error.tsx`, `not-found.tsx`
@@ -84,7 +85,7 @@ Statut : ⬜ à faire · Prochaine tâche : 4.0 Conception de `WPD15` · Préreq
   - [ ] `WL23` dans le shell parent (`EventRow`, `EventDetail` du lot 1)
   - [ ] `WPD12` Inscrire un enfant (`EventSignupForm` : enfants actifs, motivation, récapitulatif + `PaymentForm` si payant)
   - [ ] Branchement API : `events/`, `events/{slug}/`, `events/applications/` (`accept/`, `refuse/`), `events/{slug}/applications/`, `payments/orders/` `kind: "event"`
-  - [ ] Règles : événement payant accepté vers `WPD15`, `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés, ticket Steamy Events gratuit avec accord requis, prix serveur
+  - [ ] Règles : événement payant accepté → paiement de la commande d'événement (`orderReference`, D53 amendé), `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés, ticket Steamy Events gratuit avec accord requis, prix serveur
   - [ ] Tests unitaires : `EventApplicationRow` par statut, `EventSignupForm` gratuit / payant, enfants non actifs exclus
   - [ ] Playwright : accord à un événement payant (`WD11`, `WPD06`, `WPD15`, paiement, « acceptée » en `WD10`)
   - [ ] Playwright : inscription directe par le parent (`WPD12`) à un événement payant
@@ -278,7 +279,7 @@ dans la table des liens de notification (`WPD14`) au fur et à mesure.
 | Écrans | `WPD06`, `WL23` dans le shell parent, `WPD12` |
 | Composants | `EventRow`, `EventDetail` (lot 1), `EventApplicationRow` (événement, enfant, statut, Accepter / Refuser), `RefuseApplicationDialog` (motif facultatif), `EventSignupForm` (`<select>` des enfants actifs, motivation, récapitulatif + `PaymentForm` si payant) |
 | API | `GET events/` · `GET events/{slug}/` · `GET events/applications/` · `POST events/applications/{id}/accept/` (payant → demande de paiement) · `POST …/refuse/` · `POST events/{slug}/applications/` `{ childId, motivation? }` · `POST payments/orders/` `{ kind: "event", … }` (§7.5, §7.6) |
-| Règles | Accepter un événement payant → `WPD15` ; la candidature n'est acceptée qu'au paiement (D53, S8). Pas de sélection par Steamy : l'accord (et le paiement) **confirme** l'inscription dans la limite des places (C3) ; `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés. Ticket Steamy Events : candidature gratuite, accord toujours requis (C12). Prix serveur |
+| Règles | Accepter un événement payant → paiement de la commande d'événement créée par l'API (`orderReference`, formulaire de `WPD15`, sans demande de paiement) ; la candidature n'est acceptée qu'au paiement (D53 amendé le 2026-10-16, S8). Pas de sélection par Steamy : l'accord (et le paiement) **confirme** l'inscription dans la limite des places (C3) ; `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés. Ticket Steamy Events : candidature gratuite, accord toujours requis (C12). Prix serveur |
 | Tests unitaires | `EventApplicationRow` pour chaque statut ; `EventSignupForm` gratuit / payant ; enfants non actifs exclus |
 | Playwright | **Accord événement payant** : l'enfant candidate (`WD11`) → le parent accepte dans `WPD06` → `WPD15` → paiement → la candidature passe à « acceptée » côté enfant (`WD10`). Inscription directe par le parent (`WPD12`) à un événement payant |
 | Recette | Refus notifié à l'enfant ; un événement complet ne peut plus être payé |

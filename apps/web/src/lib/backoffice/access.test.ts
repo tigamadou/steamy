@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { adminLoginUrl, adminUrl, backofficeNav, hasGroup, isVerifiedStaff, PAGE_GROUPS, STAFF_GROUPS } from "./access";
+import {
+  adminLoginUrl,
+  adminPathUrl,
+  adminUrl,
+  backofficeNav,
+  hasGroup,
+  isVerifiedStaff,
+  PAGE_GROUPS,
+  STAFF_GROUPS,
+} from "./access";
 
 const API = "http://api.steamy.test:8000";
 const staff = (staffGroups: string[], over = {}) => ({ isStaff: true, otpVerified: true, staffGroups, ...over });
@@ -78,5 +87,13 @@ describe("backofficeNav", () => {
       ["Plateforme", ["Paiements"]],
     ]);
     expect(labels([])).toEqual([["Pilotage", ["Vue d'ensemble"]]]);
+  });
+});
+
+describe("liens de l'admin fournis par le serveur", () => {
+  it("joint l'URL de l'API et le chemin de la liste filtrée", () => {
+    expect(adminPathUrl("http://api:8000/", "/admin/accounts/consentrequest/?status__exact=pending")).toBe(
+      "http://api:8000/admin/accounts/consentrequest/?status__exact=pending",
+    );
   });
 });

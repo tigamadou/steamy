@@ -104,6 +104,14 @@ class Relationship(Referential):
         verbose_name_plural = _("liens de parenté")
 
 
+class DeletionReason(Referential):
+    """Motif d'une suppression de compte (WD15, WPD09)."""
+
+    class Meta(Referential.Meta):
+        verbose_name = _("motif de suppression")
+        verbose_name_plural = _("motifs de suppression")
+
+
 class RefusalReason(Referential):
     class Meta(Referential.Meta):
         verbose_name = _("motif de refus")
