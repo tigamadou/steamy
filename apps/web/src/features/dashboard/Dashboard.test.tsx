@@ -8,10 +8,8 @@ import { dashboard, enrollment } from "./fixtures";
 
 const GET = vi.fn();
 const getStarterCourses = vi.fn();
-const flags = { events: false, unlock: false };
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
 vi.mock("@/lib/catalog", () => ({ getStarterCourses: () => getStarterCourses() }));
-vi.mock("@/lib/features", () => ({ features: flags }));
 // Composant asynchrone (catalogue public) : testé à part, remplacé ici par un marqueur
 vi.mock("./StarterSuggestions", () => ({ StarterSuggestions: () => <p>suggestions</p> }));
 
@@ -28,7 +26,6 @@ async function renderDashboard(data: object) {
 describe("Dashboard (WD01)", () => {
   beforeEach(() => {
     GET.mockReset();
-    flags.events = false;
   });
 
   it("reprend le parcours en cours, affiche streak, points et rang tels que l'API les renvoie", async () => {
@@ -60,22 +57,17 @@ describe("Dashboard (WD01)", () => {
     expect(within(stats).getByText("1 jour")).toBeInTheDocument();
   });
 
-  it("raccourcis : catalogue, souhaits (compteur de l'API), quiz ; Steamy Events absent tant que le drapeau est baissé", async () => {
+  it("raccourcis : catalogue, souhaits (compteur de l'API), quiz, Steamy Events", async () => {
     await renderDashboard(dashboard());
     const nav = screen.getByRole("navigation", { name: "Raccourcis" });
     expect(within(nav).getAllByRole("link").map((a) => a.getAttribute("href"))).toEqual([
       "/apprenant/catalogue",
       "/apprenant/souhaits",
       "/apprenant/quiz",
+      "/apprenant/evenements",
     ]);
     expect(within(nav).getByText("2 parcours")).toBeInTheDocument();
     expect(screen.queryByText(/Bientôt/)).toBeNull();
-  });
-
-  it("affiche le raccourci Steamy Events quand le drapeau `events` est levé", async () => {
-    flags.events = true;
-    await renderDashboard(dashboard());
-    expect(screen.getByRole("link", { name: /Steamy Events/ })).toHaveAttribute("href", "/apprenant/evenements");
   });
 
   it("« Pour toi » : recommandations de l'API vers la fiche de l'espace apprenant, « Voir tout » vers le catalogue", async () => {
