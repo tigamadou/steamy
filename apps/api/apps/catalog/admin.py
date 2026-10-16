@@ -35,6 +35,7 @@ from .models import (
     Question,
     Quiz,
 )
+from .validators import parse_vimeo_url
 
 
 @admin.register(Category)
@@ -61,9 +62,44 @@ class ProjectInline(SortableTabularInline):
 
 
 def admin_link(obj) -> str:
-    """Lien vers la fiche d'un objet du catalogue dans l'admin."""
+    """Lien vers la fiche d'un objet du catalogue dans l'admin, libellé par son seul titre."""
     url = reverse(f"admin:{obj._meta.app_label}_{obj._meta.model_name}_change", args=[obj.pk])
-    return format_html('<a href="{}">{}</a>', url, obj)
+    return format_html('<a href="{}">{}</a>', url, obj.title)
+
+
+def vimeo_player_url(vimeo_id: str, vimeo_hash: str) -> str:
+    """Lecteur intégré (ADR 0004) : `h` juste après l'identifiant, puis `dnt=1` (moins de traces chez Vimeo)."""
+    query = f"h={vimeo_hash}&dnt=1" if vimeo_hash else "dnt=1"
+    return f"https://player.vimeo.com/video/{vimeo_id}?{query}"
+
+
+class VimeoUrlForm(forms.ModelForm):
+    """
+    Accepte l'URL de partage Vimeo collée dans le champ identifiant (ADR 0004 §6) : identifiant et hachage en sont
+    extraits avant la validation (identifiant numérique, hachage alphanumérique).
+    """
+
+    #: Paires (champ identifiant, champ hachage) du modèle
+    vimeo_fields: tuple[tuple[str, str], ...] = ()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for id_field, _hash_field in self.vimeo_fields:
+            self.fields[
+                id_field
+            ].help_text = (
+                "Identifiant, ou URL de partage Vimeo complète (le hachage en est extrait)."
+            )
+        if not self.is_bound:
+            return
+        data = self.data.copy()
+        for id_field, hash_field in self.vimeo_fields:
+            parsed = parse_vimeo_url(data.get(self.add_prefix(id_field), ""))
+            if parsed:
+                data[self.add_prefix(id_field)], vimeo_hash = parsed
+                if vimeo_hash:
+                    data[self.add_prefix(hash_field)] = vimeo_hash
+        self.data = data
 
 
 def breadcrumb(*parents) -> str:
@@ -102,6 +138,12 @@ class CourseAdmin(SortableAdminBase, admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     readonly_fields = ("status", "created_at", "updated_at")
     autocomplete_fields = ("required_kit",)
+    list_select_related = ("category", "required_kit")
+    form = type(
+        "CourseForm",
+        (VimeoUrlForm,),
+        {"vimeo_fields": (("trailer_vimeo_id", "trailer_vimeo_hash"),)},
+    )
     inlines = [ProjectInline]
     actions = ["publish", "unpublish"]
 
@@ -122,7 +164,14 @@ class CourseAdmin(SortableAdminBase, admin.ModelAdmin):
     @admin.action(description="Publier", permissions=["publish"])
     def publish(self, request, queryset):
         published = 0
-        for course in queryset:
+        already = queryset.filter(status=Course.Status.PUBLISHED).count()
+        if already:
+            self.message_user(
+                request,
+                ngettext("%d parcours déjà publié.", "%d parcours déjà publiés.", already)
+                % already,
+            )
+        for course in queryset.exclude(status=Course.Status.PUBLISHED):
             problems = publication.publish(course, request.user, request)
             if problems:
                 self.message_user(
@@ -145,10 +194,14 @@ class CourseAdmin(SortableAdminBase, admin.ModelAdmin):
 
     @admin.action(description="Repasser en brouillon", permissions=["publish"])
     def unpublish(self, request, queryset):
+        # Un parcours déjà en brouillon n'est ni modifié ni journalisé
+        queryset = queryset.filter(status=Course.Status.PUBLISHED)
+
         def apply(_data=None):
-            for course in queryset:
+            courses = list(queryset)
+            for course in courses:
                 publication.unpublish(course, request.user, request)
-            count = queryset.count()
+            count = len(courses)
             self.message_user(
                 request,
                 ngettext(
@@ -208,6 +261,9 @@ class LevelAdmin(SortableAdminBase, admin.ModelAdmin):
     search_fields = ("title", "project__title")
     readonly_fields = ("path",)
     inlines = [MissionInline]
+    form = type(
+        "LevelForm", (VimeoUrlForm,), {"vimeo_fields": (("intro_vimeo_id", "intro_vimeo_hash"),)}
+    )
 
     @admin.display(description="Dans")
     def path(self, obj):
@@ -220,6 +276,7 @@ class MissionAdmin(admin.ModelAdmin):
     list_filter = ("level__project__course",)
     search_fields = ("title", "level__title")
     readonly_fields = ("path", "vimeo_preview")
+    form = type("MissionForm", (VimeoUrlForm,), {"vimeo_fields": (("vimeo_id", "vimeo_hash"),)})
 
     @admin.display(description="Dans")
     def path(self, obj):
@@ -234,13 +291,12 @@ class MissionAdmin(admin.ModelAdmin):
         """Lecteur Vimeo non listé (identifiant validé par le modèle), pour vérifier la vidéo avant publication."""
         if not obj.vimeo_id:
             return "Aucune vidéo."
-        src = f"https://player.vimeo.com/video/{obj.vimeo_id}"
-        if obj.vimeo_hash:
-            src += f"?h={obj.vimeo_hash}"
+        # Domaine de l'admin autorisé dans Vimeo : l'origine doit lui parvenir (Referer limité à l'origine)
         return format_html(
-            '<iframe src="{}" width="400" height="225" title="Aperçu : {}" allow="fullscreen" '
+            '<iframe src="{}" width="400" height="225" title="Aperçu : {}" '
+            'allow="fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" '
             'style="border:0"></iframe>',
-            src,
+            vimeo_player_url(obj.vimeo_id, obj.vimeo_hash),
             obj.title,
         )
 

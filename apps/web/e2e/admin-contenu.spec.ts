@@ -9,6 +9,10 @@ import { API_URL, STAFF, staffLogin } from "./support/staff";
 
 test("6.3 Contenu parcourt l'arbre d'un parcours et le publie (WAD09)", async ({ page }) => {
   test.slow(); // attente possible de la fenêtre TOTP suivante ; admin-connexion.spec.ts envoie un code faux à Contenu
+  // Le lecteur Vimeo de l'aperçu n'est pas chargé : le test ne dépend pas d'un service externe
+  await page.route("https://player.vimeo.com/**", (route) =>
+    route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>Lecteur Vimeo</title>" }),
+  );
   await page.goto(`${API_URL}/admin/login/?next=/admin/catalog/course/`);
   await staffLogin(page, STAFF.content);
   await expect(page).toHaveURL(`${API_URL}/admin/catalog/course/`);
@@ -34,12 +38,15 @@ test("6.3 Contenu parcourt l'arbre d'un parcours et le publie (WAD09)", async ({
 
   await page.getByRole("link", { name: "Modification", exact: true }).first().click();
   await expect(page.locator(".field-path a")).toHaveCount(3);
-  await expect(page.locator(".field-vimeo_preview iframe")).toHaveAttribute("src", /^https:\/\/player\.vimeo\.com\/video\/\d+/);
+  await expect(page.locator(".field-vimeo_preview iframe")).toHaveAttribute(
+    "src",
+    /^https:\/\/player\.vimeo\.com\/video\/\d+\?(h=[0-9A-Za-z]+&)?dnt=1$/,
+  );
 
-  // « Publier » sur un parcours complet : confirmé, le statut reste « Publié »
+  // « Publier » sur un parcours déjà publié : sans effet ni journal, signalé comme tel
   await page.goto(`${API_URL}/admin/catalog/course/?status__exact=published`);
   await results.locator("tbody tr").first().locator('input[name="_selected_action"]').check();
   await page.locator('select[name="action"]').selectOption("publish");
   await page.getByRole("button", { name: /Exécuter|Envoyer|Go/ }).click();
-  await expect(page.locator(".messagelist")).toContainText("1 parcours publié.");
+  await expect(page.locator(".messagelist")).toContainText("1 parcours déjà publié.");
 });

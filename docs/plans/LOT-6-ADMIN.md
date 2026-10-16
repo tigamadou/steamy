@@ -78,6 +78,12 @@ Statut : 🟡 en cours · Prochaine tâche : 6.4 et 6.5 (admin Django) ; 6.2 apr
   > aucun » : contrainte `quiz_kind_matches_target` validée par le formulaire. `isCorrect` : test S8 existant
   > (`learning/tests/test_quiz.py`). Le prix d'un parcours ne touche pas les `OrderItem` (prix figé à la commande).
   > Recette manuelle à faire par le produit ; le test Playwright parcourt l'arbre en lecture (jeu D2 non modifié).
+  > Suites de relecture : liste sans requête par ligne (`list_select_related`) ; aperçu Vimeo conforme à l'ADR 0004
+  > (`dnt=1`, `referrerpolicy="strict-origin-when-cross-origin"`, `allow="fullscreen; picture-in-picture"`) ; l'URL de
+  > partage collée dans un champ identifiant (parcours, niveau, mission) en extrait l'identifiant et le hachage ;
+  > « Publier » et « Repasser en brouillon » sans effet ni journal sur un parcours déjà dans l'état visé ; fil d'Ariane
+  > par titre. Écart : l'admin Django n'a pas de CSP (le lecteur Vimeo y est intégré sans `frame-src`) ; à poser avec
+  > celle du front (ADR 0004 §5).
 - [ ] **6.4** Boutique, commandes, paiements · `feature/lot6-boutique-paiements` (requiert 6.1, API-L3b)
   - [ ] WAD10 Kits (admin Django) : `KitAdmin` (stock avec badge à 3 seuils, parcours compatibles), `DeliveryZoneAdmin`, `RestockAlertAdmin` en lecture seule
   - [ ] WAD10 Commandes (admin Django) : `OrderAdmin` (montants, statut, payeur en lecture seule), action *changer le statut de livraison* (`preparing → shipped → delivered`, notifie le payeur)

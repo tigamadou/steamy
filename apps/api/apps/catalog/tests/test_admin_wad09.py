@@ -214,8 +214,8 @@ def test_chained_pages_show_the_path_to_the_parents(content):
 @pytest.mark.parametrize(
     ("vimeo_id", "vimeo_hash", "expected"),
     [
-        ("76979871", "", 'src="https://player.vimeo.com/video/76979871"'),
-        ("76979871", "abc123", 'src="https://player.vimeo.com/video/76979871?h=abc123"'),
+        ("76979871", "", 'src="https://player.vimeo.com/video/76979871?dnt=1"'),
+        ("76979871", "abc123", 'src="https://player.vimeo.com/video/76979871?h=abc123&amp;dnt=1"'),
         ("", "", "Aucune vidéo."),
     ],
 )
@@ -223,6 +223,9 @@ def test_mission_shows_a_vimeo_preview(content, vimeo_id, vimeo_hash, expected):
     mission = MissionFactory(vimeo_id=vimeo_id, vimeo_hash=vimeo_hash)
     page = content.get(reverse("admin:catalog_mission_change", args=[mission.pk])).content.decode()
     assert expected in page
+    if vimeo_id:
+        assert 'referrerpolicy="strict-origin-when-cross-origin"' in page
+        assert 'allow="fullscreen; picture-in-picture"' in page
     assert content.get(reverse("admin:catalog_mission_changelist")).status_code == 200
 
 
@@ -254,3 +257,91 @@ def test_changing_a_price_leaves_past_orders_untouched(content):
     Course.objects.filter(pk=course.pk).update(price=25000)
     item.refresh_from_db()
     assert (item.unit_price, item.total) == (15000, 15000)
+
+
+def test_the_course_list_does_not_query_per_row(content):
+    from django.db import connection
+    from django.test.utils import CaptureQueriesContext
+
+    from apps.shop.tests.factories import KitFactory
+
+    def listing_queries() -> int:
+        with CaptureQueriesContext(connection) as queries:
+            assert content.get(CHANGELIST).status_code == 200
+        return len(queries)
+
+    for _ in range(5):
+        CourseFactory(paid=True, required_kit=KitFactory())
+    listing_queries()  # échauffement : caches de session et de types de contenu
+    five = listing_queries()
+    for _ in range(5):
+        CourseFactory(paid=True, required_kit=KitFactory())
+    assert listing_queries() == five  # catégorie et kit chargés avec la liste
+
+
+@pytest.mark.parametrize(
+    ("pasted", "vimeo_id", "vimeo_hash"),
+    [
+        ("https://vimeo.com/76979871/abc123", "76979871", "abc123"),
+        ("https://vimeo.com/76979871?h=abc123&share=copy", "76979871", "abc123"),
+        ("https://player.vimeo.com/video/76979871?h=abc123&dnt=1", "76979871", "abc123"),
+        ("https://vimeo.com/76979871", "76979871", ""),
+        ("76979871", "76979871", ""),
+    ],
+)
+def test_a_pasted_vimeo_url_fills_id_and_hash(content, pasted, vimeo_id, vimeo_hash):
+    mission = MissionFactory(vimeo_id="", vimeo_hash="")
+    change = reverse("admin:catalog_mission_change", args=[mission.pk])
+    response = content.post(
+        change,
+        {
+            "level": mission.level.pk,
+            "order": 0,
+            "title": mission.title,
+            "duration_min": 5,
+            "vimeo_id": pasted,
+            "blocks": "[]",
+        },
+    )
+    assert response.status_code == 302, response.content.decode()[:2000]
+    mission.refresh_from_db()
+    assert (mission.vimeo_id, mission.vimeo_hash) == (vimeo_id, vimeo_hash)
+
+
+def test_a_bad_vimeo_value_is_still_refused(content):
+    mission = MissionFactory()
+    change = reverse("admin:catalog_mission_change", args=[mission.pk])
+    response = content.post(
+        change,
+        {
+            "level": mission.level.pk,
+            "order": 0,
+            "title": mission.title,
+            "duration_min": 5,
+            "vimeo_id": "pas une vidéo",
+            "blocks": "[]",
+        },
+    )
+    assert "L&#x27;identifiant Vimeo ne contient que des chiffres." in response.content.decode()
+
+
+def test_publishing_an_already_published_course_does_nothing(content):
+    course = complete_course()
+    Course.objects.filter(pk=course.pk).update(status=Course.Status.PUBLISHED)
+    response = act(content, "publish", [course])
+    assert "1 parcours déjà publié." in texts(response)
+    assert not AuditLog.objects.filter(action="catalog.course_published").exists()
+
+
+def test_unpublishing_a_draft_does_nothing(content):
+    course = CourseFactory(draft=True)
+    response = act(content, "unpublish", [course])
+    assert not any("brouillon" in message for message in texts(response) if "0" not in message)
+    assert not AuditLog.objects.filter(action="catalog.course_unpublished").exists()
+
+
+def test_the_path_shows_titles_only(content):
+    course = complete_course(title="Arduino")
+    level = course.projects.get().levels.get()
+    page = content.get(reverse("admin:catalog_level_change", args=[level.pk])).content.decode()
+    assert ">Robot suiveur</a>" in page

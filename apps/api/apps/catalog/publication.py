@@ -15,7 +15,11 @@ from .models import Course
 def publication_problems(course: Course) -> list[str]:
     """Raisons qui empêchent la publication ; liste vide si le parcours est publiable."""
     problems = []
-    projects = list(course.projects.prefetch_related("levels__missions", "levels__quiz", "quiz"))
+    projects = list(
+        course.projects.prefetch_related(
+            "levels__missions", "levels__quiz__questions", "quiz__questions"
+        )
+    )
     if not projects:
         problems.append("Le parcours n'a aucun projet.")
     for project in projects:
@@ -44,7 +48,7 @@ def publication_problems(course: Course) -> list[str]:
 
 def _quiz_with_questions(node) -> bool:
     quiz = getattr(node, "quiz", None)
-    return quiz is not None and quiz.questions.exists()
+    return quiz is not None and len(quiz.questions.all()) > 0  # questions préchargées
 
 
 def publish(course: Course, user, request=None) -> list[str]:
