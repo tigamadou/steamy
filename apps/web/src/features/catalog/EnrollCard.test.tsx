@@ -115,6 +115,10 @@ describe("EnrollCard · WC05", () => {
     expect(screen.queryByText(/25\s000/)).not.toBeInTheDocument();
     expect(screen.getByText("Kit requis")).toBeInTheDocument();
     expect(screen.getByText(/35\s000 F CFA · En stock/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Voir le kit/ })).toHaveAttribute(
+      "href",
+      `/apprenant/boutique/${KIT_DETAIL.slug}`,
+    );
     expect(screen.queryByText("J'ai un Kit Code")).not.toBeInTheDocument();
     expect(screen.queryByText(/h de contenu|Certificat/)).not.toBeInTheDocument();
   });
