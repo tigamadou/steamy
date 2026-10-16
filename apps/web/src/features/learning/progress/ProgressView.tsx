@@ -39,7 +39,7 @@ export async function ProgressView() {
   const { weekSeconds, lastDays, points, rank, streakDays, counters, mastery } = progress.data;
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(13rem,1fr))] gap-3">
         <StatPill icon="book" label="Cette semaine" value={formatSeconds(weekSeconds)} tone="primary" />
         <StatPill icon="flame" label="Streak" value={`${streakDays} jour${streakDays > 1 ? "s" : ""}`} tone="amber" />
         {points !== null && <StatPill icon="sparkle" label="Points" value={points.toLocaleString("fr-FR")} tone="primary" />}
