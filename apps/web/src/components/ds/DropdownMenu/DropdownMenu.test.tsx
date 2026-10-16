@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { axe } from "@/test/axe";
 
@@ -97,6 +97,18 @@ describe("DropdownMenu", () => {
     await user.click(button);
     await user.click(button);
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it("Espace choisit l'option ; le focus revient au bouton", async () => {
+    const { user, button } = setup();
+    await user.click(button);
+    const option = screen.getByRole("menuitemradio", { name: "Débutant" });
+    const clicked = vi.fn((event: MouseEvent) => event.preventDefault());
+    option.addEventListener("click", clicked);
+    await user.keyboard(" ");
+    expect(clicked).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    expect(button).toHaveFocus();
   });
 
   it("sans option choisie, affiche et focalise la première", async () => {

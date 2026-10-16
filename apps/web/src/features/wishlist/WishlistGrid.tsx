@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button, Mascot } from "@/components/ds";
 import { CourseList, type LearnerCourseItem } from "@/features/catalog/LearnerCourseGrid";
@@ -19,6 +19,17 @@ export function savedLabel(count: number): string {
 export function WishlistGrid({ items, sort }: { items: LearnerCourseItem[]; sort: ReactNode }) {
   const wishlist = useWishlist(items.map((item) => item.slug));
   const visible = items.filter((item) => wishlist.wished.has(item.slug));
+  const grid = useRef<HTMLDivElement>(null);
+  // Carte revenue à l'écran (annulation, ou retrait refusé) : le focus retourne sur son cœur
+  const [restored, setRestored] = useState<{ slug: string } | null>(null);
+  useEffect(() => {
+    if (!restored) return;
+    grid.current?.querySelector<HTMLButtonElement>(`[data-course="${CSS.escape(restored.slug)}"] button`)?.focus();
+  }, [restored]);
+
+  // La carte retirée disparaît : le focus passe sur « Annuler » du toast (WCAG 2.4.3)
+  const remove = (slug: string) =>
+    wishlist.toggle(slug, { focusUndo: true, onRestore: () => setRestored({ slug }) });
 
   return (
     <>
@@ -32,7 +43,9 @@ export function WishlistGrid({ items, sort }: { items: LearnerCourseItem[]; sort
             {sort}
           </div>
           <h2 className="sr-only">Mes parcours sauvegardés</h2>
-          <CourseList items={visible} wished={wishlist.wished} onFav={wishlist.toggle} />
+          <div ref={grid}>
+            <CourseList items={visible} wished={wishlist.wished} onFav={remove} />
+          </div>
         </>
       ) : (
         <WishlistEmpty />

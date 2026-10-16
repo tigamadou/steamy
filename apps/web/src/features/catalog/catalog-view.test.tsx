@@ -127,6 +127,17 @@ describe("WC03 · aucun résultat", () => {
   });
 });
 
+describe("panne des souhaits ou des inscriptions", () => {
+  it("le catalogue s'affiche avec un avertissement", async () => {
+    getCategories.mockResolvedValue([CATEGORY]);
+    getCourses.mockResolvedValue({ count: 1, results: [course()], hasNext: false });
+    getLearnerCourseState.mockResolvedValue({ wished: [], progress: {}, degraded: true });
+    render(await LearnerCatalog({ searchParams: Promise.resolve({}) }));
+    expect(screen.getByRole("status")).toHaveTextContent(/n'ont pas pu être chargés/);
+    expect(screen.getByRole("link", { name: "Découverte de la robotique" })).toBeInTheDocument();
+  });
+});
+
 describe("chargement", () => {
   it("silhouette verbalisée", () => {
     render(<LearnerCatalogSkeleton />);

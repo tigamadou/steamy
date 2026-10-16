@@ -43,13 +43,19 @@ export type LearnerCourseState = {
   wished: string[];
   /** Progression (API) de chaque parcours suivi, par slug. */
   progress: Record<string, number>;
+  /** Souhaits ou inscriptions illisibles : l'écran s'affiche quand même, avec un avertissement. */
+  degraded: boolean;
 };
 
-/** Souhaits et inscriptions, lus en parallèle. */
+/** Souhaits et inscriptions, lus en parallèle ; une panne de l'un ou l'autre dégrade l'écran sans le bloquer. */
 export async function getLearnerCourseState(): Promise<LearnerCourseState> {
-  const [wishlist, enrollments] = await Promise.all([getWishlist(), getEnrollments()]);
+  const [wishlist, enrollments] = await Promise.allSettled([getWishlist(), getEnrollments()]);
   return {
-    wished: wishlist.map((item) => item.course.slug),
-    progress: Object.fromEntries(enrollments.map((e) => [e.course.slug, e.progressPct])),
+    wished: wishlist.status === "fulfilled" ? wishlist.value.map((item) => item.course.slug) : [],
+    progress:
+      enrollments.status === "fulfilled"
+        ? Object.fromEntries(enrollments.value.map((e) => [e.course.slug, e.progressPct]))
+        : {},
+    degraded: wishlist.status === "rejected" || enrollments.status === "rejected",
   };
 }

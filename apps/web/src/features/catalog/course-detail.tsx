@@ -2,20 +2,13 @@ import type { Schemas } from "@steamy/api-client";
 import type { CSSProperties, ReactNode } from "react";
 
 import { Accordion, Badge, Icon, SkeletonBlock, VimeoPlayer } from "@/components/ds";
-import { offerOf } from "@/components/public/course-detail";
+import { offerOf, plural } from "@/components/public/course-detail";
 import { DIFFICULTY_LABELS, formatMinutes, formatPrice, KIT_CODE_LABEL } from "@/lib/format";
 
 // Fiche parcours de l'apprenant (WC04, WC05) : en-tête, sections, programme. Le h1 est le titre du shell
 // (« Catalogue ») : le titre du parcours est un h2, les sections des h3.
 
 type Course = Schemas["CourseDetail"];
-
-const PLURALS: Record<string, string> = { projet: "projets", niveau: "niveaux", mission: "missions" };
-
-/** « 1 projet », « 3 missions ». */
-export function plural(n: number, word: keyof typeof PLURALS): string {
-  return `${n} ${n > 1 ? PLURALS[word] : word}`;
-}
 
 export function DetailSection({ title, children }: { title: string; children: ReactNode }) {
   return (

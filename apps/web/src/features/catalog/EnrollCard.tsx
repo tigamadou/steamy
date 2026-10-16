@@ -5,13 +5,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Badge, Button, KitMiniCard, ProgressBar } from "@/components/ds";
-import { offerOf, stringList } from "@/components/public/course-detail";
+import { offerOf, plural, stringList } from "@/components/public/course-detail";
 import { features } from "@/lib/features";
 import { formatPrice } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
 import { enroll, failureMessage } from "./api";
-import { plural } from "./course-detail";
 import { useWishlist } from "./use-wishlist";
 
 export type EnrollCardProps = {
