@@ -25,6 +25,8 @@ export type ModalProps = {
   variant?: "default" | "danger";
   /** Libellé accessible du bouton de fermeture. */
   closeLabel?: string;
+  /** `ink` : variante monochrome du back-office (focus et pastille d'icône en encre). */
+  tone?: "brand" | "ink";
   className?: string;
 };
 
@@ -46,8 +48,10 @@ function ModalBox({
   actions,
   variant = "default",
   closeLabel = "Fermer",
+  tone = "brand",
   className,
 }: ModalProps) {
+  const ink = tone === "ink";
   const baseId = `modale-${useId()}`;
   const boxRef = useRef<HTMLDivElement>(null);
   const danger = variant === "danger";
@@ -122,7 +126,10 @@ function ModalBox({
           type="button"
           aria-label={closeLabel}
           onClick={onClose}
-          className="absolute top-2 right-2 flex size-11 cursor-pointer items-center justify-center rounded-pill text-ink-600 hover:bg-ink-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+          className={cx(
+            "absolute top-2 right-2 flex size-11 cursor-pointer items-center justify-center rounded-pill text-ink-600 hover:bg-ink-50 focus-visible:outline-3 focus-visible:outline-offset-2",
+            ink ? "focus-visible:outline-ink-900" : "focus-visible:outline-primary-500",
+          )}
         >
           <Icon name="x" size={20} strokeWidth={2.5} />
         </button>
@@ -131,7 +138,7 @@ function ModalBox({
             aria-hidden
             className={cx(
               "mb-4 flex size-18 items-center justify-center rounded-pill text-[36px] leading-none",
-              danger ? "bg-error-50" : "bg-primary-50",
+              danger ? "bg-error-50" : ink ? "bg-ink-100" : "bg-primary-50",
             )}
           >
             {icon}

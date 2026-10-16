@@ -1,9 +1,8 @@
 import type { Schemas } from "@steamy/api-client";
-import Link from "next/link";
+import { Breadcrumb } from "@/components/ds/Breadcrumb";
 
 import { formatKpiValue, formatShortDate, numericSeries } from "@/lib/backoffice/format";
 import { withPeriod, type ImpactPeriodId } from "@/lib/backoffice/period";
-import { cx } from "@/lib/cx";
 import { routes } from "@/lib/routes";
 
 import { BarChart } from "./BarChart";
@@ -12,7 +11,7 @@ import { DonutChart } from "./DonutChart";
 import { KpiStatusBadge } from "./KpiStatusBadge";
 import { SectionHead } from "./SectionHead";
 import { SourceTag } from "./SourceTag";
-import { CARD, FOCUS } from "./styles";
+import { CARD, formatNumber } from "./styles";
 
 export type KpiDetailData = Schemas["KpiDetail"];
 type HistoryRow = KpiDetailData["history"][number];
@@ -38,22 +37,10 @@ export function KpiDetail({ kpi, period }: KpiDetailProps) {
   const range = `${formatShortDate(kpi.period.start)} → ${formatShortDate(kpi.period.end)}`;
   return (
     <div className="flex flex-col gap-4">
-      <nav aria-label="Fil d'Ariane" className="text-[13px] font-bold text-ink-600">
-        <ol className="m-0 flex list-none flex-wrap items-center gap-1.5 p-0">
-          <li>
-            <Link
-              href={withPeriod(routes.backoffice.impact, period)}
-              className={cx("rounded-sm hover:text-ink-900 hover:underline", FOCUS)}
-            >
-              Impact Tracker
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li aria-current="page" className="font-black text-ink-900">
-            {kpi.label}
-          </li>
-        </ol>
-      </nav>
+      <Breadcrumb
+        tone="ink"
+        items={[{ label: "Impact Tracker", href: withPeriod(routes.backoffice.impact, period) }, { label: kpi.label }]}
+      />
 
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[1.5fr_1fr]">
         <div className="flex min-w-0 flex-col gap-4">
@@ -71,7 +58,7 @@ export function KpiDetail({ kpi, period }: KpiDetailProps) {
                 </p>
                 <p className="m-0 mt-1.5 text-[13px] font-bold text-ink-600">
                   {kpi.target === null ? "Sans cible" : `Cible ${formatKpiValue(kpi.target, kpi.unit)}`}
-                  {kpi.attainment !== null && ` · atteinte à ${kpi.attainment} %`}
+                  {kpi.attainment !== null && ` · atteinte à ${formatNumber(kpi.attainment)} %`}
                 </p>
               </div>
               <div className="min-w-55 flex-1">

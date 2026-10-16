@@ -6,6 +6,7 @@ Toute route `children/{id}/` passe par le lien parent ↔ enfant du parent conne
 """
 
 from django.db import transaction
+from django.db.models import Count, F, Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_field
 from rest_framework import mixins, serializers, status, viewsets
@@ -16,9 +17,19 @@ from rest_framework.response import Response
 from apps.accounts import children as service
 from apps.accounts import deletion as deletion_service
 from apps.accounts import signup as signup_service
+from apps.accounts import weekly_report as weekly_service
 from apps.accounts.fields import PasswordField
 from apps.accounts.models import DeletionRequest, Gender, ParentChildLink, User
 from apps.accounts.profile import ProfileStep, profile_step
+from apps.learning.models import Enrollment, LearnerBadge, QuizAttempt
+from apps.learning.payloads import attempt_item, enrollment_payload
+from apps.learning.progression import Progression
+from apps.learning.serializers import (
+    AttemptListItemSerializer,
+    DaySecondsSerializer,
+    EnrollmentSerializer,
+)
+from apps.notifications.services import contact_email
 from apps.referentials.models import Disability, Relationship, SchoolGrade
 from apps.referentials.serializers import (
     AvatarSerializer,
@@ -35,7 +46,18 @@ from .deletion import ChildDeletionSerializer
 from .learner_signup import UsernameField
 from .profiles import age_on, check_birth_date, code_field, locality_field
 
+#: Tentatives affichées dans WPD03.
+RECENT_ATTEMPTS = 5
+
 # --- Lecture ------------------------------------------------------------------------------------
+
+
+def courses_payload(child) -> list[dict]:
+    """Progression par parcours (WPD03, WPD11), l'activité la plus récente d'abord."""
+    enrollments = Enrollment.objects.filter(learner=child).order_by(
+        F("last_activity_at").desc(nulls_last=True), "-created_at", "-id"
+    )
+    return [enrollment_payload(e, Progression(e)) for e in enrollments]
 
 
 class ChildDeletionStateSerializer(serializers.ModelSerializer):
@@ -64,6 +86,9 @@ class ChildSerializer(serializers.ModelSerializer):
     )
     created_at = serializers.DateTimeField(source="date_joined", read_only=True)
     deletion = serializers.SerializerMethodField()
+    active_courses = serializers.IntegerField(
+        read_only=True, help_text="Parcours en cours (WPD01, stat « Parcours en cours »)"
+    )
 
     class Meta:
         model = User
@@ -83,6 +108,7 @@ class ChildSerializer(serializers.ModelSerializer):
             "profile_step",
             "created_at",
             "deletion",
+            "active_courses",
         )
         read_only_fields = fields
 
@@ -122,9 +148,21 @@ class ChildDetailSerializer(ChildSerializer):
         help_text="Opt-in parental à l'affichage public (pseudonyme et avatar, D15)",
     )
 
+    courses = serializers.SerializerMethodField(
+        help_text="Progression par parcours (WPD03), la plus récente activité d'abord"
+    )
+
+    recent_attempts = serializers.SerializerMethodField(
+        help_text=f"{RECENT_ATTEMPTS} dernières tentatives de quiz (WPD03, statut serveur D31)"
+    )
+    badges = serializers.SerializerMethodField(help_text="Nombre de badges obtenus (WPD03)")
+
     class Meta(ChildSerializer.Meta):
         fields = (
             *ChildSerializer.Meta.fields,
+            "courses",
+            "recent_attempts",
+            "badges",
             "birth_date",
             "gender",
             "disability",
@@ -133,6 +171,20 @@ class ChildDetailSerializer(ChildSerializer):
             "public_display_allowed",
         )
         read_only_fields = fields
+
+    @extend_schema_field(EnrollmentSerializer(many=True))
+    def get_courses(self, child):
+        return EnrollmentSerializer(courses_payload(child), many=True).data
+
+    @extend_schema_field(AttemptListItemSerializer(many=True))
+    def get_recent_attempts(self, child):
+        attempts = QuizAttempt.objects.filter(learner=child).select_related(
+            "quiz__level__project", "quiz__project", "enrollment__course"
+        )[:RECENT_ATTEMPTS]
+        return AttemptListItemSerializer([attempt_item(a) for a in attempts], many=True).data
+
+    def get_badges(self, child) -> int:
+        return LearnerBadge.objects.filter(learner=child).count()
 
 
 # --- Écriture -----------------------------------------------------------------------------------
@@ -192,6 +244,32 @@ class ChildPasswordResetSerializer(serializers.Serializer):
     password = PasswordField(help_text="Nouveau mot de passe, à communiquer à l'enfant (D26)")
 
 
+# --- WPD11 · Rapport hebdomadaire ----------------------------------------------------------------
+
+
+class WeeklyReportSerializer(serializers.Serializer):
+    week = serializers.CharField(help_text="Semaine ISO `AAAA-Www`")
+    start_date = serializers.DateField(help_text="Lundi")
+    end_date = serializers.DateField(help_text="Dimanche")
+    previous_week = serializers.CharField()
+    next_week = serializers.CharField(allow_null=True, help_text="Null pour la semaine en cours")
+    seconds = serializers.IntegerField(help_text="Temps d'apprentissage (journal, D55)")
+    missions_completed = serializers.IntegerField()
+    quizzes_passed = serializers.IntegerField()
+    days = DaySecondsSerializer(many=True, help_text="7 jours, du lundi au dimanche")
+    courses = EnrollmentSerializer(many=True, help_text="Progression actuelle par parcours")
+    email = serializers.EmailField(
+        allow_null=True,
+        help_text="Adresse où le rapport est envoyé chaque semaine, null sans email",
+    )
+
+
+class WeeklyReportQuerySerializer(serializers.Serializer):
+    week = serializers.CharField(
+        required=False, help_text="`AAAA-Www` ; par défaut, la semaine en cours"
+    )
+
+
 class ChildViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -209,7 +287,9 @@ class ChildViewSet(
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return User.objects.none()
-        return service.children_of(self.request.user)
+        return service.children_of(self.request.user).annotate(
+            active_courses=Count("enrollments", filter=Q(enrollments__status="active"))
+        )
 
     def get_serializer_class(self):
         return ChildSerializer if self.action == "list" else ChildDetailSerializer
@@ -272,6 +352,19 @@ class ChildViewSet(
                 request.user, child, **serializer.validated_data, request=request
             )
         return Response(ChildDetailSerializer(self.get_queryset().get(pk=child.pk)).data)
+
+    @extend_schema(parameters=[WeeklyReportQuerySerializer], responses=WeeklyReportSerializer)
+    @action(detail=True, methods=["get"], url_path="weekly-report")
+    def weekly_report(self, request, pk=None):
+        """WPD11 : semaine ISO (`?week=AAAA-Www`), navigation vers les semaines précédentes (D55)."""
+        child = self.get_object()
+        monday = weekly_service.parse_week(request.query_params.get("week"))
+        data = {
+            **weekly_service.report(child, monday),
+            "courses": courses_payload(child),
+            "email": contact_email(request.user),
+        }
+        return Response(WeeklyReportSerializer(data).data)
 
 
 # --- WD22 · Mon parent --------------------------------------------------------------------------

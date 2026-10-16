@@ -16,6 +16,13 @@ describe("Breadcrumb", () => {
     expect(screen.getByText("Débuter en robotique")).toHaveAttribute("aria-current", "page");
   });
 
+  it("a une variante monochrome sans couleur primaire", () => {
+    render(<Breadcrumb tone="ink" items={[{ label: "Impact Tracker", href: "/backoffice/impact" }, { label: "Rapport" }]} />);
+    const link = screen.getByRole("link", { name: "Impact Tracker" });
+    expect(link.className).toMatch(/outline-ink-900/);
+    expect(link.className).not.toMatch(/primary/);
+  });
+
   it("ne présente aucune violation d'accessibilité", async () => {
     const { container } = render(<Breadcrumb items={ITEMS} />);
     expect(await axe(container)).toHaveNoViolations();

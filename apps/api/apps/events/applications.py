@@ -2,7 +2,8 @@
 Candidatures aux Steamy Events (S8, D41, D53, C3, C12) : règles côté serveur, appelées par les vues et par
 l'exécution post-paiement.
 
-- L'apprenant candidate : la candidature attend l'accord de son parent (`pending_parent`, décision en API-L4).
+- L'apprenant candidate : la candidature attend l'accord de son parent (`pending_parent`), qui l'accepte ou la
+  refuse (WPD06, API-L4.2) ; accepter un événement payant revient à l'inscrire lui-même (place et commande).
 - Le parent inscrit son enfant (WPD12) : c'est son accord. Gratuit ou couvert par un ticket → confirmée tout de
   suite ; payant → place réservée (`pending_payment`) et commande d'événement à payer, confirmée au paiement.
 - Les places se comptent sous verrou de l'événement : premier arrivé, premier servi (C3).
@@ -72,6 +73,70 @@ def apply(event: SteamyEvent, learner, *, applied_by, motivation="", self_level=
     else:
         tell_parent(application)
     return application, order
+
+
+def pending_for_parent(parent, application_id) -> EventApplication:
+    """Candidature d'un enfant du parent qui attend sa décision ; celle d'une autre famille → 404."""
+    application = (
+        EventApplication.objects.select_for_update(of=("self",))
+        .select_related("event", "learner")
+        .filter(pk=application_id, learner_id__in=children_of(parent))
+        .first()
+    )
+    if application is None:
+        raise ApiError("NOT_FOUND")
+    if application.status != EventApplication.Status.PENDING_PARENT:
+        raise ApiError("APPLICATION_ALREADY_RESOLVED")
+    return application
+
+
+@transaction.atomic
+def accept(parent, application_id):
+    """
+    WPD06 « Accepter » (D53) : gratuit ou couvert par un ticket → confirmée ; payant → place réservée et commande
+    d'événement à payer par le parent, confirmée au paiement. Renvoie `(candidature, commande ou None)`.
+    """
+    application = pending_for_parent(parent, application_id)
+    event = lock_open_event(application.event)
+    if event.seats_left <= 0:
+        raise ApiError("EVENT_FULL")
+    application.parent_decided_at = timezone.now()
+    order = None
+    if event.price > 0 and application.ticket_id is None:
+        application.status = EventApplication.Status.PENDING_PAYMENT
+        order = event_order(application, payer=parent)
+    else:
+        application.status = EventApplication.Status.ACCEPTED
+        tell_learner_confirmed(application)
+    application.save(update_fields=["status", "parent_decided_at", "updated_at"])
+    return application, order
+
+
+@transaction.atomic
+def refuse(parent, application_id, reason: str = "") -> EventApplication:
+    """WPD06 « Refuser » : motif facultatif ; le ticket éventuel est rendu ; l'enfant est prévenu."""
+    from apps.notifications.models import Category
+    from apps.notifications.services import notify
+
+    application = pending_for_parent(parent, application_id)
+    application.status = EventApplication.Status.REFUSED
+    application.refusal_reason = reason
+    application.parent_decided_at = timezone.now()
+    application.ticket = None
+    application.save(
+        update_fields=["status", "refusal_reason", "parent_decided_at", "ticket", "updated_at"]
+    )
+    notify(
+        application.learner,
+        Category.EVENTS,
+        "event_refused",
+        f"Ton parent n'a pas accepté ta candidature à {application.event.title}",
+        reason,
+        url="/apprenant/evenements",
+        tone="warning",
+        icon=application.event.emoji or "🎟️",
+    )
+    return application
 
 
 def event_order(application: EventApplication, *, payer):

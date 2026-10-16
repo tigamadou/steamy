@@ -1,9 +1,10 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-import { apiSession } from "./support/api";
+import { apiSession, decideConsent, uniquePhone } from "./support/api";
 import { DEMO, DEMO_PASSWORD } from "./support/demo";
 import { loginAs } from "./support/session";
+import { completeLearnerProfile, sendConsentRequest, startLearnerSignup } from "./support/signup";
 
 // LOT-3 étape 3.3a · Mes parcours (WD23), arbre (WC06a/b), projet (WJ01), niveau (WJ02), mission (WJ03).
 // Jeu D2 : Léa suit « Découverte de la robotique » (en cours) et a terminé « Initiation à Scratch ».
@@ -118,13 +119,23 @@ test("accès direct à une mission verrouillée → « Ce contenu n'est pas enco
   await expect(page).toHaveURL(`/apprenant/parcours/${COURSE}`);
 });
 
-test("WJ03 : « Marquer comme terminée » mène à l'étape renvoyée par l'API @donnees-uniques", async ({ page }) => {
-  const tree = await learnerTree();
-  expect(tree.next.type).toBe("mission");
+test("WJ03 : « Marquer comme terminée » mène à l'étape renvoyée par l'API (apprenant neuf)", async ({ page }) => {
+  test.setTimeout(120_000);
   await fakeVimeo(page);
-  await loginAs(page, "learner");
-  const mission = `/apprenant/parcours/${COURSE}/missions/${tree.next.id}`;
-  await page.goto(mission);
+  // Apprenant créé pour le test : la progression de Léa, lue par les autres tests, n'est pas modifiée
+  await startLearnerSignup(page);
+  const phone = uniquePhone();
+  const link = await sendConsentRequest(page, phone);
+  await decideConsent(link, phone, { accept: true });
+  await page.goto("/inscription/apprenant/mot-de-passe");
+  await completeLearnerProfile(page, "Robot2026x");
+  await page.goto(`/apprenant/catalogue/${COURSE}`);
+  await page.getByRole("button", { name: "Commencer le parcours" }).click();
+  await expect(page).toHaveURL(new RegExp(`/apprenant/parcours/${COURSE}/projets/\\d+$`));
+  await page.getByRole("link", { name: /Continuer le niveau 1/ }).click();
+  await page.getByRole("link", { name: "Commencer la 1ʳᵉ mission" }).click();
+  await expect(page).toHaveURL(new RegExp(`/apprenant/parcours/${COURSE}/missions/\\d+$`));
+  const mission = new URL(page.url()).pathname;
   await page.getByRole("button", { name: /Marquer comme terminée/ }).click();
   await expect(page).not.toHaveURL(mission);
   await expect(page).toHaveURL(new RegExp(`/apprenant/parcours/${COURSE}/(missions|quiz)/\\d+$`));

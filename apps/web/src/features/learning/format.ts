@@ -11,14 +11,6 @@ export function position(item: { order: number }): number {
   return item.order + 1;
 }
 
-/** Durée en minutes → « 45 min », « 1 h », « 1 h 30 ». */
-export function formatMinutes(minutes: number): string {
-  if (minutes < 60) return `${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-  return rest ? `${hours} h ${String(rest).padStart(2, "0")}` : `${hours} h`;
-}
-
 /** Durée en heures (projets) → « 3 h ». */
 export function formatHours(hours: number): string {
   return `${hours} h`;
