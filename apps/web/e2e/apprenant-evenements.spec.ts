@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-import { loginViaApi } from "./support/session";
+import { loginAs, loginViaApi } from "./support/session";
 import { createLearner } from "./support/signup";
 
 // LOT-3 étape 3.8 · Steamy Events côté apprenant : WD10, WL23 dans le shell, WD11. Parcours P6 sur un apprenant
@@ -52,7 +52,7 @@ test("P6 : WD10 → WL23 → WD11 → WD10 « En attente de ton parent » ; seco
 
   // WD11 : motivation obligatoire, expérience (jamais « niveau »), accord du parent
   await expect(page).toHaveURL(`/apprenant/evenements/${OPEN_EVENT.slug}/candidature`);
-  await expect(page.getByText("Ta candidature sera envoyée à ton parent pour accord.")).toBeVisible();
+  await expect(page.getByText("Ta candidature sera envoyée à ton parent pour accord.").filter({ visible: true })).toBeVisible();
   await axe(page);
   await page.getByRole("button", { name: "Envoyer ma candidature" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Dis-nous pourquoi tu veux participer." })).toBeVisible();
@@ -102,8 +102,8 @@ test("WL23 : événement complet, CTA désactivé avec son motif ; WD11 inaccess
 });
 
 test("WD01 : le raccourci Steamy Events mène à WD10", async ({ page }) => {
-  const learner = await createLearner();
-  await loginViaApi(page, learner.username, learner.password);
+  // Léa (jeu de démo) a un parcours à reprendre : WD01 et ses raccourcis (lecture seule, aucune candidature)
+  await loginAs(page, "learner");
   await page.goto("/apprenant");
   await page.getByRole("navigation", { name: "Raccourcis" }).getByRole("link", { name: /Steamy Events/ }).click();
   await expect(page).toHaveURL("/apprenant/evenements");
