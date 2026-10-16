@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 import { cx } from "@/lib/cx";
 
+import { FOCUS } from "./styles";
+
 export type DataColumn<Row> = {
   key: string;
   label: string;
@@ -37,7 +39,13 @@ export function DataTable<Row extends object>({
   dense,
 }: DataTableProps<Row>) {
   return (
-    <div className="overflow-x-auto rounded-[14px] border border-ink-100 bg-surface">
+    // Zone défilante sur mobile : focalisable et nommée, pour défiler au clavier (WCAG 2.1.1)
+    <div
+      role="region"
+      aria-label={caption}
+      tabIndex={0}
+      className={cx("overflow-x-auto rounded-[14px] border border-ink-100 bg-surface", FOCUS)}
+    >
       <table className="w-full border-collapse">
         <caption className={showCaption ? "px-4 pt-3 text-left text-sm font-extrabold text-ink-900" : "sr-only"}>
           {caption}
@@ -50,7 +58,7 @@ export function DataTable<Row extends object>({
                 scope="col"
                 style={column.width ? { width: column.width } : undefined}
                 className={cx(
-                  "border-b border-ink-100 px-4 py-3 text-[11px] font-extrabold uppercase tracking-[.05em] whitespace-nowrap text-ink-500",
+                  "border-b border-ink-100 px-4 py-3 text-[11px] font-extrabold uppercase tracking-[.05em] whitespace-nowrap text-ink-600",
                   ALIGN[column.align ?? "left"],
                 )}
               >
@@ -62,7 +70,7 @@ export function DataTable<Row extends object>({
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="p-9 text-center text-sm font-semibold text-ink-500">
+              <td colSpan={columns.length} className="p-9 text-center text-sm font-semibold text-ink-600">
                 {empty}
               </td>
             </tr>

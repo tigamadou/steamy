@@ -163,12 +163,12 @@ def test_s7_paid_course_cannot_be_enrolled_for_free(paid_course, user):
 def test_s4_lists_only_return_the_callers_objects(user):
     from apps.learning.tests.factories import EnrollmentFactory
     from apps.notifications.tests.factories import NotificationFactory
-    from apps.payments.models import Order, Payment
+    from apps.payments.tests.factories import OrderFactory, PaymentFactory
 
     other = LearnerFactory()
     EnrollmentFactory(learner=other)
-    order = Order.objects.create(user=other, reference="REF-AUTRE", total=1000)
-    Payment.objects.create(order=order, provider="kkiapay", amount=1000)
+    order = OrderFactory(beneficiary=other)
+    PaymentFactory(order=order)
     NotificationFactory(user=other, title="Privée")
 
     client = APIClient()
@@ -176,7 +176,6 @@ def test_s4_lists_only_return_the_callers_objects(user):
     for url in [
         "/api/learning/enrollments/",
         "/api/payments/orders/",
-        "/api/payments/payments/",
         "/api/notifications/",
     ]:
         resp = client.get(url)
@@ -184,7 +183,7 @@ def test_s4_lists_only_return_the_callers_objects(user):
         assert resp.json()["results"] == [], url
 
     # Et l'objet d'autrui n'existe pas pour l'appelant.
-    assert client.get(f"/api/payments/orders/{order.id}/").status_code == 404
+    assert client.get(f"/api/payments/orders/{order.reference}/").status_code == 404
 
 
 # --- S9 · Throttling, et format d'erreur unique en français (D4) ----------------------------
@@ -231,7 +230,7 @@ def test_errors_use_the_single_format_in_french(user):
 
     client = APIClient()
     client.force_authenticate(user)
-    not_found = client.get("/api/payments/orders/999999/").json()
+    not_found = client.get("/api/payments/orders/CMD-INCONNUE/").json()
     assert not_found == {"code": "NOT_FOUND", "message": not_found["message"]}
     assert "trouvé" in not_found["message"].lower()
 

@@ -13,10 +13,10 @@ paiement `WA03`, états `WA04`/`WA05`/`WA07`, suivi `WK07`).
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 4.0 Conception de `WPD15` · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
+Statut : 🟡 en cours · Prochaine tâche : validation de la maquette de `WPD15` (C18), puis 4.1 après `API-L4` · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
 
-### Lot 4 · Espace parent — ⬜ à faire
-- [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15`
+### Lot 4 · Espace parent — 🟡 en cours
+- [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15` · PR #72
   - [x] Créer `design/screens-parent-a-concevoir-web.jsx` (même design system) et l'ajouter à `App.html`
   - [x] Concevoir `WPD15` en 3 variantes d'objet : parcours, kit (adresse + zone + frais), événement
   - [x] Concevoir les 8 états de `WPD15` : en attente, attente de confirmation, payée, échec, refusée, expirée, annulée par l'enfant, kit en rupture
@@ -26,6 +26,7 @@ Statut : ⬜ à faire · Prochaine tâche : 4.0 Conception de `WPD15` · Préreq
   - [x] Concevoir la modale de refus d'une candidature (`WPD06`)
   - [x] Respecter les contraintes : `WA03` (C1 magenta), carte enfant de `WPD05`, montants serveur, mention « Paiement sécurisé · aucune carte bancaire », mobile 360 px d'abord
   - [x] Recette : toutes variantes et tous états dessinés, aucun prix, réseau ou délai en dur, vouvoiement
+  - [x] Compléter d'après §5.11 : kit requis (parcours), adresse de kit modifiée (frais recalculés), mobile 360 du kit et de l'attente de confirmation, âge sur `WPD05` (D20), état « déjà traitée » de `WPD05`, « Payer » en magenta (C1)
   - [ ] Maquette validée par le produit (C18) avant 4.4
 - [ ] **4.1** Socle parent, accueil et notifications · `feature/lot4-accueil` (requiert API-L4)
   - [ ] Layout `(parent)` : contrôle du rôle côté serveur, redirection vers `/connexion?next=`, `loading.tsx`, `error.tsx`, `not-found.tsx`
