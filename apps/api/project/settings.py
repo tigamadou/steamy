@@ -382,6 +382,16 @@ FEDAPAY_MODES = json.loads(
         '"TG:moov": "moov_tg", "CI:mtn": "mtn_ci"}',
     )
 )
+# Factures (ADR 0005) : le format légal attend la comptabilité (P1 facture normalisée MECeF, P2 TVA). Tout ce qui a
+# une valeur légale est réglé ici, jamais inventé dans le code ; par défaut, un « reçu » non fiscal sans TVA.
+INVOICE_PROVISIONAL = os.getenv("INVOICE_PROVISIONAL", "true").lower() == "true"
+# Vendeur imprimé (seuls les champs renseignés) : {"name", "address", "tax_id" (IFU), "registration" (RCCM), …}
+INVOICE_SELLER = json.loads(os.getenv("INVOICE_SELLER", '{"name": "Steamy"}'))
+# Taux de TVA en % (vide : aucune ventilation) et prix catalogue TTC ou HT
+INVOICE_VAT_RATE = float(os.getenv("INVOICE_VAT_RATE")) if os.getenv("INVOICE_VAT_RATE") else None
+INVOICE_PRICES_INCLUDE_VAT = os.getenv("INVOICE_PRICES_INCLUDE_VAT", "true").lower() == "true"
+# Mentions légales supplémentaires (liste JSON de lignes)
+INVOICE_MENTIONS = json.loads(os.getenv("INVOICE_MENTIONS", "[]"))
 # Identifiants FedaPay des devises, quand une notification ne donne que `currency_id`
 FEDAPAY_CURRENCY_IDS = json.loads(os.getenv("FEDAPAY_CURRENCY_IDS", '{"1": "XOF"}'))
 
@@ -553,6 +563,10 @@ CELERY_BEAT_SCHEDULE = {
     "reconcile-pending-payments": {
         "task": "apps.payments.tasks.reconcile_pending_payments",
         "schedule": crontab(minute="*/5"),
+    },
+    "retry-pending-invoices": {
+        "task": "apps.payments.tasks.retry_pending_invoices",
+        "schedule": crontab(minute="*/10"),
     },
     "expire-payment-requests": {
         "task": "apps.payments.tasks.expire_payment_requests",

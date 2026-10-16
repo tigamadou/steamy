@@ -3293,6 +3293,53 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/payments/orders/{reference}/invoice/:
+    get:
+      operationId: payments_orders_invoice_retrieve
+      description: |-
+        Réservée au payeur (C12) : l'apprenant bénéficiaire n'y a pas accès (404). PDF pas prêt → 409
+        `PDF_NOT_READY` ; sinon redirection vers une URL présignée de 5 minutes (ADR 0005 §6).
+      summary: Télécharger la facture (payeur seulement, ou invité avec X-Guest-Token)
+      parameters:
+      - in: header
+        name: X-Guest-Token
+        schema:
+          type: string
+        description: Jeton d'une commande invitée, remis à sa création (C10)
+      - in: path
+        name: reference
+        schema:
+          type: string
+          title: Référence
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '302':
+          description: Redirection vers l'URL présignée (5 min)
+        '200':
+          description: Fichier PDF
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/payments/orders/{reference}/payments/:
     post:
       operationId: payments_orders_payments_create
@@ -6190,6 +6237,16 @@ components:
       description: |-
         * `draft` - Brouillon
         * `submitted` - Soumis
+    InvoiceSummary:
+      type: object
+      properties:
+        number:
+          type: string
+        pdfStatus:
+          $ref: '#/components/schemas/PdfStatusEnum'
+      required:
+      - number
+      - pdfStatus
     Kit:
       type: object
       properties:
@@ -7317,8 +7374,9 @@ components:
       - null
     Order:
       type: object
-      description: 'Commande vue par son payeur (parent ou invité) : avec l''adresse
-        de livraison et les Kit Codes (C10).'
+      description: |-
+        Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison, les Kit Codes (C10) et la facture
+        (C12, `GET …/invoice/` quand `pdfStatus` vaut `ready`).
       properties:
         reference:
           type: string
@@ -7395,6 +7453,11 @@ components:
           items:
             $ref: '#/components/schemas/KitCode'
           readOnly: true
+        invoice:
+          allOf:
+          - $ref: '#/components/schemas/InvoiceSummary'
+          nullable: true
+          readOnly: true
       required:
       - beneficiary
       - createdAt
@@ -7402,6 +7465,7 @@ components:
       - deliveryAddress
       - deliveryZone
       - expiresAt
+      - invoice
       - items
       - kind
       - kitCodes
@@ -7447,8 +7511,9 @@ components:
       - kind
     OrderCreated:
       type: object
-      description: 'Commande vue par son payeur (parent ou invité) : avec l''adresse
-        de livraison et les Kit Codes (C10).'
+      description: |-
+        Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison, les Kit Codes (C10) et la facture
+        (C12, `GET …/invoice/` quand `pdfStatus` vaut `ready`).
       properties:
         reference:
           type: string
@@ -7525,6 +7590,11 @@ components:
           items:
             $ref: '#/components/schemas/KitCode'
           readOnly: true
+        invoice:
+          allOf:
+          - $ref: '#/components/schemas/InvoiceSummary'
+          nullable: true
+          readOnly: true
         guestToken:
           type: string
           readOnly: true
@@ -7539,6 +7609,7 @@ components:
       - deliveryZone
       - expiresAt
       - guestToken
+      - invoice
       - items
       - kind
       - kitCodes
