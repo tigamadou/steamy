@@ -159,6 +159,9 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > Les notes des valeurs saisies (`note`) sont renvoyées telles quelles à l'enregistrement, faute de champ dans la
   > maquette. La modale de confirmation reprend `Modal` du design system (anneau de focus du bouton de fermeture
   > en primaire, seul écart au monochrome).
+  > La lecture seule de WAD05 dérive du statut serveur à chaque rendu : Next conserve l'état d'une route déjà visitée
+  > (`cacheComponents`), un état local initialisé une fois restait éditable après la soumission. En-tête du
+  > back-office : actions repliables à 360 px (trois actions sur WAD02).
 - [ ] **Critères de fin du lot 6**
   - [ ] WAD01-WAD05 conformes à la spec et à la définition de « terminé », monochrome sans `--primary-*`, accessibles, responsive, sans donnée en dur
   - [ ] WAD06-WAD14 couverts par l'admin Django (colonnes, filtres, recherches, actions, inlines de §5.14), sans élément de « À ne pas porter », thème monochrome, admin en français

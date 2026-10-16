@@ -173,6 +173,13 @@ describe("WAD05 · Saisie des indicateurs manuels", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(message);
   });
 
+  it("passe en lecture seule quand le serveur renvoie le rapport soumis, même déjà affiché", () => {
+    const { rerender } = renderForm();
+    expect(screen.getByLabelText("Lesquels ?")).toBeEnabled();
+    rerender(<ManualEntryForm period="2026-t4" label="T4 2026" locked rows={MANUAL} />);
+    expect(screen.getByLabelText("Lesquels ?")).toBeDisabled();
+  });
+
   it("est en lecture seule une fois le rapport soumis (D74)", () => {
     renderForm({ locked: true });
     expect(screen.getByLabelText("Financements reçus (FCFA)")).toBeDisabled();

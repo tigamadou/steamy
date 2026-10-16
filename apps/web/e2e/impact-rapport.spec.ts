@@ -35,12 +35,12 @@ test("6.9 Finance saisit, valide, relit et soumet un rapport trimestriel", async
 
   // Valider : les indicateurs vides sont signalés, puis la saisie complète est confirmée
   await page.getByRole("button", { name: "Valider la saisie" }).click();
-  await expect(page.getByRole("alert")).toContainText("restent à renseigner");
+  await expect(page.getByRole("alert").filter({ hasText: "restent à renseigner" })).toBeVisible();
   for (const select of await form.locator("select").all()) await select.selectOption("non");
   for (const textarea of await form.locator("textarea").all()) await textarea.fill("Aucun");
   for (const input of await form.locator("input").all()) await input.fill("5");
   await page.getByRole("button", { name: "Valider la saisie" }).click();
-  await expect(page.getByRole("status")).toContainText("Saisie validée");
+  await expect(page.getByRole("status").filter({ hasText: "Saisie validée" })).toBeVisible();
 
   const entry = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(entry.violations).toEqual([]);

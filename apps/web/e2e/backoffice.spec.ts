@@ -89,6 +89,7 @@ test("6.6 et 6.7 ouvrent WAD01 au groupe Support, « À traiter » vers l'admin 
   // 6.9 : la saisie du rapport trimestriel est refusée de même
   await page.goto("/backoffice/impact/rapports/2026-t4/saisie");
   await expect(page).toHaveURL(`${BASE_URL}/backoffice/acces-refuse`);
+  await expect(page.getByRole("heading", { level: 1, name: "Accès refusé" })).toBeVisible();
 
   await openMenu(page);
   await page.getByRole("button", { name: "Se déconnecter" }).click();

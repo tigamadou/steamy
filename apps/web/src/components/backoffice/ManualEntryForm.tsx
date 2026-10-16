@@ -69,7 +69,10 @@ export function ManualEntryForm({ period, label, locked, rows }: ManualEntryForm
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [sending, setSending] = useState(false);
-  const [readOnly, setReadOnly] = useState(locked);
+  // Verrouillé par le serveur (prop, relue après soumission) ou par un `REPORT_LOCKED` reçu ici. Dérivé de la prop :
+  // Next conserve l'état d'une route déjà visitée (cacheComponents), un état initialisé une fois resterait périmé.
+  const [lockedHere, setLockedHere] = useState(false);
+  const readOnly = locked || lockedHere;
 
   const known = new Set(ENTRY_CARDS.flatMap((card) => card.groups));
   const cards = [
@@ -121,7 +124,7 @@ export function ManualEntryForm({ period, label, locked, rows }: ManualEntryForm
       return;
     }
     if (error.code === "REPORT_LOCKED") {
-      setReadOnly(true);
+      setLockedHere(true);
       setFeedback({ tone: "error", text: "Ce rapport a été soumis : la saisie n'est plus modifiable." });
       router.refresh();
       return;
