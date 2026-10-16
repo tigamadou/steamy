@@ -149,3 +149,18 @@ def test_admin_and_name():
     verified_client(client, is_superuser=True)  # session vérifiée par TOTP (WAD15)
     assert client.get(reverse("admin:shop_kit_changelist")).status_code == 200
     assert client.get(reverse("admin:shop_kit_change", args=[kit.pk])).status_code == 200
+
+
+def test_delivery_zones_are_public_and_filtered_by_country():
+    from .factories import DeliveryZoneFactory
+
+    zone = DeliveryZoneFactory(fee=1500, delay_label="24 h")
+    DeliveryZoneFactory(country_id="TG")
+    DeliveryZoneFactory(active=False)
+    resp = APIClient().get("/api/shop/delivery-zones/", {"country": "bj"})
+    assert resp.status_code == 200
+    assert resp.json() == [
+        {"id": zone.pk, "country": "BJ", "name": zone.name, "fee": 1500, "delayLabel": "24 h"}
+    ]
+    assert len(APIClient().get("/api/shop/delivery-zones/").json()) == 2
+    assert APIClient().get("/api/shop/delivery-zones/", {"country": "BEN"}).status_code == 400

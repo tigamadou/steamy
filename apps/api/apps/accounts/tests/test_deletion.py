@@ -30,6 +30,7 @@ from apps.accounts.tests.factories import (
 from apps.core.models import AuditLog
 from apps.notifications.models import Notification
 from apps.payments.models import Invoice, Order
+from apps.payments.tests.factories import OrderFactory
 from apps.referentials.models import Disability, Locality, Relationship
 
 pytestmark = pytest.mark.django_db
@@ -327,7 +328,7 @@ def test_parent_is_anonymized_and_invoices_are_kept(parent):
     profile.profession = "Comptable"
     profile.save()
     phone = parent.phone
-    order = Order.objects.create(user=parent, total=15000, reference="ORDER-1")
+    order = OrderFactory(payer=parent, beneficiary=None, kind=Order.Kind.KIT, items=[], paid=True)
     invoice = Invoice.objects.create(order=order, number="F-2026-0001")
     ConsentRequest.objects.create(
         origin="learner",
@@ -344,6 +345,17 @@ def test_parent_is_anonymized_and_invoices_are_kept(parent):
         expires_at=timezone.now(),
         last_sent_at=timezone.now(),
     )
+    from apps.shop.models import DeliveryAddress, RestockAlert
+    from apps.shop.tests.factories import DeliveryZoneFactory, KitFactory
+
+    DeliveryAddress.objects.create(
+        user=parent,
+        zone=DeliveryZoneFactory(),
+        recipient_name="Marie",
+        city="Cotonou",
+        address_line="Rue 12",
+    )
+    RestockAlert.objects.create(kit=KitFactory(), user=parent, phone=phone)
     as_user(parent).post(ME, {}, format="json")
     DeletionRequest.objects.update(scheduled_for=timezone.now())
     call_command("anonymize_due_accounts")
@@ -353,8 +365,10 @@ def test_parent_is_anonymized_and_invoices_are_kept(parent):
     assert profile.email is None and profile.profession == ""
     assert not ConsentRequest.objects.filter(parent_phone=phone).exists()
     assert not OtpChallenge.objects.filter(phone=phone).exists()
+    assert not DeliveryAddress.objects.filter(user=parent).exists()
+    assert not RestockAlert.objects.exists()
     invoice.refresh_from_db()
-    assert invoice.order.user == parent and invoice.number == "F-2026-0001"
+    assert invoice.order.payer == parent and invoice.number == "F-2026-0001"
     # le numéro est libéré
     assert ParentFactory(phone=phone).phone == phone
 
