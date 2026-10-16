@@ -12,6 +12,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 vi.mock("@/lib/api-browser", () => ({ getBrowserApi: () => getBrowserApi() }));
 
 const { ManualEntryForm, toField, toValue } = await import("./ManualEntryForm");
+const { createApiClient } = await import("@steamy/api-client");
 
 const MANUAL = REPORT.rows.filter((row) => row.source === "manual");
 const ok = () => ({ response: new Response(null, { status: 200 }) });
@@ -160,6 +161,14 @@ describe("WAD05 · Saisie des indicateurs manuels", () => {
     ["groupe refusé", async () => fail(403, { code: "PERMISSION_DENIED", message: "" }), "Votre groupe ne peut pas saisir"],
     ["panne", async () => fail(500, { code: "SERVER_ERROR", message: "" }), "Une erreur est survenue de notre côté"],
     ["réponse vide", async () => ({ response: new Response(null, { status: 502 }) }), "Une erreur est survenue de notre côté"],
+    [
+      "page HTML d'un proxy (via openapi-fetch)",
+      () =>
+        createApiClient("http://api.test", {
+          fetch: async () => new Response("<html>Bad Gateway</html>", { status: 502, headers: { "Content-Type": "text/html" } }),
+        }).PATCH("/api/backoffice/impact-reports/{period}/values/", { params: { path: { period: "2026-t4" } }, body: { values: [] } }),
+      "Une erreur est survenue de notre côté",
+    ],
     [
       "réseau",
       async () => {

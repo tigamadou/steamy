@@ -3,6 +3,8 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
+import { routes } from "@/lib/routes";
+
 import { registerOf, STATE_ACTIONS } from "./messages";
 import { OfflineState } from "./presets";
 
@@ -72,7 +74,13 @@ export function OfflineGate() {
       aria-labelledby="hors-ligne-titre"
       className="fixed inset-0 z-50 flex overflow-y-auto bg-bg outline-none"
     >
-      <OfflineState register={registerOf(pathname)} onRetry={retry} notice={notice} titleId="hors-ligne-titre" />
+      <OfflineState
+        register={registerOf(pathname)}
+        tone={pathname?.startsWith(routes.backoffice.home) ? "ink" : "brand"}
+        onRetry={retry}
+        notice={notice}
+        titleId="hors-ligne-titre"
+      />
     </div>
   );
 }

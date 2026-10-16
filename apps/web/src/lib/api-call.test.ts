@@ -3,14 +3,38 @@ import { describe, expect, it, vi } from "vitest";
 const getBrowserApi = vi.fn();
 vi.mock("@/lib/api-browser", () => ({ getBrowserApi }));
 
-const { apiCall, errorMessage } = await import("./api-call");
+const { apiCall, apiErrorBody, errorMessage } = await import("./api-call");
+const { createApiClient } = await import("@steamy/api-client");
+
+/** Client openapi-fetch réel dont le réseau renvoie une page HTML de proxy (502). */
+const htmlGateway = () =>
+  createApiClient("http://api.test", {
+    fetch: async () => new Response("<html><body>Bad Gateway</body></html>", { status: 502, headers: { "Content-Type": "text/html" } }),
+  });
 
 const respond = (status: number, body: object = {}, headers: Record<string, string> = {}) => async () => ({
   ...body,
   response: new Response(null, { status, headers }),
 });
 
+describe("apiErrorBody", () => {
+  it("ne retient que les corps d'erreur de l'API", () => {
+    expect(apiErrorBody({ code: "REPORT_LOCKED", message: "Verrouillé." })).toEqual({ code: "REPORT_LOCKED", message: "Verrouillé." });
+    expect(apiErrorBody("<html>Bad Gateway</html>")).toBeUndefined();
+    expect(apiErrorBody(null)).toBeUndefined();
+    expect(apiErrorBody({ detail: "x" })).toBeUndefined();
+    expect(apiErrorBody(undefined)).toBeUndefined();
+  });
+});
+
 describe("apiCall", () => {
+  it("traite une page HTML de proxy (502, via openapi-fetch) comme une panne du serveur", async () => {
+    getBrowserApi.mockResolvedValue({});
+    const api = htmlGateway();
+    const result = await apiCall(() => api.GET("/api/accounts/me/"));
+    expect(result).toMatchObject({ ok: false, code: "SERVER_ERROR", message: "", fields: {} });
+  });
+
   it("renvoie les données d'une réponse réussie, y compris 204", async () => {
     getBrowserApi.mockResolvedValue({});
     await expect(apiCall(respond(200, { data: { a: 1 } }))).resolves.toEqual({ ok: true, data: { a: 1 } });
