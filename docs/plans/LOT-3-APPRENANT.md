@@ -77,7 +77,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.3c, 3.4 · Prérequis : API-1 et 
   - [x] Brouillon des réponses en `sessionStorage`, envoi unique, protection contre la double soumission
   - [x] Tests unitaires : seuil affiché = seuil de l'API, compte à rebours, aucune bonne réponse dans le DOM avant soumission
   - [x] Parcours Playwright P1 (WJ07 et le PDF ajoutés en 3.3c)
-- [x] **3.3c** Certification (requiert API-L3a ; ticket via API-L3b) · `feature/lot3-certification` · PR #—
+- [x] **3.3c** Certification (requiert API-L3a ; ticket via API-L3b) · `feature/lot3-certification` · PR #96
   - [x] WJ07 certification obtenue (PDF avec état « Préparation… », ticket derrière le drapeau `events` jusqu'à 3.8)
   - [x] WJ09 certification non obtenue (projets ou missions restants)
   - [x] Test unitaire `CertificateView` : réponse d'API affichée telle quelle
