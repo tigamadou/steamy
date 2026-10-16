@@ -86,14 +86,14 @@ export function ProjectAccordion({ courseSlug, project, next, expanded }: Projec
           <Link
             href={open ? routes.learner.course(courseSlug) : `${routes.learner.course(courseSlug)}?projet=${project.id}`}
             scroll={false}
-            aria-expanded={open}
-            aria-controls={panelId}
             className={cx(
               headClasses,
               "rounded-xl hover:bg-ink-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary-500",
             )}
           >
             {head}
+            {/* Lien (le dépliage est porté par l'URL, `?projet=`) : son effet est dit en clair, sans `aria-expanded` */}
+            <span className="sr-only">{open ? " : masquer les étapes" : " : afficher les étapes"}</span>
           </Link>
         )}
       </h3>

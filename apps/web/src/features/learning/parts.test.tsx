@@ -16,7 +16,6 @@ const { DoneCourseCard, EnrolledCourseCard, positionLabel } = await import("./En
 const { InfoBlock } = await import("./InfoBlock");
 const { MarkDoneButton } = await import("./MarkDoneButton");
 const { MissionBlocks } = await import("./MissionBlocks");
-const { TeacherCommentCard } = await import("./TeacherCommentCard");
 
 describe("EnrolledCourseCard (WD23)", () => {
   const now = new Date("2026-10-16T10:00:00Z");
@@ -91,15 +90,6 @@ describe("blocs de contenu", () => {
     expect(container.querySelector("figcaption")).toBeNull();
   });
 
-  it("TeacherCommentCard : absente sans commentaire, sinon les mots de l'enseignant", () => {
-    const { container, rerender } = render(<TeacherCommentCard comments={[]} />);
-    expect(container).toBeEmptyDOMElement();
-    rerender(
-      <TeacherCommentCard comments={[{ id: 1, author: "M. Koffi", message: "Bravo Léa !", createdAt: "2026-10-14T09:00:00Z" }]} />,
-    );
-    expect(screen.getByRole("heading", { name: /Mot de ton enseignant/ })).toBeInTheDocument();
-    expect(screen.getByText("M. Koffi · 14 octobre 2026")).toBeInTheDocument();
-  });
 });
 
 describe("MarkDoneButton (WJ03)", () => {

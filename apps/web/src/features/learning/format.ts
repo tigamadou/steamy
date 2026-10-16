@@ -1,7 +1,7 @@
 // Formats propres à la pédagogie : durées et dates relatives, lues dans l'API et jamais calculées en règle.
 
-const DAY_MS = 86_400_000;
-const DAY_KEY = new Intl.DateTimeFormat("fr-CA", { timeZone: "Africa/Porto-Novo" });
+import { calendarDaysBetween } from "@/lib/dates";
+
 const SHORT_DATE = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "Africa/Porto-Novo" });
 
 /**
@@ -16,14 +16,9 @@ export function formatHours(hours: number): string {
   return `${hours} h`;
 }
 
-/** Jour calendaire au fuseau de la plateforme (C16), en millisecondes à minuit UTC. */
-function dayOf(date: Date): number {
-  return Date.parse(`${DAY_KEY.format(date)}T00:00:00Z`);
-}
-
 /** Dernière activité : « Aujourd'hui », « Hier », « Il y a 4 jours », puis « 3 oct. ». */
 export function formatLastActivity(isoInstant: string, now: Date = new Date()): string {
-  const days = Math.round((dayOf(now) - dayOf(new Date(isoInstant))) / DAY_MS);
+  const days = calendarDaysBetween(new Date(isoInstant), now);
   if (days <= 0) return "Aujourd'hui";
   if (days === 1) return "Hier";
   if (days < 7) return `Il y a ${days} jours`;

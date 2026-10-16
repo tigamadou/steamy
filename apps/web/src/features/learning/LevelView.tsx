@@ -13,11 +13,17 @@ import { LockedContentState } from "./LockedContentState";
 // WJ02 · Niveau : vidéo d'introduction (si fournie), résumé, missions et entrée dans la mission à faire.
 export async function LevelView({ slug, levelId }: { slug: string; levelId: number }) {
   const api = await getServerApi();
-  const content = readContent(await api.GET("/api/learning/levels/{id}/", { params: { path: { id: levelId } } }));
+  const [levelResult, treeResult] = await Promise.all([
+    api.GET("/api/learning/levels/{id}/", { params: { path: { id: levelId } } }),
+    api.GET("/api/learning/enrollments/{course_slug}/tree/", { params: { path: { course_slug: slug } } }),
+  ]);
+  const content = readContent(levelResult);
   if (!content.ok) return <LockedContentState code={content.code} courseSlug={slug} />;
   const level = content.data;
   const { course } = level;
-  const todo = level.missions.find((mission) => mission.state === "available");
+  // Mission en cours : l'étape suivante renvoyée par l'API (`next`), jamais déduite des états
+  const next = treeResult.data?.next;
+  const todo = next?.type === "mission" ? level.missions.find((mission) => mission.id === next.id) : undefined;
   const started = level.missions.some((mission) => mission.state === "done");
   return (
     <div className="flex flex-col gap-5">
