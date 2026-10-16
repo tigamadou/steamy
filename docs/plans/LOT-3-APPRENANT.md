@@ -142,7 +142,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6 (après API-L3b) · Prérequis 
   - [ ] Parcours Playwright P4
 - [ ] **3.7c** Demande de kit au parent (requiert API-L3b) · `feature/lot3-boutique-demande-parent`
   - [ ] WK08 demande de kit au parent (`/apprenant/demandes/[id]`, `kind=kit`)
-- [x] **3.8** Steamy Events côté apprenant (requiert API-L3b, `events`) · `feature/lot3-steamy-events` · PR #PR38
+- [x] **3.8** Steamy Events côté apprenant (requiert API-L3b, `events`) · `feature/lot3-steamy-events` · PR #116
   - [x] `WD10` événements et candidatures (ticket libre signalé, C12)
   - [x] `WL23` fiche événement dans le shell (`EventDetail` du lot 1 en h2, `EVENT_FULL`, `EVENT_CLOSED`)
   - [x] `WD11` candidature (`ALREADY_APPLIED`)
