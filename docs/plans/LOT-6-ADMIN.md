@@ -103,7 +103,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   - [x] WAD01 (Next.js) `/backoffice` : hero, 4 `StatCard`, carte échéance (`DeadlineTracker`), liste « À traiter »
   - [x] Branchement API : `GET backoffice/overview/` (entrées « À traiter » filtrées par groupe, `adminPath` fourni par le serveur)
   - [x] Tests Vitest : états vide, chargement, erreur
-  - [x] Test pytest (API-L6) : compteurs sur D2, entrées filtrées par groupe
+  - [x] Test pytest (API-L6) : compteurs sur un jeu de test dédié (D2 non chargé par les tests), entrées filtrées par groupe
   - [x] Playwright : Support clique « Consentements en attente » vers la liste Django filtrée
   > Notes : les pytest de la vue d'ensemble sont livrés par API-L6.4 (`apps/impact/tests/test_api.py`), sur un jeu de
   > test dédié et non sur D2. « À traiter » ne compte encore que les consentements en attente : paiements échoués et
@@ -120,7 +120,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
     - [ ] Boutons « Saisie manuelle » (WAD05) et « Rapport trimestriel » (WAD04) : avec leurs pages, étape 6.9
   - [x] WAD03 (Next.js) `/backoffice/impact/indicateurs/[code]` : statut, valeur, cible, taux d'atteinte, `BarChart` par période, historique, composition (`DonutChart`), définition serveur
   - [x] Branchement API : `backoffice/kpis/?period=` et `kpis/{code}/` ; pas de recalcul du statut côté front ni de tuiles « Activer / Configurer la collecte » (D75)
-  - [x] Tests pytest (API-L6) : valeurs de référence de chaque KPI `auto` sur D2, table de vérité de `kpiStatus`, bornes de période
+  - [x] Tests pytest (API-L6) : valeurs de référence de chaque KPI `auto` sur un jeu de test dédié (D2 non chargé par les tests), table de vérité de `kpiStatus`, bornes de période
   - [x] Tests Vitest : rendu de chaque statut
   - [x] Playwright : Finance change de période et ouvre un indicateur
   > Notes : prérequis vérifiés dans API-L6.4 (`apps/impact/definitions.py`, migration `0002`, tâche nocturne

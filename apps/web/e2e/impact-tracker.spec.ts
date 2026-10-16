@@ -6,6 +6,9 @@ import { API_URL, STAFF, staffLogin } from "./support/staff";
 // LOT-6 · 6.8 Impact Tracker : WAD02 (période dans l'URL, valeurs relues côté serveur) et WAD03 (détail d'un
 // indicateur), par le groupe Finance. Les valeurs dépendent du calcul nocturne : seuls la période, les libellés et
 // la définition renvoyés par l'API sont vérifiés. Un code TOTP ne sert qu'une fois : `staffLogin` attend au besoin.
+// Compte Finance, le groupe visé par le plan : admin-connexion.spec.ts (projet mobile) lui envoie un code faux, et la
+// limitation de django-otp qui s'ensuit (1 s, levée au premier succès) est absorbée par les reprises de `staffLogin`.
+// Super-admin est déjà connecté par cinq tests : il attendrait davantage de fenêtres TOTP.
 
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:3000";
 
