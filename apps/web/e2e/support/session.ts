@@ -35,7 +35,8 @@ export function loginAs(page: Page, role: DemoRole): Promise<void> {
 
 /** Ouvre le tiroir de navigation du shell quand il est replié (écran de moins de 768 px). */
 export async function openShellMenu(page: Page): Promise<void> {
-  const menu = page.getByRole("button", { name: "Ouvrir le menu" });
+  // Masqué (display: none) au-dessus de 768 px : recherché aussi parmi les éléments cachés
+  const menu = page.getByRole("button", { name: "Ouvrir le menu", includeHidden: true });
   await menu.waitFor({ state: "attached" });
   // Un clic arrivé avant l'hydratation serait perdu (ou rejoué après coup) : on attend que React ait pris la main
   await page.waitForFunction(() => {
