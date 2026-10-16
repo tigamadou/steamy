@@ -1,6 +1,7 @@
 import type { Schemas } from "@steamy/api-client";
 import Link from "next/link";
 
+import { Button } from "@/components/ds/Button";
 import { Icon, type IconName } from "@/components/ds/Icon";
 import { adminPathUrl } from "@/lib/backoffice/access";
 import { formatKpiValue, formatShortDate } from "@/lib/backoffice/format";
@@ -13,7 +14,7 @@ import { KpiStatusBadge } from "./KpiStatusBadge";
 import { SectionHead } from "./SectionHead";
 import { StatCard } from "./StatCard";
 import { StatusBadge } from "./StatusBadge";
-import { BUTTON_DARK, CARD, FOCUS, formatNumber } from "./styles";
+import { CARD, FOCUS, formatNumber } from "./styles";
 
 export type OverviewData = Schemas["Overview"];
 type Report = Schemas["ReportDeadline"];
@@ -131,9 +132,9 @@ function ReportCard({ report, canOpen }: { report: Report; canOpen: boolean }) {
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
             {canOpen && (
-              <Link href={routes.backoffice.report(report.period)} className={BUTTON_DARK}>
+              <Button href={routes.backoffice.report(report.period)} variant="ink" size="sm">
                 Ouvrir le rapport
-              </Link>
+              </Button>
             )}
           </div>
         }

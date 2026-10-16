@@ -1,9 +1,7 @@
-import Link from "next/link";
-
 import { AdminContent, AdminHeader } from "@/components/backoffice/AdminHeader";
 import { ImpactReport } from "@/components/backoffice/ImpactReport";
-import { BUTTON_OUTLINE } from "@/components/backoffice/styles";
 import { SubmitReport } from "@/components/backoffice/SubmitReport";
+import { Button } from "@/components/ds/Button";
 import { getServerApi } from "@/lib/api";
 import { PAGE_GROUPS } from "@/lib/backoffice/access";
 import { backofficeData } from "@/lib/backoffice/fetch";
@@ -27,9 +25,9 @@ export default async function ReportPage({ params }: PageProps<"/backoffice/impa
         title="Rapport d'impact trimestriel"
         actions={
           <>
-            <Link href={routes.backoffice.reportEntry(report.period)} className={BUTTON_OUTLINE}>
+            <Button href={routes.backoffice.reportEntry(report.period)} variant="ink-outline" size="sm">
               {draft ? "Saisie manuelle" : "Voir la saisie"}
-            </Link>
+            </Button>
             {draft && (
               <SubmitReport period={report.period} label={report.label} entered={report.entered} total={report.total} />
             )}

@@ -5,13 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { Breadcrumb } from "@/components/ds/Breadcrumb";
+import { Button } from "@/components/ds/Button";
 import { getBrowserApi } from "@/lib/api-browser";
 import { errorMessage } from "@/lib/api-call";
 import { cx } from "@/lib/cx";
 import { routes } from "@/lib/routes";
 
-import { SectionHead } from "./SectionHead";
-import { BUTTON_DARK, BUTTON_OUTLINE, CARD, FOCUS } from "./styles";
+import { CARD, FOCUS } from "./styles";
 
 type Row = Schemas["ReportRow"];
 type Unit = Row["unit"];
@@ -84,13 +85,15 @@ export function ManualEntryForm({ period, label, locked, rows }: ManualEntryForm
     setSending(true);
     setFeedback(null);
     setErrors({});
-    const body = { values: rows.map((row) => ({ code: row.code, value: toValue(values[row.code], row.unit), note: row.note })) };
+    const body = {
+      values: rows.map((row) => ({ code: row.code, value: toValue(values[row.code], row.unit), note: row.note })),
+    };
     let outcome: { ok: boolean; status: number; error?: Schemas["Error"] };
     try {
       const api = await getBrowserApi();
       const { error, response } = await api.PATCH("/api/backoffice/impact-reports/{period}/values/", {
         params: { path: { period } },
-        body: body as never,
+        body,
       });
       outcome = { ok: response.ok, status: response.status, error };
     } catch {
@@ -118,8 +121,9 @@ export function ManualEntryForm({ period, label, locked, rows }: ManualEntryForm
       return;
     }
 
-    const error = outcome.error as Schemas["Error"];
-    if (error.code === "OTP_REQUIRED" || outcome.status === 401) {
+    // Réponse sans corps (proxy en 502…) : traitée comme une panne du serveur
+    const error = outcome.error ?? { code: "SERVER_ERROR" as const, message: "" };
+    if (outcome.status === 401 || error.code === "OTP_REQUIRED") {
       router.refresh();
       return;
     }
@@ -159,28 +163,14 @@ export function ManualEntryForm({ period, label, locked, rows }: ManualEntryForm
 
   return (
     <form onSubmit={onSubmit} noValidate className="mx-auto flex max-w-220 flex-col gap-4">
-      <nav aria-label="Fil d'Ariane" className="text-[13px] font-bold text-ink-600">
-        <ol className="m-0 flex list-none flex-wrap items-center gap-1.5 p-0">
-          <li>
-            <Link href={routes.backoffice.impact} className={cx("rounded-sm hover:text-ink-900 hover:underline", FOCUS)}>
-              Impact Tracker
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li>
-            <Link
-              href={routes.backoffice.report(period)}
-              className={cx("rounded-sm hover:text-ink-900 hover:underline", FOCUS)}
-            >
-              Rapport {label}
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li aria-current="page" className="font-black text-ink-900">
-            Saisie manuelle
-          </li>
-        </ol>
-      </nav>
+      <Breadcrumb
+        tone="ink"
+        items={[
+          { label: "Impact Tracker", href: routes.backoffice.impact },
+          { label: `Rapport ${label}`, href: routes.backoffice.report(period) },
+          { label: "Saisie manuelle" },
+        ]}
+      />
 
       {readOnly && (
         <p className={`${CARD} m-0 bg-ink-50 text-sm font-semibold text-ink-700`}>
@@ -194,9 +184,8 @@ export function ManualEntryForm({ period, label, locked, rows }: ManualEntryForm
         <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
           {cards.map((card) => (
             <fieldset key={card.title} disabled={readOnly} className={`${CARD} m-0 min-w-0`}>
-              <legend className="sr-only">{card.title}</legend>
-              <SectionHead title={card.title} />
-              <div className="flex flex-col gap-3.5">
+              <legend className="float-left mb-3.5 w-full p-0 text-[15px] font-extrabold text-ink-900">{card.title}</legend>
+              <div className="clear-both flex flex-col gap-3.5">
                 {card.rows.map((row) => (
                   <EntryField
                     key={row.code}
@@ -212,36 +201,30 @@ export function ManualEntryForm({ period, label, locked, rows }: ManualEntryForm
         </div>
       )}
 
-      <div aria-live="polite" className="min-h-0">
-        {feedback && (
-          <p
-            role={feedback.tone === "error" ? "alert" : "status"}
-            className={cx("m-0 text-sm font-bold", feedback.tone === "error" ? "text-error-700" : "text-ink-800")}
-          >
-            {feedback.text}{" "}
-            {feedback.complete && (
-              <Link href={routes.backoffice.report(period)} className={cx("rounded-sm underline", FOCUS)}>
-                Revoir le rapport avant de le soumettre
-              </Link>
-            )}
-          </p>
+      {/* Régions live présentes dès le rendu : leur contenu, et non leur apparition, est annoncé */}
+      <p role="status" className="m-0 text-sm font-bold text-ink-800 empty:hidden">
+        {feedback?.tone === "info" && feedback.text}
+        {feedback?.complete && (
+          <>
+            {" "}
+            <Link href={routes.backoffice.report(period)} className={cx("rounded-sm underline", FOCUS)}>
+              Revoir le rapport avant de le soumettre
+            </Link>
+          </>
         )}
-      </div>
+      </p>
+      <p role="alert" className="m-0 text-sm font-bold text-error-700 empty:hidden">
+        {feedback?.tone === "error" && feedback.text}
+      </p>
 
       {!readOnly && cards.length > 0 && (
         <div className="flex flex-wrap justify-end gap-2.5">
-          <button type="submit" className={BUTTON_OUTLINE} disabled={sending}>
+          <Button type="submit" variant="ink-outline" size="sm" disabled={sending}>
             Enregistrer le brouillon
-          </button>
-          <button
-            type="button"
-            className={BUTTON_DARK}
-            disabled={sending}
-            aria-busy={sending}
-            onClick={() => void save(true)}
-          >
+          </Button>
+          <Button variant="ink" size="sm" loading={sending} onClick={() => void save(true)}>
             Valider la saisie
-          </button>
+          </Button>
         </div>
       )}
     </form>
@@ -294,7 +277,7 @@ function EntryField({
         <input
           {...common}
           type="text"
-          inputMode={row.unit === "fcfa" ? "decimal" : "numeric"}
+          inputMode="decimal"
           autoComplete="off"
           onChange={(event) => onChange(event.target.value)}
         />

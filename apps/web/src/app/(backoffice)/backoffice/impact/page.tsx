@@ -1,9 +1,7 @@
-import Link from "next/link";
-
 import { AdminContent, AdminHeader } from "@/components/backoffice/AdminHeader";
 import { ImpactDashboard } from "@/components/backoffice/ImpactDashboard";
 import { PeriodSwitch } from "@/components/backoffice/PeriodSwitch";
-import { BUTTON_DARK, BUTTON_OUTLINE } from "@/components/backoffice/styles";
+import { Button } from "@/components/ds/Button";
 import { getServerApi } from "@/lib/api";
 import { PAGE_GROUPS } from "@/lib/backoffice/access";
 import { backofficeData } from "@/lib/backoffice/fetch";
@@ -30,12 +28,12 @@ export default async function ImpactPage({ searchParams }: PageProps<"/backoffic
         title="Impact Tracker"
         actions={
           <>
-            <Link href={routes.backoffice.reportEntry(currentQuarterKey())} className={BUTTON_OUTLINE}>
+            <Button href={routes.backoffice.reportEntry(currentQuarterKey())} variant="ink-outline" size="sm">
               Saisie manuelle
-            </Link>
-            <Link href={routes.backoffice.reports} className={BUTTON_DARK}>
+            </Button>
+            <Button href={routes.backoffice.reports} variant="ink" size="sm">
               Rapport trimestriel
-            </Link>
+            </Button>
             <PeriodSwitch value={period.id} />
           </>
         }

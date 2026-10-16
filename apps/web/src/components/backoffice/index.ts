@@ -23,5 +23,4 @@ export { CompletenessBar, completeness } from "./CompletenessBar";
 export { ImpactReport, type ImpactReportData } from "./ImpactReport";
 export { ENTRY_CARDS, ManualEntryForm, toField, toValue, type ManualEntryFormProps } from "./ManualEntryForm";
 export { SubmitReport, type SubmitReportProps } from "./SubmitReport";
-export { BUTTON_DARK, BUTTON_OUTLINE } from "./styles";
 export { ScrollRegion, type ScrollRegionProps } from "./ScrollRegion";

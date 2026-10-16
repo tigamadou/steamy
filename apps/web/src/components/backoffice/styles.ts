@@ -12,11 +12,3 @@ const NUMBER = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
 export function formatNumber(value: number): string {
   return NUMBER.format(value);
 }
-
-const BUTTON_BASE = `inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-[10px] px-3.5 py-2 text-[13px] font-extrabold no-underline transition-colors ${FOCUS}`;
-
-/** Lien-bouton principal du back-office, en encre (`ADM_DARK_BTN`). */
-export const BUTTON_DARK = `${BUTTON_BASE} border-[1.5px] border-ink-900 bg-ink-900 text-surface hover:bg-ink-800`;
-
-/** Lien-bouton secondaire, à filet. */
-export const BUTTON_OUTLINE = `${BUTTON_BASE} border-[1.5px] border-ink-200 bg-surface text-ink-900 hover:bg-ink-50`;

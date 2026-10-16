@@ -153,12 +153,13 @@ describe("WAD05 · Saisie des indicateurs manuels", () => {
     renderForm();
     await userEvent.click(screen.getByRole("button", { name: "Enregistrer le brouillon" }));
     expect(refresh).toHaveBeenCalled();
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toBeEmptyDOMElement();
   });
 
   it.each([
     ["groupe refusé", async () => fail(403, { code: "PERMISSION_DENIED", message: "" }), "Votre groupe ne peut pas saisir"],
     ["panne", async () => fail(500, { code: "SERVER_ERROR", message: "" }), "Une erreur est survenue de notre côté"],
+    ["réponse vide", async () => ({ response: new Response(null, { status: 502 }) }), "Une erreur est survenue de notre côté"],
     [
       "réseau",
       async () => {

@@ -154,11 +154,11 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > `generate_report_export`) ne sont pas encore livrés par API-L6.4 (reprise prévue après API-L3a.4) : pas de bouton
   > d'export tant que l'endpoint manque. « Valider la saisie » (hypothèse de travail, sans champ serveur) : enregistre,
   > puis signale chaque indicateur manuel encore vide ; « Soumettre » ne l'exige pas (l'API ne l'impose pas) mais la
-  > modale annonce les indicateurs manquants. Carte « Indicateurs non collectés » omise : les institutions sont
+  > modale annonce les indicateurs manquants. Carte « Indicateurs non collectés » omise (SPEC-ECRANS-3 mise à jour) : les institutions sont
   > calculées (D75). WAD01 : « Ouvrir le rapport » ajouté, réservé comme l'Impact Tracker à Finance et Super-admin.
   > Les notes des valeurs saisies (`note`) sont renvoyées telles quelles à l'enregistrement, faute de champ dans la
-  > maquette. La modale de confirmation reprend `Modal` du design system (anneau de focus du bouton de fermeture
-  > en primaire, seul écart au monochrome).
+  > maquette. Monochrome : la modale, les boutons et le fil d'Ariane passent par les variantes « encre » du design
+  > system (`Modal tone="ink"`, `Button variant="ink" | "ink-outline"`, `Breadcrumb tone="ink"`).
   > La lecture seule de WAD05 dérive du statut serveur à chaque rendu : Next conserve l'état d'une route déjà visitée
   > (`cacheComponents`), un état local initialisé une fois restait éditable après la soumission. En-tête du
   > back-office : actions repliables à 360 px (trois actions sur WAD02).
@@ -418,7 +418,7 @@ valeurs rechargées, ouvre un indicateur.
 | --- | --- |
 | Routes | `/backoffice/impact/rapports` → trimestre courant ; `/backoffice/impact/rapports/[periode]` (WAD04) ; `…/[periode]/saisie` (WAD05). Groupes : Finance, Super-admin |
 | WAD04 | En-tête (trimestre, complétude, échéances) ; `DataTable` Indicateur / Du / Au / Réponse / Statut / Source (plages serveur) ; « Exporter CSV » / « Exporter PDF » ; « Soumettre » (modale de confirmation) → rapport verrouillé, statut « Soumis » |
-| WAD05 | Groupes Financement · Produit & innovation · Satisfaction & emploi ; champs typés selon `unit` (nombre, oui/non, texte) ; « Enregistrer le brouillon » ; « Valider la saisie » ; lecture seule si soumis (D74). Carte « Indicateurs non collectés » : vide en v1 si les institutions sont calculées (voir Points ouverts) |
+| WAD05 | Groupes Financement · Produit & innovation · Satisfaction & emploi ; champs typés selon `unit` (nombre, oui/non, texte) ; « Enregistrer le brouillon » ; « Valider la saisie » ; lecture seule si soumis (D74). Pas de carte « Indicateurs non collectés » : aucun KPI n'est indisponible en v1 (institutions calculées, D75) |
 | Exports | `POST …/exports/ { format }` → `GET backoffice/exports/{id}/` interrogé jusqu'à `ready` (pastille `Loader` verbalisée), puis lien de téléchargement présigné ; notification à la fin (D74). PDF par WeasyPrint (déjà dans `requirements.txt`) |
 | API | `GET backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/`, `POST …/exports/`, `GET backoffice/exports/{id}/` (§7.8) |
 | Erreurs | `REPORT_LOCKED` (saisie après soumission), `VALIDATION_ERROR` par champ, `PERMISSION_DENIED`, `OTP_REQUIRED` (renvoi vers WAD15) |

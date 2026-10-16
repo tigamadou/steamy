@@ -1,9 +1,8 @@
 import type { Schemas } from "@steamy/api-client";
-import Link from "next/link";
 
+import { Breadcrumb } from "@/components/ds/Breadcrumb";
 import { formatInstant } from "@/lib/dates";
 import { formatKpiValue, formatShortDate } from "@/lib/backoffice/format";
-import { cx } from "@/lib/cx";
 import { routes } from "@/lib/routes";
 
 import { CompletenessBar } from "./CompletenessBar";
@@ -13,7 +12,7 @@ import { KpiStatusBadge } from "./KpiStatusBadge";
 import { REPORT_STATUS, reportSteps } from "./Overview";
 import { SourceTag } from "./SourceTag";
 import { StatusBadge } from "./StatusBadge";
-import { CARD, FOCUS } from "./styles";
+import { CARD } from "./styles";
 
 export type ImpactReportData = Schemas["ImpactReport"];
 type Row = ImpactReportData["rows"][number];
@@ -26,19 +25,10 @@ export function ImpactReport({ report }: { report: ImpactReportData }) {
   const status = REPORT_STATUS[report.status];
   return (
     <div className="flex flex-col gap-4">
-      <nav aria-label="Fil d'Ariane" className="text-[13px] font-bold text-ink-600">
-        <ol className="m-0 flex list-none flex-wrap items-center gap-1.5 p-0">
-          <li>
-            <Link href={routes.backoffice.impact} className={cx("rounded-sm hover:text-ink-900 hover:underline", FOCUS)}>
-              Impact Tracker
-            </Link>
-          </li>
-          <li aria-hidden>›</li>
-          <li aria-current="page" className="font-black text-ink-900">
-            Rapport {report.label}
-          </li>
-        </ol>
-      </nav>
+      <Breadcrumb
+        tone="ink"
+        items={[{ label: "Impact Tracker", href: routes.backoffice.impact }, { label: `Rapport ${report.label}` }]}
+      />
 
       <section aria-labelledby="report-title" className={CARD}>
         <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[1.4fr_1fr]">

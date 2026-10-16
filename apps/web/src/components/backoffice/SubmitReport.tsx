@@ -3,10 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Button } from "@/components/ds/Button";
 import { Modal } from "@/components/ds/Modal";
 import { apiCall, errorMessage } from "@/lib/api-call";
 
-import { BUTTON_DARK, BUTTON_OUTLINE } from "./styles";
 
 export type SubmitReportProps = {
   /** Trimestre, au format de l'API (`2026-t4`). */
@@ -48,21 +48,22 @@ export function SubmitReport({ period, label, entered, total }: SubmitReportProp
 
   return (
     <>
-      <button type="button" className={BUTTON_DARK} onClick={() => setOpen(true)}>
+      <Button variant="ink" size="sm" onClick={() => setOpen(true)}>
         Soumettre
-      </button>
+      </Button>
       <Modal
         open={open}
         onClose={() => setOpen(false)}
+        tone="ink"
         title={`Soumettre le rapport ${label} ?`}
         actions={
           <>
-            <button type="button" className={BUTTON_OUTLINE} onClick={() => setOpen(false)}>
+            <Button variant="ink-outline" size="sm" onClick={() => setOpen(false)}>
               Annuler
-            </button>
-            <button type="button" className={BUTTON_DARK} onClick={submit} disabled={sending} aria-busy={sending}>
-              {sending ? "Soumission…" : "Soumettre le rapport"}
-            </button>
+            </Button>
+            <Button variant="ink" size="sm" onClick={submit} loading={sending}>
+              Soumettre le rapport
+            </Button>
           </>
         }
       >

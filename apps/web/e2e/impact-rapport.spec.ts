@@ -7,6 +7,8 @@ import { API_URL, STAFF, staffLogin } from "./support/staff";
 // enregistre un brouillon (WAD05), valide la saisie, relit le rapport (WAD04), le soumet ; la saisie passe en lecture
 // seule (D74). La soumission est définitive : chaque projet travaille sur son propre trimestre passé, pour ne pas
 // verrouiller celui du jour ni celui de l'autre projet. Exports CSV / PDF : en attente de leurs endpoints (API-L6.4).
+// Rejouable une seule fois par base : un rapport soumis ne se rouvre pas (D74, aucun endpoint ne le permet). En CI la
+// base est neuve ; en local, repartir d'une pile vierge (`make e2e-down` puis `make e2e`).
 
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:3000";
 const QUARTERS: Record<string, string> = { bureau: "2025-t3", mobile: "2025-t4" };
