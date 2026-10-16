@@ -50,6 +50,11 @@ describe("DataTable", () => {
     expect(screen.getByText("Indicateurs du trimestre")).toHaveClass("sr-only");
   });
 
+  it("rend sa zone défilante focalisable au clavier", () => {
+    render(<DataTable columns={columns} rows={[]} rowKey={(row) => row.code} caption="Indicateurs du trimestre" />);
+    expect(screen.getByRole("region", { name: "Indicateurs du trimestre" })).toHaveAttribute("tabindex", "0");
+  });
+
   it("affiche l'état vide et la légende visible", () => {
     render(
       <DataTable

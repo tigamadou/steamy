@@ -18,6 +18,7 @@ ENDPOINTS = [
     "disabilities",
     "relationships",
     "refusal-reasons",
+    "deletion-reasons",
     "localities",
 ]
 

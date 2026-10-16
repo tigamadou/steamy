@@ -17,7 +17,7 @@ from . import quotas
 from .models import Classroom, ClassroomMembership, School, validate_color
 
 
-class CourseSummarySerializer(serializers.ModelSerializer):
+class ClassroomCourseSerializer(serializers.ModelSerializer):
     category = CategorySummarySerializer(read_only=True)
 
     class Meta:
@@ -34,7 +34,7 @@ class SchoolSerializer(serializers.ModelSerializer):
     learners_left = serializers.SerializerMethodField()
     classrooms_used = serializers.SerializerMethodField()
     classrooms_left = serializers.SerializerMethodField()
-    courses = CourseSummarySerializer(many=True, read_only=True)
+    courses = ClassroomCourseSerializer(many=True, read_only=True)
 
     class Meta:
         model = School
@@ -70,7 +70,7 @@ class SchoolSerializer(serializers.ModelSerializer):
 class ClassroomSerializer(serializers.ModelSerializer):
     """Carte de classe (WT01, WT03) et en-tête de WT04."""
 
-    course = CourseSummarySerializer(read_only=True)
+    course = ClassroomCourseSerializer(read_only=True)
     school_grade = SchoolGradeSerializer(read_only=True, allow_null=True)
     member_count = serializers.IntegerField(read_only=True, help_text="Élèves actifs")
     pending_invitation_count = serializers.IntegerField(
@@ -221,14 +221,14 @@ class ProjectNodeSerializer(serializers.ModelSerializer):
         fields = ("id", "order", "title", "duration_hours", "levels")
 
 
-class SupervisedCourseSerializer(CourseSummarySerializer):
+class SupervisedCourseSerializer(ClassroomCourseSerializer):
     """Parcours encadré (WT02) : ses classes et ses élèves actifs chez l'enseignant."""
 
     classroom_count = serializers.IntegerField(read_only=True)
     learner_count = serializers.IntegerField(read_only=True)
 
-    class Meta(CourseSummarySerializer.Meta):
-        fields = (*CourseSummarySerializer.Meta.fields, "classroom_count", "learner_count")
+    class Meta(ClassroomCourseSerializer.Meta):
+        fields = (*ClassroomCourseSerializer.Meta.fields, "classroom_count", "learner_count")
         read_only_fields = fields
 
 

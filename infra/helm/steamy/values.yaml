@@ -43,6 +43,11 @@ sms:
   provider: twilio
   sender: STEAMY              # identifiant alphanumérique enregistré chez Twilio, ou numéro Twilio
 
+# Paiement (ADR 0003) : FedaPay seul prestataire réel. Clés dans les secrets FEDAPAY_SECRET_KEY / FEDAPAY_WEBHOOK_SECRET
+payments:
+  provider: fedapay
+  fedapayEnvironment: sandbox # `live` en production, une fois le compte Business validé (KYC)
+
 api:
   replicas: 1
   gunicornWorkers: 2

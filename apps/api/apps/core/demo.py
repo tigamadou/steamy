@@ -31,6 +31,7 @@ from apps.impact import services as impact
 from apps.impact.models import KpiDefinition, KpiValue
 from apps.impact.periods import QUARTER, Period
 from apps.notifications.models import Category, Notification, Tone
+from apps.payments.demo import seed_commerce
 from apps.referentials.models import (
     Avatar,
     Country,
@@ -827,5 +828,6 @@ def seed_all() -> dict[str, User]:
     seed_kits()
     seed_learning(accounts)
     seed_impact(accounts)
+    seed_commerce(accounts)
     seed_classes(School.objects.get(name=SCHOOL_NAME), accounts["koffi"])
     return accounts

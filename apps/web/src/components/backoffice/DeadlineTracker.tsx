@@ -8,7 +8,7 @@ const STATE_TEXT = { done: "terminée", current: "en cours", todo: "à venir" } 
 // Échéances du rapport trimestriel (WAD01, WAD04) : étapes reliées, la courante mise en avant.
 export function DeadlineTracker({ steps, label }: { steps: DeadlineStep[]; label: string }) {
   if (steps.length === 0) {
-    return <p className="m-0 text-sm font-semibold text-ink-500">Aucune échéance.</p>;
+    return <p className="m-0 text-sm font-semibold text-ink-600">Aucune échéance.</p>;
   }
   return (
     <ol aria-label={label} className="m-0 flex list-none items-start p-0">
@@ -29,13 +29,13 @@ export function DeadlineTracker({ steps, label }: { steps: DeadlineStep[]; label
               "relative z-1 flex size-6 items-center justify-center rounded-full border-2 text-[10px] font-black",
               step.state === "done" && "border-ink-900 bg-ink-900 text-surface",
               step.state === "current" && "border-ink-900 bg-surface text-ink-900 shadow-[0_0_0_4px_var(--ink-100)]",
-              step.state === "todo" && "border-ink-300 bg-surface text-ink-500",
+              step.state === "todo" && "border-ink-300 bg-surface text-ink-600",
             )}
           >
             {step.state === "done" ? <Icon name="check" size={13} strokeWidth={3} /> : i + 1}
           </span>
           <span className="mt-2 text-xs font-extrabold text-ink-800">{step.label}</span>
-          <span className="mt-0.5 text-[11px] font-bold text-ink-500">{step.date}</span>
+          <span className="mt-0.5 text-[11px] font-bold text-ink-600">{step.date}</span>
           <span className="sr-only">, {STATE_TEXT[step.state]}</span>
         </li>
       ))}
