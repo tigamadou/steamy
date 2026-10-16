@@ -11,10 +11,17 @@ export type BreadcrumbItem = {
 export type BreadcrumbProps = {
   items: BreadcrumbItem[];
   className?: string;
+  /** `ink` : variante monochrome du back-office (survol et focus en encre). */
+  tone?: "brand" | "ink";
 };
 
+const LINK_TONES = {
+  brand: "hover:text-primary-600 focus-visible:outline-primary-500",
+  ink: "hover:text-ink-900 hover:underline focus-visible:outline-ink-900",
+} as const;
+
 /** Fil d'Ariane (WL18) : liens séparés par « › », la page courante marquée `aria-current`. */
-export function Breadcrumb({ items, className }: BreadcrumbProps) {
+export function Breadcrumb({ items, className, tone = "brand" }: BreadcrumbProps) {
   return (
     <nav aria-label="Fil d'Ariane" className={cx("text-[13px] font-bold text-ink-600", className)}>
       <ol className="flex flex-wrap items-center gap-1.5">
@@ -24,7 +31,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
             {item.href ? (
               <Link
                 href={item.href}
-                className="rounded-sm hover:text-primary-600 focus-visible:outline-3 focus-visible:outline-primary-500"
+                className={cx("rounded-sm focus-visible:outline-3", LINK_TONES[tone])}
               >
                 {item.label}
               </Link>

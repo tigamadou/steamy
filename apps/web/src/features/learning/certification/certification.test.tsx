@@ -54,7 +54,8 @@ beforeEach(() => {
 
 describe("CertificationView (WJ07 / WJ09)", () => {
   it("WJ07 : certificat de l'API, nom, mois, badges de projet, PDF prêt, recommandations", async () => {
-    mockApi(ok(certified()));
+    const kitCourse = { ...COURSE, slug: "robot-kit", title: "Robot à kit", isFree: false, price: 25000, requiredKit: { slug: "kit", name: "Kit" } };
+    mockApi(ok(certified()), { recos: [COURSE, kitCourse as typeof COURSE] });
     render((await CertificationView({ slug: "robot-bluetooth" })) as ReactElement);
     expect(screen.getByRole("heading", { level: 2, name: "Construis ton robot Bluetooth" })).toBeInTheDocument();
     expect(screen.getByText("Léa Adjovi")).toBeInTheDocument();
@@ -69,6 +70,9 @@ describe("CertificationView (WJ07 / WJ09)", () => {
       "href",
       "/apprenant/catalogue/decouverte-robotique",
     );
+    // D36 : un parcours à kit recommandé n'affiche pas de prix de parcours
+    expect(screen.getByText("Avec le Kit Code")).toBeInTheDocument();
+    expect(screen.queryByText(/25\s000/)).not.toBeInTheDocument();
     // Ticket Steamy Events derrière le drapeau `events` (étape 3.8)
     expect(screen.queryByText(/Ticket Steamy Events/)).not.toBeInTheDocument();
   });

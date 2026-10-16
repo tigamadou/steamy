@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { Loader } from "@/components/ds/Loader";
 import { Quiz, type QuizQuestion } from "@/components/ds/Quiz";
@@ -34,6 +34,13 @@ export function QuizRunner({ quizId, courseSlug, questions }: QuizRunnerProps) {
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState<number | null>(null);
   const sent = useRef(false);
+
+  // Délai écoulé (`QUIZ_COOLDOWN`) : le quiz revient avec les réponses gardées, prêt à être renvoyé.
+  useEffect(() => {
+    if (cooldown === null) return;
+    const timer = window.setTimeout(() => setCooldown(null), cooldown * 1000);
+    return () => window.clearTimeout(timer);
+  }, [cooldown]);
 
   const update = (next: QuizDraft) => {
     setLocal(next);

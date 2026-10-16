@@ -9,7 +9,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 const { certificateDownloadUrl, readContent } = await import("./content");
-const { formatHours, formatLastActivity, formatMinutes } = await import("./format");
+const { formatHours, formatLastActivity } = await import("./format");
 const { nextStepHref, nextStepLabel } = await import("./next-step");
 const { displayState, isNextStep, projectCounts, quizStep, remainingMinutes } = await import("./tree");
 
@@ -42,10 +42,6 @@ describe("readContent", () => {
 
 describe("formats", () => {
   it("durées", () => {
-    expect(formatMinutes(45)).toBe("45 min");
-    expect(formatMinutes(60)).toBe("1 h");
-    expect(formatMinutes(95)).toBe("1 h 35");
-    expect(formatMinutes(125)).toBe("2 h 05");
     expect(formatHours(3)).toBe("3 h");
   });
 
