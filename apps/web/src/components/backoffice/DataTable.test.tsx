@@ -1,5 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { axe } from "@/test/axe";
 
@@ -20,6 +20,8 @@ const columns: DataColumn<Row>[] = [
 ];
 
 describe("DataTable", () => {
+  afterEach(() => vi.restoreAllMocks());
+
   it("rend un vrai tableau, titré, avec une ligne par entrée", () => {
     render(
       <DataTable
@@ -50,9 +52,12 @@ describe("DataTable", () => {
     expect(screen.getByText("Indicateurs du trimestre")).toHaveClass("sr-only");
   });
 
-  it("rend sa zone défilante focalisable au clavier", () => {
+  it("nomme sa zone défilante par la légende du tableau quand elle déborde", () => {
+    vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockReturnValue(800);
     render(<DataTable columns={columns} rows={[]} rowKey={(row) => row.code} caption="Indicateurs du trimestre" />);
-    expect(screen.getByRole("region", { name: "Indicateurs du trimestre" })).toHaveAttribute("tabindex", "0");
+    const region = screen.getByRole("region", { name: "Indicateurs du trimestre" });
+    expect(region).toHaveAttribute("aria-labelledby", screen.getByText("Indicateurs du trimestre").id);
+    expect(region).not.toHaveAttribute("aria-label");
   });
 
   it("affiche l'état vide et la légende visible", () => {

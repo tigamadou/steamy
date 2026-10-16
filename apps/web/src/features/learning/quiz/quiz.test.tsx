@@ -105,6 +105,17 @@ describe("QuizRunner (WJ04 / WJ10)", () => {
     expect(screen.getByText("Question 2 sur 2")).toBeInTheDocument();
   });
 
+  it("QUIZ_COOLDOWN : à la fin du délai, le quiz revient avec les réponses gardées", async () => {
+    const user = userEvent.setup();
+    apiCall.mockResolvedValue({ ok: false, code: "QUIZ_COOLDOWN", message: "", fields: {}, retryAfter: 1 });
+    render(<QuizRunner quizId={202} courseSlug="robot-bluetooth" questions={QUESTIONS} />);
+    await answerAll(user);
+    await user.click(screen.getByRole("button", { name: /Envoyer mes réponses/ }));
+    expect(screen.getByRole("heading", { name: "Encore un peu de patience" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /Envoyer mes réponses/ }, { timeout: 3000 })).toBeEnabled();
+    expect(screen.queryByRole("heading", { name: "Encore un peu de patience" })).not.toBeInTheDocument();
+  });
+
   it("QUIZ_COOLDOWN : compte à rebours du délai renvoyé ; sans délai annoncé, lien direct", async () => {
     const user = userEvent.setup();
     apiCall.mockResolvedValue({ ok: false, code: "QUIZ_COOLDOWN", message: "", fields: {}, retryAfter: 300 });

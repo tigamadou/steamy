@@ -3,9 +3,10 @@ import { Button } from "@/components/ds/Button";
 import { MissionItem } from "@/components/ds/MissionItem";
 import { getServerApi } from "@/lib/api";
 import { routes } from "@/lib/routes";
+import { formatMinutes } from "@/lib/format";
 
 import { readContent } from "./content";
-import { formatMinutes, position } from "./format";
+import { position } from "./format";
 import { LessonVideo } from "./LessonVideo";
 import { LockedContentState } from "./LockedContentState";
 

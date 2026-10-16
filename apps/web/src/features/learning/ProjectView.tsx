@@ -6,9 +6,10 @@ import { SectionHeader } from "@/components/ds/SectionHeader";
 import { getServerApi } from "@/lib/api";
 import { cx } from "@/lib/cx";
 import { routes } from "@/lib/routes";
+import { formatMinutes } from "@/lib/format";
 
 import { readContent } from "./content";
-import { formatHours, formatMinutes, position } from "./format";
+import { formatHours, position } from "./format";
 import { InfoBlock } from "./InfoBlock";
 import { LockedContentState } from "./LockedContentState";
 

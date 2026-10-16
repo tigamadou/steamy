@@ -5,8 +5,9 @@ import { Icon } from "@/components/ds/Icon";
 import { MissionItem } from "@/components/ds/MissionItem";
 import { cx } from "@/lib/cx";
 import { routes } from "@/lib/routes";
+import { formatMinutes } from "@/lib/format";
 
-import { formatHours, formatMinutes, position } from "./format";
+import { formatHours, position } from "./format";
 import { displayState, isNextStep, quizStep } from "./tree";
 
 export type ProjectAccordionProps = {

@@ -18,3 +18,11 @@ export function impactPeriod(value: string | string[] | undefined): ImpactPeriod
 export function withPeriod(path: string, period: ImpactPeriodId): string {
   return period === IMPACT_PERIODS[0].id ? path : `${path}?periode=${period}`;
 }
+
+const YEAR_MONTH = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "numeric", timeZone: "Africa/Porto-Novo" });
+
+/** Trimestre en cours au fuseau de la plateforme (C16), au format des URL de WAD04 : `2026-t4`. */
+export function currentQuarterKey(now: Date = new Date()): string {
+  const parts = Object.fromEntries(YEAR_MONTH.formatToParts(now).map((part) => [part.type, part.value]));
+  return `${parts.year}-t${Math.ceil(Number(parts.month) / 3)}`;
+}

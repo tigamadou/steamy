@@ -9,6 +9,8 @@ describe("routes", () => {
     expect(routes.article("premier-robot")).toBe("/blog/premier-robot");
     expect(routes.legal("cgu")).toBe("/legal/cgu");
     expect(routes.backoffice.kpi("na_f")).toBe("/backoffice/impact/indicateurs/na_f");
+    expect(routes.backoffice.report("2026-t4")).toBe("/backoffice/impact/rapports/2026-t4");
+    expect(routes.backoffice.reportEntry("2026-t4")).toBe("/backoffice/impact/rapports/2026-t4/saisie");
   });
 
   it("présélectionne le sujet du formulaire de contact", () => {

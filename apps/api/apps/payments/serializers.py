@@ -18,7 +18,7 @@ from libs.phone import mask_phone
 
 from . import pricing
 from .models import Invoice, KitCode, Order, OrderItem, Payment, PaymentRequest
-from .requests import next_resend_at
+from .requests import ensure_pending, next_resend_at
 
 #: Types de commande créables directement (l'événement passe par la candidature)
 ORDER_CREATE_KINDS = [Order.Kind.COURSE, Order.Kind.KIT]
@@ -61,17 +61,29 @@ class OrderCreateSerializer(serializers.Serializer):
     """
     `kind=course` : un parcours payant pour un enfant du parent (`beneficiaryId`). `kind=kit` : des kits livrés
     (`deliveryAddress`), pour le parent (bénéficiaire facultatif) ou pour un invité (`guest`, sans compte, D12).
-    Les commandes d'événement naissent de la candidature (API-L3b.6).
+    Les commandes d'événement naissent de la candidature (API-L3b.6). `paymentRequestId` (WPD15) : la commande
+    règle la demande de l'enfant ; type, lignes et bénéficiaire viennent alors de la demande, seule l'adresse de
+    livraison d'un kit est à fournir.
     """
 
-    kind = serializers.ChoiceField(choices=ORDER_CREATE_KINDS)
-    items = OrderItemInputSerializer(many=True, allow_empty=False)
+    kind = serializers.ChoiceField(choices=ORDER_CREATE_KINDS, required=False)
+    items = OrderItemInputSerializer(many=True, allow_empty=False, required=False)
+    payment_request_id = serializers.IntegerField(
+        required=False,
+        help_text="Demande de paiement de l'enfant réglée par cette commande (WPD15)",
+    )
     beneficiary_id = serializers.IntegerField(required=False, help_text="Enfant du parent")
     guest = GuestInputSerializer(required=False, help_text="Achat de kit sans compte")
     delivery_address = DeliveryAddressInputSerializer(required=False)
 
     def validate(self, attrs):
         payer = self.context["payer"]
+        request_id = attrs.pop("payment_request_id", None)
+        if request_id is not None:
+            attrs.update(self._from_payment_request(payer, request_id))
+        for field in ("kind", "items"):
+            if field not in attrs:
+                raise invalid(field, "REQUIRED", "Champ obligatoire.")
         if payer is None and attrs["kind"] != Order.Kind.KIT:
             raise NotAuthenticated()  # un invité n'achète que des kits (D12)
         if payer is None and "guest" not in attrs:
@@ -84,6 +96,31 @@ class OrderCreateSerializer(serializers.Serializer):
         else:
             attrs["quote"] = self._kit_quote(attrs, payer)
         return attrs
+
+    def _from_payment_request(self, payer, request_id) -> dict:
+        if payer is None:
+            raise NotAuthenticated()
+        request = (
+            PaymentRequest.objects.select_related("course")
+            .filter(pk=request_id, parent=payer)
+            .first()
+        )
+        if request is None:
+            raise invalid("payment_request_id", "NOT_FOUND")
+        ensure_pending(request)
+        if request.course_id:
+            items = [{"course_slug": request.course.slug, "quantity": 1}]
+        else:
+            items = [
+                {"kit_slug": item["kit_slug"], "quantity": item["quantity"]}
+                for item in request.items
+            ]
+        return {
+            "kind": request.kind,
+            "items": items,
+            "beneficiary_id": request.requested_by_id,
+            "payment_request": request,
+        }
 
     def _beneficiary(self, payer, beneficiary_id):
         if beneficiary_id is None:

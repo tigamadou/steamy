@@ -48,6 +48,10 @@ describe("WAD01 · Vue d'ensemble", () => {
 
     const report = screen.getByRole("region", { name: "Rapport d'impact · prochaine échéance" });
     expect(within(report).getByText("Brouillon")).toBeInTheDocument();
+    expect(within(report).getByRole("link", { name: "Ouvrir le rapport" })).toHaveAttribute(
+      "href",
+      "/backoffice/impact/rapports/2026-t4",
+    );
     expect(within(report).getByText("Trimestre T4 2026 · 3/12 indicateurs manuels renseignés")).toBeInTheDocument();
     expect(within(report).getByRole("progressbar", { name: "Complétude du rapport" })).toHaveAttribute(
       "aria-valuenow",
@@ -84,6 +88,7 @@ describe("WAD01 · Vue d'ensemble", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Nouveaux apprenants ce mois : calcul en attente" })).toBeInTheDocument();
     expect(screen.queryByText(/^Cible/)).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Voir l'Impact Tracker" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Ouvrir le rapport" })).not.toBeInTheDocument();
     expect(within(screen.getByRole("region", { name: "Ventes du mois" })).getByText("—")).toBeInTheDocument();
     expect(screen.getByText("calcul en attente")).toBeInTheDocument();
     expect(screen.getByText("pas encore mesuré")).toBeInTheDocument();
