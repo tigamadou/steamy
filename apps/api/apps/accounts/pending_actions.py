@@ -104,7 +104,7 @@ def event_applications(parent: User) -> list[PendingAction]:
             child_first_name=application.learner.first_name,
             child_last_name=application.learner.last_name,
             created_at=application.created_at,
-            url="/parent/evenements",
+            url=f"/parent/evenements?candidature={application.pk}",
         )
         for application in pending
     ]

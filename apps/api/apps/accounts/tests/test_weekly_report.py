@@ -108,7 +108,7 @@ def test_current_week_by_default_without_email(parent):
     assert body["seconds"] == 0 and body["email"] is None
 
 
-@pytest.mark.parametrize("week", ["2026-41", "2026-W54", "abc"])
+@pytest.mark.parametrize("week", ["2026-41", "2026-W54", "abc", "0001-W01", "9999-W52"])
 def test_invalid_week(parent, week):
     resp = as_user(parent).get(url(link(parent), week))
     assert resp.status_code == 400
@@ -145,5 +145,7 @@ def test_monday_sends_the_previous_week_in_app_and_by_email(parent, monkeypatch)
     )
     assert notification.title.startswith("Semaine de Léa")
     assert [m.to for m in mail.outbox] == [["marie@exemple.bj"]]
+    # relancé (reprise après panne) : rien n'est renvoyé
     call_command("send_weekly_reports")
-    assert Notification.objects.filter(type="weekly_report").count() == 4
+    assert Notification.objects.filter(type="weekly_report").count() == 2
+    assert len(mail.outbox) == 1

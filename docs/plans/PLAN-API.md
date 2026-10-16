@@ -611,10 +611,10 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > childLastName, createdAt, url }`, la plus récente d'abord ; `type` ∈ `consent`, `payment_request`,
   > `event_application`, `deletion_request` (les 4 déclarés dès maintenant) ; `childId` nul pour un consentement
   > (pas encore de lien) ; `url` = route du front (`/parent/consentements/<id>`,
-  > `/parent/enfants/<id>/supprimer?demande=<id>`, `/parent/demandes/<id>`, `/parent/evenements`). Chaque type est
+  > `/parent/enfants/<id>/supprimer?demande=<id>`, `/parent/demandes/<id>`, `/parent/evenements?candidature=<id>`). Chaque type est
   > une source de `pending_actions.SOURCES`. Accepter un événement payant crée directement la commande d'événement
   > du parent (`orderReference` dans la réponse, place réservée, confirmée au paiement) : pas de `PaymentRequest`
-  > intermédiaire, le parent étant déjà sur l'écran. Refus : motif facultatif, ticket rendu, enfant notifié ; code
+  > intermédiaire, le parent étant déjà sur l’écran (D53 amendé le 2026-10-16). Refus : motif facultatif, ticket rendu, enfant notifié ; code
   > `APPLICATION_ALREADY_RESOLVED` (409). Commande avec `paymentRequestId` : type, lignes et bénéficiaire tirés de la
   > demande (seule l'adresse d'un kit est à fournir) ; `kind` et `items` deviennent facultatifs dans ce cas ;
   > `PAYMENT_REQUEST_CLOSED` si la demande n'est plus en attente ; payée, la demande passe à `paid`.
@@ -641,18 +641,21 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > previousWeek, nextWeek (null pour la semaine en cours), seconds, missionsCompleted, quizzesPassed, days[7],
   > courses, email }` ; `week` invalide → `fields.week` `INVALID`. Le lundi à 7 h, une notification
   > « Progression » par enfant actif pour la semaine écoulée (`/parent/enfants/<id>/rapport?semaine=AAAA-Www`) ;
-  > l'email part si le parent a une adresse et n'a pas coupé l'email « Progression » (`notify`).
+  > l'email part si le parent a une adresse et n'a pas coupé l'email « Progression » (`notify`) ; relançable
+  > sans doublon (une notification par parent, enfant et semaine). **Un email par enfant** (D55 précisé le
+  > 2026-10-16). Années acceptées : 2000 à 9998.
 - [x] **API-L4.5** Changement de téléphone · `feature/api-l4-5-changement-telephone` · PR #78
   - [x] `POST accounts/me/phone-change/`, `…/verify/` (OTP sur le nouveau numéro)
   - [x] Préférences parent
   > Décisions : `phone-change/` `{ phone, password }` exige le mot de passe actuel (`INVALID_CREDENTIALS`) ;
   > `PHONE_TAKEN` (409) si le numéro est déjà pris, `PHONE_INVALID` si c'est le même ; renvoi par
   > `auth/otp/resend/`. Le code validé remplace le numéro de connexion et suit dans les demandes de consentement
-  > reçues ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
+  > encore ouvertes ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
   > ajout du **Mobile Money préféré** (`ParentProfile.mobileMoney` `{ country, network, phone }`, réseau activé du
   > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
-  > Reprise : PR en chaîne #75 → #77 → #78 → #79 → #80 → #102 (fusion dans cet ordre). Restent les
-  > critères de fin d'API-L4 (seed enrichi).
+  > Reprise : chaîne #75 → #77 → #78 → #79 → #80 → #102 fusionnée ; suites de la relecture dans une PR de suivi
+  > (`feature/api-l4-suivi-revue`). Restent les critères de fin d'API-L4 (seed enrichi) et l'action d'admin pour
+  > annuler la suppression d'un compte parent.
 - [ ] **Critères de fin d'API-L4**
   - [ ] Un `childId` étranger → 404 partout
   - [ ] `Notification.url` pointe vers les routes front des plans

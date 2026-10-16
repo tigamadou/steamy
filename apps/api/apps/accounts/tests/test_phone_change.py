@@ -70,11 +70,22 @@ def test_consent_requests_follow_the_number(parent, sms):
         relationship=Relationship.objects.first(),
         expires_at="2099-01-01T00:00:00Z",
     )
+    refused = ConsentRequest.objects.create(
+        origin="learner",
+        parent_phone=OLD,
+        relationship=Relationship.objects.first(),
+        status=ConsentRequest.Status.REFUSED,
+        expires_at="2099-01-01T00:00:00Z",
+    )
     client = as_user(parent)
     challenge = start(client).json()["challengeId"]
     client.post(VERIFY, {"challengeId": challenge, "code": sms.last_code(NEW)}, format="json")
     consent.refresh_from_db()
+    refused.refresh_from_db()
     assert consent.parent_phone == NEW
+    assert (
+        refused.parent_phone == OLD
+    )  # demande close : le délai de 30 jours reste sur l'ancien numéro
     assert client.get("/api/accounts/consent-requests/").json()["count"] == 1
 
 

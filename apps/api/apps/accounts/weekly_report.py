@@ -12,13 +12,15 @@ from django.utils import timezone
 from rest_framework.exceptions import ErrorDetail, ValidationError
 
 from apps.learning.models import LearningActivity, MissionProgress, QuizAttempt
-from apps.notifications.models import Category
+from apps.notifications.models import Category, Notification
 from apps.notifications.services import notify
 
 from .children import children_of
 from .models import User
 
 WEEK_REGEX = re.compile(r"^(\d{4})-W(\d{2})$")
+#: Années acceptées : au-delà, la semaine précédente ou suivante sortirait des dates représentables.
+MIN_YEAR, MAX_YEAR = 2000, 9998
 
 
 def week_code(day: date) -> str:
@@ -33,6 +35,8 @@ def parse_week(value: str | None) -> date:
         return today - timedelta(days=today.weekday())
     match = WEEK_REGEX.match(value)
     try:
+        if not MIN_YEAR <= int(match[1]) <= MAX_YEAR:
+            raise ValueError(value)
         return date.fromisocalendar(int(match[1]), int(match[2]), 1)
     except (TypeError, ValueError) as error:
         raise ValidationError(
@@ -72,7 +76,10 @@ def report(child: User, monday: date) -> dict:
 
 
 def send_weekly_reports() -> int:
-    """Chaque lundi : une notification par enfant actif pour la semaine écoulée (email selon la préférence)."""
+    """
+    Chaque lundi : une notification par enfant actif pour la semaine écoulée (email selon la préférence).
+    Relançable : un rapport déjà notifié pour ce parent, cet enfant et cette semaine n'est pas renvoyé.
+    """
     today = timezone.localdate()
     monday = today - timedelta(days=today.weekday() + 7)
     code = week_code(monday)
@@ -80,6 +87,9 @@ def send_weekly_reports() -> int:
     parents = User.objects.filter(role=User.Role.PARENT, status=User.Status.ACTIVE)
     for parent in parents.filter(children_links__isnull=False).distinct():
         for child in children_of(parent).filter(status=User.Status.ACTIVE):
+            url = f"/parent/enfants/{child.pk}/rapport?semaine={code}"
+            if Notification.objects.filter(user=parent, type="weekly_report", url=url).exists():
+                continue
             data = report(child, monday)
             minutes = data["seconds"] // 60
             notify(
@@ -89,7 +99,7 @@ def send_weekly_reports() -> int:
                 f"Semaine de {child.first_name} : {minutes} min d'apprentissage",
                 f"{data['missions_completed']} mission(s) terminée(s), "
                 f"{data['quizzes_passed']} quiz réussi(s).",
-                url=f"/parent/enfants/{child.pk}/rapport?semaine={code}",
+                url=url,
             )
             sent += 1
     return sent
