@@ -37,16 +37,20 @@ test("WD01 : Léa reprend son parcours, voit ses statistiques et ses raccourcis"
 
 test("WD03 : le squelette de l'accueil s'affiche pendant la lecture du tableau de bord", async ({ page }) => {
   await loginAs(page, "learner");
-  await page.goto("/apprenant/aide");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Aide & Support");
-  // Données de l'accueil retardées : le squelette (loading.tsx) reste visible le temps de la lecture
+  // Données de l'accueil retardées (préchargement compris : le lien « Accueil » est visible dès le chargement sur
+  // bureau) : le squelette (loading.tsx) reste visible le temps de la lecture
   await page.route(
     (url) => url.pathname === "/apprenant",
     async (route) => {
-      if (route.request().headers()["rsc"]) await new Promise((resolve) => setTimeout(resolve, 1500));
+      const headers = route.request().headers();
+      // Préchargement retenu plus longtemps : il est encore en cours au moment du clic
+      const delay = headers["next-router-prefetch"] ? 5000 : headers["rsc"] ? 1500 : 0;
+      await new Promise((resolve) => setTimeout(resolve, delay));
       await route.continue();
     },
   );
+  await page.goto("/apprenant/aide");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Aide & Support");
   await openShellMenu(page);
   await page.getByRole("navigation", { name: "Navigation de ton espace" }).getByRole("link", { name: "Accueil" }).click();
   await expect(page.getByRole("status", { name: "Chargement de ton tableau de bord…" })).toBeVisible();
