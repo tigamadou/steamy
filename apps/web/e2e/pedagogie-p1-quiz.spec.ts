@@ -18,8 +18,9 @@ async function axe(page: Page) {
 }
 
 async function answerQuiz(page: Page, choice: string) {
-  await expect(page.getByText(/Obtiens au moins \d+ %/)).toBeVisible();
-  await expect(page.getByText(RIGHT)).toHaveCount(1);
+  // Next garde la page précédente masquée (navigation arrière) : seuls les éléments visibles comptent
+  await expect(page.getByText(/Obtiens au moins \d+ %/).filter({ visible: true })).toBeVisible();
+  await expect(page.getByText(RIGHT).filter({ visible: true })).toHaveCount(1);
   await page.getByRole("radio", { name: choice }).check({ force: true });
   await page.getByRole("button", { name: /Question suivante/ }).click();
   await page.getByRole("radio", { name: choice }).check({ force: true });
@@ -54,12 +55,12 @@ test("P1 : missions, formative réussie, sommative ratée puis réussie après l
 
   // WJ04 (formative) réussie → WJ05 → WJ06
   await expect(page).toHaveURL(new RegExp(`/apprenant/parcours/${COURSE}/quiz/\\d+$`));
-  await expect(page.getByText(/pour valider le niveau/)).toBeVisible();
+  await expect(page.getByText(/pour valider le niveau/).filter({ visible: true })).toBeVisible();
   await axe(page);
   await answerQuiz(page, RIGHT);
   await expect(page).toHaveURL(/\/resultats\/\d+$/);
-  await expect(page.getByText("Réussi")).toBeVisible();
-  await expect(page.getByText(/2 bonnes réponses sur 2 · seuil \d+ %/)).toBeVisible();
+  await expect(page.getByText("Réussi").filter({ visible: true })).toBeVisible();
+  await expect(page.getByText(/2 bonnes réponses sur 2 · seuil \d+ %/).filter({ visible: true })).toBeVisible();
   await axe(page);
   await page.getByRole("link", { name: "Voir mon badge" }).click();
   await expect(page).toHaveURL(/\/niveaux\/\d+\/badge\?tentative=\d+$/);
@@ -69,10 +70,10 @@ test("P1 : missions, formative réussie, sommative ratée puis réussie après l
 
   // WJ10 (sommative) ratée → WJ08 : réessai bloqué par le compte à rebours, puis rouvert
   await page.getByRole("link", { name: /Passer l'évaluation du projet/ }).click();
-  await expect(page.getByText(/pour valider le projet/)).toBeVisible();
+  await expect(page.getByText(/pour valider le projet/).filter({ visible: true })).toBeVisible();
   await answerQuiz(page, WRONG);
   await expect(page.getByRole("heading", { name: "Pas encore validé" })).toBeVisible();
-  await expect(page.getByText("Échoué")).toBeVisible();
+  await expect(page.getByText("Échoué").filter({ visible: true })).toBeVisible();
   await expect(page.getByRole("link", { name: /Revoir « / }).first()).toHaveAttribute("href", /\/missions\/\d+$/);
   await expect(page.getByRole("button", { name: /Réessayer le quiz dans/ })).toBeDisabled();
   await axe(page);
@@ -80,7 +81,7 @@ test("P1 : missions, formative réussie, sommative ratée puis réussie après l
 
   // WJ10 réussie → WJ11 → étape suivante : la certification
   await answerQuiz(page, RIGHT);
-  await expect(page.getByText("Tu as validé le projet.")).toBeVisible();
+  await expect(page.getByText("Tu as validé le projet.").filter({ visible: true })).toBeVisible();
   await page.getByRole("link", { name: "Voir mon badge" }).click();
   await expect(page).toHaveURL(/\/projets\/\d+\/badge\?tentative=\d+$/);
   await expect(page.getByRole("heading", { level: 1, name: "Projet validé !" })).toBeVisible();
