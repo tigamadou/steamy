@@ -53,7 +53,11 @@ export function QuizRunner({ quizId, courseSlug, questions }: QuizRunnerProps) {
       }),
     );
     if (result.ok) {
+      // Next garde la page masquée en mémoire (Activity) : au retour sur ce quiz (« Réessayer »), il repart à zéro
       clearDraft(quizId);
+      setLocal({ answers: {}, index: 0, startedAt: Date.now() });
+      sent.current = false;
+      setSubmitting(false);
       router.replace(routes.learner.quizResult(courseSlug, quizId, result.data.id));
       return;
     }

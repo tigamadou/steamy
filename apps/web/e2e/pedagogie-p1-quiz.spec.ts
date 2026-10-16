@@ -1,12 +1,13 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-import { loginAs } from "./support/session";
+import { decideConsent, uniquePhone } from "./support/api";
+import { completeLearnerProfile, sendConsentRequest, startLearnerSignup } from "./support/signup";
 
-// LOT-3 §8.2 · P1 (étapes 3.3a et 3.3b) : Léa suit le parcours gratuit court du jeu D2 (1 projet, 1 niveau,
+// LOT-3 §8.2 · P1 (étapes 3.3a et 3.3b) : un apprenant créé pour le test suit le parcours gratuit court du jeu D2 (1 projet, 1 niveau,
 // 2 missions, formative et sommative de 2 questions), réussit la formative, rate la sommative, attend le délai
 // court de la stack e2e (`seed_demo --e2e`), puis la réussit. Les bonnes réponses sont celles du jeu D2 (la
-// première), jamais lues dans la page. Données uniques : joué une seule fois après `make seed`.
+// première), jamais lues dans la page. L'apprenant est neuf à chaque passage : le parcours est rejouable (retry).
 
 const COURSE = "premiers-pas-zeti";
 const RIGHT = "L'idée vue dans la mission";
@@ -27,14 +28,23 @@ async function answerQuiz(page: Page, choice: string) {
   await page.getByRole("button", { name: /Envoyer mes réponses/ }).click();
 }
 
-test("P1 : missions, formative réussie, sommative ratée puis réussie après le délai, badges @donnees-uniques", async ({
+test("P1 : missions, formative réussie, sommative ratée puis réussie après le délai, badges", async ({
   page,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   await page.route("https://player.vimeo.com/**", (route) =>
     route.fulfill({ contentType: "text/html", body: "<!doctype html><title>Vidéo factice</title>" }),
   );
-  await loginAs(page, "learner");
+  // Apprenant neuf (accord du parent, profil), inscrit au parcours gratuit depuis sa fiche (WC04)
+  await startLearnerSignup(page);
+  const phone = uniquePhone();
+  const link = await sendConsentRequest(page, phone);
+  await decideConsent(link, phone, { accept: true });
+  await page.goto("/inscription/apprenant/mot-de-passe");
+  await completeLearnerProfile(page, "Robot2026x");
+  await page.goto(`/apprenant/catalogue/${COURSE}`);
+  await page.getByRole("button", { name: "Commencer le parcours" }).click();
+  await expect(page).toHaveURL(new RegExp(`/apprenant/parcours/${COURSE}/projets/\\d+$`));
 
   // WD23 → WC06a → WJ01 → WJ02 → WJ03 ×2
   await page.goto("/apprenant/parcours");
