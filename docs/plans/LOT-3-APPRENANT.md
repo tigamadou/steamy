@@ -30,7 +30,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6 (après API-L3b) · Prérequis 
   - [x] Parcours Playwright : apprenant → shell ; parent sur `/apprenant` → redirection ; non connecté → `/connexion?next=` puis retour
   - [x] Recette : aucune donnée en dur, aucun `title="Bientôt"`, rendu 360 px, squelette du shell pendant le chargement
   - [x] Tiroir sous 768 px en boîte modale (`role="dialog"`, reste de la page `inert`), focus rendu au menu après WD16 (suivi de relecture, PR #105)
-  - [x] Suivi de relecture du lot 3 : tiroir fermé à 768 px ou plus, focus après un toast et à la pagination, grille de parcours unique, étape « en cours » lue dans `next`, ARIA de `ProjectAccordion` · `feature/lot3-suivi-relecture`
+  - [x] Suivi de relecture du lot 3 : tiroir fermé à 768 px ou plus, focus après un toast et à la pagination, grille de parcours unique, étape « en cours » lue dans `next`, ARIA de `ProjectAccordion` · `feature/lot3-suivi-relecture` · PR #112
 - [x] **3.1** Accueil, notifications et aide (requiert API-L3a) · `feature/lot3-accueil-notifications` · PR #101
   - [x] `WD01` tableau de bord avec reprise (`StatPill` Streak, Points, Rang masqués si `null`)
   - [x] `WD02` tableau de bord sans reprise (catalogue `prix=gratuit`)
