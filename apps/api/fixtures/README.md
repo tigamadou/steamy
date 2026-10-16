@@ -45,6 +45,17 @@ et paliers **de démonstration**, saisis s'ils sont vides), un streak de 5 jours
 `make e2e` lance `seed_demo --e2e`, qui ramène le délai entre deux essais d'une sommative ratée à 5 secondes (10 min
 sinon, D32).
 
+## Commerce (API-L3b)
+
+- Zones de livraison du Bénin : « Cotonou et Abomey-Calavi » (1 000 FCFA, 24 à 48 h), « Porto-Novo » (1 500 FCFA),
+  « Reste du Bénin » (2 500 FCFA) ; adresse de livraison enregistrée pour Marie.
+- Une commande de kit payée par Marie pour Léa, expédiée, avec son **Kit Code** (visible de Marie dans la commande)
+  et son reçu PDF.
+- Une demande de paiement de Léa à Marie pour un parcours payant, en attente (lien SMS dans Mailpit).
+- Une candidature de Léa à un événement payant, en attente de l'accord de Marie (le ticket de Léa la rend gratuite).
+- Paiement en local : faux prestataire, **pilotable par le numéro** (`…01` succès, `…02` échec, `…03` reste en
+  attente) ; `manage.py simulate_payment <référence> success|failed` et `manage.py pay_payment_request <id>`.
+
 ## Classes de M. Adékambi (API-L5)
 
 L'école a l'offre « Offre Classe Robotique 2026 » (3 parcours, 120 élèves, 4 classes). Deux classes :
@@ -77,3 +88,10 @@ connexion (QR code). Le secret :
 
 La connexion à l'admin (WAD15) demande l'email, le mot de passe `Steamy2026` et le code à 6 chiffres de
 l'application. Un même code ne sert qu'une fois par compte : attendre le suivant (30 s) pour se reconnecter.
+
+## Impact Tracker
+
+`seed_demo` calcule les KPI `auto` sur le jeu D2 (même calcul que la tâche nocturne `aggregate_daily_stats`, aussi
+lançable par `make manage c="aggregate_daily_stats"`) et saisit, pour le trimestre en cours, une partie des
+indicateurs manuels (financements, produit, satisfaction, emploi) au nom de Rachidi Bello (Finance). « Lesquels ? »
+reste à renseigner dans WAD05. Ventes et parcours complétés restent « En attente » jusqu'à API-L3a/L3b.

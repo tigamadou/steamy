@@ -18,6 +18,12 @@ from .models import ClassroomMembership, School
 Status = ClassroomMembership.Status
 
 
+def check_offer(school: School) -> None:
+    """Offre échue (`valid_until` dépassé) : plus de nouvelle classe ni de nouvel élève (2026-10-16, C21)."""
+    if school.valid_until is not None and school.valid_until < timezone.localdate():
+        raise ApiError("SCHOOL_OFFER_EXPIRED")
+
+
 def lock_school(school: School) -> School:
     """À appeler dans une transaction, avant de compter."""
     return School.objects.select_for_update().get(pk=school.pk)

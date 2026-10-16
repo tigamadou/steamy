@@ -1,6 +1,6 @@
 // screens-parent-a-concevoir-web.jsx - Écrans parent absents de la maquette (C18), version web (1240×760).
 // WPD15 · Demande de paiement (D52, S8, C3, C4, C17) : 3 objets (parcours, kit, événement), 8 états,
-// modale « Refuser la demande », accès refusé, version mobile 360 (lien SMS).
+// modale « Refuser la demande », adresse de kit modifiée, accès refusé, version mobile 360 (lien SMS).
 // États manquants de l'étape 4.0 : WPD05 origine enseignant (D60) et lecture seule, modale de
 // réinitialisation du mot de passe (WPD03, D26), modale de refus d'une candidature (WPD06, D53).
 // Spec : docs/SPEC-ECRANS-3-parent-teacher-admin.md §5.11. Registre : vouvoiement.
@@ -49,6 +49,7 @@ const WPDAC_REQUESTS = {
     emoji: "⚡",
     lines: [["Parcours complet · accès à vie", "18 000 FCFA"]],
     total: "18 000 FCFA",
+    requiredKit: "Kit Capteurs Steamy · non inclus (Kit Code à saisir par Léa)",
     note: "Le parcours est débloqué pour Léa dès la confirmation du paiement.",
   },
   kit: {
@@ -153,9 +154,47 @@ function WPDACChild({ badge }) {
   );
 }
 
+// Adresse de livraison en cours de modification (zones et frais : référentiel shop, D38).
+function WPDACAddressEdit() {
+  return (
+    <div style={{ padding: 14, borderRadius: 14, border: "2px solid var(--primary-200)", background: "var(--primary-50)", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ fontSize: 13, fontWeight: 900 }}>🚚 Modifier l'adresse de livraison</div>
+      <Field label="Zone de livraison" required hint="Les frais dépendent de la zone.">
+        <div className="input" style={{ background: "var(--surface)" }}>
+          <select style={WPDAC_SELECT}>
+            <option>Abomey-Calavi</option>
+            <option>Cotonou</option>
+            <option>Porto-Novo</option>
+          </select>
+        </div>
+      </Field>
+      <Field label="Adresse" required>
+        <Input value="Godomey, carré 214, près du marché" />
+      </Field>
+      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <label style={{ flex: 1, display: "flex", gap: 8, alignItems: "center", fontSize: 12, fontWeight: 700, color: "var(--ink-600)" }}>
+          <input type="checkbox" /> Enregistrer comme adresse par défaut
+        </label>
+        <Button size="sm" variant="outline">
+          Annuler
+        </Button>
+        <Button size="sm">Valider</Button>
+      </div>
+    </div>
+  );
+}
+
 // Objet de la demande + détail du montant.
-function WPDACObject({ kind = "course", compact }) {
-  const r = WPDAC_REQUESTS[kind];
+function WPDACObject({ kind = "course", compact, editAddress }) {
+  const base = WPDAC_REQUESTS[kind];
+  // Adresse modifiée : frais de la nouvelle zone et total recalculés par le serveur.
+  const r = editAddress
+    ? {
+        ...base,
+        lines: [base.lines[0], ["Livraison · zone Abomey-Calavi", "2 000 FCFA"]],
+        total: "37 000 FCFA",
+      }
+    : base;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -181,13 +220,22 @@ function WPDACObject({ kind = "course", compact }) {
           <div style={{ fontSize: 17, fontWeight: 900, marginTop: 4 }}>{r.title}</div>
         </div>
       </div>
+      {r.requiredKit && !compact && (
+        <div style={{ display: "flex", gap: 8, fontSize: 13, fontWeight: 700, color: "var(--ink-600)" }}>
+          <span>🧰</span>
+          <span>
+            Kit requis : <b>{r.requiredKit}</b>
+          </span>
+        </div>
+      )}
       {kind === "event" && !compact && (
         <div style={{ display: "flex", gap: 14, fontSize: 13, fontWeight: 700, color: "var(--ink-600)", flexWrap: "wrap" }}>
           <span>📅 Samedi 28 juin 2026 · 14:00 – 16:30</span>
           <span>📍 Porto-Novo · Maison des jeunes</span>
         </div>
       )}
-      {kind === "kit" && !compact && (
+      {kind === "kit" && !compact && editAddress && <WPDACAddressEdit />}
+      {kind === "kit" && !compact && !editAddress && (
         <div style={{ padding: 14, borderRadius: 14, border: "2px solid var(--ink-100)", display: "flex", gap: 12, alignItems: "flex-start" }}>
           <span style={{ fontSize: 18 }}>🚚</span>
           <div style={{ flex: 1 }}>
@@ -218,7 +266,7 @@ function WPDACObject({ kind = "course", compact }) {
 }
 
 // Colonne gauche commune : enfant, objet, rappel de la demande.
-function WPDACSummary({ kind = "course", badge, metaLine }) {
+function WPDACSummary({ kind = "course", badge, metaLine, editAddress }) {
   return (
     <WPDACCard>
       <WPDACKicker>Demande de votre enfant</WPDACKicker>
@@ -226,14 +274,14 @@ function WPDACSummary({ kind = "course", badge, metaLine }) {
       <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-500)" }}>
         {metaLine || "Reçue le 13 oct. 2026 · valable jusqu'au 20 oct. 2026 (7 jours)"}
       </div>
-      <WPDACObject kind={kind} />
+      <WPDACObject kind={kind} editAddress={editAddress} />
       <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-600)", lineHeight: 1.5 }}>{WPDAC_REQUESTS[kind].note}</div>
     </WPDACCard>
   );
 }
 
 // Formulaire PaymentForm (WA03) dans le shell parent : pays, réseau (référentiel par pays, D76), numéro prérempli (WPD08).
-function WPDACPaymentForm({ kind = "course", disabled }) {
+function WPDACPaymentForm({ kind = "course", disabled, total }) {
   const r = WPDAC_REQUESTS[kind];
   return (
     <WPDACCard>
@@ -261,8 +309,8 @@ function WPDACPaymentForm({ kind = "course", disabled }) {
       <Field label="Numéro Mobile Money" required hint="Prérempli depuis vos paramètres (Livraison & paiement).">
         <PhoneInput value="01 97 45 22 18" />
       </Field>
-      <Button block size="lg" variant="secondary" disabled={disabled}>
-        Payer {r.total}
+      <Button block size="lg" disabled={disabled}>
+        Payer {total || r.total}
       </Button>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontSize: 12, fontWeight: 700, color: "var(--ink-500)" }}>
         <Icon name="lock" size={14} color="var(--ink-500)" /> Paiement sécurisé · aucune carte bancaire
@@ -285,7 +333,22 @@ function WPDACPaymentForm({ kind = "course", disabled }) {
 }
 
 // Panneau de statut (PaymentStatusPanel du lot 3 rendu dans le shell parent).
-function WPDACStatusPanel({ status }) {
+function WPDACStatusPanel({ status, mobile }) {
+  if (status === "confirming" && mobile)
+    return (
+      <WPDACCard style={{ alignItems: "center", textAlign: "center", padding: "24px 16px" }}>
+        <Mascot pose="focus" size={90} />
+        <Loader />
+        <div style={{ fontSize: 18, fontWeight: 900 }}>Validez le paiement sur ce téléphone</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-600)", lineHeight: 1.5 }}>
+          Une fenêtre MTN Mobile Money va s'afficher : saisissez votre code secret, puis revenez sur cette page. Le statut
+          se met à jour tout seul.
+        </div>
+        <WPDACNote icon="⏱️" tone="ink">
+          Rien ne s'affiche ? Composez le menu Mobile Money de votre opérateur pour valider l'opération en attente.
+        </WPDACNote>
+      </WPDACCard>
+    );
   if (status === "confirming")
     return (
       <WPDACCard style={{ alignItems: "center", textAlign: "center", padding: "32px 24px" }}>
@@ -442,7 +505,7 @@ function WPDACStatusBadge({ status }) {
 // ════════════════════════════════════════════════════════
 // WPD15 · DEMANDE DE PAIEMENT
 // ════════════════════════════════════════════════════════
-function WPD15_PaymentRequest({ kind = "course", status = "pending", modal }) {
+function WPD15_PaymentRequest({ kind = "course", status = "pending", modal, editAddress }) {
   return (
     <div style={{ position: "relative", height: "100%" }}>
       <WebParentShell active="home" headerTitle="Demande de paiement" notifDot>
@@ -450,8 +513,12 @@ function WPD15_PaymentRequest({ kind = "course", status = "pending", modal }) {
           Accueil › À valider › <b>Demande de paiement</b>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 420px", gap: 22, alignItems: "flex-start" }}>
-          <WPDACSummary kind={kind} badge={<WPDACStatusBadge status={status} />} />
-          {status === "pending" ? <WPDACPaymentForm kind={kind} /> : <WPDACStatusPanel status={status} />}
+          <WPDACSummary kind={kind} badge={<WPDACStatusBadge status={status} />} editAddress={editAddress} />
+          {status === "pending" ? (
+            <WPDACPaymentForm kind={kind} total={editAddress ? "37 000 FCFA" : undefined} />
+          ) : (
+            <WPDACStatusPanel status={status} />
+          )}
         </div>
       </WebParentShell>
       {modal && <WPDACRefuseModal />}
@@ -502,7 +569,8 @@ function WPD15_NotFound() {
 }
 
 // Version mobile 360 : le lien SMS est ouvert sur le téléphone du parent.
-function WPD15_Mobile() {
+function WPD15_Mobile({ kind = "course", status = "pending" }) {
+  const r = WPDAC_REQUESTS[kind];
   return (
     <div style={{ height: "100%", overflowY: "auto", background: "var(--bg)", fontFamily: "var(--font-sans)", color: "var(--ink-900)" }}>
       <div
@@ -523,38 +591,44 @@ function WPD15_Mobile() {
         <Icon name="bell" size={20} color="var(--ink-700)" />
       </div>
       <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
-        <WPDACChild badge={<WPDACStatusBadge status="pending" />} />
+        <WPDACChild badge={<WPDACStatusBadge status={status} />} />
         <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-500)" }}>Reçue le 13 oct. · valable jusqu'au 20 oct.</div>
         <WPDACCard style={{ padding: 16 }}>
-          <WPDACObject kind="course" />
+          <WPDACObject kind={kind} />
         </WPDACCard>
-        <WPDACCard style={{ padding: 16 }}>
-          <Field label="Pays" required>
-            <div className="input">
-              <span style={{ fontSize: 18 }}>🇧🇯</span>
-              <select style={WPDAC_SELECT}>
-                <option>Bénin</option>
-              </select>
-            </div>
-          </Field>
-          <div style={{ display: "flex", gap: 8 }}>
-            <WANetworkCard name="MTN" dot="var(--amber-400)" selected />
-            <WANetworkCard name="Moov" dot="var(--info-500)" />
-            <WANetworkCard name="Celtiis" dot="var(--error-500)" />
-          </div>
-          <Field label="Numéro Mobile Money" required>
-            <PhoneInput value="01 97 45 22 18" />
-          </Field>
-          <Button block size="lg" variant="secondary">
-            Payer 18 000 FCFA
-          </Button>
-          <div style={{ textAlign: "center", fontSize: 12, fontWeight: 700, color: "var(--ink-500)" }}>
-            🔒 Paiement sécurisé · aucune carte bancaire
-          </div>
-        </WPDACCard>
-        <button style={{ border: 0, background: "transparent", font: "800 14px var(--font-sans)", color: "var(--error-600)", padding: 8 }}>
-          Refuser la demande
-        </button>
+        {status !== "pending" ? (
+          <WPDACStatusPanel status={status} mobile />
+        ) : (
+          <>
+            <WPDACCard style={{ padding: 16 }}>
+              <Field label="Pays" required>
+                <div className="input">
+                  <span style={{ fontSize: 18 }}>🇧🇯</span>
+                  <select style={WPDAC_SELECT}>
+                    <option>Bénin</option>
+                  </select>
+                </div>
+              </Field>
+              <div style={{ display: "flex", gap: 8 }}>
+                <WANetworkCard name="MTN" dot="var(--amber-400)" selected />
+                <WANetworkCard name="Moov" dot="var(--info-500)" />
+                <WANetworkCard name="Celtiis" dot="var(--error-500)" />
+              </div>
+              <Field label="Numéro Mobile Money" required>
+                <PhoneInput value="01 97 45 22 18" />
+              </Field>
+              <Button block size="lg">
+                Payer {r.total}
+              </Button>
+              <div style={{ textAlign: "center", fontSize: 12, fontWeight: 700, color: "var(--ink-500)" }}>
+                🔒 Paiement sécurisé · aucune carte bancaire
+              </div>
+            </WPDACCard>
+            <button style={{ border: 0, background: "transparent", font: "800 14px var(--font-sans)", color: "var(--error-600)", padding: 8 }}>
+              Refuser la demande
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -579,6 +653,7 @@ function WPDACTeacherOrigin() {
   );
 }
 
+// readOnly : "expired" (7 jours sans réponse, D21) ou "done" (déjà traitée, par exemple depuis le lien SMS).
 function WPD05_TeacherConsent({ readOnly }) {
   return (
     <WebParentShell active="home" headerTitle="Demande de consentement">
@@ -587,33 +662,47 @@ function WPD05_TeacherConsent({ readOnly }) {
           Accueil › <b>Demande de consentement</b>
         </div>
         <WPDACCard style={{ padding: 26, gap: 16 }}>
-          {readOnly && (
+          {readOnly === "expired" && (
             <WPDACNote icon="⌛" tone="ink">
               Cette demande a expiré le 20 oct. 2026 (7 jours sans réponse) : elle est en lecture seule. L'enseignant peut
               vous en renvoyer une.
+            </WPDACNote>
+          )}
+          {readOnly === "done" && (
+            <WPDACNote icon="✅" tone="success">
+              Vous avez déjà accepté cette demande le 14 oct. 2026 : le compte d'Inès est créé et elle a rejoint la classe.
+              Retrouvez-la dans « Mes enfants ».
             </WPDACNote>
           )}
           <div style={{ display: "flex", alignItems: "center", gap: 14, padding: 16, borderRadius: 18, background: "var(--bg)", border: "2px solid var(--ink-100)" }}>
             <Avatar name="Inès" size={52} color="var(--cat-code)" ring />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 18, fontWeight: 900 }}>Inès Adjovi</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-500)" }}>Lien de parenté indiqué : vous êtes sa mère</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-500)" }}>12 ans · lien de parenté indiqué : vous êtes sa mère</div>
             </div>
-            <Badge tone={readOnly ? "neutral" : "amber"}>{readOnly ? "Expirée" : "En attente"}</Badge>
+            <Badge tone={{ expired: "neutral", done: "success" }[readOnly] || "amber"}>
+              {{ expired: "Expirée", done: "Acceptée" }[readOnly] || "En attente"}
+            </Badge>
           </div>
           <WPDACTeacherOrigin />
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-600)", lineHeight: 1.5 }}>
             En acceptant, vous créez le compte d'Inès (identifiant et mot de passe) : elle rejoint ensuite la classe. Vous
             restez son responsable légal et suivez sa progression depuis votre espace.
           </div>
-          <div style={{ display: "flex", gap: 12 }}>
-            <Button variant="secondary" block disabled={readOnly}>
-              Accepter et créer son compte
+          {readOnly === "done" ? (
+            <Button variant="outline" block>
+              Voir le profil d'Inès
             </Button>
-            <Button variant="outline" block disabled={readOnly}>
-              Refuser
-            </Button>
-          </div>
+          ) : (
+            <div style={{ display: "flex", gap: 12 }}>
+              <Button variant="secondary" block disabled={!!readOnly}>
+                Accepter et créer son compte
+              </Button>
+              <Button variant="outline" block disabled={!!readOnly}>
+                Refuser
+              </Button>
+            </div>
+          )}
         </WPDACCard>
       </div>
     </WebParentShell>
@@ -745,12 +834,15 @@ function ParentACSections() {
       key="ac-wpd15-objets"
       id="ac-wpd15-objets"
       title="À valider (C18) · WPD15 Demande de paiement · objets"
-      subtitle="Cible du lien SMS et des notifications (D52). Parent du bénéficiaire uniquement. Montant calculé par le serveur. Kit : adresse préremplie depuis WPD08, modifiable, frais de la zone ; stock réservé à l'initiation du paiement (D38). Événement : inscription confirmée au paiement (C3)."
+      subtitle="Cible du lien SMS et des notifications (D52). Parent du bénéficiaire uniquement. Montant calculé par le serveur. Parcours : kit requis éventuel. Kit : adresse préremplie depuis WPD08, modifiable (zone du référentiel, frais et total recalculés par le serveur) ; stock réservé à l'initiation du paiement (D38). Événement : inscription confirmée au paiement (C3). « Payer » en magenta (C1). Mobile 360 d'abord : le lien SMS s'ouvre sur le téléphone qui valide aussi le paiement."
     >
       {ab("WPD15", "WPD15 · Parcours · à payer", <WPD15_PaymentRequest kind="course" />)}
       {ab("WPD15-kit", "WPD15 · Kit · à payer", <WPD15_PaymentRequest kind="kit" />)}
       {ab("WPD15-evenement", "WPD15 · Événement · à payer", <WPD15_PaymentRequest kind="event" />)}
+      {ab("WPD15-kit-adresse", "WPD15 · Kit · adresse modifiée", <WPD15_PaymentRequest kind="kit" editAddress />)}
       {ab("WPD15-mobile", "WPD15 · Mobile 360 (lien SMS)", <WPD15_Mobile />, 360, 760)}
+      {ab("WPD15-mobile-kit", "WPD15 · Mobile 360 · kit", <WPD15_Mobile kind="kit" />, 360, 760)}
+      {ab("WPD15-mobile-confirmation", "WPD15 · Mobile 360 · confirmation", <WPD15_Mobile status="confirming" />, 360, 760)}
     </DCSection>,
     <DCSection
       key="ac-wpd15-etats"
@@ -772,11 +864,12 @@ function ParentACSections() {
       key="ac-wpd-etats"
       id="ac-wpd-etats"
       title="À valider (C18) · États manquants de l'espace parent (étape 4.0)"
-      subtitle="WPD05 origine enseignant (D60) : acceptation → création de l'identifiant (champs de WPD04 préremplis) → l'élève rejoint la classe ; expirée ou déjà traitée : lecture seule. WPD03 : réinitialisation du mot de passe (D26). WPD06 : refus d'une candidature (D53)."
+      subtitle="WPD05 origine enseignant (D60) : prénom, nom, âge, lien de parenté (D20) ; acceptation → création de l'identifiant (champs de WPD04 préremplis) → l'élève rejoint la classe ; expirée ou déjà traitée : lecture seule. WPD03 : réinitialisation du mot de passe (D26). WPD06 : refus d'une candidature (D53)."
     >
       {ab("WPD05-enseignant", "WPD05 · Origine enseignant", <WPD05_TeacherConsent />)}
       {ab("WPD05-enseignant-compte", "WPD05 · Création du compte", <WPD05_TeacherAccountStep />)}
-      {ab("WPD05-expiree", "WPD05 · Expirée (lecture seule)", <WPD05_TeacherConsent readOnly />)}
+      {ab("WPD05-expiree", "WPD05 · Expirée (lecture seule)", <WPD05_TeacherConsent readOnly="expired" />)}
+      {ab("WPD05-traitee", "WPD05 · Déjà traitée (lecture seule)", <WPD05_TeacherConsent readOnly="done" />)}
       {ab("WPD03-mdp", "WPD03 · Modale mot de passe", <WPD03_ResetPasswordModal />)}
       {ab("WPD06-refus", "WPD06 · Modale de refus", <WPD06_RefuseApplicationModal />)}
     </DCSection>,

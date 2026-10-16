@@ -1,92 +1,91 @@
-# apps/payments/utils.py
-import hashlib
-import hmac
+"""
+Traitement des notifications de paiement (S5, S9, ADR 0003). Le webhook vérifié est la source de vérité ; la tâche
+`reconcile_pending_payments` passe par le même traitement quand un webhook s'est perdu.
+"""
+
 import logging
-from decimal import Decimal, InvalidOperation
 
-from django.conf import settings
-from django.db import IntegrityError, transaction
+from django.db import transaction
+from django.utils import timezone
 
+from apps.core.audit import audit
+
+from .fulfillment import settle
 from .models import Order, Payment
+from .providers import PaymentEvent, PaymentStatus
 
 logger = logging.getLogger(__name__)
 
-SUCCESS_STATES = {"success", "completed", "paid", "succeeded", "approved"}
+TERMINAL = (Payment.Status.SUCCEEDED, Payment.Status.FAILED)
 
 
 class WebhookRejected(Exception):
     """Notification de paiement refusée : elle ne doit avoir aucun effet (S5)."""
 
 
-def verify_provider_webhook(provider_name: str, request):
-    """
-    Vérifie l'authenticité d'une notification (HMAC-SHA256 du corps brut).
-    Le format exact de chaque prestataire est intégré en API-L3b, après leur comparaison (S9).
-    """
-    secret = getattr(settings, f"PAYMENTS_{provider_name.upper()}_SECRET", None)
-    if not secret:
-        return False
-
-    signature = request.headers.get("X-Signature") or request.headers.get("X-Callback-Signature")
-    if not signature:
-        return False
-
-    computed = hmac.new(secret.encode(), request.body, hashlib.sha256).hexdigest()
-    return hmac.compare_digest(computed, signature)
-
-
-def _parse_amount(value):
-    try:
-        return Decimal(str(value))
-    except (InvalidOperation, TypeError, ValueError):
-        raise WebhookRejected("montant illisible") from None
-
-
 @transaction.atomic
-def handle_provider_event(provider_name: str, data: dict):
+def handle_payment_event(provider_name: str, event: PaymentEvent) -> bool:
     """
-    Enregistre une notification de paiement et marque la commande payée si elle est valide.
+    Applique une notification authentifiée et normalisée. Garanties :
+    - verrou sur la commande (`select_for_update`) : deux notifications simultanées sont traitées l'une après
+      l'autre, et l'exécution post-paiement n'a lieu qu'une fois ;
+    - idempotence : un paiement déjà réussi ou échoué n'est plus modifié (rejeu) ;
+    - montant et devise comparés à la commande : un écart fait échouer le paiement, sans payer la commande, et
+      laisse une alerte dans le journal d'audit.
 
-    Garanties (S5) :
-    - le montant ET la devise doivent correspondre exactement à la commande ;
-    - idempotence : une transaction (prestataire + identifiant) n'est traitée qu'une fois,
-      même en cas de notifications simultanées (verrou sur la commande + contrainte unique) ;
-    - une commande déjà payée n'est jamais modifiée.
+    Renvoie False si la notification est refusée après avoir été enregistrée (écart de montant ou de devise).
     """
-    reference = data.get("reference") or data.get("merchant_ref") or data.get("order_ref")
-    tx_id = data.get("transaction_id") or data.get("tx_id") or data.get("id")
-    status = str(data.get("status") or data.get("state") or data.get("event") or "").lower()
-    if not reference or not tx_id:
-        raise WebhookRejected("référence ou transaction manquante")
-
-    try:
-        order = Order.objects.select_for_update().get(reference=reference)
-    except Order.DoesNotExist:
-        raise WebhookRejected("commande inconnue") from None
-
-    amount = _parse_amount(data.get("amount"))
-    currency = str(data.get("currency") or "").upper()
-    if amount != order.total or currency != order.currency.upper():
-        raise WebhookRejected(
-            f"montant ou devise incohérents ({amount} {currency} pour {order.total} {order.currency})"
-        )
-
-    try:
-        payment, _ = Payment.objects.get_or_create(
+    order = Order.objects.select_for_update().filter(reference=event.reference).first()
+    if order is None:
+        raise WebhookRejected("commande inconnue")
+    payment = (
+        Payment.objects.select_for_update()
+        .filter(provider=provider_name, provider_transaction_id=event.provider_tx_id)
+        .first()
+    )
+    if payment is not None and payment.order_id != order.id:
+        raise WebhookRejected("transaction rattachée à une autre commande")
+    if payment is None:  # initiation perdue ou faite hors de Steamy : la notification fait foi
+        payment = Payment.objects.create(
+            order=order,
             provider=provider_name,
-            provider_transaction_id=str(tx_id),
-            defaults={"order": order, "amount": amount, "currency": order.currency},
+            provider_transaction_id=event.provider_tx_id,
+            amount=event.amount,
+            currency=event.currency or order.currency,
+            status=Payment.Status.PENDING,
         )
-    except IntegrityError:  # notification concurrente pour la même transaction
-        payment = Payment.objects.get(provider=provider_name, provider_transaction_id=str(tx_id))
-    if payment.order_id != order.id:
-        raise WebhookRejected("transaction déjà rattachée à une autre commande")
-    if payment.success or order.paid:
-        return payment  # rejeu : déjà traité
+    if payment.status in TERMINAL:
+        return True  # rejeu : déjà traité
 
-    payment.provider_payload = data
-    if status in SUCCESS_STATES:
-        payment.mark_success(tx_id=str(tx_id))
-    else:
+    payment.payload = {"status": event.status, "amount": event.amount, "currency": event.currency}
+    if event.amount != order.total or event.currency != order.currency:
+        payment.status = Payment.Status.FAILED
+        payment.failure_code = "AMOUNT_MISMATCH"
+        payment.failure_reason = "Montant ou devise différents de la commande."
         payment.save()
-    return payment
+        audit(
+            "payment.amount_mismatch",
+            target=order,
+            data={
+                "payment": payment.pk,
+                "expected": [order.total, order.currency],
+                "received": [event.amount, event.currency],
+            },
+        )
+        logger.warning("Paiement %s : montant ou devise incohérents", payment.pk)
+        return False
+
+    if event.status == PaymentStatus.SUCCEEDED:
+        payment.status = Payment.Status.SUCCEEDED
+        payment.confirmed_at = timezone.now()
+        payment.save()
+        settle(order, payment)
+    elif event.status == PaymentStatus.FAILED:
+        payment.status = Payment.Status.FAILED
+        payment.failure_code = "DECLINED"
+        payment.failure_reason = event.failure_reason or "Paiement refusé."
+        payment.save()
+    else:
+        payment.status = Payment.Status.PENDING
+        payment.save()
+    return True

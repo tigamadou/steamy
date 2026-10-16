@@ -1,18 +1,20 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { RoleGate } from "@/components/auth/RoleGate";
-import { Loader } from "@/components/ds/Loader";
+import { AppShellSkeleton } from "@/components/ds/AppShell";
 
-// Espace apprenant : session et rôle vérifiés côté serveur, sous Suspense (cacheComponents).
+// Espace personnel : jamais indexé.
+export const metadata: Metadata = {
+  title: { default: "Mon espace", template: "%s · Steamy" },
+  robots: { index: false, follow: false },
+};
+
+// Espace apprenant : session et rôle vérifiés côté serveur, sous Suspense (cacheComponents), avec le squelette du
+// shell pendant la lecture de la session.
 export default function ApprenantLayout({ children }: LayoutProps<"/">) {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-dvh items-center justify-center">
-          <Loader label="Chargement de ton espace…" />
-        </div>
-      }
-    >
+    <Suspense fallback={<AppShellSkeleton label="Chargement de ton espace…" />}>
       <RoleGate role="learner">{children}</RoleGate>
     </Suspense>
   );
