@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { decideConsent, uniquePhone } from "./support/api";
+import { logoutFromShell } from "./support/session";
 import { sendConsentRequest, startLearnerSignup } from "./support/signup";
 
 // W10-W15 · Mot de passe et profil de l'apprenant après l'accord du parent (LOT-2-AUTH, étape 2.5)
@@ -87,7 +88,7 @@ test("W10 → W15 : l'apprenant choisit son mot de passe, complète son profil e
   await page.getByRole("link", { name: "Aller sur mon tableau de bord" }).click();
   await expect(page).toHaveURL("/apprenant");
 
-  await page.getByRole("button", { name: "Se déconnecter" }).click();
+  await logoutFromShell(page);
   await expect(page).toHaveURL("/connexion");
   await page.getByRole("textbox", { name: /Identifiant ou numéro/ }).fill(username);
   await page.getByRole("textbox", { name: /^Mot de passe/ }).fill("Robot2026x");

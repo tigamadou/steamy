@@ -9,14 +9,15 @@ import { getCurrentUser } from "@/lib/auth/session";
 
 /**
  * Garde de rôle d'un espace (layouts `(apprenant)`, `(parent)`, `(enseignant)`), à placer sous `<Suspense>` :
- * session absente ou expirée → connexion avec retour (`?next=`) ; autre rôle → son propre espace.
+ * session absente ou expirée → connexion avec retour (`?next=`) ; autre rôle → son propre espace ; profil
+ * incomplet → étape de profil restante (W11-W14, WP07-WP09).
  */
 export async function RoleGate({ role, children }: { role: Role; children: ReactNode }) {
   const me = await getCurrentUser();
   if (!me) {
     redirect(loginUrl((await headers()).get(PATH_HEADER)));
   }
-  if (me.role !== role) {
+  if (me.role !== role || me.profileStep) {
     redirect(homeForRole(me));
   }
   return children;

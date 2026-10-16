@@ -108,6 +108,10 @@ CATALOG: dict[str, tuple[int, str]] = {
         S.HTTP_400_BAD_REQUEST,
         "La date de naissance ne correspond pas à l'âge indiqué à l'inscription.",
     ),
+    "DELETION_ALREADY_RESOLVED": (
+        S.HTTP_409_CONFLICT,
+        "Cette demande de suppression a déjà été traitée.",
+    ),
     # --- Pédagogie --------------------------------------------------------------------------
     "PAYMENT_REQUIRED": (
         S.HTTP_402_PAYMENT_REQUIRED,
@@ -150,10 +154,15 @@ CATALOG: dict[str, tuple[int, str]] = {
     "ORDER_EXPIRED": (S.HTTP_410_GONE, "Cette commande a expiré."),
     "ORDER_ALREADY_PAID": (S.HTTP_409_CONFLICT, "Cette commande est déjà payée."),
     "PAYMENT_FAILED": (S.HTTP_402_PAYMENT_REQUIRED, "Le paiement n'a pas abouti."),
+    "PAYMENT_REQUEST_CLOSED": (S.HTTP_409_CONFLICT, "Cette demande de paiement est déjà traitée."),
     # --- Événements, classes, pilotage ------------------------------------------------------
     "EVENT_FULL": (S.HTTP_409_CONFLICT, "Cet événement est complet."),
     "EVENT_CLOSED": (S.HTTP_409_CONFLICT, "Les candidatures à cet événement sont closes."),
     "ALREADY_APPLIED": (S.HTTP_409_CONFLICT, "Une candidature existe déjà pour cet événement."),
+    "APPLICATION_ALREADY_RESOLVED": (
+        S.HTTP_409_CONFLICT,
+        "Cette candidature a déjà été traitée.",
+    ),
     "EVENT_ALREADY_PROPOSED": (
         S.HTTP_409_CONFLICT,
         "Cet événement a déjà été proposé à cette classe.",
@@ -165,6 +174,10 @@ CATALOG: dict[str, tuple[int, str]] = {
     "LEARNER_QUOTA_EXCEEDED": (
         S.HTTP_409_CONFLICT,
         "Le nombre maximal d'élèves de votre offre est atteint.",
+    ),
+    "SCHOOL_OFFER_EXPIRED": (
+        S.HTTP_403_FORBIDDEN,
+        "L'offre de votre école a expiré : contactez l'équipe Steamy pour la renouveler.",
     ),
     "COURSE_NOT_IN_OFFER": (
         S.HTTP_400_BAD_REQUEST,

@@ -11,16 +11,19 @@ from apps.accounts.fields import PhoneField
 from apps.accounts.models import ConsentRequest
 from apps.catalog.models import Course, Level, Mission, Project, Quiz
 from apps.catalog.serializers import CategorySummarySerializer
+from apps.events.models import EventApplication
+from apps.events.serializers import EventSummarySerializer
 from apps.learning.models import QuizAttempt
 from apps.learning.serializers import BadgeSerializer
 from apps.referentials.models import Relationship, SchoolGrade
 from apps.referentials.serializers import AvatarSerializer, SchoolGradeSerializer
+from libs.errors import ApiError
 
 from . import follow_up, quotas
 from .models import Classroom, ClassroomMembership, School, TeacherComment, validate_color
 
 
-class CourseSummarySerializer(serializers.ModelSerializer):
+class ClassroomCourseSerializer(serializers.ModelSerializer):
     category = CategorySummarySerializer(read_only=True)
 
     class Meta:
@@ -37,7 +40,10 @@ class SchoolSerializer(serializers.ModelSerializer):
     learners_left = serializers.SerializerMethodField()
     classrooms_used = serializers.SerializerMethodField()
     classrooms_left = serializers.SerializerMethodField()
-    courses = CourseSummarySerializer(many=True, read_only=True)
+    offer_expired = serializers.SerializerMethodField(
+        help_text="Offre échue : création de classes et ajout d'élèves bloqués (`SCHOOL_OFFER_EXPIRED`)"
+    )
+    courses = ClassroomCourseSerializer(many=True, read_only=True)
 
     class Meta:
         model = School
@@ -47,6 +53,7 @@ class SchoolSerializer(serializers.ModelSerializer):
             "country",
             "offer",
             "valid_until",
+            "offer_expired",
             "learner_quota",
             "learners_used",
             "learners_left",
@@ -56,6 +63,13 @@ class SchoolSerializer(serializers.ModelSerializer):
             "courses",
         )
         read_only_fields = fields
+
+    def get_offer_expired(self, school) -> bool:
+        try:
+            quotas.check_offer(school)
+        except ApiError:
+            return True
+        return False
 
     def get_learners_used(self, school) -> int:
         return quotas.learners_used(school)
@@ -73,7 +87,7 @@ class SchoolSerializer(serializers.ModelSerializer):
 class ClassroomSerializer(serializers.ModelSerializer):
     """Carte de classe (WT01, WT03) et en-tête de WT04."""
 
-    course = CourseSummarySerializer(read_only=True)
+    course = ClassroomCourseSerializer(read_only=True)
     school_grade = SchoolGradeSerializer(read_only=True, allow_null=True)
     member_count = serializers.IntegerField(read_only=True, help_text="Élèves actifs")
     pending_invitation_count = serializers.IntegerField(
@@ -296,14 +310,14 @@ class ProjectNodeSerializer(StatsMixin, serializers.ModelSerializer):
         return self._stat("project_pass_rate", project.pk)
 
 
-class SupervisedCourseSerializer(CourseSummarySerializer):
+class SupervisedCourseSerializer(ClassroomCourseSerializer):
     """Parcours encadré (WT02) : ses classes et ses élèves actifs chez l'enseignant."""
 
     classroom_count = serializers.IntegerField(read_only=True)
     learner_count = serializers.IntegerField(read_only=True)
 
-    class Meta(CourseSummarySerializer.Meta):
-        fields = (*CourseSummarySerializer.Meta.fields, "classroom_count", "learner_count")
+    class Meta(ClassroomCourseSerializer.Meta):
+        fields = (*ClassroomCourseSerializer.Meta.fields, "classroom_count", "learner_count")
         read_only_fields = fields
 
 
@@ -366,7 +380,7 @@ class ImportRequestSerializer(serializers.Serializer):
     """Un fichier CSV ou Excel (.xlsx, 1 Mo, 200 lignes) **ou** des lignes (liste collée, lignes corrigées)."""
 
     file = serializers.FileField(required=False)
-    rows = ImportRowSerializer(many=True, required=False)
+    rows = ImportRowSerializer(many=True, required=False, max_length=200)
 
     def validate(self, attrs):
         if bool(attrs.get("file")) == ("rows" in attrs):
@@ -582,3 +596,23 @@ class LearnerCommentSerializer(serializers.ModelSerializer):
 
 class CommentQuerySerializer(serializers.Serializer):
     learnerId = serializers.IntegerField(required=False, help_text="Parent : un de ses enfants")
+
+
+# --- Candidatures des élèves aux Steamy Events (WT09, API-L5.5) -----------------------------------
+
+
+class EventApplicationQuerySerializer(serializers.Serializer):
+    # Paramètres d'URL : noms en camelCase, comme le reste de l'API
+    classroomId = serializers.IntegerField(required=False)
+    event = serializers.SlugField(required=False, help_text="Slug de l'événement")
+
+
+class ClassroomEventApplicationSerializer(serializers.Serializer):
+    """Candidature d'un élève vue par son enseignant : statut seulement, ni motivation ni paiement (S8, D64)."""
+
+    id = serializers.IntegerField()
+    status = serializers.ChoiceField(choices=EventApplication.Status.choices)
+    event = EventSummarySerializer()
+    learner = MemberLearnerSerializer()
+    classroom = ClassroomRefSerializer(source="classroom_ref")
+    created_at = serializers.DateTimeField()
