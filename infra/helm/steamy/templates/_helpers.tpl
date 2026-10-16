@@ -85,7 +85,11 @@ securityContext:
   value: {{ $v.sms.sender | quote }}
 - name: TWILIO_STATUS_CALLBACK_URL
   value: {{ printf "https://%s/api/notifications/sms/status/" $v.hosts.api | quote }}
-{{- range $key, $optional := dict "SECRET_KEY" false "AWS_ACCESS_KEY_ID" false "AWS_SECRET_ACCESS_KEY" false "EMAIL_HOST_USER" true "EMAIL_HOST_PASSWORD" true "PAYMENTS_KKIAPAY_SECRET" true "PAYMENTS_FEDAPAY_SECRET" true "TWILIO_ACCOUNT_SID" true "TWILIO_AUTH_TOKEN" true }}
+- name: PAYMENT_PROVIDER
+  value: {{ $v.payments.provider | quote }}
+- name: FEDAPAY_ENVIRONMENT
+  value: {{ $v.payments.fedapayEnvironment | quote }}
+{{- range $key, $optional := dict "SECRET_KEY" false "AWS_ACCESS_KEY_ID" false "AWS_SECRET_ACCESS_KEY" false "EMAIL_HOST_USER" true "EMAIL_HOST_PASSWORD" true "FEDAPAY_SECRET_KEY" true "FEDAPAY_WEBHOOK_SECRET" true "TWILIO_ACCOUNT_SID" true "TWILIO_AUTH_TOKEN" true }}
 - name: {{ $key }}
   valueFrom:
     secretKeyRef:

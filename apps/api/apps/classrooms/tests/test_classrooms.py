@@ -484,3 +484,24 @@ def test_strings():
     membership = ClassroomMembership(classroom=Classroom(name="4e B"), status=Status.INVITED)
     assert str(membership) == "Invitation · 4e B (invited)"
     assert str(membership.classroom) == "4e B"
+
+
+# --- Offre échue (C21) -----------------------------------------------------------------------
+
+
+def test_expired_offer_blocks_new_classrooms(api, school, course):
+    from datetime import date, timedelta
+
+    school.valid_until = timezone.localdate()
+    school.save()
+    assert api.get(f"{URL}school/").json()["offerExpired"] is False
+    assert create(api, name="Dernier jour", courseSlug=course.slug).status_code == 201
+
+    school.valid_until = timezone.localdate() - timedelta(days=1)
+    school.save()
+    assert api.get(f"{URL}school/").json()["offerExpired"] is True
+    response = create(api, name="Trop tard", courseSlug=course.slug)
+    assert response.status_code == 403
+    assert response.json()["code"] == "SCHOOL_OFFER_EXPIRED"
+    assert response.json()["message"].startswith("L'offre de votre école a expiré")
+    assert isinstance(school.valid_until, date)

@@ -17,7 +17,7 @@ const SOURCES: Record<KpiSource, { label: string; description: string; className
   unavailable: {
     label: "Indisponible",
     description: "Donnée non collectée",
-    className: "border border-dashed border-ink-300 italic text-ink-500",
+    className: "border border-dashed border-ink-300 italic text-ink-600",
   },
 };
 

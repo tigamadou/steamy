@@ -269,7 +269,7 @@ Correspondance entre les noms GitHub et ceux que reçoit le serveur :
 | `RUSTFS_ACCESS_KEY` / `RUSTFS_SECRET_KEY` | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` |
 | `WASABI_ACCESS_KEY_ID` / `WASABI_SECRET_ACCESS_KEY` | idem |
 | `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | idem |
-| `PAYMENTS_KKIAPAY_SECRET` / `PAYMENTS_FEDAPAY_SECRET` | idem |
+| `FEDAPAY_SECRET_KEY` / `FEDAPAY_WEBHOOK_SECRET` | idem |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | idem |
 | `GHCR_PULL_TOKEN` + variable `GHCR_PULL_USER` | idem (utilisés par le serveur, pas transmis à l'application) |
 
@@ -283,7 +283,7 @@ Durée habituelle : à mesurer au premier déploiement réel.
 | --- | --- | --- | --- |
 | `GITHUB_TOKEN` | secret automatique | dépôt | `deploy.yml` : `images` et `charts` (publication GHCR) |
 | `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS` | secret | environnement | `deploy` : connexion SSH |
-| `SECRET_KEY`, `RUSTFS_*`, `WASABI_*`, `EMAIL_*`, `PAYMENTS_*`, `TWILIO_*`, `GHCR_PULL_TOKEN` | secret | environnement | `deploy` : transmis au serveur |
+| `SECRET_KEY`, `RUSTFS_*`, `WASABI_*`, `EMAIL_*`, `FEDAPAY_*`, `TWILIO_*`, `GHCR_PULL_TOKEN` | secret | environnement | `deploy` : transmis au serveur |
 | `DEPLOY_HOST` | variable | environnement | `deploy` : cible SSH |
 | `API_URL` | variable | environnement | `deploy` : vérification après déploiement |
 | `APP_URL` | variable | environnement | `deploy` : lien affiché |

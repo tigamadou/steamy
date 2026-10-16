@@ -1,0 +1,70 @@
+{% extends "pdf/base.html" %}
+{% block title %}{% if provisional %}Reçu{% else %}Facture{% endif %} {{ number }}{% endblock %}
+{% block style %}
+  header { display: flex; justify-content: space-between; margin-bottom: 10mm; }
+  .brand { font-size: 20pt; }
+  h1 { font-size: 18pt; margin: 0 0 2mm; }
+  .parties { display: flex; justify-content: space-between; margin-bottom: 8mm; font-size: 10pt; }
+  .parties div { width: 48%; }
+  .label { color: #6B6890; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.04em; }
+  table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+  th { text-align: left; border-bottom: 2px solid #5B3FE0; padding: 2mm 1mm; }
+  td { border-bottom: 1px solid #E4E2F0; padding: 2mm 1mm; }
+  .num { text-align: right; white-space: nowrap; }
+  .totals { margin-top: 4mm; margin-left: auto; width: 60%; font-size: 10pt; }
+  .totals td { border: none; }
+  .grand td { font-weight: 800; font-size: 12pt; border-top: 2px solid #1F1B3A; }
+  .notice { margin-top: 8mm; padding: 3mm; background: #F4F2FB; font-size: 9pt; }
+  .mentions { margin-top: 4mm; font-size: 8.5pt; color: #4A4670; }
+{% endblock %}
+{% block content %}
+<header>
+  <div class="brand">STEAMY</div>
+  <div>
+    <h1>{% if provisional %}Reçu de paiement{% else %}Facture{% endif %}</h1>
+    <div>N° {{ number }} · émis le {{ issued_on }}</div>
+    <div>Commande {{ reference }}</div>
+  </div>
+</header>
+<div class="parties">
+  <div>
+    <div class="label">Vendeur</div>
+    {% if seller.name %}<div><strong>{{ seller.name }}</strong></div>{% endif %}
+    {% if seller.address %}<div>{{ seller.address }}</div>{% endif %}
+    {% if seller.tax_id %}<div>IFU : {{ seller.tax_id }}</div>{% endif %}
+    {% if seller.registration %}<div>RCCM : {{ seller.registration }}</div>{% endif %}
+    {% if seller.phone %}<div>{{ seller.phone }}</div>{% endif %}
+    {% if seller.email %}<div>{{ seller.email }}</div>{% endif %}
+  </div>
+  <div>
+    <div class="label">Payé par</div>
+    <div><strong>{{ buyer.name }}</strong></div>
+    {% if buyer.phone %}<div>{{ buyer.phone }}</div>{% endif %}
+  </div>
+</div>
+<table>
+  <thead><tr><th>Désignation</th><th class="num">Prix unitaire</th><th class="num">Qté</th><th class="num">Montant</th></tr></thead>
+  <tbody>
+    {% for line in lines %}
+    <tr><td>{{ line.title }}</td><td class="num">{{ line.unit_price }} FCFA</td><td class="num">{{ line.quantity }}</td><td class="num">{{ line.total }} FCFA</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+<table class="totals">
+  <tr><td>Sous-total</td><td class="num">{{ subtotal }} FCFA</td></tr>
+  {% if shipping_fee %}<tr><td>Livraison</td><td class="num">{{ shipping_fee }} FCFA</td></tr>{% endif %}
+  {% if vat %}
+  <tr><td>Total HT</td><td class="num">{{ vat.excluding_vat }} FCFA</td></tr>
+  <tr><td>TVA ({{ vat.rate }} %)</td><td class="num">{{ vat.vat }} FCFA</td></tr>
+  <tr class="grand"><td>Total TTC</td><td class="num">{{ vat.including_vat }} FCFA</td></tr>
+  {% else %}
+  <tr class="grand"><td>Total payé</td><td class="num">{{ total }} FCFA</td></tr>
+  {% endif %}
+</table>
+<p>Payé le {{ payment.paid_on }} par Mobile Money{% if payment.network %} ({{ payment.network }}){% endif %}{% if payment.transaction %} · transaction {{ payment.transaction }}{% endif %}.</p>
+{% if provisional %}
+<div class="notice">Document non fiscal : reçu de paiement émis par Steamy. La facture normalisée n'est pas émise par ce document.</div>
+{% endif %}
+{% if mentions %}<div class="mentions">{% for mention in mentions %}<div>{{ mention }}</div>{% endfor %}</div>{% endif %}
+{% endblock %}
+{% block footer %}{{ number }}{% endblock %}
