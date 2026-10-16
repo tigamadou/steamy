@@ -103,7 +103,9 @@ export async function AttemptsList({ status, page }: { status: AttemptStatus | n
           Aucune tentative « {status ? attemptStatusLabel(status) : ""} » pour l&apos;instant.
         </p>
       ) : (
-        <ul className="m-0 flex list-none flex-col gap-2.5 p-0">{attempts.map(row)}</ul>
+        <ul aria-label="Tes tentatives" className="m-0 flex list-none flex-col gap-2.5 p-0">
+          {attempts.map(row)}
+        </ul>
       )}
       {(page > 1 || data.next) && (
         <nav aria-label="Pages des tentatives" className="flex justify-between gap-3">

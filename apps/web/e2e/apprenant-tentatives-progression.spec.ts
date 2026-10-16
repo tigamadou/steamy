@@ -23,7 +23,7 @@ test("WD07 → WD08 : bandeau, filtre par statut dans l'URL, détail d'une tenta
   await page.getByRole("link", { name: "Réussis" }).click();
   await expect(page).toHaveURL("/apprenant/quiz?statut=ok");
   await expect(page.getByRole("link", { name: "Réussis" })).toHaveAttribute("aria-current", "page");
-  const rows = page.getByRole("list").getByRole("link");
+  const rows = page.getByRole("list", { name: "Tes tentatives" }).getByRole("link");
   await expect(rows.first()).toContainText("Réussi");
   await page.reload();
   await expect(page.getByRole("link", { name: "Réussis" })).toHaveAttribute("aria-current", "page");
