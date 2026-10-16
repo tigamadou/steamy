@@ -144,6 +144,24 @@ export interface paths {
         patch: operations["accounts_me_partial_update"];
         trace?: never;
     };
+    "/api/accounts/me/delivery-address/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `accounts/me/delivery-address/` (WD19, WK05) : adresse proposée par défaut à la commande. */
+        get: operations["accounts_me_delivery_address_retrieve"];
+        /** @description `accounts/me/delivery-address/` (WD19, WK05) : adresse proposée par défaut à la commande. */
+        put: operations["accounts_me_delivery_address_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/accounts/me/email/": {
         parameters: {
             query?: never;
@@ -1391,6 +1409,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/shop/cart/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Panier côté serveur (D38) ; celui d'un invité reste dans le navigateur et part avec la commande. */
+        get: operations["shop_cart_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shop/cart/items/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ajouter un kit au panier (ajoute à la quantité déjà présente) */
+        post: operations["shop_cart_items_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shop/cart/items/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["shop_cart_items_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["shop_cart_items_partial_update"];
+        trace?: never;
+    };
     "/api/shop/delivery-zones/": {
         parameters: {
             query?: never;
@@ -1436,6 +1504,28 @@ export interface paths {
         get: operations["shop_kits_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shop/kits/{slug}/restock-alerts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Être prévenu du retour en stock d'un kit (WK11)
+         * @description Invité : `{ phone }`, un seul SMS (D38). Parent connecté : SMS sur le numéro du compte, sans corps.
+         *     Apprenant : notification dans l'application, jamais de téléphone (D30). Réponse identique si la demande
+         *     existait déjà.
+         */
+        post: operations["shop_kits_restock_alerts_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1591,6 +1681,26 @@ export interface components {
         Beneficiary: {
             id: number;
             firstName: string;
+        };
+        /** @description Panier (WK03, WK10) : prix courants des kits ; le total définitif est celui de la commande. */
+        Cart: {
+            items: components["schemas"]["CartItem"][];
+            /** @description Nombre d'articles (somme des quantités) */
+            count: number;
+            /** @description Somme des lignes, hors livraison (FCFA) */
+            subtotal: number;
+        };
+        CartItem: {
+            readonly id: number;
+            readonly kit: components["schemas"]["Kit"];
+            /** Quantité */
+            readonly quantity: number;
+            readonly total: number;
+        };
+        CartItemCreateRequest: {
+            kitSlug: string;
+            /** @default 1 */
+            quantity: number;
         };
         Category: {
             slug: string;
@@ -1842,13 +1952,18 @@ export interface components {
             date: string;
             seconds: number;
         };
+        /** @description Adresse de livraison enregistrée (WD19, WK05). `phone` : par défaut, celui du compte. */
         DeliveryAddress: {
+            zoneId: number;
+            readonly zone: components["schemas"]["DeliveryZone"];
+            /** Destinataire */
             recipientName: string;
-            phone: string;
-            country: string;
-            zone: string;
+            phone?: string;
+            /** Ville */
             city: string;
-            district: string;
+            /** Quartier */
+            district?: string;
+            /** Adresse */
             addressLine: string;
         };
         DeliveryAddressInputRequest: {
@@ -1861,6 +1976,19 @@ export interface components {
             /** @default  */
             district: string;
             /** @description Rue, repère, indications */
+            addressLine: string;
+        };
+        /** @description Adresse de livraison enregistrée (WD19, WK05). `phone` : par défaut, celui du compte. */
+        DeliveryAddressRequest: {
+            zoneId: number;
+            /** Destinataire */
+            recipientName: string;
+            phone?: string;
+            /** Ville */
+            city: string;
+            /** Quartier */
+            district?: string;
+            /** Adresse */
             addressLine: string;
         };
         DeliveryZone: {
@@ -2552,7 +2680,7 @@ export interface components {
              * Format: date-time
              */
             readonly createdAt: string;
-            readonly deliveryAddress: components["schemas"]["DeliveryAddress"] | null;
+            readonly deliveryAddress: components["schemas"]["OrderDeliveryAddress"] | null;
         };
         /**
          * @description * `course` - course
@@ -2610,9 +2738,18 @@ export interface components {
              * Format: date-time
              */
             readonly createdAt: string;
-            readonly deliveryAddress: components["schemas"]["DeliveryAddress"] | null;
+            readonly deliveryAddress: components["schemas"]["OrderDeliveryAddress"] | null;
             /** @description Invité seulement, remis une seule fois : à renvoyer dans l'en-tête X-Guest-Token */
             readonly guestToken: string | null;
+        };
+        OrderDeliveryAddress: {
+            recipientName: string;
+            phone: string;
+            country: string;
+            zone: string;
+            city: string;
+            district: string;
+            addressLine: string;
         };
         OrderItem: {
             readonly id: number;
@@ -2912,6 +3049,9 @@ export interface components {
         PasswordResetRequestRequest: {
             /** @description Numéro du parent ou email de l'enseignant (C7) */
             identifier: string;
+        };
+        PatchedCartItemUpdateRequest: {
+            quantity?: number;
         };
         PatchedLearnerProfileUpdateRequest: {
             /**
@@ -3245,6 +3385,13 @@ export interface components {
         };
         ResetToken: {
             resetToken: string;
+        };
+        RestockAlertAck: {
+            ok: boolean;
+        };
+        RestockAlertRequest: {
+            /** @description Invité seulement : un connecté est prévenu sur son compte */
+            phone?: string;
         };
         ResumeRequest: {
             username: string;
@@ -4028,6 +4175,104 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_delivery_address_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryAddress"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_delivery_address_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeliveryAddressRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryAddress"];
                 };
             };
             400: {
@@ -7547,6 +7792,221 @@ export interface operations {
             };
         };
     };
+    shop_cart_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cart"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_cart_items_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CartItemCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cart"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_cart_items_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_cart_items_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCartItemUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cart"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     shop_delivery_zones_list: {
         parameters: {
             query?: {
@@ -7628,6 +8088,63 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KitDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_kits_restock_alerts_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RestockAlertRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestockAlertAck"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             404: {

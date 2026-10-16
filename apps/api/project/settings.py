@@ -296,6 +296,8 @@ REST_FRAMEWORK = {
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
         # Création de commande (réserve du stock) : par utilisateur, ou par IP pour un invité
         "orders": os.getenv("THROTTLE_ORDERS", "30/hour"),
+        # Alerte de réassort (un SMS par demande) : par IP pour un invité
+        "restock-alert": os.getenv("THROTTLE_RESTOCK_ALERT", "10/hour"),
         # Formulaires publics (devis, newsletter, contact) : par IP
         "public-form": os.getenv("THROTTLE_PUBLIC_FORM", "10/hour"),
     },

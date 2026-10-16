@@ -179,7 +179,7 @@ class DeliveryZoneSummarySerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class DeliveryAddressSerializer(serializers.Serializer):
+class OrderDeliveryAddressSerializer(serializers.Serializer):
     recipient_name = serializers.CharField()
     phone = serializers.CharField()
     country = serializers.CharField()
@@ -225,7 +225,7 @@ class BeneficiaryOrderSerializer(serializers.ModelSerializer):
 class OrderSerializer(BeneficiaryOrderSerializer):
     """Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison."""
 
-    delivery_address = DeliveryAddressSerializer(read_only=True, allow_null=True)
+    delivery_address = OrderDeliveryAddressSerializer(read_only=True, allow_null=True)
 
     class Meta(BeneficiaryOrderSerializer.Meta):
         fields = (*BeneficiaryOrderSerializer.Meta.fields, "delivery_address")
