@@ -11,12 +11,19 @@ import { routes } from "@/lib/routes";
 // Briques du catalogue public (WL01, WL06, WL16).
 
 /** Grille de cartes parcours, 1 → 3 colonnes. */
-export function CourseGrid({ courses }: { courses: Schemas["CourseList"][] }) {
+export function CourseGrid({
+  courses,
+  courseHref,
+}: {
+  courses: Schemas["CourseList"][];
+  /** Lien de chaque carte (fiche WC04 dans l'espace apprenant) ; fiche publique WL22 par défaut. */
+  courseHref?: (slug: string) => string;
+}) {
   return (
     <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {courses.map((course) => (
         <li key={course.slug} className="flex">
-          <CourseCard course={toCourseCard(course)} className="flex-1" />
+          <CourseCard course={toCourseCard(course, courseHref?.(course.slug))} className="flex-1" />
         </li>
       ))}
     </ul>

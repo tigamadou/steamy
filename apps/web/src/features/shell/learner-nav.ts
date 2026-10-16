@@ -24,7 +24,7 @@ export type LearnerSection = { active: LearnerSectionId; title: string };
 const SECTIONS: Array<[prefix: string, section: LearnerSection]> = [
   [l.notifications, { active: "home", title: "Notifications" }],
   [l.attempts, { active: "home", title: "Mes tentatives de quiz" }],
-  ["/apprenant/evenements", { active: "home", title: "Steamy Events" }],
+  [l.events, { active: "home", title: "Steamy Events" }],
   ["/apprenant/demandes", { active: "catalog", title: "Demande à ton parent" }],
   [l.help, { active: "profile", title: "Aide & Support" }],
   [l.progress, { active: "profile", title: "Ma progression" }],

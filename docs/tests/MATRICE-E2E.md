@@ -57,18 +57,18 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WP10` | Bienvenue parent | 2 | Bienvenue, enfants rattachés puis espace parent | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP11` | Motifs de refus | 2 | Motif obligatoire, confirmation du refus | `apps/web/e2e/decision-parent.spec.ts` |
 | `WP12` | Refus envoyé (terminal) | 2 | Refus envoyé, W18 côté enfant | `apps/web/e2e/decision-parent.spec.ts` |
-| `WD01` | Accueil | 3 |  |  |
-| `WD02` | Accueil nouvel utilisateur | 3 |  |  |
-| `WD03` | Chargement | 3 |  |  |
-| `WD04` | Notifications · liste | 3 |  |  |
-| `WD05` | Notifications · vide | 3 |  |  |
-| `WD06` | Notifications · paramètres | 3 |  |  |
+| `WD01` | Accueil | 3 | Reprise du parcours → mission, pastilles Streak/Points/Rang (API), raccourcis sans Steamy Events, « Pour toi » | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD02` | Accueil nouvel utilisateur | 3 | Nouvel apprenant : bienvenue, catalogue `prix=gratuit`, suggestions gratuites | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD03` | Chargement | 3 | Squelette de l'accueil envoyé en flux avant le tableau de bord, puis remplacé | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD04` | Notifications · liste | 3 | Onglets dans l'URL, clic = lue + navigation, « Tout marquer comme lu » → cloche du shell à 0 | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD05` | Notifications · vide | 3 | Nouvel apprenant sans notification → « Régler les notifications » | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD06` | Notifications · paramètres | 3 | In-app verrouillé, email désactivé sans adresse, ni SMS ni push | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
 | `WD07` | Tentatives de quiz · liste | 3 | Bandeau de l'API, filtre par statut dans l'URL (rechargement) | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD08` | Tentatives de quiz · détail | 3 | Détail : score, seuil appliqué, « Voir le parcours » | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD09` | Tentatives de quiz · vide | 3 | Nouvel apprenant sans quiz → Mes parcours | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD10` | Steamy Events | 3 |  |  |
 | `WD11` | Demande de participation | 3 |  |  |
-| `WD12` | Aide & support | 3 |  |  |
+| `WD12` | Aide & support | 3 | Recherche locale dans la FAQ, « Contacter le support » → WL24 | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
 | `WD13` | Paramètres (hub) | 3 |  |  |
 | `WD14` | Historique de commande | 3 |  |  |
 | `WD15` | Supprimer le compte | 3 |  |  |

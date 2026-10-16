@@ -29,17 +29,17 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6 (après API-L3b) · Prérequis 
   - [x] Tests unitaires : nav à 5 entrées visibles, `active` dérivé de l'URL, compteur, modale au clavier
   - [x] Parcours Playwright : apprenant → shell ; parent sur `/apprenant` → redirection ; non connecté → `/connexion?next=` puis retour
   - [x] Recette : aucune donnée en dur, aucun `title="Bientôt"`, rendu 360 px, squelette du shell pendant le chargement
-- [ ] **3.1** Accueil, notifications et aide (requiert API-L3a) · `feature/lot3-accueil-notifications`
-  - [ ] WD01 tableau de bord avec reprise (`StatPill` Streak, Points, Rang masqués si `null`)
-  - [ ] WD02 tableau de bord sans reprise (catalogue `prix=gratuit`)
-  - [ ] WD03 `loading.tsx` fidèle à WD01
-  - [ ] WD04 notifications (onglets Toutes / Non lues, lecture au clic, « Tout marquer comme lu »)
-  - [ ] WD05 notifications vides
-  - [ ] WD06 préférences de notification
-  - [ ] WD12 aide (FAQ statique, recherche locale, lien WL24)
-  - [ ] Composants `NotifItem`, `ResumeCard`
-  - [ ] Tests unitaires : WD01 sans points, notification lue au clic, toggle email désactivé sans adresse
-  - [ ] Parcours Playwright : « Tout marquer comme lu » met le compteur du shell à 0
+- [x] **3.1** Accueil, notifications et aide (requiert API-L3a) · `feature/lot3-accueil-notifications` · PR #101
+  - [x] `WD01` tableau de bord avec reprise (`StatPill` Streak, Points, Rang masqués si `null`)
+  - [x] `WD02` tableau de bord sans reprise (catalogue `prix=gratuit`)
+  - [x] `WD03` `loading.tsx` fidèle à WD01
+  - [x] `WD04` notifications (onglets Toutes / Non lues, lecture au clic, « Tout marquer comme lu »)
+  - [x] `WD05` notifications vides
+  - [x] `WD06` préférences de notification
+  - [x] `WD12` aide (FAQ statique, recherche locale, lien WL24)
+  - [x] Composants `NotifItem`, `ResumeCard`
+  - [x] Tests unitaires : WD01 sans points, notification lue au clic, toggle email désactivé sans adresse
+  - [x] Parcours Playwright : « Tout marquer comme lu » met le compteur du shell à 0
 - [x] **3.2** Catalogue, fiche parcours et souhaits (requiert API-L1, API-L3a) · `feature/lot3-catalogue-souhaits` · PR #98
   - [x] `WC01` catalogue (filtres catégorie × difficulté × prix + tri + `q` dans l'URL)
   - [x] `WC02` filtres actifs (`ActiveFilterBar`)

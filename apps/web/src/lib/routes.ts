@@ -49,6 +49,14 @@ export const routes = {
   learner: {
     home: "/apprenant",
     notifications: "/apprenant/notifications",
+    /** WD04 : onglet « Non lues » et page de la liste dans l'URL (la page 1 et « Toutes » n'y figurent pas). */
+    notificationList: (tab: "toutes" | "non-lues" = "toutes", page = 1) => {
+      const query = new URLSearchParams();
+      if (tab === "non-lues") query.set("onglet", tab);
+      if (page > 1) query.set("page", String(page));
+      const search = query.toString();
+      return search ? `/apprenant/notifications?${search}` : "/apprenant/notifications";
+    },
     notificationPreferences: "/apprenant/notifications/preferences",
     attempts: "/apprenant/quiz",
     attempt: (id: number | string) => `/apprenant/quiz/${id}`,
@@ -66,6 +74,8 @@ export const routes = {
     projectBadge: (slug: string, id: number | string) => `/apprenant/parcours/${slug}/projets/${id}/badge`,
     certification: (slug: string) => `/apprenant/parcours/${slug}/certification`,
     catalog: "/apprenant/catalogue",
+    /** Catalogue filtré sur les parcours gratuits (WD02, W15, D27). */
+    freeCatalog: "/apprenant/catalogue?prix=gratuit",
     /** Catalogue filtré par une recherche (`q`, recherche du header). */
     catalogSearch: (q: string) => `/apprenant/catalogue?q=${encodeURIComponent(q)}`,
     catalogCourse: (slug: string) => `/apprenant/catalogue/${slug}`,

@@ -68,6 +68,11 @@ export async function getHomeCourses(): Promise<Schemas["CourseList"][]> {
   return [...featured, ...popular].slice(0, 3);
 }
 
+/** Trois parcours gratuits de difficulté débutant, suggérés à l'apprenant qui n'a rien à reprendre (WD02, D27). */
+export async function getStarterCourses(): Promise<Schemas["CourseList"][]> {
+  return (await getCourses({ price: "free", difficulty: "beginner", pageSize: 3 })).results;
+}
+
 /** Slugs de tous les parcours publiés, pour le sitemap. */
 export async function getCourseSlugs(): Promise<string[]> {
   "use cache";
