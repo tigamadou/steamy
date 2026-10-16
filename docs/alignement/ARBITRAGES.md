@@ -89,9 +89,9 @@ Légende du statut : ⏳ à décider · ✅ décidé.
 | D50 | Enfant « en attente » (WPD02) | Ce statut signifie qu'une demande de consentement a été reçue (CTA « Examiner » → WPD05). « Relancer l'invitation » et `resend-invite` sont supprimés | ✅ |
 | D51 | Création d'un enfant par le parent (WPD04) | Ajouter la date de naissance et le lien de parenté. L'enfant fait W11-W14 à sa première connexion | ✅ |
 | D52 | Payer une demande de l'enfant | Lien SMS vers une page authentifiée « Demande de paiement » dans l'espace parent (écran à concevoir, reprend WA03). WPD01 liste consentements, paiements et événements à valider | ✅ |
-| D53 | Valider une candidature à un événement | Boutons Accepter / Refuser sur WPD06 ; pour un événement payant, « Accepter » mène à la page « Demande de paiement » (D52). WPD12 (inscription par le parent) inclut le paiement | ✅ |
+| D53 | Valider une candidature à un événement | Boutons Accepter / Refuser sur WPD06 ; pour un événement payant, « Accepter » réserve la place et crée la commande d'événement du parent, payée aussitôt avec le formulaire de paiement (WA03), sans passer par la page « Demande de paiement » ; la candidature n'est confirmée qu'au paiement (S8). WPD12 (inscription par le parent) inclut le paiement. *Amendé le 2026-10-16 (commande directe au lieu de WPD15)* | ✅ |
 | D54 | Suppression (enfant, compte parent) | Désactivation puis anonymisation à J+30, annulable. Un compte parent ne se supprime qu'après suppression ou transfert de ses enfants | ✅ |
-| D55 | Rapport hebdomadaire | Visible dans l'app ; envoyé par email si une adresse est renseignée. Nécessite un journal de temps d'apprentissage | ✅ |
+| D55 | Rapport hebdomadaire | Visible dans l'app ; envoyé par email si une adresse est renseignée, **un email par enfant**. Nécessite un journal de temps d'apprentissage. *Précisé le 2026-10-16 (un email par enfant)* | ✅ |
 | D56 | Alerte de connexion (WPD14) | Reportée après la v1 | ✅ |
 
 ### Lot 5 · Enseignant

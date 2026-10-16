@@ -169,6 +169,9 @@ class OrderViewSet(
             delivery_zone=data.get("delivery_zone"),
             delivery_address=data.get("delivery_address"),
         )
+        if data.get("payment_request") is not None:
+            order.payment_request = data["payment_request"]
+            order.save(update_fields=["payment_request"])
         if (
             guest_token
         ):  # suivi par lien SMS (C10) : le seul moyen pour l'invité de retrouver sa commande

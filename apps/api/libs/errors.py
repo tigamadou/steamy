@@ -159,6 +159,10 @@ CATALOG: dict[str, tuple[int, str]] = {
     "EVENT_FULL": (S.HTTP_409_CONFLICT, "Cet événement est complet."),
     "EVENT_CLOSED": (S.HTTP_409_CONFLICT, "Les candidatures à cet événement sont closes."),
     "ALREADY_APPLIED": (S.HTTP_409_CONFLICT, "Une candidature existe déjà pour cet événement."),
+    "APPLICATION_ALREADY_RESOLVED": (
+        S.HTTP_409_CONFLICT,
+        "Cette candidature a déjà été traitée.",
+    ),
     "EVENT_ALREADY_PROPOSED": (
         S.HTTP_409_CONFLICT,
         "Cet événement a déjà été proposé à cette classe.",

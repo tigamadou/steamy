@@ -14,9 +14,9 @@ from rest_framework.views import APIView
 
 from apps.accounts.models import ParentChildLink
 from libs.errors import ApiError
-from libs.permissions import IsLearner
+from libs.permissions import IsLearner, IsParent
 
-from .applications import apply, children_of
+from .applications import accept, apply, children_of, refuse
 from .models import EventApplication, EventTicket, SteamyEvent
 from .serializers import (
     ApplicationCreateSerializer,
@@ -150,3 +150,34 @@ class TicketListView(generics.ListAPIView):
         if not user.is_authenticated:  # génération du schéma OpenAPI
             return queryset.none()
         return queryset.filter(learner=user)
+
+
+class ApplicationRefuseSerializer(serializers.Serializer):
+    reason = serializers.CharField(max_length=255, required=False, allow_blank=True, default="")
+
+
+class ApplicationAcceptView(APIView):
+    """
+    `POST events/applications/{id}/accept/` (WPD06, D53) : gratuit ou ticket → confirmée ; payant → place réservée
+    et commande d'événement (`orderReference`) à payer par le parent. L'apprenant ne décide jamais (S8).
+    """
+
+    permission_classes = [IsParent]
+
+    @extend_schema(request=None, responses=ApplicationSerializer)
+    def post(self, request, pk):
+        application, _order = accept(request.user, pk)
+        return Response(ApplicationSerializer(application).data)
+
+
+class ApplicationRefuseView(APIView):
+    """`POST events/applications/{id}/refuse/` (WPD06) : motif facultatif, l'enfant est prévenu."""
+
+    permission_classes = [IsParent]
+
+    @extend_schema(request=ApplicationRefuseSerializer, responses=ApplicationSerializer)
+    def post(self, request, pk):
+        body = ApplicationRefuseSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        application = refuse(request.user, pk, body.validated_data["reason"])
+        return Response(ApplicationSerializer(application).data)
