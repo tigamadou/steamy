@@ -592,6 +592,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.payments.tasks.expire_payment_requests",
         "schedule": crontab(minute=45),
     },
+    "detect-dropouts": {
+        "task": "apps.classrooms.tasks.detect_dropouts",
+        "schedule": crontab(minute=0, hour=7),
+    },
 }
 # optional default task time limits
 CELERY_TASK_TIME_LIMIT = int(os.getenv("CELERY_TASK_TIME_LIMIT", 300))
