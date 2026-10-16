@@ -54,18 +54,18 @@ Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3
   - [ ] Inscription `POST learning/enrollments/` et gestion de `PAYMENT_REQUIRED`, `KIT_CODE_REQUIRED`
   - [ ] Tests unitaires : filtres ↔ URL, carte « Gratuit », pas de prix de parcours sur un parcours avec kit
   - [ ] Parcours Playwright « souhaits » : ajouter depuis WC01, retirer depuis WW01, annuler, recharger
-- [ ] **3.3a** Mes parcours, arbre et missions (requiert API-L3a, maquette WD23 validée, offre Vimeo) · `feature/lot3-mes-parcours-missions`
+- [x] **3.3a** Mes parcours, arbre et missions (requiert API-L3a, maquette WD23 validée, offre Vimeo) · `feature/lot3-mes-parcours-missions` · PR #—
   - [x] Conception de la maquette WD23 dans `design/screens-apprenant-a-concevoir-web.jsx`, validée (C18)
-  - [ ] WD23 mes parcours (onglets En cours / Terminés, `EnrolledCourseCard`)
-  - [ ] WC06a arbre du parcours
-  - [ ] WC06b projet déplié (`?projet=`)
-  - [ ] WJ01 projet
-  - [ ] WJ02 niveau
-  - [ ] WJ03 mission (`MissionBlocks`, « Marquer comme terminée », navigation vers `next`)
-  - [ ] Composants `ProjectAccordion`, `MissionItem`, `TeacherCommentCard`, `LockedContentState`
-  - [ ] `VimeoPlayer` (`@vimeo/player` épinglé, chargement différé, suivi `learning/activity/`, repli en cas d'erreur, CSP `frame-src`)
-  - [ ] Tests unitaires : `MissionItem` verrouillé non activable, `next` respecté, `VimeoPlayer` avec faux `Player`
-  - [ ] Parcours Playwright : accès direct à une mission verrouillée → `LockedContentState` ; `player.vimeo.com` intercepté
+  - [x] WD23 mes parcours (onglets En cours / Terminés, `EnrolledCourseCard`)
+  - [x] WC06a arbre du parcours
+  - [x] WC06b projet déplié (`?projet=`)
+  - [x] WJ01 projet
+  - [x] WJ02 niveau
+  - [x] WJ03 mission (`MissionBlocks`, « Marquer comme terminée », navigation vers `next`)
+  - [x] Composants `ProjectAccordion`, `MissionItem`, `TeacherCommentCard` (carte absente tant que `classrooms/comments/` n'existe pas, API-L5), `LockedContentState`
+  - [x] `VimeoPlayer` (composant livré en 3.2 ; `@vimeo/player` épinglé, chargement différé, suivi `learning/activity/`, repli en cas d'erreur, CSP `frame-src`)
+  - [x] Tests unitaires : `MissionItem` verrouillé non activable, `next` respecté, `VimeoPlayer` avec faux `Player`
+  - [x] Parcours Playwright : accès direct à une mission verrouillée → `LockedContentState` ; `player.vimeo.com` intercepté
 - [ ] **3.3b** Quiz, résultats et badges (requiert API-L3a) · `feature/lot3-quiz`
   - [ ] WJ04 quiz formatif
   - [ ] WJ10 quiz sommatif

@@ -84,8 +84,8 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WC03` | Aucun résultat | 3 |  |  |
 | `WC04` | Détail parcours gratuit | 3 |  |  |
 | `WC05` | Détail parcours payant + kit | 3 |  |  |
-| `WC06a` | Vue inscrit · projets repliés | 3 |  |  |
-| `WC06b` | Vue inscrit · projet 2 déplié | 3 |  |  |
+| `WC06a` | Vue inscrit · projets repliés | 3 | Arbre du parcours suivi, étape verrouillée non cliquable | `apps/web/e2e/apprenant-parcours.spec.ts` |
+| `WC06b` | Vue inscrit · projet 2 déplié | 3 | Projet déplié par `?projet=`, prochaine mission « en cours » | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WW01` | Avec items | 3 |  |  |
 | `WW02` | Vide | 3 |  |  |
 | `WW03` | Toast après retrait | 3 |  |  |
@@ -96,9 +96,9 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WA05` | Paiement réussi | 3 |  |  |
 | `WA06` | Kit Code invalide | 3 |  |  |
 | `WA07` | Paiement échoué | 3 |  |  |
-| `WJ01` | Détail projet | 3 |  |  |
-| `WJ02` | Intro niveau | 3 |  |  |
-| `WJ03` | Contenu mission | 3 |  |  |
+| `WJ01` | Détail projet | 3 | Projet → niveaux, accessibilité | `apps/web/e2e/apprenant-parcours.spec.ts` |
+| `WJ02` | Intro niveau | 3 | Niveau → missions, vidéo factice | `apps/web/e2e/apprenant-parcours.spec.ts` |
+| `WJ03` | Contenu mission | 3 | Mission ouverte, « Marquer comme terminée » → étape suivante de l'API, mission verrouillée → état dédié | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WJ04` | Évaluation formative (≥ 70 %) | 3 |  |  |
 | `WJ05` | Revue des résultats | 3 |  |  |
 | `WJ06` | Badge de niveau débloqué | 3 |  |  |
@@ -165,6 +165,6 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WL22` | Fiche parcours publique (variante de WC04 sans contenu des missions) | 1 | WL06 → fiche → CTA inscription avec `next` ; sans contenu de mission ni Vimeo ; plan au clavier ; kit requis ; brouillon → 404 | `apps/web/e2e/fiche-parcours.spec.ts` |
 | `WL23` | Fiche événement (publique, réutilisée dans les espaces connectés) | 1 | CTA visiteur → connexion avec `next` ; complet et passé désactivés avec motif ; inconnu → 404 | `apps/web/e2e/evenements-boutique.spec.ts` |
 | `WL24` | Aide & contact (FAQ + formulaire) | 1 | Contact : « Rejoindre l'équipe » → `?sujet=candidature` → envoi → confirmation ; FAQ et recherche ; ancres | `apps/web/e2e/formulaires.spec.ts` |
-| `WD23` | Mes parcours (liste des inscriptions) | 3 |  |  |
+| `WD23` | Mes parcours (liste des inscriptions) | 3 | Onglets En cours / Terminés adressables, carte → arbre | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WPD15` | Demande de paiement (parcours, kit ou événement demandé par l'enfant ; reprend WA03) | 4 |  |  |
 | `WT13` | Créer une classe (une classe = un parcours, D62) | 5 |  |  |
