@@ -23,6 +23,8 @@ test("WD07 → WD08 : bandeau, filtre par statut dans l'URL, détail d'une tenta
   await page.getByRole("link", { name: "Réussis" }).click();
   await expect(page).toHaveURL("/apprenant/quiz?statut=ok");
   await expect(page.getByRole("link", { name: "Réussis" })).toHaveAttribute("aria-current", "page");
+  // Nouveau filtre : le focus passe à la liste des tentatives (WCAG 2.4.3)
+  await expect(page.getByRole("list", { name: "Tes tentatives" })).toBeFocused();
   const rows = page.getByRole("list", { name: "Tes tentatives" }).getByRole("link");
   await expect(rows.first()).toContainText("Réussi");
   await page.reload();

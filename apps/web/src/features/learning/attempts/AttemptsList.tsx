@@ -12,6 +12,7 @@ import { cx } from "@/lib/cx";
 import { routes } from "@/lib/routes";
 
 import { quizStep } from "../tree";
+import { FocusableList } from "./FocusableList";
 
 export const ATTEMPTS_PAGE_SIZE = 20;
 export const ATTEMPT_STATUSES: AttemptStatus[] = ["ok", "warn", "ko"];
@@ -103,9 +104,9 @@ export async function AttemptsList({ status, page }: { status: AttemptStatus | n
           Aucune tentative « {status ? attemptStatusLabel(status) : ""} » pour l&apos;instant.
         </p>
       ) : (
-        <ul aria-label="Tes tentatives" className="m-0 flex list-none flex-col gap-2.5 p-0">
+        <FocusableList changeKey={`${status}-${page}`} label="Tes tentatives">
           {attempts.map(row)}
-        </ul>
+        </FocusableList>
       )}
       {(page > 1 || data.next) && (
         <nav aria-label="Pages des tentatives" className="flex justify-between gap-3">

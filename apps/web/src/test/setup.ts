@@ -10,6 +10,17 @@ expect.extend(axeMatchers);
 
 globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver;
 
+// jsdom ne fournit pas `matchMedia` : par défaut, aucune requête média ne correspond (écran étroit)
+if (!window.matchMedia) {
+  window.matchMedia = (query: string) =>
+    ({
+      matches: false,
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }) as unknown as MediaQueryList;
+}
+
 afterEach(() => {
   cleanup();
 });

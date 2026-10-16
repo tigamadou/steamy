@@ -97,6 +97,18 @@ export function AppShell({
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // Passage à 768 px ou plus (rotation, fenêtre agrandie) : le tiroir n'a plus lieu d'être, il se ferme.
+  useEffect(() => {
+    if (!open) return;
+    const wide = window.matchMedia("(min-width: 768px)");
+    const onChange = () => {
+      if (wide.matches) setOpen(false);
+    };
+    onChange();
+    wide.addEventListener("change", onChange);
+    return () => wide.removeEventListener("change", onChange);
+  }, [open]);
+
   // Déconnexion depuis le tiroir : il se ferme et le focus passe au bouton de menu, que la modale WD16 lui rendra.
   const requestLogout = () => {
     if (open) closeToMenu();
@@ -106,6 +118,7 @@ export function AppShell({
   return (
     <div className="flex min-h-dvh bg-bg font-sans text-ink-900">
       <a
+        inert={open || undefined}
         href="#contenu"
         className="sr-only z-50 rounded-md bg-primary-600 px-4 py-3 font-extrabold text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >

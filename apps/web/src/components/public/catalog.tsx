@@ -2,7 +2,7 @@ import type { Schemas } from "@steamy/api-client";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
-import { CourseCard, Icon, SkeletonBlock, Tag } from "@/components/ds";
+import { CourseCard, Icon, SkeletonBlock, Tag, type CourseCardData } from "@/components/ds";
 import { catalogHref, listHref } from "@/lib/catalog-filters";
 import { cx } from "@/lib/cx";
 import { toCourseCard } from "@/lib/format";
@@ -10,7 +10,31 @@ import { routes } from "@/lib/routes";
 
 // Briques du catalogue public (WL01, WL06, WL16).
 
-/** Grille de cartes parcours, 1 → 3 colonnes. */
+export type CourseCardItem = {
+  slug: string;
+  card: CourseCardData;
+  /** Cœur des souhaits (espace apprenant) : état et bascule. */
+  favorited?: boolean;
+  onFav?: () => void;
+};
+
+/**
+ * Grille unique des cartes parcours (catalogue public, WC01, WW01, recommandations), 1 → 3 colonnes. Dans le shell,
+ * plus étroit, la troisième colonne n'apparaît qu'à partir de `xl`.
+ */
+export function CourseCardList({ items, narrow }: { items: CourseCardItem[]; narrow?: boolean }) {
+  return (
+    <ul className={cx("grid gap-4 sm:grid-cols-2", narrow ? "xl:grid-cols-3" : "lg:grid-cols-3")}>
+      {items.map(({ slug, card, favorited, onFav }) => (
+        <li key={slug} data-course={slug} className="flex">
+          <CourseCard course={card} favorited={favorited} onFav={onFav} className="flex-1" />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Grille de parcours de l'API, 1 → 3 colonnes. */
 export function CourseGrid({
   courses,
   courseHref,
@@ -20,13 +44,9 @@ export function CourseGrid({
   courseHref?: (slug: string) => string;
 }) {
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {courses.map((course) => (
-        <li key={course.slug} className="flex">
-          <CourseCard course={toCourseCard(course, courseHref?.(course.slug))} className="flex-1" />
-        </li>
-      ))}
-    </ul>
+    <CourseCardList
+      items={courses.map((course) => ({ slug: course.slug, card: toCourseCard(course, courseHref?.(course.slug)) }))}
+    />
   );
 }
 
