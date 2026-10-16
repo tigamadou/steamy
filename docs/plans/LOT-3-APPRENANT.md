@@ -123,7 +123,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6, 3.7b, 3.7c, 3.8 · Prérequis 
   - [ ] Tests unitaires : `KitCodeInput`, `PaymentForm` sans réseau en dur, `PaymentStatusPanel` dans ses 3 états
   - [ ] Parcours Playwright P2 (Kit Code)
   - [ ] Parcours Playwright P3 (demande de paiement)
-- [x] **3.7a** Boutique : catalogue, détail et panier (requiert API-L3b) · `feature/lot3-boutique-catalogue-panier`
+- [x] **3.7a** Boutique : catalogue, détail et panier (requiert API-L3b) · `feature/lot3-boutique-catalogue-panier` · PR #117
   - [x] `WK01` catalogue de la boutique (connecté ; `/boutique` invité = WL07)
   - [x] `WK02` détail d'un kit
   - [x] `WK11` kit en rupture (alerte de réassort)
