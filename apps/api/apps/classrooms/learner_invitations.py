@@ -11,6 +11,7 @@ par le parent (`apps.classrooms.joining`). Aucun compte apprenant n'existe avant
 """
 
 import secrets
+import unicodedata
 from dataclasses import dataclass, field
 from datetime import timedelta
 
@@ -39,6 +40,20 @@ def daily_limit() -> int:
     return settings.CLASSROOM_INVITATIONS_PER_DAY
 
 
+def phone_daily_limit() -> int:
+    return settings.CLASSROOM_INVITATIONS_PER_PHONE_PER_DAY
+
+
+#: Plafond atteint pour un numéro de parent (même code que le plafond de l'enseignant, message propre).
+PHONE_LIMIT_MESSAGE = "Ce parent a reçu trop d'invitations aujourd'hui. Réessayez demain."
+
+
+def fold(value) -> str:
+    """Comparaison des noms sans casse, sans accents ni espaces superflus (« Kémi » = « kemi »)."""
+    text = unicodedata.normalize("NFKD", str(value or "")).encode("ascii", "ignore").decode()
+    return " ".join(text.casefold().split())
+
+
 @dataclass
 class Invitee:
     first_name: str
@@ -47,11 +62,7 @@ class Invitee:
     relationship: object  # referentials.Relationship
 
     def key(self):
-        return (
-            self.first_name.strip().casefold(),
-            self.last_name.strip().casefold(),
-            self.parent_phone,
-        )
+        return (fold(self.first_name), fold(self.last_name), self.parent_phone)
 
 
 @dataclass
@@ -63,15 +74,24 @@ class ImportResult:
         self.errors.append({"line": line, "code": code, "message": message_for(code), "data": data})
 
 
-def sent_today(teacher) -> int:
+def _today():
     start = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
     return ConsentRequest.objects.filter(
-        origin=ConsentRequest.Origin.TEACHER, requested_by=teacher, created_at__gte=start
-    ).count()
+        origin=ConsentRequest.Origin.TEACHER, created_at__gte=start
+    )
+
+
+def sent_today(teacher) -> int:
+    return _today().filter(requested_by=teacher).count()
+
+
+def sent_today_to(phone: str) -> int:
+    """Invitations reçues aujourd'hui par ce numéro de parent, toutes classes confondues."""
+    return _today().filter(parent_phone=phone).count()
 
 
 def _same_child(invitee: Invitee, first_name: str, last_name: str) -> bool:
-    return invitee.key()[:2] == (first_name.strip().casefold(), last_name.strip().casefold())
+    return invitee.key()[:2] == (fold(first_name), fold(last_name))
 
 
 def check_not_in_classroom(classroom: Classroom, invitee: Invitee) -> None:
@@ -126,8 +146,11 @@ def invite(classroom: Classroom, teacher, invitee: Invitee) -> ClassroomMembersh
     """WT06 onglet Individuel."""
     with transaction.atomic():
         school = quotas.lock_school(classroom.school)
+        quotas.check_offer(school)
         if sent_today(teacher) >= daily_limit():
             raise ApiError("INVITATION_DAILY_LIMIT")
+        if sent_today_to(invitee.parent_phone) >= phone_daily_limit():
+            raise ApiError("INVITATION_DAILY_LIMIT", PHONE_LIMIT_MESSAGE)
         check_not_in_classroom(classroom, invitee)
         check_cooldown(invitee.parent_phone)
         if quotas.learners_used(school) >= school.learner_quota:
@@ -142,8 +165,10 @@ def invite_many(classroom: Classroom, teacher, rows, result: ImportResult) -> Im
     """
     with transaction.atomic():
         school = quotas.lock_school(classroom.school)
+        quotas.check_offer(school)
         seats_left = school.learner_quota - quotas.learners_used(school)
         sends_left = daily_limit() - sent_today(teacher)
+        per_phone = {}
         for line, invitee, data in rows:
             try:
                 check_not_in_classroom(classroom, invitee)
@@ -154,9 +179,12 @@ def invite_many(classroom: Classroom, teacher, rows, result: ImportResult) -> Im
             if seats_left <= 0:
                 result.fail(line, "LEARNER_QUOTA_EXCEEDED", data)
                 continue
-            if sends_left <= 0:
+            phone = invitee.parent_phone
+            per_phone.setdefault(phone, sent_today_to(phone))
+            if sends_left <= 0 or per_phone[phone] >= phone_daily_limit():
                 result.fail(line, "INVITATION_DAILY_LIMIT", data)
                 continue
+            per_phone[phone] += 1
             result.created.append(_create(classroom, teacher, invitee))
             seats_left -= 1
             sends_left -= 1

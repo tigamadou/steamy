@@ -2,8 +2,9 @@
 Steamy Events (SPEC-TECHNIQUE §3.4, S8) : ateliers, défis et compétitions, distincts de la télémétrie
 (`analytics.TrackingEvent`). Saisis dans l'admin Django (groupe Contenu) ; l'API publique ne lit que les publiés.
 
-Les candidatures (`EventApplication`, accord parental systématique) arrivent en API-L3b.6 : `seats_left` décomptera
-alors aussi les candidatures acceptées.
+Candidatures (`EventApplication`, API-L3b.6) : accord parental systématique (S3, S8), sans sélection par Steamy
+(C3) ; l'accord du parent, plus le paiement si l'événement est payant, confirme la place. `seats_left` décompte les
+places réservées par l'accord (en attente de paiement) et les places confirmées.
 """
 
 from django.conf import settings
@@ -12,6 +13,8 @@ from django.db import models
 from django.db.models import F, Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from apps.catalog.models import Course
 
 validate_color = RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Couleur au format #RRVVBB.")
 
@@ -73,7 +76,8 @@ class SteamyEvent(models.Model):
 
     @property
     def seats_left(self) -> int:
-        return self.capacity - self.seats_reserved
+        taken = self.applications.filter(status__in=EventApplication.HOLDING_A_SEAT).count()
+        return max(self.capacity - self.seats_reserved - taken, 0)
 
     @property
     def is_past(self) -> bool:
@@ -111,6 +115,77 @@ class EventTicket(models.Model):
 
     def __str__(self):
         return f"Ticket de {self.learner} ({self.enrollment.course})"
+
+
+class EventApplication(models.Model):
+    """
+    Candidature d'un apprenant à un Steamy Event (WD11, WPD06, WPD12). Faite par l'apprenant (en attente de son
+    parent) ou par le parent (accord immédiat). L'accord réserve la place ; payant : la place est confirmée au
+    paiement, et rendue s'il n'aboutit pas (C3). Un ticket offert à la certification (D33) rend la candidature
+    gratuite, l'accord du parent restant requis (C12).
+    """
+
+    class Status(models.TextChoices):
+        PENDING_PARENT = "pending_parent", _("En attente du parent")
+        PENDING_PAYMENT = "pending_payment", _("En attente du paiement")
+        ACCEPTED = "accepted", _("Inscription confirmée")
+        REFUSED = "refused", _("Refusée")
+        CANCELLED = "cancelled", _("Annulée")
+
+    #: Statuts qui occupent une place (C3) ; `pending_parent` n'en réserve pas encore
+    HOLDING_A_SEAT = (Status.PENDING_PAYMENT, Status.ACCEPTED)
+    #: Statuts d'une candidature en cours (une seule par apprenant et par événement)
+    ACTIVE = (Status.PENDING_PARENT, Status.PENDING_PAYMENT, Status.ACCEPTED)
+
+    event = models.ForeignKey(
+        SteamyEvent, models.PROTECT, related_name="applications", verbose_name=_("événement")
+    )
+    learner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        models.CASCADE,
+        related_name="event_applications",
+        verbose_name=_("apprenant"),
+    )
+    applied_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        models.SET_NULL,
+        null=True,
+        related_name="+",
+        verbose_name=_("déposée par"),
+    )
+    motivation = models.TextField(_("motivation"), blank=True)
+    self_level = models.CharField(
+        _("niveau déclaré"), max_length=12, choices=Course.Difficulty.choices, blank=True
+    )
+    status = models.CharField(_("statut"), max_length=16, choices=Status)
+    #: Ticket Steamy Events utilisé (D33, C12) : un ticket ne sert qu'une fois
+    ticket = models.OneToOneField(
+        EventTicket,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="used_by",
+        verbose_name=_("ticket utilisé"),
+    )
+    parent_decided_at = models.DateTimeField(_("décision du parent"), null=True, blank=True)
+    refusal_reason = models.CharField(_("motif de refus"), max_length=255, blank=True)
+    created_at = models.DateTimeField(_("déposée le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("modifiée le"), auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        verbose_name = _("candidature")
+        verbose_name_plural = _("candidatures")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "learner"],
+                condition=Q(status__in=["pending_parent", "pending_payment", "accepted"]),
+                name="event_application_one_active",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.learner} → {self.event}"
 
 
 class EventProposal(models.Model):
