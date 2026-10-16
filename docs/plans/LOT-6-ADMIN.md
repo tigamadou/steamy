@@ -68,7 +68,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.5 (admin Django) ; 6.2 après API
   - [ ] Tests : groupe Contenu seul en écriture ; publication refusée sur arbre incomplet ; quiz sur les deux ou aucun = erreur
   - [ ] Tests : `isCorrect` absent des réponses de l'API (S8) ; changement de prix sans effet sur les `OrderItem` existants
   - [ ] Recette : créer un parcours complet (2 projets, niveaux, missions Vimeo, quiz), le publier, le voir dans `WL22` et `WC`
-- [x] **6.4** Boutique, commandes, paiements · `feature/lot6-boutique-paiements` · PR #PR64 (requiert 6.1, API-L3b)
+- [x] **6.4** Boutique, commandes, paiements · `feature/lot6-boutique-paiements` · PR #114 (requiert 6.1, API-L3b)
   - [x] WAD10 Kits (admin Django) : `KitAdmin` (stock avec badge à 3 seuils, parcours compatibles), `DeliveryZoneAdmin`, `RestockAlertAdmin` en lecture seule
   - [x] WAD10 Commandes (admin Django) : `OrderAdmin` (montants, statut, payeur en lecture seule), action *changer le statut de livraison* (`preparing → shipped → delivered`, notifie le payeur)
   - [x] WAD10 inlines `OrderItem` et `KitCode` en lecture seule, action *révoquer* sur un code non utilisé
