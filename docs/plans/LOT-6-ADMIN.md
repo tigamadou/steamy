@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API) ; exports de 6.9 après leurs endpoints (API-L6.4) · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : 6.5 (admin Django) ; 6.2 après API-L5 · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -68,14 +68,25 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   - [ ] Tests : groupe Contenu seul en écriture ; publication refusée sur arbre incomplet ; quiz sur les deux ou aucun = erreur
   - [ ] Tests : `isCorrect` absent des réponses de l'API (S8) ; changement de prix sans effet sur les `OrderItem` existants
   - [ ] Recette : créer un parcours complet (2 projets, niveaux, missions Vimeo, quiz), le publier, le voir dans `WL22` et `WC`
-- [ ] **6.4** Boutique, commandes, paiements · `feature/lot6-boutique-paiements` (requiert 6.1, API-L3b)
-  - [ ] WAD10 Kits (admin Django) : `KitAdmin` (stock avec badge à 3 seuils, parcours compatibles), `DeliveryZoneAdmin`, `RestockAlertAdmin` en lecture seule
-  - [ ] WAD10 Commandes (admin Django) : `OrderAdmin` (montants, statut, payeur en lecture seule), action *changer le statut de livraison* (`preparing → shipped → delivered`, notifie le payeur)
-  - [ ] WAD10 inlines `OrderItem` et `KitCode` en lecture seule, action *révoquer* sur un code non utilisé
-  - [ ] WAD11 Paiements (admin Django) : `PaymentAdmin` entièrement en lecture seule, filtres, `date_hierarchy`, agrégats en tête, `msisdn` masqué, `payload` réservé à Finance
-  - [ ] `RefundAdmin` (Finance : création depuis un paiement réussi, action *traiter* avec double confirmation) et `InvoiceAdmin` (lecture, téléchargement)
-  - [ ] Tests : aucune voie de l'admin ne passe une commande à `paid` ; transitions de livraison non monotones refusées ; révocation d'un code utilisé refusée
-  - [ ] Tests : Support sans `payload` ; Contenu sans accès aux paiements ; agrégats égaux à un calcul de référence sur D2
+- [x] **6.4** Boutique, commandes, paiements · `feature/lot6-boutique-paiements` · PR #PR64 (requiert 6.1, API-L3b)
+  - [x] WAD10 Kits (admin Django) : `KitAdmin` (stock avec badge à 3 seuils, parcours compatibles), `DeliveryZoneAdmin`, `RestockAlertAdmin` en lecture seule
+  - [x] WAD10 Commandes (admin Django) : `OrderAdmin` (montants, statut, payeur en lecture seule), action *changer le statut de livraison* (`preparing → shipped → delivered`, notifie le payeur)
+  - [x] WAD10 inlines `OrderItem` et `KitCode` en lecture seule, action *révoquer* sur un code non utilisé
+  - [x] WAD11 Paiements (admin Django) : `PaymentAdmin` entièrement en lecture seule, filtres, `date_hierarchy`, agrégats en tête, `msisdn` masqué, `payload` réservé à Finance
+  - [x] `RefundAdmin` (Finance : création depuis un paiement réussi, action *traiter* avec double confirmation) et `InvoiceAdmin` (lecture, téléchargement)
+  - [x] Tests : aucune voie de l'admin ne passe une commande à `paid` ; transitions de livraison non monotones refusées ; révocation d'un code utilisé refusée
+  - [x] Tests : Support sans `payload` ; Contenu sans accès aux paiements ; agrégats égaux à un calcul de référence sur D2
+  > Notes : écritures du personnel dans `payments/backoffice.py`, journalisées dans `AuditLog` ; aucune ne passe une
+  > commande à « payée » (formulaires des commandes et paiements en lecture seule, S9). Livraison : action « Changer le
+  > statut de livraison » (Support, `set_shipping_status`), une étape à la fois sur une commande payée, payeur prévenu.
+  > Kit Codes : liste par commande sur sa fiche (inline impossible : le code dépend de l'article) ; action « Révoquer »
+  > (Support) refusée pour un code utilisé ou déjà révoqué. Paiements : colonnes payeur, bénéficiaire, type, numéro
+  > masqué ; filtres statut, réseau, pays, type ; `date_hierarchy` ; agrégats (volume encaissé, réussis / échoués, taux
+  > d'échec) sur la liste filtrée, vérifiés contre un calcul de référence sur un jeu de test (pas D2). Remboursements
+  > (Finance) : demande sur un paiement réussi dans la limite du remboursable, puis « Traiter » avec double
+  > confirmation (commande « remboursée », payeur prévenu). Factures : téléchargement par URL présignée. Le stock d'un
+  > kit garde sa saisie en liste ; badge à 3 seuils (rupture, stock bas sous 10, en stock). Selon la matrice D71, Super-
+  > admin lit les commandes sans changer la livraison (droit propre au Support).
 - [ ] **6.5** Steamy Events et réglages · `feature/lot6-events-reglages` (requiert 6.1, API-L3b)
   - [ ] WAD12 Événements (admin Django) : `SteamyEventAdmin` (Contenu)
   - [ ] WAD12 Candidatures (admin Django) : `EventApplicationAdmin` avec statut en lecture seule et action unique *refus exceptionnel* (motif obligatoire, notifications, `Refund` si payée)
