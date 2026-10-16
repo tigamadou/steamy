@@ -1,7 +1,7 @@
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from .models import ImpactReport, KpiDefinition
+from .models import ImpactReport, KpiDefinition, ReportExport
 from .periods import KINDS
 from .status import STATUS_CODES, TONES
 
@@ -224,3 +224,23 @@ class ValueEntrySerializer(serializers.Serializer):
 
 class ValuesInputSerializer(serializers.Serializer):
     values = ValueEntrySerializer(many=True, allow_empty=False)
+
+
+class ExportRequestSerializer(serializers.Serializer):
+    format = serializers.ChoiceField(choices=ReportExport.Format.choices)
+
+
+class ReportExportSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    period = serializers.CharField(source="report.period", help_text="2026-t1")
+    format = serializers.ChoiceField(choices=ReportExport.Format.choices)
+    status = serializers.ChoiceField(choices=ReportExport.Status.choices)
+    created_at = serializers.DateTimeField()
+    download_path = serializers.SerializerMethodField(
+        help_text="Chemin de téléchargement sur l'API, une fois l'export prêt (redirige vers une URL présignée)"
+    )
+
+    def get_download_path(self, export) -> str | None:
+        if export.status != ReportExport.Status.READY:
+            return None
+        return f"/api/backoffice/exports/{export.pk}/download/"
