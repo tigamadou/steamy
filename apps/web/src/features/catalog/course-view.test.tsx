@@ -101,6 +101,16 @@ describe("WC04 / WC05 · fiche parcours de l'apprenant", () => {
     expect(screen.getByText("📜 Certification")).toBeInTheDocument();
   });
 
+  it("boutique, souhaits ou inscriptions en panne : fiche dégradée, pas d'échec", async () => {
+    getCourse.mockResolvedValue(courseDetail({ isFree: false, requiredKit: { slug: "steamy-bot-v1", name: "Steamy Bot v1" } }));
+    getKit.mockRejectedValue(new Error("boutique en panne"));
+    getLearnerCourseState.mockResolvedValue({ wished: [], progress: {}, degraded: true });
+    render(await LearnerCourseView({ params: params("robot-bluetooth") }));
+    expect(screen.getAllByRole("status")[0]).toHaveTextContent(/n'ont pas pu être chargés/);
+    expect(screen.getByText("Débloqué avec le Kit Code")).toBeInTheDocument();
+    expect(screen.queryByText("Kit requis")).not.toBeInTheDocument();
+  });
+
   it("parcours inconnu ou non publié → 404", async () => {
     getCourse.mockResolvedValue(null);
     await expect(LearnerCourseView({ params: params("disparu") })).rejects.toThrow("NEXT_NOT_FOUND");

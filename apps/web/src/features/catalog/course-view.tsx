@@ -10,6 +10,7 @@ import { getKit } from "@/lib/shop";
 
 import { CourseHero, Curriculum, DetailSection } from "./course-detail";
 import { EnrollCard } from "./EnrollCard";
+import { DegradedNotice } from "./DegradedNotice";
 import { getLearnerCourseState } from "./learner-state";
 
 /**
@@ -24,11 +25,13 @@ export async function LearnerCourseView({ params }: { params: Promise<{ slug: st
   if (!course) {
     notFound();
   }
-  const kit = course.requiredKit ? await getKit(course.requiredKit.slug) : null;
+  // Boutique en panne : la fiche s'affiche sans le bloc « Kit requis »
+  const kit = course.requiredKit ? await getKit(course.requiredKit.slug).catch(() => null) : null;
   const outcomes = stringList(course.outcomes);
 
   return (
     <>
+      {state.degraded && <DegradedNotice />}
       <Breadcrumb
         className="mb-3"
         items={[

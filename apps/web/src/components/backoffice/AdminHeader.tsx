@@ -30,7 +30,7 @@ export function AdminHeader({ title, actions }: AdminHeaderProps) {
           <Icon name="menu" size={18} title="Menu du back-office" />
         </button>
       )}
-      <h1 className="m-0 min-w-0 flex-1 truncate text-xl font-extrabold tracking-[-.01em] text-ink-900">{title}</h1>
+      <h1 className="m-0 min-w-40 flex-1 truncate text-xl font-extrabold tracking-[-.01em] text-ink-900">{title}</h1>
       {actions && <div className="flex shrink-0 flex-wrap items-center gap-3">{actions}</div>}
     </header>
   );
