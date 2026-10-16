@@ -40,10 +40,19 @@ export function ExportReport({ period, apiUrl }: ExportReportProps) {
   const router = useRouter();
   const [state, setState] = useState<State>({ step: "idle" });
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // Démonté pendant une requête : la réponse est ignorée et l'interrogation ne reprend pas
+  const mounted = useRef(true);
 
-  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      clearTimeout(timer.current);
+    };
+  }, []);
 
   function fail(result: { code: Schemas["ErrorCodeEnum"]; message: string }) {
+    if (!mounted.current) return;
     if (result.code === "OTP_REQUIRED") {
       router.refresh();
       setState({ step: "idle" });
@@ -59,12 +68,21 @@ export function ExportReport({ period, apiUrl }: ExportReportProps) {
   }
 
   function follow(item: Export, polls: number) {
+    if (!mounted.current) return;
     if (item.status === "ready" && item.downloadPath) {
       setState({ step: "ready", format: item.format, href: `${apiUrl.replace(/\/+$/, "")}${item.downloadPath}` });
       return;
     }
-    if (item.status === "failed" || polls >= MAX_POLLS) {
+    if (item.status === "failed") {
       setState({ step: "error", message: `L'export ${LABELS[item.format]} n'a pas pu être généré. Réessayez.` });
+      return;
+    }
+    if (polls >= MAX_POLLS) {
+      // Le serveur réessaie encore (jusqu'à un quart d'heure) : ce n'est pas un échec
+      setState({
+        step: "error",
+        message: `L'export ${LABELS[item.format]} prend plus de temps que prévu. Relancez-le dans quelques minutes.`,
+      });
       return;
     }
     timer.current = setTimeout(async () => {
@@ -104,7 +122,8 @@ export function ExportReport({ period, apiUrl }: ExportReportProps) {
           Exporter {LABELS[format]}
         </Button>
       ))}
-      <p role="status" className="m-0 basis-full text-sm font-bold text-ink-800 empty:hidden">
+      {/* Régions live toujours rendues : leur contenu, et non leur apparition, est annoncé */}
+      <p role="status" className="m-0 basis-full text-sm font-bold text-ink-800">
         {pending && `Préparation de l'export ${LABELS[state.format]}… Vous pouvez rester sur cette page.`}
         {state.step === "ready" && (
           <>
@@ -115,7 +134,7 @@ export function ExportReport({ period, apiUrl }: ExportReportProps) {
           </>
         )}
       </p>
-      <p role="alert" className="m-0 basis-full text-sm font-bold text-error-700 empty:hidden">
+      <p role="alert" className="m-0 basis-full text-sm font-bold text-error-700">
         {state.step === "error" && state.message}
       </p>
     </div>

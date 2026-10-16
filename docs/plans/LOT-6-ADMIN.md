@@ -141,7 +141,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.3 à 6.5 (admin Django) ; 6.2 apr
     - [x] « Exporter CSV » / « Exporter PDF » (PR #111, endpoints d'API-L6.4 livrés par PR #110)
   - [x] Redirection `/backoffice/impact/rapports` vers le trimestre courant
   - [x] WAD05 (Next.js) `…/[periode]/saisie` : groupes, champs typés selon `unit`, « Enregistrer le brouillon », « Valider la saisie », lecture seule si soumis (D74)
-  - [x] Exports asynchrones : `POST …/exports/`, interrogation de `backoffice/exports/{id}/` jusqu'à `ready`, lien présigné, notification, PDF par WeasyPrint
+  - [x] Exports asynchrones : `POST …/exports/`, interrogation de `backoffice/exports/{id}/` jusqu'à `ready`, lien présigné, PDF par WeasyPrint ; fin annoncée dans la page (pas de notification : le personnel n'a pas de centre de notifications)
   - [x] Gestion des erreurs `REPORT_LOCKED`, `VALIDATION_ERROR` par champ, `PERMISSION_DENIED`, `OTP_REQUIRED`
   - [x] Tests pytest (API-L6) : soumission idempotente, `REPORT_LOCKED`, export d'autrui refusé, CSV identique à WAD04
     - [x] Soumission idempotente et `REPORT_LOCKED` (`apps/impact/tests/test_reports.py`, API-L6.4)

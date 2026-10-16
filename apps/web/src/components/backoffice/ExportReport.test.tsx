@@ -88,7 +88,7 @@ describe("ExportReport", () => {
     const user = setup();
     await user.click(screen.getByRole("button", { name: "Exporter CSV" }));
     for (let i = 0; i < MAX_POLLS; i += 1) await tick();
-    expect(screen.getByRole("alert")).toHaveTextContent("n'a pas pu être généré");
+    expect(screen.getByRole("alert")).toHaveTextContent("L'export CSV prend plus de temps que prévu.");
   });
 
   it.each([
@@ -109,6 +109,29 @@ describe("ExportReport", () => {
     expect(refresh).toHaveBeenCalled();
     expect(screen.getByRole("alert")).toBeEmptyDOMElement();
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  });
+
+  it("ignore la réponse d'une requête en cours au démontage", async () => {
+    let resolve: (value: unknown) => void = () => {};
+    apiCall.mockReturnValueOnce(new Promise((r) => (resolve = r)));
+    const { unmount } = render(<ExportReport period="2026-t4" apiUrl="http://api.test" />);
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await user.click(screen.getByRole("button", { name: "Exporter CSV" }));
+    unmount();
+    await act(async () => resolve(ok(item())));
+    await tick();
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it("ignore une erreur reçue après le démontage", async () => {
+    let resolve: (value: unknown) => void = () => {};
+    apiCall.mockReturnValueOnce(new Promise((r) => (resolve = r)));
+    const { unmount } = render(<ExportReport period="2026-t4" apiUrl="http://api.test" />);
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await user.click(screen.getByRole("button", { name: "Exporter PDF" }));
+    unmount();
+    await act(async () => resolve(failure("OTP_REQUIRED")));
+    expect(refresh).not.toHaveBeenCalled();
   });
 
   it("cesse d'interroger une fois démonté", async () => {
