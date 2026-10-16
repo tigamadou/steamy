@@ -9,15 +9,10 @@ import { Field } from "@/components/ds/Field";
 import { ReferentialSelect } from "@/components/ds/ReferentialSelect";
 import { errorMessage } from "@/lib/api-call";
 import { submitWith } from "@/lib/form";
+import { GENDERS, type Gender } from "@/lib/genders";
 import { useReferential } from "@/lib/use-referential";
 
 import { useLearnerProfileSave } from "./useProfileSave";
-
-const GENDERS = [
-  { value: "female", emoji: "👧", label: "Fille" },
-  { value: "male", emoji: "👦", label: "Garçon" },
-  { value: "other", emoji: "🌟", label: "Autre" },
-];
 
 type State = { attempt: number; grade?: string; error?: string };
 
@@ -38,7 +33,7 @@ export function SchoolStep() {
     const disability = form.get("disability");
     const failure = await save({
       schoolGrade,
-      gender: gender ? (String(gender) as "female" | "male" | "other") : null,
+      gender: gender ? (String(gender) as Gender) : null,
       disability: disability ? String(disability) : null,
     });
     if (!failure) return { attempt };

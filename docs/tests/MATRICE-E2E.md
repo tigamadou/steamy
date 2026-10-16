@@ -69,12 +69,12 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WD10` | Steamy Events | 3 |  |  |
 | `WD11` | Demande de participation | 3 |  |  |
 | `WD12` | Aide & support | 3 | Recherche locale dans la FAQ, « Contacter le support » → WL24 | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
-| `WD13` | Paramètres (hub) | 3 |  |  |
+| `WD13` | Paramètres (hub) | 3 | Apprenant neuf : identifiant en lecture seule, ni téléphone ni « Bientôt », liens vers WD06, CGU, WD18 et retour par le fil d'Ariane | `apps/web/e2e/profil-parametres.spec.ts` |
 | `WD14` | Historique de commande | 3 |  |  |
 | `WD15` | Supprimer le compte | 3 |  |  |
 | `WD16` | Déconnexion (modal partagé) | 3 | Shell apprenant : annulation par Échap puis déconnexion, espace refermé | `apps/web/e2e/apprenant-shell.spec.ts` |
-| `WD17` | Éditer le profil | 3 |  |  |
-| `WD18` | Modifier la connexion | 3 |  |  |
+| `WD17` | Éditer le profil | 3 | Formulaire prérempli, date incohérente refusée (D23), modifier le profil puis recharger, classe reprise par WD13 | `apps/web/e2e/profil-parametres.spec.ts` |
+| `WD18` | Modifier la connexion | 3 | Mot de passe actuel faux refusé, changement réussi, session conservée, reconnexion avec le nouveau | `apps/web/e2e/profil-parametres.spec.ts` |
 | `WD19` | Informations de livraison | 3 |  |  |
 | `WD21` | Progression & recommandations | 3 | Semaine, histogramme accessible, maîtrise par catégorie | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD22` | Infos de mon parent | 3 |  |  |
