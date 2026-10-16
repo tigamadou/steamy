@@ -4,6 +4,59 @@
  */
 
 export interface paths {
+    "/api/accounts/children/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WPD01, WPD02 : les enfants, par prénom. */
+        get: operations["accounts_children_list"];
+        put?: never;
+        /** @description WPD04 : compte actif, consentement d'origine `parent` créé accepté (D51). */
+        post: operations["accounts_children_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/children/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WPD03, WPD10. */
+        get: operations["accounts_children_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description WPD10 : profil de l'enfant, et opt-in à l'affichage public (D15). */
+        patch: operations["accounts_children_partial_update"];
+        trace?: never;
+    };
+    "/api/accounts/children/{id}/password-reset/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WPD03 « Réinitialiser le mot de passe » (D26, §8.9) : l'ancien ne permet plus de se connecter. */
+        post: operations["accounts_children_password_reset_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/accounts/consent-requests/": {
         parameters: {
             query?: never;
@@ -198,6 +251,22 @@ export interface paths {
         head?: never;
         /** @description W11-W14 (une étape par appel) et WD17. */
         patch: operations["accounts_me_learner_profile_partial_update"];
+        trace?: never;
+    };
+    "/api/accounts/me/parent/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["accounts_me_parent_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/accounts/me/parent-profile/": {
@@ -2074,6 +2143,78 @@ export interface components {
             /** @description Ticket Steamy Events offert à la certification */
             eventTicket: boolean;
         };
+        /** @description Ligne d'un enfant (WPD01, WPD02) : rien de sensible (genre, handicap, localité) hors du détail. */
+        Child: {
+            readonly id: number;
+            /** Prénom */
+            readonly firstName: string;
+            /** Nom */
+            readonly lastName: string;
+            /** Identifiant */
+            readonly username: string | null;
+            /** Statut */
+            readonly status: components["schemas"]["UserStatusEnum"];
+            readonly age: number | null;
+            readonly relationship: components["schemas"]["Relationship"];
+            readonly avatar: components["schemas"]["Avatar"] | null;
+            readonly schoolGrade: components["schemas"]["SchoolGrade"] | null;
+            readonly points: number;
+            readonly streakDays: number;
+            readonly rank: string;
+            /** @description Étape de profil que l'enfant doit encore compléter (W11-W14), null si complet */
+            readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
+            /** Format: date-time */
+            readonly createdAt: string;
+        };
+        /** @description WPD04 : le parent crée le compte et choisit le mot de passe initial. */
+        ChildCreateRequest: {
+            firstName: string;
+            lastName: string;
+            /**
+             * Format: date
+             * @description 10 à 17 ans (D23)
+             */
+            birthDate: string;
+            /** @description Lien de parenté (référentiel `relationships`) */
+            relationship: string;
+            username: string;
+            password: string;
+        };
+        /** @description Détail (WPD03, WPD10) : seul écran, avec la modification, où paraissent genre, handicap et localité (D6). */
+        ChildDetail: {
+            readonly id: number;
+            /** Prénom */
+            readonly firstName: string;
+            /** Nom */
+            readonly lastName: string;
+            /** Identifiant */
+            readonly username: string | null;
+            /** Statut */
+            readonly status: components["schemas"]["UserStatusEnum"];
+            readonly age: number | null;
+            readonly relationship: components["schemas"]["Relationship"];
+            readonly avatar: components["schemas"]["Avatar"] | null;
+            readonly schoolGrade: components["schemas"]["SchoolGrade"] | null;
+            readonly points: number;
+            readonly streakDays: number;
+            readonly rank: string;
+            /** @description Étape de profil que l'enfant doit encore compléter (W11-W14), null si complet */
+            readonly profileStep: (components["schemas"]["ProfileStepEnum"] | components["schemas"]["NullEnum"]) | null;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date */
+            readonly birthDate: string;
+            readonly gender: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            readonly disability: components["schemas"]["Disability"] | null;
+            readonly locality: components["schemas"]["Locality"] | null;
+            readonly goals: components["schemas"]["Goal"][];
+            /** @description Opt-in parental à l'affichage public (pseudonyme et avatar, D15) */
+            readonly publicDisplayAllowed: boolean;
+        };
+        ChildPasswordResetRequest: {
+            /** @description Nouveau mot de passe, à communiquer à l'enfant (D26) */
+            password: string;
+        };
         /** @description Réponse proposée, sans le corrigé. */
         Choice: {
             id: number;
@@ -2859,7 +3000,7 @@ export interface components {
             /** Rôle */
             readonly role: (components["schemas"]["RoleEnum"] | components["schemas"]["NullEnum"]) | null;
             /** Statut */
-            readonly status: components["schemas"]["MeStatusEnum"];
+            readonly status: components["schemas"]["UserStatusEnum"];
             /** Identifiant */
             readonly username: string | null;
             /** Téléphone */
@@ -2888,15 +3029,6 @@ export interface components {
             /** @description Compteurs du shell de l'apprenant (parcours, certificats, badges), null pour les autres rôles */
             readonly counters: components["schemas"]["LearnerCounters"] | null;
         };
-        /**
-         * @description * `pending` - En attente de consentement
-         *     * `active` - Actif
-         *     * `suspended` - Suspendu
-         *     * `deactivated` - Désactivé
-         *     * `anonymized` - Anonymisé
-         * @enum {string}
-         */
-        MeStatusEnum: "pending" | "active" | "suspended" | "deactivated" | "anonymized";
         MissionBlock: {
             type: components["schemas"]["MissionBlockTypeEnum"];
             text?: string;
@@ -2953,6 +3085,14 @@ export interface components {
             durationMin?: number;
             /** Icône */
             icon?: string;
+        };
+        /** @description Le parent vu par l'apprenant (WD22) : nom et lien de parenté, ni numéro ni email. */
+        MyParent: {
+            firstName: string;
+            lastName: string;
+            relationship: components["schemas"]["Relationship"];
+            /** Format: date-time */
+            linkedAt: string;
         };
         /** @description Étape suivante : mission ou quiz à faire, ou certification quand tout le parcours est fait. */
         NextStep: {
@@ -3243,6 +3383,21 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Certificate"][];
         };
+        PaginatedChildList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["Child"][];
+        };
         PaginatedConsentRequestList: {
             /** @example 123 */
             count?: number;
@@ -3438,6 +3593,22 @@ export interface components {
         };
         PatchedCartItemUpdateRequest: {
             quantity?: number;
+        };
+        /** @description WPD10. L'identifiant ne se modifie pas (C12) ; le mot de passe passe par `password-reset/` (D26). */
+        PatchedChildUpdateRequest: {
+            firstName?: string;
+            lastName?: string;
+            /**
+             * Format: date
+             * @description Cohérente avec l'âge déclaré (D23)
+             */
+            birthDate?: string;
+            schoolGrade?: string;
+            /** @description `id` de la localité */
+            locality?: number;
+            gender?: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
+            disability?: string | null;
+            publicDisplayAllowed?: boolean;
         };
         PatchedLearnerProfileUpdateRequest: {
             /**
@@ -4148,6 +4319,15 @@ export interface components {
         UnreadCount: {
             count: number;
         };
+        /**
+         * @description * `pending` - En attente de consentement
+         *     * `active` - Actif
+         *     * `suspended` - Suspendu
+         *     * `deactivated` - Désactivé
+         *     * `anonymized` - Anonymisé
+         * @enum {string}
+         */
+        UserStatusEnum: "pending" | "active" | "suspended" | "deactivated" | "anonymized";
         UsernameAvailabilityResponse: {
             available: boolean;
         };
@@ -4177,6 +4357,291 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    accounts_children_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedChildList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChildCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChildDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChildDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedChildUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChildDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_children_password_reset_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChildPasswordResetRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     accounts_consent_requests_list: {
         parameters: {
             query?: {
@@ -4885,6 +5350,49 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_parent_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyParent"];
                 };
             };
             401: {

@@ -37,15 +37,32 @@ def age_on(birth_date: date, day: date) -> int:
     return day.year - birth_date.year - ((day.month, day.day) < (birth_date.month, birth_date.day))
 
 
+def check_birth_date(value: date, profile: LearnerProfile | None = None) -> date:
+    """
+    10 à 17 ans aujourd'hui et, pour un profil existant, l'âge qu'avait l'enfant à l'inscription est celui qu'il a
+    déclaré (D23).
+    """
+    # Dates du Bénin (C16) : en UTC, la nuit, la date n'est pas la même
+    if not MIN_AGE <= age_on(value, timezone.localdate()) <= MAX_AGE:
+        raise serializers.ValidationError(message_for("AGE_OUT_OF_RANGE"), code="AGE_OUT_OF_RANGE")
+    declared = profile.declared_age if profile else None
+    signed_up = timezone.localdate(profile.user.date_joined) if profile else None
+    if declared is not None and age_on(value, signed_up) != declared:
+        raise serializers.ValidationError(
+            message_for("BIRTHDATE_AGE_MISMATCH"), code="BIRTHDATE_AGE_MISMATCH"
+        )
+    return value
+
+
 def code_field(model, **kwargs):
     return serializers.SlugRelatedField(
         slug_field="code", queryset=model.objects.filter(active=True), **kwargs
     )
 
 
-def locality_field():
+def locality_field(**kwargs):
     return serializers.PrimaryKeyRelatedField(
-        queryset=Locality.objects.filter(active=True), help_text="`id` de la localité"
+        queryset=Locality.objects.filter(active=True), help_text="`id` de la localité", **kwargs
     )
 
 
@@ -108,19 +125,7 @@ class LearnerProfileUpdateSerializer(serializers.ModelSerializer):
         extra_kwargs = {"email": {"allow_null": True, "required": False}}
 
     def validate_birth_date(self, value):
-        """10 à 17 ans aujourd'hui, et l'âge qu'avait l'enfant à l'inscription est celui qu'il a déclaré (D23)."""
-        # Dates du Bénin (C16) : en UTC, la nuit, la date n'est pas la même
-        if not MIN_AGE <= age_on(value, timezone.localdate()) <= MAX_AGE:
-            raise serializers.ValidationError(
-                message_for("AGE_OUT_OF_RANGE"), code="AGE_OUT_OF_RANGE"
-            )
-        declared = self.instance.declared_age
-        signed_up = timezone.localdate(self.instance.user.date_joined)
-        if declared is not None and age_on(value, signed_up) != declared:
-            raise serializers.ValidationError(
-                message_for("BIRTHDATE_AGE_MISMATCH"), code="BIRTHDATE_AGE_MISMATCH"
-            )
-        return value
+        return check_birth_date(value, self.instance)
 
     def validate_goals(self, value):
         if len(set(value)) < MIN_LEARNER_GOALS:

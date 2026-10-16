@@ -4,6 +4,254 @@ info:
   version: 1.0.0
   description: API pour la plateforme de formation
 paths:
+  /api/accounts/children/:
+    get:
+      operationId: accounts_children_list
+      description: 'WPD01, WPD02 : les enfants, par prénom.'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChildList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: accounts_children_create
+      description: 'WPD04 : compte actif, consentement d''origine `parent` créé accepté
+        (D51).'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/children/{id}/:
+    get:
+      operationId: accounts_children_retrieve
+      description: WPD03, WPD10.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    patch:
+      operationId: accounts_children_partial_update
+      description: 'WPD10 : profil de l''enfant, et opt-in à l''affichage public (D15).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedChildUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/children/{id}/password-reset/:
+    post:
+      operationId: accounts_children_password_reset_create
+      description: 'WPD03 « Réinitialiser le mot de passe » (D26, §8.9) : l''ancien
+        ne permet plus de se connecter.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildPasswordResetRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/consent-requests/:
     get:
       operationId: accounts_consent_requests_list
@@ -611,6 +859,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/parent/:
+    get:
+      operationId: accounts_me_parent_retrieve
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyParent'
           description: ''
         '401':
           content:
@@ -5430,6 +5710,247 @@ components:
       - missionsDone
       - summativeCount
       - summativesPassed
+    Child:
+      type: object
+      description: 'Ligne d''un enfant (WPD01, WPD02) : rien de sensible (genre, handicap,
+        localité) hors du détail.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        firstName:
+          type: string
+          readOnly: true
+          title: Prénom
+        lastName:
+          type: string
+          readOnly: true
+          title: Nom
+        username:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Identifiant
+        status:
+          allOf:
+          - $ref: '#/components/schemas/UserStatusEnum'
+          readOnly: true
+          title: Statut
+        age:
+          type: integer
+          nullable: true
+          readOnly: true
+        relationship:
+          allOf:
+          - $ref: '#/components/schemas/Relationship'
+          readOnly: true
+        avatar:
+          allOf:
+          - $ref: '#/components/schemas/Avatar'
+          readOnly: true
+          nullable: true
+        schoolGrade:
+          allOf:
+          - $ref: '#/components/schemas/SchoolGrade'
+          readOnly: true
+          nullable: true
+        points:
+          type: integer
+          readOnly: true
+        streakDays:
+          type: integer
+          readOnly: true
+        rank:
+          type: string
+          readOnly: true
+        profileStep:
+          description: Étape de profil que l'enfant doit encore compléter (W11-W14),
+            null si complet
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ProfileStepEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - age
+      - avatar
+      - createdAt
+      - firstName
+      - id
+      - lastName
+      - points
+      - profileStep
+      - rank
+      - relationship
+      - schoolGrade
+      - status
+      - streakDays
+      - username
+    ChildCreateRequest:
+      type: object
+      description: 'WPD04 : le parent crée le compte et choisit le mot de passe initial.'
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        birthDate:
+          type: string
+          format: date
+          description: 10 à 17 ans (D23)
+        relationship:
+          type: string
+          minLength: 1
+          description: Lien de parenté (référentiel `relationships`)
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - birthDate
+      - firstName
+      - lastName
+      - password
+      - relationship
+      - username
+    ChildDetail:
+      type: object
+      description: 'Détail (WPD03, WPD10) : seul écran, avec la modification, où paraissent
+        genre, handicap et localité (D6).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        firstName:
+          type: string
+          readOnly: true
+          title: Prénom
+        lastName:
+          type: string
+          readOnly: true
+          title: Nom
+        username:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Identifiant
+        status:
+          allOf:
+          - $ref: '#/components/schemas/UserStatusEnum'
+          readOnly: true
+          title: Statut
+        age:
+          type: integer
+          nullable: true
+          readOnly: true
+        relationship:
+          allOf:
+          - $ref: '#/components/schemas/Relationship'
+          readOnly: true
+        avatar:
+          allOf:
+          - $ref: '#/components/schemas/Avatar'
+          readOnly: true
+          nullable: true
+        schoolGrade:
+          allOf:
+          - $ref: '#/components/schemas/SchoolGrade'
+          readOnly: true
+          nullable: true
+        points:
+          type: integer
+          readOnly: true
+        streakDays:
+          type: integer
+          readOnly: true
+        rank:
+          type: string
+          readOnly: true
+        profileStep:
+          description: Étape de profil que l'enfant doit encore compléter (W11-W14),
+            null si complet
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ProfileStepEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        birthDate:
+          type: string
+          format: date
+          readOnly: true
+        gender:
+          readOnly: true
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        disability:
+          allOf:
+          - $ref: '#/components/schemas/Disability'
+          readOnly: true
+          nullable: true
+        locality:
+          allOf:
+          - $ref: '#/components/schemas/Locality'
+          readOnly: true
+          nullable: true
+        goals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Goal'
+          readOnly: true
+        publicDisplayAllowed:
+          type: boolean
+          readOnly: true
+          description: Opt-in parental à l'affichage public (pseudonyme et avatar,
+            D15)
+      required:
+      - age
+      - avatar
+      - birthDate
+      - createdAt
+      - disability
+      - firstName
+      - gender
+      - goals
+      - id
+      - lastName
+      - locality
+      - points
+      - profileStep
+      - publicDisplayAllowed
+      - rank
+      - relationship
+      - schoolGrade
+      - status
+      - streakDays
+      - username
+    ChildPasswordResetRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+          description: Nouveau mot de passe, à communiquer à l'enfant (D26)
+          maxLength: 128
+      required:
+      - password
     Choice:
       type: object
       description: Réponse proposée, sans le corrigé.
@@ -7349,7 +7870,7 @@ components:
           - $ref: '#/components/schemas/NullEnum'
         status:
           allOf:
-          - $ref: '#/components/schemas/MeStatusEnum'
+          - $ref: '#/components/schemas/UserStatusEnum'
           readOnly: true
           title: Statut
         username:
@@ -7438,20 +7959,6 @@ components:
       - staffGroups
       - status
       - username
-    MeStatusEnum:
-      enum:
-      - pending
-      - active
-      - suspended
-      - deactivated
-      - anonymized
-      type: string
-      description: |-
-        * `pending` - En attente de consentement
-        * `active` - Actif
-        * `suspended` - Suspendu
-        * `deactivated` - Désactivé
-        * `anonymized` - Anonymisé
     MissionBlock:
       type: object
       properties:
@@ -7592,6 +8099,25 @@ components:
           maxLength: 16
       required:
       - title
+    MyParent:
+      type: object
+      description: 'Le parent vu par l''apprenant (WD22) : nom et lien de parenté,
+        ni numéro ni email.'
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        relationship:
+          $ref: '#/components/schemas/Relationship'
+        linkedAt:
+          type: string
+          format: date-time
+      required:
+      - firstName
+      - lastName
+      - linkedAt
+      - relationship
     NextStep:
       type: object
       description: 'Étape suivante : mission ou quiz à faire, ou certification quand
@@ -8230,6 +8756,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Certificate'
+    PaginatedChildList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Child'
     PaginatedConsentRequestList:
       type: object
       properties:
@@ -8569,6 +9115,40 @@ components:
           type: integer
           maximum: 10
           minimum: 1
+    PatchedChildUpdateRequest:
+      type: object
+      description: WPD10. L'identifiant ne se modifie pas (C12) ; le mot de passe
+        passe par `password-reset/` (D26).
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        birthDate:
+          type: string
+          format: date
+          description: Cohérente avec l'âge déclaré (D23)
+        schoolGrade:
+          type: string
+          minLength: 1
+        locality:
+          type: integer
+          description: '`id` de la localité'
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        disability:
+          type: string
+          minLength: 1
+          nullable: true
+        publicDisplayAllowed:
+          type: boolean
     PatchedLearnerProfileUpdateRequest:
       type: object
       properties:
@@ -10183,6 +10763,20 @@ components:
           type: integer
       required:
       - count
+    UserStatusEnum:
+      enum:
+      - pending
+      - active
+      - suspended
+      - deactivated
+      - anonymized
+      type: string
+      description: |-
+        * `pending` - En attente de consentement
+        * `active` - Actif
+        * `suspended` - Suspendu
+        * `deactivated` - Désactivé
+        * `anonymized` - Anonymisé
     UsernameAvailabilityResponse:
       type: object
       properties:
