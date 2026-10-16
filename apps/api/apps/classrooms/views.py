@@ -17,18 +17,22 @@ from rest_framework.response import Response
 
 from apps.accounts.fields import phone_country
 from apps.catalog.models import Course, Level, Mission, Project
+from apps.events.models import EventApplication
 from apps.learning.models import Enrollment, MissionProgress, QuizAttempt
 from apps.referentials.models import Relationship
+from libs.errors import ApiError
 from libs.permissions import IsTeacher
 
 from . import follow_up, imports, services
 from .learner_invitations import Invitee, invite, invite_many
 from .models import Classroom, ClassroomMembership, TeacherComment
 from .serializers import (
+    ClassroomEventApplicationSerializer,
     ClassroomSerializer,
     ClassroomWriteSerializer,
     CommentQuerySerializer,
     CommentRequestSerializer,
+    EventApplicationQuerySerializer,
     ImportRequestSerializer,
     ImportResultSerializer,
     InvitationSerializer,
@@ -191,6 +195,11 @@ class ClassroomViewSet(
         `ALREADY_IN_CLASSROOM`, `LEARNER_QUOTA_EXCEEDED`…). Plus de 200 lignes : `IMPORT_TOO_LARGE`.
         """
         classroom = self.get_object()
+        rows = request.data.get("rows")
+        if (
+            isinstance(rows, list) and len(rows) > imports.MAX_ROWS
+        ):  # avant toute validation ligne à ligne
+            raise ApiError("IMPORT_TOO_LARGE")
         payload = ImportRequestSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
         if payload.validated_data.get("file"):
@@ -483,3 +492,49 @@ class CommentListView(generics.ListAPIView):
         params = CommentQuerySerializer(data=self.request.query_params)
         params.is_valid(raise_exception=True)
         return follow_up.visible_comments(self.request.user, params.validated_data.get("learnerId"))
+
+
+class EventApplicationListView(TeacherMixin, generics.GenericAPIView):
+    """
+    WT09 « Candidatures de mes élèves » : candidatures des élèves actifs des classes de l'enseignant, en lecture
+    seule (chaque élève candidate seul, son parent décide, S8, C3). Filtres `classroomId`, `event`. Paginé.
+    """
+
+    serializer_class = ClassroomEventApplicationSerializer
+
+    @extend_schema(
+        parameters=[EventApplicationQuerySerializer],
+        responses=ClassroomEventApplicationSerializer(many=True),
+    )
+    def get(self, request):
+        params = EventApplicationQuerySerializer(data=request.query_params)
+        params.is_valid(raise_exception=True)
+        seats = ClassroomMembership.objects.filter(
+            status=Status.ACTIVE,
+            classroom__teacher=request.user,
+            classroom__archived_at__isnull=True,
+            learner=OuterRef("learner"),
+        )
+        if params.validated_data.get("classroomId") is not None:
+            seats = seats.filter(classroom_id=params.validated_data["classroomId"])
+        seats = seats.order_by("-joined_at", "-id")
+        queryset = (
+            EventApplication.objects.filter(Exists(seats))
+            .annotate(
+                classroom_id=Subquery(seats.values("classroom_id")[:1]),
+                classroom_name=Subquery(seats.values("classroom__name")[:1]),
+            )
+            .select_related("event", "learner__learner_profile__avatar")
+            .order_by("-created_at", "-id")
+        )
+        if params.validated_data.get("event"):
+            queryset = queryset.filter(event__slug=params.validated_data["event"])
+        page = self.paginate_queryset(queryset)
+        for application in page:
+            application.classroom_ref = {
+                "id": application.classroom_id,
+                "name": application.classroom_name,
+            }
+        return self.get_paginated_response(
+            ClassroomEventApplicationSerializer(page, many=True).data
+        )

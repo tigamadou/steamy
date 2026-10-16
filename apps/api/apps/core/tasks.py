@@ -23,3 +23,10 @@ def clear_expired_sessions():
 
     Session.objects.filter(expire_date__lt=timezone.now()).delete()
     return True
+
+
+@shared_task
+def broadcast_announcement(announcement_id: int) -> int:
+    from .announcements import broadcast
+
+    return broadcast(announcement_id)

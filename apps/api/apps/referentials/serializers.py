@@ -49,6 +49,12 @@ class RelationshipSerializer(serializers.ModelSerializer):
         fields = (*BASE, "parent_label")
 
 
+class DeletionReasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.DeletionReason
+        fields = BASE
+
+
 class RefusalReasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.RefusalReason

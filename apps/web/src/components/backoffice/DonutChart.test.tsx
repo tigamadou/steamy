@@ -18,6 +18,15 @@ describe("DonutChart", () => {
     expect(screen.getByText("2/5")).toBeInTheDocument();
   });
 
+  it("réduit le texte central long pour qu'il tienne dans l'anneau", () => {
+    const { container } = render(<DonutChart value={5} total={5} label="Tout" size={100} />);
+    const [text] = container.querySelectorAll("text");
+    expect(text).toHaveTextContent("100 %");
+    expect(text).toHaveAttribute("font-size", "19");
+    const { container: short } = render(<DonutChart value={1} total={5} label="Part" size={100} />);
+    expect(short.querySelector("text")).toHaveAttribute("font-size", "24");
+  });
+
   it("borne la part et traite un total nul", () => {
     expect(ratio(5, 0)).toBe(0);
     expect(ratio(-1, 10)).toBe(0);

@@ -540,3 +540,140 @@ def test_an_earlier_enrollment_is_kept(invited, classroom):
     Enrollment.objects.create(learner=child, course=classroom.course, source=Enrollment.Source.FREE)
     client.post(f"{CONSENT_URL}{consent.pk}/accept/", {"learnerId": child.pk}, format="json")
     assert Enrollment.objects.get(learner=child).source == Enrollment.Source.FREE
+
+
+# --- Relecture d'API-L5.2 : fichiers hostiles, plafonds, cas limites -------------------------
+
+
+def test_unreadable_csv_is_an_invalid_file(api, classroom):
+    for content in (b"Awa;Dossou\x00;0197112233;Mere\n", b'"' + b"A" * 140_000 + b'"\n'):
+        response = upload(api, classroom, "eleves.csv", content)
+        assert response.status_code == 400
+        assert response.json()["code"] == "IMPORT_INVALID_FILE"
+
+
+def _workbook(rows) -> bytes:
+    workbook = Workbook()
+    sheet = workbook.active
+    for values in rows:
+        sheet.append(values)
+    buffer = io.BytesIO()
+    workbook.save(buffer)
+    return buffer.getvalue()
+
+
+def test_excel_reading_stops_early(api, classroom, monkeypatch):
+    # Trop de lignes non vides : arrêt de la lecture, sans charger le reste du classeur
+    content = _workbook([["Awa", "Dossou", "0197112233", "Mère"]] * 205)
+    response = upload(api, classroom, "eleves.xlsx", content)
+    assert (response.status_code, response.json()["code"]) == (413, "IMPORT_TOO_LARGE")
+    # Des milliers de lignes vides (classeur gonflé) : arrêt aussi
+    monkeypatch.setattr(imports, "MAX_SCANNED", 3)
+    far = [*[None] * 20, "x"]  # hors des colonnes lues : ligne vide pour l'import
+    content = _workbook([["Awa", "Dossou", "0197112233", "Mère"], far, far, far])
+    assert upload(api, classroom, "eleves.xlsx", content).json()["code"] == "IMPORT_TOO_LARGE"
+
+
+def test_excel_columns_are_bounded(api, classroom, sms):
+    content = _workbook([["Awa", "Dossou", "0197112233", "Mère", *[""] * 20, "très loin"]])
+    body = upload(api, classroom, "eleves.xlsx", content).json()
+    assert [m["firstName"] for m in body["created"]] == ["Awa"]
+
+
+def test_accents_do_not_hide_a_duplicate(api, classroom, sms):
+    invite(api, classroom, firstName="Kémi")
+    assert invite(api, classroom, firstName="kemi").json()["code"] == "ALREADY_IN_CLASSROOM"
+
+
+def test_daily_cap_per_parent_phone(api, classroom, sms, settings):
+    settings.CLASSROOM_INVITATIONS_PER_PHONE_PER_DAY = 1
+    classroom.school.learner_quota = 10
+    classroom.school.save()
+    invite(api, classroom)
+    response = invite(api, classroom, firstName="Kémi")
+    assert (response.status_code, response.json()["code"]) == (429, "INVITATION_DAILY_LIMIT")
+    assert (
+        response.json()["message"]
+        == "Ce parent a reçu trop d'invitations aujourd'hui. Réessayez demain."
+    )
+    body = import_rows(
+        api,
+        classroom,
+        [
+            row(first="Ola"),
+            row(first="Tobi", phone="0197000002"),
+            row(first="Ada", phone="0197000002"),
+        ],
+    ).json()
+    assert [m["firstName"] for m in body["created"]] == ["Tobi"]
+    assert [(e["line"], e["code"]) for e in body["errors"]] == [
+        (1, "INVITATION_DAILY_LIMIT"),
+        (3, "INVITATION_DAILY_LIMIT"),
+    ]
+
+
+def test_expired_offer_blocks_invitations_and_joining(api, classroom, sms):
+    from datetime import timedelta as days
+
+    invite(api, classroom)
+    parent = ParentFactory(phone=PHONE)
+    client = client_for(parent)
+    client.post(f"{CONSENT_URL}claim/", {"token": token_from(sms)}, format="json")
+    consent = ConsentRequest.objects.get()
+    classroom.school.valid_until = timezone.localdate() - days(days=1)
+    classroom.school.save()
+
+    for response in (
+        invite(api, classroom, firstName="Kémi"),
+        import_rows(api, classroom, [row(first="Ola")]),
+        client.post(
+            f"{CONSENT_URL}{consent.pk}/accept/",
+            {"username": "awa.d", "password": "Robots2026"},
+            format="json",
+        ),
+    ):
+        assert (response.status_code, response.json()["code"]) == (403, "SCHOOL_OFFER_EXPIRED")
+    assert ClassroomMembership.objects.get().status == Status.INVITED
+
+
+def test_rows_beyond_200_are_refused_before_validation(api, classroom):
+    response = import_rows(api, classroom, [{}] * 201)
+    assert (response.status_code, response.json()["code"]) == (413, "IMPORT_TOO_LARGE")
+
+
+def test_join_fails_cleanly_when_the_invitation_is_gone(invited, classroom):
+    _, client, consent = invited
+    url = f"{CONSENT_URL}{consent.pk}/accept/"
+    payload = {"username": "awa.d", "password": "Robots2026"}
+    classroom.archived_at = timezone.now()
+    classroom.save()
+    assert client.post(url, payload, format="json").json()["code"] == "CONSENT_REQUEST_EXPIRED"
+    classroom.archived_at = None
+    classroom.save()
+    ClassroomMembership.objects.update(status=Status.ACTIVE)
+    assert client.post(url, payload, format="json").json()["code"] == "CONSENT_REQUEST_EXPIRED"
+    ClassroomMembership.objects.all().delete()
+    assert client.post(url, payload, format="json").json()["code"] == "CONSENT_REQUEST_EXPIRED"
+
+
+def test_concurrent_username_is_reported_as_taken(invited, monkeypatch):
+    from django.db import IntegrityError
+
+    _, client, consent = invited
+
+    def clash(*args, **kwargs):
+        raise IntegrityError("accounts_user_username_unique")
+
+    monkeypatch.setattr(User.objects, "create_learner", clash)
+    response = client.post(
+        f"{CONSENT_URL}{consent.pk}/accept/",
+        {"username": "awa.d", "password": "Robots2026"},
+        format="json",
+    )
+    assert (response.status_code, response.json()["code"]) == (409, "USERNAME_TAKEN")
+
+
+def test_csv_of_more_than_200_lines_is_refused(api, classroom):
+    content = "".join(f"E{i};Dossou;0197112233;Mère\n" for i in range(201)).encode()
+    response = upload(api, classroom, "eleves.csv", content)
+    assert (response.status_code, response.json()["code"]) == (413, "IMPORT_TOO_LARGE")

@@ -7,16 +7,19 @@ et l'appartenance à la classe : le front ne valide que la forme.
 
 import csv
 import io
-import unicodedata
 import zipfile
 
 from libs.errors import ApiError
 from libs.phone import normalize_phone
 
-from .learner_invitations import ImportResult, Invitee
+from .learner_invitations import ImportResult, Invitee, fold
 
 MAX_ROWS = 200
 MAX_BYTES = 1024 * 1024
+#: Colonnes lues dans un classeur : les 4 attendues et une marge pour signaler une ligne mal formée.
+MAX_COLUMNS = 8
+#: Lignes parcourues au plus dans un classeur, vides comprises (un classeur compressé peut en déclarer des millions).
+MAX_SCANNED = 5000
 MAX_NAME = 150
 COLUMNS = ("first_name", "last_name", "parent_phone", "relationship")
 HEADER_WORDS = {"prenom", "firstname", "first name"}
@@ -35,19 +38,27 @@ def _cell(value) -> str:
     return str(value if value is not None else "").strip()
 
 
-def _fold(value) -> str:
-    text = unicodedata.normalize("NFKD", str(value or "")).encode("ascii", "ignore").decode()
-    return " ".join(text.casefold().split())
-
-
 def _read_xlsx(content: bytes) -> list[list]:
+    """
+    Lecture en flux, bornée (bombe de décompression) : `MAX_COLUMNS` colonnes, arrêt dès `MAX_ROWS + 2` lignes non
+    vides (en-tête compris) ou `MAX_SCANNED` lignes parcourues. Le XML est lu par `defusedxml` (openpyxl l'utilise
+    dès qu'il est installé).
+    """
     from openpyxl import load_workbook
 
     try:
         sheet = load_workbook(io.BytesIO(content), read_only=True, data_only=True).worksheets[0]
+        rows, filled = [], 0
+        for scanned, row in enumerate(
+            sheet.iter_rows(max_col=MAX_COLUMNS, values_only=True), start=1
+        ):
+            rows.append(list(row))
+            filled += any(_cell(cell) for cell in row)
+            if filled >= MAX_ROWS + 2 or scanned >= MAX_SCANNED:
+                raise ApiError("IMPORT_TOO_LARGE")
     except (zipfile.BadZipFile, KeyError, OSError, ValueError) as error:
         raise ApiError("IMPORT_INVALID_FILE") from error
-    return [list(row) for row in sheet.iter_rows(values_only=True)]
+    return rows
 
 
 def _read_csv(content: bytes) -> list[list]:
@@ -59,7 +70,12 @@ def _read_csv(content: bytes) -> list[list]:
         dialect = csv.Sniffer().sniff(text[:4096], delimiters=";,\t")
     except csv.Error:
         dialect = _Semicolon
-    return [row for row in csv.reader(io.StringIO(text), dialect)]
+    if "\x00" in text:  # accepté par `csv` depuis Python 3.11, refusé par PostgreSQL
+        raise ApiError("IMPORT_INVALID_FILE")
+    try:
+        return [row for row in csv.reader(io.StringIO(text), dialect)]
+    except csv.Error as error:  # champ démesuré, guillemets incohérents…
+        raise ApiError("IMPORT_INVALID_FILE") from error
 
 
 def read_file(upload) -> list[tuple[int, list]]:
@@ -75,7 +91,7 @@ def read_file(upload) -> list[tuple[int, list]]:
         for number, row in enumerate(rows, start=1)
         if any(_cell(cell) for cell in row)
     ]
-    if lines and _fold(lines[0][1][0]) in HEADER_WORDS:
+    if lines and fold(lines[0][1][0]) in HEADER_WORDS:
         lines = lines[1:]
     return lines
 
@@ -92,14 +108,14 @@ def parse(lines, *, relationships, dial_code: str, phone_valid) -> tuple[list, I
     """
     by_name = {}
     for relationship in relationships:
-        by_name[_fold(relationship.code)] = relationship
-        by_name[_fold(relationship.label)] = relationship
+        by_name[fold(relationship.code)] = relationship
+        by_name[fold(relationship.label)] = relationship
     result, ready, seen = ImportResult(), [], set()
     for line, cells in lines:
         cells = [_cell(cell) for cell in cells]
         # Ligne courte : les colonnes manquantes sont absentes des données renvoyées
         values = data = dict(zip(COLUMNS, cells[:4], strict=False))
-        relationship = by_name.get(_fold(values.get("relationship")))
+        relationship = by_name.get(fold(values.get("relationship")))
         if (
             len(cells) < 4
             or not all(cells[:4])
