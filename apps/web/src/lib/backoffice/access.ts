@@ -120,3 +120,8 @@ export function backofficeNav(me: Pick<Me, "staffGroups">, apiUrl: string): NavG
       ),
   })).filter((group) => group.items.length > 0);
 }
+
+/** Lien d'une liste filtrée de l'admin Django dont le serveur fournit le chemin (`/admin/…?filtre=…`, WAD01). */
+export function adminPathUrl(apiUrl: string, adminPath: string): string {
+  return `${apiUrl.replace(/\/+$/, "")}/${adminPath.replace(/^\/+/, "")}`;
+}

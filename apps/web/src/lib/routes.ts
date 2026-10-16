@@ -93,6 +93,7 @@ export const routes = {
   backoffice: {
     home: "/backoffice",
     impact: "/backoffice/impact",
+    kpi: (code: string) => `/backoffice/impact/indicateurs/${encodeURIComponent(code)}`,
     accessDenied: "/backoffice/acces-refuse",
   },
 } as const;

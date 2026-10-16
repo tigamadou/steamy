@@ -4,6 +4,357 @@ info:
   version: 1.0.0
   description: API pour la plateforme de formation
 paths:
+  /api/accounts/children/:
+    get:
+      operationId: accounts_children_list
+      description: 'WPD01, WPD02 : les enfants, par prénom.'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChildList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: accounts_children_create
+      description: 'WPD04 : compte actif, consentement d''origine `parent` créé accepté
+        (D51).'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/children/{id}/:
+    get:
+      operationId: accounts_children_retrieve
+      description: WPD03, WPD10.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    patch:
+      operationId: accounts_children_partial_update
+      description: 'WPD10 : profil de l''enfant, et opt-in à l''affichage public (D15).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedChildUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/children/{id}/deletion/:
+    post:
+      operationId: accounts_children_deletion_create
+      description: |-
+        WPD09 (`POST`) : compte désactivé aussitôt, anonymisé à J+30 ; valide aussi la demande de l'enfant (WD15).
+        WPD02 (`DELETE`) : « Annuler la suppression », l'enfant peut de nouveau se connecter.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildDeletionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: accounts_children_deletion_destroy
+      description: |-
+        WPD09 (`POST`) : compte désactivé aussitôt, anonymisé à J+30 ; valide aussi la demande de l'enfant (WD15).
+        WPD02 (`DELETE`) : « Annuler la suppression », l'enfant peut de nouveau se connecter.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/children/{id}/password-reset/:
+    post:
+      operationId: accounts_children_password_reset_create
+      description: 'WPD03 « Réinitialiser le mot de passe » (D26, §8.9) : l''ancien
+        ne permet plus de se connecter.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildPasswordResetRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/consent-requests/:
     get:
       operationId: accounts_consent_requests_list
@@ -387,6 +738,205 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/accounts/deletion-requests/:
+    get:
+      operationId: accounts_deletion_requests_list
+      description: Demandes de suppression des enfants du parent connecté (WPD01,
+        WPD09 `?demande=<id>`).
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDeletionRequestList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/deletion-requests/{id}/:
+    get:
+      operationId: accounts_deletion_requests_retrieve
+      description: Demandes de suppression des enfants du parent connecté (WPD01,
+        WPD09 `?demande=<id>`).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/deletion-requests/{id}/approve/:
+    post:
+      operationId: accounts_deletion_requests_approve_create
+      description: 'WPD09 : la demande de l''enfant est validée, son compte désactivé
+        puis anonymisé à J+30.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/deletion-requests/{id}/refuse/:
+    post:
+      operationId: accounts_deletion_requests_refuse_create
+      description: 'WPD01 : refus, notifié à l''enfant.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/me/:
     get:
       operationId: accounts_me_retrieve
@@ -438,6 +988,194 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Me'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/deletion-request/:
+    get:
+      operationId: accounts_me_deletion_request_retrieve
+      description: 'WD15 : demande en cours (« Demande envoyée à ton parent »), 404
+        sans demande.'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: accounts_me_deletion_request_create
+      description: |-
+        Suppression du compte connecté. Apprenant (WD15) : demande envoyée au parent, retirable tant qu'elle attend.
+        Parent (WPD08) : sans enfant rattaché seulement (`CHILDREN_STILL_LINKED`) ; le compte est désactivé et la
+        session fermée aussitôt.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeletionRequestCreateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: accounts_me_deletion_request_destroy
+      description: 'WD15 : l''apprenant retire sa demande tant que son parent ne l''a
+        pas validée.'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/delivery-address/:
+    get:
+      operationId: accounts_me_delivery_address_retrieve
+      description: '`accounts/me/delivery-address/` (WD19, WK05) : adresse proposée
+        par défaut à la commande.'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryAddress'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    put:
+      operationId: accounts_me_delivery_address_update
+      description: '`accounts/me/delivery-address/` (WD19, WK05) : adresse proposée
+        par défaut à la commande.'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryAddressRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryAddress'
           description: ''
         '400':
           content:
@@ -551,7 +1289,71 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/accounts/me/parent/:
+    get:
+      operationId: accounts_me_parent_retrieve
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyParent'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/me/parent-profile/:
+    get:
+      operationId: accounts_me_parent_profile_retrieve
+      description: 'WPD08 : profil du parent connecté.'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentProfile'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
     patch:
       operationId: accounts_me_parent_profile_partial_update
       description: WP07-WP09 (une étape par appel) et WPD08.
@@ -613,6 +1415,96 @@ paths:
       responses:
         '204':
           description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/phone-change/:
+    post:
+      operationId: accounts_me_phone_change_create
+      description: Envoie un code au nouveau numéro ; le renvoi passe par `auth/otp/resend/`.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhoneChangeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallenge'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/accounts/me/phone-change/verify/:
+    post:
+      operationId: accounts_me_phone_change_verify_create
+      description: 'Code valide : le numéro de connexion est remplacé.'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
         '400':
           content:
             application/json:
@@ -1843,6 +2735,174 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/events/{slug}/applications/:
+    post:
+      operationId: events_applications_create
+      description: |-
+        `POST events/{slug}/applications/` (WD11, WPD12). Apprenant : candidature en attente de son parent. Parent
+        (`childId` d'un de ses enfants) : accord immédiat ; payant et sans ticket → place réservée et `orderReference`
+        à payer par `POST payments/orders/{reference}/payments/`. Codes : `EVENT_CLOSED`, `EVENT_FULL`,
+        `ALREADY_APPLIED`.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationCreateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/events/applications/:
+    get:
+      operationId: events_applications_list
+      description: '`GET events/applications/` (WD10, WPD06) : les siennes (apprenant),
+        celles de ses enfants (parent).'
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - events
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedApplicationList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/events/tickets/:
+    get:
+      operationId: events_tickets_list
+      description: '`GET events/tickets/` (WJ07, WD10, WD11) : tickets de l''apprenant,
+        utilisés ou non.'
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - events
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ticket'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/health/:
     get:
       operationId: health_retrieve
@@ -2996,14 +4056,67 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/payments/kit-codes/redeem/:
+    post:
+      operationId: payments_kit_codes_redeem_create
+      description: |-
+        `POST payments/kit-codes/redeem/` (WA01, WA06) : l'apprenant saisit le code de la notice et choisit le parcours ;
+        le code est consommé et l'inscription créée (`source=kit_code`). Déjà inscrit : 200, code non consommé.
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KitCodeRedeemRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KitCodeRedeemed'
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KitCodeRedeemed'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/payments/orders/:
     get:
       operationId: payments_orders_list
       description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+        Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+        (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+        d'autrui répond 404.
+      summary: Commandes du parent (payeur) ou de l'apprenant (bénéficiaire)
       parameters:
       - name: ordering
         required: false
@@ -3029,6 +4142,21 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: status
+        schema:
+          enum:
+          - pending
+          - paid
+          - cancelled
+          - refunded
+          type: string
+          minLength: 1
+        description: |-
+          * `pending` - En attente de paiement
+          * `paid` - Payée
+          * `cancelled` - Annulée
+          * `refunded` - Remboursée
       tags:
       - payments
       security:
@@ -3058,25 +4186,75 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/payments/orders/{id}/:
+    post:
+      operationId: payments_orders_create
+      description: |-
+        Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+        (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+        d'autrui répond 404.
+      summary: 'Créer une commande : prix, frais et total calculés par le serveur
+        (parent ou invité)'
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderCreated'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/orders/{reference}/:
     get:
       operationId: payments_orders_retrieve
       description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+        Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+        (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+        d'autrui répond 404.
+      summary: Commande par sa référence (payeur, bénéficiaire, ou invité avec X-Guest-Token)
       parameters:
-      - in: path
-        name: id
+      - in: header
+        name: X-Guest-Token
         schema:
-          type: integer
-        description: A unique integer value identifying this order.
+          type: string
+        description: Jeton d'une commande invitée, remis à sa création (C10)
+      - in: path
+        name: reference
+        schema:
+          type: string
+          title: Référence
         required: true
       tags:
       - payments
       security:
       - cookieAuth: []
+      - {}
       responses:
         '200':
           content:
@@ -3084,7 +4262,105 @@ paths:
               schema:
                 $ref: '#/components/schemas/Order'
           description: ''
-        '401':
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/orders/{reference}/invoice/:
+    get:
+      operationId: payments_orders_invoice_retrieve
+      description: |-
+        Réservée au payeur (C12) : l'apprenant bénéficiaire n'y a pas accès (404). PDF pas prêt → 409
+        `PDF_NOT_READY` ; sinon redirection vers une URL présignée de 5 minutes (ADR 0005 §6).
+      summary: Télécharger la facture (payeur seulement, ou invité avec X-Guest-Token)
+      parameters:
+      - in: header
+        name: X-Guest-Token
+        schema:
+          type: string
+        description: Jeton d'une commande invitée, remis à sa création (C10)
+      - in: path
+        name: reference
+        schema:
+          type: string
+          title: Référence
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '302':
+          description: Redirection vers l'URL présignée (5 min)
+        '200':
+          description: Fichier PDF
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/orders/{reference}/payments/:
+    post:
+      operationId: payments_orders_payments_create
+      description: |-
+        Initie le débit (USSD push, sans redirection). La réponse donne le paiement `pending` (ou `failed` si le
+        prestataire refuse) ; son issue se lit ensuite sur `GET payments/payments/{id}/`. Aussi pour reprendre une
+        commande en attente après un échec.
+      summary: Payer une commande par Mobile Money (parent payeur, ou invité avec
+        X-Guest-Token)
+      parameters:
+      - in: header
+        name: X-Guest-Token
+        schema:
+          type: string
+        description: Jeton d'une commande invitée, remis à sa création (C10)
+      - in: path
+        name: reference
+        schema:
+          type: string
+          title: Référence
+        required: true
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+        '400':
           content:
             application/json:
               schema:
@@ -3108,14 +4384,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/payments/payments/:
+  /api/payments/payment-requests/:
     get:
-      operationId: payments_payments_list
+      operationId: payments_payment_requests_list
       description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: 'Demandes de paiement : les siennes (apprenant), celles de ses enfants
+        (parent)'
       parameters:
       - name: ordering
         required: false
@@ -3141,6 +4417,23 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: status
+        schema:
+          enum:
+          - pending
+          - paid
+          - declined
+          - expired
+          - cancelled
+          type: string
+          minLength: 1
+        description: |-
+          * `pending` - En attente du parent
+          * `paid` - Payée
+          * `declined` - Refusée
+          * `expired` - Expirée
+          * `cancelled` - Annulée
       tags:
       - payments
       security:
@@ -3150,7 +4443,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedPaymentList'
+                $ref: '#/components/schemas/PaginatedPaymentRequestList'
           description: ''
         '401':
           content:
@@ -3170,20 +4463,72 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/payments/payments/{id}/:
-    get:
-      operationId: payments_payments_retrieve
+    post:
+      operationId: payments_payment_requests_create
       description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: Demander à son parent de payer un parcours ou des kits (apprenant)
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequestCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/payment-requests/{id}/:
+    get:
+      operationId: payments_payment_requests_retrieve
+      description: |-
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: Une demande de paiement
       parameters:
       - in: path
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this payment.
+        description: A unique integer value identifying this demande de paiement.
         required: true
       tags:
       - payments
@@ -3194,7 +4539,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Payment'
+                $ref: '#/components/schemas/PaymentRequest'
           description: ''
         '401':
           content:
@@ -3220,23 +4565,229 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/payments/payment-requests/{id}/cancel/:
+    post:
+      operationId: payments_payment_requests_cancel_create
+      description: |-
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: Annuler sa demande (apprenant)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this demande de paiement.
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/payment-requests/{id}/decline/:
+    post:
+      operationId: payments_payment_requests_decline_create
+      description: |-
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: Refuser la demande de son enfant (parent)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this demande de paiement.
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/payment-requests/{id}/resend/:
+    post:
+      operationId: payments_payment_requests_resend_create
+      description: |-
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: Relancer son parent (3 envois au plus, espacés de 24 h)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this demande de paiement.
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/payments/{id}/:
+    get:
+      operationId: payments_payments_retrieve
+      description: Paiement lisible par le payeur de la commande seulement ; l'apprenant
+        n'y a pas accès (C12).
+      summary: État d'un paiement (payeur, ou invité avec X-Guest-Token)
+      parameters:
+      - in: header
+        name: X-Guest-Token
+        schema:
+          type: string
+        description: Jeton d'une commande invitée, remis à sa création (C10)
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this paiement.
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/payments/webhook/{provider_name}/:
     post:
       operationId: payments_webhook_create
       description: |-
-        Generic webhook entrypoint for external providers.
-        - provider_name: "kkiapay" or "fedapay"
-        The request.body should be validated by provider-specific verification code.
-      summary: Webhook des prestataires de paiement (appelé par KKiaPay / FedaPay,
-        pas par le front)
+        Point d'entrée des notifications des prestataires (S9, ADR 0003). La signature est vérifiée **avant** toute
+        lecture du contenu ; le prestataire normalise ensuite la notification (`parse_event`).
+      summary: Webhook des prestataires de paiement (appelé par le prestataire, pas
+        par le front)
       parameters:
       - in: path
         name: provider_name
         schema:
           type: string
           enum:
+          - fake
           - fedapay
-          - kkiapay
         required: true
       tags:
       - payments
@@ -3433,6 +4984,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/referentials/deletion-reasons/:
+    get:
+      operationId: referentials_deletion_reasons_list
+      tags:
+      - referentials
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeletionReason'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/referentials/disabilities/:
     get:
       operationId: referentials_disabilities_list
@@ -3600,6 +5173,211 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/shop/cart/:
+    get:
+      operationId: shop_cart_retrieve
+      description: Panier côté serveur (D38) ; celui d'un invité reste dans le navigateur
+        et part avec la commande.
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/shop/cart/items/:
+    post:
+      operationId: shop_cart_items_create
+      summary: Ajouter un kit au panier (ajoute à la quantité déjà présente)
+      tags:
+      - shop
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/shop/cart/items/{id}/:
+    patch:
+      operationId: shop_cart_items_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - shop
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCartItemUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: shop_cart_items_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/shop/delivery-zones/:
+    get:
+      operationId: shop_delivery_zones_list
+      description: Zones de livraison actives, avec leurs frais et leur délai (D38,
+        WK05). Non paginées.
+      parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+          minLength: 2
+          maxLength: 2
+        description: Code ISO du pays (BJ)
+      tags:
+      - shop
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeliveryZone'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/shop/kits/:
     get:
       operationId: shop_kits_list
@@ -3661,6 +5439,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/KitDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/shop/kits/{slug}/restock-alerts/:
+    post:
+      operationId: shop_kits_restock_alerts_create
+      description: |-
+        Invité : `{ phone }`, un seul SMS (D38). Parent connecté : SMS sur le numéro du compte, sans corps.
+        Apprenant : notification dans l'application, jamais de téléphone (D30). Réponse identique si la demande
+        existait déjà.
+      summary: Être prévenu du retour en stock d'un kit (WK11)
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestockAlertRequest'
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestockAlertAck'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
         '404':
           content:
@@ -3872,6 +5705,100 @@ components:
       required:
       - choiceId
       - questionId
+    Application:
+      type: object
+      description: 'Candidature (WD10, WPD06) ; `orderReference` : commande à payer
+        ou payée (événement payant).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        event:
+          allOf:
+          - $ref: '#/components/schemas/EventSummary'
+          readOnly: true
+        learner:
+          allOf:
+          - $ref: '#/components/schemas/LearnerSummary'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ApplicationStatusEnum'
+          readOnly: true
+          title: Statut
+        motivation:
+          type: string
+          readOnly: true
+        selfLevel:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          readOnly: true
+          title: Niveau déclaré
+        ticketUsed:
+          type: boolean
+          readOnly: true
+        parentDecidedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Décision du parent
+        refusalReason:
+          type: string
+          readOnly: true
+          title: Motif de refus
+        orderReference:
+          type: string
+          nullable: true
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Déposée le
+      required:
+      - createdAt
+      - event
+      - id
+      - learner
+      - motivation
+      - orderReference
+      - parentDecidedAt
+      - refusalReason
+      - selfLevel
+      - status
+      - ticketUsed
+    ApplicationCreateRequest:
+      type: object
+      description: 'Apprenant : `{motivation, selfLevel}`. Parent : `{childId, motivation?}`
+        (WPD12, accord immédiat).'
+      properties:
+        childId:
+          type: integer
+          description: 'Parent : l''enfant inscrit'
+        motivation:
+          type: string
+          default: ''
+          maxLength: 2000
+        selfLevel:
+          default: ''
+          oneOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+    ApplicationStatusEnum:
+      enum:
+      - pending_parent
+      - pending_payment
+      - accepted
+      - refused
+      - cancelled
+      type: string
+      description: |-
+        * `pending_parent` - En attente du parent
+        * `pending_payment` - En attente du paiement
+        * `accepted` - Inscription confirmée
+        * `refused` - Refusée
+        * `cancelled` - Annulée
     AreaTypeEnum:
       enum:
       - urban
@@ -4101,6 +6028,74 @@ components:
         * `level` - Niveau
         * `project` - Projet
         * `course` - Parcours
+    Beneficiary:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+      required:
+      - firstName
+      - id
+    BlankEnum:
+      enum:
+      - ''
+    Cart:
+      type: object
+      description: 'Panier (WK03, WK10) : prix courants des kits ; le total définitif
+        est celui de la commande.'
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        count:
+          type: integer
+          description: Nombre d'articles (somme des quantités)
+        subtotal:
+          type: integer
+          description: Somme des lignes, hors livraison (FCFA)
+      required:
+      - count
+      - items
+      - subtotal
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kit:
+          allOf:
+          - $ref: '#/components/schemas/Kit'
+          readOnly: true
+        quantity:
+          type: integer
+          readOnly: true
+          title: Quantité
+        total:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - kit
+      - quantity
+      - total
+    CartItemCreateRequest:
+      type: object
+      properties:
+        kitSlug:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        quantity:
+          type: integer
+          maximum: 10
+          minimum: 1
+          default: 1
+      required:
+      - kitSlug
     Category:
       type: object
       properties:
@@ -4270,6 +6265,297 @@ components:
       - missionsDone
       - summativeCount
       - summativesPassed
+    Child:
+      type: object
+      description: 'Ligne d''un enfant (WPD01, WPD02) : rien de sensible (genre, handicap,
+        localité) hors du détail.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        firstName:
+          type: string
+          readOnly: true
+          title: Prénom
+        lastName:
+          type: string
+          readOnly: true
+          title: Nom
+        username:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Identifiant
+        status:
+          allOf:
+          - $ref: '#/components/schemas/UserStatusEnum'
+          readOnly: true
+          title: Statut
+        age:
+          type: integer
+          nullable: true
+          readOnly: true
+        relationship:
+          allOf:
+          - $ref: '#/components/schemas/Relationship'
+          readOnly: true
+        avatar:
+          allOf:
+          - $ref: '#/components/schemas/Avatar'
+          readOnly: true
+          nullable: true
+        schoolGrade:
+          allOf:
+          - $ref: '#/components/schemas/SchoolGrade'
+          readOnly: true
+          nullable: true
+        points:
+          type: integer
+          readOnly: true
+        streakDays:
+          type: integer
+          readOnly: true
+        rank:
+          type: string
+          readOnly: true
+        profileStep:
+          description: Étape de profil que l'enfant doit encore compléter (W11-W14),
+            null si complet
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ProfileStepEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        deletion:
+          allOf:
+          - $ref: '#/components/schemas/ChildDeletionState'
+          nullable: true
+          readOnly: true
+      required:
+      - age
+      - avatar
+      - createdAt
+      - deletion
+      - firstName
+      - id
+      - lastName
+      - points
+      - profileStep
+      - rank
+      - relationship
+      - schoolGrade
+      - status
+      - streakDays
+      - username
+    ChildCreateRequest:
+      type: object
+      description: 'WPD04 : le parent crée le compte et choisit le mot de passe initial.'
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        birthDate:
+          type: string
+          format: date
+          description: 10 à 17 ans (D23)
+        relationship:
+          type: string
+          minLength: 1
+          description: Lien de parenté (référentiel `relationships`)
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - birthDate
+      - firstName
+      - lastName
+      - password
+      - relationship
+      - username
+    ChildDeletionRequest:
+      type: object
+      description: 'WPD09 : motif obligatoire.'
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          description: Motif (référentiel `deletion-reasons`) ; facultatif pour l'apprenant
+            (WD15)
+        note:
+          type: string
+          default: ''
+          maxLength: 1000
+      required:
+      - reason
+    ChildDeletionState:
+      type: object
+      description: 'Suppression en cours : à examiner (`pending_parent`) ou programmée
+        (« Supprimé le … », annulable, D54).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/DeletionRequestStatusEnum'
+          readOnly: true
+          title: Statut
+        scheduledFor:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Anonymisation prévue le
+      required:
+      - id
+      - scheduledFor
+      - status
+    ChildDetail:
+      type: object
+      description: 'Détail (WPD03, WPD10) : seul écran, avec la modification, où paraissent
+        genre, handicap et localité (D6).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        firstName:
+          type: string
+          readOnly: true
+          title: Prénom
+        lastName:
+          type: string
+          readOnly: true
+          title: Nom
+        username:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Identifiant
+        status:
+          allOf:
+          - $ref: '#/components/schemas/UserStatusEnum'
+          readOnly: true
+          title: Statut
+        age:
+          type: integer
+          nullable: true
+          readOnly: true
+        relationship:
+          allOf:
+          - $ref: '#/components/schemas/Relationship'
+          readOnly: true
+        avatar:
+          allOf:
+          - $ref: '#/components/schemas/Avatar'
+          readOnly: true
+          nullable: true
+        schoolGrade:
+          allOf:
+          - $ref: '#/components/schemas/SchoolGrade'
+          readOnly: true
+          nullable: true
+        points:
+          type: integer
+          readOnly: true
+        streakDays:
+          type: integer
+          readOnly: true
+        rank:
+          type: string
+          readOnly: true
+        profileStep:
+          description: Étape de profil que l'enfant doit encore compléter (W11-W14),
+            null si complet
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ProfileStepEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        deletion:
+          allOf:
+          - $ref: '#/components/schemas/ChildDeletionState'
+          nullable: true
+          readOnly: true
+        birthDate:
+          type: string
+          format: date
+          readOnly: true
+        gender:
+          readOnly: true
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        disability:
+          allOf:
+          - $ref: '#/components/schemas/Disability'
+          readOnly: true
+          nullable: true
+        locality:
+          allOf:
+          - $ref: '#/components/schemas/Locality'
+          readOnly: true
+          nullable: true
+        goals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Goal'
+          readOnly: true
+        publicDisplayAllowed:
+          type: boolean
+          readOnly: true
+          description: Opt-in parental à l'affichage public (pseudonyme et avatar,
+            D15)
+      required:
+      - age
+      - avatar
+      - birthDate
+      - createdAt
+      - deletion
+      - disability
+      - firstName
+      - gender
+      - goals
+      - id
+      - lastName
+      - locality
+      - points
+      - profileStep
+      - publicDisplayAllowed
+      - rank
+      - relationship
+      - schoolGrade
+      - status
+      - streakDays
+      - username
+    ChildPasswordResetRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+          description: Nouveau mot de passe, à communiquer à l'enfant (D26)
+          maxLength: 128
+      required:
+      - password
     Choice:
       type: object
       description: Réponse proposée, sans le corrigé.
@@ -4656,6 +6942,16 @@ components:
       required:
       - slug
       - title
+    CourseSummary:
+      type: object
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+      required:
+      - slug
+      - title
     CsrfToken:
       type: object
       properties:
@@ -4713,6 +7009,262 @@ components:
       required:
       - date
       - seconds
+    DeletionReason:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          title: Libellé
+          maxLength: 120
+      required:
+      - code
+      - id
+      - label
+    DeletionRequest:
+      type: object
+      description: 'Demande de suppression ; `accountId` : le compte concerné (l''enfant,
+        pour le parent).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        accountId:
+          type: integer
+          readOnly: true
+        firstName:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/DeletionRequestStatusEnum'
+          readOnly: true
+          title: Statut
+        reason:
+          allOf:
+          - $ref: '#/components/schemas/DeletionReason'
+          readOnly: true
+          nullable: true
+        note:
+          type: string
+          readOnly: true
+          title: Précisions
+        requestedByLearner:
+          type: boolean
+          readOnly: true
+          description: Demande faite par l'apprenant lui-même (WD15), à valider par
+            le parent
+        scheduledFor:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Anonymisation prévue le
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        resolvedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - accountId
+      - createdAt
+      - firstName
+      - id
+      - note
+      - reason
+      - requestedByLearner
+      - resolvedAt
+      - scheduledFor
+      - status
+    DeletionRequestCreateRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          nullable: true
+          description: Motif (référentiel `deletion-reasons`) ; facultatif pour l'apprenant
+            (WD15)
+        note:
+          type: string
+          default: ''
+          maxLength: 1000
+    DeletionRequestStatusEnum:
+      enum:
+      - pending_parent
+      - scheduled
+      - refused
+      - cancelled
+      - done
+      type: string
+      description: |-
+        * `pending_parent` - En attente du parent
+        * `scheduled` - Programmée
+        * `refused` - Refusée par le parent
+        * `cancelled` - Annulée
+        * `done` - Effectuée
+    DeliveryAddress:
+      type: object
+      description: 'Adresse de livraison enregistrée (WD19, WK05). `phone` : par défaut,
+        celui du compte.'
+      properties:
+        zoneId:
+          type: integer
+        zone:
+          allOf:
+          - $ref: '#/components/schemas/DeliveryZone'
+          readOnly: true
+        recipientName:
+          type: string
+          title: Destinataire
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 32
+        city:
+          type: string
+          title: Ville
+          maxLength: 80
+        district:
+          type: string
+          title: Quartier
+          maxLength: 80
+        addressLine:
+          type: string
+          title: Adresse
+          maxLength: 255
+      required:
+      - addressLine
+      - city
+      - recipientName
+      - zone
+      - zoneId
+    DeliveryAddressInputRequest:
+      type: object
+      properties:
+        zoneId:
+          type: integer
+          description: Zone de `GET shop/delivery-zones/`
+        recipientName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        phone:
+          type: string
+          minLength: 1
+          description: Par défaut, celui du payeur
+          maxLength: 32
+        city:
+          type: string
+          minLength: 1
+          maxLength: 80
+        district:
+          type: string
+          default: ''
+          maxLength: 80
+        addressLine:
+          type: string
+          minLength: 1
+          description: Rue, repère, indications
+          maxLength: 255
+      required:
+      - addressLine
+      - city
+      - recipientName
+      - zoneId
+    DeliveryAddressRequest:
+      type: object
+      description: 'Adresse de livraison enregistrée (WD19, WK05). `phone` : par défaut,
+        celui du compte.'
+      properties:
+        zoneId:
+          type: integer
+        recipientName:
+          type: string
+          minLength: 1
+          title: Destinataire
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 32
+        city:
+          type: string
+          minLength: 1
+          title: Ville
+          maxLength: 80
+        district:
+          type: string
+          title: Quartier
+          maxLength: 80
+        addressLine:
+          type: string
+          minLength: 1
+          title: Adresse
+          maxLength: 255
+      required:
+      - addressLine
+      - city
+      - recipientName
+      - zoneId
+    DeliveryZone:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        country:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+          description: « Cotonou et Calavi »
+        fee:
+          type: integer
+          readOnly: true
+          title: Frais de livraison (FCFA)
+        delayLabel:
+          type: string
+          readOnly: true
+          title: Délai annoncé
+          description: « 2 à 3 jours »
+      required:
+      - country
+      - delayLabel
+      - fee
+      - id
+      - name
+    DeliveryZoneSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+          description: « Cotonou et Calavi »
+        delayLabel:
+          type: string
+          readOnly: true
+          title: Délai annoncé
+          description: « 2 à 3 jours »
+      required:
+      - delayLabel
+      - id
+      - name
     DifficultyEnum:
       enum:
       - beginner
@@ -4862,6 +7414,7 @@ components:
       - CONSENT_REQUEST_EXPIRED
       - CONTENT_LOCKED
       - COURSE_NOT_IN_OFFER
+      - DELETION_ALREADY_RESOLVED
       - DELIVERY_ZONE_UNAVAILABLE
       - DUPLICATE_ROW
       - EMAIL_TAKEN
@@ -4897,6 +7450,7 @@ components:
       - PASSWORD_RESET_BY_PARENT
       - PASSWORD_TOO_WEAK
       - PAYMENT_FAILED
+      - PAYMENT_REQUEST_CLOSED
       - PAYMENT_REQUIRED
       - PDF_NOT_READY
       - PERMISSION_DENIED
@@ -4931,6 +7485,7 @@ components:
         * `CONSENT_REQUEST_EXPIRED` - CONSENT_REQUEST_EXPIRED
         * `CONTENT_LOCKED` - CONTENT_LOCKED
         * `COURSE_NOT_IN_OFFER` - COURSE_NOT_IN_OFFER
+        * `DELETION_ALREADY_RESOLVED` - DELETION_ALREADY_RESOLVED
         * `DELIVERY_ZONE_UNAVAILABLE` - DELIVERY_ZONE_UNAVAILABLE
         * `DUPLICATE_ROW` - DUPLICATE_ROW
         * `EMAIL_TAKEN` - EMAIL_TAKEN
@@ -4966,6 +7521,7 @@ components:
         * `PASSWORD_RESET_BY_PARENT` - PASSWORD_RESET_BY_PARENT
         * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
         * `PAYMENT_FAILED` - PAYMENT_FAILED
+        * `PAYMENT_REQUEST_CLOSED` - PAYMENT_REQUEST_CLOSED
         * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
         * `PDF_NOT_READY` - PDF_NOT_READY
         * `PERMISSION_DENIED` - PERMISSION_DENIED
@@ -4982,6 +7538,51 @@ components:
         * `USERNAME_INVALID` - USERNAME_INVALID
         * `USERNAME_TAKEN` - USERNAME_TAKEN
         * `VALIDATION_ERROR` - VALIDATION_ERROR
+    EventSummary:
+      type: object
+      properties:
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        emoji:
+          type: string
+          readOnly: true
+        color:
+          type: string
+          readOnly: true
+          title: Couleur
+        startsAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Début
+        city:
+          type: string
+          readOnly: true
+          title: Ville
+        online:
+          type: boolean
+          readOnly: true
+          title: En ligne
+        price:
+          type: integer
+          readOnly: true
+          title: Prix (FCFA)
+          description: 0 = gratuit
+      required:
+      - city
+      - color
+      - emoji
+      - online
+      - price
+      - slug
+      - startsAt
+      - title
     FieldError:
       type: object
       properties:
@@ -5023,6 +7624,26 @@ components:
       - code
       - id
       - label
+    GuestInputRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        phone:
+          type: string
+          minLength: 1
+          description: Reçoit le lien de suivi de la commande
+          maxLength: 32
+      required:
+      - firstName
+      - lastName
+      - phone
     Health:
       type: object
       properties:
@@ -5158,6 +7779,16 @@ components:
       description: |-
         * `draft` - Brouillon
         * `submitted` - Soumis
+    InvoiceSummary:
+      type: object
+      properties:
+        number:
+          type: string
+        pdfStatus:
+          $ref: '#/components/schemas/PdfStatusEnum'
+      required:
+      - number
+      - pdfStatus
     Kit:
       type: object
       properties:
@@ -5199,6 +7830,52 @@ components:
       - name
       - price
       - slug
+    KitCode:
+      type: object
+      properties:
+        code:
+          type: string
+          readOnly: true
+        kitSlug:
+          type: string
+          readOnly: true
+        redeemed:
+          type: boolean
+          readOnly: true
+      required:
+      - code
+      - kitSlug
+      - redeemed
+    KitCodeRedeemRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          description: STEAMY-XXXX-XXXX, casse et tirets indifférents
+          maxLength: 32
+        courseSlug:
+          type: string
+          minLength: 1
+          description: Parcours à débloquer
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - code
+      - courseSlug
+    KitCodeRedeemed:
+      type: object
+      properties:
+        courseSlug:
+          type: string
+        courseTitle:
+          type: string
+        created:
+          type: boolean
+          description: Faux si l'apprenant était déjà inscrit (code non consommé)
+      required:
+      - courseSlug
+      - courseTitle
+      - created
     KitDetail:
       type: object
       properties:
@@ -5706,6 +8383,16 @@ components:
       - firstName
       - step
       - username
+    LearnerSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+      required:
+      - firstName
+      - id
     LevelDetail:
       type: object
       description: 'Niveau (WJ02) : introduction vidéo (identifiant et hachage, ADR
@@ -5894,7 +8581,7 @@ components:
           - $ref: '#/components/schemas/NullEnum'
         status:
           allOf:
-          - $ref: '#/components/schemas/MeStatusEnum'
+          - $ref: '#/components/schemas/UserStatusEnum'
           readOnly: true
           title: Statut
         username:
@@ -5983,20 +8670,6 @@ components:
       - staffGroups
       - status
       - username
-    MeStatusEnum:
-      enum:
-      - pending
-      - active
-      - suspended
-      - deactivated
-      - anonymized
-      type: string
-      description: |-
-        * `pending` - En attente de consentement
-        * `active` - Actif
-        * `suspended` - Suspendu
-        * `deactivated` - Désactivé
-        * `anonymized` - Anonymisé
     MissionBlock:
       type: object
       properties:
@@ -6137,6 +8810,68 @@ components:
           maxLength: 16
       required:
       - title
+    MobileMoney:
+      type: object
+      description: 'Mobile Money préféré (WPD08) : pays, réseau activé de ce pays
+        (D76) et numéro de ce pays.'
+      properties:
+        country:
+          type: string
+          title: Code ISO
+          description: Code ISO
+        network:
+          type: string
+          description: Code du réseau (`payment-networks`)
+          maxLength: 40
+        phone:
+          type: string
+          maxLength: 32
+      required:
+      - country
+      - network
+      - phone
+    MobileMoneyRequest:
+      type: object
+      description: 'Mobile Money préféré (WPD08) : pays, réseau activé de ce pays
+        (D76) et numéro de ce pays.'
+      properties:
+        country:
+          type: string
+          minLength: 1
+          title: Code ISO
+          description: Code ISO
+        network:
+          type: string
+          minLength: 1
+          description: Code du réseau (`payment-networks`)
+          maxLength: 40
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 32
+      required:
+      - country
+      - network
+      - phone
+    MyParent:
+      type: object
+      description: 'Le parent vu par l''apprenant (WD22) : nom et lien de parenté,
+        ni numéro ni email.'
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        relationship:
+          $ref: '#/components/schemas/Relationship'
+        linkedAt:
+          type: string
+          format: date-time
+      required:
+      - firstName
+      - lastName
+      - linkedAt
+      - relationship
     NextStep:
       type: object
       description: 'Étape suivante : mission ou quiz à faire, ou certification quand
@@ -6239,45 +8974,277 @@ components:
       - null
     Order:
       type: object
+      description: |-
+        Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison, les Kit Codes (C10) et la facture
+        (C12, `GET …/invoice/` quand `pdfStatus` vaut `ready`).
       properties:
-        id:
-          type: integer
-          readOnly: true
         reference:
           type: string
           readOnly: true
-        user:
+          title: Référence
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/OrderKindEnum'
+          readOnly: true
+          title: Type
+        status:
+          allOf:
+          - $ref: '#/components/schemas/OrderStatusEnum'
+          readOnly: true
+          title: Statut
+        shippingStatus:
+          allOf:
+          - $ref: '#/components/schemas/ShippingStatusEnum'
+          readOnly: true
+          title: Livraison
+        subtotal:
           type: integer
           readOnly: true
-        total:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Sous-total (FCFA)
+        shippingFee:
+          type: integer
           readOnly: true
+          title: Frais de livraison (FCFA)
+        total:
+          type: integer
+          readOnly: true
+          title: Total (FCFA)
         currency:
           type: string
           readOnly: true
-        paid:
-          type: boolean
-          readOnly: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
+          title: Devise
         items:
           type: array
           items:
             $ref: '#/components/schemas/OrderItem'
           readOnly: true
+        beneficiary:
+          allOf:
+          - $ref: '#/components/schemas/Beneficiary'
+          nullable: true
+          readOnly: true
+        deliveryZone:
+          allOf:
+          - $ref: '#/components/schemas/DeliveryZoneSummary'
+          readOnly: true
+        expiresAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Expire le
+        paidAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Payée le
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Créée le
+        deliveryAddress:
+          allOf:
+          - $ref: '#/components/schemas/OrderDeliveryAddress'
+          readOnly: true
+          nullable: true
+        kitCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/KitCode'
+          readOnly: true
+        invoice:
+          allOf:
+          - $ref: '#/components/schemas/InvoiceSummary'
+          nullable: true
+          readOnly: true
       required:
+      - beneficiary
       - createdAt
       - currency
-      - id
+      - deliveryAddress
+      - deliveryZone
+      - expiresAt
+      - invoice
       - items
-      - paid
+      - kind
+      - kitCodes
+      - paidAt
       - reference
+      - shippingFee
+      - shippingStatus
+      - status
+      - subtotal
       - total
-      - user
+    OrderCreateKindEnum:
+      enum:
+      - course
+      - kit
+      type: string
+      description: |-
+        * `course` - course
+        * `kit` - kit
+    OrderCreateRequest:
+      type: object
+      description: |-
+        `kind=course` : un parcours payant pour un enfant du parent (`beneficiaryId`). `kind=kit` : des kits livrés
+        (`deliveryAddress`), pour le parent (bénéficiaire facultatif) ou pour un invité (`guest`, sans compte, D12).
+        Les commandes d'événement naissent de la candidature (API-L3b.6).
+      properties:
+        kind:
+          $ref: '#/components/schemas/OrderCreateKindEnum'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemInputRequest'
+        beneficiaryId:
+          type: integer
+          description: Enfant du parent
+        guest:
+          allOf:
+          - $ref: '#/components/schemas/GuestInputRequest'
+          description: Achat de kit sans compte
+        deliveryAddress:
+          $ref: '#/components/schemas/DeliveryAddressInputRequest'
+      required:
+      - items
+      - kind
+    OrderCreated:
+      type: object
+      description: |-
+        Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison, les Kit Codes (C10) et la facture
+        (C12, `GET …/invoice/` quand `pdfStatus` vaut `ready`).
+      properties:
+        reference:
+          type: string
+          readOnly: true
+          title: Référence
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/OrderKindEnum'
+          readOnly: true
+          title: Type
+        status:
+          allOf:
+          - $ref: '#/components/schemas/OrderStatusEnum'
+          readOnly: true
+          title: Statut
+        shippingStatus:
+          allOf:
+          - $ref: '#/components/schemas/ShippingStatusEnum'
+          readOnly: true
+          title: Livraison
+        subtotal:
+          type: integer
+          readOnly: true
+          title: Sous-total (FCFA)
+        shippingFee:
+          type: integer
+          readOnly: true
+          title: Frais de livraison (FCFA)
+        total:
+          type: integer
+          readOnly: true
+          title: Total (FCFA)
+        currency:
+          type: string
+          readOnly: true
+          title: Devise
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          readOnly: true
+        beneficiary:
+          allOf:
+          - $ref: '#/components/schemas/Beneficiary'
+          nullable: true
+          readOnly: true
+        deliveryZone:
+          allOf:
+          - $ref: '#/components/schemas/DeliveryZoneSummary'
+          readOnly: true
+        expiresAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Expire le
+        paidAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Payée le
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Créée le
+        deliveryAddress:
+          allOf:
+          - $ref: '#/components/schemas/OrderDeliveryAddress'
+          readOnly: true
+          nullable: true
+        kitCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/KitCode'
+          readOnly: true
+        invoice:
+          allOf:
+          - $ref: '#/components/schemas/InvoiceSummary'
+          nullable: true
+          readOnly: true
+        guestToken:
+          type: string
+          readOnly: true
+          nullable: true
+          description: 'Invité seulement, remis une seule fois : à renvoyer dans l''en-tête
+            X-Guest-Token'
+      required:
+      - beneficiary
+      - createdAt
+      - currency
+      - deliveryAddress
+      - deliveryZone
+      - expiresAt
+      - guestToken
+      - invoice
+      - items
+      - kind
+      - kitCodes
+      - paidAt
+      - reference
+      - shippingFee
+      - shippingStatus
+      - status
+      - subtotal
+      - total
+    OrderDeliveryAddress:
+      type: object
+      properties:
+        recipientName:
+          type: string
+        phone:
+          type: string
+        country:
+          type: string
+        zone:
+          type: string
+        city:
+          type: string
+        district:
+          type: string
+        addressLine:
+          type: string
+      required:
+      - addressLine
+      - city
+      - country
+      - district
+      - phone
+      - recipientName
+      - zone
     OrderItem:
       type: object
       properties:
@@ -6287,35 +9254,77 @@ components:
         title:
           type: string
           readOnly: true
-        contentType:
+          title: Libellé
+        courseSlug:
           type: string
           readOnly: true
-          nullable: true
-        objectId:
+        kitSlug:
           type: string
           readOnly: true
-          nullable: true
+        eventSlug:
+          type: string
+          readOnly: true
         unitPrice:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          type: integer
           readOnly: true
+          title: Prix unitaire (FCFA)
         quantity:
           type: integer
           readOnly: true
+          title: Quantité
         total:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          type: integer
           readOnly: true
+          title: Total (FCFA)
       required:
-      - contentType
+      - courseSlug
+      - eventSlug
       - id
-      - objectId
+      - kitSlug
       - quantity
       - title
       - total
       - unitPrice
+    OrderItemInputRequest:
+      type: object
+      properties:
+        courseSlug:
+          type: string
+          minLength: 1
+          description: Commande de parcours
+          pattern: ^[-a-zA-Z0-9_]+$
+        kitSlug:
+          type: string
+          minLength: 1
+          description: Commande de kit
+          pattern: ^[-a-zA-Z0-9_]+$
+        quantity:
+          type: integer
+          maximum: 10
+          minimum: 1
+          default: 1
+    OrderKindEnum:
+      enum:
+      - course
+      - kit
+      - event
+      type: string
+      description: |-
+        * `course` - Parcours
+        * `kit` - Kit
+        * `event` - Événement
+    OrderStatusEnum:
+      enum:
+      - pending
+      - paid
+      - cancelled
+      - refunded
+      type: string
+      description: |-
+        * `pending` - En attente de paiement
+        * `paid` - Payée
+        * `cancelled` - Annulée
+        * `refunded` - Remboursée
     OriginEnum:
       enum:
       - learner
@@ -6420,6 +9429,26 @@ components:
       - completionRate
       - salesMonth
       - users
+    PaginatedApplicationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
     PaginatedAttemptListItemList:
       type: object
       properties:
@@ -6481,6 +9510,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Certificate'
+    PaginatedChildList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Child'
     PaginatedConsentRequestList:
       type: object
       properties:
@@ -6521,6 +9570,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CourseList'
+    PaginatedDeletionRequestList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeletionRequest'
     PaginatedEnrollmentList:
       type: object
       properties:
@@ -6621,7 +9690,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Order'
-    PaginatedPaymentList:
+    PaginatedPaymentRequestList:
       type: object
       properties:
         count:
@@ -6640,7 +9709,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Payment'
+            $ref: '#/components/schemas/PaymentRequest'
     PaginatedSteamyEventList:
       type: object
       properties:
@@ -6720,6 +9789,11 @@ components:
           items:
             $ref: '#/components/schemas/Goal'
           readOnly: true
+        mobileMoney:
+          allOf:
+          - $ref: '#/components/schemas/MobileMoney'
+          nullable: true
+          readOnly: true
         profileStep:
           description: Étape de profil restante, null si le profil est complet
           nullable: true
@@ -6734,6 +9808,7 @@ components:
       - gender
       - goalsForChildren
       - locality
+      - mobileMoney
       - profession
       - profileStep
     ParentSignupRequest:
@@ -6813,6 +9888,47 @@ components:
           maxLength: 255
       required:
       - identifier
+    PatchedCartItemUpdateRequest:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          maximum: 10
+          minimum: 1
+    PatchedChildUpdateRequest:
+      type: object
+      description: WPD10. L'identifiant ne se modifie pas (C12) ; le mot de passe
+        passe par `password-reset/` (D26).
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        birthDate:
+          type: string
+          format: date
+          description: Cohérente avec l'âge déclaré (D23)
+        schoolGrade:
+          type: string
+          minLength: 1
+        locality:
+          type: integer
+          description: '`id` de la localité'
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        disability:
+          type: string
+          minLength: 1
+          nullable: true
+        publicDisplayAllowed:
+          type: boolean
     PatchedLearnerProfileUpdateRequest:
       type: object
       properties:
@@ -6896,6 +10012,11 @@ components:
             type: string
             minLength: 1
           description: Au moins un objectif (WP09)
+        mobileMoney:
+          allOf:
+          - $ref: '#/components/schemas/MobileMoneyRequest'
+          nullable: true
+          description: Mobile Money préféré ; null pour l'effacer
     PatchedPreferencesUpdateRequest:
       type: object
       properties:
@@ -6912,45 +10033,95 @@ components:
             $ref: '#/components/schemas/ValueEntryRequest'
     Payment:
       type: object
+      description: État d'un paiement (WA04, WA05, WA07, WK09), interrogé jusqu'à
+        `succeeded` ou `failed`.
       properties:
         id:
           type: integer
           readOnly: true
-        order:
+        orderReference:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+          title: Statut
+        country:
+          type: string
+          readOnly: true
+          title: Pays
+        network:
+          type: string
+          readOnly: true
+          title: Réseau
+        msisdnMasked:
+          type: string
+          readOnly: true
+        amount:
           type: integer
           readOnly: true
-        provider:
-          allOf:
-          - $ref: '#/components/schemas/ProviderEnum'
-          readOnly: true
-        providerTransactionId:
-          type: string
-          readOnly: true
-          nullable: true
-        amount:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          readOnly: true
+          title: Montant (FCFA)
         currency:
           type: string
           readOnly: true
-        success:
-          type: boolean
+          title: Devise
+        failureCode:
+          type: string
           readOnly: true
+          title: Code d'échec
+        failureReason:
+          type: string
+          readOnly: true
+          title: Raison de l'échec
         createdAt:
           type: string
           format: date-time
           readOnly: true
+        confirmedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Confirmé le
       required:
       - amount
+      - confirmedAt
+      - country
       - createdAt
       - currency
+      - failureCode
+      - failureReason
       - id
-      - order
-      - provider
-      - providerTransactionId
-      - success
+      - msisdnMasked
+      - network
+      - orderReference
+      - status
+    PaymentCreateRequest:
+      type: object
+      description: 'Mobile Money uniquement : pays, réseau (référentiel `payment-networks`)
+        et numéro du payeur (D76).'
+      properties:
+        country:
+          type: string
+          minLength: 2
+          description: Code ISO (BJ)
+          maxLength: 2
+        network:
+          type: string
+          minLength: 1
+          description: Code du réseau (mtn, moov, celtiis…)
+          maxLength: 40
+          pattern: ^[-a-zA-Z0-9_]+$
+        msisdn:
+          type: string
+          minLength: 1
+          description: Numéro Mobile Money qui validera le paiement
+          maxLength: 32
+      required:
+      - country
+      - msisdn
+      - network
     PaymentNetwork:
       type: object
       properties:
@@ -6973,6 +10144,136 @@ components:
       - country
       - id
       - label
+    PaymentRequest:
+      type: object
+      description: Demande vue par l'enfant (WA02, WK08) et par son parent (WPD01,
+        WPD15).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/OrderKindEnum'
+          readOnly: true
+          title: Type
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+          title: Statut
+        course:
+          allOf:
+          - $ref: '#/components/schemas/CourseSummary'
+          nullable: true
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentRequestItem'
+          readOnly: true
+        amount:
+          type: integer
+          readOnly: true
+          title: Montant (FCFA)
+          description: Hors frais de livraison
+        learner:
+          allOf:
+          - $ref: '#/components/schemas/Beneficiary'
+          readOnly: true
+        parentFirstName:
+          type: string
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Créée le
+        expiresAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Expire le
+        lastSentAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Dernier envoi
+        nextResendAt:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        decidedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Traitée le
+        orderReference:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - amount
+      - course
+      - createdAt
+      - decidedAt
+      - expiresAt
+      - id
+      - items
+      - kind
+      - lastSentAt
+      - learner
+      - nextResendAt
+      - orderReference
+      - parentFirstName
+      - status
+    PaymentRequestCreateRequest:
+      type: object
+      description: '`kind=course` : `courseSlug`. `kind=kit` : `items` (souvent le
+        panier). Montant recalculé par le serveur.'
+      properties:
+        kind:
+          $ref: '#/components/schemas/OrderCreateKindEnum'
+        courseSlug:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemInputRequest'
+      required:
+      - kind
+    PaymentRequestItem:
+      type: object
+      properties:
+        kitSlug:
+          type: string
+        title:
+          type: string
+        unitPrice:
+          type: integer
+        quantity:
+          type: integer
+      required:
+      - kitSlug
+      - quantity
+      - title
+      - unitPrice
+    PaymentStatusEnum:
+      enum:
+      - initiated
+      - pending
+      - succeeded
+      - failed
+      type: string
+      description: |-
+        * `initiated` - Initié
+        * `pending` - En attente de validation
+        * `succeeded` - Réussi
+        * `failed` - Échoué
     PdfStatusEnum:
       enum:
       - pending
@@ -7004,6 +10305,21 @@ components:
       - key
       - label
       - start
+    PhoneChangeRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          description: Nouveau numéro, saisi librement ; normalisé en E.164
+          maxLength: 32
+        password:
+          type: string
+          minLength: 1
+          description: Mot de passe actuel
+      required:
+      - password
+      - phone
     Preferences:
       type: object
       properties:
@@ -7186,14 +10502,6 @@ components:
       required:
       - levels
       - title
-    ProviderEnum:
-      enum:
-      - kkiapay
-      - fedapay
-      type: string
-      description: |-
-        * `kkiapay` - Kkiapay
-        * `fedapay` - FedaPay
     Question:
       type: object
       properties:
@@ -7636,6 +10944,21 @@ components:
           type: string
       required:
       - resetToken
+    RestockAlertAck:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required:
+      - ok
+    RestockAlertRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          description: 'Invité seulement : un connecté est prévenu sur son compte'
+          maxLength: 32
     ResumeRequest:
       type: object
       properties:
@@ -7697,6 +11020,16 @@ components:
       - label
       - period
       - value
+    ShippingStatusEnum:
+      enum:
+      - preparing
+      - shipped
+      - delivered
+      type: string
+      description: |-
+        * `preparing` - En préparation
+        * `shipped` - Expédiée
+        * `delivered` - Livrée
     SourceEnum:
       enum:
       - free
@@ -7947,6 +11280,40 @@ components:
       - expiresAt
       - firstName
       - lastName
+    Ticket:
+      type: object
+      description: Ticket Steamy Events offert à la certification (D33), utilisable
+        une fois (C12).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        courseSlug:
+          type: string
+          readOnly: true
+        courseTitle:
+          type: string
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Offert le
+        used:
+          type: boolean
+          readOnly: true
+        usedFor:
+          allOf:
+          - $ref: '#/components/schemas/EventSummary'
+          nullable: true
+          readOnly: true
+      required:
+      - courseSlug
+      - courseTitle
+      - createdAt
+      - id
+      - used
+      - usedFor
     Todo:
       type: object
       properties:
@@ -8196,6 +11563,20 @@ components:
           type: integer
       required:
       - count
+    UserStatusEnum:
+      enum:
+      - pending
+      - active
+      - suspended
+      - deactivated
+      - anonymized
+      type: string
+      description: |-
+        * `pending` - En attente de consentement
+        * `active` - Actif
+        * `suspended` - Suspendu
+        * `deactivated` - Désactivé
+        * `anonymized` - Anonymisé
     UsernameAvailabilityResponse:
       type: object
       properties:
