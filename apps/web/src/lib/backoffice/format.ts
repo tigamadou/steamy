@@ -24,6 +24,15 @@ export function formatKpiValue(value: KpiValue, unit?: KpiUnit): string {
   return number;
 }
 
+/**
+ * Points chiffrés d'une série (courbes, histogrammes), avec le libellé de leur période. Les périodes sans valeur
+ * (pas encore calculées, non saisies) et les KPI non numériques sont omis plutôt que dessinés à zéro.
+ */
+export function numericSeries(points: Array<{ label: string; value: KpiValue }>): { values: number[]; labels: string[] } {
+  const numeric = points.filter((point): point is { label: string; value: number } => typeof point.value === "number");
+  return { values: numeric.map((point) => point.value), labels: numeric.map((point) => point.label) };
+}
+
 /** `2027-01-15` → « 15 janv. 2027 ». */
 export function formatShortDate(isoDate: string): string {
   return SHORT_DATE.format(new Date(`${isoDate}T12:00:00Z`));

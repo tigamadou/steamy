@@ -15,4 +15,7 @@ export { StatusBadge, type StatusBadgeProps, type StatusTone } from "./StatusBad
 export { CARD, FOCUS, formatNumber } from "./styles";
 export { Overview, REPORT_STATUS, reportSteps, type OverviewData, type OverviewProps } from "./Overview";
 export { SectionHead, type SectionHeadProps } from "./SectionHead";
-export { PendingPanel, type PendingPanelProps } from "./PendingPanel";
+export { ImpactDashboard, KpiList, MAIN_KPIS, SOURCE_LEGEND, targetText } from "./ImpactDashboard";
+export { type ImpactDashboardProps, type KpiDashboard, type KpiSummary } from "./ImpactDashboard";
+export { KpiDetail, PERIODICITY, SOURCE_TEXT, type KpiDetailData, type KpiDetailProps } from "./KpiDetail";
+export { PeriodSwitch } from "./PeriodSwitch";
