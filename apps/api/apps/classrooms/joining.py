@@ -11,6 +11,7 @@ L'élève rejoint la classe dès l'acceptation et il est inscrit au parcours de 
 par l'offre de l'école, sans paiement (D62). Une inscription antérieure au même parcours est gardée telle quelle.
 """
 
+from django.db import IntegrityError, transaction
 from django.db.models.functions import Lower
 from django.utils import timezone
 
@@ -20,6 +21,7 @@ from apps.notifications.models import Category
 from apps.notifications.services import notify
 from libs.errors import ApiError
 
+from . import quotas
 from .models import ClassroomMembership
 
 Status = ClassroomMembership.Status
@@ -51,15 +53,20 @@ def _new_learner(consent, parent, username, password) -> User:
                 if not value
             },
         )
+    taken = ApiError("USERNAME_TAKEN", fields={"username": "USERNAME_TAKEN"})
     if User.objects.annotate(lower=Lower("username")).filter(lower=username.lower()).exists():
-        raise ApiError("USERNAME_TAKEN", fields={"username": "USERNAME_TAKEN"})
-    learner = User.objects.create_learner(
-        username,
-        password,
-        first_name=consent.subject.get("first_name", ""),
-        last_name=consent.subject.get("last_name", ""),
-        status=User.Status.ACTIVE,
-    )
+        raise taken
+    try:
+        with transaction.atomic():  # deux parents choisissent le même identifiant au même instant
+            learner = User.objects.create_learner(
+                username,
+                password,
+                first_name=consent.subject.get("first_name", ""),
+                last_name=consent.subject.get("last_name", ""),
+                status=User.Status.ACTIVE,
+            )
+    except IntegrityError:
+        raise taken from None
     LearnerProfile.objects.create(user=learner)
     ParentChildLink.objects.create(
         parent=parent, learner=learner, relationship=consent.relationship, consent_request=consent
@@ -83,7 +90,20 @@ def _existing_child(parent, learner_id) -> User:
 
 
 def join_classroom(consent: ConsentRequest, parent, data: dict) -> ClassroomMembership:
-    membership = ClassroomMembership.objects.select_for_update().get(consent_request=consent)
+    membership = (
+        ClassroomMembership.objects.select_for_update(of=("self",))
+        .select_related("classroom__school")
+        .filter(consent_request=consent)
+        .first()
+    )
+    # Invitation retirée, classe archivée ou supprimée : la demande n'a plus d'objet
+    if (
+        membership is None
+        or membership.status != Status.INVITED
+        or membership.classroom.archived_at is not None
+    ):
+        raise ApiError("CONSENT_REQUEST_EXPIRED")
+    quotas.check_offer(membership.classroom.school)
     learner_id = data.get("learner_id")
     if learner_id is not None:
         learner = _existing_child(parent, learner_id)

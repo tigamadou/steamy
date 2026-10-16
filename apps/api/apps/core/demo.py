@@ -27,7 +27,11 @@ from apps.classrooms.invitations import send_invitation
 from apps.classrooms.models import School, TeacherInvitation
 from apps.core.groups import CONTENT, FINANCE, SUPER_ADMIN, SUPPORT
 from apps.events.models import SteamyEvent
+from apps.impact import services as impact
+from apps.impact.models import KpiDefinition, KpiValue
+from apps.impact.periods import QUARTER, Period
 from apps.notifications.models import Category, Notification, Tone
+from apps.payments.demo import seed_commerce
 from apps.referentials.models import (
     Avatar,
     Country,
@@ -640,6 +644,35 @@ def seed_backoffice(accounts: dict[str, User]) -> None:
     )
 
 
+#: Saisie manuelle du trimestre en cours (WAD05) : quelques indicateurs restent à renseigner.
+IMPACT_MANUAL = {
+    "fin_montant": 1951472,
+    "fin_hors": "oui",
+    "fin_first": "oui",
+    "fin_who": "OIF",
+    "prod": "non",
+    "prod_vuln": "non",
+    "nps": 10,
+    "emp": 5,
+    "emp_f": 2,
+}
+
+
+def seed_impact(accounts: dict[str, User]) -> None:
+    """Impact Tracker : KPI `auto` calculés sur le jeu D2 et saisie manuelle du trimestre en cours (brouillon)."""
+    impact.aggregate_daily_stats(timezone.localdate())
+    impact.compute_kpis(timezone.localdate())
+    quarter = Period.current(QUARTER).key
+    for code, value in IMPACT_MANUAL.items():
+        kpi = KpiDefinition.objects.get(code=code)
+        number, text = (value, "") if kpi.is_numeric else (None, value)
+        KpiValue.objects.update_or_create(
+            kpi=kpi,
+            period=quarter,
+            defaults={"number": number, "text": text, "entered_by": accounts[FINANCE]},
+        )
+
+
 #: Inscriptions de Léa : parcours, nombre de missions faites (None : toutes). Les quiz suivant des missions faites
 #: sont réussis ; « Découverte de la robotique » montre en plus une tentative `ko` puis `warn` avant la réussite
 #: (WD07). Le parcours court de P1 repart de zéro à chaque seed, pour rejouer le parcours Playwright.
@@ -794,6 +827,8 @@ def seed_all() -> dict[str, User]:
     seed_events()
     seed_kits()
     seed_learning(accounts)
+    seed_impact(accounts)
+    seed_commerce(accounts)
     classrooms = seed_classes(School.objects.get(name=SCHOOL_NAME), accounts["koffi"])
     seed_members(classrooms, accounts["koffi"], accounts["lea"], DEMO_PASSWORD)
     seed_proposals(classrooms[0], accounts["koffi"])
