@@ -129,4 +129,4 @@ def test_payment_requests_and_event_applications_are_listed():
     assert by_type["payment_request"]["url"] == f"/parent/demandes/{request_id}"
     assert by_type["payment_request"]["childId"] == child.pk
     assert by_type["event_application"]["id"] == str(application_id)
-    assert by_type["event_application"]["url"] == "/parent/evenements"
+    assert by_type["event_application"]["url"] == f"/parent/evenements?candidature={application_id}"

@@ -6,7 +6,7 @@ Toute route `children/{id}/` passe par le lien parent ↔ enfant du parent conne
 """
 
 from django.db import transaction
-from django.db.models import F
+from django.db.models import Count, F, Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_field
 from rest_framework import mixins, serializers, status, viewsets
@@ -22,13 +22,14 @@ from apps.accounts.fields import PasswordField
 from apps.accounts.models import DeletionRequest, Gender, ParentChildLink, User
 from apps.accounts.profile import ProfileStep, profile_step
 from apps.learning.models import Enrollment, LearnerBadge, QuizAttempt
+from apps.learning.payloads import attempt_item, enrollment_payload
 from apps.learning.progression import Progression
 from apps.learning.serializers import (
     AttemptListItemSerializer,
     DaySecondsSerializer,
     EnrollmentSerializer,
 )
-from apps.learning.views import attempt_item, enrollment_payload
+from apps.notifications.services import contact_email
 from apps.referentials.models import Disability, Relationship, SchoolGrade
 from apps.referentials.serializers import (
     AvatarSerializer,
@@ -286,7 +287,9 @@ class ChildViewSet(
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return User.objects.none()
-        return service.children_of(self.request.user)
+        return service.children_of(self.request.user).annotate(
+            active_courses=Count("enrollments", filter=Q(enrollments__status="active"))
+        )
 
     def get_serializer_class(self):
         return ChildSerializer if self.action == "list" else ChildDetailSerializer
@@ -356,11 +359,10 @@ class ChildViewSet(
         """WPD11 : semaine ISO (`?week=AAAA-Www`), navigation vers les semaines précédentes (D55)."""
         child = self.get_object()
         monday = weekly_service.parse_week(request.query_params.get("week"))
-        profile = getattr(request.user, "parent_profile", None)
         data = {
             **weekly_service.report(child, monday),
             "courses": courses_payload(child),
-            "email": getattr(profile, "email", None) or None,
+            "email": contact_email(request.user),
         }
         return Response(WeeklyReportSerializer(data).data)
 
