@@ -7,7 +7,8 @@ import { formatDate } from "@/lib/dates";
 import { features } from "@/lib/features";
 import { routes } from "@/lib/routes";
 
-import { getLearnerProfile, localityLabel } from "./api";
+import { getLearnerProfile } from "./api";
+import { localityLabel } from "./locality";
 
 const l = routes.learner;
 

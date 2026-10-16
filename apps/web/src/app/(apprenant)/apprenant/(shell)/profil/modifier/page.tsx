@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { EditProfile, EditProfileSkeleton, ProfileBreadcrumb } from "@/features/account/EditProfile";
+import { EditProfile, EditProfileSkeleton } from "@/features/account/EditProfile";
+import { ProfileBreadcrumb } from "@/features/account/ProfileBreadcrumb";
 
 export const metadata: Metadata = { title: "Modifier mon profil" };
 

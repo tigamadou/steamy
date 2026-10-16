@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { ProfileBreadcrumb } from "@/features/account/EditProfile";
+import { ProfileBreadcrumb } from "@/features/account/ProfileBreadcrumb";
 import { PasswordForm } from "@/features/account/PasswordForm";
 
 export const metadata: Metadata = { title: "Changer de mot de passe" };

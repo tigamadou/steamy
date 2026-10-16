@@ -3,10 +3,7 @@ import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/features/account/ProfileHub", () => ({ ProfileHub: () => null, ProfileHubSkeleton: () => null }));
-vi.mock("@/features/account/EditProfile", async (original) => ({
-  ...(await original<typeof import("@/features/account/EditProfile")>()),
-  EditProfile: () => null,
-}));
+vi.mock("@/features/account/EditProfile", () => ({ EditProfile: () => null, EditProfileSkeleton: () => null }));
 vi.mock("@/features/account/PasswordForm", () => ({ PasswordForm: () => <form aria-label="Mot de passe" /> }));
 
 const { ProfileHub, ProfileHubSkeleton } = await import("@/features/account/ProfileHub");

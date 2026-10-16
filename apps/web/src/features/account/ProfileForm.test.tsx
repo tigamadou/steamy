@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { axe } from "@/test/axe";
 
-import type { LearnerProfile } from "./api";
+import type { LearnerProfile } from "./locality";
 
 const PATCH = vi.fn();
 const router = { refresh: vi.fn() };

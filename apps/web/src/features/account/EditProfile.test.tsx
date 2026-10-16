@@ -6,7 +6,8 @@ const GET = vi.fn();
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
 vi.mock("./ProfileForm", () => ({ ProfileForm: () => null }));
 
-const { EditProfile, EditProfileSkeleton, ProfileBreadcrumb } = await import("./EditProfile");
+const { EditProfile, EditProfileSkeleton } = await import("./EditProfile");
+const { ProfileBreadcrumb } = await import("./ProfileBreadcrumb");
 const { ProfileForm } = await import("./ProfileForm");
 
 describe("EditProfile (WD17, serveur)", () => {

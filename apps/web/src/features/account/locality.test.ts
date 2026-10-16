@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { localityLabel } from "./api";
+import { localityLabel } from "./locality";
 
 describe("localityLabel", () => {
   it("ville et quartier, ou la ville seule", () => {

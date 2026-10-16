@@ -20,7 +20,7 @@ import { GENDERS, type Gender } from "@/lib/genders";
 import { routes } from "@/lib/routes";
 import { useReferential } from "@/lib/use-referential";
 
-import { localityLabel, type LearnerProfile } from "./api";
+import { localityLabel, type LearnerProfile } from "./locality";
 import { SavedToast } from "./SavedToast";
 
 type ProfileUpdate = Schemas["PatchedLearnerProfileUpdateRequest"];
