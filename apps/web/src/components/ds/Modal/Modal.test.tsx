@@ -130,6 +130,17 @@ describe("Modal", () => {
     expect(screen.getByRole("heading", { name: "Refuser ?" })).toHaveClass("text-error-700");
   });
 
+  it("a une variante monochrome sans couleur primaire (back-office)", () => {
+    render(
+      <Modal open onClose={() => {}} title="Soumettre ?" icon="📄" tone="ink">
+        Le rapport sera verrouillé.
+      </Modal>,
+    );
+    const dialog = screen.getByRole("dialog", { name: "Soumettre ?" });
+    expect(dialog.innerHTML).not.toMatch(/primary/);
+    expect(screen.getByRole("button", { name: "Fermer" })).toHaveClass("focus-visible:outline-ink-900");
+  });
+
   it("ne présente aucune violation d'accessibilité", async () => {
     render(
       <Modal open onClose={() => {}} title="Mot de passe oublié ?" icon="🔑" actions={<Button>OK</Button>}>

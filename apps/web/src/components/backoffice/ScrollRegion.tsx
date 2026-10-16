@@ -24,10 +24,24 @@ export function ScrollRegion({ labelledBy, className, children }: ScrollRegionPr
   useEffect(() => {
     const node = ref.current as HTMLDivElement;
     const measure = () => setScrollable(node.scrollWidth > node.clientWidth);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(node);
-    return () => observer.disconnect();
+    const resize = new ResizeObserver(measure);
+    resize.observe(node);
+    // Le contenu (le tableau) peut changer de largeur sans que la boîte change de taille : il est observé lui aussi,
+    // et de nouveau quand React le remplace
+    let child: Element | null = null;
+    const track = () => {
+      if (child) resize.unobserve(child);
+      child = node.firstElementChild;
+      if (child) resize.observe(child);
+      measure();
+    };
+    track();
+    const mutations = new MutationObserver(track);
+    mutations.observe(node, { childList: true });
+    return () => {
+      resize.disconnect();
+      mutations.disconnect();
+    };
   }, []);
 
   return (
