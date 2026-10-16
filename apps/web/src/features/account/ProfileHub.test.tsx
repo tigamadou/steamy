@@ -7,9 +7,7 @@ import { axe } from "@/test/axe";
 const getCurrentUser = vi.fn();
 const GET = vi.fn();
 const flags = vi.hoisted(() => ({
-  unlock: false,
   events: false,
-  orders: false,
   deliveryAddress: false,
   parentInfo: false,
   accountDeletion: false,
@@ -46,7 +44,7 @@ describe("ProfileHub (WD13)", () => {
   beforeEach(() => {
     getCurrentUser.mockReset().mockResolvedValue(ME);
     GET.mockReset().mockResolvedValue({ data: PROFILE, response: new Response(null, { status: 200 }) });
-    Object.assign(flags, { orders: false, deliveryAddress: false, parentInfo: false, accountDeletion: false });
+    Object.assign(flags, { deliveryAddress: false, parentInfo: false, accountDeletion: false });
   });
 
   it("affiche le profil lu dans l'API et l'identifiant en lecture seule", async () => {
@@ -77,6 +75,7 @@ describe("ProfileHub (WD13)", () => {
       "/apprenant/profil/modifier",
       "/apprenant/profil/mot-de-passe",
       "/apprenant/notifications/preferences",
+      "/apprenant/profil/commandes",
       "/apprenant/profil/progression",
       "/legal/cgu",
       "/apprenant/aide",
@@ -92,8 +91,8 @@ describe("ProfileHub (WD13)", () => {
     ]);
   });
 
-  it("drapeaux ouverts : livraison, commandes, parent et zone sensible", async () => {
-    Object.assign(flags, { orders: true, deliveryAddress: true, parentInfo: true, accountDeletion: true });
+  it("drapeaux ouverts : livraison, parent et zone sensible", async () => {
+    Object.assign(flags, { deliveryAddress: true, parentInfo: true, accountDeletion: true });
     await renderHub();
     expect(within(screen.getByRole("region", { name: "Livraison" })).getByRole("link")).toHaveAttribute(
       "href",

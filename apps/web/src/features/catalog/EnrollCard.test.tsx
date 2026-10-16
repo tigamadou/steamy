@@ -16,8 +16,8 @@ vi.mock("./api", async (original) => ({
   addToWishlist,
   removeFromWishlist,
 }));
-const flags = { unlock: false, events: false };
-vi.mock("@/lib/features", () => ({ features: flags }));
+const createPaymentRequest = vi.fn();
+vi.mock("@/features/unlock/api", () => ({ createPaymentRequest }));
 
 const { EnrollCard } = await import("./EnrollCard");
 
@@ -36,7 +36,7 @@ const KIT_DETAIL = { ...KIT, description: "", compatibleCourses: [] };
 beforeEach(() => {
   push.mockReset();
   enroll.mockReset();
-  flags.unlock = false;
+  createPaymentRequest.mockReset();
 });
 
 describe("EnrollCard · WC04 gratuit", () => {
@@ -100,13 +100,36 @@ describe("EnrollCard · WC04 gratuit", () => {
 });
 
 describe("EnrollCard · WC05", () => {
-  it("payant sans kit : prix de l'API, payé par le parent, CTA absent sans le drapeau", () => {
+  it("payant sans kit : prix de l'API ; « Demander à mon parent » crée la demande puis ouvre WA02", async () => {
+    const user = userEvent.setup();
+    createPaymentRequest.mockResolvedValue({ ok: true, data: { id: 12 } });
     render(<EnrollCard course={PAID} wished={false} kit={null} />);
     expect(screen.getByText(/18\s000 F CFA/)).toBeInTheDocument();
     expect(screen.getByText("Payé par ton parent · accès à vie")).toBeInTheDocument();
-    expect(screen.queryByText("Demander à mon parent")).not.toBeInTheDocument();
-    expect(screen.queryByText(/Bientôt/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Bientôt|Acheter/)).not.toBeInTheDocument();
     expect(screen.queryByText("Prérequis")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Demander à mon parent" }));
+    expect(createPaymentRequest).toHaveBeenCalledWith({ kind: "course", courseSlug: "capteurs" });
+    expect(push).toHaveBeenCalledWith("/apprenant/demandes/12");
+  });
+
+  it.each([
+    [{ courseSlug: "Tu suis déjà ce parcours." }, "", "Tu suis déjà ce parcours."],
+    [{}, "Action non autorisée.", "Action non autorisée."],
+  ])("demande refusée par l'API : message du champ, sinon de l'API", async (fields, message, shown) => {
+    const user = userEvent.setup();
+    createPaymentRequest.mockResolvedValue({ ok: false, code: "VALIDATION_ERROR", message, fields });
+    render(<EnrollCard course={PAID} wished={false} kit={null} />);
+    await user.click(screen.getByRole("button", { name: "Demander à mon parent" }));
+    expect(screen.getByRole("alert")).toHaveTextContent(shown);
+    expect(screen.getByRole("button", { name: "Demander à mon parent" })).toBeEnabled();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("demande déjà en cours : « Demande envoyée » → WA02", () => {
+    render(<EnrollCard course={PAID} wished={false} kit={null} pendingRequestId={7} />);
+    expect(screen.getByRole("link", { name: "Demande envoyée" })).toHaveAttribute("href", "/apprenant/demandes/7");
+    expect(screen.queryByRole("button", { name: "Demander à mon parent" })).not.toBeInTheDocument();
   });
 
   it("avec kit : pas de prix de parcours, « Débloqué avec le Kit Code », kit lu dans la boutique", () => {
@@ -115,7 +138,10 @@ describe("EnrollCard · WC05", () => {
     expect(screen.queryByText(/25\s000/)).not.toBeInTheDocument();
     expect(screen.getByText("Kit requis")).toBeInTheDocument();
     expect(screen.getByText(/35\s000 F CFA · En stock/)).toBeInTheDocument();
-    expect(screen.queryByText("J'ai un Kit Code")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "J'ai un Kit Code" })).toHaveAttribute(
+      "href",
+      "/apprenant/catalogue/robot-bluetooth/kit-code",
+    );
     expect(screen.queryByText(/h de contenu|Certificat/)).not.toBeInTheDocument();
   });
 
@@ -124,18 +150,8 @@ describe("EnrollCard · WC05", () => {
     expect(screen.queryByText("Kit requis")).not.toBeInTheDocument();
   });
 
-  it("drapeau unlock : CTA « J'ai un Kit Code » et « Demander à mon parent »", () => {
-    flags.unlock = true;
-    const { unmount } = render(<EnrollCard course={WITH_KIT} wished={false} kit={{ ...KIT_DETAIL, emoji: "" }} />);
-    expect(screen.getByRole("link", { name: "J'ai un Kit Code" })).toHaveAttribute(
-      "href",
-      "/apprenant/catalogue/robot-bluetooth/kit-code",
-    );
-    unmount();
-    render(<EnrollCard course={PAID} wished={false} kit={null} />);
-    expect(screen.getByRole("link", { name: "Demander à mon parent" })).toHaveAttribute(
-      "href",
-      "/apprenant/catalogue/capteurs/demande",
-    );
+  it("kit sans emoji : icône de la catégorie", () => {
+    render(<EnrollCard course={WITH_KIT} wished={false} kit={{ ...KIT_DETAIL, emoji: "" }} />);
+    expect(screen.getByText("Kit requis")).toBeInTheDocument();
   });
 });

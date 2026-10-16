@@ -104,7 +104,7 @@ test("WC04 : fiche d'un parcours suivi, « Continuer », sans note ni contact Vi
   expect(vimeo).toEqual([]);
 });
 
-test("WC05 : parcours à kit sans prix de parcours, parcours payant sans CTA tant que le déblocage n'est pas livré", async ({
+test("WC05 : parcours à kit sans prix de parcours → WA01 ; parcours payant déjà demandé → « Demande envoyée » (WA02)", async ({
   page,
 }) => {
   await loginAs(page, "learner");
@@ -115,13 +115,18 @@ test("WC05 : parcours à kit sans prix de parcours, parcours payant sans CTA tan
   await expect(card.getByText("Steamy Bot v1", { exact: true })).toBeVisible();
   await expect(card.getByText(/35\s000 F CFA · En stock/)).toBeVisible();
   await expect(page.getByText(/25\s000/)).toHaveCount(0);
-  await expect(page.getByText("J'ai un Kit Code")).toHaveCount(0);
+  await expect(card.getByRole("link", { name: "J'ai un Kit Code" })).toHaveAttribute(
+    "href",
+    "/apprenant/catalogue/robot-bluetooth/kit-code",
+  );
   await axe(page);
 
   await page.goto("/apprenant/catalogue/capteurs-electroniques");
   await expect(page.getByRole("complementary").getByText(/18\s000 F CFA/)).toBeVisible();
   await expect(page.getByText("Payé par ton parent · accès à vie")).toBeVisible();
-  await expect(page.getByText("Demander à mon parent")).toHaveCount(0);
+  // Jeu D2 : Léa a déjà demandé ce parcours à Marie
+  await expect(page.getByRole("link", { name: "Demande envoyée" })).toHaveAttribute("href", /^\/apprenant\/demandes\/\d+$/);
+  await expect(page.getByText(/Acheter|Mobile Money/)).toHaveCount(0);
   await expect(page.locator('[title="Bientôt"]')).toHaveCount(0);
   await axe(page);
 

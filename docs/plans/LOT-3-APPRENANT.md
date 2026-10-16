@@ -15,7 +15,7 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 3.6 (après API-L3b) · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
+Statut : 🟡 en cours · Prochaine tâche : 3.7a à 3.8 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
 
 ### Valeur pédagogique (API-L3a) — 🟡 en cours
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
@@ -107,22 +107,28 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6 (après API-L3b) · Prérequis 
   > Reprise : WD19, WD22 et WD15 attendent leurs endpoints, absents de `development` au 2026-10-16 :
   > `accounts/me/delivery-address/` (API-L3b.3), `accounts/me/parent/` (API-L4.1), `accounts/me/deletion-request/`
   > (API-L4.3). Leurs lignes du hub WD13 existent derrière les drapeaux `deliveryAddress`, `parentInfo` et
-  > `accountDeletion` de `src/lib/features.ts` (et `orders` pour WD14, étape 3.6) : livrer l'écran, passer le drapeau
+  > `accountDeletion` de `src/lib/features.ts` : livrer l'écran, passer le drapeau
   > à `true`, puis le retirer. `AddressForm` (DS) est prêt pour WD19 : zones fournies par l'appelant.
 
-### Commerce (API-L3b) — ⬜ à faire
-- [ ] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage`
-  - [ ] WA01 saisie du Kit Code (`KitCodeInput`)
-  - [ ] WA06 erreur de Kit Code (`KIT_CODE_INVALID`, `KIT_CODE_ALREADY_USED`, `KIT_CODE_NOT_COMPATIBLE`, `THROTTLED`)
-  - [ ] WA02 suivi de la demande au parent (interrogation 10 s, relance, annulation)
-  - [ ] Drapeau `unlock` activé sur WC05
-  - [ ] WD14 commandes de l'apprenant
-  - [ ] Bandeau des demandes en attente dans WD23
-  - [ ] Composant `PaymentForm` (WA03, `WANetworkCard`)
-  - [ ] Composant `PaymentStatusPanel` (WA04 attente, WA05 succès, WA07 échec ; prop `register`)
-  - [ ] Tests unitaires : `KitCodeInput`, `PaymentForm` sans réseau en dur, `PaymentStatusPanel` dans ses 3 états
-  - [ ] Parcours Playwright P2 (Kit Code)
-  - [ ] Parcours Playwright P3 (demande de paiement)
+### Commerce (API-L3b) — 🟡 en cours
+- [x] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage`
+  - [x] `WA01` saisie du Kit Code (`KitCodeInput`), toast « Parcours débloqué » sur `WC06a`
+  - [x] `WA06` erreur de Kit Code (`KIT_CODE_INVALID`, `KIT_CODE_ALREADY_USED`, `KIT_CODE_NOT_COMPATIBLE`, `THROTTLED`)
+  - [x] `WA02` suivi de la demande au parent (interrogation 10 s, relance, annulation, nouvelle demande)
+  - [x] Drapeau `unlock` activé puis retiré : CTA de `WC05` « J'ai un Kit Code », « Demander à mon parent » (création de la demande puis `WA02`, route intermédiaire `/catalogue/[slug]/demande` retirée), « Demande envoyée »
+  - [x] `WD14` commandes de l'apprenant ; drapeau `orders` activé puis retiré (ligne du hub `WD13`)
+  - [x] Bandeau des demandes en attente dans `WD23`
+  - [x] Composant `PaymentForm` (WA03, `WANetworkCard`)
+  - [x] Composant `PaymentStatusPanel` (WA04 attente, WA05 succès, WA07 échec ; prop `register`)
+  - [x] Tests unitaires : `KitCodeInput`, `PaymentForm` sans réseau en dur, `PaymentStatusPanel` dans ses 3 états
+  - [x] Parcours Playwright P2 (Kit Code)
+  - [x] Parcours Playwright P3 (demande de paiement ; paiement du parent par l'API en attendant WPD15)
+  > Écarts d'API signalés (correctifs à faire côté API) : `Retry-After` n'est pas exposé par CORS
+  > (`CORS_EXPOSE_HEADERS`), le délai de `THROTTLED` n'est donc pas lisible par le navigateur (WA06 l'affiche quand il
+  > l'est) ; `PaymentRequest.status` est typé avec l'énumération des paiements dans le schéma OpenAPI (collision
+  > `PaymentStatusEnum`, à fixer dans `ENUM_NAME_OVERRIDES`), le front rétablit le type ; `Order.deliveryZone` n'est pas
+  > `nullable` dans le schéma alors qu'il vaut `null` pour un parcours. Filtre « Échouées » de WD14 remplacé par
+  > « Annulées » : une commande n'a pas de statut d'échec (D37, statuts `pending`, `paid`, `cancelled`, `refunded`).
 - [ ] **3.7a** Boutique : catalogue, détail et panier (requiert API-L3b) · `feature/lot3-boutique-catalogue-panier`
   - [ ] WK01 catalogue de la boutique (connecté ; `/boutique` invité = WL07)
   - [ ] WK02 détail d'un kit

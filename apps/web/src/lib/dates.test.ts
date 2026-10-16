@@ -1,6 +1,20 @@
 import { describe, expect, it } from "vitest";
 
-import { datePill, formatDate, formatFullDate, formatInstant, formatRelative, formatTimeRange } from "./dates";
+import {
+  datePill,
+  formatDate,
+  formatFullDate,
+  formatInstant,
+  formatInstantTime,
+  formatRelative,
+  formatTimeRange,
+} from "./dates";
+
+describe("formatInstantTime", () => {
+  it("donne le jour et l'heure au fuseau de Porto-Novo", () => {
+    expect(formatInstantTime("2026-10-17T08:30:00Z")).toBe("17 octobre 2026 à 09:30");
+  });
+});
 
 describe("formatDate", () => {
   it("écrit la date en toutes lettres, en français", () => {

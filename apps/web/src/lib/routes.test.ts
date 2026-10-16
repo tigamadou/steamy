@@ -43,7 +43,10 @@ describe("routes", () => {
     expect(l.notificationList("non-lues")).toBe("/apprenant/notifications?onglet=non-lues");
     expect(l.notificationList("non-lues", 3)).toBe("/apprenant/notifications?onglet=non-lues&page=3");
     expect(l.kitCode("robot")).toBe("/apprenant/catalogue/robot/kit-code");
-    expect(l.parentRequest("robot")).toBe("/apprenant/catalogue/robot/demande");
+    expect(l.request(4)).toBe("/apprenant/demandes/4");
+    expect(l.orderList()).toBe("/apprenant/profil/commandes");
+    expect(l.orderList("payees", 2)).toBe("/apprenant/profil/commandes?statut=payees&page=2");
+    expect(l.orderList(undefined, 3)).toBe("/apprenant/profil/commandes?page=3");
   });
 });
 

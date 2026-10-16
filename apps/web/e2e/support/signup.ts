@@ -73,7 +73,12 @@ export async function createLearner({
   firstName = "Kofi",
   password = DEMO_PASSWORD,
   age = 14,
-}: { firstName?: string; password?: string; age?: number } = {}): Promise<{ username: string; password: string }> {
+}: { firstName?: string; password?: string; age?: number } = {}): Promise<{
+  username: string;
+  password: string;
+  /** Numéro du parent créé pour l'accord, qui se connecte avec `DEMO_PASSWORD` (`parentSession`). */
+  parentPhone: string;
+}> {
   const username = `kofi.${uniqueSuffix()}`;
   const phone = uniquePhone();
   const { post, patch, get, api } = await apiSession();
@@ -92,7 +97,7 @@ export async function createLearner({
   await patch("/api/accounts/me/learner-profile/", { goals: goals.slice(0, 2).map((goal) => goal.code) });
   await patch("/api/accounts/me/learner-profile/", { avatar: avatar.code });
   await api.dispose();
-  return { username, password };
+  return { username, password, parentPhone: phone };
 }
 
 /** W10 → W15 : mot de passe puis profil complet (âge de W05 : 14 ans avec `startLearnerSignup`). */

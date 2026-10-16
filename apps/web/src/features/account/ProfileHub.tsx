@@ -65,7 +65,7 @@ export async function ProfileHub() {
       </Section>
 
       <Section title="Mon compte">
-        {features.orders && <SettingsRow label="Mes commandes" href={l.orders} />}
+        <SettingsRow label="Mes commandes" href={l.orders} />
         <SettingsRow label="Ma progression" href={l.progress} />
         {features.parentInfo && <SettingsRow label="Mon parent" href={l.parent} />}
         <SettingsRow label="CGU et politiques" href={routes.legal("cgu")} />
