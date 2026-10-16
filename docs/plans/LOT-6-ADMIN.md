@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API) ; exports de 6.9 après leurs endpoints (API-L6.4) · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : 6.4 et 6.5 (admin Django) ; 6.2 après API-L5 ; exports de 6.9 en PR #111 · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -58,16 +58,26 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   - [ ] Tests : Contenu et Finance sans accès aux consentements ni champs sensibles ; Support sans genre/handicap sans permission
   - [ ] Tests : invitation enseignant crée une `TeacherInvitation` et aucun `User` actif ; dernier Super-admin non supprimable ; changement de parent sans acceptation = lien inchangé
   - [ ] Recette sur le jeu D2 : retrouver Léa Adjovi, voir son parent et ses consentements, relancer une demande, inviter un enseignant rattaché à une école
-- [ ] **6.3** Contenu des parcours · `feature/lot6-contenu-parcours` (requiert 6.1, API-L1, API-L3a)
-  - [ ] WAD09 Contenu (admin Django) : `CourseAdmin` (colonnes, filtres, slug prérempli, couverture S3, `trailerVimeoId`)
-  - [ ] Hiérarchie par inlines chaînés : `Project` dans `Course`, `Level` dans `Project`, `Mission` dans `Level` (fil d'Ariane, ordre éditable)
-  - [ ] `QuizAdmin` + `Question`, `QuestionAdmin` + `Choice` ; contrainte « exactement un de `level` / `project` » en `clean()` et `CheckConstraint`, seuils 70 / 80
-  - [ ] Mission : `vimeoId` validé avec aperçu, blocs de contenu
-  - [ ] Action « Publier » (refus si arbre incomplet ou parcours payant sans prix ; confirmation pour dépublier avec inscrits)
-  - [ ] `CategoryAdmin` et `BadgeAdmin`
-  - [ ] Tests : groupe Contenu seul en écriture ; publication refusée sur arbre incomplet ; quiz sur les deux ou aucun = erreur
-  - [ ] Tests : `isCorrect` absent des réponses de l'API (S8) ; changement de prix sans effet sur les `OrderItem` existants
+- [x] **6.3** Contenu des parcours · `feature/lot6-contenu-parcours` · PR #PR63 (requiert 6.1, API-L1, API-L3a)
+  - [x] WAD09 Contenu (admin Django) : `CourseAdmin` (colonnes, filtres, slug prérempli, couverture S3, `trailerVimeoId`)
+  - [x] Hiérarchie par inlines chaînés : `Project` dans `Course`, `Level` dans `Project`, `Mission` dans `Level` (fil d'Ariane, ordre éditable)
+  - [x] `QuizAdmin` + `Question`, `QuestionAdmin` + `Choice` ; contrainte « exactement un de `level` / `project` » en `clean()` et `CheckConstraint`, seuils 70 / 80
+  - [x] Mission : `vimeoId` validé avec aperçu, blocs de contenu
+  - [x] Action « Publier » (refus si arbre incomplet ou parcours payant sans prix ; confirmation pour dépublier avec inscrits)
+  - [x] `CategoryAdmin` et `BadgeAdmin`
+  - [x] Tests : groupe Contenu seul en écriture ; publication refusée sur arbre incomplet ; quiz sur les deux ou aucun = erreur
+  - [x] Tests : `isCorrect` absent des réponses de l'API (S8) ; changement de prix sans effet sur les `OrderItem` existants
   - [ ] Recette : créer un parcours complet (2 projets, niveaux, missions Vimeo, quiz), le publier, le voir dans `WL22` et `WC`
+  > Notes : une grande partie de WAD09 existait (API-L1, API-L3a : inlines triables, quiz, `SingleCorrectChoiceFormSet`,
+  > `CategoryAdmin`, `BadgeAdmin`). Ajouts : colonnes accès (gratuit / payant + prix), kit requis et inscrits
+  > (annotation), filtre « kit » ; statut en lecture seule, modifié seulement par « Publier » (`catalog/publication.py` :
+  > projet, niveau, mission, formative et sommative avec questions exigés ; raisons affichées) et « Repasser en
+  > brouillon » (confirmation cochée s'il y a des inscrits : ils n'ouvrent plus le contenu), journalisés dans
+  > `AuditLog`. « Payant sans prix » est déjà impossible (contrainte `course_free_iff_no_price`). Fil d'Ariane des pages
+  > chaînées par un champ « Dans » (liens vers les parents) ; aperçu Vimeo en lecteur intégré. « Quiz sur les deux ou
+  > aucun » : contrainte `quiz_kind_matches_target` validée par le formulaire. `isCorrect` : test S8 existant
+  > (`learning/tests/test_quiz.py`). Le prix d'un parcours ne touche pas les `OrderItem` (prix figé à la commande).
+  > Recette manuelle à faire par le produit ; le test Playwright parcourt l'arbre en lecture (jeu D2 non modifié).
 - [ ] **6.4** Boutique, commandes, paiements · `feature/lot6-boutique-paiements` (requiert 6.1, API-L3b)
   - [ ] WAD10 Kits (admin Django) : `KitAdmin` (stock avec badge à 3 seuils, parcours compatibles), `DeliveryZoneAdmin`, `RestockAlertAdmin` en lecture seule
   - [ ] WAD10 Commandes (admin Django) : `OrderAdmin` (montants, statut, payeur en lecture seule), action *changer le statut de livraison* (`preparing → shipped → delivered`, notifie le payeur)
