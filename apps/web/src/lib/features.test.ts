@@ -8,9 +8,6 @@ describe("features", () => {
       unlock: false,
       events: false,
       orders: false,
-      deliveryAddress: false,
-      parentInfo: false,
-      accountDeletion: false,
     });
   });
 });
