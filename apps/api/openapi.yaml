@@ -3356,6 +3356,352 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/payments/payment-requests/:
+    get:
+      operationId: payments_payment_requests_list
+      description: |-
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: 'Demandes de paiement : les siennes (apprenant), celles de ses enfants
+        (parent)'
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          enum:
+          - pending
+          - paid
+          - declined
+          - expired
+          - cancelled
+          type: string
+          minLength: 1
+        description: |-
+          * `pending` - En attente du parent
+          * `paid` - Payée
+          * `declined` - Refusée
+          * `expired` - Expirée
+          * `cancelled` - Annulée
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaymentRequestList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: payments_payment_requests_create
+      description: |-
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: Demander à son parent de payer un parcours ou des kits (apprenant)
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequestCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/payment-requests/{id}/:
+    get:
+      operationId: payments_payment_requests_retrieve
+      description: |-
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: Une demande de paiement
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this demande de paiement.
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/payment-requests/{id}/cancel/:
+    post:
+      operationId: payments_payment_requests_cancel_create
+      description: |-
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: Annuler sa demande (apprenant)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this demande de paiement.
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/payment-requests/{id}/decline/:
+    post:
+      operationId: payments_payment_requests_decline_create
+      description: |-
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: Refuser la demande de son enfant (parent)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this demande de paiement.
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/payment-requests/{id}/resend/:
+    post:
+      operationId: payments_payment_requests_resend_create
+      description: |-
+        Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+        refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+      summary: Relancer son parent (3 envois au plus, espacés de 24 h)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this demande de paiement.
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/payments/payments/{id}/:
     get:
       operationId: payments_payments_retrieve
@@ -5158,6 +5504,16 @@ components:
       required:
       - slug
       - title
+    CourseSummary:
+      type: object
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+      required:
+      - slug
+      - title
     CsrfToken:
       type: object
       properties:
@@ -5551,6 +5907,7 @@ components:
       - PASSWORD_RESET_BY_PARENT
       - PASSWORD_TOO_WEAK
       - PAYMENT_FAILED
+      - PAYMENT_REQUEST_CLOSED
       - PAYMENT_REQUIRED
       - PDF_NOT_READY
       - PERMISSION_DENIED
@@ -5620,6 +5977,7 @@ components:
         * `PASSWORD_RESET_BY_PARENT` - PASSWORD_RESET_BY_PARENT
         * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
         * `PAYMENT_FAILED` - PAYMENT_FAILED
+        * `PAYMENT_REQUEST_CLOSED` - PAYMENT_REQUEST_CLOSED
         * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
         * `PDF_NOT_READY` - PDF_NOT_READY
         * `PERMISSION_DENIED` - PERMISSION_DENIED
@@ -7601,6 +7959,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Order'
+    PaginatedPaymentRequestList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentRequest'
     PaginatedSteamyEventList:
       type: object
       properties:
@@ -7990,6 +8368,124 @@ components:
       - country
       - id
       - label
+    PaymentRequest:
+      type: object
+      description: Demande vue par l'enfant (WA02, WK08) et par son parent (WPD01,
+        WPD15).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/OrderKindEnum'
+          readOnly: true
+          title: Type
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+          title: Statut
+        course:
+          allOf:
+          - $ref: '#/components/schemas/CourseSummary'
+          nullable: true
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentRequestItem'
+          readOnly: true
+        amount:
+          type: integer
+          readOnly: true
+          title: Montant (FCFA)
+          description: Hors frais de livraison
+        learner:
+          allOf:
+          - $ref: '#/components/schemas/Beneficiary'
+          readOnly: true
+        parentFirstName:
+          type: string
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Créée le
+        expiresAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Expire le
+        lastSentAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Dernier envoi
+        nextResendAt:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        decidedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Traitée le
+        orderReference:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - amount
+      - course
+      - createdAt
+      - decidedAt
+      - expiresAt
+      - id
+      - items
+      - kind
+      - lastSentAt
+      - learner
+      - nextResendAt
+      - orderReference
+      - parentFirstName
+      - status
+    PaymentRequestCreateRequest:
+      type: object
+      description: '`kind=course` : `courseSlug`. `kind=kit` : `items` (souvent le
+        panier). Montant recalculé par le serveur.'
+      properties:
+        kind:
+          $ref: '#/components/schemas/OrderCreateKindEnum'
+        courseSlug:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemInputRequest'
+      required:
+      - kind
+    PaymentRequestItem:
+      type: object
+      properties:
+        kitSlug:
+          type: string
+        title:
+          type: string
+        unitPrice:
+          type: integer
+        quantity:
+          type: integer
+      required:
+      - kitSlug
+      - quantity
+      - title
+      - unitPrice
     PaymentStatusEnum:
       enum:
       - initiated

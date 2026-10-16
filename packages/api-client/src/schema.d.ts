@@ -1234,6 +1234,116 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/payments/payment-requests/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Demandes de paiement : les siennes (apprenant), celles de ses enfants (parent)
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        get: operations["payments_payment_requests_list"];
+        put?: never;
+        /**
+         * Demander à son parent de payer un parcours ou des kits (apprenant)
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        post: operations["payments_payment_requests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/payment-requests/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Une demande de paiement
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        get: operations["payments_payment_requests_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/payment-requests/{id}/cancel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Annuler sa demande (apprenant)
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        post: operations["payments_payment_requests_cancel_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/payment-requests/{id}/decline/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refuser la demande de son enfant (parent)
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        post: operations["payments_payment_requests_decline_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/payment-requests/{id}/resend/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Relancer son parent (3 envois au plus, espacés de 24 h)
+         * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
+         *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
+         */
+        post: operations["payments_payment_requests_resend_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/payments/payments/{id}/": {
         parameters: {
             query?: never;
@@ -1993,6 +2103,10 @@ export interface components {
             slug: string;
             title: string;
         };
+        CourseSummary: {
+            slug: string;
+            title: string;
+        };
         CsrfToken: {
             csrfToken: string;
         };
@@ -2189,6 +2303,7 @@ export interface components {
          *     * `PASSWORD_RESET_BY_PARENT` - PASSWORD_RESET_BY_PARENT
          *     * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
          *     * `PAYMENT_FAILED` - PAYMENT_FAILED
+         *     * `PAYMENT_REQUEST_CLOSED` - PAYMENT_REQUEST_CLOSED
          *     * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
          *     * `PDF_NOT_READY` - PDF_NOT_READY
          *     * `PERMISSION_DENIED` - PERMISSION_DENIED
@@ -2207,7 +2322,7 @@ export interface components {
          *     * `VALIDATION_ERROR` - VALIDATION_ERROR
          * @enum {string}
          */
-        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUEST_CLOSED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
         FieldError: {
             code: string;
             message: string;
@@ -3058,6 +3173,21 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Order"][];
         };
+        PaginatedPaymentRequestList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["PaymentRequest"][];
+        };
         PaginatedSteamyEventList: {
             /** @example 123 */
             count?: number;
@@ -3222,6 +3352,58 @@ export interface components {
             label: string;
             /** @description Code ISO du pays */
             country: string;
+        };
+        /** @description Demande vue par l'enfant (WA02, WK08) et par son parent (WPD01, WPD15). */
+        PaymentRequest: {
+            readonly id: number;
+            /** Type */
+            readonly kind: components["schemas"]["OrderKindEnum"];
+            /** Statut */
+            readonly status: components["schemas"]["PaymentStatusEnum"];
+            readonly course: components["schemas"]["CourseSummary"] | null;
+            readonly items: components["schemas"]["PaymentRequestItem"][];
+            /**
+             * Montant (FCFA)
+             * @description Hors frais de livraison
+             */
+            readonly amount: number;
+            readonly learner: components["schemas"]["Beneficiary"];
+            readonly parentFirstName: string;
+            /**
+             * Créée le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+            /**
+             * Expire le
+             * Format: date-time
+             */
+            readonly expiresAt: string;
+            /**
+             * Dernier envoi
+             * Format: date-time
+             */
+            readonly lastSentAt: string;
+            /** Format: date-time */
+            readonly nextResendAt: string | null;
+            /**
+             * Traitée le
+             * Format: date-time
+             */
+            readonly decidedAt: string | null;
+            readonly orderReference: string | null;
+        };
+        /** @description `kind=course` : `courseSlug`. `kind=kit` : `items` (souvent le panier). Montant recalculé par le serveur. */
+        PaymentRequestCreateRequest: {
+            kind: components["schemas"]["OrderCreateKindEnum"];
+            courseSlug?: string;
+            items?: components["schemas"]["OrderItemInputRequest"][];
+        };
+        PaymentRequestItem: {
+            kitSlug: string;
+            title: string;
+            unitPrice: number;
+            quantity: number;
         };
         /**
          * @description * `initiated` - Initié
@@ -7558,6 +7740,369 @@ export interface operations {
                 };
             };
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payment_requests_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /** @description A search term. */
+                search?: string;
+                /**
+                 * @description * `pending` - En attente du parent
+                 *     * `paid` - Payée
+                 *     * `declined` - Refusée
+                 *     * `expired` - Expirée
+                 *     * `cancelled` - Annulée
+                 */
+                status?: "pending" | "paid" | "declined" | "expired" | "cancelled";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedPaymentRequestList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payment_requests_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentRequestCreateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequest"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payment_requests_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this demande de paiement. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequest"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payment_requests_cancel_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this demande de paiement. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payment_requests_decline_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this demande de paiement. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_payment_requests_resend_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this demande de paiement. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentRequest"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -4,7 +4,7 @@ import pytest
 from django.urls import reverse
 
 from apps.core.tests.staff import verified_client
-from apps.payments.models import Invoice, Refund
+from apps.payments.models import Invoice, KitCode, PaymentRequest, Refund
 from apps.shop.models import RestockAlert, StockReservation
 from apps.shop.tests.factories import DeliveryZoneFactory, KitFactory
 
@@ -37,6 +37,15 @@ def objects():
         "shop_deliveryzone": DeliveryZoneFactory(),
         "shop_stockreservation": reservation,
         "shop_restockalert": RestockAlert.objects.create(kit=item.kit, phone="+2290197000021"),
+        "payments_kitcode": KitCode.objects.create(kit=item.kit, order_item=item),
+        "payments_paymentrequest": PaymentRequest.objects.create(
+            requested_by=order.beneficiary,
+            parent=order.payer,
+            kind="course",
+            amount=15000,
+            last_sent_at=order.expires_at,
+            expires_at=order.expires_at,
+        ),
     }
 
 
@@ -50,6 +59,8 @@ def objects():
         "shop_deliveryzone",
         "shop_stockreservation",
         "shop_restockalert",
+        "payments_kitcode",
+        "payments_paymentrequest",
     ],
 )
 def test_admin_pages_are_served(admin_client, objects, model):
@@ -61,7 +72,14 @@ def test_admin_pages_are_served(admin_client, objects, model):
 
 @pytest.mark.parametrize(
     "model",
-    ["payments_order", "payments_payment", "shop_stockreservation", "shop_restockalert"],
+    [
+        "payments_order",
+        "payments_payment",
+        "shop_stockreservation",
+        "shop_restockalert",
+        "payments_kitcode",
+        "payments_paymentrequest",
+    ],
 )
 def test_orders_and_payments_are_never_created_by_hand(admin_client, model):
     assert admin_client.get(reverse(f"admin:{model}_add")).status_code == 403

@@ -11,12 +11,14 @@ from rest_framework.exceptions import ErrorDetail, NotAuthenticated
 from apps.accounts.fields import PhoneField, phone_country
 from apps.accounts.models import ParentChildLink
 from apps.catalog.models import Course
+from apps.learning.models import Enrollment
 from apps.shop.models import DeliveryZone, Kit
 from libs.errors import message_for
 from libs.phone import mask_phone
 
 from . import pricing
-from .models import KitCode, Order, OrderItem, Payment
+from .models import KitCode, Order, OrderItem, Payment, PaymentRequest
+from .requests import next_resend_at
 
 #: Types de commande créables directement (l'événement passe par la candidature)
 ORDER_CREATE_KINDS = [Order.Kind.COURSE, Order.Kind.KIT]
@@ -326,3 +328,119 @@ class KitCodeRedeemedSerializer(serializers.Serializer):
     created = serializers.BooleanField(
         help_text="Faux si l'apprenant était déjà inscrit (code non consommé)"
     )
+
+
+# --- Demandes de paiement ----------------------------------------------------------------------
+
+
+class PaymentRequestCreateSerializer(serializers.Serializer):
+    """`kind=course` : `courseSlug`. `kind=kit` : `items` (souvent le panier). Montant recalculé par le serveur."""
+
+    kind = serializers.ChoiceField(choices=ORDER_CREATE_KINDS)
+    course_slug = serializers.SlugField(required=False)
+    items = OrderItemInputSerializer(many=True, required=False)
+
+    def validate(self, attrs):
+        learner = self.context["learner"]
+        if attrs["kind"] == Order.Kind.COURSE:
+            course = Course.objects.filter(
+                slug=attrs.get("course_slug", ""), status=Course.Status.PUBLISHED
+            ).first()
+            if course is None:
+                raise invalid("course_slug", "NOT_FOUND")
+            if course.required_kit_id:
+                raise invalid("course_slug", "KIT_CODE_REQUIRED")
+            if course.is_free:
+                raise invalid(
+                    "course_slug", "COURSE_FREE", "Ce parcours est gratuit : inscris-toi."
+                )
+            if Enrollment.objects.filter(learner=learner, course=course).exists():
+                raise invalid("course_slug", "ALREADY_ENROLLED", "Tu suis déjà ce parcours.")
+            return {"kind": attrs["kind"], "course": course, "amount": course.price, "items": []}
+        items = attrs.get("items") or []
+        slugs = [item.get("kit_slug") for item in items]
+        if (
+            not slugs
+            or None in slugs
+            or len(set(slugs)) != len(slugs)
+            or len(slugs) > MAX_KIT_LINES
+        ):
+            raise invalid("items", "INVALID", "Une ligne par kit, sans doublon.")
+        kits = {kit.slug: kit for kit in Kit.objects.filter(slug__in=slugs, active=True)}
+        if len(kits) != len(slugs):
+            raise invalid("items", "NOT_FOUND")
+        if not all(kit.available for kit in kits.values()):
+            raise invalid("items", "OUT_OF_STOCK")
+        lines = [
+            {
+                "kit_slug": item["kit_slug"],
+                "title": kits[item["kit_slug"]].name,
+                "unit_price": kits[item["kit_slug"]].price,
+                "quantity": item["quantity"],
+            }
+            for item in items
+        ]
+        amount = sum(line["unit_price"] * line["quantity"] for line in lines)
+        return {"kind": attrs["kind"], "course": None, "amount": amount, "items": lines}
+
+
+class CourseSummarySerializer(serializers.Serializer):
+    slug = serializers.CharField()
+    title = serializers.CharField()
+
+
+class PaymentRequestItemSerializer(serializers.Serializer):
+    kit_slug = serializers.CharField()
+    title = serializers.CharField()
+    unit_price = serializers.IntegerField()
+    quantity = serializers.IntegerField()
+
+
+class PaymentRequestSerializer(serializers.ModelSerializer):
+    """Demande vue par l'enfant (WA02, WK08) et par son parent (WPD01, WPD15)."""
+
+    course = serializers.SerializerMethodField()
+    items = PaymentRequestItemSerializer(many=True, read_only=True)
+    learner = serializers.SerializerMethodField()
+    parent_first_name = serializers.CharField(source="parent.first_name", read_only=True)
+    next_resend_at = serializers.SerializerMethodField()
+    order_reference = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PaymentRequest
+        fields = (
+            "id",
+            "kind",
+            "status",
+            "course",
+            "items",
+            "amount",
+            "learner",
+            "parent_first_name",
+            "created_at",
+            "expires_at",
+            "last_sent_at",
+            "next_resend_at",
+            "decided_at",
+            "order_reference",
+        )
+        read_only_fields = fields
+
+    @extend_schema_field(CourseSummarySerializer(allow_null=True))
+    def get_course(self, request):
+        course = request.course
+        return {"slug": course.slug, "title": course.title} if course else None
+
+    @extend_schema_field(BeneficiarySerializer)
+    def get_learner(self, request):
+        return {"id": request.requested_by_id, "first_name": request.requested_by.first_name}
+
+    @extend_schema_field(serializers.DateTimeField(allow_null=True))
+    def get_next_resend_at(self, request):
+        moment = next_resend_at(request)
+        return serializers.DateTimeField().to_representation(moment) if moment else None
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_order_reference(self, request):
+        order = request.orders.filter(status=Order.Status.PAID).first()
+        return order.reference if order else None

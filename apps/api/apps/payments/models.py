@@ -32,6 +32,61 @@ class PaymentProvider(models.TextChoices):
     FEDA = "fedapay", "FedaPay"
 
 
+class PaymentRequest(models.Model):
+    """
+    Demande de paiement de l'enfant à son parent (D52, C4) : l'apprenant ne paie jamais. Lien SMS vers la page
+    « Demande de paiement » du parent (WPD15). Montant recalculé par le serveur ; expire à 7 jours ; renvoi limité ;
+    annulable par l'enfant. Le stock d'un kit n'est réservé qu'à la commande du parent (C10).
+    """
+
+    class Kind(models.TextChoices):
+        COURSE = "course", _("Parcours")
+        KIT = "kit", _("Kit")
+        EVENT = "event", _("Événement")
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("En attente du parent")
+        PAID = "paid", _("Payée")
+        DECLINED = "declined", _("Refusée")
+        EXPIRED = "expired", _("Expirée")
+        CANCELLED = "cancelled", _("Annulée")
+
+    requested_by = models.ForeignKey(
+        User, models.CASCADE, related_name="payment_requests_sent", verbose_name=_("apprenant")
+    )
+    parent = models.ForeignKey(
+        User, models.CASCADE, related_name="payment_requests_received", verbose_name=_("parent")
+    )
+    kind = models.CharField(_("type"), max_length=8, choices=Kind)
+    course = models.ForeignKey(
+        "catalog.Course", models.PROTECT, null=True, blank=True, related_name="+"
+    )
+    #: Kits demandés, figés à la demande : `[{kit_slug, title, unit_price, quantity}]`
+    items = models.JSONField(_("kits"), default=list, blank=True)
+    amount = models.PositiveIntegerField(_("montant (FCFA)"), help_text="Hors frais de livraison")
+    status = models.CharField(_("statut"), max_length=10, choices=Status, default=Status.PENDING)
+    send_count = models.PositiveSmallIntegerField(_("envois"), default=1)
+    last_sent_at = models.DateTimeField(_("dernier envoi"))
+    expires_at = models.DateTimeField(_("expire le"))
+    decided_at = models.DateTimeField(_("traitée le"), null=True, blank=True)
+    created_at = models.DateTimeField(_("créée le"), auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        verbose_name = _("demande de paiement")
+        verbose_name_plural = _("demandes de paiement")
+        indexes = [models.Index(fields=["status", "expires_at"])]
+
+    def __str__(self):
+        return f"Demande {self.pk} · {self.requested_by}"
+
+    @property
+    def title(self) -> str:
+        if self.course_id:
+            return self.course.title
+        return ", ".join(f"{item['title']} × {item['quantity']}" for item in self.items)
+
+
 class Order(models.Model):
     class Kind(models.TextChoices):
         COURSE = "course", _("Parcours")
@@ -93,6 +148,15 @@ class Order(models.Model):
     )
     #: Adresse figée au moment de la commande
     delivery_address = models.JSONField(_("adresse de livraison"), null=True, blank=True)
+    #: Demande de l'enfant que la commande règle (WPD15, D52)
+    payment_request = models.ForeignKey(
+        PaymentRequest,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orders",
+        verbose_name=_("demande de paiement"),
+    )
     expires_at = models.DateTimeField(_("expire le"))
     paid_at = models.DateTimeField(_("payée le"), null=True, blank=True)
     created_at = models.DateTimeField(_("créée le"), auto_now_add=True)

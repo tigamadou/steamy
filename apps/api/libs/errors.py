@@ -150,6 +150,7 @@ CATALOG: dict[str, tuple[int, str]] = {
     "ORDER_EXPIRED": (S.HTTP_410_GONE, "Cette commande a expiré."),
     "ORDER_ALREADY_PAID": (S.HTTP_409_CONFLICT, "Cette commande est déjà payée."),
     "PAYMENT_FAILED": (S.HTTP_402_PAYMENT_REQUIRED, "Le paiement n'a pas abouti."),
+    "PAYMENT_REQUEST_CLOSED": (S.HTTP_409_CONFLICT, "Cette demande de paiement est déjà traitée."),
     # --- Événements, classes, pilotage ------------------------------------------------------
     "EVENT_FULL": (S.HTTP_409_CONFLICT, "Cet événement est complet."),
     "EVENT_CLOSED": (S.HTTP_409_CONFLICT, "Les candidatures à cet événement sont closes."),

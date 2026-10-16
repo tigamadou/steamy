@@ -6,7 +6,7 @@ RBAC du back-office (API-L6.2).
 
 from django.contrib import admin
 
-from .models import Invoice, KitCode, Order, OrderItem, Payment, Refund
+from .models import Invoice, KitCode, Order, OrderItem, Payment, PaymentRequest, Refund
 
 
 class ReadOnlyInline(admin.TabularInline):
@@ -94,6 +94,21 @@ class KitCodeAdmin(admin.ModelAdmin):
     list_display = ("code", "kit", "redeemed_by", "redeemed_course", "redeemed_at", "revoked_at")
     list_filter = ("kit",)
     search_fields = ("code", "order_item__order__reference")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(PaymentRequest)
+class PaymentRequestAdmin(admin.ModelAdmin):
+    """Suivi des demandes de l'enfant au parent (Support) ; la relance par le personnel arrive en L6.2."""
+
+    list_display = ("id", "requested_by", "parent", "kind", "amount", "status", "expires_at")
+    list_filter = ("kind", "status")
+    search_fields = ("requested_by__username", "parent__phone")
 
     def has_add_permission(self, request):
         return False
