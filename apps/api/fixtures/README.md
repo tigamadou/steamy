@@ -43,6 +43,17 @@ et paliers **de démonstration**, saisis s'ils sont vides), un streak de 5 jours
 `make e2e` lance `seed_demo --e2e`, qui ramène le délai entre deux essais d'une sommative ratée à 5 secondes (10 min
 sinon, D32).
 
+## Commerce (API-L3b)
+
+- Zones de livraison du Bénin : « Cotonou et Abomey-Calavi » (1 000 FCFA, 24 à 48 h), « Porto-Novo » (1 500 FCFA),
+  « Reste du Bénin » (2 500 FCFA) ; adresse de livraison enregistrée pour Marie.
+- Une commande de kit payée par Marie pour Léa, expédiée, avec son **Kit Code** (visible de Marie dans la commande)
+  et son reçu PDF.
+- Une demande de paiement de Léa à Marie pour un parcours payant, en attente (lien SMS dans Mailpit).
+- Une candidature de Léa à un événement payant, en attente de l'accord de Marie (le ticket de Léa la rend gratuite).
+- Paiement en local : faux prestataire, **pilotable par le numéro** (`…01` succès, `…02` échec, `…03` reste en
+  attente) ; `manage.py simulate_payment <référence> success|failed` et `manage.py pay_payment_request <id>`.
+
 ## Invitation enseignant en attente
 
 `seed_demo` crée une invitation pour **Nadia Houngbo** (`nadia.houngbo@steamy.test`, même école) et l'envoie :
