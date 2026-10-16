@@ -6,6 +6,7 @@ ne modifie l'enfant de B, sur toutes les routes (404).
 from datetime import date
 
 import pytest
+from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.accounts.models import ConsentRequest, ParentChildLink, User
@@ -31,7 +32,7 @@ def as_user(user):
 
 def years_ago(years: int) -> date:
     """Date de naissance d'un enfant qui fête ses `years` ans aujourd'hui."""
-    today = date.today()
+    today = timezone.localdate()
     return today.replace(year=today.year - years, day=min(today.day, 28))
 
 

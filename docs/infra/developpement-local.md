@@ -33,14 +33,16 @@ Ordre de démarrage garanti par `depends_on` : postgres/redis/rustfs → migrati
 - **Front** : variables dans `compose.yml` :
   - `API_URL=http://api:8000` : appels faits par le serveur Next.js, dans le réseau Docker ;
   - `PUBLIC_API_URL=http://localhost:8000` : appels faits par le navigateur.
-- **Surcharges personnelles**, comme une clé sandbox KKiaPay ou un SMTP réel : les mettre dans un `compose.override.yml`
+- **Surcharges personnelles**, comme une clé sandbox FedaPay ou un SMTP réel : les mettre dans un `compose.override.yml`
   à la racine. Ce fichier est gitignoré et Docker Compose le lit automatiquement :
 
   ```yaml
   services:
     api:
       environment:
-        PAYMENTS_KKIAPAY_SECRET: "…"
+        PAYMENT_PROVIDER: fedapay
+        FEDAPAY_SECRET_KEY: "sk_sandbox_…"
+        FEDAPAY_WEBHOOK_SECRET: "wh_sandbox_…"
   ```
 
 > ⚠️ Ne jamais mettre de vrai secret dans `infra/dev/api.env` ni dans `compose.yml`.

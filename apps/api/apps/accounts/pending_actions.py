@@ -2,14 +2,17 @@
 « À valider » du parent (WPD01, D52, §4.2) : tout ce qui attend sa décision, une ligne par demande, la plus récente
 d'abord. La longueur de la liste est la statistique « À valider ».
 
-Chaque type a sa source ; les demandes de paiement (API-L3b.5) et les candidatures aux événements (API-L3b.6)
-s'ajoutent à `SOURCES` quand leurs modèles existent.
+Une source par type : consentements, demandes de paiement de l'enfant (WPD15), candidatures aux événements (WPD06)
+et demandes de suppression (WPD09).
 """
 
 from dataclasses import dataclass
 from datetime import datetime
 
+from django.utils import timezone
+
 from . import consent as consent_service
+from .children import children_of
 from .deletion import requests_for_parent
 from .models import ConsentRequest, DeletionRequest, User
 
@@ -62,7 +65,52 @@ def deletions(parent: User) -> list[PendingAction]:
     ]
 
 
-SOURCES = [consents, deletions]
+def payment_requests(parent: User) -> list[PendingAction]:
+    """Demandes de paiement de l'enfant encore ouvertes (WPD15)."""
+    from apps.payments.models import PaymentRequest
+
+    pending = PaymentRequest.objects.filter(
+        parent=parent,
+        status=PaymentRequest.Status.PENDING,
+        expires_at__gt=timezone.now(),
+        requested_by__in=children_of(parent),
+    ).select_related("requested_by")
+    return [
+        PendingAction(
+            type="payment_request",
+            id=str(request.pk),
+            child_id=request.requested_by_id,
+            child_first_name=request.requested_by.first_name,
+            child_last_name=request.requested_by.last_name,
+            created_at=request.created_at,
+            url=f"/parent/demandes/{request.pk}",
+        )
+        for request in pending
+    ]
+
+
+def event_applications(parent: User) -> list[PendingAction]:
+    """Candidatures d'un enfant à un Steamy Event, à accepter ou refuser (WPD06)."""
+    from apps.events.models import EventApplication
+
+    pending = EventApplication.objects.filter(
+        learner__in=children_of(parent), status=EventApplication.Status.PENDING_PARENT
+    ).select_related("learner")
+    return [
+        PendingAction(
+            type="event_application",
+            id=str(application.pk),
+            child_id=application.learner_id,
+            child_first_name=application.learner.first_name,
+            child_last_name=application.learner.last_name,
+            created_at=application.created_at,
+            url="/parent/evenements",
+        )
+        for application in pending
+    ]
+
+
+SOURCES = [consents, payment_requests, event_applications, deletions]
 
 
 def for_parent(parent: User) -> list[PendingAction]:

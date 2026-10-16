@@ -6,8 +6,6 @@ Le parent qui crée un enfant (WPD04) est l'auteur de la demande : elle est cré
 `parent` (§4.2). L'enfant complète W11-W14 à sa première connexion (D51).
 """
 
-from datetime import date
-
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Prefetch, Q
 from django.utils import timezone
@@ -49,7 +47,7 @@ def create_child(
 ):
     """WPD04 : compte actif, profil daté, demande d'origine `parent` acceptée et lien parent ↔ enfant."""
     now = timezone.now()
-    age = age_on(birth_date, date.today())
+    age = age_on(birth_date, timezone.localdate())
     try:
         with transaction.atomic():
             child = User.objects.create_learner(
