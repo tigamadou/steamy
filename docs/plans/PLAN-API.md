@@ -645,6 +645,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `…/members/`, `POST …/members/{memberId}/remove/`, `GET classrooms/courses/`, `…/{slug}/`
   - [x] Tests : enseignant A ne voit ni la classe ni les élèves de B, quota dépassé
   - [x] Seed D2 : offre de l'école de Koffi (3 parcours) et ses deux classes
+  - [x] Offre échue bloquée (C21) : `SCHOOL_OFFER_EXPIRED` à la création d'une classe
   > Décisions : la demande de consentement est reliée à la classe par `ClassroomMembership.consent_request`
   > (pas de champ `classroom` sur `ConsentRequest`) ; une invitation est un membre `invited` sans compte
   > apprenant. Quota d'élèves : élèves actifs distincts de l'école + invitations en attente non échues (C19).
@@ -653,8 +654,8 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (WT04, WT10) arrivent avec API-L5.3, après API-L3a. Énumérations `ConsentStatusEnum` et
   > `MembershipStatusEnum` nommées dans `ENUM_NAME_OVERRIDES`. Sérialiseur de parcours nommé `ClassroomCourse`
   > (`CourseSummary` est pris par `payments`).
-  > Point ouvert (soumis à l'utilisateur) : `School.valid_until` n'est vérifié nulle part ; une offre échue permet
-  > encore de créer des classes et d'inviter des élèves.
+  > Offre échue (C21, 2026-10-16) : école bloquée, `SCHOOL_OFFER_EXPIRED` (403) à la création d'une classe ;
+  > `classrooms/school/` expose `offerExpired`.
 - [ ] **API-L5.2** Invitations · `feature/api-l5-2-invitations`
   - [ ] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
   - [ ] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; `Enrollment` `source=classroom` (D62)
