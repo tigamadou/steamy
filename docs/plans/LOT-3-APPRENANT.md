@@ -111,7 +111,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.7a à 3.8 · Prérequis : API-1 e
   > à `true`, puis le retirer. `AddressForm` (DS) est prêt pour WD19 : zones fournies par l'appelant.
 
 ### Commerce (API-L3b) — 🟡 en cours
-- [x] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage`
+- [x] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage` · PR #119
   - [x] `WA01` saisie du Kit Code (`KitCodeInput`), toast « Parcours débloqué » sur `WC06a`
   - [x] `WA06` erreur de Kit Code (`KIT_CODE_INVALID`, `KIT_CODE_ALREADY_USED`, `KIT_CODE_NOT_COMPATIBLE`, `THROTTLED`)
   - [x] `WA02` suivi de la demande au parent (interrogation 10 s, relance, annulation, nouvelle demande)
