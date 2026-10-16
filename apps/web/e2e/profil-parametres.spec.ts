@@ -12,6 +12,11 @@ async function axe(page: Page) {
   expect(violations).toEqual([]);
 }
 
+/** Récapitulatif des erreurs du formulaire (l'annonceur de route de Next porte aussi le rôle `alert`). */
+function errorSummary(page: Page) {
+  return page.getByRole("alert").filter({ hasText: "Corrige les erreurs" });
+}
+
 /** Valeur affichée par le hub WD13 pour une donnée du profil. */
 function info(page: Page, label: string) {
   return page.locator("dt", { hasText: label }).locator("xpath=following-sibling::dd[1]");
@@ -63,7 +68,7 @@ test("WD17 : modifier le profil puis recharger", async ({ page }) => {
   const original = await birthDate.inputValue();
   await birthDate.fill("2010-01-01");
   await page.getByRole("button", { name: "Enregistrer" }).click();
-  await expect(page.getByRole("alert")).toContainText("ne correspond pas à l'âge indiqué");
+  await expect(errorSummary(page)).toContainText("ne correspond pas à l'âge indiqué");
   await birthDate.fill(original);
 
   await grade.selectOption({ index: 2 });
@@ -101,7 +106,7 @@ test("WD18 : changer le mot de passe, puis se reconnecter avec le nouveau", asyn
   await next.fill("Nouveau2027x");
   await confirm.fill("Nouveau2027x");
   await page.getByRole("button", { name: "Mettre à jour le mot de passe" }).click();
-  await expect(page.getByRole("alert")).toContainText("Mot de passe actuel incorrect.");
+  await expect(errorSummary(page)).toContainText("Mot de passe actuel incorrect.");
 
   await current.fill(learner.password);
   await page.getByRole("button", { name: "Mettre à jour le mot de passe" }).click();
