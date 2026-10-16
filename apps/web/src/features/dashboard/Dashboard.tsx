@@ -2,13 +2,12 @@ import type { Schemas } from "@steamy/api-client";
 import { Suspense } from "react";
 
 import { Button, Mascot, QuickActionTile, SectionHeader, StatPill } from "@/components/ds";
+import { CourseGrid, CourseGridSkeleton } from "@/components/public/catalog";
 import { getServerApi } from "@/lib/api";
 import { readOrNull } from "@/lib/api-read";
 import { features } from "@/lib/features";
 import { routes } from "@/lib/routes";
 
-import { CourseGrid, GRID } from "./CourseGrid";
-import { CourseGridSkeleton } from "./DashboardSkeleton";
 import { ResumeCard } from "./ResumeCard";
 import { StarterSuggestions } from "./StarterSuggestions";
 
@@ -46,7 +45,7 @@ export function DashboardStats({ data }: { data: Pick<DashboardData, "streakDays
 /** Raccourcis de WD01 : Steamy Events seulement quand le drapeau `events` est levé (3.8), jamais « Bientôt ». */
 export function QuickActions({ wishlist }: { wishlist: number }) {
   return (
-    <nav aria-label="Raccourcis" className={GRID}>
+    <nav aria-label="Raccourcis" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <QuickActionTile icon="compass" title="Catalogue" href={l.catalog} tone="primary" />
       <QuickActionTile icon="heart" title="Mes souhaits" count={coursesLabel(wishlist)} href={l.wishlist} tone="amber" />
       <QuickActionTile icon="book" title="Mes quiz" href={l.attempts} tone="success" />
@@ -65,7 +64,7 @@ function ResumeDashboard({ data, resume }: { data: DashboardData; resume: Schema
       <section aria-labelledby="pour-toi">
         <SectionHeader id="pour-toi" title="Pour toi" action={{ label: "Voir tout", href: l.catalog }} />
         {data.recommendations.length > 0 ? (
-          <CourseGrid courses={data.recommendations} />
+          <CourseGrid courses={data.recommendations} courseHref={l.catalogCourse} />
         ) : (
           <p className="m-0 text-sm font-semibold text-ink-600">
             Tu suis déjà tous nos parcours publiés. Reviens voir le catalogue pour les prochains !

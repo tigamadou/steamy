@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -53,6 +53,16 @@ describe("PreferencesForm (WD06)", () => {
     });
     expect(screen.getByRole("switch", { name: /^Récompenses\s*par email$/ })).toBeChecked();
     expect(screen.getByText("Préférence enregistrée.")).toBeInTheDocument();
+  });
+
+  it("un enregistrement à la fois : les interrupteurs attendent la réponse", async () => {
+    let finish: (value: unknown) => void = () => {};
+    apiCall.mockImplementation(() => new Promise((resolve) => (finish = resolve)));
+    render(<PreferencesForm initial={PREFERENCES} />);
+    await userEvent.click(screen.getByRole("switch", { name: /^Récompenses\s*par email$/ }));
+    expect(screen.getByRole("switch", { name: /^Apprentissage\s*par email$/ })).toBeDisabled();
+    await act(async () => finish({ ok: true, data: PREFERENCES }));
+    expect(screen.getByRole("switch", { name: /^Apprentissage\s*par email$/ })).toBeEnabled();
   });
 
   it("revient en arrière si l'enregistrement échoue", async () => {

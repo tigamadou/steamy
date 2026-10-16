@@ -89,6 +89,18 @@ describe("Dashboard (WD01)", () => {
     expect(within(section).getByRole("link", { name: "Voir tout" })).toHaveAttribute("href", "/apprenant/catalogue");
   });
 
+  it("une recommandation à kit n'affiche pas de prix de parcours (D36)", async () => {
+    await renderDashboard(
+      dashboard({
+        recommendations: [
+          { ...course({ slug: "bot", isFree: false, price: 25000, requiredKit: { slug: "k", name: "Kit" } }), matchesGoals: false },
+        ],
+      }),
+    );
+    expect(screen.getByText("Avec le Kit Code")).toBeInTheDocument();
+    expect(screen.queryByText(/25\s000/)).toBeNull();
+  });
+
   it("sans recommandation, invite à revenir au catalogue", async () => {
     await renderDashboard(dashboard({ recommendations: [] }));
     expect(screen.getByText(/Tu suis déjà tous nos parcours publiés/)).toBeInTheDocument();

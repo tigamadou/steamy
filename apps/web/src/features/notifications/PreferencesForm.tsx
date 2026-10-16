@@ -26,11 +26,13 @@ const HEADING = "m-0 mb-2.5 text-[13px] font-black tracking-[0.06em] text-ink-70
 /**
  * WD06 · préférences de notification : l'application est un canal toujours actif ; l'email se règle par catégorie,
  * seulement si une adresse est renseignée (D30, C12 : ni SMS ni push). Chaque interrupteur est enregistré aussitôt
- * (`PATCH notifications/preferences/`), et revient en arrière si l'enregistrement échoue.
+ * (`PATCH notifications/preferences/`, un à la fois), et revient en arrière si l'enregistrement échoue.
  */
 export function PreferencesForm({ initial }: { initial: Preferences }) {
   const [preferences, setPreferences] = useState(initial);
   const [status, setStatus] = useState<{ error: boolean; text: string } | null>(null);
+  // Un enregistrement à la fois : les interrupteurs attendent la réponse du précédent (pas de PATCH concurrents)
+  const [saving, setSaving] = useState(false);
   const hasEmail = preferences.emailAddress !== null;
 
   async function toggle(category: Category, email: boolean) {
@@ -40,9 +42,11 @@ export function PreferencesForm({ initial }: { initial: Preferences }) {
       categories: preferences.categories.map((c) => (c.category === category ? { ...c, email } : c)),
     });
     setStatus(null);
+    setSaving(true);
     const result = await apiCall((api) =>
       api.PATCH("/api/notifications/preferences/", { body: { categories: [{ category, email }] } }),
     );
+    setSaving(false);
     if (!result.ok) {
       setPreferences(previous);
       setStatus({ error: true, text: errorMessage(result, "tu") });
@@ -100,7 +104,7 @@ export function PreferencesForm({ initial }: { initial: Preferences }) {
             }
             description={DESCRIPTIONS[c.category]}
             checked={hasEmail && c.email}
-            disabled={!hasEmail}
+            disabled={!hasEmail || saving}
             onChange={(email) => void toggle(c.category, email)}
           />
         ))}

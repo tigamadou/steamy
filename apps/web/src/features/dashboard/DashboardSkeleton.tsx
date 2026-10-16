@@ -1,15 +1,5 @@
 import { SkeletonBlock } from "@/components/ds";
-
-/** Grille de 3 cartes parcours en chargement (« Pour toi », suggestions de WD02). */
-export function CourseGridSkeleton({ label }: { label: string }) {
-  return (
-    <div role="status" aria-busy="true" aria-label={label} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <SkeletonBlock className="h-65 rounded-[22px]" />
-      <SkeletonBlock className="h-65 rounded-[22px]" />
-      <SkeletonBlock className="h-65 rounded-[22px]" />
-    </div>
-  );
-}
+import { CourseGridSkeleton } from "@/components/public/catalog";
 
 /** WD03 · squelette fidèle à WD01 : carte de reprise, pastilles, raccourcis et « Pour toi ». */
 export function DashboardSkeleton() {
@@ -28,11 +18,7 @@ export function DashboardSkeleton() {
       </div>
       <div>
         <SkeletonBlock className="mb-3 h-5 w-30 rounded-sm" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <SkeletonBlock className="h-65 rounded-[22px]" />
-          <SkeletonBlock className="h-65 rounded-[22px]" />
-          <SkeletonBlock className="h-65 rounded-[22px]" />
-        </div>
+        <CourseGridSkeleton label="Chargement des recommandations…" />
       </div>
     </div>
   );
