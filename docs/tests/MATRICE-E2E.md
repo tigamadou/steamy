@@ -78,17 +78,17 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WD19` | Informations de livraison | 3 |  |  |
 | `WD21` | Progression & recommandations | 3 | Semaine, histogramme accessible, maîtrise par catégorie | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD22` | Infos de mon parent | 3 |  |  |
-| `WC01` | Par défaut | 3 |  |  |
-| `WC02` | Filtré (Robotique · Débutant) | 3 |  |  |
-| `WC02b` | Dropdown Niveau ouvert | 3 |  |  |
-| `WC03` | Aucun résultat | 3 |  |  |
-| `WC04` | Détail parcours gratuit | 3 |  |  |
-| `WC05` | Détail parcours payant + kit | 3 |  |  |
+| `WC01` | Par défaut | 3 | Compteur réel, cartes vers la fiche, entrée « Catalogue » active, aucun « Niveau » ; ajout aux souhaits par le cœur (P7) | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC02` | Filtré (Robotique · Débutant) | 3 | Recherche `q`, catégorie et difficulté dans l'URL, puces retirables, « Effacer les filtres » | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC02b` | Dropdown Niveau ouvert | 3 | Menu « Difficulté » ouvert (options cochables, axe), choix au clavier | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC03` | Aucun résultat | 3 | « Aucun parcours ne correspond », « Voir toutes les catégories », « Effacer les filtres » | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC04` | Détail parcours gratuit | 3 | Titre en h2, programme, sans note (C8), aucun contact Vimeo avant clic (`player.vimeo.com` intercepté), CSP `frame-src` ; « Continuer » si inscrit ; « Commencer le parcours » → WJ01 (apprenant neuf) ; 404 dans le shell | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC05` | Détail parcours payant + kit | 3 | Parcours à kit : « Débloqué avec le Kit Code », kit et prix lus dans la boutique, pas de prix de parcours ; payant : prix de l'API, CTA de déblocage absents (drapeau `unlock`) | `apps/web/e2e/catalogue-apprenant.spec.ts` |
 | `WC06a` | Vue inscrit · projets repliés | 3 | Arbre du parcours suivi, étape verrouillée non cliquable | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WC06b` | Vue inscrit · projet 2 déplié | 3 | Projet déplié par `?projet=`, prochaine mission « en cours » | `apps/web/e2e/apprenant-parcours.spec.ts` |
-| `WW01` | Avec items | 3 |  |  |
-| `WW02` | Vide | 3 |  |  |
-| `WW03` | Toast après retrait | 3 |  |  |
+| `WW01` | Avec items | 3 | Souhaits du jeu de démo, tri dans l'URL ; P7 : retrait optimiste, rechargement | `apps/web/e2e/souhaits-apprenant.spec.ts` |
+| `WW02` | Vide | 3 | Apprenant neuf sans souhait → « Découvrir le catalogue » ; dernier souhait retiré | `apps/web/e2e/souhaits-apprenant.spec.ts` |
+| `WW03` | Toast après retrait | 3 | P7 : toast `aria-live`, « Annuler » rétablit le souhait, conservé après rechargement | `apps/web/e2e/souhaits-apprenant.spec.ts` |
 | `WA01` | Saisie du Kit Code | 3 |  |  |
 | `WA02` | Paiement par le parent | 3 |  |  |
 | `WA03` | Formulaire de paiement Mobile Money | 3 |  |  |
