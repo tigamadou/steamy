@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("next/server", () => ({ connection: vi.fn(async () => {}) }));
 const getDeliveryZones = vi.fn();
 vi.mock("@/lib/shop", () => ({ getDeliveryZones }));
 
