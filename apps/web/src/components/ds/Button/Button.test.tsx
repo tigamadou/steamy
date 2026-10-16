@@ -6,7 +6,17 @@ import { axe } from "@/test/axe";
 
 import { Button, type ButtonVariant } from "./Button";
 
-const VARIANTS: ButtonVariant[] = ["primary", "secondary", "amber", "outline", "outline-inverse", "ghost", "danger"];
+const VARIANTS: ButtonVariant[] = [
+  "primary",
+  "secondary",
+  "amber",
+  "outline",
+  "outline-inverse",
+  "ghost",
+  "danger",
+  "ink",
+  "ink-outline",
+];
 
 describe("Button", () => {
   it("est un bouton de type button par défaut", () => {
@@ -43,6 +53,19 @@ describe("Button", () => {
     expect(button).toHaveAttribute("aria-busy", "true");
     await user.click(button);
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("garde un focus en encre sur les variantes monochromes du back-office", () => {
+    render(
+      <>
+        <Button variant="ink">Soumettre</Button>
+        <Button variant="ink-outline">Annuler</Button>
+        <Button>Continuer</Button>
+      </>,
+    );
+    expect(screen.getByRole("button", { name: "Soumettre" }).className).toMatch(/outline-ink-900/);
+    expect(screen.getByRole("button", { name: "Annuler" }).className).not.toMatch(/primary/);
+    expect(screen.getByRole("button", { name: "Continuer" }).className).toMatch(/outline-primary-500/);
   });
 
   it("se rend en lien avec href", () => {

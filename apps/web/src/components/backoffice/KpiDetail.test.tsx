@@ -76,6 +76,11 @@ describe("WAD03 · Détail d'un indicateur", () => {
     expect(screen.getByRole("link", { name: "Impact Tracker" })).toHaveAttribute("href", "/backoffice/impact");
   });
 
+  it("formate le taux d'atteinte", () => {
+    render(<KpiDetail period="mois" kpi={{ ...DETAIL, attainment: 1250 }} />);
+    expect(screen.getByText(/atteinte à 1.250 %/)).toBeInTheDocument();
+  });
+
   it("ne dessine pas la composition d'une valeur nulle", () => {
     render(<KpiDetail period="mois" kpi={{ ...DETAIL, value: 0, source: "unavailable", status: STATUS.unavailable }} />);
     expect(screen.queryByRole("img", { name: /parmi/ })).not.toBeInTheDocument();
