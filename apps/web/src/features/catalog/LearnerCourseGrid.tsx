@@ -30,7 +30,7 @@ export function CourseList({
   return (
     <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {items.map(({ slug, card }) => (
-        <li key={slug} className="flex">
+        <li key={slug} data-course={slug} className="flex">
           <CourseCard course={card} favorited={wished.has(slug)} onFav={() => onFav(slug)} className="flex-1" />
         </li>
       ))}

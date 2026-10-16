@@ -85,6 +85,75 @@ describe("useUndoableAction (WW03)", () => {
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
+  it("focus sur « Annuler » quand l'élément disparaît, puis rendu à l'élément rétabli", async () => {
+    const user = userEvent.setup();
+    const onRestore = vi.fn();
+    function Focus() {
+      const { perform, toast } = useUndoableAction();
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() =>
+              perform(
+                { message: "Retiré", apply: () => {}, revert: () => {}, commit: ok, undo: ok },
+                { focusUndo: true, onRestore },
+              )
+            }
+          >
+            Retirer
+          </button>
+          {toast}
+        </>
+      );
+    }
+    render(<Focus />);
+    await user.click(screen.getByRole("button", { name: "Retirer" }));
+    expect(screen.getByRole("button", { name: "Annuler" })).toHaveFocus();
+    await user.click(screen.getByRole("button", { name: "Annuler" }));
+    expect(onRestore).toHaveBeenCalledOnce();
+  });
+
+  it("envoi en échec : l'élément rétabli reprend le focus", async () => {
+    const user = userEvent.setup();
+    const onRestore = vi.fn();
+    function Failing() {
+      const { perform, toast } = useUndoableAction();
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() =>
+              perform(
+                { message: "Retiré", apply: () => {}, revert: () => {}, commit: async () => "Refusé.", undo: ok },
+                { onRestore },
+              )
+            }
+          >
+            Retirer
+          </button>
+          {toast}
+        </>
+      );
+    }
+    render(<Failing />);
+    await user.click(screen.getByRole("button", { name: "Retirer" }));
+    expect(onRestore).toHaveBeenCalledOnce();
+    expect(screen.getByRole("status")).toHaveTextContent("Refusé.");
+  });
+
+  it("le toast reste tant qu'il est survolé ou qu'il a le focus (WCAG 2.2.1)", () => {
+    vi.useFakeTimers();
+    render(<Harness server={{ commit: ok, undo: ok }} />);
+    act(() => screen.getByRole("button", { name: "Retirer" }).click());
+    act(() => screen.getByRole("button", { name: "Annuler" }).focus());
+    act(() => vi.advanceTimersByTime(UNDO_TOAST_MS * 3));
+    expect(screen.getByRole("status")).toHaveTextContent("Parcours retiré des souhaits");
+    act(() => screen.getByRole("button", { name: "Annuler" }).blur());
+    act(() => vi.advanceTimersByTime(UNDO_TOAST_MS));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
   it("le toast d'information disparaît seul ; un toast plus récent n'est pas fermé par l'ancien délai", () => {
     vi.useFakeTimers();
     render(<Harness server={{ commit: ok, undo: ok }} />);

@@ -12,22 +12,34 @@ export type VimeoFrameProps = {
   onError: () => void;
 };
 
+const EVENTS = ["timeupdate", "pause", "ended", "error"] as const;
+
 /**
- * Lecteur monté après le clic sur la vignette (chargé par `next/dynamic`, sans rendu serveur) : l'iframe Vimeo et
- * le SDK `@vimeo/player`, empaqueté avec l'application, pour les événements de lecture.
+ * Lecteur monté après le clic sur la vignette (chargé par `next/dynamic`, sans rendu serveur) : l'iframe Vimeo,
+ * rendue par React, et le SDK `@vimeo/player`, empaqueté avec l'application, branché dessus pour les événements.
+ * Au démontage, seuls les écouteurs sont retirés : `destroy()` supprimerait du DOM l'iframe que React gère (perte du
+ * lecteur en StrictMode). Un changement de `src` remonte une nouvelle iframe (`key`).
  */
-export default function VimeoFrame({ src, title, onProgress, onError }: VimeoFrameProps) {
+export default function VimeoFrame(props: VimeoFrameProps) {
+  return <Frame key={props.src} {...props} />;
+}
+
+function Frame({ src, title, onProgress, onError }: VimeoFrameProps) {
   const frame = useRef<HTMLIFrameElement>(null);
-  // Rappels les plus récents, sans recréer le lecteur à chaque rendu
+  // Rappels les plus récents, sans rebrancher le lecteur à chaque rendu
   const callbacks = useRef({ onProgress, onError });
   useEffect(() => {
     callbacks.current = { onProgress, onError };
   });
 
   useEffect(() => {
+    // Le SDK réutilise l'instance déjà attachée à cette iframe (remontage en StrictMode)
     const player = new Player(frame.current!);
     const tracker = createProgressTracker((seconds) => callbacks.current.onProgress?.(seconds));
-    const fail = () => callbacks.current.onError();
+    let active = true;
+    const fail = () => {
+      if (active) callbacks.current.onError();
+    };
     player.on("timeupdate", (data: { seconds: number }) => tracker.tick(data.seconds));
     player.on("pause", () => tracker.pause());
     player.on("ended", () => tracker.pause());
@@ -38,11 +50,12 @@ export default function VimeoFrame({ src, title, onProgress, onError }: VimeoFra
     };
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
+      active = false;
       document.removeEventListener("visibilitychange", onVisibility);
       tracker.pause();
-      player.destroy().catch(() => {});
+      for (const event of EVENTS) player.off(event);
     };
-  }, [src]);
+  }, []);
 
   return (
     <iframe
