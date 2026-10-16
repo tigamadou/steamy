@@ -21,6 +21,22 @@ describe("routes", () => {
     expect(routes.login("/parcours/robot")).toBe("/connexion?next=%2Fparcours%2Frobot");
     expect(routes.signup("/evenements/a")).toBe("/inscription?next=%2Fevenements%2Fa");
   });
+
+  it("construit les URL de l'espace apprenant à partir des identifiants de l'API", () => {
+    const l = routes.learner;
+    expect(l.attempt(7)).toBe("/apprenant/quiz/7");
+    expect(l.course("robot")).toBe("/apprenant/parcours/robot");
+    expect(l.project("robot", 1)).toBe("/apprenant/parcours/robot/projets/1");
+    expect(l.level("robot", 2)).toBe("/apprenant/parcours/robot/niveaux/2");
+    expect(l.mission("robot", 3)).toBe("/apprenant/parcours/robot/missions/3");
+    expect(l.quiz("robot", 4)).toBe("/apprenant/parcours/robot/quiz/4");
+    expect(l.quizResult("robot", 4, 9)).toBe("/apprenant/parcours/robot/quiz/4/resultats/9");
+    expect(l.levelBadge("robot", 2)).toBe("/apprenant/parcours/robot/niveaux/2/badge");
+    expect(l.projectBadge("robot", 1)).toBe("/apprenant/parcours/robot/projets/1/badge");
+    expect(l.certification("robot")).toBe("/apprenant/parcours/robot/certification");
+    expect(l.catalogSearch("robot & co")).toBe("/apprenant/catalogue?q=robot%20%26%20co");
+    expect(l.catalogCourse("robot")).toBe("/apprenant/catalogue/robot");
+  });
 });
 
 describe("sectionOf", () => {
