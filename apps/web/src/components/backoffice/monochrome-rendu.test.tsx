@@ -69,7 +69,7 @@ const SCREENS: Array<[string, () => ReactElement]> = [
   ["WAD01", () => <Overview overview={OVERVIEW} apiUrl="http://api.test" canOpenImpact />],
   ["WAD02", () => <ImpactDashboard dashboard={DASHBOARD} period="mois" />],
   ["WAD03", () => <KpiDetail kpi={DETAIL} period="mois" />],
-  ["WAD04", () => <ImpactReport report={REPORT} />],
+  ["WAD04", () => <ImpactReport report={REPORT} apiUrl="http://api.test" />],
   [
     "WAD05",
     () => <ManualEntryForm period="2026-t4" label="T4 2026" locked={false} rows={REPORT.rows.filter((r) => r.source === "manual")} />,

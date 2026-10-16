@@ -133,12 +133,12 @@ Statut : 🟡 en cours · Prochaine tâche : 6.3 à 6.5 (admin Django) ; 6.2 apr
   > (`backoffice/not-found.tsx`). La période est aussi proposée sur WAD03 et conservée entre WAD02 et WAD03.
   > `DataTable` (6.6) : zone défilante nommée par la légende du tableau, focalisable seulement quand son contenu
   > déborde (`ScrollRegion`, #103), relevée par axe à 360 px sur WAD03.
-  > Reprise : 6.7 (#93), 6.8 (#100), 6.9 (#106) et leurs suites fusionnées ; exports de 6.9 en PR #PRF (API : #110).
+  > Reprise : 6.7 (#93), 6.8 (#100), 6.9 (#106) et leurs suites fusionnées ; exports de 6.9 en PR #111 (API : #110).
   > Suite : 6.3 à 6.5 (admin Django), 6.2 après API-L5.
-- [x] **6.9** Rapport trimestriel, saisie manuelle, exports · `feature/lot6-impact-rapport` · PR #106, puis `feature/lot6-impact-exports` · PR #PRF (requiert 6.8, API-L6.4)
+- [x] **6.9** Rapport trimestriel, saisie manuelle, exports · `feature/lot6-impact-rapport` · PR #106, puis `feature/lot6-impact-exports` · PR #111 (requiert 6.8, API-L6.4)
   - [x] WAD04 (Next.js) `/backoffice/impact/rapports/[periode]` : en-tête, `DataTable`, exports CSV / PDF, « Soumettre » avec modale de confirmation et verrouillage
     - [x] En-tête (trimestre, statut, complétude, échéances), `DataTable` des lignes serveur, « Soumettre » avec confirmation et verrouillage
-    - [x] « Exporter CSV » / « Exporter PDF » (PR #PRF, endpoints d'API-L6.4 livrés par PR #110)
+    - [x] « Exporter CSV » / « Exporter PDF » (PR #111, endpoints d'API-L6.4 livrés par PR #110)
   - [x] Redirection `/backoffice/impact/rapports` vers le trimestre courant
   - [x] WAD05 (Next.js) `…/[periode]/saisie` : groupes, champs typés selon `unit`, « Enregistrer le brouillon », « Valider la saisie », lecture seule si soumis (D74)
   - [x] Exports asynchrones : `POST …/exports/`, interrogation de `backoffice/exports/{id}/` jusqu'à `ready`, lien présigné, notification, PDF par WeasyPrint
@@ -148,15 +148,15 @@ Statut : 🟡 en cours · Prochaine tâche : 6.3 à 6.5 (admin Django) ; 6.2 apr
     - [x] Export d'autrui refusé, CSV identique à WAD04 (`apps/impact/tests/test_exports.py`, PR #110)
   - [x] Playwright (parcours critique) : Finance via WAD15 (TOTP de développement), brouillon WAD05, validation, export CSV WAD04, soumission, champs en lecture seule ; Support sur la même URL = accès refusé
     - [x] Tout le parcours sauf l'export CSV (`e2e/impact-rapport.spec.ts`, refus de Support dans `e2e/backoffice.spec.ts`)
-    - [x] Export CSV téléchargé et vérifié (en-tête, lignes) dans `e2e/impact-rapport.spec.ts` (PR #PRF)
+    - [x] Export CSV téléchargé et vérifié (en-tête, lignes) dans `e2e/impact-rapport.spec.ts` (PR #111)
   - [ ] Confirmation produit du comportement de « Valider la saisie » (point ouvert)
-  > Notes : exports (PR #PRF) : « Exporter CSV / PDF » demande l'export, interroge son état toutes les 2 s (2 min au
-  > plus), puis annonce le lien de téléchargement (redirection de l'API vers une URL présignée) ; pas de notification
-  > au personnel, sans centre de notifications. « Valider la saisie » (hypothèse de travail, sans champ serveur) : enregistre,
-  > puis signale chaque indicateur manuel encore vide ; « Soumettre » ne l'exige pas (l'API ne l'impose pas) mais la
-  > modale annonce les indicateurs manquants. Carte « Indicateurs non collectés » omise (SPEC-ECRANS-3 mise à jour) :
-  > les institutions sont calculées (D75). WAD01 : « Ouvrir le rapport » ajouté, réservé comme l'Impact Tracker à
-  > Finance et Super-admin. Les notes des valeurs saisies (`note`) sont renvoyées telles quelles à l'enregistrement,
+  > Notes : exports (PR #111) : « Exporter CSV / PDF » demande l'export, interroge son état toutes les 2 s (2 min au
+  > plus), puis annonce le lien de téléchargement (redirection de l'API vers une URL présignée) ; pas de notification au
+  > personnel, sans centre de notifications. « Valider la saisie » (hypothèse de travail, sans champ serveur) :
+  > enregistre, puis signale chaque indicateur manuel encore vide ; « Soumettre » ne l'exige pas (l'API ne l'impose pas)
+  > mais la modale annonce les indicateurs manquants. Carte « Indicateurs non collectés » omise (SPEC-ECRANS-3 mise à
+  > jour) : les institutions sont calculées (D75). WAD01 : « Ouvrir le rapport » ajouté, réservé comme l'Impact Tracker
+  > à Finance et Super-admin. Les notes des valeurs saisies (`note`) sont renvoyées telles quelles à l'enregistrement,
   > faute de champ dans la maquette. Monochrome : la modale, les boutons et le fil d'Ariane passent par les variantes «
   > encre » du design system (`Modal tone="ink"`, `Button variant="ink" | "ink-outline"`, `Breadcrumb tone="ink"`). La
   > lecture seule de WAD05 dérive du statut serveur à chaque rendu : Next conserve l'état d'une route déjà visitée
