@@ -13,13 +13,25 @@ export type OfflineStateProps = {
   /** Annonce après un essai infructueux. */
   notice?: string;
   titleId?: string;
+  /** `ink` : variante monochrome du back-office. */
+  tone?: StateTone;
 };
 
+/** Ton des états : couleurs de la marque, ou encre dans le back-office monochrome (SPEC-TECHNIQUE §2.4). */
+export type StateTone = "brand" | "ink";
+
+/** Variantes de bouton (secondaire, principal) selon le ton. */
+const ACTIONS = {
+  brand: { secondary: "outline", primary: "primary" },
+  ink: { secondary: "ink-outline", primary: "ink" },
+} as const;
+
 /** WX01 · Hors ligne. Pas de bouton « Mode hors ligne » (D16). */
-export function OfflineState({ register = "tu", onRetry, notice, titleId }: OfflineStateProps) {
+export function OfflineState({ register = "tu", onRetry, notice, titleId, tone = "brand" }: OfflineStateProps) {
   const text = STATE_MESSAGES.offline[register];
   return (
     <WXState
+      tone={tone}
       pose="sleep"
       emoji="📡"
       title={text.title}
@@ -32,7 +44,11 @@ export function OfflineState({ register = "tu", onRetry, notice, titleId }: Offl
           </p>
         </>
       }
-      actions={<Button onClick={onRetry}>{STATE_ACTIONS.retry}</Button>}
+      actions={
+        <Button variant={ACTIONS[tone].primary} onClick={onRetry}>
+          {STATE_ACTIONS.retry}
+        </Button>
+      }
     />
   );
 }
@@ -46,13 +62,24 @@ export type ErrorStateProps = {
   detail?: string;
   headingLevel?: 1 | 2;
   compact?: boolean;
+  /** `ink` : variante monochrome du back-office. */
+  tone?: StateTone;
 };
 
 /** WX02 · Erreur. */
-export function ErrorState({ register = "tu", onRetry, onBack, detail, headingLevel, compact }: ErrorStateProps) {
+export function ErrorState({
+  register = "tu",
+  onRetry,
+  onBack,
+  detail,
+  headingLevel,
+  compact,
+  tone = "brand",
+}: ErrorStateProps) {
   const text = STATE_MESSAGES.error[register];
   return (
     <WXState
+      tone={tone}
       pose="sad"
       emoji="⚠️"
       title={text.title}
@@ -67,11 +94,13 @@ export function ErrorState({ register = "tu", onRetry, onBack, detail, headingLe
       actions={
         <>
           {onBack && (
-            <Button variant="outline" onClick={onBack}>
+            <Button variant={ACTIONS[tone].secondary} onClick={onBack}>
               {STATE_ACTIONS.back}
             </Button>
           )}
-          <Button onClick={onRetry}>{STATE_ACTIONS.retry}</Button>
+          <Button variant={ACTIONS[tone].primary} onClick={onRetry}>
+            {STATE_ACTIONS.retry}
+          </Button>
         </>
       }
     />

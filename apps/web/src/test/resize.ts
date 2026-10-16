@@ -5,6 +5,7 @@ export const observed = new Set<Element>();
 
 export class ResizeObserverStub {
   private readonly callback: () => void;
+  private readonly targets = new Set<Element>();
 
   constructor(callback: () => void) {
     this.callback = callback;
@@ -12,14 +13,18 @@ export class ResizeObserverStub {
 
   observe(target: Element) {
     callbacks.add(this.callback);
+    this.targets.add(target);
     observed.add(target);
   }
 
   disconnect() {
     callbacks.delete(this.callback);
+    this.targets.forEach((target) => observed.delete(target));
+    this.targets.clear();
   }
 
   unobserve(target: Element) {
+    this.targets.delete(target);
     observed.delete(target);
   }
 }

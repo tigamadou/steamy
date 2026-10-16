@@ -154,14 +154,17 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > `generate_report_export`) ne sont pas encore livrés par API-L6.4 (reprise prévue après API-L3a.4) : pas de bouton
   > d'export tant que l'endpoint manque. « Valider la saisie » (hypothèse de travail, sans champ serveur) : enregistre,
   > puis signale chaque indicateur manuel encore vide ; « Soumettre » ne l'exige pas (l'API ne l'impose pas) mais la
-  > modale annonce les indicateurs manquants. Carte « Indicateurs non collectés » omise (SPEC-ECRANS-3 mise à jour) : les institutions sont
-  > calculées (D75). WAD01 : « Ouvrir le rapport » ajouté, réservé comme l'Impact Tracker à Finance et Super-admin.
-  > Les notes des valeurs saisies (`note`) sont renvoyées telles quelles à l'enregistrement, faute de champ dans la
-  > maquette. Monochrome : la modale, les boutons et le fil d'Ariane passent par les variantes « encre » du design
-  > system (`Modal tone="ink"`, `Button variant="ink" | "ink-outline"`, `Breadcrumb tone="ink"`).
-  > La lecture seule de WAD05 dérive du statut serveur à chaque rendu : Next conserve l'état d'une route déjà visitée
-  > (`cacheComponents`), un état local initialisé une fois restait éditable après la soumission. En-tête du
-  > back-office : actions repliables à 360 px (trois actions sur WAD02).
+  > modale annonce les indicateurs manquants. Carte « Indicateurs non collectés » omise (SPEC-ECRANS-3 mise à jour) :
+  > les institutions sont calculées (D75). WAD01 : « Ouvrir le rapport » ajouté, réservé comme l'Impact Tracker à
+  > Finance et Super-admin. Les notes des valeurs saisies (`note`) sont renvoyées telles quelles à l'enregistrement,
+  > faute de champ dans la maquette. Monochrome : la modale, les boutons et le fil d'Ariane passent par les variantes «
+  > encre » du design system (`Modal tone="ink"`, `Button variant="ink" | "ink-outline"`, `Breadcrumb tone="ink"`). La
+  > lecture seule de WAD05 dérive du statut serveur à chaque rendu : Next conserve l'état d'une route déjà visitée
+  > (`cacheComponents`), un état local initialisé une fois restait éditable après la soumission. En-tête du back-office
+  > : actions repliables à 360 px (trois actions sur WAD02).
+  > Garde-fou monochrome étendu au rendu (`components/backoffice/monochrome-rendu.test.tsx`) : le HTML de chaque
+  > écran et état du back-office, composants du design system compris, ne contient aucune classe primaire ; `Loader`,
+  > `Mascot` et les états WX ont une variante encre (le hors-ligne la prend sous `/backoffice`).
 - [ ] **Critères de fin du lot 6**
   - [ ] WAD01-WAD05 conformes à la spec et à la définition de « terminé », monochrome sans `--primary-*`, accessibles, responsive, sans donnée en dur
   - [ ] WAD06-WAD14 couverts par l'admin Django (colonnes, filtres, recherches, actions, inlines de §5.14), sans élément de « À ne pas porter », thème monochrome, admin en français

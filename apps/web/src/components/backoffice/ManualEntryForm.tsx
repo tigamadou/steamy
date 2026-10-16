@@ -8,7 +8,7 @@ import { useState, type FormEvent } from "react";
 import { Breadcrumb } from "@/components/ds/Breadcrumb";
 import { Button } from "@/components/ds/Button";
 import { getBrowserApi } from "@/lib/api-browser";
-import { errorMessage } from "@/lib/api-call";
+import { apiErrorBody, errorMessage } from "@/lib/api-call";
 import { cx } from "@/lib/cx";
 import { routes } from "@/lib/routes";
 
@@ -88,7 +88,7 @@ export function ManualEntryForm({ period, label, locked, rows }: ManualEntryForm
     const body = {
       values: rows.map((row) => ({ code: row.code, value: toValue(values[row.code], row.unit), note: row.note })),
     };
-    let outcome: { ok: boolean; status: number; error?: Schemas["Error"] };
+    let outcome: { ok: boolean; status: number; error?: unknown };
     try {
       const api = await getBrowserApi();
       const { error, response } = await api.PATCH("/api/backoffice/impact-reports/{period}/values/", {
@@ -121,8 +121,8 @@ export function ManualEntryForm({ period, label, locked, rows }: ManualEntryForm
       return;
     }
 
-    // Réponse sans corps (proxy en 502…) : traitée comme une panne du serveur
-    const error = outcome.error ?? { code: "SERVER_ERROR" as const, message: "" };
+    // Réponse sans corps JSON de l'API (vide, ou page HTML d'un proxy en 502) : traitée comme une panne du serveur
+    const error = apiErrorBody(outcome.error) ?? { code: "SERVER_ERROR" as const, message: "" };
     if (outcome.status === 401 || error.code === "OTP_REQUIRED") {
       router.refresh();
       return;
