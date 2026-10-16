@@ -131,6 +131,12 @@ class LearnerProfileUpdateSerializer(serializers.ModelSerializer):
 class LearnerProfileView(APIView):
     permission_classes = [IsLearner]
 
+    @extend_schema(responses=LearnerProfileSerializer)
+    def get(self, request):
+        """WD13, WD17 : profil courant, pour l'afficher et préremplir le formulaire."""
+        profile, _ = LearnerProfile.objects.get_or_create(user=request.user)
+        return Response(LearnerProfileSerializer(profile).data)
+
     @extend_schema(request=LearnerProfileUpdateSerializer, responses=LearnerProfileSerializer)
     def patch(self, request):
         """W11-W14 (une étape par appel) et WD17."""

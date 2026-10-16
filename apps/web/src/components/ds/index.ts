@@ -1,5 +1,6 @@
 // Design system Steamy (SPEC-TECHNIQUE §2), porté de design/ds-*.jsx.
 export * from "./Accordion";
+export * from "./AddressForm";
 export * from "./AppShell";
 export * from "./Avatar";
 export * from "./AvatarPicker";
@@ -17,6 +18,7 @@ export * from "./Field";
 export * from "./FullScreenStage";
 export * from "./GoalChip";
 export * from "./Icon";
+export * from "./InfoCard";
 export * from "./IdentifierInput";
 export * from "./Input";
 export * from "./Loader";
@@ -36,6 +38,7 @@ export * from "./QuickActionTile";
 export * from "./ReferentialSelect";
 export * from "./ResendCountdown";
 export * from "./ResumeCodeCard";
+export * from "./Section";
 export * from "./SectionHeader";
 export * from "./Select";
 export * from "./SettingsRow";

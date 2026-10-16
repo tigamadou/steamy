@@ -508,6 +508,39 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
   /api/accounts/me/learner-profile/:
+    get:
+      operationId: accounts_me_learner_profile_retrieve
+      description: 'WD13, WD17 : profil courant, pour l''afficher et préremplir le
+        formulaire.'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerProfile'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
     patch:
       operationId: accounts_me_learner_profile_partial_update
       description: W11-W14 (une étape par appel) et WD17.
