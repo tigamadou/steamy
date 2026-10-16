@@ -66,7 +66,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.3c, 3.4 · Prérequis : API-1 et 
   - [x] `VimeoPlayer` (composant livré en 3.2 ; `@vimeo/player` épinglé, chargement différé, suivi `learning/activity/`, repli en cas d'erreur, CSP `frame-src`)
   - [x] Tests unitaires : `MissionItem` verrouillé non activable, `next` respecté, `VimeoPlayer` avec faux `Player`
   - [x] Parcours Playwright : accès direct à une mission verrouillée → `LockedContentState` ; `player.vimeo.com` intercepté
-- [x] **3.3b** Quiz, résultats et badges (requiert API-L3a) · `feature/lot3-quiz` · PR #—
+- [x] **3.3b** Quiz, résultats et badges (requiert API-L3a) · `feature/lot3-quiz` · PR #95
   - [x] WJ04 quiz formatif
   - [x] WJ10 quiz sommatif
   - [x] WJ05 résultat formatif
