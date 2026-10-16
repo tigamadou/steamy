@@ -68,12 +68,12 @@ Statut : 🟡 en cours · Prochaine tâche : 3.3c, 3.4 · Prérequis : API-1 et 
   - [x] Tests unitaires : `MissionItem` verrouillé non activable, `next` respecté, `VimeoPlayer` avec faux `Player`
   - [x] Parcours Playwright : accès direct à une mission verrouillée → `LockedContentState` ; `player.vimeo.com` intercepté
 - [x] **3.3b** Quiz, résultats et badges (requiert API-L3a) · `feature/lot3-quiz` · PR #95
-  - [x] WJ04 quiz formatif
-  - [x] WJ10 quiz sommatif
-  - [x] WJ05 résultat formatif
-  - [x] WJ08 résultat sommatif (`RetryCountdown`)
-  - [x] WJ06 badge de niveau (plein écran)
-  - [x] WJ11 badge de projet (plein écran)
+  - [x] `WJ04` quiz formatif
+  - [x] `WJ10` quiz sommatif
+  - [x] `WJ05` résultat formatif
+  - [x] `WJ08` résultat sommatif (`RetryCountdown`)
+  - [x] `WJ06` badge de niveau (plein écran)
+  - [x] `WJ11` badge de projet (plein écran)
   - [x] Composants `Quiz`, `QuizResult`, `QuestionReview`, `RetryCountdown`, `Medal`
   - [x] Brouillon des réponses en `sessionStorage`, envoi unique, protection contre la double soumission
   - [x] Tests unitaires : seuil affiché = seuil de l'API, compte à rebours, aucune bonne réponse dans le DOM avant soumission
