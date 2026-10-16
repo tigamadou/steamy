@@ -3,6 +3,8 @@ Validation des champs saisis dans l'admin par le groupe Contenu : identifiants V
 mission (texte, média, astuce : SPEC-TECHNIQUE §3.2).
 """
 
+import re
+
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
@@ -12,6 +14,20 @@ validate_vimeo_id = RegexValidator(r"^\d+$", "L'identifiant Vimeo ne contient qu
 validate_vimeo_hash = RegexValidator(
     r"^[0-9A-Za-z]+$", "Le hachage Vimeo ne contient que des lettres et des chiffres."
 )
+
+#: URL de partage ou d'intégration Vimeo : `vimeo.com/123/abc`, `vimeo.com/123?h=abc`, `player.vimeo.com/video/123?h=abc`
+VIMEO_URL = re.compile(
+    r"vimeo\.com/(?:video/)?(?P<id>\d+)(?:/(?P<path_hash>[0-9A-Za-z]+))?(?:\?(?:.*&)?h=(?P<query_hash>[0-9A-Za-z]+))?"
+)
+
+
+def parse_vimeo_url(value: str) -> tuple[str, str] | None:
+    """Identifiant et hachage extraits d'une URL Vimeo collée telle quelle (ADR 0004 §6) ; `None` si ce n'en est pas une."""
+    match = VIMEO_URL.search(value or "")
+    if match is None:
+        return None
+    return match["id"], match["path_hash"] or match["query_hash"] or ""
+
 
 #: Champs de chaque type de bloc : obligatoires, puis facultatifs.
 BLOCK_FIELDS = {
