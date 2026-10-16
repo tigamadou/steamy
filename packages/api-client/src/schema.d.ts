@@ -4743,7 +4743,8 @@ export interface components {
              * @description Dimanche
              */
             endDate: string;
-            previousWeek: string;
+            /** @description Null pour la première semaine acceptée (2000-W01) */
+            previousWeek: string | null;
             /** @description Null pour la semaine en cours */
             nextWeek: string | null;
             /** @description Temps d'apprentissage (journal, D55) */

@@ -29,7 +29,7 @@ def test_seed_demo_twice_creates_no_duplicate():
     first = counts()
     call_command("seed_demo")
     assert counts() == first
-    assert first[0] == 7  # Léa, Marie, Koffi et un membre du personnel par groupe
+    assert first[0] == 8  # Léa, Noé, Marie, Koffi et un membre du personnel par groupe
 
 
 def test_seed_demo_is_refused_in_production(settings):

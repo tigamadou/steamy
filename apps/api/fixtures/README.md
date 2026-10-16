@@ -14,6 +14,7 @@ Mot de passe de tous les comptes : **`Steamy2026`**.
 | Persona | Connexion | Identifiant | Remarque |
 | --- | --- | --- | --- |
 | Apprenante | W16 (`/connexion`) | `lea.adjovi` | Léa Adjovi, 4ᵉ, Cotonou ; profil complet |
+| Apprenant | W16 | `noe.adjovi` | Noé Adjovi, 11 ans, créé par Marie ; profil à compléter (W11-W14) |
 | Parent | W16 | `+229 01 90 00 00 01` (ou `0190000001`) | Marie Adjovi ; email de contact `marie.adjovi@steamy.test` |
 | Enseignant | W16 | `koffi.adekambi@steamy.test` | M. Koffi Adékambi |
 | Personnel · Super-admin | admin Django (`/admin/`, WAD15) | `superadmin@steamy.test` | Groupe Super-admin (pas `is_superuser`, réservé au compte de secours) |
@@ -21,9 +22,12 @@ Mot de passe de tous les comptes : **`Steamy2026`**.
 | Personnel · Support | admin Django | `support@steamy.test` | |
 | Personnel · Finance | admin Django | `finance@steamy.test` | |
 
-Marie est le parent de Léa (lien parent ↔ enfant, consentement donné). M. Adékambi est rattaché au
-« Collège Steamy de Cotonou ». Le pseudonyme public de Léa (« LéaBot ») attend la modération du support (WAD08,
-D15).
+Marie est le parent de Léa (lien parent ↔ enfant, consentement donné) et de **Noé** (`noe.adjovi`, 11 ans), qu'elle a
+créé elle-même (WPD04) : Noé n'a pas encore complété son profil (W11-W14) et a demandé la suppression de son compte
+(WD15, en attente de Marie). « À valider » de Marie compte donc trois demandes : la suppression de Noé, la demande de
+paiement de Léa et sa candidature à un événement. Mobile Money préféré de Marie : MTN, `+229 01 90 00 00 01`. M.
+Adékambi est rattaché au « Collège Steamy de Cotonou ». Le pseudonyme public de Léa (« LéaBot ») attend la modération
+du support (WAD08, D15).
 
 ## Parcours de Léa (API-L3a)
 
