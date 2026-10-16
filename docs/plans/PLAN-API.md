@@ -653,11 +653,11 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > encore ouvertes ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
   > ajout du **Mobile Money préféré** (`ParentProfile.mobileMoney` `{ country, network, phone }`, réseau activé du
   > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
-  > Suites : relecture (#104) ; fin d'API-L4 (PR #105) : jeu de démonstration, annulation d'une suppression par le
+  > Suites : relecture (#104) ; fin d'API-L4 (PR #107) : jeu de démonstration, annulation d'une suppression par le
   > support (admin `DeletionRequest`, permission `cancel_deletion`, Super-admin et Support ; un compte réactivé à la
   > main n'est jamais anonymisé), rapport hebdomadaire réservé dans `WeeklyReportSent` (contrainte d'unicité),
   > `previousWeek` nul à la borne de 2000.
-- [x] **Critères de fin d'API-L4** · PR #105
+- [x] **Critères de fin d'API-L4** · PR #107
   - [x] Un `childId` étranger → 404 partout
   - [x] `Notification.url` pointe vers les routes front des plans
   - [x] Seed enrichi, `make openapi` committé
