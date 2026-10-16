@@ -72,7 +72,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WD13` | Paramètres (hub) | 3 |  |  |
 | `WD14` | Historique de commande | 3 |  |  |
 | `WD15` | Supprimer le compte | 3 |  |  |
-| `WD16` | Déconnexion (modal partagé) | 3 |  |  |
+| `WD16` | Déconnexion (modal partagé) | 3 | Shell apprenant : annulation par Échap puis déconnexion, espace refermé | `apps/web/e2e/apprenant-shell.spec.ts` |
 | `WD17` | Éditer le profil | 3 |  |  |
 | `WD18` | Modifier la connexion | 3 |  |  |
 | `WD19` | Informations de livraison | 3 |  |  |
@@ -144,9 +144,9 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WK09` | Paiement échoué | 3 |  |  |
 | `WK10` | Panier vide | 3 |  |  |
 | `WK11` | Stock épuisé | 3 |  |  |
-| `WAD01` | Vue d'ensemble | 6 |  |  |
-| `WAD02` | Impact Tracker · dashboard KPI | 6 |  |  |
-| `WAD03` | Impact Tracker · détail indicateur | 6 |  |  |
+| `WAD01` | Vue d'ensemble | 6 | Support : chiffres et échéance du serveur, sans lien vers l'Impact Tracker ; « Consentements en attente » → liste Django filtrée | `apps/web/e2e/backoffice.spec.ts` |
+| `WAD02` | Impact Tracker · dashboard KPI | 6 | Finance : période Mois → Trimestre dans l'URL, valeurs relues côté serveur, rechargement ; sans tuile « Activer la collecte » | `apps/web/e2e/impact-tracker.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
+| `WAD03` | Impact Tracker · détail indicateur | 6 | Finance ouvre un indicateur depuis WAD02 (période conservée) : définition serveur, historique ; fil d'Ariane ; code inconnu → 404 | `apps/web/e2e/impact-tracker.spec.ts` |
 | `WAD04` | Impact Tracker · rapport trimestriel | 6 |  |  |
 | `WAD05` | Impact Tracker · saisie manuelle | 6 |  |  |
 | `WAD06` | Utilisateurs | 6 |  |  |

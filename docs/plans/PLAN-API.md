@@ -418,75 +418,244 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Seed enrichi avec les données du domaine
   - [x] `make openapi` committé
 
-### API-L3b · Commerce, boutique, événements payants — ⬜ à faire
+### API-L3b · Commerce, boutique, événements payants — 🟡 en cours
 - [ ] **API-L3b.0a** Comparaison paiement (S9) · `feature/api-l3b-0a-adr-paiement` · doc
   - [x] Comparer KKiaPay et FedaPay : réseaux par pays (MTN, Moov, Celtiis), frais, initiation côté serveur, webhook signé, vérification de transaction, remboursements par API, sandbox, reversement, XOF
   - [x] Écrire l'**ADR-Paiement** (FedaPay seul prestataire intégré, remplaçable ; KKiaPay/CinetPay non intégrés en v1)
   - [ ] Faire valider le format de `Invoice` par la comptabilité
-- [ ] **API-L3b.0b** Interface paiement · `feature/api-l3b-0b-paiement`
-  - [ ] `payments/providers/` : `PaymentProvider` (`initiate`, `verify_webhook`, `parse_event`, `fetch_status`, `refund`)
-  - [ ] `FakePaymentProvider` pilotable (numéros `…01` succès, `…02` échec, `…03` en attente), webhook signé asynchrone
-  - [ ] Commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>`
-  - [ ] `FedaPayProvider` (seule implémentation réelle ; clé sandbox puis live)
-- [ ] **API-L3b.1** Commandes · `feature/api-l3b-1-commandes`
-  - [ ] `Order`, `OrderItem` refondus (§3.3) ; service `pricing` unique
-  - [ ] `POST payments/orders/` (identifiants et quantités seulement)
-  - [ ] `GET payments/orders/`, `…/{reference}/` (jeton invité haché, `X-Guest-Token`, `kitCodes` visibles du payeur seul)
-  - [ ] L'apprenant ne crée pas de commande (`PARENT_APPROVAL_REQUIRED`)
-  - [ ] Tests : prix envoyé par le client ignoré, jeton invité d'une autre commande refusé
-- [ ] **API-L3b.2** Paiement et webhook · `feature/api-l3b-2-paiement-webhook`
-  - [ ] `Payment` à 4 états ; `POST payments/orders/{reference}/payments/` (`NETWORK_UNAVAILABLE`) ; `GET payments/payments/{id}/`
-  - [ ] `POST payments/webhook/{provider}/` durci (signature avant traitement, montant/devise/référence, idempotence)
-  - [ ] Exécution post-paiement unique en transaction (inscription, Kit Codes, stock, candidature, facture asynchrone)
-  - [ ] Tâche `reconcile_pending_payments` (5 min)
-  - [ ] Paiement tardif : honoré si stock disponible, sinon remboursement automatique (C17)
-  - [ ] Module `core/pdf.py`, tâche `generate_invoice_pdf`, `GET …/invoice/` (payeur seulement)
-  - [ ] Tests : webhook non signé, rejoué, à montant ou devise faux ; double exécution impossible (webhooks concurrents) ; facture refusée à l'apprenant bénéficiaire ; apprenant ne peut pas initier de paiement
-- [ ] **API-L3b.3** Boutique · `feature/api-l3b-3-boutique`
-  - [ ] `StockReservation`, `Cart`/`CartItem`, `DeliveryZone`, `DeliveryAddress`, `RestockAlert`
-  - [ ] `shop/cart/*`, `GET shop/delivery-zones/`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`
-  - [ ] Tâche `release_expired_reservations` (30 min)
-  - [ ] Tests : dernier kit commandé simultanément → un seul succès, `OUT_OF_STOCK`
-- [ ] **API-L3b.4** Kit Codes · `feature/api-l3b-4-kit-codes`
-  - [ ] Génération `STEAMY-XXXX-XXXX` (Crockford base32, `secrets`) à l'exécution post-paiement
-  - [ ] `POST payments/kit-codes/redeem/` : normalisation, `KIT_CODE_NOT_COMPATIBLE`, consommation atomique, throttle utilisateur et IP (D35)
-  - [ ] `Enrollment` `source=kit_code`
-  - [ ] Tests : deux rachats concurrents → un seul succès
-- [ ] **API-L3b.5** Demandes de paiement · `feature/api-l3b-5-demandes-paiement`
-  - [ ] `PaymentRequest` ; `POST payments/payment-requests/` (montant recalculé), `…/{id}/resend/`, `GET`, `…/cancel/`, `…/decline/`
-  - [ ] SMS au parent avec lien WPD15 ; tâche `expire_payment_requests` (7 j)
-  - [ ] Tests : scoping enfant / parent
-- [ ] **API-L3b.6** Candidatures · `feature/api-l3b-6-candidatures`
-  - [ ] `EventApplication`, `EventTicket` consommé
-  - [ ] `POST events/{slug}/applications/`, `GET events/applications/`, `GET events/tickets/`
-  - [ ] Codes `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED`
-- [ ] **Critères de fin d'API-L3b**
-  - [ ] Tests prioritaires de la section « Points délicats » passants
-  - [ ] Seed enrichi (commandes, kits en rupture…)
-  - [ ] `make openapi` committé
+- [x] **API-L3b.0b** Interface paiement · `feature/api-l3b-0b-paiement` · PR #73
+  - [x] `payments/providers/` : `PaymentProvider` (`initiate`, `verify_webhook`, `parse_event`, `fetch_status`, `refund`)
+  - [x] `FakePaymentProvider` pilotable (numéros `…01` succès, `…02` échec, `…03` en attente), webhook signé asynchrone
+  - ~~Commandes `simulate_payment <reference> success|failed` et `pay_payment_request <id>`~~ : déplacées en
+    L3b.2 et L3b.5, qui créent les modèles `Payment` et `PaymentRequest` qu'elles manipulent
+  - [x] `FedaPayProvider` (seule implémentation réelle ; clé sandbox puis live)
+  - [x] Webhook `payments/webhook/{provider}/` branché sur l'interface (signature, puis `parse_event`) ; KKiaPay retiré
+  - [x] Variables `PAYMENT_PROVIDER`, `FEDAPAY_*` : chart, secrets GitHub, `docs/infra/`
+  > Décisions : `initiate(Charge)` reçoit une demande de débit construite par le serveur (référence, montant XOF
+  > entier, pays, réseau, numéro E.164, nom du payeur) plutôt qu'une `Order`, pour rester indépendant du modèle
+  > refondu en L3b.1 ; il renvoie `InitiateResult(provider_tx_id, status, redirect_url=None)`. `refund` renvoie
+  > `done | pending_manual | unsupported` (FedaPay : `pending_manual`, pas d'API publique). Le faux prestataire
+  > garde ses transactions dans le cache et poste son webhook signé (`X-Fake-Signature`) par la tâche
+  > `deliver_fake_webhook`, après la validation de la transaction et `FAKE_PAYMENT_DELAY` secondes ; la vue du
+  > webhook est appelée sur place (aucun appel réseau), donc avec la même vérification. Autres numéros que
+  > `…01/02/03` : succès. FedaPay : transaction (`merchant_reference` = référence de la commande), jeton, débit
+  > direct `POST /{mode}` ; signature `t=…,s=HMAC-SHA256("t.corps")` tolérée 5 min ; modes par `PAYS:réseau`
+  > (`FEDAPAY_MODES`, Celtiis supposé `sbin`) et devises (`FEDAPAY_CURRENCY_IDS`) en réglages, **à confirmer
+  > dans le bac à sable** (inconnues 1, 5 et 6 de l'ADR 0003). Statuts FedaPay : `approved`/`transferred` →
+  > `succeeded`, `declined`/`canceled`/`expired`/`refunded` → `failed`.
+- [x] **API-L3b.1** Commandes · `feature/api-l3b-1-commandes` · PR #76
+  - [x] `Order`, `OrderItem` refondus (§3.3) ; service `pricing` unique
+  - [x] `POST payments/orders/` (identifiants et quantités seulement)
+  - [x] `GET payments/orders/`, `…/{reference}/` (jeton invité haché, `X-Guest-Token`) ; ~~`kitCodes` visibles
+    du payeur seul~~ : avec `KitCode` en L3b.4 (le serializer du bénéficiaire, distinct, ne les aura pas)
+  - [x] L'apprenant ne crée pas de commande (`PARENT_APPROVAL_REQUIRED`)
+  - [x] `DeliveryZone`, `StockReservation` et `GET shop/delivery-zones/` (avancés de L3b.3 : le prix et la
+    réservation se font à la commande) ; tâche `release_expired_reservations` (5 min) et commande du même nom
+  - [x] Tests : prix envoyé par le client ignoré, jeton invité d'une autre commande refusé, dernier kit commandé
+    deux fois → un seul succès, stock rendu à l'expiration
+  > Décisions : refonte destructive de `payments` (migrations 0003 à 0005 : anciens modèles supprimés puis
+  > recréés, `Payment` à 4 états et montants entiers compris ; autorisé avant le lancement). Référence
+  > `CMD-XXXXXXXX` (Crockford base32, `secrets`). `POST payments/orders/` : `kind` ∈ `course|kit` (les commandes
+  > d'événement naissent de la candidature, L3b.6), `items[{courseSlug|kitSlug, quantity}]`, `beneficiaryId`
+  > (enfant lié au parent, sinon `NOT_FOUND` sur le champ), `guest{firstName, lastName, phone}` (anonyme, kits
+  > seulement ; ignoré pour un parent), `deliveryAddress{zoneId, recipientName, phone?, city, district?,
+  > addressLine}` figée dans la commande. Codes de champ : `COURSE_FREE` (inscription directe), `KIT_CODE_REQUIRED`,
+  > `ALREADY_PURCHASED` (commande payée pour le même enfant), `DELIVERY_ZONE_UNAVAILABLE`, `OUT_OF_STOCK` (409).
+  > Anonyme sur un parcours → 401 ; enseignant ou personnel → 403. Le jeton invité (`guestToken`, 43 caractères)
+  > n'est rendu qu'à la création ; seule son empreinte SHA-256 est gardée. Stock décrémenté sous verrou des kits
+  > (ordre des identifiants) et rendu à l'expiration (30 min, `ORDER_TTL_MINUTES`), commande `cancelled`.
+  > Throttle `orders` (30/h). Lecture : le payeur voit `deliveryAddress`, le bénéficiaire non. Les URL passent de
+  > `{id}` à `{reference}` ; `GET payments/payments/` disparaît, remplacé par `…/payments/{id}/` en L3b.2.
+- [x] **API-L3b.2** Paiement et webhook · `feature/api-l3b-2-paiement-webhook` · PR #83
+  - [x] `Payment` à 4 états ; `POST payments/orders/{reference}/payments/` (`NETWORK_UNAVAILABLE`) ; `GET payments/payments/{id}/`
+  - [x] `POST payments/webhook/{provider}/` durci (signature avant traitement, montant/devise/référence, idempotence)
+  - [x] Exécution post-paiement unique en transaction (inscription, stock, panier, notifications) ; Kit Codes en
+    L3b.4, candidature en L3b.6, facture en L3b.2b
+  - [x] Tâche `reconcile_pending_payments` (5 min) et commande du même nom ; commande `simulate_payment <reference> success|failed`
+  - [x] Paiement tardif : honoré si stock disponible, sinon remboursement automatique (C17) ; second paiement réussi remboursé
+  - [x] Tests : webhook non signé, rejoué, à montant ou devise faux ; double exécution impossible (webhooks concurrents) ; apprenant ne peut pas initier de paiement
+  > Décisions : `POST …/payments/` `{country, network, msisdn}` : parent payeur (apprenant → `PARENT_APPROVAL_REQUIRED`,
+  > autre parent → 404) ou invité avec `X-Guest-Token` (CSRF) ; throttle `payments` (20/h) ; réseau = `PaymentNetwork`
+  > activé et actif du pays (sinon `NETWORK_UNAVAILABLE` sur `network`), numéro du même pays (sinon `PHONE_INVALID`
+  > sur `msisdn`) ; commande payée → 409 `ORDER_ALREADY_PAID`, annulée ou échue → 410 `ORDER_EXPIRED`. Réponse 201
+  > avec le paiement `pending`, ou `failed` si le prestataire refuse (`failureCode` `PROVIDER_REFUSED` /
+  > `PROVIDER_UNAVAILABLE`) ; plusieurs essais possibles. `GET payments/payments/{id}/` : payeur ou invité (jeton),
+  > jamais le bénéficiaire (C12) ; numéro masqué (`msisdnMasked`). La commande est verrouillée pendant l'initiation
+  > (un webhook très rapide attend l'enregistrement de la transaction). Webhook : commande verrouillée, paiement
+  > retrouvé par `provider` + transaction (créé s'il est inconnu), rejeu sans effet, écart de montant ou de devise →
+  > paiement `failed` (`AMOUNT_MISMATCH`) + `AuditLog` `payment.amount_mismatch` + 400 neutre. Refus du prestataire →
+  > `failed` (`DECLINED`). Exécution : commande `paid`, réservations confirmées, `Enrollment` `source=order` pour un
+  > parcours (sans champ `order` dans `learning`, pour ne pas toucher aux migrations d'API-L3a), kits retirés du
+  > panier du payeur, notification au parent (`/parent/commandes/<ref>`) ou SMS à l'invité, notification à
+  > l'apprenant. Paiement tardif honoré → `AuditLog` `payment.late_honored` ; sinon `Refund` + commande `refunded`
+  > + message au payeur. Remboursement : `refund()` du prestataire, sinon `Refund.processed=false` pour la Finance ;
+  > `AuditLog` `payment.refunded`. Invité : SMS de suivi à la création, lien `/boutique/commandes/<ref>#jeton=<jeton>`
+  > (jeton dans le fragment, jamais envoyé à un serveur). Réconciliation : paiements sans issue depuis 10 min ;
+  > sans transaction → `failed` (`INITIATION_LOST`).
+- [x] **API-L3b.2b** Facture · `feature/api-l3b-2b-facture` · PR #89
+  - [x] `Invoice` (`pdfStatus`, instantané), module `core/pdf.py` partagé avec les certificats (API-L3a.4, PR #69)
+  - [x] Tâche `generate_invoice_pdf` lancée par l'exécution post-paiement ; `GET payments/orders/{reference}/invoice/` (payeur seulement, invité par jeton, P7)
+  - [x] Mentions et TVA **paramétrables** (réglages), sans valeur légale inventée, en attendant P1 (MECeF) et P2 (TVA) de l'ADR 0005
+  - [x] Tests : facture refusée à l'apprenant bénéficiaire, numérotation sans trou
+  - [ ] **Écart** : format légal non validé (P1, P2). Tant que la comptabilité n'a pas répondu, le document reste un
+    « Reçu de paiement » non fiscal (`INVOICE_PROVISIONAL=true`) ; ne pas passer à `false` en production avant la
+    décision, ni livrer une facture normalisée sans l'interface `FiscalInvoiceProvider` prévue par l'ADR 0005
+  > Séparée de L3b.2 (tâche découverte) : elle dépendait de `core/pdf.py`, du stockage privé et de
+  > `DocumentSequence` (API-L3a.4). Décisions : facture émise une fois dans la transaction d'exécution post-paiement
+  > (y compris paiement tardif honoré), numéro `FAC-AAAA-NNNNNN` par `DocumentSequence("invoice", année)` (P3),
+  > fichier `invoices/<année>/<uuid>.pdf` dans le stockage privé, `snapshot` figé (vendeur, acheteur, lignes,
+  > sous-total, livraison, total, TVA, réseau et transaction, dates). Réglages : `INVOICE_PROVISIONAL` (vrai : titre
+  > « Reçu de paiement » et mention « document non fiscal »), `INVOICE_SELLER` (JSON ; seuls les champs renseignés
+  > sont imprimés, `{"name": "Steamy"}` par défaut), `INVOICE_VAT_RATE` (vide : aucune ventilation),
+  > `INVOICE_PRICES_INCLUDE_VAT`, `INVOICE_MENTIONS`. Téléchargement : parent payeur ou invité (jeton) ; apprenant,
+  > autre parent, enseignant → 404 ; PDF pas prêt → 409 `PDF_NOT_READY` ; 302 vers l'URL présignée de 5 min, ou le
+  > fichier sans stockage objet (CI). La commande du payeur expose `invoice{number, pdfStatus}`. Filet
+  > `retry_pending_invoices` (10 min) et action d'admin « Régénérer le PDF ». Avoir sur remboursement : P1.
+- [x] **API-L3b.3** Boutique · `feature/api-l3b-3-boutique` · PR #82
+  - [x] `Cart`/`CartItem`, `DeliveryAddress`, `RestockAlert` (`StockReservation` et `DeliveryZone` : L3b.1)
+  - [x] `shop/cart/*`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`
+  - [x] Tests : panier par utilisateur, alerte de réassort unique
+  > Décisions : panier et adresse pour le parent **et** l'apprenant (l'apprenant prépare la demande de kit qu'il
+  > enverra à son parent, L3b.5) ; enseignant → 403. `GET shop/cart/` → `{items[{id, kit, quantity, total}],
+  > count, subtotal}` (prix courants ; le total définitif est celui de la commande) ; `POST shop/cart/items/`
+  > `{kitSlug, quantity}` ajoute à la quantité présente (plafond 10), kit retiré → 404, en rupture → 409
+  > `OUT_OF_STOCK` ; `PATCH/DELETE shop/cart/items/{id}/` renvoient le panier. Le panier se vide des kits payés
+  > à l'exécution post-paiement (L3b.2). Adresse : `GET` → 404 tant qu'aucune n'est enregistrée ; `PUT` `{zoneId,
+  > recipientName, phone?, city, district?, addressLine}` ; route servie par `shop` sous `accounts/me/` (montée
+  > dans `project/urls.py`). Réassort : invité `{phone}` (CSRF, throttle `restock-alert` 10/h), parent prévenu
+  > par SMS sur le numéro du compte, apprenant par notification (`/apprenant/boutique/<slug>`) ; réponse
+  > `201 {ok: true}` identique si la demande existe déjà ; l'envoi part quand le stock repasse au-dessus de zéro
+  > (signal `post_save` du kit, tâche `notify_restock_alerts`), une seule fois par demande.
+- [x] **API-L3b.4** Kit Codes · `feature/api-l3b-4-kit-codes` · PR #85
+  - [x] Génération `STEAMY-XXXX-XXXX` (Crockford base32, `secrets`) à l'exécution post-paiement
+  - [x] `POST payments/kit-codes/redeem/` : normalisation, `KIT_CODE_NOT_COMPATIBLE`, consommation atomique, throttle utilisateur et IP (D35)
+  - [x] `Enrollment` `source=kit_code`
+  - [x] `kitCodes` dans la commande, visibles du payeur seul (reporté de L3b.1)
+  - [x] Tests : deux rachats concurrents → un seul succès
+  > Décisions : `KitCode` (`code`, `kit`, `orderItem`, `redeemedBy`, `redeemedCourse`, `redeemedAt`, `revokedAt`,
+  > permission `revoke_kitcode` de la matrice des groupes) ; un code par kit commandé, retiré au tirage en cas de
+  > collision. Saisie normalisée : casse, espaces et tirets indifférents, préfixe `STEAMY` facultatif, `O`→`0`,
+  > `I`/`L`→`1`. Rachat réservé à l'apprenant (`{code, courseSlug}`) : parcours inconnu → 404 `NOT_FOUND` ; code
+  > inconnu, mal formé ou révoqué → 400 `KIT_CODE_INVALID` ; parcours qui n'exige pas ce kit et n'est pas dans ses
+  > parcours compatibles → 400 `KIT_CODE_NOT_COMPATIBLE` ; déjà utilisé → 409 `KIT_CODE_ALREADY_USED` ; déjà inscrit →
+  > 200 sans consommer le code ; sinon 201 `{courseSlug, courseTitle, created}`. Code verrouillé
+  > (`select_for_update`) dans la transaction qui crée l'inscription. Throttles `kit-code` (10/h par apprenant) et
+  > `kit-code-ip` (30/h par IP). `kitCodes[{code, kitSlug, redeemed}]` dans la commande du payeur (parent ou
+  > invité), jamais dans celle du bénéficiaire.
+- [x] **API-L3b.5** Demandes de paiement · `feature/api-l3b-5-demandes-paiement` · PR #87
+  - [x] `PaymentRequest` ; `POST payments/payment-requests/` (montant recalculé), `…/{id}/resend/`, `GET`, `…/cancel/`, `…/decline/`
+  - [x] SMS au parent avec lien WPD15 ; tâche `expire_payment_requests` (7 j)
+  - [x] Commande `pay_payment_request <id>` (déplacée de L3b.0b) ; `Order.paymentRequest`, demande `paid` à l'exécution post-paiement
+  - [x] Tests : scoping enfant / parent
+  > Décisions : `POST` (apprenant) `{kind: course, courseSlug}` ou `{kind: kit, items[{kitSlug, quantity}]}` ;
+  > montant serveur hors livraison (le parent choisit l'adresse dans WPD15) ; kits figés dans `items` (`kitSlug`,
+  > `title`, `unitPrice`, `quantity`), stock non réservé (C10), kit en rupture → `OUT_OF_STOCK`. Codes de champ :
+  > `NOT_FOUND`, `COURSE_FREE`, `KIT_CODE_REQUIRED`, `ALREADY_ENROLLED`. Une demande en attente pour le même parcours
+  > est renvoyée (200, sans nouveau SMS). Parent prévenu par SMS (`/parent/demandes/<id>`) et notification. Renvoi
+  > (C4) : 3 envois au plus, espacés de 24 h, sinon 429 `THROTTLED` ; `nextResendAt` dit quand (ou `null`).
+  > Annulation (enfant) et refus (parent, enfant notifié sur `/apprenant/demandes/<id>`) : demande en attente
+  > seulement, sinon 409 `PAYMENT_REQUEST_CLOSED` (nouveau code). Lecture : l'enfant voit les siennes, le parent
+  > celles de ses enfants (404 sinon), avec `parentFirstName`, `learner`, `orderReference`. La demande est réglée
+  > par une commande qui la référence (`Order.paymentRequest`) ; le passage de `paymentRequestId` à
+  > `POST payments/orders/` reste à API-L4.2 (WPD15). Expiration horaire (`expire_payment_requests`, à la 45ᵉ minute).
+- [x] **API-L3b.6** Candidatures · `feature/api-l3b-6-candidatures` · PR #90
+  - [x] `EventApplication`, `EventTicket` consommé
+  - [x] `POST events/{slug}/applications/`, `GET events/applications/`, `GET events/tickets/`
+  - [x] Codes `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED`
+  - [x] Commande d'événement (WPD12) : place réservée à l'accord, confirmée au paiement, rendue à l'expiration ; paiement tardif (C17)
+  > Décisions : `EventApplication` (`event`, `learner`, `appliedBy`, `motivation`, `selfLevel` ∈ difficultés du
+  > catalogue, `status`, `ticket` (le ticket utilisé, `EventTicket.used_by` en sens inverse : « usedBy » de §3.4),
+  > `parentDecidedAt`, `refusalReason`) ; une seule candidature en cours par apprenant et par événement (contrainte).
+  > `seatsLeft` = capacité − places attribuées − candidatures `pending_payment` ou `accepted` (C3 : l'accord réserve,
+  > `pending_parent` ne réserve pas). Apprenant : `{motivation, selfLevel}` → `pending_parent`, parent notifié
+  > (`/parent/evenements`). Parent : `{childId, motivation?}` = accord (WPD12) → `accepted` si gratuit ou couvert par un
+  > ticket de l'enfant (le plus ancien libre), sinon `pending_payment` + commande `kind=event` (payée par
+  > `POST payments/orders/{reference}/payments/`, `orderReference` dans la candidature). Ticket réservé dès la
+  > candidature d'un événement payant (libre à nouveau si elle est refusée : à faire en API-L4.2). Événement non
+  > publié → 404 ; candidatures closes ou événement passé → 409 `EVENT_CLOSED` ; plus de place → 409 `EVENT_FULL`.
+  > Exécution post-paiement : candidature `accepted`, apprenant notifié (`/apprenant/evenements`). Commande expirée :
+  > candidature `cancelled` (« Paiement non abouti. »), place rendue ; paiement tardif honoré si une place reste et
+  > que l'enfant n'a pas recandidaté, sinon remboursé. `GET events/tickets/` (apprenant, non paginé) :
+  > `{id, courseSlug, courseTitle, createdAt, used, usedFor}`. Accepter / refuser une candidature de l'enfant :
+  > API-L4.2.
+- [x] **Critères de fin d'API-L3b** · `feature/api-l3b-criteres-fin` · PR #91
+  - [x] Tests prioritaires de la section « Points délicats » passants
+  - [x] Seed enrichi (commandes, kits en rupture…)
+  - [x] `make openapi` committé
+  > Seed (`apps/payments/demo.py`, appelé par `seed_demo`) : 3 zones de livraison du Bénin, adresse de Marie, une
+  > commande de kit payée par Marie pour Léa (expédiée, Kit Code, reçu), une demande de paiement de Léa en attente,
+  > une candidature de Léa à un événement payant (en attente de Marie, couverte par son ticket). Le kit en rupture
+  > existait déjà (L1.5). Reste ouvert : la validation du format des factures par la comptabilité (L3b.0a, P1/P2).
 
-### API-L4 · Espace parent — ⬜ à faire
-- [ ] **API-L4.1** Enfants · `feature/api-l4-1-enfants`
-  - [ ] `GET/POST accounts/children/` (consentement origine `parent`, D51)
-  - [ ] `GET/PATCH accounts/children/{id}/` (`publicDisplayAllowed` D15, progression et tentatives récentes)
-  - [ ] `POST …/password-reset/` (§8.9), `GET accounts/me/parent/`
-  - [ ] Tests : parent A ne lit ni ne modifie l'enfant de B (toutes les routes)
-- [ ] **API-L4.2** À valider · `feature/api-l4-2-a-valider`
-  - [ ] `GET accounts/pending-actions/` (D52)
-  - [ ] `POST events/applications/{id}/accept/` (payant → `PaymentRequest`/commande, D53), `…/refuse/`
-  - [ ] `POST payments/orders/` avec `paymentRequestId` (WPD15)
-  - [ ] Tests : l'apprenant ne peut pas accepter sa propre candidature
-- [ ] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions`
-  - [ ] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
-  - [ ] `CHILDREN_STILL_LINKED` (D54)
-  - [ ] Tâche `anonymize_due_accounts` (J+30, factures conservées, D40)
-  - [ ] Tests : anonymisation complète, factures intactes, identifiant libéré, annulation avant J+30, l'apprenant n'approuve pas sa propre suppression
-- [ ] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo`
-  - [ ] `GET accounts/children/{id}/weekly-report/?week=AAAA-Www`
-  - [ ] Tâche hebdomadaire `send_weekly_reports` (D55)
-- [ ] **API-L4.5** Changement de téléphone · `feature/api-l4-5-changement-telephone`
-  - [ ] `POST accounts/me/phone-change/`, `…/verify/` (OTP sur le nouveau numéro)
-  - [ ] Préférences parent
+### API-L4 · Espace parent — 🟡 en cours
+- [x] **API-L4.1** Enfants · `feature/api-l4-1-enfants` · PR #75, #80
+  - [x] `GET/POST accounts/children/` (consentement origine `parent`, D51)
+  - [x] `GET/PATCH accounts/children/{id}/` (`publicDisplayAllowed` D15)
+  - [x] Progression par parcours dans `GET accounts/children/{id}/` (`courses`, forme de `learning/enrollments/`) et `activeCourses` dans la liste · PR #80
+  - [x] Tentatives récentes (`recentAttempts`, 5 dernières) et nombre de badges dans `GET accounts/children/{id}/` · PR #80
+  - [x] `POST …/password-reset/` (§8.9), `GET accounts/me/parent/`
+  - [x] Tests : parent A ne lit ni ne modifie l'enfant de B (toutes les routes)
+  > Décisions : `children/` ne liste que les enfants rattachés (comptes anonymisés exclus) ; l'enfant « en attente »
+  > de WPD02 (D50) vient de `consent-requests/?status=pending`, sans lien encore. `PATCH` : prénom, nom, date de
+  > naissance (`AGE_OUT_OF_RANGE`, `BIRTHDATE_AGE_MISMATCH`), classe, localité, genre, handicap,
+  > `publicDisplayAllowed` ; identifiant et mot de passe ignorés. Genre, handicap et localité seulement dans le
+  > détail (D6). `me/parent/` : nom et lien de parenté, ni numéro ni email (WD22). Enum `UserStatusEnum` nommé
+  > dans le schéma (collision des `status`).
+- [x] **API-L4.2** À valider · `feature/api-l4-2-a-valider` · PR #79
+  - [x] `GET accounts/pending-actions/` (D52) : consentements et demandes de suppression
+  - [x] `pending-actions` : demandes de paiement et candidatures
+  - [x] `POST events/applications/{id}/accept/` (payant → commande d'événement, D53), `…/refuse/`
+  - [x] `POST payments/orders/` avec `paymentRequestId` (WPD15)
+  - [x] Tests : l'apprenant ne peut pas accepter sa propre candidature
+  > Décisions : `pending-actions/` renvoie une liste non paginée `{ type, id, childId, childFirstName,
+  > childLastName, createdAt, url }`, la plus récente d'abord ; `type` ∈ `consent`, `payment_request`,
+  > `event_application`, `deletion_request` (les 4 déclarés dès maintenant) ; `childId` nul pour un consentement
+  > (pas encore de lien) ; `url` = route du front (`/parent/consentements/<id>`,
+  > `/parent/enfants/<id>/supprimer?demande=<id>`, `/parent/demandes/<id>`, `/parent/evenements?candidature=<id>`). Chaque type est
+  > une source de `pending_actions.SOURCES`. Accepter un événement payant crée directement la commande d'événement
+  > du parent (`orderReference` dans la réponse, place réservée, confirmée au paiement) : pas de `PaymentRequest`
+  > intermédiaire, le parent étant déjà sur l’écran (D53 amendé le 2026-10-16). Refus : motif facultatif, ticket rendu, enfant notifié ; code
+  > `APPLICATION_ALREADY_RESOLVED` (409). Commande avec `paymentRequestId` : type, lignes et bénéficiaire tirés de la
+  > demande (seule l'adresse d'un kit est à fournir) ; `kind` et `items` deviennent facultatifs dans ce cas ;
+  > `PAYMENT_REQUEST_CLOSED` si la demande n'est plus en attente ; payée, la demande passe à `paid`.
+- [x] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions` · PR #77
+  - [x] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
+  - [x] `CHILDREN_STILL_LINKED` (D54)
+  - [x] Tâche `anonymize_due_accounts` (J+30, factures conservées, D40)
+  - [x] Tests : anonymisation complète, factures intactes, identifiant libéré, annulation avant J+30, l'apprenant n'approuve pas sa propre suppression
+  > Décisions : référentiel `DeletionReason` (`referentials/deletion-reasons/`, motif facultatif pour l'apprenant,
+  > obligatoire en WPD09). Statut `refused` ajouté (refus du parent, notifié à l'enfant) ; code
+  > `DELETION_ALREADY_RESOLVED` (409). `GET accounts/me/deletion-request/` (état de WD15) et
+  > `GET accounts/deletion-requests/` · `{id}/` (WPD09 `?demande=`). `POST children/{id}/deletion/` valide aussi la
+  > demande en attente de l'enfant ; `children/` expose `deletion` (`id`, `status`, `scheduledFor`). Le parent qui
+  > supprime son compte est désactivé et déconnecté aussitôt : l'annulation passe par le support (action d'admin à
+  > ajouter avec API-L6). Anonymisation : identifiants, nom, mot de passe, données du profil, notifications, OTP,
+  > instantanés des demandes de consentement ; la ligne `User` reste (commandes et factures). Les autres apps
+  > effacent leurs données sur le signal `account_anonymized` ; adresse de livraison, alertes de
+  > réassort et pseudonyme public sont effacés directement. Contraintes
+  > « identifiant par rôle » levées pour un compte anonymisé.
+- [x] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo` · PR #102
+  - [x] `GET accounts/children/{id}/weekly-report/?week=AAAA-Www`
+  - [x] Tâche hebdomadaire `send_weekly_reports` (D55)
+  > Décisions : semaine ISO, lundi → dimanche au fuseau du Bénin ; réponse `{ week, startDate, endDate,
+  > previousWeek, nextWeek (null pour la semaine en cours), seconds, missionsCompleted, quizzesPassed, days[7],
+  > courses, email }` ; `week` invalide → `fields.week` `INVALID`. Le lundi à 7 h, une notification
+  > « Progression » par enfant actif pour la semaine écoulée (`/parent/enfants/<id>/rapport?semaine=AAAA-Www`) ;
+  > l'email part si le parent a une adresse et n'a pas coupé l'email « Progression » (`notify`) ; relançable
+  > sans doublon (une notification par parent, enfant et semaine). **Un email par enfant** (D55 précisé le
+  > 2026-10-16). Années acceptées : 2000 à 9998.
+- [x] **API-L4.5** Changement de téléphone · `feature/api-l4-5-changement-telephone` · PR #78
+  - [x] `POST accounts/me/phone-change/`, `…/verify/` (OTP sur le nouveau numéro)
+  - [x] Préférences parent
+  > Décisions : `phone-change/` `{ phone, password }` exige le mot de passe actuel (`INVALID_CREDENTIALS`) ;
+  > `PHONE_TAKEN` (409) si le numéro est déjà pris, `PHONE_INVALID` si c'est le même ; renvoi par
+  > `auth/otp/resend/`. Le code validé remplace le numéro de connexion et suit dans les demandes de consentement
+  > encore ouvertes ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
+  > ajout du **Mobile Money préféré** (`ParentProfile.mobileMoney` `{ country, network, phone }`, réseau activé du
+  > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
+  > Reprise : chaîne #75 → #77 → #78 → #79 → #80 → #102 fusionnée ; suites de la relecture dans une PR de suivi
+  > (`feature/api-l4-suivi-revue`). Restent les critères de fin d'API-L4 (seed enrichi) et l'action d'admin pour
+  > annuler la suppression d'un compte parent.
 - [ ] **Critères de fin d'API-L4**
   - [ ] Un `childId` étranger → 404 partout
   - [ ] `Notification.url` pointe vers les routes front des plans
@@ -499,13 +668,17 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `…/members/`, `POST …/members/{memberId}/remove/`, `GET classrooms/courses/`, `…/{slug}/`
   - [x] Tests : enseignant A ne voit ni la classe ni les élèves de B, quota dépassé
   - [x] Seed D2 : offre de l'école de Koffi (3 parcours) et ses deux classes
+  - [x] Offre échue bloquée (C21) : `SCHOOL_OFFER_EXPIRED` à la création d'une classe
   > Décisions : la demande de consentement est reliée à la classe par `ClassroomMembership.consent_request`
   > (pas de champ `classroom` sur `ConsentRequest`) ; une invitation est un membre `invited` sans compte
   > apprenant. Quota d'élèves : élèves actifs distincts de l'école + invitations en attente non échues (C19).
   > Parcours figé dès que la classe a eu un membre (`VALIDATION_ERROR` sur `courseSlug`). Retirer une invitation
   > en attente annule la demande au parent. Progression, dernière activité et compteurs de missions terminées
   > (WT04, WT10) arrivent avec API-L5.3, après API-L3a. Énumérations `ConsentStatusEnum` et
-  > `MembershipStatusEnum` nommées dans `ENUM_NAME_OVERRIDES`.
+  > `MembershipStatusEnum` nommées dans `ENUM_NAME_OVERRIDES`. Sérialiseur de parcours nommé `ClassroomCourse`
+  > (`CourseSummary` est pris par `payments`).
+  > Offre échue (C21, 2026-10-16) : école bloquée, `SCHOOL_OFFER_EXPIRED` (403) à la création d'une classe ;
+  > `classrooms/school/` expose `offerExpired`.
 - [x] **API-L5.2** Invitations · `feature/api-l5-2-invitations` · PR #81
   - [x] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
   - [x] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; l'élève devient membre actif, l'enseignant est notifié
@@ -525,6 +698,12 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > enseignant, école, parcours) pour WPD05. Pas de plafond OTP par IP pour ces SMS : le plafond par enseignant le
   > remplace. Pas de champ `classroom` sur `Enrollment` (pas de migration `learning`) : la classe se retrouve par
   > `ClassroomMembership` ; l'inscription reste après un retrait de la classe (progression conservée).
+  > Relecture (#81) : CSV illisible (octet NUL, champ démesuré) → `IMPORT_INVALID_FILE` ; Excel lu en flux et borné
+  > (8 colonnes, arrêt à 202 lignes non vides ou 5 000 lignes parcourues → `IMPORT_TOO_LARGE`), XML lu par
+  > `defusedxml` ; `rows` limité à 200 ; noms comparés sans accents ; plafond par numéro de parent
+  > (`CLASSROOM_INVITATIONS_PER_PHONE_PER_DAY`, 5, code `INVITATION_DAILY_LIMIT`) ; `join_classroom` : invitation
+  > retirée, classe archivée ou membre déjà actif → `CONSENT_REQUEST_EXPIRED`, identifiant pris en concurrence →
+  > `USERNAME_TAKEN`. Offre échue (C21) : invitation, import et acceptation par le parent → `SCHOOL_OFFER_EXPIRED`.
 - [ ] **API-L5.3** Suivi · `feature/api-l5-3-suivi`
   - [ ] `GET classrooms/dashboard/`
   - [ ] `GET classrooms/learners/{id}/?classroomId=` (serializer sans handicap, localité, date de naissance, téléphone, D64)

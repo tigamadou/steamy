@@ -4,6 +4,7 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 from apps.core.views import health, presign_upload
+from apps.shop.views import DeliveryAddressView
 
 # try to use sidecar if available, otherwise fallback to standard SpectacularSwaggerView
 try:
@@ -20,6 +21,12 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # Apps
     path("api/auth/", include("apps.accounts.urls.auth")),
+    # Adresse de livraison : domaine `accounts/me/`, servie par la boutique (API-L3b.3)
+    path(
+        "api/accounts/me/delivery-address/",
+        DeliveryAddressView.as_view(),
+        name="accounts-delivery-address",
+    ),
     path("api/accounts/", include("apps.accounts.urls.accounts")),
     path("api/catalog/", include("apps.catalog.urls")),
     path("api/classrooms/", include("apps.classrooms.urls")),

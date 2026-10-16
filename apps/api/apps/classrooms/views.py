@@ -16,6 +16,7 @@ from rest_framework.response import Response
 from apps.accounts.fields import phone_country
 from apps.catalog.models import Course, Level, Project
 from apps.referentials.models import Relationship
+from libs.errors import ApiError
 from libs.permissions import IsTeacher
 
 from . import imports, services
@@ -158,6 +159,11 @@ class ClassroomViewSet(
         `ALREADY_IN_CLASSROOM`, `LEARNER_QUOTA_EXCEEDED`…). Plus de 200 lignes : `IMPORT_TOO_LARGE`.
         """
         classroom = self.get_object()
+        rows = request.data.get("rows")
+        if (
+            isinstance(rows, list) and len(rows) > imports.MAX_ROWS
+        ):  # avant toute validation ligne à ligne
+            raise ApiError("IMPORT_TOO_LARGE")
         payload = ImportRequestSerializer(data=request.data)
         payload.is_valid(raise_exception=True)
         if payload.validated_data.get("file"):

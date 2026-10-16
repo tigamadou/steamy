@@ -68,7 +68,7 @@ export function BarChart({
                   textAnchor="middle"
                   fontSize={9}
                   fontWeight={700}
-                  fill="var(--ink-500)"
+                  fill="var(--ink-600)"
                 >
                   {labels[i]}
                 </text>
