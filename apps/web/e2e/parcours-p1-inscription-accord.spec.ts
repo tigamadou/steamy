@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { uniquePhone } from "./support/api";
+import { logoutFromShell } from "./support/session";
 import {
   completeLearnerProfile,
   completeParentProfile,
@@ -41,7 +42,7 @@ test("P1 : l'enfant s'inscrit, son parent crée son compte et accepte, l'enfant 
   await completeLearnerProfile(page, "Kossi2026x");
   await page.getByRole("link", { name: "Aller sur mon tableau de bord" }).click();
   await expect(page).toHaveURL("/apprenant");
-  await page.getByRole("button", { name: "Se déconnecter" }).click();
+  await logoutFromShell(page);
   await expect(page).toHaveURL("/connexion");
   await page.getByRole("textbox", { name: /Identifiant ou numéro/ }).fill(username);
   await page.getByRole("textbox", { name: /^Mot de passe/ }).fill("Kossi2026x");
