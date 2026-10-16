@@ -5,7 +5,7 @@ Suppression de compte (D40, D54, §4.1) : désactivation immédiate, anonymisati
   (WPD01, WPD09) ; l'apprenant peut la retirer tant qu'elle attend.
 - Le parent supprime un enfant de lui-même (WPD09) et annule depuis WPD02 tant que l'anonymisation n'a pas eu lieu.
 - Le parent supprime son propre compte seulement sans enfant rattaché (`CHILDREN_STILL_LINKED`) ; désactivé
-  aussitôt, il ne peut plus se connecter : l'annulation passe par le support (admin Django).
+  aussitôt, il ne peut plus se connecter : l'annulation passe par le support (`cancel_by_support`, admin Django).
 - L'anonymisation efface les données personnelles et libère les identifiants ; la ligne `User` reste, et avec elle
   les commandes et factures (D40). Les autres apps effacent leurs propres données sur `account_anonymized`.
 """
@@ -137,6 +137,36 @@ def cancel_child(parent: User, child: User, request=None) -> None:
         audit("deletion.cancelled", actor=parent, target=child, request=request)
 
 
+def cancel_by_support(deletion: DeletionRequest, reason: str, request=None) -> bool:
+    """
+    Admin Django (support) : annule une suppression encore ouverte et réactive le compte désactivé par elle. Faux si
+    la demande est déjà close.
+    """
+    with transaction.atomic():
+        deletion = (
+            DeletionRequest.objects.select_for_update()
+            .select_related("user")
+            .filter(pk=deletion.pk, status__in=DeletionRequest.OPEN_STATUSES)
+            .first()
+        )
+        if deletion is None:
+            return False
+        deletion.status = Status.CANCELLED
+        deletion.resolved_at = timezone.now()
+        deletion.save()
+        user = deletion.user
+        if user.status == User.Status.DEACTIVATED:
+            user.status = User.Status.ACTIVE
+            user.save(update_fields=["status", "updated_at"])
+        audit(
+            "deletion.cancelled_by_support",
+            target=user,
+            data={"reason": reason},
+            request=request,
+        )
+    return True
+
+
 def requests_for_parent(parent: User):
     """Demandes de suppression des enfants du parent."""
     return DeletionRequest.objects.filter(user__in=children_of(parent)).select_related(
@@ -231,10 +261,17 @@ def anonymize_due() -> int:
             .select_related("user")
             .filter(status=Status.SCHEDULED, scheduled_for__lte=timezone.now())
         )
+        done = 0
         for deletion in due:
+            deletion.resolved_at = timezone.now()
+            if deletion.user.status != User.Status.DEACTIVATED:
+                # Compte réactivé à la main entre-temps (admin) : la suppression n'a plus lieu d'être
+                deletion.status = Status.CANCELLED
+                deletion.save()
+                continue
             anonymize(deletion.user)
             deletion.status = Status.DONE
-            deletion.resolved_at = timezone.now()
             deletion.save()
             audit("deletion.done", target=deletion.user)
-    return len(due)
+            done += 1
+    return done

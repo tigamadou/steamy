@@ -587,7 +587,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > une candidature de Léa à un événement payant (en attente de Marie, couverte par son ticket). Le kit en rupture
   > existait déjà (L1.5). Reste ouvert : la validation du format des factures par la comptabilité (L3b.0a, P1/P2).
 
-### API-L4 · Espace parent — 🟡 en cours
+### API-L4 · Espace parent — ✅ terminé
 - [x] **API-L4.1** Enfants · `feature/api-l4-1-enfants` · PR #75, #80
   - [x] `GET/POST accounts/children/` (consentement origine `parent`, D51)
   - [x] `GET/PATCH accounts/children/{id}/` (`publicDisplayAllowed` D15)
@@ -653,13 +653,14 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > encore ouvertes ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
   > ajout du **Mobile Money préféré** (`ParentProfile.mobileMoney` `{ country, network, phone }`, réseau activé du
   > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
-  > Reprise : chaîne #75 → #77 → #78 → #79 → #80 → #102 fusionnée ; suites de la relecture dans une PR de suivi
-  > (`feature/api-l4-suivi-revue`). Restent les critères de fin d'API-L4 (seed enrichi) et l'action d'admin pour
-  > annuler la suppression d'un compte parent.
-- [ ] **Critères de fin d'API-L4**
-  - [ ] Un `childId` étranger → 404 partout
-  - [ ] `Notification.url` pointe vers les routes front des plans
-  - [ ] Seed enrichi, `make openapi` committé
+  > Suites : relecture (#104) ; fin d'API-L4 (PR #105) : jeu de démonstration, annulation d'une suppression par le
+  > support (admin `DeletionRequest`, permission `cancel_deletion`, Super-admin et Support ; un compte réactivé à la
+  > main n'est jamais anonymisé), rapport hebdomadaire réservé dans `WeeklyReportSent` (contrainte d'unicité),
+  > `previousWeek` nul à la borne de 2000.
+- [x] **Critères de fin d'API-L4** · PR #105
+  - [x] Un `childId` étranger → 404 partout
+  - [x] `Notification.url` pointe vers les routes front des plans
+  - [x] Seed enrichi, `make openapi` committé
 
 ### API-L5 · Enseignant et classes — ⬜ à faire
 - [ ] **API-L5.1** Classes · `feature/api-l5-1-classes`

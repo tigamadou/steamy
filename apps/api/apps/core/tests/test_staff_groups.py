@@ -37,6 +37,7 @@ FROZEN = {
     "accounts.parentchildlink": {SA: ("v", "change_parent"), SU: ("v", "change_parent")},
     "accounts.parentprofile": {SA: ("vac",), SU: ("vc",), FI: ("v",)},
     "accounts.publicprofilereview": {SA: ("vc",), SU: ("vc",)},
+    "accounts.deletionrequest": {SA: ("v", "cancel_deletion"), SU: ("v", "cancel_deletion")},
     "accounts.staffmember": {SA: ("vacd",)},
     "accounts.teacherprofile": {SA: ("vac",), SU: ("vc",), FI: ("v",)},
     "accounts.user": {SA: ("vac",), SU: USER_SUPPORT, FI: ("v",)},

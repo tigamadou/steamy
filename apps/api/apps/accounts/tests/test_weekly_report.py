@@ -11,7 +11,7 @@ from django.core.management import call_command
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from apps.accounts.models import ParentChildLink, User
+from apps.accounts.models import ParentChildLink, User, WeeklyReportSent
 from apps.accounts.tasks import send_weekly_reports
 from apps.accounts.tests.factories import LearnerFactory, ParentFactory
 from apps.accounts.weekly_report import week_code
@@ -115,6 +115,15 @@ def test_invalid_week(parent, week):
     assert resp.json()["fields"]["week"][0]["code"] == "INVALID"
 
 
+@pytest.mark.parametrize(
+    ("week", "previous"), [("2000-W01", None), ("2000-W02", "2000-W01"), ("9998-W52", "9998-W51")]
+)
+def test_limit_years_are_accepted(parent, week, previous):
+    body = as_user(parent).get(url(link(parent), week)).json()
+    assert body["week"] == week
+    assert body["previousWeek"] == previous
+
+
 def test_another_parents_child_is_not_found(parent):
     other = link(ParentFactory())
     assert as_user(parent).get(url(other)).status_code == 404
@@ -149,3 +158,13 @@ def test_monday_sends_the_previous_week_in_app_and_by_email(parent, monkeypatch)
     call_command("send_weekly_reports")
     assert Notification.objects.filter(type="weekly_report").count() == 2
     assert len(mail.outbox) == 1
+    sent = WeeklyReportSent.objects.get(parent=parent)
+    assert str(sent).startswith(f"Rapport {week_code(last_monday)}")
+
+
+def test_a_reserved_report_is_not_sent_again(parent):
+    child = link(parent)
+    last_monday = timezone.localdate() - timedelta(days=timezone.localdate().weekday() + 7)
+    WeeklyReportSent.objects.create(parent=parent, child=child, week=week_code(last_monday))
+    assert send_weekly_reports() == 0
+    assert not Notification.objects.filter(type="weekly_report").exists()

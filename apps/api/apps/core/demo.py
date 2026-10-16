@@ -13,6 +13,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from django.utils import timezone
 
+from apps.accounts.demo import seed_parent_space
 from apps.accounts.models import (
     LearnerProfile,
     ParentChildLink,
@@ -828,4 +829,5 @@ def seed_all() -> dict[str, User]:
     seed_learning(accounts)
     seed_impact(accounts)
     seed_commerce(accounts)
+    accounts["noe"] = seed_parent_space(accounts, DEMO_PASSWORD)
     return accounts
