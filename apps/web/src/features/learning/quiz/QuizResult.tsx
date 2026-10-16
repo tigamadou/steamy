@@ -12,7 +12,7 @@ import { routes } from "@/lib/routes";
 
 import { readContent } from "../content";
 import { LockedContentState } from "../LockedContentState";
-import { AttemptStatusBadge } from "./AttemptStatusBadge";
+import { AttemptStatusBadge } from "@/components/ds/AttemptStatusBadge";
 import { QuestionReview } from "./QuestionReview";
 
 export type Attempt = Schemas["AttemptDetail"];
@@ -28,17 +28,23 @@ export function badgeHref(attempt: Attempt): string {
 }
 
 /**
- * WJ05 (réussite) / WJ08 (échec) · Un seul écran paramétré par `kind`, `threshold`, `passed` et `status` de l'API,
+ * WJ05 (réussite) / WJ08 (échec), et détail d'une tentative de l'historique (WD08) · Un seul écran paramétré par `kind`, `threshold`, `passed` et `status` de l'API,
  * affichés tels quels (D31). Réessai d'une sommative : compte à rebours sur `retryInSec` (D32).
  */
-export function AttemptSummary({ attempt }: { attempt: Attempt }) {
+export function AttemptSummary({ attempt, history = false }: { attempt: Attempt; history?: boolean }) {
   const { quiz } = attempt;
   const summative = quiz.kind === "summative";
   const retryHref = routes.learner.quiz(quiz.courseSlug, quiz.id);
-  const reviewHref =
-    quiz.levelId === null
-      ? routes.learner.project(quiz.courseSlug, quiz.projectId)
-      : routes.learner.level(quiz.courseSlug, quiz.levelId);
+  // Résultat juste après l'envoi : revoir le niveau ou le projet ; historique (WD08) : voir le parcours
+  const review = history
+    ? { label: "Voir le parcours", href: routes.learner.course(quiz.courseSlug) }
+    : {
+        label: summative ? "Revoir le projet" : "Revoir le niveau",
+        href:
+          quiz.levelId === null
+            ? routes.learner.project(quiz.courseSlug, quiz.projectId)
+            : routes.learner.level(quiz.courseSlug, quiz.levelId),
+      };
   return (
     <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
       <div className="flex min-w-0 flex-col gap-5">
@@ -94,17 +100,17 @@ export function AttemptSummary({ attempt }: { attempt: Attempt }) {
             <h3 className="m-0 text-lg font-black text-ink-900">Bien joué !</h3>
             <p className="m-0 text-sm font-semibold text-ink-600">
               {summative ? "Tu as validé le projet." : "Tu as validé le niveau."}
-              {attempt.badge && " Un nouveau badge t'attend."}
+              {attempt.badge && !history && " Un nouveau badge t'attend."}
             </p>
             {attempt.pointsEarned > 0 && <Badge tone="amber">+{attempt.pointsEarned} points</Badge>}
             <div className="flex w-full flex-col gap-2">
-              {attempt.badge && (
+              {attempt.badge && !history && (
                 <Button href={badgeHref(attempt)} variant="secondary" block>
                   Voir mon badge
                 </Button>
               )}
-              <Button href={reviewHref} variant="outline" block>
-                {summative ? "Revoir le projet" : "Revoir le niveau"}
+              <Button href={review.href} variant="outline" block>
+                {review.label}
               </Button>
             </div>
           </>
@@ -122,8 +128,8 @@ export function AttemptSummary({ attempt }: { attempt: Attempt }) {
                   Réessayer le quiz
                 </Button>
               )}
-              <Button href={reviewHref} variant="outline" block>
-                {summative ? "Revoir le projet" : "Revoir le niveau"}
+              <Button href={review.href} variant="outline" block>
+                {review.label}
               </Button>
             </div>
           </>

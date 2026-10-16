@@ -81,13 +81,14 @@ Statut : 🟡 en cours · Prochaine tâche : 3.3c, 3.4 · Prérequis : API-1 et 
   - [x] WJ07 certification obtenue (PDF avec état « Préparation… », ticket derrière le drapeau `events` jusqu'à 3.8)
   - [x] WJ09 certification non obtenue (projets ou missions restants)
   - [x] Test unitaire `CertificateView` : réponse d'API affichée telle quelle
-- [ ] **3.4** Tentatives et progression (requiert API-L3a) · `feature/lot3-tentatives-progression`
-  - [ ] WD07 liste des tentatives (bandeau, filtres et tri dans l'URL)
-  - [ ] WD09 liste vide (renvoi vers WD23)
-  - [ ] WD08 détail d'une tentative (corrigé, concepts, `RetryCountdown`)
-  - [ ] WD21 progression (`WeeklyActivityBars`, maîtrise par catégorie, recommandations)
-  - [ ] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
-  - [ ] Tests unitaires : statut issu du serveur affiché tel quel (D31)
+- [x] **3.4** Tentatives et progression (requiert API-L3a) · `feature/lot3-tentatives-progression` · PR #—
+  - [x] WD07 liste des tentatives (bandeau, filtres et tri dans l'URL)
+  - [x] WD09 liste vide (renvoi vers WD23)
+  - [x] WD08 détail d'une tentative (corrigé, concepts, `RetryCountdown`)
+  - [x] WD21 progression (`WeeklyActivityBars`, maîtrise par catégorie, recommandations)
+  - [x] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
+  - [x] Tests unitaires : statut issu du serveur affiché tel quel (D31)
+  - [x] Parcours Playwright : filtre dans l'URL, détail, apprenant sans quiz, progression
 - [ ] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres`
   - [ ] WD13 profil (hub de `SettingsRow`, identifiant en lecture seule)
   - [ ] WD17 modification du profil (`ProfileForm`, `AvatarPicker`, `GoalChip`)

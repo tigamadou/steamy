@@ -63,9 +63,9 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WD04` | Notifications · liste | 3 |  |  |
 | `WD05` | Notifications · vide | 3 |  |  |
 | `WD06` | Notifications · paramètres | 3 |  |  |
-| `WD07` | Tentatives de quiz · liste | 3 |  |  |
-| `WD08` | Tentatives de quiz · détail | 3 |  |  |
-| `WD09` | Tentatives de quiz · vide | 3 |  |  |
+| `WD07` | Tentatives de quiz · liste | 3 | Bandeau de l'API, filtre par statut dans l'URL (rechargement) | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
+| `WD08` | Tentatives de quiz · détail | 3 | Détail : score, seuil appliqué, « Voir le parcours » | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
+| `WD09` | Tentatives de quiz · vide | 3 | Nouvel apprenant sans quiz → Mes parcours | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD10` | Steamy Events | 3 |  |  |
 | `WD11` | Demande de participation | 3 |  |  |
 | `WD12` | Aide & support | 3 |  |  |
@@ -76,7 +76,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WD17` | Éditer le profil | 3 |  |  |
 | `WD18` | Modifier la connexion | 3 |  |  |
 | `WD19` | Informations de livraison | 3 |  |  |
-| `WD21` | Progression & recommandations | 3 |  |  |
+| `WD21` | Progression & recommandations | 3 | Semaine, histogramme accessible, maîtrise par catégorie | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD22` | Infos de mon parent | 3 |  |  |
 | `WC01` | Par défaut | 3 |  |  |
 | `WC02` | Filtré (Robotique · Débutant) | 3 |  |  |
