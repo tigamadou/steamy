@@ -58,7 +58,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.4 et 6.5 (admin Django) ; 6.2 apr
   - [ ] Tests : Contenu et Finance sans accès aux consentements ni champs sensibles ; Support sans genre/handicap sans permission
   - [ ] Tests : invitation enseignant crée une `TeacherInvitation` et aucun `User` actif ; dernier Super-admin non supprimable ; changement de parent sans acceptation = lien inchangé
   - [ ] Recette sur le jeu D2 : retrouver Léa Adjovi, voir son parent et ses consentements, relancer une demande, inviter un enseignant rattaché à une école
-- [x] **6.3** Contenu des parcours · `feature/lot6-contenu-parcours` · PR #PR63 (requiert 6.1, API-L1, API-L3a)
+- [x] **6.3** Contenu des parcours · `feature/lot6-contenu-parcours` · PR #113 (requiert 6.1, API-L1, API-L3a)
   - [x] WAD09 Contenu (admin Django) : `CourseAdmin` (colonnes, filtres, slug prérempli, couverture S3, `trailerVimeoId`)
   - [x] Hiérarchie par inlines chaînés : `Project` dans `Course`, `Level` dans `Project`, `Mission` dans `Level` (fil d'Ariane, ordre éditable)
   - [x] `QuizAdmin` + `Question`, `QuestionAdmin` + `Choice` ; contrainte « exactement un de `level` / `project` » en `clean()` et `CheckConstraint`, seuils 70 / 80
