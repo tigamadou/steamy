@@ -343,8 +343,9 @@ SPECTACULAR_SETTINGS = {
         "KpiStatusEnum": "apps.impact.status.STATUS_CODES",
         "KpiToneEnum": "apps.impact.status.TONES",
         "ImpactReportStatusEnum": "apps.impact.models.ImpactReport.Status",
-        # État de génération d'un document (certificat, facture, export de rapport) : mêmes choix partout
-        "DocumentStatusEnum": "apps.impact.models.ReportExport.Status",
+        # État de génération d'un document (certificat, facture, export de rapport) : mêmes choix partout, nom
+        # historique conservé (le front l'emploie)
+        "PdfStatusEnum": "apps.impact.models.ReportExport.Status",
         # `source` des inscriptions garde son nom face à `KpiSourceEnum`
         "SourceEnum": "apps.learning.models.Enrollment.Source",
         "KpiSourceEnum": "apps.impact.models.KpiDefinition.Source",

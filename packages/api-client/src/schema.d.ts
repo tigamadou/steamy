@@ -2424,7 +2424,7 @@ export interface components {
              *     * `ready` - Prêt
              *     * `failed` - Échec
              */
-            pdfStatus: components["schemas"]["DocumentStatusEnum"];
+            pdfStatus: components["schemas"]["PdfStatusEnum"];
         };
         /** @description Conditions D33 (100 % des missions, toutes les sommatives réussies), certificat et ticket (WJ07, WJ09). */
         Certification: {
@@ -2840,13 +2840,6 @@ export interface components {
             /** Libellé */
             label: string;
         };
-        /**
-         * @description * `pending` - En préparation
-         *     * `ready` - Prêt
-         *     * `failed` - Échec
-         * @enum {string}
-         */
-        DocumentStatusEnum: "pending" | "ready" | "failed";
         EmailChangeRequest: {
             password: string;
             /** Format: email */
@@ -3079,7 +3072,7 @@ export interface components {
         ImpactReportStatusEnum: "draft" | "submitted";
         InvoiceSummary: {
             number: string;
-            pdfStatus: components["schemas"]["DocumentStatusEnum"];
+            pdfStatus: components["schemas"]["PdfStatusEnum"];
         };
         Kit: {
             slug: string;
@@ -4190,6 +4183,13 @@ export interface components {
          * @enum {string}
          */
         PaymentStatusEnum: "initiated" | "pending" | "succeeded" | "failed";
+        /**
+         * @description * `pending` - En préparation
+         *     * `ready` - Prêt
+         *     * `failed` - Échec
+         * @enum {string}
+         */
+        PdfStatusEnum: "pending" | "ready" | "failed";
         PendingAction: {
             type: components["schemas"]["PendingActionTypeEnum"];
             /** @description Identifiant de la demande, dans son type */
@@ -4466,7 +4466,7 @@ export interface components {
             /** @description 2026-t1 */
             period: string;
             format: components["schemas"]["FormatEnum"];
-            status: components["schemas"]["DocumentStatusEnum"];
+            status: components["schemas"]["PdfStatusEnum"];
             /** Format: date-time */
             createdAt: string;
             /** @description Chemin de téléchargement sur l'API, une fois l'export prêt (redirige vers une URL présignée) */

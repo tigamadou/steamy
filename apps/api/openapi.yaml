@@ -6574,7 +6574,7 @@ components:
           format: date-time
         pdfStatus:
           allOf:
-          - $ref: '#/components/schemas/DocumentStatusEnum'
+          - $ref: '#/components/schemas/PdfStatusEnum'
           description: |-
             `pending` : « Préparation… », interroger de nouveau ; `failed` : échec signalé au Support
 
@@ -7678,16 +7678,6 @@ components:
       - code
       - id
       - label
-    DocumentStatusEnum:
-      enum:
-      - pending
-      - ready
-      - failed
-      type: string
-      description: |-
-        * `pending` - En préparation
-        * `ready` - Prêt
-        * `failed` - Échec
     EmailChangeRequest:
       type: object
       properties:
@@ -8199,7 +8189,7 @@ components:
         number:
           type: string
         pdfStatus:
-          $ref: '#/components/schemas/DocumentStatusEnum'
+          $ref: '#/components/schemas/PdfStatusEnum'
       required:
       - number
       - pdfStatus
@@ -10690,6 +10680,16 @@ components:
         * `pending` - En attente de validation
         * `succeeded` - Réussi
         * `failed` - Échoué
+    PdfStatusEnum:
+      enum:
+      - pending
+      - ready
+      - failed
+      type: string
+      description: |-
+        * `pending` - En préparation
+        * `ready` - Prêt
+        * `failed` - Échec
     PendingAction:
       type: object
       properties:
@@ -11341,7 +11341,7 @@ components:
         format:
           $ref: '#/components/schemas/FormatEnum'
         status:
-          $ref: '#/components/schemas/DocumentStatusEnum'
+          $ref: '#/components/schemas/PdfStatusEnum'
         createdAt:
           type: string
           format: date-time

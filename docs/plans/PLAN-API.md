@@ -748,7 +748,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `downloadPath` une fois prêt ; export visible de son seul demandeur (404 sinon). CSV pour tableur français (`;`,
   > BOM UTF-8, virgule décimale, dates `jj/mm/aaaa`). Réessais exponentiels, puis `failed` ; code `EXPORT_NOT_READY`
   > (409). Pas de notification en fin d'export : le personnel n'a pas de centre de notifications, WAD04 interroge
-  > l'état et annonce le fichier prêt. Énumération partagée `DocumentStatusEnum` (certificats, factures, exports).
+  > l'état et annonce le fichier prêt. Énumération partagée `PdfStatusEnum` (certificats, factures, exports).
 - [ ] **Critères de fin d'API-L6**
   - [ ] Toutes les routes `backoffice/` protégées par `IsStaffVerified`
   - [ ] Seed enrichi, `make openapi` committé
