@@ -588,10 +588,11 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > existait déjà (L1.5). Reste ouvert : la validation du format des factures par la comptabilité (L3b.0a, P1/P2).
 
 ### API-L4 · Espace parent — 🟡 en cours
-- [ ] **API-L4.1** Enfants · `feature/api-l4-1-enfants` · PR #75
+- [x] **API-L4.1** Enfants · `feature/api-l4-1-enfants` · PR #75, #80
   - [x] `GET/POST accounts/children/` (consentement origine `parent`, D51)
   - [x] `GET/PATCH accounts/children/{id}/` (`publicDisplayAllowed` D15)
-  - [ ] Progression par parcours et tentatives récentes dans `GET accounts/children/{id}/` (attend API-L3a.1 et L3a.2)
+  - [x] Progression par parcours dans `GET accounts/children/{id}/` (`courses`, forme de `learning/enrollments/`) et `activeCourses` dans la liste · PR #80
+  - [x] Tentatives récentes (`recentAttempts`, 5 dernières) et nombre de badges dans `GET accounts/children/{id}/` · PR #80
   - [x] `POST …/password-reset/` (§8.9), `GET accounts/me/parent/`
   - [x] Tests : parent A ne lit ni ne modifie l'enfant de B (toutes les routes)
   > Décisions : `children/` ne liste que les enfants rattachés (comptes anonymisés exclus) ; l'enfant « en attente »
@@ -645,6 +646,8 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > reçues ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
   > ajout du **Mobile Money préféré** (`ParentProfile.mobileMoney` `{ country, network, phone }`, réseau activé du
   > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
+  > Reprise : PR en chaîne #75 → #77 → #78 → #79 → #80 (fusion dans cet ordre), puis L4.4. Restent les
+  > critères de fin d'API-L4 (seed enrichi).
 - [ ] **Critères de fin d'API-L4**
   - [ ] Un `childId` étranger → 404 partout
   - [ ] `Notification.url` pointe vers les routes front des plans

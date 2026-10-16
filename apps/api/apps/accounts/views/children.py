@@ -6,6 +6,7 @@ Toute route `children/{id}/` passe par le lien parent ↔ enfant du parent conne
 """
 
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_field
 from rest_framework import mixins, serializers, status, viewsets
@@ -19,6 +20,10 @@ from apps.accounts import signup as signup_service
 from apps.accounts.fields import PasswordField
 from apps.accounts.models import DeletionRequest, Gender, ParentChildLink, User
 from apps.accounts.profile import ProfileStep, profile_step
+from apps.learning.models import Enrollment, LearnerBadge, QuizAttempt
+from apps.learning.progression import Progression
+from apps.learning.serializers import AttemptListItemSerializer, EnrollmentSerializer
+from apps.learning.views import attempt_item, enrollment_payload
 from apps.referentials.models import Disability, Relationship, SchoolGrade
 from apps.referentials.serializers import (
     AvatarSerializer,
@@ -34,6 +39,9 @@ from libs.permissions import IsLearner, IsParent
 from .deletion import ChildDeletionSerializer
 from .learner_signup import UsernameField
 from .profiles import age_on, check_birth_date, code_field, locality_field
+
+#: Tentatives affichées dans WPD03.
+RECENT_ATTEMPTS = 5
 
 # --- Lecture ------------------------------------------------------------------------------------
 
@@ -64,6 +72,9 @@ class ChildSerializer(serializers.ModelSerializer):
     )
     created_at = serializers.DateTimeField(source="date_joined", read_only=True)
     deletion = serializers.SerializerMethodField()
+    active_courses = serializers.IntegerField(
+        read_only=True, help_text="Parcours en cours (WPD01, stat « Parcours en cours »)"
+    )
 
     class Meta:
         model = User
@@ -83,6 +94,7 @@ class ChildSerializer(serializers.ModelSerializer):
             "profile_step",
             "created_at",
             "deletion",
+            "active_courses",
         )
         read_only_fields = fields
 
@@ -122,9 +134,21 @@ class ChildDetailSerializer(ChildSerializer):
         help_text="Opt-in parental à l'affichage public (pseudonyme et avatar, D15)",
     )
 
+    courses = serializers.SerializerMethodField(
+        help_text="Progression par parcours (WPD03), la plus récente activité d'abord"
+    )
+
+    recent_attempts = serializers.SerializerMethodField(
+        help_text=f"{RECENT_ATTEMPTS} dernières tentatives de quiz (WPD03, statut serveur D31)"
+    )
+    badges = serializers.SerializerMethodField(help_text="Nombre de badges obtenus (WPD03)")
+
     class Meta(ChildSerializer.Meta):
         fields = (
             *ChildSerializer.Meta.fields,
+            "courses",
+            "recent_attempts",
+            "badges",
             "birth_date",
             "gender",
             "disability",
@@ -133,6 +157,24 @@ class ChildDetailSerializer(ChildSerializer):
             "public_display_allowed",
         )
         read_only_fields = fields
+
+    @extend_schema_field(EnrollmentSerializer(many=True))
+    def get_courses(self, child):
+        enrollments = Enrollment.objects.filter(learner=child).order_by(
+            F("last_activity_at").desc(nulls_last=True), "-created_at", "-id"
+        )
+        payload = [enrollment_payload(e, Progression(e)) for e in enrollments]
+        return EnrollmentSerializer(payload, many=True).data
+
+    @extend_schema_field(AttemptListItemSerializer(many=True))
+    def get_recent_attempts(self, child):
+        attempts = QuizAttempt.objects.filter(learner=child).select_related(
+            "quiz__level__project", "quiz__project", "enrollment__course"
+        )[:RECENT_ATTEMPTS]
+        return AttemptListItemSerializer([attempt_item(a) for a in attempts], many=True).data
+
+    def get_badges(self, child) -> int:
+        return LearnerBadge.objects.filter(learner=child).count()
 
 
 # --- Écriture -----------------------------------------------------------------------------------

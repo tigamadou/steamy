@@ -7,7 +7,7 @@ Le parent qui crée un enfant (WPD04) est l'auteur de la demande : elle est cré
 """
 
 from django.db import IntegrityError, transaction
-from django.db.models import Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.utils import timezone
 
 from apps.core.audit import audit
@@ -22,6 +22,7 @@ def children_of(parent: User):
     return (
         User.objects.filter(role=User.Role.LEARNER, parent_link__parent=parent)
         .exclude(status=User.Status.ANONYMIZED)
+        .annotate(active_courses=Count("enrollments", filter=Q(enrollments__status="active")))
         .select_related(
             "parent_link__relationship",
             "learner_profile__avatar",

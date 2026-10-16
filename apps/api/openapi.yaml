@@ -6487,7 +6487,12 @@ components:
           - $ref: '#/components/schemas/ChildDeletionState'
           nullable: true
           readOnly: true
+        activeCourses:
+          type: integer
+          readOnly: true
+          description: Parcours en cours (WPD01, stat « Parcours en cours »)
       required:
+      - activeCourses
       - age
       - avatar
       - createdAt
@@ -6646,6 +6651,27 @@ components:
           - $ref: '#/components/schemas/ChildDeletionState'
           nullable: true
           readOnly: true
+        activeCourses:
+          type: integer
+          readOnly: true
+          description: Parcours en cours (WPD01, stat « Parcours en cours »)
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Enrollment'
+          readOnly: true
+          description: Progression par parcours (WPD03), la plus récente activité
+            d'abord
+        recentAttempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttemptListItem'
+          readOnly: true
+          description: 5 dernières tentatives de quiz (WPD03, statut serveur D31)
+        badges:
+          type: integer
+          readOnly: true
+          description: Nombre de badges obtenus (WPD03)
         birthDate:
           type: string
           format: date
@@ -6677,9 +6703,12 @@ components:
           description: Opt-in parental à l'affichage public (pseudonyme et avatar,
             D15)
       required:
+      - activeCourses
       - age
       - avatar
+      - badges
       - birthDate
+      - courses
       - createdAt
       - deletion
       - disability
@@ -6693,6 +6722,7 @@ components:
       - profileStep
       - publicDisplayAllowed
       - rank
+      - recentAttempts
       - relationship
       - schoolGrade
       - status
