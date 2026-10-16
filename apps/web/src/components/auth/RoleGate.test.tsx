@@ -35,4 +35,11 @@ describe("RoleGate", () => {
     getCurrentUser.mockResolvedValue({ role: "learner", profileStep: null });
     await expect(RoleGate({ role: "parent", children: null })).rejects.toThrow("redirect:/apprenant");
   });
+
+  it("renvoie vers l'étape de profil restante un utilisateur au profil incomplet", async () => {
+    getCurrentUser.mockResolvedValue({ role: "learner", profileStep: "learner-school" });
+    await expect(RoleGate({ role: "learner", children: null })).rejects.toThrow(
+      "redirect:/inscription/apprenant/profil/ecole",
+    );
+  });
 });

@@ -10,10 +10,10 @@ vi.mock("@/components/auth/SpaceWaiting", () => ({ SpaceWaiting: () => null }));
 type Gate = ReactElement<{ fallback: ReactElement; children: ReactElement<{ role: string; children: unknown }> }>;
 
 describe.each([
-  ["apprenant", "learner", () => import("./(apprenant)/layout"), () => import("./(apprenant)/apprenant/page")],
-  ["parent", "parent", () => import("./(parent)/layout"), () => import("./(parent)/parent/page")],
-  ["enseignant", "teacher", () => import("./(enseignant)/layout"), () => import("./(enseignant)/enseignant/page")],
-] as const)("espace %s", (_, role, layout, page) => {
+  ["apprenant", "learner", () => import("./(apprenant)/layout")],
+  ["parent", "parent", () => import("./(parent)/layout")],
+  ["enseignant", "teacher", () => import("./(enseignant)/layout")],
+] as const)("espace %s", (_, role, layout) => {
   it("garde l'espace par le rôle, sous Suspense", async () => {
     const { default: Layout } = await layout();
     const tree = Layout({ children: "contenu" } as never) as Gate;
@@ -21,7 +21,12 @@ describe.each([
     expect(tree.props.children.type).toBe(RoleGate);
     expect(tree.props.children.props).toEqual({ role, children: "contenu" });
   });
+});
 
+describe.each([
+  ["parent", "parent", () => import("./(parent)/parent/page")],
+  ["enseignant", "teacher", () => import("./(enseignant)/enseignant/page")],
+] as const)("espace %s en attente de son lot", (_, role, page) => {
   it("affiche la page d'attente du rôle", async () => {
     const { default: Page } = await page();
     const tree = Page() as ReactElement<{ role: string }>;
