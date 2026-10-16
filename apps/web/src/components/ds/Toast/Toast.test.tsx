@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -35,6 +35,34 @@ describe("Toast", () => {
     expect(close).toHaveFocus();
     await user.keyboard("{Enter}");
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("signale survol et focus pour suspendre sa disparition", () => {
+    const onHoldChange = vi.fn();
+    render(<Toast title="Retiré" onClose={() => {}} action={<button type="button">Annuler</button>} onHoldChange={onHoldChange} />);
+    const box = screen.getByRole("status").firstElementChild as HTMLElement;
+    fireEvent.pointerEnter(box);
+    expect(onHoldChange).toHaveBeenLastCalledWith(true);
+    fireEvent.pointerLeave(box);
+    expect(onHoldChange).toHaveBeenLastCalledWith(false);
+    const undo = screen.getByRole("button", { name: "Annuler" });
+    const close = screen.getByRole("button", { name: "Fermer" });
+    act(() => undo.focus());
+    expect(onHoldChange).toHaveBeenLastCalledWith(true);
+    // D'un bouton du toast à l'autre : toujours tenu
+    act(() => close.focus());
+    expect(onHoldChange).toHaveBeenLastCalledWith(true);
+    act(() => close.blur());
+    expect(onHoldChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it("sans onHoldChange, survol et focus ne plantent pas", () => {
+    render(<Toast title="Envoyé" onClose={() => {}} />);
+    const box = screen.getByRole("status").firstElementChild as HTMLElement;
+    fireEvent.pointerEnter(box);
+    fireEvent.pointerLeave(box);
+    act(() => screen.getByRole("button", { name: "Fermer" }).focus());
+    act(() => screen.getByRole("button", { name: "Fermer" }).blur());
   });
 
   it("ne présente aucune violation d'accessibilité", async () => {

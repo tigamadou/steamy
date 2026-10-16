@@ -11,7 +11,6 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ back }) }));
 vi.mock("@/features/shell/LearnerShell", () => ({ LearnerShell: () => null }));
 
 const { default: Layout } = await import("./layout");
-const { default: Home } = await import("./page");
 const { default: LearnerError } = await import("./error");
 
 type Boundary = ReactElement<{ fallback: ReactElement<{ label: string }>; children: ReactElement<{ children: unknown }> }>;
@@ -23,14 +22,6 @@ describe("layout du shell apprenant", () => {
     expect(tree.props.fallback.props.label).toBe("Chargement de ton espace…");
     expect(tree.props.children.type).toBe(LearnerShell);
     expect(tree.props.children.props.children).toBe("page");
-  });
-});
-
-describe("accueil provisoire", () => {
-  it("invite à explorer l'espace sans titre concurrent du header", () => {
-    render(<Home />);
-    expect(screen.getByText(/Ton tableau de bord se prépare/)).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
   });
 });
 

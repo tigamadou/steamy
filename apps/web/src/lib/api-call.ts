@@ -20,6 +20,17 @@ export type ApiResult<T> = { ok: true; data: T } | ApiFailure;
 type Response_<T> = { data?: T; error?: Schemas["Error"]; response: Response };
 
 /**
+ * Corps d'erreur de l'API (`{ code, message, fields? }`), ou rien. openapi-fetch renvoie le texte brut quand la
+ * réponse n'est pas du JSON (page HTML d'un proxy en 502…) : ce n'est pas une erreur de l'API, l'appelant se replie
+ * alors sur `SERVER_ERROR`.
+ */
+export function apiErrorBody(error: unknown): Schemas["Error"] | undefined {
+  return typeof error === "object" && error !== null && typeof (error as { code?: unknown }).code === "string"
+    ? (error as Schemas["Error"])
+    : undefined;
+}
+
+/**
  * Appel du client navigateur réduit à un résultat : données, ou code d'erreur, message, erreurs par champ et délai.
  * Un réseau injoignable devient `NETWORK_UNAVAILABLE`. Une réponse 204 renvoie `data: undefined`.
  */
@@ -30,8 +41,9 @@ export async function apiCall<T>(request: (api: ApiClient) => Promise<Response_<
   } catch {
     return { ok: false, code: "NETWORK_UNAVAILABLE", message: "", fields: {} };
   }
-  const { data, error, response } = result;
+  const { data, response } = result;
   if (response.ok) return { ok: true, data: data as T };
+  const error = apiErrorBody(result.error);
   const fields = Object.fromEntries(
     Object.entries(error?.fields ?? {}).map(([name, errors]) => [name, errors.map((e) => e.message).join(" ")]),
   );

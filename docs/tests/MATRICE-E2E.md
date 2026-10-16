@@ -57,38 +57,38 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WP10` | Bienvenue parent | 2 | Bienvenue, enfants rattachés puis espace parent | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP11` | Motifs de refus | 2 | Motif obligatoire, confirmation du refus | `apps/web/e2e/decision-parent.spec.ts` |
 | `WP12` | Refus envoyé (terminal) | 2 | Refus envoyé, W18 côté enfant | `apps/web/e2e/decision-parent.spec.ts` |
-| `WD01` | Accueil | 3 |  |  |
-| `WD02` | Accueil nouvel utilisateur | 3 |  |  |
-| `WD03` | Chargement | 3 |  |  |
-| `WD04` | Notifications · liste | 3 |  |  |
-| `WD05` | Notifications · vide | 3 |  |  |
-| `WD06` | Notifications · paramètres | 3 |  |  |
-| `WD07` | Tentatives de quiz · liste | 3 |  |  |
-| `WD08` | Tentatives de quiz · détail | 3 |  |  |
-| `WD09` | Tentatives de quiz · vide | 3 |  |  |
+| `WD01` | Accueil | 3 | Reprise du parcours → mission, pastilles Streak/Points/Rang (API), raccourcis sans Steamy Events, « Pour toi » | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD02` | Accueil nouvel utilisateur | 3 | Nouvel apprenant : bienvenue, catalogue `prix=gratuit`, suggestions gratuites | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD03` | Chargement | 3 | Squelette de l'accueil envoyé en flux avant le tableau de bord, puis remplacé | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD04` | Notifications · liste | 3 | Onglets dans l'URL, clic = lue + navigation, « Tout marquer comme lu » → cloche du shell à 0 | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD05` | Notifications · vide | 3 | Nouvel apprenant sans notification → « Régler les notifications » | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD06` | Notifications · paramètres | 3 | In-app verrouillé, email désactivé sans adresse, ni SMS ni push | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD07` | Tentatives de quiz · liste | 3 | Bandeau de l'API, filtre par statut dans l'URL (rechargement) | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
+| `WD08` | Tentatives de quiz · détail | 3 | Détail : score, seuil appliqué, « Voir le parcours » | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
+| `WD09` | Tentatives de quiz · vide | 3 | Nouvel apprenant sans quiz → Mes parcours | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD10` | Steamy Events | 3 |  |  |
 | `WD11` | Demande de participation | 3 |  |  |
-| `WD12` | Aide & support | 3 |  |  |
-| `WD13` | Paramètres (hub) | 3 |  |  |
+| `WD12` | Aide & support | 3 | Recherche locale dans la FAQ, « Contacter le support » → WL24 | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
+| `WD13` | Paramètres (hub) | 3 | Apprenant neuf : identifiant en lecture seule, ni téléphone ni « Bientôt », liens vers WD06, CGU, WD18 et retour par le fil d'Ariane | `apps/web/e2e/profil-parametres.spec.ts` |
 | `WD14` | Historique de commande | 3 |  |  |
 | `WD15` | Supprimer le compte | 3 |  |  |
 | `WD16` | Déconnexion (modal partagé) | 3 | Shell apprenant : annulation par Échap puis déconnexion, espace refermé | `apps/web/e2e/apprenant-shell.spec.ts` |
-| `WD17` | Éditer le profil | 3 |  |  |
-| `WD18` | Modifier la connexion | 3 |  |  |
+| `WD17` | Éditer le profil | 3 | Formulaire prérempli, date incohérente refusée (D23), modifier le profil puis recharger, classe reprise par WD13 | `apps/web/e2e/profil-parametres.spec.ts` |
+| `WD18` | Modifier la connexion | 3 | Mot de passe actuel faux refusé, changement réussi, session conservée, reconnexion avec le nouveau | `apps/web/e2e/profil-parametres.spec.ts` |
 | `WD19` | Informations de livraison | 3 |  |  |
-| `WD21` | Progression & recommandations | 3 |  |  |
+| `WD21` | Progression & recommandations | 3 | Semaine, histogramme accessible, maîtrise par catégorie | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD22` | Infos de mon parent | 3 |  |  |
-| `WC01` | Par défaut | 3 |  |  |
-| `WC02` | Filtré (Robotique · Débutant) | 3 |  |  |
-| `WC02b` | Dropdown Niveau ouvert | 3 |  |  |
-| `WC03` | Aucun résultat | 3 |  |  |
-| `WC04` | Détail parcours gratuit | 3 |  |  |
-| `WC05` | Détail parcours payant + kit | 3 |  |  |
-| `WC06a` | Vue inscrit · projets repliés | 3 |  |  |
-| `WC06b` | Vue inscrit · projet 2 déplié | 3 |  |  |
-| `WW01` | Avec items | 3 |  |  |
-| `WW02` | Vide | 3 |  |  |
-| `WW03` | Toast après retrait | 3 |  |  |
+| `WC01` | Par défaut | 3 | Compteur réel, cartes vers la fiche, entrée « Catalogue » active, aucun « Niveau » ; ajout aux souhaits par le cœur (P7) | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC02` | Filtré (Robotique · Débutant) | 3 | Recherche `q`, catégorie et difficulté dans l'URL, puces retirables, « Effacer les filtres » | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC02b` | Dropdown Niveau ouvert | 3 | Menu « Difficulté » ouvert (options cochables, axe), choix au clavier | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC03` | Aucun résultat | 3 | « Aucun parcours ne correspond », « Voir toutes les catégories », « Effacer les filtres » | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC04` | Détail parcours gratuit | 3 | Titre en h2, programme, sans note (C8), aucun contact Vimeo avant clic (`player.vimeo.com` intercepté), CSP `frame-src` ; « Continuer » si inscrit ; « Commencer le parcours » → WJ01 (apprenant neuf) ; 404 dans le shell | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC05` | Détail parcours payant + kit | 3 | Parcours à kit : « Débloqué avec le Kit Code », kit et prix lus dans la boutique, pas de prix de parcours ; payant : prix de l'API, CTA de déblocage absents (drapeau `unlock`) | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC06a` | Vue inscrit · projets repliés | 3 | Arbre du parcours suivi, étape verrouillée non cliquable | `apps/web/e2e/apprenant-parcours.spec.ts` |
+| `WC06b` | Vue inscrit · projet 2 déplié | 3 | Projet déplié par `?projet=`, prochaine mission « en cours » | `apps/web/e2e/apprenant-parcours.spec.ts` |
+| `WW01` | Avec items | 3 | Souhaits du jeu de démo, tri dans l'URL ; P7 : retrait optimiste, rechargement | `apps/web/e2e/souhaits-apprenant.spec.ts` |
+| `WW02` | Vide | 3 | Apprenant neuf sans souhait → « Découvrir le catalogue » ; dernier souhait retiré | `apps/web/e2e/souhaits-apprenant.spec.ts` |
+| `WW03` | Toast après retrait | 3 | P7 : toast `aria-live`, « Annuler » rétablit le souhait, conservé après rechargement | `apps/web/e2e/souhaits-apprenant.spec.ts` |
 | `WA01` | Saisie du Kit Code | 3 |  |  |
 | `WA02` | Paiement par le parent | 3 |  |  |
 | `WA03` | Formulaire de paiement Mobile Money | 3 |  |  |
@@ -96,17 +96,17 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WA05` | Paiement réussi | 3 |  |  |
 | `WA06` | Kit Code invalide | 3 |  |  |
 | `WA07` | Paiement échoué | 3 |  |  |
-| `WJ01` | Détail projet | 3 |  |  |
-| `WJ02` | Intro niveau | 3 |  |  |
-| `WJ03` | Contenu mission | 3 |  |  |
-| `WJ04` | Évaluation formative (≥ 70 %) | 3 |  |  |
-| `WJ05` | Revue des résultats | 3 |  |  |
-| `WJ06` | Badge de niveau débloqué | 3 |  |  |
-| `WJ07` | Certification & fin de parcours | 3 |  |  |
-| `WJ08` | Échec d'évaluation | 3 |  |  |
-| `WJ09` | Parcours incomplet | 3 |  |  |
-| `WJ10` | Évaluation sommative (≥ 80 %) | 3 |  |  |
-| `WJ11` | Projet validé + badge de projet | 3 |  |  |
+| `WJ01` | Détail projet | 3 | Projet → niveaux, accessibilité | `apps/web/e2e/apprenant-parcours.spec.ts` |
+| `WJ02` | Intro niveau | 3 | Niveau → missions, vidéo factice | `apps/web/e2e/apprenant-parcours.spec.ts` |
+| `WJ03` | Contenu mission | 3 | Mission ouverte, « Marquer comme terminée » → étape suivante de l'API, mission verrouillée → état dédié | `apps/web/e2e/apprenant-parcours.spec.ts` |
+| `WJ04` | Évaluation formative (≥ 70 %) | 3 | P1 : formative, seuil de l'API, envoi groupé | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
+| `WJ05` | Revue des résultats | 3 | P1 : résultat réussi, badge | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
+| `WJ06` | Badge de niveau débloqué | 3 | P1 : badge de niveau plein écran, étape suivante de l'API | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
+| `WJ07` | Certification & fin de parcours | 3 | Certificat de l'API, PDF préparé puis téléchargé ; fin de P1 | `apps/web/e2e/apprenant-certification.spec.ts`, `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
+| `WJ08` | Échec d'évaluation | 3 | P1 : sommative ratée, concepts à revoir, compte à rebours | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
+| `WJ09` | Parcours incomplet | 3 | Reste à faire, reprise, aucune mention du parent | `apps/web/e2e/apprenant-certification.spec.ts` |
+| `WJ10` | Évaluation sommative (≥ 80 %) | 3 | P1 : sommative ratée puis réussie après le délai | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
+| `WJ11` | Projet validé + badge de projet | 3 | P1 : badge de projet, lien vers la certification | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WPD01` | Accueil parent | 4 |  |  |
 | `WPD02` | Mes enfants | 4 |  |  |
 | `WPD03` | Détail enfant | 4 |  |  |
@@ -147,8 +147,8 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WAD01` | Vue d'ensemble | 6 | Support : chiffres et échéance du serveur, sans lien vers l'Impact Tracker ; « Consentements en attente » → liste Django filtrée | `apps/web/e2e/backoffice.spec.ts` |
 | `WAD02` | Impact Tracker · dashboard KPI | 6 | Finance : période Mois → Trimestre dans l'URL, valeurs relues côté serveur, rechargement ; sans tuile « Activer la collecte » | `apps/web/e2e/impact-tracker.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
 | `WAD03` | Impact Tracker · détail indicateur | 6 | Finance ouvre un indicateur depuis WAD02 (période conservée) : définition serveur, historique ; fil d'Ariane ; code inconnu → 404 | `apps/web/e2e/impact-tracker.spec.ts` |
-| `WAD04` | Impact Tracker · rapport trimestriel | 6 |  |  |
-| `WAD05` | Impact Tracker · saisie manuelle | 6 |  |  |
+| `WAD04` | Impact Tracker · rapport trimestriel | 6 | Finance : WAD02 → trimestre en cours ; relecture après saisie, soumission confirmée, rapport verrouillé « Soumis » (export CSV à venir) | `apps/web/e2e/impact-rapport.spec.ts` |
+| `WAD05` | Impact Tracker · saisie manuelle | 6 | Finance : brouillon, validation (vides signalés puis saisie complète), lecture seule après soumission ; Support refusé | `apps/web/e2e/impact-rapport.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
 | `WAD06` | Utilisateurs | 6 |  |  |
 | `WAD07` | Détail utilisateur | 6 |  |  |
 | `WAD08` | Modération & consentements | 6 |  |  |
@@ -165,6 +165,6 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WL22` | Fiche parcours publique (variante de WC04 sans contenu des missions) | 1 | WL06 → fiche → CTA inscription avec `next` ; sans contenu de mission ni Vimeo ; plan au clavier ; kit requis ; brouillon → 404 | `apps/web/e2e/fiche-parcours.spec.ts` |
 | `WL23` | Fiche événement (publique, réutilisée dans les espaces connectés) | 1 | CTA visiteur → connexion avec `next` ; complet et passé désactivés avec motif ; inconnu → 404 | `apps/web/e2e/evenements-boutique.spec.ts` |
 | `WL24` | Aide & contact (FAQ + formulaire) | 1 | Contact : « Rejoindre l'équipe » → `?sujet=candidature` → envoi → confirmation ; FAQ et recherche ; ancres | `apps/web/e2e/formulaires.spec.ts` |
-| `WD23` | Mes parcours (liste des inscriptions) | 3 |  |  |
+| `WD23` | Mes parcours (liste des inscriptions) | 3 | Onglets En cours / Terminés adressables, carte → arbre | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WPD15` | Demande de paiement (parcours, kit ou événement demandé par l'enfant ; reprend WA03) | 4 |  |  |
 | `WT13` | Créer une classe (une classe = un parcours, D62) | 5 |  |  |
