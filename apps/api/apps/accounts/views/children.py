@@ -23,7 +23,11 @@ from apps.accounts.models import DeletionRequest, Gender, ParentChildLink, User
 from apps.accounts.profile import ProfileStep, profile_step
 from apps.learning.models import Enrollment, LearnerBadge, QuizAttempt
 from apps.learning.progression import Progression
-from apps.learning.serializers import AttemptListItemSerializer, EnrollmentSerializer
+from apps.learning.serializers import (
+    AttemptListItemSerializer,
+    DaySecondsSerializer,
+    EnrollmentSerializer,
+)
 from apps.learning.views import attempt_item, enrollment_payload
 from apps.referentials.models import Disability, Relationship, SchoolGrade
 from apps.referentials.serializers import (
@@ -240,11 +244,6 @@ class ChildPasswordResetSerializer(serializers.Serializer):
 
 
 # --- WPD11 · Rapport hebdomadaire ----------------------------------------------------------------
-
-
-class DaySecondsSerializer(serializers.Serializer):
-    date = serializers.DateField()
-    seconds = serializers.IntegerField()
 
 
 class WeeklyReportSerializer(serializers.Serializer):

@@ -634,7 +634,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > effacent leurs données sur le signal `account_anonymized` ; adresse de livraison, alertes de
   > réassort et pseudonyme public sont effacés directement. Contraintes
   > « identifiant par rôle » levées pour un compte anonymisé.
-- [x] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo` · PR #96
+- [x] **API-L4.4** Rapport hebdomadaire · `feature/api-l4-4-rapport-hebdo` · PR #102
   - [x] `GET accounts/children/{id}/weekly-report/?week=AAAA-Www`
   - [x] Tâche hebdomadaire `send_weekly_reports` (D55)
   > Décisions : semaine ISO, lundi → dimanche au fuseau du Bénin ; réponse `{ week, startDate, endDate,
@@ -651,7 +651,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > reçues ; réponse `MeSerializer`. Préférences parent : les catégories de notification existent depuis API-1.4 ;
   > ajout du **Mobile Money préféré** (`ParentProfile.mobileMoney` `{ country, network, phone }`, réseau activé du
   > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
-  > Reprise : PR en chaîne #75 → #77 → #78 → #79 → #80 → #96 (fusion dans cet ordre). Restent les
+  > Reprise : PR en chaîne #75 → #77 → #78 → #79 → #80 → #102 (fusion dans cet ordre). Restent les
   > critères de fin d'API-L4 (seed enrichi).
 - [ ] **Critères de fin d'API-L4**
   - [ ] Un `childId` étranger → 404 partout
