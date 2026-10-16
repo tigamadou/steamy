@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import EventTicket, SteamyEvent
+from .models import EventApplication, EventTicket, SteamyEvent
 
 
 @admin.register(SteamyEvent)
@@ -24,6 +24,21 @@ class EventTicketAdmin(admin.ModelAdmin):
     list_display = ("learner", "enrollment", "created_at")
     search_fields = ("learner__username",)
     readonly_fields = ("learner", "enrollment", "created_at")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(EventApplication)
+class EventApplicationAdmin(admin.ModelAdmin):
+    """Suivi des candidatures (WAD12) ; le refus exceptionnel avec remboursement arrive avec le back-office (L6.2)."""
+
+    list_display = ("event", "learner", "status", "ticket", "created_at")
+    list_filter = ("status", "event")
+    search_fields = ("learner__username", "event__title")
 
     def has_add_permission(self, request):
         return False

@@ -27,7 +27,7 @@ def test_public_read_only_declares_throttling(schema):
 
 
 def test_path_parameter_declares_not_found(schema):
-    assert "404" in statuses(schema, "/api/payments/orders/{id}/", "get")
+    assert "404" in statuses(schema, "/api/payments/orders/{reference}/", "get")
 
 
 def test_error_component_and_session_scheme(schema):

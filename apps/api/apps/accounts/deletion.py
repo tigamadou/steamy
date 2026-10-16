@@ -191,6 +191,12 @@ def anonymize(user: User) -> None:
     PasswordResetToken.objects.filter(user=user).delete()
     SignupSession.objects.filter(learner=user).delete()
     PublicProfileReview.objects.filter(learner=user).delete()
+    from apps.shop.models import DeliveryAddress, RestockAlert
+
+    DeliveryAddress.objects.filter(user=user).delete()
+    RestockAlert.objects.filter(user=user).delete()
+    if phone:
+        RestockAlert.objects.filter(phone=phone).delete()
     Notification.objects.filter(user=user).delete()
     DeletionRequest.objects.filter(user=user).update(note="")
 
