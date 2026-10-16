@@ -163,6 +163,21 @@ def test_kits_include_one_out_of_stock_and_one_required_by_a_course():
     assert Course.objects.filter(required_kit__isnull=False, is_free=False).exists()
 
 
+def test_seed_demo_gives_koffi_two_classrooms_within_the_offer():
+    from apps.classrooms.demo import OFFER_COURSES
+    from apps.classrooms.models import Classroom
+    from apps.core.demo import KOFFI_EMAIL
+
+    call_command("seed_demo")
+    call_command("seed_demo")  # idempotent
+    koffi = User.objects.get(email=KOFFI_EMAIL)
+    school = koffi.teacher_profile.school
+    assert sorted(school.courses.values_list("slug", flat=True)) == sorted(OFFER_COURSES)
+    classrooms = Classroom.objects.filter(teacher=koffi)
+    assert classrooms.count() == 2
+    assert all(c.course.slug in OFFER_COURSES and c.school == school for c in classrooms)
+
+
 def test_lea_has_a_course_in_progress_a_finished_one_and_the_short_course_reset():
     from apps.core.demo import SHORT_COURSE
     from apps.learning.models import Enrollment, MissionProgress

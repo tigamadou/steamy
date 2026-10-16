@@ -2736,6 +2736,444 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/classrooms/:
+    get:
+      operationId: classrooms_list
+      description: Classes de l'enseignant connecté (WT03, WT04, WT13).
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedClassroomList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: classrooms_create
+      description: 'WT13 : `CLASSROOM_QUOTA_EXCEEDED`, `COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`.'
+      tags:
+      - classrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassroomWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Classroom'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/{id}/:
+    get:
+      operationId: classrooms_retrieve
+      description: Classes de l'enseignant connecté (WT03, WT04, WT13).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Classroom'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    patch:
+      operationId: classrooms_partial_update
+      description: 'WT13 en édition : le parcours est figé dès que la classe a eu
+        un membre.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - classrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedClassroomWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Classroom'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/{id}/members/:
+    get:
+      operationId: classrooms_members_list
+      description: 'WT04 : élèves actifs et invitations (en attente, refusées, expirées)
+        ; les retirés n''y sont plus.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMemberList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/{id}/members/{member_id}/remove/:
+    post:
+      operationId: classrooms_members_remove_create
+      description: 'WT04 « Retirer de la classe » : statut `left`, place libérée ;
+        une invitation en attente est annulée.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: member_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/courses/:
+    get:
+      operationId: classrooms_courses_list
+      description: 'WT02 : parcours encadrés, avec le nombre de classes et d''élèves
+        actifs.'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSupervisedCourseList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/courses/{slug}/:
+    get:
+      operationId: classrooms_courses_retrieve
+      description: 'WT10 : un parcours encadré, ses classes et son arbre ; un parcours
+        non encadré → 404.'
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupervisedCourseDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/school/:
+    get:
+      operationId: classrooms_school_retrieve
+      description: 'WT03, WT06, WT13 : école, offre, parcours de l''offre et quotas
+        restants.'
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/School'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/core/presign/:
     post:
       operationId: core_presign_create
@@ -6835,6 +7273,118 @@ components:
       required:
       - id
       - text
+    Classroom:
+      type: object
+      description: Carte de classe (WT01, WT03) et en-tête de WT04.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+        color:
+          type: string
+          readOnly: true
+          title: Couleur
+        course:
+          allOf:
+          - $ref: '#/components/schemas/ClassroomCourse'
+          readOnly: true
+        schoolGrade:
+          allOf:
+          - $ref: '#/components/schemas/SchoolGrade'
+          readOnly: true
+          nullable: true
+        memberCount:
+          type: integer
+          readOnly: true
+          description: Élèves actifs
+        pendingInvitationCount:
+          type: integer
+          readOnly: true
+          description: Invitations en attente du parent
+        hasMembers:
+          type: boolean
+          readOnly: true
+          description: 'Parcours figé : la classe a déjà eu un membre'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - color
+      - course
+      - createdAt
+      - hasMembers
+      - id
+      - memberCount
+      - name
+      - pendingInvitationCount
+      - schoolGrade
+    ClassroomCourse:
+      type: object
+      properties:
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        emoji:
+          type: string
+          readOnly: true
+          description: Visuel des cartes
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          readOnly: true
+          title: Difficulté
+        durationHours:
+          type: integer
+          readOnly: true
+          title: Durée (heures)
+      required:
+      - category
+      - difficulty
+      - durationHours
+      - emoji
+      - slug
+      - title
+    ClassroomWriteRequest:
+      type: object
+      description: 'WT13 : nom*, parcours* (de l''offre), niveau scolaire facultatif,
+        couleur facultative.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        courseSlug:
+          type: string
+          minLength: 1
+          description: Parcours de l'offre de l'école (`classrooms/school/`)
+        schoolGrade:
+          type: string
+          minLength: 1
+          nullable: true
+          description: Code du référentiel `school-grades`
+        color:
+          type: string
+          minLength: 1
+          description: '#RRGGBB'
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+      required:
+      - courseSlug
+      - name
     CompositionPart:
       type: object
       properties:
@@ -6943,7 +7493,7 @@ components:
           readOnly: true
         status:
           allOf:
-          - $ref: '#/components/schemas/ConsentRequestStateStatusEnum'
+          - $ref: '#/components/schemas/ConsentStatusEnum'
           readOnly: true
           title: Statut
         parentPhoneMasked:
@@ -6972,7 +7522,7 @@ components:
       - relationship
       - resendInSec
       - status
-    ConsentRequestStateStatusEnum:
+    ConsentStatusEnum:
       enum:
       - pending
       - accepted
@@ -7729,6 +8279,7 @@ components:
       - REPORT_LOCKED
       - RESET_TOKEN_INVALID
       - RESUME_CODE_INVALID
+      - SCHOOL_OFFER_EXPIRED
       - SERVER_ERROR
       - SIGNUP_EXPIRED
       - THROTTLED
@@ -7801,6 +8352,7 @@ components:
         * `REPORT_LOCKED` - REPORT_LOCKED
         * `RESET_TOKEN_INVALID` - RESET_TOKEN_INVALID
         * `RESUME_CODE_INVALID` - RESUME_CODE_INVALID
+        * `SCHOOL_OFFER_EXPIRED` - SCHOOL_OFFER_EXPIRED
         * `SERVER_ERROR` - SERVER_ERROR
         * `SIGNUP_EXPIRED` - SIGNUP_EXPIRED
         * `THROTTLED` - THROTTLED
@@ -8740,6 +9292,35 @@ components:
       - quiz
       - state
       - title
+    LevelNode:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        order:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationMin:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (minutes)
+        missions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MissionNode'
+          readOnly: true
+      required:
+      - id
+      - missions
+      - title
     LevelSummary:
       type: object
       properties:
@@ -8940,6 +9521,93 @@ components:
       - staffGroups
       - status
       - username
+    Member:
+      type: object
+      description: |-
+        Ligne de WT04 : élève actif (`MemberRow`) ou invitation (`InvitationRow`). Une invitation montre le prénom et le
+        nom saisis par l'enseignant et l'état de la demande au parent, jamais son numéro.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/MembershipStatusEnum'
+          readOnly: true
+          title: Statut
+        firstName:
+          type: string
+          readOnly: true
+        lastName:
+          type: string
+          readOnly: true
+        learner:
+          allOf:
+          - $ref: '#/components/schemas/MemberLearner'
+          nullable: true
+          readOnly: true
+        invitationStatus:
+          description: État de la demande au parent (`invited` seulement) ; `refused`
+            et `expired` sont à signaler
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ConsentStatusEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        invitationExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        joinedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: A rejoint le
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - firstName
+      - id
+      - invitationExpiresAt
+      - invitationStatus
+      - joinedAt
+      - lastName
+      - learner
+      - status
+    MemberLearner:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        avatar:
+          allOf:
+          - $ref: '#/components/schemas/Avatar'
+          nullable: true
+          readOnly: true
+      required:
+      - avatar
+      - firstName
+      - id
+      - lastName
+    MembershipStatusEnum:
+      enum:
+      - invited
+      - active
+      - left
+      type: string
+      description: |-
+        * `invited` - Invité
+        * `active` - Actif
+        * `left` - Retiré
     MissionBlock:
       type: object
       properties:
@@ -9056,6 +9724,33 @@ components:
       - id
       - order
       - state
+      - title
+    MissionNode:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        order:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationMin:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (minutes)
+        icon:
+          type: string
+          title: Icône
+          maxLength: 16
+      required:
+      - id
       - title
     MissionSummary:
       type: object
@@ -9802,6 +10497,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Child'
+    PaginatedClassroomList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Classroom'
     PaginatedConsentRequestList:
       type: object
       properties:
@@ -9922,6 +10637,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LearnerBadge'
+    PaginatedMemberList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Member'
     PaginatedNotificationList:
       type: object
       properties:
@@ -10002,6 +10737,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SteamyEvent'
+    PaginatedSupervisedCourseList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupervisedCourse'
     PaginatedWishlistItemList:
       type: object
       properties:
@@ -10201,6 +10956,30 @@ components:
           nullable: true
         publicDisplayAllowed:
           type: boolean
+    PatchedClassroomWriteRequest:
+      type: object
+      description: 'WT13 : nom*, parcours* (de l''offre), niveau scolaire facultatif,
+        couleur facultative.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        courseSlug:
+          type: string
+          minLength: 1
+          description: Parcours de l'offre de l'école (`classrooms/school/`)
+        schoolGrade:
+          type: string
+          minLength: 1
+          nullable: true
+          description: Code du référentiel `school-grades`
+        color:
+          type: string
+          minLength: 1
+          description: '#RRGGBB'
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
     PatchedLearnerProfileUpdateRequest:
       type: object
       properties:
@@ -10786,6 +11565,35 @@ components:
       - quiz
       - state
       - title
+    ProjectNode:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        order:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Ordre
+        title:
+          type: string
+          title: Titre
+          maxLength: 160
+        durationHours:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Durée (heures)
+        levels:
+          type: array
+          items:
+            $ref: '#/components/schemas/LevelNode'
+          readOnly: true
+      required:
+      - id
+      - levels
+      - title
     ProjectSummary:
       type: object
       properties:
@@ -11298,6 +12106,77 @@ components:
         * `learner` - Apprenant
         * `parent` - Parent
         * `teacher` - Enseignant
+    School:
+      type: object
+      description: 'WT03, WT06, WT13 : l''école, son offre et ce qui reste des quotas
+        (invitations en attente comprises, C19).'
+      properties:
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+        city:
+          type: string
+          readOnly: true
+          title: Ville
+        country:
+          type: string
+          readOnly: true
+        offer:
+          type: string
+          readOnly: true
+          title: Offre
+          description: Nom de l'offre B2B
+        validUntil:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Offre valable jusqu'au
+        offerExpired:
+          type: boolean
+          readOnly: true
+          description: 'Offre échue : création de classes et ajout d''élèves bloqués
+            (`SCHOOL_OFFER_EXPIRED`)'
+        learnerQuota:
+          type: integer
+          readOnly: true
+          title: Quota d'élèves
+        learnersUsed:
+          type: integer
+          readOnly: true
+        learnersLeft:
+          type: integer
+          readOnly: true
+        classroomQuota:
+          type: integer
+          readOnly: true
+          title: Quota de classes
+        classroomsUsed:
+          type: integer
+          readOnly: true
+        classroomsLeft:
+          type: integer
+          readOnly: true
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassroomCourse'
+          readOnly: true
+      required:
+      - city
+      - classroomQuota
+      - classroomsLeft
+      - classroomsUsed
+      - country
+      - courses
+      - learnerQuota
+      - learnersLeft
+      - learnersUsed
+      - name
+      - offer
+      - offerExpired
+      - validUntil
     SchoolGrade:
       type: object
       properties:
@@ -11564,6 +12443,111 @@ components:
         * `changement-parent` - Changement de parent
         * `candidature` - Candidature
         * `autre` - Autre
+    SupervisedCourse:
+      type: object
+      description: 'Parcours encadré (WT02) : ses classes et ses élèves actifs chez
+        l''enseignant.'
+      properties:
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        emoji:
+          type: string
+          readOnly: true
+          description: Visuel des cartes
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          readOnly: true
+          title: Difficulté
+        durationHours:
+          type: integer
+          readOnly: true
+          title: Durée (heures)
+        classroomCount:
+          type: integer
+          readOnly: true
+        learnerCount:
+          type: integer
+          readOnly: true
+      required:
+      - category
+      - classroomCount
+      - difficulty
+      - durationHours
+      - emoji
+      - learnerCount
+      - slug
+      - title
+    SupervisedCourseDetail:
+      type: object
+      description: 'WT10 : l''arbre Projet → Niveau → Mission, en lecture seule (S5).'
+      properties:
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        emoji:
+          type: string
+          readOnly: true
+          description: Visuel des cartes
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        difficulty:
+          allOf:
+          - $ref: '#/components/schemas/DifficultyEnum'
+          readOnly: true
+          title: Difficulté
+        durationHours:
+          type: integer
+          readOnly: true
+          title: Durée (heures)
+        classroomCount:
+          type: integer
+          readOnly: true
+        learnerCount:
+          type: integer
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        classrooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Classroom'
+          readOnly: true
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectNode'
+          readOnly: true
+      required:
+      - category
+      - classroomCount
+      - classrooms
+      - description
+      - difficulty
+      - durationHours
+      - emoji
+      - learnerCount
+      - projects
+      - slug
+      - title
     TeacherActivationRequest:
       type: object
       properties:
