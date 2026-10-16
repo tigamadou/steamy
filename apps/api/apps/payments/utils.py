@@ -1,7 +1,7 @@
 import logging
-from decimal import Decimal
 
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 
 from .models import Order, Payment
 from .providers import PaymentEvent, PaymentStatus
@@ -30,7 +30,7 @@ def handle_payment_event(provider_name: str, event: PaymentEvent):
     except Order.DoesNotExist:
         raise WebhookRejected("commande inconnue") from None
 
-    if Decimal(event.amount) != order.total or event.currency != order.currency.upper():
+    if event.amount != order.total or event.currency != order.currency.upper():
         raise WebhookRejected(
             f"montant ou devise incohérents ({event.amount} {event.currency} "
             f"pour {order.total} {order.currency})"
@@ -40,7 +40,12 @@ def handle_payment_event(provider_name: str, event: PaymentEvent):
         payment, _ = Payment.objects.get_or_create(
             provider=provider_name,
             provider_transaction_id=event.provider_tx_id,
-            defaults={"order": order, "amount": event.amount, "currency": order.currency},
+            defaults={
+                "order": order,
+                "amount": event.amount,
+                "currency": order.currency,
+                "status": Payment.Status.PENDING,
+            },
         )
     except IntegrityError:  # notification concurrente pour la même transaction
         payment = Payment.objects.get(
@@ -48,11 +53,14 @@ def handle_payment_event(provider_name: str, event: PaymentEvent):
         )
     if payment.order_id != order.id:
         raise WebhookRejected("transaction déjà rattachée à une autre commande")
-    if payment.success or order.paid:
+    if payment.status == Payment.Status.SUCCEEDED or order.status == Order.Status.PAID:
         return payment  # rejeu : déjà traité
 
+    payment.status = event.status
+    payment.failure_reason = event.failure_reason
     if event.status == PaymentStatus.SUCCEEDED:
-        payment.mark_success(tx_id=event.provider_tx_id)
-    else:
-        payment.save()
+        payment.confirmed_at = order.paid_at = timezone.now()
+        order.status = Order.Status.PAID
+        order.save(update_fields=["status", "paid_at", "updated_at"])
+    payment.save()
     return payment

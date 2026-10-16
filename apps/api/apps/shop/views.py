@@ -1,6 +1,6 @@
 """
 Kits en lecture (§7.5, WL07, WK01, WK02) : anonymes, kits en vente seulement, indépendants de la session et
-cachables (§1.2). Panier et commande : API-L3b.
+cachables (§1.2). Zones de livraison publiques (WK05). Panier : API-L3b.3 ; commande : `payments`.
 """
 
 from django.utils.decorators import method_decorator
@@ -9,8 +9,8 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import generics, serializers
 from rest_framework.permissions import AllowAny
 
-from .models import Kit
-from .serializers import KitDetailSerializer, KitSerializer
+from .models import DeliveryZone, Kit
+from .serializers import DeliveryZoneSerializer, KitDetailSerializer, KitSerializer
 
 CACHE_SECONDS = 300
 
@@ -53,3 +53,29 @@ class KitDetailView(PublicKitMixin, generics.RetrieveAPIView):
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related("compatible_courses")
+
+
+class DeliveryZoneQuerySerializer(serializers.Serializer):
+    country = serializers.CharField(
+        required=False, min_length=2, max_length=2, help_text="Code ISO du pays (BJ)"
+    )
+
+
+@method_decorator(cache_control(public=True, max_age=CACHE_SECONDS), name="dispatch")
+@extend_schema(parameters=[DeliveryZoneQuerySerializer])
+class DeliveryZoneListView(generics.ListAPIView):
+    """Zones de livraison actives, avec leurs frais et leur délai (D38, WK05). Non paginées."""
+
+    authentication_classes = []
+    permission_classes = [AllowAny]
+    filter_backends = []
+    pagination_class = None
+    serializer_class = DeliveryZoneSerializer
+
+    def get_queryset(self):
+        params = DeliveryZoneQuerySerializer(data=self.request.query_params)
+        params.is_valid(raise_exception=True)
+        queryset = DeliveryZone.objects.filter(active=True)
+        if "country" in params.validated_data:
+            queryset = queryset.filter(country_id=params.validated_data["country"].upper())
+        return queryset

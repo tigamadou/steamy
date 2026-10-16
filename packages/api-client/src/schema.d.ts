@@ -1132,21 +1132,27 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         * Commandes du parent (payeur) ou de l'apprenant (bénéficiaire)
+         * @description Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+         *     (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+         *     d'autrui répond 404.
          */
         get: operations["payments_orders_list"];
         put?: never;
-        post?: never;
+        /**
+         * Créer une commande : prix, frais et total calculés par le serveur (parent ou invité)
+         * @description Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+         *     (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+         *     d'autrui répond 404.
+         */
+        post: operations["payments_orders_create"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/payments/orders/{id}/": {
+    "/api/payments/orders/{reference}/": {
         parameters: {
             query?: never;
             header?: never;
@@ -1154,56 +1160,12 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+         * Commande par sa référence (payeur, bénéficiaire, ou invité avec X-Guest-Token)
+         * @description Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+         *     (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+         *     d'autrui répond 404.
          */
         get: operations["payments_orders_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/payments/payments/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["payments_payments_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/payments/payments/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-         *
-         *     L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-         *     pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-         */
-        get: operations["payments_payments_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1429,6 +1391,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/shop/delivery-zones/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Zones de livraison actives, avec leurs frais et leur délai (D38, WK05). Non paginées. */
+        get: operations["shop_delivery_zones_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/shop/kits/": {
         parameters: {
             query?: never;
@@ -1609,6 +1588,10 @@ export interface components {
          * @enum {string}
          */
         BadgeKindEnum: "level" | "project" | "course";
+        Beneficiary: {
+            id: number;
+            firstName: string;
+        };
         Category: {
             slug: string;
             /** Libellé */
@@ -1859,6 +1842,56 @@ export interface components {
             date: string;
             seconds: number;
         };
+        DeliveryAddress: {
+            recipientName: string;
+            phone: string;
+            country: string;
+            zone: string;
+            city: string;
+            district: string;
+            addressLine: string;
+        };
+        DeliveryAddressInputRequest: {
+            /** @description Zone de `GET shop/delivery-zones/` */
+            zoneId: number;
+            recipientName: string;
+            /** @description Par défaut, celui du payeur */
+            phone?: string;
+            city: string;
+            /** @default  */
+            district: string;
+            /** @description Rue, repère, indications */
+            addressLine: string;
+        };
+        DeliveryZone: {
+            readonly id: number;
+            readonly country: string;
+            /**
+             * Nom
+             * @description « Cotonou et Calavi »
+             */
+            readonly name: string;
+            /** Frais de livraison (FCFA) */
+            readonly fee: number;
+            /**
+             * Délai annoncé
+             * @description « 2 à 3 jours »
+             */
+            readonly delayLabel: string;
+        };
+        DeliveryZoneSummary: {
+            readonly id: number;
+            /**
+             * Nom
+             * @description « Cotonou et Calavi »
+             */
+            readonly name: string;
+            /**
+             * Délai annoncé
+             * @description « 2 à 3 jours »
+             */
+            readonly delayLabel: string;
+        };
         /**
          * @description * `beginner` - Débutant
          *     * `intermediate` - Intermédiaire
@@ -2002,6 +2035,12 @@ export interface components {
             /** Libellé */
             label: string;
             emoji?: string;
+        };
+        GuestInputRequest: {
+            firstName: string;
+            lastName: string;
+            /** @description Reçoit le lien de suivi de la commande */
+            phone: string;
         };
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
@@ -2477,29 +2516,141 @@ export interface components {
         };
         /** @enum {unknown} */
         NullEnum: null;
+        /** @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison. */
         Order: {
-            readonly id: number;
+            /** Référence */
             readonly reference: string;
-            readonly user: number;
-            /** Format: decimal */
-            readonly total: string;
+            /** Type */
+            readonly kind: components["schemas"]["OrderKindEnum"];
+            /** Statut */
+            readonly status: components["schemas"]["OrderStatusEnum"];
+            /** Livraison */
+            readonly shippingStatus: components["schemas"]["ShippingStatusEnum"];
+            /** Sous-total (FCFA) */
+            readonly subtotal: number;
+            /** Frais de livraison (FCFA) */
+            readonly shippingFee: number;
+            /** Total (FCFA) */
+            readonly total: number;
+            /** Devise */
             readonly currency: string;
-            readonly paid: boolean;
-            /** Format: date-time */
-            readonly createdAt: string;
             readonly items: components["schemas"]["OrderItem"][];
+            readonly beneficiary: components["schemas"]["Beneficiary"] | null;
+            readonly deliveryZone: components["schemas"]["DeliveryZoneSummary"];
+            /**
+             * Expire le
+             * Format: date-time
+             */
+            readonly expiresAt: string;
+            /**
+             * Payée le
+             * Format: date-time
+             */
+            readonly paidAt: string | null;
+            /**
+             * Créée le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+            readonly deliveryAddress: components["schemas"]["DeliveryAddress"] | null;
+        };
+        /**
+         * @description * `course` - course
+         *     * `kit` - kit
+         * @enum {string}
+         */
+        OrderCreateKindEnum: "course" | "kit";
+        /**
+         * @description `kind=course` : un parcours payant pour un enfant du parent (`beneficiaryId`). `kind=kit` : des kits livrés
+         *     (`deliveryAddress`), pour le parent (bénéficiaire facultatif) ou pour un invité (`guest`, sans compte, D12).
+         *     Les commandes d'événement naissent de la candidature (API-L3b.6).
+         */
+        OrderCreateRequest: {
+            kind: components["schemas"]["OrderCreateKindEnum"];
+            items: components["schemas"]["OrderItemInputRequest"][];
+            /** @description Enfant du parent */
+            beneficiaryId?: number;
+            /** @description Achat de kit sans compte */
+            guest?: components["schemas"]["GuestInputRequest"];
+            deliveryAddress?: components["schemas"]["DeliveryAddressInputRequest"];
+        };
+        /** @description Commande vue par son payeur (parent ou invité) : avec l'adresse de livraison. */
+        OrderCreated: {
+            /** Référence */
+            readonly reference: string;
+            /** Type */
+            readonly kind: components["schemas"]["OrderKindEnum"];
+            /** Statut */
+            readonly status: components["schemas"]["OrderStatusEnum"];
+            /** Livraison */
+            readonly shippingStatus: components["schemas"]["ShippingStatusEnum"];
+            /** Sous-total (FCFA) */
+            readonly subtotal: number;
+            /** Frais de livraison (FCFA) */
+            readonly shippingFee: number;
+            /** Total (FCFA) */
+            readonly total: number;
+            /** Devise */
+            readonly currency: string;
+            readonly items: components["schemas"]["OrderItem"][];
+            readonly beneficiary: components["schemas"]["Beneficiary"] | null;
+            readonly deliveryZone: components["schemas"]["DeliveryZoneSummary"];
+            /**
+             * Expire le
+             * Format: date-time
+             */
+            readonly expiresAt: string;
+            /**
+             * Payée le
+             * Format: date-time
+             */
+            readonly paidAt: string | null;
+            /**
+             * Créée le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+            readonly deliveryAddress: components["schemas"]["DeliveryAddress"] | null;
+            /** @description Invité seulement, remis une seule fois : à renvoyer dans l'en-tête X-Guest-Token */
+            readonly guestToken: string | null;
         };
         OrderItem: {
             readonly id: number;
+            /** Libellé */
             readonly title: string;
-            readonly contentType: string | null;
-            readonly objectId: string | null;
-            /** Format: decimal */
-            readonly unitPrice: string;
+            readonly courseSlug: string;
+            readonly kitSlug: string;
+            readonly eventSlug: string;
+            /** Prix unitaire (FCFA) */
+            readonly unitPrice: number;
+            /** Quantité */
             readonly quantity: number;
-            /** Format: decimal */
-            readonly total: string;
+            /** Total (FCFA) */
+            readonly total: number;
         };
+        OrderItemInputRequest: {
+            /** @description Commande de parcours */
+            courseSlug?: string;
+            /** @description Commande de kit */
+            kitSlug?: string;
+            /** @default 1 */
+            quantity: number;
+        };
+        /**
+         * @description * `course` - Parcours
+         *     * `kit` - Kit
+         *     * `event` - Événement
+         * @enum {string}
+         */
+        OrderKindEnum: "course" | "kit" | "event";
+        /**
+         * @description * `pending` - En attente de paiement
+         *     * `paid` - Payée
+         *     * `cancelled` - Annulée
+         *     * `refunded` - Remboursée
+         * @enum {string}
+         */
+        OrderStatusEnum: "pending" | "paid" | "cancelled" | "refunded";
         /**
          * @description * `learner` - Apprenant
          *     * `parent` - Parent
@@ -2689,21 +2840,6 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Order"][];
         };
-        PaginatedPaymentList: {
-            /** @example 123 */
-            count?: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results?: components["schemas"]["Payment"][];
-        };
         PaginatedSteamyEventList: {
             /** @example 123 */
             count?: number;
@@ -2822,18 +2958,6 @@ export interface components {
         PatchedValuesInputRequest: {
             values?: components["schemas"]["ValueEntryRequest"][];
         };
-        Payment: {
-            readonly id: number;
-            readonly order: number;
-            readonly provider: components["schemas"]["ProviderEnum"];
-            readonly providerTransactionId: string | null;
-            /** Format: decimal */
-            readonly amount: string;
-            readonly currency: string;
-            readonly success: boolean;
-            /** Format: date-time */
-            readonly createdAt: string;
-        };
         PaymentNetwork: {
             readonly id: number;
             code: string;
@@ -2934,12 +3058,6 @@ export interface components {
             materials?: unknown;
             readonly levels: components["schemas"]["LevelSummary"][];
         };
-        /**
-         * @description * `fake` - Faux prestataire
-         *     * `fedapay` - FedaPay
-         * @enum {string}
-         */
-        ProviderEnum: "fake" | "fedapay";
         Question: {
             id: number;
             order: number;
@@ -3151,6 +3269,13 @@ export interface components {
             /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
             value: (number | boolean | string) | null;
         };
+        /**
+         * @description * `preparing` - En préparation
+         *     * `shipped` - Expédiée
+         *     * `delivered` - Livrée
+         * @enum {string}
+         */
+        ShippingStatusEnum: "preparing" | "shipped" | "delivered";
         /**
          * @description * `free` - Parcours gratuit
          *     * `order` - Commande
@@ -6838,6 +6963,13 @@ export interface operations {
                 pageSize?: number;
                 /** @description A search term. */
                 search?: string;
+                /**
+                 * @description * `pending` - En attente de paiement
+                 *     * `paid` - Payée
+                 *     * `cancelled` - Annulée
+                 *     * `refunded` - Remboursée
+                 */
+                status?: "pending" | "paid" | "cancelled" | "refunded";
             };
             header?: never;
             path?: never;
@@ -6879,13 +7011,62 @@ export interface operations {
             };
         };
     };
-    payments_orders_retrieve: {
+    payments_orders_create: {
         parameters: {
             query?: never;
             header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderCreated"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_orders_retrieve: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Jeton d'une commande invitée, remis à sa création (C10) */
+                "X-Guest-Token"?: string;
+            };
             path: {
-                /** @description A unique integer value identifying this order. */
-                id: number;
+                reference: string;
             };
             cookie?: never;
         };
@@ -6897,128 +7078,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Order"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    payments_payments_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                pageSize?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedPaymentList"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    payments_payments_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A unique integer value identifying this payment. */
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Payment"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
                 };
             };
             404: {
@@ -7476,6 +7535,36 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SchoolGrade"][];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shop_delivery_zones_list: {
+        parameters: {
+            query?: {
+                /** @description Code ISO du pays (BJ) */
+                country?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryZone"][];
                 };
             };
             429: {

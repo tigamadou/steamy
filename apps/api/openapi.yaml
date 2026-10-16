@@ -3000,10 +3000,10 @@ paths:
     get:
       operationId: payments_orders_list
       description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+        Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+        (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+        d'autrui répond 404.
+      summary: Commandes du parent (payeur) ou de l'apprenant (bénéficiaire)
       parameters:
       - name: ordering
         required: false
@@ -3029,6 +3029,21 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: status
+        schema:
+          enum:
+          - pending
+          - paid
+          - cancelled
+          - refunded
+          type: string
+          minLength: 1
+        description: |-
+          * `pending` - En attente de paiement
+          * `paid` - Payée
+          * `cancelled` - Annulée
+          * `refunded` - Remboursée
       tags:
       - payments
       security:
@@ -3058,155 +3073,81 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
-  /api/payments/orders/{id}/:
+    post:
+      operationId: payments_orders_create
+      description: |-
+        Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+        (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+        d'autrui répond 404.
+      summary: 'Créer une commande : prix, frais et total calculés par le serveur
+        (parent ou invité)'
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderCreated'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/payments/orders/{reference}/:
     get:
       operationId: payments_orders_retrieve
       description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
+        Commandes (§7.5, D37). Le parent commande un parcours pour son enfant ou des kits ; un invité commande des kits
+        (D12). L'apprenant ne commande jamais : il demande à son parent (`PARENT_APPROVAL_REQUIRED`, D52). Une commande
+        d'autrui répond 404.
+      summary: Commande par sa référence (payeur, bénéficiaire, ou invité avec X-Guest-Token)
       parameters:
-      - in: path
-        name: id
+      - in: header
+        name: X-Guest-Token
         schema:
-          type: integer
-        description: A unique integer value identifying this order.
+          type: string
+        description: Jeton d'une commande invitée, remis à sa création (C10)
+      - in: path
+        name: reference
+        schema:
+          type: string
+          title: Référence
         required: true
       tags:
       - payments
       security:
       - cookieAuth: []
+      - {}
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Order'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/payments/payments/:
-    get:
-      operationId: payments_payments_list
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: pageSize
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - payments
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedPaymentList'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/payments/payments/{id}/:
-    get:
-      operationId: payments_payments_retrieve
-      description: |-
-        Restreint le queryset d'une vue aux objets de l'utilisateur connecté (S4).
-
-        L'objet d'autrui n'existe pas pour l'appelant : 404 plutôt que 403, ce qui ne révèle
-        pas son existence. Le personnel n'a pas de passe-droit ici : il passe par le back-office.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this payment.
-        required: true
-      tags:
-      - payments
-      security:
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Payment'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
           description: ''
         '404':
           content:
@@ -3592,6 +3533,38 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SchoolGrade'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/shop/delivery-zones/:
+    get:
+      operationId: shop_delivery_zones_list
+      description: Zones de livraison actives, avec leurs frais et leur délai (D38,
+        WK05). Non paginées.
+      parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+          minLength: 2
+          maxLength: 2
+        description: Code ISO du pays (BJ)
+      tags:
+      - shop
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeliveryZone'
           description: ''
         '429':
           content:
@@ -4100,6 +4073,16 @@ components:
         * `level` - Niveau
         * `project` - Projet
         * `course` - Parcours
+    Beneficiary:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+      required:
+      - firstName
+      - id
     Category:
       type: object
       properties:
@@ -4712,6 +4695,113 @@ components:
       required:
       - date
       - seconds
+    DeliveryAddress:
+      type: object
+      properties:
+        recipientName:
+          type: string
+        phone:
+          type: string
+        country:
+          type: string
+        zone:
+          type: string
+        city:
+          type: string
+        district:
+          type: string
+        addressLine:
+          type: string
+      required:
+      - addressLine
+      - city
+      - country
+      - district
+      - phone
+      - recipientName
+      - zone
+    DeliveryAddressInputRequest:
+      type: object
+      properties:
+        zoneId:
+          type: integer
+          description: Zone de `GET shop/delivery-zones/`
+        recipientName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        phone:
+          type: string
+          minLength: 1
+          description: Par défaut, celui du payeur
+          maxLength: 32
+        city:
+          type: string
+          minLength: 1
+          maxLength: 80
+        district:
+          type: string
+          default: ''
+          maxLength: 80
+        addressLine:
+          type: string
+          minLength: 1
+          description: Rue, repère, indications
+          maxLength: 255
+      required:
+      - addressLine
+      - city
+      - recipientName
+      - zoneId
+    DeliveryZone:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        country:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+          description: « Cotonou et Calavi »
+        fee:
+          type: integer
+          readOnly: true
+          title: Frais de livraison (FCFA)
+        delayLabel:
+          type: string
+          readOnly: true
+          title: Délai annoncé
+          description: « 2 à 3 jours »
+      required:
+      - country
+      - delayLabel
+      - fee
+      - id
+      - name
+    DeliveryZoneSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+          description: « Cotonou et Calavi »
+        delayLabel:
+          type: string
+          readOnly: true
+          title: Délai annoncé
+          description: « 2 à 3 jours »
+      required:
+      - delayLabel
+      - id
+      - name
     DifficultyEnum:
       enum:
       - beginner
@@ -5022,6 +5112,26 @@ components:
       - code
       - id
       - label
+    GuestInputRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 150
+        phone:
+          type: string
+          minLength: 1
+          description: Reçoit le lien de suivi de la commande
+          maxLength: 32
+      required:
+      - firstName
+      - lastName
+      - phone
     Health:
       type: object
       properties:
@@ -6238,45 +6348,226 @@ components:
       - null
     Order:
       type: object
+      description: 'Commande vue par son payeur (parent ou invité) : avec l''adresse
+        de livraison.'
       properties:
-        id:
-          type: integer
-          readOnly: true
         reference:
           type: string
           readOnly: true
-        user:
+          title: Référence
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/OrderKindEnum'
+          readOnly: true
+          title: Type
+        status:
+          allOf:
+          - $ref: '#/components/schemas/OrderStatusEnum'
+          readOnly: true
+          title: Statut
+        shippingStatus:
+          allOf:
+          - $ref: '#/components/schemas/ShippingStatusEnum'
+          readOnly: true
+          title: Livraison
+        subtotal:
           type: integer
           readOnly: true
-        total:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Sous-total (FCFA)
+        shippingFee:
+          type: integer
           readOnly: true
+          title: Frais de livraison (FCFA)
+        total:
+          type: integer
+          readOnly: true
+          title: Total (FCFA)
         currency:
           type: string
           readOnly: true
-        paid:
-          type: boolean
-          readOnly: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
+          title: Devise
         items:
           type: array
           items:
             $ref: '#/components/schemas/OrderItem'
           readOnly: true
+        beneficiary:
+          allOf:
+          - $ref: '#/components/schemas/Beneficiary'
+          nullable: true
+          readOnly: true
+        deliveryZone:
+          allOf:
+          - $ref: '#/components/schemas/DeliveryZoneSummary'
+          readOnly: true
+        expiresAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Expire le
+        paidAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Payée le
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Créée le
+        deliveryAddress:
+          allOf:
+          - $ref: '#/components/schemas/DeliveryAddress'
+          readOnly: true
+          nullable: true
       required:
+      - beneficiary
       - createdAt
       - currency
-      - id
+      - deliveryAddress
+      - deliveryZone
+      - expiresAt
       - items
-      - paid
+      - kind
+      - paidAt
       - reference
+      - shippingFee
+      - shippingStatus
+      - status
+      - subtotal
       - total
-      - user
+    OrderCreateKindEnum:
+      enum:
+      - course
+      - kit
+      type: string
+      description: |-
+        * `course` - course
+        * `kit` - kit
+    OrderCreateRequest:
+      type: object
+      description: |-
+        `kind=course` : un parcours payant pour un enfant du parent (`beneficiaryId`). `kind=kit` : des kits livrés
+        (`deliveryAddress`), pour le parent (bénéficiaire facultatif) ou pour un invité (`guest`, sans compte, D12).
+        Les commandes d'événement naissent de la candidature (API-L3b.6).
+      properties:
+        kind:
+          $ref: '#/components/schemas/OrderCreateKindEnum'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemInputRequest'
+        beneficiaryId:
+          type: integer
+          description: Enfant du parent
+        guest:
+          allOf:
+          - $ref: '#/components/schemas/GuestInputRequest'
+          description: Achat de kit sans compte
+        deliveryAddress:
+          $ref: '#/components/schemas/DeliveryAddressInputRequest'
+      required:
+      - items
+      - kind
+    OrderCreated:
+      type: object
+      description: 'Commande vue par son payeur (parent ou invité) : avec l''adresse
+        de livraison.'
+      properties:
+        reference:
+          type: string
+          readOnly: true
+          title: Référence
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/OrderKindEnum'
+          readOnly: true
+          title: Type
+        status:
+          allOf:
+          - $ref: '#/components/schemas/OrderStatusEnum'
+          readOnly: true
+          title: Statut
+        shippingStatus:
+          allOf:
+          - $ref: '#/components/schemas/ShippingStatusEnum'
+          readOnly: true
+          title: Livraison
+        subtotal:
+          type: integer
+          readOnly: true
+          title: Sous-total (FCFA)
+        shippingFee:
+          type: integer
+          readOnly: true
+          title: Frais de livraison (FCFA)
+        total:
+          type: integer
+          readOnly: true
+          title: Total (FCFA)
+        currency:
+          type: string
+          readOnly: true
+          title: Devise
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          readOnly: true
+        beneficiary:
+          allOf:
+          - $ref: '#/components/schemas/Beneficiary'
+          nullable: true
+          readOnly: true
+        deliveryZone:
+          allOf:
+          - $ref: '#/components/schemas/DeliveryZoneSummary'
+          readOnly: true
+        expiresAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Expire le
+        paidAt:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Payée le
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Créée le
+        deliveryAddress:
+          allOf:
+          - $ref: '#/components/schemas/DeliveryAddress'
+          readOnly: true
+          nullable: true
+        guestToken:
+          type: string
+          readOnly: true
+          nullable: true
+          description: 'Invité seulement, remis une seule fois : à renvoyer dans l''en-tête
+            X-Guest-Token'
+      required:
+      - beneficiary
+      - createdAt
+      - currency
+      - deliveryAddress
+      - deliveryZone
+      - expiresAt
+      - guestToken
+      - items
+      - kind
+      - paidAt
+      - reference
+      - shippingFee
+      - shippingStatus
+      - status
+      - subtotal
+      - total
     OrderItem:
       type: object
       properties:
@@ -6286,35 +6577,77 @@ components:
         title:
           type: string
           readOnly: true
-        contentType:
+          title: Libellé
+        courseSlug:
           type: string
           readOnly: true
-          nullable: true
-        objectId:
+        kitSlug:
           type: string
           readOnly: true
-          nullable: true
+        eventSlug:
+          type: string
+          readOnly: true
         unitPrice:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          type: integer
           readOnly: true
+          title: Prix unitaire (FCFA)
         quantity:
           type: integer
           readOnly: true
+          title: Quantité
         total:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          type: integer
           readOnly: true
+          title: Total (FCFA)
       required:
-      - contentType
+      - courseSlug
+      - eventSlug
       - id
-      - objectId
+      - kitSlug
       - quantity
       - title
       - total
       - unitPrice
+    OrderItemInputRequest:
+      type: object
+      properties:
+        courseSlug:
+          type: string
+          minLength: 1
+          description: Commande de parcours
+          pattern: ^[-a-zA-Z0-9_]+$
+        kitSlug:
+          type: string
+          minLength: 1
+          description: Commande de kit
+          pattern: ^[-a-zA-Z0-9_]+$
+        quantity:
+          type: integer
+          maximum: 10
+          minimum: 1
+          default: 1
+    OrderKindEnum:
+      enum:
+      - course
+      - kit
+      - event
+      type: string
+      description: |-
+        * `course` - Parcours
+        * `kit` - Kit
+        * `event` - Événement
+    OrderStatusEnum:
+      enum:
+      - pending
+      - paid
+      - cancelled
+      - refunded
+      type: string
+      description: |-
+        * `pending` - En attente de paiement
+        * `paid` - Payée
+        * `cancelled` - Annulée
+        * `refunded` - Remboursée
     OriginEnum:
       enum:
       - learner
@@ -6620,26 +6953,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Order'
-    PaginatedPaymentList:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Payment'
     PaginatedSteamyEventList:
       type: object
       properties:
@@ -6909,47 +7222,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ValueEntryRequest'
-    Payment:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        order:
-          type: integer
-          readOnly: true
-        provider:
-          allOf:
-          - $ref: '#/components/schemas/ProviderEnum'
-          readOnly: true
-        providerTransactionId:
-          type: string
-          readOnly: true
-          nullable: true
-        amount:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          readOnly: true
-        currency:
-          type: string
-          readOnly: true
-        success:
-          type: boolean
-          readOnly: true
-        createdAt:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - amount
-      - createdAt
-      - currency
-      - id
-      - order
-      - provider
-      - providerTransactionId
-      - success
     PaymentNetwork:
       type: object
       properties:
@@ -7185,14 +7457,6 @@ components:
       required:
       - levels
       - title
-    ProviderEnum:
-      enum:
-      - fake
-      - fedapay
-      type: string
-      description: |-
-        * `fake` - Faux prestataire
-        * `fedapay` - FedaPay
     Question:
       type: object
       properties:
@@ -7696,6 +7960,16 @@ components:
       - label
       - period
       - value
+    ShippingStatusEnum:
+      enum:
+      - preparing
+      - shipped
+      - delivered
+      type: string
+      description: |-
+        * `preparing` - En préparation
+        * `shipped` - Expédiée
+        * `delivered` - Livrée
     SourceEnum:
       enum:
       - free
