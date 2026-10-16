@@ -296,6 +296,8 @@ REST_FRAMEWORK = {
         "webhook": os.getenv("THROTTLE_WEBHOOK", "120/min"),
         # Création de commande (réserve du stock) : par utilisateur, ou par IP pour un invité
         "orders": os.getenv("THROTTLE_ORDERS", "30/hour"),
+        # Initiation d'un paiement (chaque essai sollicite le téléphone du payeur)
+        "payments": os.getenv("THROTTLE_PAYMENTS", "20/hour"),
         # Alerte de réassort (un SMS par demande) : par IP pour un invité
         "restock-alert": os.getenv("THROTTLE_RESTOCK_ALERT", "10/hour"),
         # Formulaires publics (devis, newsletter, contact) : par IP
@@ -543,6 +545,10 @@ CELERY_BEAT_SCHEDULE = {
     },
     "release-expired-reservations": {
         "task": "apps.payments.tasks.release_expired_reservations",
+        "schedule": crontab(minute="*/5"),
+    },
+    "reconcile-pending-payments": {
+        "task": "apps.payments.tasks.reconcile_pending_payments",
         "schedule": crontab(minute="*/5"),
     },
 }

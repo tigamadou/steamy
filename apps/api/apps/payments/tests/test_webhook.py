@@ -5,6 +5,7 @@ import json
 import pytest
 from rest_framework.test import APIClient
 
+from apps.core.models import AuditLog
 from apps.payments.models import Order, Payment
 from apps.payments.providers.fake import SIGNATURE_HEADER, sign
 from apps.payments.tests.factories import OrderFactory
@@ -57,7 +58,10 @@ def test_falsified_amount_or_currency_does_not_pay(order, overrides):
     assert resp.status_code == 400 and resp.json() == {"ok": False}
     order.refresh_from_db()
     assert order.status == Order.Status.PENDING
-    assert not Payment.objects.exists()
+    payment = Payment.objects.get()
+    assert (payment.status, payment.failure_code) == (Payment.Status.FAILED, "AMOUNT_MISMATCH")
+    alert = AuditLog.objects.get(action="payment.amount_mismatch")
+    assert alert.target_id == str(order.pk)
 
 
 def test_replayed_notification_is_processed_once(order):
@@ -132,20 +136,3 @@ def test_internal_error_is_not_leaked(order, monkeypatch):
     resp = notify(valid_payload())
     assert resp.status_code == 400 and resp.json() == {"ok": False}
     assert "confidentiel" not in resp.content.decode()
-
-
-def test_concurrent_notification_reuses_the_recorded_transaction(order, monkeypatch):
-    """L'autre notification a créé la transaction entre la lecture et l'écriture : on la relit."""
-    from django.db import IntegrityError
-
-    Payment.objects.create(
-        order=order, provider="fake", provider_transaction_id="TX-1", amount=5000
-    )
-
-    def collide(**kwargs):
-        raise IntegrityError
-
-    monkeypatch.setattr(Payment.objects, "get_or_create", collide)
-    assert notify(valid_payload()).status_code == 200
-    order.refresh_from_db()
-    assert order.status == Order.Status.PAID

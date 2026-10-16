@@ -1,12 +1,22 @@
+"""
+Traitement des notifications de paiement (S5, S9, ADR 0003). Le webhook vérifié est la source de vérité ; la tâche
+`reconcile_pending_payments` passe par le même traitement quand un webhook s'est perdu.
+"""
+
 import logging
 
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from django.utils import timezone
 
+from apps.core.audit import audit
+
+from .fulfillment import settle
 from .models import Order, Payment
 from .providers import PaymentEvent, PaymentStatus
 
 logger = logging.getLogger(__name__)
+
+TERMINAL = (Payment.Status.SUCCEEDED, Payment.Status.FAILED)
 
 
 class WebhookRejected(Exception):
@@ -14,53 +24,68 @@ class WebhookRejected(Exception):
 
 
 @transaction.atomic
-def handle_payment_event(provider_name: str, event: PaymentEvent):
+def handle_payment_event(provider_name: str, event: PaymentEvent) -> bool:
     """
-    Enregistre une notification authentifiée et normalisée par le prestataire, et marque la commande payée si elle
-    est valide.
+    Applique une notification authentifiée et normalisée. Garanties :
+    - verrou sur la commande (`select_for_update`) : deux notifications simultanées sont traitées l'une après
+      l'autre, et l'exécution post-paiement n'a lieu qu'une fois ;
+    - idempotence : un paiement déjà réussi ou échoué n'est plus modifié (rejeu) ;
+    - montant et devise comparés à la commande : un écart fait échouer le paiement, sans payer la commande, et
+      laisse une alerte dans le journal d'audit.
 
-    Garanties (S5) :
-    - le montant ET la devise doivent correspondre exactement à la commande ;
-    - idempotence : une transaction (prestataire + identifiant) n'est traitée qu'une fois,
-      même en cas de notifications simultanées (verrou sur la commande + contrainte unique) ;
-    - une commande déjà payée n'est jamais modifiée.
+    Renvoie False si la notification est refusée après avoir été enregistrée (écart de montant ou de devise).
     """
-    try:
-        order = Order.objects.select_for_update().get(reference=event.reference)
-    except Order.DoesNotExist:
-        raise WebhookRejected("commande inconnue") from None
-
-    if event.amount != order.total or event.currency != order.currency.upper():
-        raise WebhookRejected(
-            f"montant ou devise incohérents ({event.amount} {event.currency} "
-            f"pour {order.total} {order.currency})"
-        )
-
-    try:
-        payment, _ = Payment.objects.get_or_create(
+    order = Order.objects.select_for_update().filter(reference=event.reference).first()
+    if order is None:
+        raise WebhookRejected("commande inconnue")
+    payment = (
+        Payment.objects.select_for_update()
+        .filter(provider=provider_name, provider_transaction_id=event.provider_tx_id)
+        .first()
+    )
+    if payment is not None and payment.order_id != order.id:
+        raise WebhookRejected("transaction rattachée à une autre commande")
+    if payment is None:  # initiation perdue ou faite hors de Steamy : la notification fait foi
+        payment = Payment.objects.create(
+            order=order,
             provider=provider_name,
             provider_transaction_id=event.provider_tx_id,
-            defaults={
-                "order": order,
-                "amount": event.amount,
-                "currency": order.currency,
-                "status": Payment.Status.PENDING,
+            amount=event.amount,
+            currency=event.currency or order.currency,
+            status=Payment.Status.PENDING,
+        )
+    if payment.status in TERMINAL:
+        return True  # rejeu : déjà traité
+
+    payment.payload = {"status": event.status, "amount": event.amount, "currency": event.currency}
+    if event.amount != order.total or event.currency != order.currency:
+        payment.status = Payment.Status.FAILED
+        payment.failure_code = "AMOUNT_MISMATCH"
+        payment.failure_reason = "Montant ou devise différents de la commande."
+        payment.save()
+        audit(
+            "payment.amount_mismatch",
+            target=order,
+            data={
+                "payment": payment.pk,
+                "expected": [order.total, order.currency],
+                "received": [event.amount, event.currency],
             },
         )
-    except IntegrityError:  # notification concurrente pour la même transaction
-        payment = Payment.objects.get(
-            provider=provider_name, provider_transaction_id=event.provider_tx_id
-        )
-    if payment.order_id != order.id:
-        raise WebhookRejected("transaction déjà rattachée à une autre commande")
-    if payment.status == Payment.Status.SUCCEEDED or order.status == Order.Status.PAID:
-        return payment  # rejeu : déjà traité
+        logger.warning("Paiement %s : montant ou devise incohérents", payment.pk)
+        return False
 
-    payment.status = event.status
-    payment.failure_reason = event.failure_reason
     if event.status == PaymentStatus.SUCCEEDED:
-        payment.confirmed_at = order.paid_at = timezone.now()
-        order.status = Order.Status.PAID
-        order.save(update_fields=["status", "paid_at", "updated_at"])
-    payment.save()
-    return payment
+        payment.status = Payment.Status.SUCCEEDED
+        payment.confirmed_at = timezone.now()
+        payment.save()
+        settle(order, payment)
+    elif event.status == PaymentStatus.FAILED:
+        payment.status = Payment.Status.FAILED
+        payment.failure_code = "DECLINED"
+        payment.failure_reason = event.failure_reason or "Paiement refusé."
+        payment.save()
+    else:
+        payment.status = Payment.Status.PENDING
+        payment.save()
+    return True

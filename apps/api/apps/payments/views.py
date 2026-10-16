@@ -12,14 +12,18 @@ from drf_spectacular.utils import (
     inline_serializer,
 )
 from rest_framework import mixins, permissions, serializers, status, viewsets
-from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.decorators import action, api_view, permission_classes, throttle_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
+from apps.notifications.sms import queue_sms
 from libs.authentication import enforce_csrf
 from libs.errors import ApiError
 
-from .models import Order
+from .checkout import initiate_payment
+from .fulfillment import guest_tracking_url
+from .models import Order, Payment
 from .orders import GUEST_TOKEN_HEADER, create_order, order_for_guest
 from .providers import PROVIDERS, get_provider
 from .serializers import (
@@ -27,6 +31,8 @@ from .serializers import (
     OrderCreatedSerializer,
     OrderCreateSerializer,
     OrderSerializer,
+    PaymentCreateSerializer,
+    PaymentSerializer,
 )
 from .utils import WebhookRejected, handle_payment_event
 
@@ -88,7 +94,7 @@ class OrderViewSet(
 
     def get_throttles(self):
         # Seule la création (qui réserve du stock) a son plafond dédié
-        self.throttle_scope = "orders" if self.action == "create" else None
+        self.throttle_scope = {"create": "orders", "pay": "payments"}.get(self.action)
         return super().get_throttles()
 
     def get_queryset(self):
@@ -150,8 +156,86 @@ class OrderViewSet(
             delivery_zone=data.get("delivery_zone"),
             delivery_address=data.get("delivery_address"),
         )
+        if (
+            guest_token
+        ):  # suivi par lien SMS (C10) : le seul moyen pour l'invité de retrouver sa commande
+            queue_sms(
+                order.guest_phone,
+                f"Steamy : commande {order.reference} enregistrée. "
+                f"Suivi : {guest_tracking_url(order, guest_token)}",
+                purpose="order",
+            )
         body = {**OrderSerializer(order).data, "guest_token": guest_token}
         return Response(body, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="Payer une commande par Mobile Money (parent payeur, ou invité avec X-Guest-Token)",
+        parameters=[GUEST_TOKEN_PARAMETER],
+        request=PaymentCreateSerializer,
+        responses={201: PaymentSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="payments", permission_classes=[AllowAny])
+    def pay(self, request, reference=None):
+        """
+        Initie le débit (USSD push, sans redirection). La réponse donne le paiement `pending` (ou `failed` si le
+        prestataire refuse) ; son issue se lit ensuite sur `GET payments/payments/{id}/`. Aussi pour reprendre une
+        commande en attente après un échec.
+        """
+        user = request.user
+        if not user.is_authenticated:
+            enforce_csrf(request)
+        elif user.is_learner:
+            raise ApiError("PARENT_APPROVAL_REQUIRED")
+        elif not user.is_parent:
+            raise ApiError("PERMISSION_DENIED")
+        order = payable_order(request, reference)
+        data = PaymentCreateSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        payment = initiate_payment(order, **data.validated_data)
+        return Response(PaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
+
+
+def payable_order(request, reference) -> Order:
+    """Commande payable par l'appelant : payée par lui (parent), ou ouverte par son jeton (invité)."""
+    queryset = Order.objects.select_related("payer")
+    if request.user.is_authenticated:
+        order = queryset.filter(reference=reference, payer=request.user).first()
+    else:
+        token = request.headers.get(GUEST_TOKEN_HEADER, "")
+        order = order_for_guest(reference, token) if token else None
+    if order is None:
+        raise ApiError("NOT_FOUND")
+    return order
+
+
+@extend_schema_view(
+    retrieve=extend_schema(
+        summary="État d'un paiement (payeur, ou invité avec X-Guest-Token)",
+        parameters=[GUEST_TOKEN_PARAMETER],
+    )
+)
+class PaymentViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """Paiement lisible par le payeur de la commande seulement ; l'apprenant n'y a pas accès (C12)."""
+
+    queryset = Payment.objects.select_related("order")
+    serializer_class = PaymentSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        payment = self.get_queryset().filter(pk=self.kwargs["pk"]).first()
+        user = self.request.user
+        allowed = payment is not None and (
+            (user.is_authenticated and payment.order.payer_id == user.pk)
+            or (
+                not user.is_authenticated
+                and order_for_guest(
+                    payment.order.reference, self.request.headers.get(GUEST_TOKEN_HEADER, "")
+                )
+            )
+        )
+        if not allowed:
+            raise ApiError("NOT_FOUND")
+        return payment
 
 
 # Webhook endpoint for providers (unprotected CSRF exempt; verify signature inside)
@@ -203,7 +287,8 @@ def provider_webhook(request, provider_name: str):
         return Response({"ok": True})  # événement sans rapport avec un paiement
 
     try:
-        handle_payment_event(provider.name, event)
+        if not handle_payment_event(provider.name, event):
+            return rejected
     except WebhookRejected as exc:
         logger.warning("Webhook %s refusé : %s", provider_name, exc)
         return rejected

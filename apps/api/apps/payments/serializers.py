@@ -8,14 +8,15 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail, NotAuthenticated
 
-from apps.accounts.fields import PhoneField
+from apps.accounts.fields import PhoneField, phone_country
 from apps.accounts.models import ParentChildLink
 from apps.catalog.models import Course
 from apps.shop.models import DeliveryZone, Kit
 from libs.errors import message_for
+from libs.phone import mask_phone
 
 from . import pricing
-from .models import Order, OrderItem
+from .models import Order, OrderItem, Payment
 
 #: Types de commande créables directement (l'événement passe par la candidature)
 ORDER_CREATE_KINDS = [Order.Kind.COURSE, Order.Kind.KIT]
@@ -242,3 +243,49 @@ class OrderCreatedSerializer(OrderSerializer):
     class Meta(OrderSerializer.Meta):
         fields = (*OrderSerializer.Meta.fields, "guest_token")
         read_only_fields = fields
+
+
+# --- Paiements ---------------------------------------------------------------------------------
+
+
+class PaymentCreateSerializer(serializers.Serializer):
+    """Mobile Money uniquement : pays, réseau (référentiel `payment-networks`) et numéro du payeur (D76)."""
+
+    country = serializers.CharField(min_length=2, max_length=2, help_text="Code ISO (BJ)")
+    network = serializers.SlugField(max_length=40, help_text="Code du réseau (mtn, moov, celtiis…)")
+    msisdn = PhoneField(help_text="Numéro Mobile Money qui validera le paiement")
+
+    def validate(self, attrs):
+        attrs["country"] = attrs["country"].upper()
+        country = phone_country(attrs["msisdn"])
+        if country is None or country.code != attrs["country"]:
+            raise invalid("msisdn", "PHONE_INVALID", "Ce numéro n'est pas un numéro de ce pays.")
+        return attrs
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    """État d'un paiement (WA04, WA05, WA07, WK09), interrogé jusqu'à `succeeded` ou `failed`."""
+
+    order_reference = serializers.CharField(source="order.reference", read_only=True)
+    msisdn_masked = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Payment
+        fields = (
+            "id",
+            "order_reference",
+            "status",
+            "country",
+            "network",
+            "msisdn_masked",
+            "amount",
+            "currency",
+            "failure_code",
+            "failure_reason",
+            "created_at",
+            "confirmed_at",
+        )
+        read_only_fields = fields
+
+    def get_msisdn_masked(self, payment) -> str:
+        return mask_phone(payment.msisdn)
