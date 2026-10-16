@@ -13,4 +13,6 @@ export { Sparkline, type SparklineProps } from "./Sparkline";
 export { StatCard, type DeltaTone, type StatCardProps } from "./StatCard";
 export { StatusBadge, type StatusBadgeProps, type StatusTone } from "./StatusBadge";
 export { CARD, FOCUS, formatNumber } from "./styles";
+export { Overview, REPORT_STATUS, reportSteps, type OverviewData, type OverviewProps } from "./Overview";
+export { SectionHead, type SectionHeadProps } from "./SectionHead";
 export { PendingPanel, type PendingPanelProps } from "./PendingPanel";

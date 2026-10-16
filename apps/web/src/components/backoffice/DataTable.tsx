@@ -50,7 +50,7 @@ export function DataTable<Row extends object>({
                 scope="col"
                 style={column.width ? { width: column.width } : undefined}
                 className={cx(
-                  "border-b border-ink-100 px-4 py-3 text-[11px] font-extrabold uppercase tracking-[.05em] whitespace-nowrap text-ink-500",
+                  "border-b border-ink-100 px-4 py-3 text-[11px] font-extrabold uppercase tracking-[.05em] whitespace-nowrap text-ink-600",
                   ALIGN[column.align ?? "left"],
                 )}
               >
@@ -62,7 +62,7 @@ export function DataTable<Row extends object>({
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="p-9 text-center text-sm font-semibold text-ink-500">
+              <td colSpan={columns.length} className="p-9 text-center text-sm font-semibold text-ink-600">
                 {empty}
               </td>
             </tr>

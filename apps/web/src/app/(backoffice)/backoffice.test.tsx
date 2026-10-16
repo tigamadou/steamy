@@ -8,9 +8,33 @@ import { BackofficeGate } from "@/components/backoffice/BackofficeGate";
 const requireGroups = vi.fn();
 const requireStaff = vi.fn();
 const back = vi.fn();
-vi.mock("@/lib/backoffice/guard", () => ({ requireGroups, requireStaff }));
+const publicApiUrl = vi.fn(() => "http://api.steamy.test:8000");
+const apiGet = vi.fn();
+vi.mock("@/lib/backoffice/guard", () => ({ requireGroups, requireStaff, publicApiUrl }));
+vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET: apiGet }) }));
 vi.mock("@/components/backoffice/BackofficeGate", () => ({ BackofficeGate: () => null }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ back }), usePathname: () => "/backoffice" }));
+
+const OVERVIEW = {
+  period: { key: "2026-10", label: "Octobre 2026", start: "2026-10-01", end: "2026-10-31" },
+  highlight: {
+    code: "na",
+    label: "Nouveaux apprenants",
+    value: 12,
+    target: 200,
+    status: { status: "off_target", tone: "error", label: "Hors-cible" },
+  },
+  stats: { users: 40, activeLearners: 12, salesMonth: null, completionRate: null },
+  report: { period: "2026-t4", label: "T4 2026", dueDate: "2027-01-15", status: "draft", entered: 0, total: 12 },
+  todo: [
+    {
+      kind: "consents_pending",
+      label: "Consentements en attente",
+      count: 2,
+      adminPath: "/admin/accounts/consentrequest/?status__exact=pending",
+    },
+  ],
+};
 
 const me = (over = {}) => ({ firstName: "Awa", staffGroups: ["Contenu"], ...over });
 
@@ -32,19 +56,33 @@ describe("pages du back-office", () => {
     requireStaff.mockReset().mockResolvedValue(me());
   });
 
-  it("WAD01 est ouverte à tout le personnel, en attendant ses données (6.7)", async () => {
+  it("WAD01 est ouverte à tout le personnel et lit la vue d'ensemble du serveur", async () => {
+    apiGet.mockResolvedValue({ data: OVERVIEW, response: new Response(null, { status: 200 }) });
     const { default: Page } = await import("./backoffice/page");
     render(await Page());
     expect(requireGroups).toHaveBeenCalledWith([]);
+    expect(apiGet).toHaveBeenCalledWith("/api/backoffice/overview/");
     expect(screen.getByRole("heading", { level: 1, name: "Vue d'ensemble" })).toBeInTheDocument();
-    expect(screen.getByText("Bonjour Awa")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Consentements en attente/ })).toHaveAttribute(
+      "href",
+      "http://api.steamy.test:8000/admin/accounts/consentrequest/?status__exact=pending",
+    );
+    // Contenu n'ouvre pas l'Impact Tracker
+    expect(screen.queryByRole("link", { name: "Voir l'Impact Tracker" })).not.toBeInTheDocument();
   });
 
-  it("WAD01 salue sans prénom", async () => {
-    requireGroups.mockResolvedValue(me({ firstName: "" }));
+  it("WAD01 propose l'Impact Tracker à Finance", async () => {
+    requireGroups.mockResolvedValue(me({ staffGroups: ["Finance"] }));
+    apiGet.mockResolvedValue({ data: OVERVIEW, response: new Response(null, { status: 200 }) });
     const { default: Page } = await import("./backoffice/page");
     render(await Page());
-    expect(screen.getByText("Bonjour")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Voir l'Impact Tracker" })).toBeInTheDocument();
+  });
+
+  it("WAD01 laisse une panne de l'API à error.tsx (WX02)", async () => {
+    apiGet.mockResolvedValue({ error: { code: "SERVER_ERROR" }, response: new Response(null, { status: 500 }) });
+    const { default: Page } = await import("./backoffice/page");
+    await expect(Page()).rejects.toThrow("réponse inattendue de l'API (500)");
   });
 
   it("l'Impact Tracker revérifie le groupe Finance ou Super-admin", async () => {

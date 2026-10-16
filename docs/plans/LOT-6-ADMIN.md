@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API), 6.7 et 6.8 (après API-L6.4) · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API), 6.8 puis 6.9 · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -99,12 +99,20 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > valeurs de `SourceTag` (`auto`, `manual`, `unavailable`) sont à aligner sur le contrat d'`API-L6.4`.
   > Le refus de `/backoffice/impact` est vérifié en e2e avec le compte Support (aussi hors Finance et Super-admin) :
   > Contenu reçoit des codes faux dans `admin-connexion.spec.ts`, ce qui déclenche la limitation de django-otp.
-- [ ] **6.7** WAD01 Vue d'ensemble · `feature/lot6-vue-ensemble` (requiert 6.6, API-L6.4)
-  - [ ] WAD01 (Next.js) `/backoffice` : hero, 4 `StatCard`, carte échéance (`DeadlineTracker`), liste « À traiter »
-  - [ ] Branchement API : `GET backoffice/overview/` (entrées « À traiter » filtrées par groupe, `adminPath` fourni par le serveur)
-  - [ ] Tests Vitest : états vide, chargement, erreur
-  - [ ] Test pytest (API-L6) : compteurs sur D2, entrées filtrées par groupe
-  - [ ] Playwright : Support clique « Consentements en attente » vers la liste Django filtrée
+- [x] **6.7** WAD01 Vue d'ensemble · `feature/lot6-vue-ensemble` · PR #93 (requiert 6.6, API-L6.4)
+  - [x] WAD01 (Next.js) `/backoffice` : hero, 4 `StatCard`, carte échéance (`DeadlineTracker`), liste « À traiter »
+  - [x] Branchement API : `GET backoffice/overview/` (entrées « À traiter » filtrées par groupe, `adminPath` fourni par le serveur)
+  - [x] Tests Vitest : états vide, chargement, erreur
+  - [x] Test pytest (API-L6) : compteurs sur D2, entrées filtrées par groupe
+  - [x] Playwright : Support clique « Consentements en attente » vers la liste Django filtrée
+  > Notes : les pytest de la vue d'ensemble sont livrés par API-L6.4 (`apps/impact/tests/test_api.py`), sur un jeu de
+  > test dédié et non sur D2. « À traiter » ne compte encore que les consentements en attente : paiements échoués et
+  > candidatures s'ajoutent côté API avec API-L3b, sans changement du front. Pas de courbe ni de variation sur les
+  > `StatCard` (l'API n'en fournit pas) ; le taux de complétion s'affiche « — » jusqu'à API-L3a. Le lien « Ouvrir le
+  > rapport » (WAD04) arrive avec sa page, à l'étape 6.9 ; « Voir l'Impact Tracker » n'apparaît qu'à Finance et
+  > Super-admin. Échéance du rapport : 15 jours après la fin du trimestre (hypothèse d'API-L6.4).
+  > Contraste : le texte secondaire des primitives de 6.6 passe de `ink-500` (4,44:1 sur blanc) à `ink-600`, relevé par
+  > axe une fois les données affichées.
 - [ ] **6.8** Impact Tracker : tableau de bord et détail · `feature/lot6-impact-kpi` (requiert 6.6, API-L6.4)
   - [ ] Vérifier les prérequis `API-L6` : 30 `KpiDefinition` en 8 groupes, calcul nocturne, statut D73, KPI d'inclusion, « Nouvelles institutions »
   - [ ] WAD02 (Next.js) `/backoffice/impact?periode=` : boutons vers WAD05 et WAD04, légende des sources, `SegmentedControl` synchronisé avec l'URL, KPI principaux, cartes démographiques, groupes de KPI (`Sparkline`, `KpiStatusBadge`)

@@ -144,7 +144,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WK09` | Paiement échoué | 3 |  |  |
 | `WK10` | Panier vide | 3 |  |  |
 | `WK11` | Stock épuisé | 3 |  |  |
-| `WAD01` | Vue d'ensemble | 6 |  |  |
+| `WAD01` | Vue d'ensemble | 6 | Support : chiffres et échéance du serveur, sans lien vers l'Impact Tracker ; « Consentements en attente » → liste Django filtrée | `apps/web/e2e/backoffice.spec.ts` |
 | `WAD02` | Impact Tracker · dashboard KPI | 6 |  |  |
 | `WAD03` | Impact Tracker · détail indicateur | 6 |  |  |
 | `WAD04` | Impact Tracker · rapport trimestriel | 6 |  |  |
