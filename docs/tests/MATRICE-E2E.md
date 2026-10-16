@@ -153,8 +153,8 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WAD07` | Détail utilisateur | 6 |  |  |
 | `WAD08` | Modération & consentements | 6 |  |  |
 | `WAD09` | Contenu / Parcours | 6 | Contenu via WAD15 : liste (accès, kit, inscrits), arbre par pages chaînées (fil d'Ariane, aperçu Vimeo), statut en lecture seule, « Publier » | `apps/web/e2e/admin-contenu.spec.ts` |
-| `WAD10` | Boutique & commandes | 6 |  |  |
-| `WAD11` | Paiements Mobile Money | 6 |  |  |
+| `WAD10` | Boutique & commandes | 6 | Support : commandes de kits (articles, livraison par action), Kit Codes sur la fiche, stock des kits à 3 seuils | `apps/web/e2e/admin-commerce.spec.ts` |
+| `WAD11` | Paiements Mobile Money | 6 | Finance : agrégats de la liste, numéro masqué, notification du prestataire visible | `apps/web/e2e/admin-commerce.spec.ts` |
 | `WAD12` | Steamy Events (modération) | 6 |  |  |
 | `WAD13` | Équipe & rôles (RBAC) | 6 |  |  |
 | `WAD14` | Paramètres généraux | 6 |  |  |
