@@ -70,7 +70,7 @@ test("WC06a/WC06b : l'arbre se déplie par l'URL, une étape verrouillée n'est 
 
   await page.getByRole("link", { name: new RegExp(first.title) }).click();
   await expect(page).toHaveURL(`/apprenant/parcours/${COURSE}?projet=${first.id}`);
-  await expect(page.getByRole("link", { name: new RegExp(first.title) })).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByRole("link", { name: new RegExp(`${first.title}.*masquer les étapes`) })).toBeVisible();
   const next = page.getByRole("link", { name: new RegExp(tree.next.title ?? "") }).filter({ has: page.locator("[aria-hidden]") });
   await expect(next.first()).toHaveAttribute("aria-current", "step");
   await axe(page);
