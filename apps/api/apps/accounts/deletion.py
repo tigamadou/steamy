@@ -264,10 +264,15 @@ def anonymize_due() -> int:
         done = 0
         for deletion in due:
             deletion.resolved_at = timezone.now()
-            if deletion.user.status != User.Status.DEACTIVATED:
+            if deletion.user.status == User.Status.ACTIVE:
                 # Compte réactivé à la main entre-temps (admin) : la suppression n'a plus lieu d'être
                 deletion.status = Status.CANCELLED
                 deletion.save()
+                audit(
+                    "deletion.cancelled",
+                    target=deletion.user,
+                    data={"reason": "Compte réactivé avant l'anonymisation"},
+                )
                 continue
             anonymize(deletion.user)
             deletion.status = Status.DONE

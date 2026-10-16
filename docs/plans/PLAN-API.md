@@ -655,8 +655,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > pays, D76 ; `null` l'efface) et de `GET accounts/me/parent-profile/` pour WPD08.
   > Suites : relecture (#104) ; fin d'API-L4 (PR #107) : jeu de démonstration, annulation d'une suppression par le
   > support (admin `DeletionRequest`, permission `cancel_deletion`, Super-admin et Support ; un compte réactivé à la
-  > main n'est jamais anonymisé), rapport hebdomadaire réservé dans `WeeklyReportSent` (contrainte d'unicité),
-  > `previousWeek` nul à la borne de 2000.
+  > main n'est jamais anonymisé, sa demande annulée et journalisée ; un compte suspendu l'est), rapport hebdomadaire
+  > réservé dans `WeeklyReportSent` (contrainte d'unicité ; la migration réserve les rapports déjà notifiés),
+  > `previousWeek` nullable, nul à la borne de 2000.
 - [x] **Critères de fin d'API-L4** · PR #107
   - [x] Un `childId` étranger → 404 partout
   - [x] `Notification.url` pointe vers les routes front des plans

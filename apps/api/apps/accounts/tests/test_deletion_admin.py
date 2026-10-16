@@ -7,12 +7,13 @@ import pytest
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from apps.accounts.models import DeletionRequest, User
+from apps.accounts.models import DeletionRequest, ParentChildLink, User
 from apps.accounts.tasks import anonymize_due_accounts
-from apps.accounts.tests.factories import ParentFactory
+from apps.accounts.tests.factories import LearnerFactory, ParentFactory
 from apps.core.groups import FINANCE, SUPPORT
 from apps.core.models import AuditLog
 from apps.core.tests.staff import verified_client
+from apps.referentials.models import Relationship
 
 pytestmark = pytest.mark.django_db
 
@@ -37,7 +38,7 @@ def parent_deletes_own_account():
 
 
 def test_support_cancels_the_deletion_of_a_parent_account(client):
-    verified_client(client, SUPPORT)
+    staff = verified_client(client, SUPPORT)
     parent, deletion = parent_deletes_own_account()
     assert client.get(URL).status_code == 200
     assert client.get(f"{URL}{deletion.pk}/change/").status_code == 200
@@ -51,6 +52,7 @@ def test_support_cancels_the_deletion_of_a_parent_account(client):
     assert parent.status == User.Status.ACTIVE
     entry = AuditLog.objects.get(action="deletion.cancelled_by_support")
     assert entry.data == {"reason": "Le parent a changé d'avis (appel du 16/10)"}
+    assert entry.actor == staff
     # Déjà close : ignorée
     again = run_action(client, [deletion], reason="Encore")
     assert any("ignorée" in str(m) for m in again.wsgi_request._messages)
@@ -84,13 +86,19 @@ def test_an_account_reactivated_by_hand_is_never_anonymized():
     parent.refresh_from_db()
     assert deletion.status == DeletionRequest.Status.CANCELLED
     assert parent.status == User.Status.ACTIVE and parent.phone
+    assert AuditLog.objects.filter(action="deletion.cancelled", target_id=str(parent.pk)).exists()
+
+
+def test_a_suspended_account_is_still_anonymized():
+    parent, deletion = parent_deletes_own_account()
+    User.objects.filter(pk=parent.pk).update(status=User.Status.SUSPENDED, is_active=False)
+    DeletionRequest.objects.filter(pk=deletion.pk).update(scheduled_for=timezone.now())
+    assert anonymize_due_accounts() == 1
+    parent.refresh_from_db()
+    assert parent.status == User.Status.ANONYMIZED
 
 
 def test_support_cancels_a_childs_request_that_still_waits_for_the_parent(client):
-    from apps.accounts.models import ParentChildLink
-    from apps.accounts.tests.factories import LearnerFactory
-    from apps.referentials.models import Relationship
-
     verified_client(client, SUPPORT)
     child = LearnerFactory()
     ParentChildLink.objects.create(

@@ -168,3 +168,28 @@ def test_a_reserved_report_is_not_sent_again(parent):
     WeeklyReportSent.objects.create(parent=parent, child=child, week=week_code(last_monday))
     assert send_weekly_reports() == 0
     assert not Notification.objects.filter(type="weekly_report").exists()
+
+
+def test_reports_notified_before_the_reservation_table_are_not_sent_again(parent):
+    from importlib import import_module
+
+    from django.apps import apps
+
+    migration = import_module("apps.accounts.migrations.0012_deletion_permission_weekly_report")
+    child = link(parent)
+    last_monday = timezone.localdate() - timedelta(days=timezone.localdate().weekday() + 7)
+    code = week_code(last_monday)
+    Notification.objects.create(
+        user=parent,
+        category="progress",
+        type="weekly_report",
+        title="Semaine de Léa",
+        url=f"/parent/enfants/{child.pk}/rapport?semaine={code}",
+    )
+    Notification.objects.create(
+        user=parent, category="progress", type="weekly_report", title="?", url="/parent"
+    )
+    migration.reserve_sent_reports(apps, None)
+    migration.reserve_sent_reports(apps, None)
+    assert list(WeeklyReportSent.objects.values_list("child_id", "week")) == [(child.pk, code)]
+    assert send_weekly_reports() == 0

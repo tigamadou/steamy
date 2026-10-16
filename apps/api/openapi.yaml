@@ -11912,6 +11912,8 @@ components:
           description: Dimanche
         previousWeek:
           type: string
+          nullable: true
+          description: Null pour la première semaine acceptée (2000-W01)
         nextWeek:
           type: string
           nullable: true
