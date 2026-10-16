@@ -3,6 +3,9 @@ Exports du rapport trimestriel (WAD04, D74) : génération asynchrone CSV / PDF 
 contenu identique à WAD04, export réservé à qui l'a demandé, téléchargement par URL présignée ou fichier servi.
 """
 
+import csv
+import io
+
 import pytest
 from celery.exceptions import Retry
 from rest_framework.test import APIClient
@@ -268,3 +271,50 @@ def test_an_export_belongs_to_its_requester(client, finance, django_capture_on_c
     support = APIClient()
     verified_client(support, SUPPORT, email="support2@steamy.test")
     assert support.get(export_url(created["id"])).status_code == 403
+
+
+@pytest.mark.parametrize(
+    ("text", "cell"),
+    [
+        ('=HYPERLINK("http://x")', '\'=HYPERLINK("http://x")'),
+        ("+33 1 23", "'+33 1 23"),
+        ("-2+3", "'-2+3"),
+        ("@SUM(A1)", "'@SUM(A1)"),
+        ("\tcachée", "'\tcachée"),
+        ("\rretour", "'\rretour"),
+        ("Fondation OIF", "Fondation OIF"),
+    ],
+)
+def test_csv_neutralizes_formulas_in_free_text(text, cell):
+    row = {
+        "start": "2026-01-01",
+        "end": "2026-03-31",
+        "status": {"label": "Renseignée"},
+        "source": "manual",
+    }
+    data = {
+        "rows": [
+            {**row, "label": "Lesquels ?", "value": text, "unit": "text"},
+            {**row, "label": "Variation", "value": -1500, "unit": "fcfa"},
+        ]
+    }
+    content = exports.render_csv(data).decode("utf-8-sig")
+    rows = list(csv.reader(io.StringIO(content, newline=""), delimiter=";"))
+    assert rows[1][3] == cell
+    assert rows[2][3] == "-1500 FCFA"  # un nombre n'est jamais préfixé
+
+
+def test_an_export_finished_meanwhile_is_not_rewritten(client, finance, monkeypatch):
+    monkeypatch.setattr(tasks.generate_report_export, "delay", lambda *args: None)
+    created = client.post(EXPORTS, {"format": "csv"}, content_type="application/json").json()
+    original = exports.RENDERERS["csv"]
+
+    def render_then_finish(data):
+        content = original(data)
+        monkeypatch.setitem(exports.RENDERERS, "csv", original)
+        exports.build_export(created["id"])  # un autre essai termine pendant ce rendu
+        return content
+
+    monkeypatch.setitem(exports.RENDERERS, "csv", render_then_finish)
+    assert exports.build_export(created["id"]) is False
+    assert ReportExport.objects.get(pk=created["id"]).status == "ready"

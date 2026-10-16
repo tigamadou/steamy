@@ -14,7 +14,16 @@ def aggregate_daily_stats() -> int:
 EXPORT_MAX_RETRIES = 5
 
 
-@shared_task(bind=True, acks_late=True, max_retries=EXPORT_MAX_RETRIES)
+#: Durée maximale d'un rendu (secondes) : au-delà, l'essai échoue et la tâche réessaie
+EXPORT_SOFT_TIME_LIMIT = 120
+
+
+@shared_task(
+    bind=True,
+    acks_late=True,
+    max_retries=EXPORT_MAX_RETRIES,
+    soft_time_limit=EXPORT_SOFT_TIME_LIMIT,
+)
 def generate_report_export(self, export_id: int) -> bool:
     """Fichier d'un export de rapport (D74) ; après les réessais, l'export passe à `failed` (WAD04 le signale)."""
     from .exports import build_export

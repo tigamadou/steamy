@@ -38,6 +38,8 @@ def request_export(quarter: Period, fmt: str, user, request=None) -> ReportExpor
     from .tasks import generate_report_export
 
     with transaction.atomic():
+        # L'export se rattache à un `ImpactReport` : un trimestre encore vide reçoit son rapport en brouillon (comme à
+        # la première saisie ou à la soumission), sans effet sur ce que WAD04 affiche
         report, _ = ImpactReport.objects.get_or_create(period=quarter.key)
         export = ReportExport.objects.create(
             report=report, format=fmt, snapshot=snapshot(quarter), requested_by=user
@@ -84,11 +86,24 @@ def lines(data: dict) -> list[list[str]]:
     ]
 
 
+#: Débuts de cellule qu'un tableur interprète comme une formule (injection CSV, OWASP)
+FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def neutralize(text: str) -> str:
+    """Texte libre rendu inerte dans un tableur : préfixé d'une apostrophe s'il commence comme une formule."""
+    return f"'{text}" if text.startswith(FORMULA_PREFIXES) else text
+
+
 def render_csv(data: dict) -> bytes:
     buffer = io.StringIO()
     writer = csv.writer(buffer, delimiter=";", lineterminator="\r\n")
     writer.writerow(HEADERS)
-    writer.writerows(lines(data))
+    for row, line in zip(data["rows"], lines(data), strict=True):
+        # Seule la réponse d'un KPI texte est saisie librement ; les nombres (montants négatifs compris) restent tels quels
+        if isinstance(row["value"], str):
+            line[3] = neutralize(line[3])
+        writer.writerow(line)
     return buffer.getvalue().encode("utf-8-sig")
 
 
@@ -117,16 +132,24 @@ def build_export(export_id: int) -> bool:
     Génère le fichier depuis le contenu figé, sous une clé déterministe (même UUID) : relancer ne crée pas de second
     fichier. Ne fait rien si l'export est prêt et présent. Renvoie si un fichier a été écrit.
     """
+    export = ReportExport.objects.get(pk=export_id)
+    if _ready(export):
+        return False
+    # Rendu (WeasyPrint peut être long) hors de la transaction : le verrou de ligne ne couvre que l'écriture
+    content = RENDERERS[export.format](export.snapshot)
     with transaction.atomic():
         export = ReportExport.objects.select_for_update().get(pk=export_id)
-        if (
-            export.status == ReportExport.Status.READY
-            and export.file
-            and export.file.storage.exists(export.file.name)
-        ):
+        if _ready(export):
             return False
-        content = RENDERERS[export.format](export.snapshot)
         export.file.save(export.filename, ContentFile(content), save=False)
         export.status = ReportExport.Status.READY
         export.save(update_fields=["file", "status"])
     return True
+
+
+def _ready(export: ReportExport) -> bool:
+    return (
+        export.status == ReportExport.Status.READY
+        and bool(export.file)
+        and export.file.storage.exists(export.file.name)
+    )

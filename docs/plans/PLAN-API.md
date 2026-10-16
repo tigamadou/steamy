@@ -749,6 +749,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > BOM UTF-8, virgule décimale, dates `jj/mm/aaaa`). Réessais exponentiels, puis `failed` ; code `EXPORT_NOT_READY`
   > (409). Pas de notification en fin d'export : le personnel n'a pas de centre de notifications, WAD04 interroge
   > l'état et annonce le fichier prêt. Énumération partagée `PdfStatusEnum` (certificats, factures, exports).
+  > Suites de relecture : réponses texte du CSV neutralisées (apostrophe devant `= + - @`, tabulation, retour chariot ;
+  > nombres intacts) ; rendu hors du verrou de ligne ; `soft_time_limit` de 120 s. Point ouvert : rétention des
+  > fichiers `impact-exports/` (aucune purge en v1, à fixer avec l'exploitation).
 - [ ] **Critères de fin d'API-L6**
   - [ ] Toutes les routes `backoffice/` protégées par `IsStaffVerified`
   - [ ] Seed enrichi, `make openapi` committé
