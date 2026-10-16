@@ -329,3 +329,24 @@ def test_seed_demo_fills_koffis_classrooms_with_learners_and_invitations(sms):
     assert EventProposal.objects.get().classroom.name == "4e B · Robotique"
     # SMS de l'invitation en attente (faux fournisseur, lisible dans Mailpit)
     assert "/consentement/" in sms.last(INVITATIONS[0][2])
+
+
+def test_seed_demo_gives_koffi_something_to_review_a_comment_and_a_dropout():
+    from rest_framework.test import APIClient
+
+    from apps.classrooms.demo import LEA_COMMENT
+    from apps.core.demo import KOFFI_EMAIL
+
+    call_command("seed_demo")
+    call_command("seed_demo")  # idempotent
+    client = APIClient()
+    client.force_authenticate(User.objects.get(email=KOFFI_EMAIL))
+    body = client.get("/api/classrooms/dashboard/").json()
+    to_review = {row["learner"]["firstName"] for row in body["toReview"]}
+    assert {"Yao", "Léa"} <= to_review
+    assert [row["learner"]["firstName"] for row in body["dropouts"]] == ["Sèna"]
+    lea = APIClient()
+    lea.force_authenticate(User.objects.get(username="lea.adjovi"))
+    assert [c["body"] for c in lea.get("/api/classrooms/comments/").json()["results"]] == [
+        LEA_COMMENT
+    ]
