@@ -32,6 +32,12 @@ export function targetText(kpi: Pick<KpiSummary, "target" | "unit">): string | n
   return kpi.target === null ? null : `cible ${formatKpiValue(kpi.target, kpi.unit)}`;
 }
 
+/** Courbe d'une `StatCard` : deux points au moins, sinon rien. */
+function sparkOf(kpi: KpiSummary): number[] | undefined {
+  const { values } = numericSeries(kpi.series);
+  return values.length > 1 ? values : undefined;
+}
+
 export type ImpactDashboardProps = { dashboard: KpiDashboard; period: ImpactPeriodId };
 
 /** WAD02 · Impact Tracker : valeurs, séries et statuts du serveur (`backoffice/kpis/`), jamais recalculés. */
@@ -67,7 +73,7 @@ export function ImpactDashboard({ dashboard, period }: ImpactDashboardProps) {
                   <KpiStatusBadge status={kpi.status} />
                 </span>
               }
-              spark={numericSeries(kpi.series).values}
+              spark={sparkOf(kpi)}
             />
           ))}
         </div>
@@ -155,7 +161,7 @@ function DemographicsCard({
       <SectionHead
         id={`group-${group.code}`}
         title={`Inclusion · ${group.label}`}
-        sub={first && `Base : ${formatKpiValue(first.value, first.unit)} inscrits · ${periodLabel}`}
+        sub={first && `Base : ${first.label.toLowerCase()} (${formatKpiValue(first.value, first.unit)}) · ${periodLabel}`}
       />
       <ul className="m-0 mb-2 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3">
         {parts.map((part) => {
@@ -166,13 +172,14 @@ function DemographicsCard({
                 <DonutChart
                   value={part.value}
                   total={of.value}
-                  size={88}
+                  size={96}
+                  thickness={10}
                   label={`${part.label} parmi ${of.label.toLowerCase()}`}
                 />
               ) : (
                 <span
                   aria-hidden
-                  className="flex size-22 items-center justify-center rounded-full border-[13px] border-ink-100 text-sm font-black text-ink-600"
+                  className="flex size-24 items-center justify-center rounded-full border-[13px] border-ink-100 text-sm font-black text-ink-600"
                 >
                   —
                 </span>

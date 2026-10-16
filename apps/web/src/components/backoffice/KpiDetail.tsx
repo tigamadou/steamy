@@ -74,7 +74,7 @@ export function KpiDetail({ kpi, period }: KpiDetailProps) {
                   {kpi.attainment !== null && ` · atteinte à ${kpi.attainment} %`}
                 </p>
               </div>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-55 flex-1">
                 <BarChart
                   data={series.values}
                   labels={series.labels}
@@ -126,6 +126,7 @@ export function KpiDetail({ kpi, period }: KpiDetailProps) {
                         value={part.value}
                         total={kpi.value}
                         size={96}
+                        thickness={10}
                         label={`${part.label} parmi ${kpi.label.toLowerCase()}`}
                       />
                     ) : (

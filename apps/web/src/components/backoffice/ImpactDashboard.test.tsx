@@ -22,6 +22,7 @@ describe("WAD02 · Impact Tracker", () => {
     expect(within(sales).getByRole("img", { name: /Tendance · Ventes réalisées/ })).toBeInTheDocument();
     const nps = screen.getByRole("region", { name: "Recommandation (NPS)" });
     expect(within(nps).getByText("—")).toBeInTheDocument();
+    expect(within(nps).queryByRole("img")).not.toBeInTheDocument();
     expect(text(within(nps).getByText(/^cible/).textContent)).toBe("cible 8 / 10En attente");
 
     // Groupe ordinaire : lignes liées au détail, en gardant la période
@@ -34,7 +35,7 @@ describe("WAD02 · Impact Tracker", () => {
 
     // Inclusion : part de chaque sous-indicateur dans sa base, « — » si la valeur manque
     const inclusion = screen.getByRole("region", { name: "Inclusion · Apprenants (NA)" });
-    expect(within(inclusion).getByText("Base : 220 inscrits · Octobre 2026")).toBeInTheDocument();
+    expect(within(inclusion).getByText("Base : nouveaux apprenants (220) · Octobre 2026")).toBeInTheDocument();
     expect(within(inclusion).getByRole("img", { name: "Femmes parmi nouveaux apprenants : 30 %" })).toBeInTheDocument();
     expect(within(inclusion).getByRole("link", { name: "Situation de handicap" })).toBeInTheDocument();
     expect(within(inclusion).getByRole("link", { name: "Connectés ≥ 1 fois" })).toBeInTheDocument();
@@ -89,7 +90,7 @@ describe("WAD02 · Impact Tracker", () => {
         }}
       />,
     );
-    expect(screen.getByText("Base : 0 inscrits · Octobre 2026")).toBeInTheDocument();
+    expect(screen.getByText("Base : nouveaux utilisateurs (0) · Octobre 2026")).toBeInTheDocument();
     expect(screen.queryByRole("img", { name: /Femmes parmi/ })).not.toBeInTheDocument();
   });
 });
