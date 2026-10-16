@@ -1529,6 +1529,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/accounts/pending-actions/:
+    get:
+      operationId: accounts_pending_actions_list
+      description: 'WPD01 « À valider » : toutes les demandes en attente, la plus
+        récente d''abord (liste non paginée).'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PendingAction'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/analytics/events/:
     post:
       operationId: analytics_events_create
@@ -2843,6 +2879,116 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
         '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/events/applications/{id}/accept/:
+    post:
+      operationId: events_applications_accept_create
+      description: |-
+        `POST events/applications/{id}/accept/` (WPD06, D53) : gratuit ou ticket → confirmée ; payant → place réservée
+        et commande d'événement (`orderReference`) à payer par le parent. L'apprenant ne décide jamais (S8).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - events
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/events/applications/{id}/refuse/:
+    post:
+      operationId: events_applications_refuse_create
+      description: '`POST events/applications/{id}/refuse/` (WPD06) : motif facultatif,
+        l''enfant est prévenu.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationRefuseRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
           content:
             application/json:
               schema:
@@ -4201,7 +4347,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OrderCreateRequest'
-        required: true
       security:
       - cookieAuth: []
       - {}
@@ -5785,6 +5930,13 @@ components:
           oneOf:
           - $ref: '#/components/schemas/DifficultyEnum'
           - $ref: '#/components/schemas/BlankEnum'
+    ApplicationRefuseRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          default: ''
+          maxLength: 255
     ApplicationStatusEnum:
       enum:
       - pending_parent
@@ -7404,6 +7556,7 @@ components:
       - AGE_OUT_OF_RANGE
       - ALREADY_APPLIED
       - ALREADY_IN_CLASSROOM
+      - APPLICATION_ALREADY_RESOLVED
       - BIRTHDATE_AGE_MISMATCH
       - CHILDREN_STILL_LINKED
       - CLASSROOM_NAME_TAKEN
@@ -7475,6 +7628,7 @@ components:
         * `AGE_OUT_OF_RANGE` - AGE_OUT_OF_RANGE
         * `ALREADY_APPLIED` - ALREADY_APPLIED
         * `ALREADY_IN_CLASSROOM` - ALREADY_IN_CLASSROOM
+        * `APPLICATION_ALREADY_RESOLVED` - APPLICATION_ALREADY_RESOLVED
         * `BIRTHDATE_AGE_MISMATCH` - BIRTHDATE_AGE_MISMATCH
         * `CHILDREN_STILL_LINKED` - CHILDREN_STILL_LINKED
         * `CLASSROOM_NAME_TAKEN` - CLASSROOM_NAME_TAKEN
@@ -9089,7 +9243,9 @@ components:
       description: |-
         `kind=course` : un parcours payant pour un enfant du parent (`beneficiaryId`). `kind=kit` : des kits livrés
         (`deliveryAddress`), pour le parent (bénéficiaire facultatif) ou pour un invité (`guest`, sans compte, D12).
-        Les commandes d'événement naissent de la candidature (API-L3b.6).
+        Les commandes d'événement naissent de la candidature (API-L3b.6). `paymentRequestId` (WPD15) : la commande
+        règle la demande de l'enfant ; type, lignes et bénéficiaire viennent alors de la demande, seule l'adresse de
+        livraison d'un kit est à fournir.
       properties:
         kind:
           $ref: '#/components/schemas/OrderCreateKindEnum'
@@ -9097,6 +9253,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderItemInputRequest'
+        paymentRequestId:
+          type: integer
+          description: Demande de paiement de l'enfant réglée par cette commande (WPD15)
         beneficiaryId:
           type: integer
           description: Enfant du parent
@@ -9106,9 +9265,6 @@ components:
           description: Achat de kit sans compte
         deliveryAddress:
           $ref: '#/components/schemas/DeliveryAddressInputRequest'
-      required:
-      - items
-      - kind
     OrderCreated:
       type: object
       description: |-
@@ -10284,6 +10440,49 @@ components:
         * `pending` - En préparation
         * `ready` - Prêt
         * `failed` - Échec
+    PendingAction:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/PendingActionTypeEnum'
+        id:
+          type: string
+          description: Identifiant de la demande, dans son type
+        childId:
+          type: integer
+          nullable: true
+          description: Enfant rattaché ; null pour un consentement (pas encore de
+            lien)
+        childFirstName:
+          type: string
+        childLastName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        url:
+          type: string
+          description: Route du front où traiter la demande
+      required:
+      - childFirstName
+      - childId
+      - childLastName
+      - createdAt
+      - id
+      - type
+      - url
+    PendingActionTypeEnum:
+      enum:
+      - consent
+      - payment_request
+      - event_application
+      - deletion_request
+      type: string
+      description: |-
+        * `consent` - Consentement (WPD05)
+        * `payment_request` - Demande de paiement (WPD15)
+        * `event_application` - Candidature à un événement (WPD06)
+        * `deletion_request` - Demande de suppression (WPD09)
     Period:
       type: object
       properties:
