@@ -93,6 +93,10 @@ describe("QuizRunner (WJ04 / WJ10)", () => {
     await act(async () => resolve({ ok: true, data: attemptDetail() }));
     expect(router.replace).toHaveBeenCalledWith("/apprenant/parcours/robot-bluetooth/quiz/201/resultats/9");
     expect(readRawDraft(201)).toBeNull();
+    // Page gardée en mémoire par Next : le quiz repart de la première question, prêt à être renvoyé
+    expect(screen.getByText("Question 1 sur 2")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Question suivante/ })).toBeDisabled();
+    expect(screen.queryByText("On corrige tes réponses…")).not.toBeInTheDocument();
   });
 
   it("reprend le brouillon de l'onglet après un rechargement", () => {
