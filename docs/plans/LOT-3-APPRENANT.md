@@ -15,7 +15,7 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
+Statut : 🟡 en cours · Prochaine tâche : 3.2 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
 
 ### Valeur pédagogique (API-L3a) — 🟡 en cours
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
@@ -29,7 +29,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3
   - [x] Tests unitaires : nav à 5 entrées visibles, `active` dérivé de l'URL, compteur, modale au clavier
   - [x] Parcours Playwright : apprenant → shell ; parent sur `/apprenant` → redirection ; non connecté → `/connexion?next=` puis retour
   - [x] Recette : aucune donnée en dur, aucun `title="Bientôt"`, rendu 360 px, squelette du shell pendant le chargement
-- [ ] **3.1** Accueil, notifications et aide (requiert API-L3a) · `feature/lot3-accueil-notifications` · PR #101
+- [x] **3.1** Accueil, notifications et aide (requiert API-L3a) · `feature/lot3-accueil-notifications` · PR #101
   - [x] WD01 tableau de bord avec reprise (`StatPill` Streak, Points, Rang masqués si `null`)
   - [x] WD02 tableau de bord sans reprise (catalogue `prix=gratuit`)
   - [x] WD03 `loading.tsx` fidèle à WD01
@@ -39,7 +39,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.1 · Prérequis : API-1 et API-L3
   - [x] WD12 aide (FAQ statique, recherche locale, lien WL24)
   - [x] Composants `NotifItem`, `ResumeCard`
   - [x] Tests unitaires : WD01 sans points, notification lue au clic, toggle email désactivé sans adresse
-  - [ ] Parcours Playwright : « Tout marquer comme lu » met le compteur du shell à 0
+  - [x] Parcours Playwright : « Tout marquer comme lu » met le compteur du shell à 0
 - [ ] **3.2** Catalogue, fiche parcours et souhaits (requiert API-L1, API-L3a) · `feature/lot3-catalogue-souhaits`
   - [ ] WC01 catalogue (filtres catégorie × difficulté × prix + tri + `q` dans l'URL)
   - [ ] WC02 filtres actifs (`ActiveFilterBar`)
