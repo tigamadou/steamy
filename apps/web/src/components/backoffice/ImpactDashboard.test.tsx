@@ -74,6 +74,33 @@ describe("WAD02 · Impact Tracker", () => {
     expect(within(inclusion).getByRole("link", { name: "Femmes" })).toHaveAttribute("href", "/backoffice/impact/indicateurs/nu_f");
   });
 
+  it("affiche chaque indicateur de base de la carte d'inclusion", () => {
+    render(
+      <ImpactDashboard
+        period="mois"
+        dashboard={{
+          period: PERIOD,
+          groups: [
+            {
+              code: "users",
+              label: "Utilisateurs (NU)",
+              kpis: [
+                kpi({ code: "nu", label: "Nouveaux utilisateurs", value: 6 }),
+                kpi({ code: "nu_alt", label: "Comptes validés", value: 4 }),
+                kpi({ code: "nu_f", label: "Femmes", baseCode: "nu", value: 3 }),
+                kpi({ code: "nu_v", label: "Validées", baseCode: "nu_alt", value: 2 }),
+              ],
+            },
+          ],
+        }}
+      />,
+    );
+    expect(
+      screen.getByText("Base : nouveaux utilisateurs (6), comptes validés (4) · Octobre 2026"),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Validées parmi comptes validés : 50 %" })).toBeInTheDocument();
+  });
+
   it("ne dessine pas de part sur une base nulle", () => {
     render(
       <ImpactDashboard

@@ -155,13 +155,17 @@ function DemographicsCard({
   const parts = group.kpis.filter((kpi) => kpi.baseCode);
   const others = group.kpis.filter((kpi) => !kpi.baseCode);
   const base = (part: KpiSummary) => group.kpis.find((kpi) => kpi.code === part.baseCode);
-  const first = base(parts[0]);
+  // Une ligne « Base » par indicateur de base distinct (un seul dans les groupes actuels)
+  const bases = group.kpis.filter((kpi) => parts.some((part) => part.baseCode === kpi.code));
   return (
     <section aria-labelledby={`group-${group.code}`} className={CARD}>
       <SectionHead
         id={`group-${group.code}`}
         title={`Inclusion · ${group.label}`}
-        sub={first && `Base : ${first.label.toLowerCase()} (${formatKpiValue(first.value, first.unit)}) · ${periodLabel}`}
+        sub={
+          bases.length > 0 &&
+          `Base : ${bases.map((b) => `${b.label.toLowerCase()} (${formatKpiValue(b.value, b.unit)})`).join(", ")} · ${periodLabel}`
+        }
       />
       <ul className="m-0 mb-2 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3">
         {parts.map((part) => {

@@ -297,3 +297,65 @@ def test_learner_sees_their_parent_without_contact_details():
 def test_my_parent_is_reserved_to_a_linked_learner(parent):
     assert as_user(LearnerFactory()).get("/api/accounts/me/parent/").status_code == 404
     assert as_user(parent).get("/api/accounts/me/parent/").status_code == 403
+
+
+# --- WPD01, WPD03 · Progression ----------------------------------------------------------------
+
+
+def test_parent_sees_the_progress_of_their_child(parent):
+    from apps.learning.models import Enrollment, MissionProgress
+    from apps.learning.tests.factories import EnrollmentFactory, build_course, missions_of
+
+    child = link(parent)
+    started = EnrollmentFactory(learner=child, course=build_course(projects=1, levels=1))
+    MissionProgress.objects.create(enrollment=started, mission=missions_of(started.course)[0])
+    EnrollmentFactory(
+        learner=child,
+        course=build_course(projects=1, levels=1, missions=1),
+        status=Enrollment.Status.COMPLETED,
+    )
+    EnrollmentFactory(course=build_course(projects=1, levels=1))  # autre apprenant
+    client = as_user(parent)
+    assert client.get(URL).json()["results"][0]["activeCourses"] == 1
+    courses = client.get(f"{URL}{child.pk}/").json()["courses"]
+    assert len(courses) == 2
+    first = next(c for c in courses if c["id"] == started.pk)
+    assert first["course"]["slug"] == started.course.slug
+    assert (first["missionsDone"], first["missionCount"]) == (1, 2)
+
+
+def test_parent_sees_the_recent_attempts_and_badges_of_their_child(parent):
+    from apps.catalog.models import Quiz
+    from apps.learning.models import QuizAttempt
+    from apps.learning.tests.factories import EnrollmentFactory, build_course
+
+    child = link(parent)
+    enrollment = EnrollmentFactory(learner=child, course=build_course(quizzes=True))
+    quiz = Quiz.objects.filter(level__project__course=enrollment.course).first()
+    for percentage in (40, 60, 75, 80, 90, 100):
+        QuizAttempt.objects.create(
+            learner=child,
+            enrollment=enrollment,
+            quiz=quiz,
+            score=percentage,
+            total=100,
+            percentage=percentage,
+            threshold=70,
+            status="ok" if percentage >= 70 else "ko",
+            passed=percentage >= 70,
+        )
+    other = EnrollmentFactory(course=enrollment.course)
+    QuizAttempt.objects.create(
+        learner=other.learner,
+        enrollment=other,
+        quiz=quiz,
+        score=0,
+        total=100,
+        percentage=0,
+        threshold=70,
+        status="ko",
+    )
+    body = as_user(parent).get(f"{URL}{child.pk}/").json()
+    assert [a["percentage"] for a in body["recentAttempts"]] == [100, 90, 80, 75, 60]
+    assert body["recentAttempts"][0]["status"] == "ok"
+    assert body["badges"] == 0
