@@ -15,7 +15,7 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 3.3c, 3.4 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
+Statut : 🟡 en cours · Prochaine tâche : 3.6 (après API-L3b) · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
 
 ### Valeur pédagogique (API-L3a) — 🟡 en cours
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
@@ -82,13 +82,14 @@ Statut : 🟡 en cours · Prochaine tâche : 3.3c, 3.4 · Prérequis : API-1 et 
   - [x] `WJ07` certification obtenue (PDF avec état « Préparation… », ticket derrière le drapeau `events` jusqu'à 3.8)
   - [x] `WJ09` certification non obtenue (projets ou missions restants)
   - [x] Test unitaire `CertificateView` : réponse d'API affichée telle quelle
-- [ ] **3.4** Tentatives et progression (requiert API-L3a) · `feature/lot3-tentatives-progression`
-  - [ ] WD07 liste des tentatives (bandeau, filtres et tri dans l'URL)
-  - [ ] WD09 liste vide (renvoi vers WD23)
-  - [ ] WD08 détail d'une tentative (corrigé, concepts, `RetryCountdown`)
-  - [ ] WD21 progression (`WeeklyActivityBars`, maîtrise par catégorie, recommandations)
-  - [ ] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
-  - [ ] Tests unitaires : statut issu du serveur affiché tel quel (D31)
+- [x] **3.4** Tentatives et progression (requiert API-L3a) · `feature/lot3-tentatives-progression` · PR #97
+  - [x] `WD07` liste des tentatives (bandeau, filtres dans l'URL ; tri : ordre de l'API, sans paramètre de tri)
+  - [x] `WD09` liste vide (renvoi vers WD23)
+  - [x] `WD08` détail d'une tentative (corrigé, concepts, `RetryCountdown`)
+  - [x] `WD21` progression (`WeeklyActivityBars`, maîtrise par catégorie, recommandations)
+  - [x] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
+  - [x] Tests unitaires : statut issu du serveur affiché tel quel (D31)
+  - [x] Parcours Playwright : filtre dans l'URL, détail, apprenant sans quiz, progression
 - [ ] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres`
   - [ ] WD13 profil (hub de `SettingsRow`, identifiant en lecture seule)
   - [ ] WD17 modification du profil (`ProfileForm`, `AvatarPicker`, `GoalChip`)

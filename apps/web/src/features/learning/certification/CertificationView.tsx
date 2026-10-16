@@ -2,19 +2,17 @@ import type { Schemas } from "@steamy/api-client";
 
 import { Breadcrumb } from "@/components/ds/Breadcrumb";
 import { Button } from "@/components/ds/Button";
-import { CourseCard } from "@/components/ds/CourseCard";
 import { MissionItem } from "@/components/ds/MissionItem";
-import { SectionHeader } from "@/components/ds/SectionHeader";
 import { getServerApi } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/session";
 import { features } from "@/lib/features";
-import { toCourseCard } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
 import { certificateDownloadUrl, readContent } from "../content";
 import { formatHours, position } from "../format";
 import { LockedContentState } from "../LockedContentState";
 import { nextStepHref } from "../next-step";
+import { Recommendations } from "../Recommendations";
 import { CertificateDownload } from "./CertificateDownload";
 
 const MONTH = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric", timeZone: "Africa/Porto-Novo" });
@@ -29,24 +27,6 @@ export function remainingLabel(tree: Schemas["Tree"]): string {
   if (projects > 1) return plural(projects, "projet", "projets");
   const missions = tree.certification.missionCount - tree.certification.missionsDone;
   return missions > 0 ? plural(missions, "mission", "missions") : plural(projects, "projet", "projets");
-}
-
-function Recommendations({ items }: { items: Schemas["Recommendation"][] }) {
-  if (items.length === 0) return null;
-  return (
-    <section aria-labelledby="continue-ton-aventure" className="flex flex-col gap-3">
-      <SectionHeader
-        id="continue-ton-aventure"
-        title="Continue ton aventure"
-        action={{ label: "Voir tout", href: routes.learner.catalog }}
-      />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((course) => (
-          <CourseCard key={course.slug} course={toCourseCard(course, routes.learner.catalogCourse(course.slug))} />
-        ))}
-      </div>
-    </section>
-  );
 }
 
 // WJ07 (certification obtenue) / WJ09 (parcours incomplet) · L'API dit si les conditions D33 sont remplies.
@@ -176,7 +156,7 @@ export async function CertificationView({ slug }: { slug: string }) {
           </Button>
         </section>
       )}
-      <Recommendations items={recommendations.data ?? []} />
+      <Recommendations id="continue-ton-aventure" title="Continue ton aventure" items={recommendations.data ?? []} />
     </div>
   );
 }

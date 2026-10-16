@@ -277,3 +277,36 @@ export function learnerBadge(overrides: Partial<Schemas["LearnerBadge"]> = {}): 
     ...overrides,
   };
 }
+
+export function attemptListItem(overrides: Partial<Schemas["AttemptListItem"]> = {}): Schemas["AttemptListItem"] {
+  const { quiz, score, total, percentage, threshold, status, passed, durationSec, pointsEarned, createdAt } = attemptDetail();
+  return { id: 9, quiz, score, total, percentage, threshold, status, passed, durationSec, pointsEarned, createdAt, ...overrides };
+}
+
+export function progress(overrides: Partial<Schemas["Progress"]> = {}): Schemas["Progress"] {
+  return {
+    weekSeconds: 4500,
+    lastDays: [
+      { date: "2026-10-10", seconds: 0 },
+      { date: "2026-10-11", seconds: 600 },
+      { date: "2026-10-12", seconds: 1200 },
+      { date: "2026-10-13", seconds: 900 },
+      { date: "2026-10-14", seconds: 300 },
+      { date: "2026-10-15", seconds: 1500 },
+      { date: "2026-10-16", seconds: 0 },
+    ],
+    points: 1240,
+    rank: { label: "Inventeur", minPoints: 300, nextLabel: "Ingénieur", nextAt: 600 },
+    streakDays: 5,
+    counters: { activeEnrollments: 2, completedEnrollments: 1, certificates: 1, badges: 4, wishlist: 2 },
+    mastery: [
+      {
+        category: { slug: "robotique", label: "Robotique", color: "#5B3FE0", icon: "🤖" },
+        missionsDone: 3,
+        missionCount: 10,
+        pct: 30,
+      },
+    ],
+    ...overrides,
+  };
+}
