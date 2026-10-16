@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0009_deletion_request'),
+        ('accounts', '0010_deletion_request'),
         ('referentials', '0003_deletion_reason'),
     ]
 

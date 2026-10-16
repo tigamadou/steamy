@@ -107,6 +107,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = _("utilisateur")
         verbose_name_plural = _("utilisateurs")
         ordering = ["id"]
+        # Droits du support sur les comptes (D71, matrice `apps.core.groups`)
+        permissions = [
+            ("invite_teacher", "Peut inviter un enseignant"),
+            ("deactivate_user", "Peut suspendre, désactiver ou réactiver un compte"),
+            ("reset_password", "Peut réinitialiser le mot de passe d'un compte"),
+        ]
         constraints = [
             # Unicités conditionnelles, insensibles à la casse (C7)
             models.UniqueConstraint(
@@ -276,6 +282,7 @@ class LearnerProfile(TimestampedModel):
     class Meta:
         verbose_name = _("profil apprenant")
         verbose_name_plural = _("profils apprenants")
+        permissions = [("view_sensitive_profile", "Peut voir le genre et le handicap (D6)")]
 
     def __str__(self):
         return f"Profil apprenant de {self.user}"
@@ -415,6 +422,8 @@ class ConsentRequest(TimestampedModel):
         LEARNER = "learner", "Apprenant"
         PARENT = "parent", "Parent"
         TEACHER = "teacher", "Enseignant"
+        #: Changement de parent demandé par le support (D22)
+        SUPPORT = "support", "Support"
 
     class Status(models.TextChoices):
         PENDING = "pending", "En attente"
@@ -461,11 +470,28 @@ class ConsentRequest(TimestampedModel):
     )
     refusal_note = models.TextField(_("précisions du refus"), blank=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
+    #: Litige signalé par le support (D70) : la demande reste à trancher par le parent.
+    disputed_at = models.DateTimeField(_("en litige depuis"), null=True, blank=True)
+    dispute_note = models.TextField(_("note du litige"), blank=True)
+    #: Changement de parent (D22) : lien remplacé seulement à l'acceptation de la demande par le nouveau parent.
+    replaces_link = models.ForeignKey(
+        "ParentChildLink",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="replacement_requests",
+        verbose_name=_("lien remplacé"),
+    )
 
     class Meta:
         verbose_name = _("demande de consentement")
         verbose_name_plural = _("demandes de consentement")
         ordering = ["-created_at"]
+        # Suivi par le support (D70) : relancer et signaler un litige, jamais trancher
+        permissions = [
+            ("resend", "Peut relancer le parent"),
+            ("flag_dispute", "Peut marquer une demande en litige"),
+        ]
         indexes = [models.Index(fields=["parent_phone", "status"])]
         constraints = [
             models.UniqueConstraint(
@@ -494,6 +520,7 @@ class ParentChildLink(TimestampedModel):
     class Meta:
         verbose_name = _("lien parent-enfant")
         verbose_name_plural = _("liens parent-enfant")
+        permissions = [("change_parent", "Peut demander un changement de parent (D22)")]
 
     def __str__(self):
         return f"{self.parent} → {self.learner}"
@@ -561,3 +588,60 @@ class DeletionRequest(TimestampedModel):
 
     def __str__(self):
         return f"Suppression de {self.user} ({self.status})"
+
+
+class StaffMember(User):
+    """Membres du personnel (WAD13), gérés par le Super-admin seul : groupes, appareil TOTP, garde-fous."""
+
+    class Meta:
+        proxy = True
+        verbose_name = _("membre du personnel")
+        verbose_name_plural = _("équipe")
+
+
+class PublicProfileReview(TimestampedModel):
+    """
+    Modération a priori de l'affichage public d'un mineur (D15, WAD08) : pseudonyme et avatar proposés, approuvés
+    ou rejetés par le support. Seul un pseudonyme approuvé est recopié sur le profil.
+    """
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "À modérer"
+        APPROVED = "approved", "Approuvé"
+        REJECTED = "rejected", "Rejeté"
+
+    learner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="public_profile_reviews",
+        verbose_name=_("apprenant"),
+    )
+    pseudonym = models.CharField(_("pseudonyme"), max_length=30)
+    avatar = models.ForeignKey(
+        "referentials.Avatar",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("avatar"),
+    )
+    status = models.CharField(
+        _("statut"), max_length=10, choices=Status.choices, default=Status.PENDING
+    )
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("modéré par"),
+    )
+    reviewed_at = models.DateTimeField(_("modéré le"), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("affichage public à modérer")
+        verbose_name_plural = _("affichages publics à modérer")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.pseudonym} ({self.get_status_display().lower()})"

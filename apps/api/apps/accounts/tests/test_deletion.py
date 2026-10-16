@@ -17,6 +17,7 @@ from apps.accounts.models import (
     DeletionRequest,
     OtpChallenge,
     ParentChildLink,
+    PublicProfileReview,
     User,
 )
 from apps.accounts.tasks import anonymize_due_accounts
@@ -287,6 +288,7 @@ def test_child_is_fully_anonymized_and_the_username_released(parent, child):
         expires_at=timezone.now(),
         last_sent_at=timezone.now(),
     )
+    PublicProfileReview.objects.create(learner=child, pseudonym="LeaBot")
     username = child.username
     schedule(parent, child)
     assert anonymize_due_accounts() == 1
@@ -308,6 +310,7 @@ def test_child_is_fully_anonymized_and_the_username_released(parent, child):
     assert consent.subject == {} and consent.refusal_note == ""
     assert not Notification.objects.filter(user=child).exists()
     assert not OtpChallenge.objects.filter(user=child).exists()
+    assert not PublicProfileReview.objects.filter(learner=child).exists()
     deletion = DeletionRequest.objects.get(user=child)
     assert deletion.status == DeletionRequest.Status.DONE and deletion.note == ""
     assert AuditLog.objects.filter(action="deletion.done", target_id=str(child.pk)).exists()
