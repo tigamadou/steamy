@@ -181,6 +181,10 @@ CATALOG: dict[str, tuple[int, str]] = {
     ),
     "CLASSROOM_NAME_TAKEN": (S.HTTP_409_CONFLICT, "Une de vos classes porte déjà ce nom."),
     "REPORT_LOCKED": (S.HTTP_409_CONFLICT, "Ce rapport est soumis : il n'est plus modifiable."),
+    "EXPORT_NOT_READY": (
+        S.HTTP_409_CONFLICT,
+        "L'export est en cours de préparation. Réessayez dans quelques instants.",
+    ),
     # --- Import d'élèves (codes par ligne, C19) ---------------------------------------------
     "DUPLICATE_ROW": (S.HTTP_400_BAD_REQUEST, "Ligne en double dans le fichier."),
     "MALFORMED_ROW": (S.HTTP_400_BAD_REQUEST, "Ligne incomplète ou mal formée."),
