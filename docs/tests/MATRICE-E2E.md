@@ -66,8 +66,8 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WD07` | Tentatives de quiz · liste | 3 | Bandeau de l'API, filtre par statut dans l'URL (rechargement) | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD08` | Tentatives de quiz · détail | 3 | Détail : score, seuil appliqué, « Voir le parcours » | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD09` | Tentatives de quiz · vide | 3 | Nouvel apprenant sans quiz → Mes parcours | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
-| `WD10` | Steamy Events | 3 |  |  |
-| `WD11` | Demande de participation | 3 |  |  |
+| `WD10` | Steamy Events | 3 | P6 : événements à venir (prix, complet), candidature « En attente de ton parent », plus de « Participer » ; raccourci de WD01 | `apps/web/e2e/apprenant-evenements.spec.ts` |
+| `WD11` | Demande de participation | 3 | P6 : motivation obligatoire, expérience, accord du parent, envoi → WD10 ; second envoi refusé (`ALREADY_APPLIED`) ; événement complet sans formulaire | `apps/web/e2e/apprenant-evenements.spec.ts` |
 | `WD12` | Aide & support | 3 | Recherche locale dans la FAQ, « Contacter le support » → WL24 | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
 | `WD13` | Paramètres (hub) | 3 | Apprenant neuf : identifiant en lecture seule, ni téléphone ni « Bientôt », liens vers WD06, CGU, WD18 et retour par le fil d'Ariane | `apps/web/e2e/profil-parametres.spec.ts` |
 | `WD14` | Historique de commande | 3 |  |  |
@@ -163,7 +163,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WX02` | Erreur réseau | 1 |  |  |
 | `WX03` | Chargement | 1 |  |  |
 | `WL22` | Fiche parcours publique (variante de WC04 sans contenu des missions) | 1 | WL06 → fiche → CTA inscription avec `next` ; sans contenu de mission ni Vimeo ; plan au clavier ; kit requis ; brouillon → 404 | `apps/web/e2e/fiche-parcours.spec.ts` |
-| `WL23` | Fiche événement (publique, réutilisée dans les espaces connectés) | 1 | CTA visiteur → connexion avec `next` ; complet et passé désactivés avec motif ; inconnu → 404 | `apps/web/e2e/evenements-boutique.spec.ts` |
+| `WL23` | Fiche événement (publique, réutilisée dans les espaces connectés) | 1 | CTA visiteur → connexion avec `next` ; complet et passé désactivés avec motif ; inconnu → 404. Dans le shell apprenant (P6) : titre en h2, « Demander à participer » → WD11, complet désactivé avec motif, inconnu → 404 | `apps/web/e2e/evenements-boutique.spec.ts`, `apps/web/e2e/apprenant-evenements.spec.ts` |
 | `WL24` | Aide & contact (FAQ + formulaire) | 1 | Contact : « Rejoindre l'équipe » → `?sujet=candidature` → envoi → confirmation ; FAQ et recherche ; ancres | `apps/web/e2e/formulaires.spec.ts` |
 | `WD23` | Mes parcours (liste des inscriptions) | 3 | Onglets En cours / Terminés adressables, carte → arbre | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WPD15` | Demande de paiement (parcours, kit ou événement demandé par l'enfant ; reprend WA03) | 4 |  |  |

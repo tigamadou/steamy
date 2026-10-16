@@ -5,7 +5,6 @@ import { Button } from "@/components/ds/Button";
 import { MissionItem } from "@/components/ds/MissionItem";
 import { getServerApi } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/session";
-import { features } from "@/lib/features";
 import { routes } from "@/lib/routes";
 
 import { certificateDownloadUrl, readContent } from "../content";
@@ -143,7 +142,7 @@ export async function CertificationView({ slug }: { slug: string }) {
           downloadUrl={certificateDownloadUrl(certificate.id)}
         />
       </section>
-      {features.events && certification.eventTicket && (
+      {certification.eventTicket && (
         <section aria-labelledby="ticket" className="flex flex-col items-start gap-2 rounded-[22px] bg-amber-50 p-5">
           <h3 id="ticket" className="m-0 text-lg font-black text-ink-900">
             Ticket Steamy Events offert !
