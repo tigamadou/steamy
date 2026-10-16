@@ -68,6 +68,10 @@ export function DropdownMenu({ label, items, variant = "outline", align = "start
     if (event.key in moves) {
       event.preventDefault();
       options.current[moves[event.key]]?.focus();
+    } else if (event.key === " ") {
+      // Espace choisit l'option comme Entrée (un lien ne réagit qu'à Entrée)
+      event.preventDefault();
+      options.current[index]?.click();
     } else if (event.key === "Escape") {
       event.preventDefault();
       close();
@@ -130,7 +134,7 @@ export function DropdownMenu({ label, items, variant = "outline", align = "start
                 aria-checked={!!item.selected}
                 tabIndex={-1}
                 scroll={false}
-                onClick={() => setOpen(false)}
+                onClick={close}
                 className={cx(
                   "flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-sm font-bold text-ink-900 outline-none",
                   "hover:bg-ink-100 focus-visible:bg-ink-100 focus-visible:outline-2 focus-visible:outline-primary-500",

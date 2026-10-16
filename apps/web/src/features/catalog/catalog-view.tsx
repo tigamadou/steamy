@@ -18,6 +18,7 @@ import {
 import { DIFFICULTY_LABELS, toCourseCard } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
+import { DegradedNotice } from "./DegradedNotice";
 import { getLearnerCourseState } from "./learner-state";
 import { LearnerCourseGrid } from "./LearnerCourseGrid";
 
@@ -151,6 +152,7 @@ export async function LearnerCatalog({
       </div>
 
       <ActiveFilterBar countLabel={countLabel(courses.count)} filters={active} clearHref={clearHref} />
+      {state.degraded && <DegradedNotice />}
 
       <h2 className="sr-only">{category ? `Parcours : ${category.label}` : "Tous les parcours"}</h2>
       <div className="mt-4">
