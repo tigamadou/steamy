@@ -5,13 +5,19 @@ import { describe, expect, it, vi } from "vitest";
 
 import { AppShellSkeleton } from "@/components/ds/AppShell";
 import { Notifications, NotificationsSkeleton } from "@/features/notifications/Notifications";
+import { ConsentRequestScreen, ConsentRequestSkeleton } from "@/features/parent/consent/ConsentRequestScreen";
 import { ParentHome, ParentHomeSkeleton } from "@/features/parent/home/ParentHome";
 import { ParentShell } from "@/features/parent/shell/ParentShell";
+import { axe } from "@/test/axe";
 
 const back = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ back }) }));
 vi.mock("@/features/parent/shell/ParentShell", () => ({ ParentShell: () => null }));
 vi.mock("@/features/parent/home/ParentHome", () => ({ ParentHome: () => null, ParentHomeSkeleton: () => null }));
+vi.mock("@/features/parent/consent/ConsentRequestScreen", () => ({
+  ConsentRequestScreen: () => null,
+  ConsentRequestSkeleton: () => null,
+}));
 vi.mock("@/features/notifications/Notifications", () => ({
   Notifications: () => null,
   NotificationsSkeleton: () => null,
@@ -23,10 +29,12 @@ const { default: ParentLoading } = await import("./loading");
 const { default: ParentError } = await import("./error");
 const { default: ParentNotFound } = await import("./not-found");
 const { default: NotificationsPage } = await import("./notifications/page");
+const { default: ConsentPage, metadata: consentMetadata } = await import("./consentements/[id]/page");
+const { default: ConsentNotFound } = await import("./consentements/[id]/not-found");
 
 type Boundary = ReactElement<{
   fallback: ReactElement<{ label?: string; space?: string; navCount?: number }>;
-  children: ReactElement<{ children?: unknown; space?: string; searchParams?: unknown }>;
+  children: ReactElement<{ children?: unknown; space?: string; searchParams?: unknown; params?: unknown }>;
 }>;
 
 describe("layout du shell parent", () => {
@@ -40,10 +48,21 @@ describe("layout du shell parent", () => {
 });
 
 describe("pages de l'espace parent", () => {
-  it("WPD01 : accueil sous Suspense, avec son squelette", () => {
-    const tree = HomePage() as Boundary;
+  it("WPD01 : accueil sous Suspense, avec son squelette et la confirmation lue dans l'URL", () => {
+    const searchParams = Promise.resolve({ consentement: "9" });
+    const tree = HomePage({ searchParams } as never) as Boundary;
     expect(tree.props.fallback.type).toBe(ParentHomeSkeleton);
     expect(tree.props.children.type).toBe(ParentHome);
+    expect(tree.props.children.props.searchParams).toBe(searchParams);
+  });
+
+  it("WPD05 : demande de consentement sous Suspense, avec son squelette", () => {
+    const params = Promise.resolve({ id: "9" });
+    const tree = ConsentPage({ params } as never) as Boundary;
+    expect(consentMetadata.title).toBe("Demande de consentement");
+    expect(tree.props.fallback.type).toBe(ConsentRequestSkeleton);
+    expect(tree.props.children.type).toBe(ConsentRequestScreen);
+    expect(tree.props.children.props.params).toBe(params);
   });
 
   it("WPD14 : notifications de l'espace parent", () => {
@@ -71,6 +90,13 @@ describe("états de l'espace parent", () => {
     expect(retry).toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: /Retour/ }));
     expect(back).toHaveBeenCalled();
+  });
+
+  it("WPD05 introuvable : « Demande introuvable », sans divulguer le numéro destinataire", async () => {
+    const { container } = render(<ConsentNotFound />);
+    expect(screen.getByRole("heading", { level: 2, name: "Demande introuvable" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Retour à l'accueil" })).toHaveAttribute("href", "/parent");
+    expect(await axe(container)).toHaveNoViolations();
   });
 
   it("introuvable : h2 et retour à l'accueil du parent", () => {

@@ -125,6 +125,12 @@ describe("ParentHomeView", () => {
     expect(screen.queryByRole("link", { name: "Voir tout" })).toBeNull();
   });
 
+  it("confirmation après l'acceptation d'une demande (WPD05)", async () => {
+    const { container } = render(<ParentHomeView kids={[]} count={0} actions={[]} acceptedFirstName="Kemi" />);
+    expect(screen.getByRole("status")).toHaveTextContent("Demande acceptée : Kemi peut terminer son inscription.");
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
   it("childrenHeadline : singulier et pluriel", () => {
     expect(childrenHeadline(1)).toBe("1 enfant accompagné sur Steamy");
     expect(childrenHeadline(3)).toBe("3 enfants accompagnés sur Steamy");
@@ -134,13 +140,49 @@ describe("ParentHomeView", () => {
 describe("ParentHome (WPD01)", () => {
   beforeEach(() => GET.mockReset());
 
-  function routeApi(children: ReturnType<typeof respond>, actions: ReturnType<typeof respond>) {
-    GET.mockImplementation(async (path: string) => (path === "/api/accounts/children/" ? children : actions));
+  const home = (query: Record<string, string | string[]> = {}) => ({ searchParams: Promise.resolve(query) });
+
+  function routeApi(
+    children: ReturnType<typeof respond>,
+    actions: ReturnType<typeof respond>,
+    consent: ReturnType<typeof respond> = respond(404),
+  ) {
+    GET.mockImplementation(async (path: string) =>
+      path === "/api/accounts/children/"
+        ? children
+        : path === "/api/accounts/consent-requests/{id}/"
+          ? consent
+          : actions,
+    );
   }
+
+  it("?consentement=<id> d'une demande acceptée : prénom relu dans l'API pour la confirmation", async () => {
+    routeApi(
+      respond(200, { count: 0, results: [] }),
+      respond(200, []),
+      respond(200, { id: 9, status: "accepted", firstName: "Kemi" }),
+    );
+    const tree = (await ParentHome(home({ consentement: "9" }))) as ReactElement<Parameters<typeof ParentHomeView>[0]>;
+    expect(GET).toHaveBeenCalledWith("/api/accounts/consent-requests/{id}/", { params: { path: { id: "9" } } });
+    expect(tree.props.acceptedFirstName).toBe("Kemi");
+  });
+
+  it("aucune confirmation pour une demande non acceptée, inconnue ou un paramètre invalide", async () => {
+    routeApi(respond(200, { count: 0, results: [] }), respond(200, []), respond(200, { status: "refused", firstName: "Kemi" }));
+    let tree = (await ParentHome(home({ consentement: "9" }))) as ReactElement<Parameters<typeof ParentHomeView>[0]>;
+    expect(tree.props.acceptedFirstName).toBeUndefined();
+    routeApi(respond(200, { count: 0, results: [] }), respond(200, []));
+    tree = (await ParentHome(home({ consentement: "9" }))) as ReactElement<Parameters<typeof ParentHomeView>[0]>;
+    expect(tree.props.acceptedFirstName).toBeUndefined();
+    GET.mockClear();
+    await ParentHome(home({ consentement: ["9", "10"] }));
+    await ParentHome(home({ consentement: "Kemi" }));
+    expect(GET).not.toHaveBeenCalledWith("/api/accounts/consent-requests/{id}/", expect.anything());
+  });
 
   it("lit les enfants et « À valider »", async () => {
     routeApi(respond(200, { count: 1, results: [child()] }), respond(200, ACTIONS));
-    const tree = (await ParentHome()) as ReactElement<Parameters<typeof ParentHomeView>[0]>;
+    const tree = (await ParentHome(home())) as ReactElement<Parameters<typeof ParentHomeView>[0]>;
     expect(GET).toHaveBeenCalledWith("/api/accounts/children/", { params: { query: { pageSize: HOME_CHILDREN_PAGE_SIZE } } });
     expect(GET).toHaveBeenCalledWith("/api/accounts/pending-actions/");
     expect(tree.type).toBe(ParentHomeView);
@@ -150,18 +192,18 @@ describe("ParentHome (WPD01)", () => {
 
   it("sans compte ni résultats dans la réponse", async () => {
     routeApi(respond(200, {}), respond(200, []));
-    const tree = (await ParentHome()) as ReactElement<Parameters<typeof ParentHomeView>[0]>;
+    const tree = (await ParentHome(home())) as ReactElement<Parameters<typeof ParentHomeView>[0]>;
     expect(tree.props).toMatchObject({ kids: [], count: 0 });
   });
 
   it("session perdue : ne rend rien (la garde redirige)", async () => {
     routeApi(respond(401), respond(200, []));
-    expect(await ParentHome()).toBeNull();
+    expect(await ParentHome(home())).toBeNull();
   });
 
   it("panne de l'API : l'erreur remonte à l'enveloppe du segment", async () => {
     routeApi(respond(200, { count: 0, results: [] }), respond(500));
-    await expect(ParentHome()).rejects.toThrow();
+    await expect(ParentHome(home())).rejects.toThrow();
   });
 
   it("squelette annoncé au vouvoiement", () => {
