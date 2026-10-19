@@ -37,13 +37,17 @@ test("événements : complet ou passé → CTA désactivé avec motif", async ({
   await expect(page.getByRole("heading", { level: 1, name: "Cet événement est introuvable" })).toBeVisible();
 });
 
-test("boutique en vitrine : prix, disponibilité, filtre dans l'URL, sans panier", async ({ page }) => {
+test("boutique : prix, disponibilité, fiches, « Ajouter » si en stock, filtre dans l'URL", async ({ page }) => {
   await page.goto("/boutique");
   await expect(page.getByRole("article")).toHaveCount(3);
   const solar = page.getByRole("article").filter({ hasText: "Kit Énergie Solaire" });
   await expect(solar.getByText("Épuisé")).toBeVisible();
-  await expect(page.getByRole("article").getByRole("link")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /Ajouter/ })).toHaveCount(0);
+  await expect(solar.getByRole("button", { name: /Ajouter/ })).toHaveCount(0);
+  await expect(solar.getByRole("link", { name: "Kit Énergie Solaire" })).toHaveAttribute(
+    "href",
+    "/boutique/kit-energie-solaire",
+  );
+  await expect(page.getByRole("button", { name: /^Ajouter .* au panier$/ })).toHaveCount(2);
 
   await page
     .getByRole("navigation", { name: "Filtrer par catégorie" })

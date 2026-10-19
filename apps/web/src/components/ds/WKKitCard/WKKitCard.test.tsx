@@ -15,14 +15,28 @@ const KIT: KitCardData = {
   emoji: "🤖",
 };
 
-describe("WKKitCard (vitrine)", () => {
-  it("affiche le prix et la disponibilité, sans lien ni bouton", () => {
+describe("WKKitCard", () => {
+  it("vitrine : prix et disponibilité, sans lien ni bouton", () => {
     render(<WKKitCard kit={KIT} />);
     expect(screen.getByRole("heading", { level: 3, name: "Steamy Bot v1" })).toBeInTheDocument();
     expect(screen.getByText("35 000 F CFA")).toBeInTheDocument();
     expect(screen.getByText("Disponible")).toBeInTheDocument();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("boutique : nom en lien vers la fiche, action au-dessus du lien, visuel atténué si épuisé", () => {
+    const { container } = render(
+      <WKKitCard
+        kit={{ ...KIT, availability: "out_of_stock" }}
+        href="/boutique/steamy-bot-v1"
+        action={<button type="button">Ajouter</button>}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Steamy Bot v1" })).toHaveAttribute("href", "/boutique/steamy-bot-v1");
+    expect(screen.getByRole("button", { name: "Ajouter" }).parentElement).toHaveClass("z-10");
+    expect(screen.getByText("Épuisé")).toBeInTheDocument();
+    expect(container.querySelector("article > div")).toHaveClass("opacity-60");
   });
 
   it.each([
@@ -40,7 +54,9 @@ describe("WKKitCard (vitrine)", () => {
   });
 
   it("ne présente aucune violation d'accessibilité", async () => {
-    const { container } = render(<WKKitCard kit={KIT} />);
+    const { container } = render(
+      <WKKitCard kit={KIT} href="/boutique/steamy-bot-v1" action={<button type="button">Ajouter</button>} />,
+    );
     expect(await axe(container)).toHaveNoViolations();
   });
 });
