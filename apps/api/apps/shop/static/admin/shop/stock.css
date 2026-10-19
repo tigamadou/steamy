@@ -1,0 +1,42 @@
+/* Badge de stock de la liste des kits (WAD10) : 3 seuils, couleurs en variables (thème clair, puis sombre). */
+:root {
+  --stock-out-color: #b42318;
+  --stock-out-background: #fee4e2;
+  --stock-low-color: #93370d;
+  --stock-low-background: #fef0c7;
+  --stock-ok-color: #05603a;
+  --stock-ok-background: #d1fadf;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --stock-out-color: #fecdca;
+    --stock-out-background: #55160c;
+    --stock-low-color: #fedf89;
+    --stock-low-background: #4e1d09;
+    --stock-ok-color: #a6f4c5;
+    --stock-ok-background: #053321;
+  }
+}
+
+.stock-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.stock-badge--out {
+  color: var(--stock-out-color);
+  background: var(--stock-out-background);
+}
+
+.stock-badge--low {
+  color: var(--stock-low-color);
+  background: var(--stock-low-background);
+}
+
+.stock-badge--ok {
+  color: var(--stock-ok-color);
+  background: var(--stock-ok-background);
+}

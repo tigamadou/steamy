@@ -17,7 +17,7 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 Statut : 🟡 en cours · Prochaine tâche : 3.6, 3.7b, 3.7c, 3.8 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
 
-### Valeur pédagogique (API-L3a) — 🟡 en cours
+### Valeur pédagogique (API-L3a) — ✅ terminé
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
   - [x] `AppShell` (props de §5.5, sidebar repliable en tiroir sous 768 px)
   - [x] `NavItem`, `NotificationBell`, `HeaderSearch`
@@ -93,22 +93,19 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6, 3.7b, 3.7c, 3.8 · Prérequis 
   - [x] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
   - [x] Tests unitaires : statut issu du serveur affiché tel quel (D31)
   - [x] Parcours Playwright : filtre dans l'URL, détail, apprenant sans quiz, progression
-- [ ] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres` · PR #99
+- [x] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres` · PR #99 ; suite `feature/lot3-profil-suite` · PR #118
   - [x] `WD13` profil (hub de `SettingsRow`, identifiant en lecture seule)
   - [x] `WD17` modification du profil (`ProfileForm`, `AvatarPicker`, `GoalChip`)
   - [x] `WD18` mot de passe
-  - [ ] WD19 adresse de livraison (`AddressForm`)
-  - [ ] WD22 parent
-  - [ ] WD15 suppression du compte (texte D40, annulation tant que `pending_parent`)
+  - [x] `WD19` adresse de livraison (`AddressForm` avec le champ « Ville », zones `shop/delivery-zones/?country=`)
+  - [x] `WD22` parent (nom, lien de parenté, lien validé ; ni numéro ni changement de parent)
+  - [x] `WD15` suppression du compte (texte D40, annulation tant que `pending_parent`)
   - [x] Composants `Section`, `InfoCard`, `ProfileForm`, `AddressForm`
   - [x] Lecture du profil : `GET accounts/me/learner-profile/` ajouté à l'API (absent d'API-L2.5, requis pour préremplir WD17)
   - [x] Tests unitaires : erreurs de champ issues de `fields`
   - [x] Parcours Playwright : modifier le profil puis recharger
-  > Reprise : WD19, WD22 et WD15 attendent leurs endpoints, absents de `development` au 2026-10-16 :
-  > `accounts/me/delivery-address/` (API-L3b.3), `accounts/me/parent/` (API-L4.1), `accounts/me/deletion-request/`
-  > (API-L4.3). Leurs lignes du hub WD13 existent derrière les drapeaux `deliveryAddress`, `parentInfo` et
-  > `accountDeletion` de `src/lib/features.ts` (et `orders` pour WD14, étape 3.6) : livrer l'écran, passer le drapeau
-  > à `true`, puis le retirer. `AddressForm` (DS) est prêt pour WD19 : zones fournies par l'appelant.
+  - [x] Lignes Livraison, Mon parent et Zone sensible du hub WD13 activées ; drapeaux `deliveryAddress`, `parentInfo` et `accountDeletion` retirés
+  - [x] Parcours Playwright : WD19 enregistrer puis recharger, WD22, WD15 envoi puis annulation (apprenant neuf)
 
 ### Commerce (API-L3b) — 🟡 en cours
 - [ ] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage`
