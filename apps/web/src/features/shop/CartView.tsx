@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Button, Mascot, SkeletonBlock, WKCartRow, WKSummaryRow } from "@/components/ds";
 import { formatPrice } from "@/lib/format";
@@ -17,9 +17,9 @@ export type CartViewProps = {
   zones?: ReactNode;
   /**
    * « Demander à mon parent » de l'apprenant (WK08, étape 3.7c) : sans ce rappel, le bouton est absent. Reçoit les
-   * lignes du panier (identifiants et quantités).
+   * lignes du panier (identifiants et quantités) ; renvoie le message d'un échec, affiché sous le bouton, ou `null`.
    */
-  onRequestParent?: (items: Array<{ kitSlug: string; quantity: number }>) => void;
+  onRequestParent?: (items: Array<{ kitSlug: string; quantity: number }>) => Promise<string | null>;
 };
 
 function articles(count: number): string {
@@ -37,6 +37,8 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
   const register = tu ? "tu" : "vous";
   const { state, pending, reload, setQuantity, remove } = useCart(context, register);
   const { notify, toast } = useUndoableAction();
+  const [asking, setAsking] = useState(false);
+  const [askError, setAskError] = useState<string | null>(null);
   const listHeading = useRef<HTMLHeadingElement>(null);
   const shop = tu ? routes.learner.shop : routes.shop;
   const kitHref = tu ? routes.learner.shopKit : routes.shopKit;
@@ -162,9 +164,19 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
               size="lg"
               icon="gift"
               disabled={unavailable}
-              onClick={() =>
-                onRequestParent(state.lines.map((line) => ({ kitSlug: line.kit.slug, quantity: line.quantity })))
-              }
+              loading={asking}
+              onClick={async () => {
+                setAsking(true);
+                setAskError(null);
+                const error = await onRequestParent(
+                  state.lines.map((line) => ({ kitSlug: line.kit.slug, quantity: line.quantity })),
+                );
+                // Succès : la page de la demande (WK08) s'ouvre, le bouton reste occupé jusque-là
+                if (error) {
+                  setAskError(error);
+                  setAsking(false);
+                }
+              }}
             >
               Demander à mon parent
             </Button>
@@ -177,6 +189,11 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
           <Button block size="lg" href={routes.checkout.guest} iconRight="arrow-right">
             Commander
           </Button>
+        )}
+        {askError && (
+          <p role="alert" className="text-sm font-bold text-error-700">
+            {askError}
+          </p>
         )}
       </section>
       {toast}

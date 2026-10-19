@@ -147,7 +147,7 @@ export function KitCodeForm({ courseSlug }: { courseSlug: string }) {
         ) : (
           <>
             Pas encore de kit ?{" "}
-            <Link href={routes.shop} className="font-black text-primary-600 hover:underline">
+            <Link href={routes.learner.shop} className="font-black text-primary-600 hover:underline">
               Commander dans la boutique
             </Link>
           </>

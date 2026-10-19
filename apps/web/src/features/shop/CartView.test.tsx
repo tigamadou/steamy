@@ -55,12 +55,16 @@ describe("WK03 · panier de l'apprenant (serveur)", () => {
     expect(api.mergeGuestCart).not.toHaveBeenCalled();
   });
 
-  it("« Demander à mon parent » remet les lignes au rappel de l'étape 3.7c", async () => {
+  it("« Demander à mon parent » remet les lignes au rappel (WK08) ; un échec est affiché sous le bouton", async () => {
     api.getCart.mockResolvedValue({ ok: true, data: cart([{ id: 1, kit: KIT, quantity: 2 }]) });
-    const onRequestParent = vi.fn();
+    const onRequestParent = vi.fn().mockResolvedValueOnce("Un kit n'est plus en stock.").mockResolvedValueOnce(null);
     render(<CartView context="learner" onRequestParent={onRequestParent} />);
     await userEvent.click(await screen.findByRole("button", { name: "Demander à mon parent" }));
     expect(onRequestParent).toHaveBeenCalledWith([{ kitSlug: "steamy-bot-v1", quantity: 2 }]);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Un kit n'est plus en stock.");
+    await userEvent.click(screen.getByRole("button", { name: "Demander à mon parent" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Demander à mon parent/ })).toBeDisabled();
   });
 
   it("quantité et retrait enregistrés sur le serveur ; échec annoncé ; focus rendu à la liste", async () => {

@@ -193,14 +193,74 @@ describe("PaymentRequestView · issues", () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it("demande sans parcours : ni lien vers un parcours ni nouvelle demande", () => {
-    const kit = { course: null, items: [{ kitSlug: "bot", title: "Steamy Bot", unitPrice: 35000, quantity: 1 }] };
-    const { unmount } = render(<PaymentRequestView initial={paymentRequest({ ...kit, status: "declined" })} />);
-    expect(screen.queryByRole("button", { name: "Refaire la demande" })).not.toBeInTheDocument();
-    unmount();
-    render(<PaymentRequestView initial={paymentRequest({ ...kit, status: "paid", nextResendAt: null })} />);
+});
+
+describe("PaymentRequestView · WK08 (kind=kit)", () => {
+  const KIT = {
+    kind: "kit" as const,
+    course: null,
+    amount: 92000,
+    items: [
+      { kitSlug: "steamy-bot-v1", title: "Steamy Bot v1", unitPrice: 35000, quantity: 2 },
+      { kitSlug: "pack-electronique", title: "Pack Électronique", unitPrice: 22000, quantity: 1 },
+    ],
+  };
+
+  it("en attente : parent, montant des articles seul, livraison ajoutée par le parent, sans relance", async () => {
+    const { container } = render(<PaymentRequestView initial={paymentRequest(KIT)} />);
+    expect(screen.getByRole("heading", { level: 2, name: "On a envoyé ta demande à Marie" })).toBeInTheDocument();
+    expect(screen.getByText(/Marie ajoutera l'adresse et les frais de livraison/)).toBeInTheDocument();
+    expect(screen.getByText("Steamy Bot v1 × 2, Pack Électronique")).toBeInTheDocument();
+    expect(screen.getByText("Montant des articles · livraison ajoutée par ton parent")).toBeInTheDocument();
+    expect(screen.getByText(/92\s000 F CFA/)).toBeInTheDocument();
+    expect(screen.getByText("Demande envoyée à Marie · en attente du paiement…")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Annuler la demande" })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "Relancer mon parent" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/relancer|Changer de parent|Renvoyer le lien|ans\b/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Boutique" })).toHaveAttribute("href", "/apprenant/boutique");
+    expect(screen.getByRole("link", { name: "Mon panier" })).toHaveAttribute("href", "/apprenant/boutique/panier");
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("réglée : commande en préparation → WD14", () => {
+    render(<PaymentRequestView initial={paymentRequest({ ...KIT, status: "paid", nextResendAt: null })} />);
+    expect(screen.getByText("Marie a réglé ta commande : ton kit est en préparation.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Voir mes commandes" })).toHaveAttribute("href", "/apprenant/profil/commandes");
     expect(screen.queryByRole("link", { name: "Accéder au parcours" })).not.toBeInTheDocument();
-    expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual(["Catalogue"]);
+  });
+
+  it("annulée : retour au panier ou à la boutique, pas de nouvelle demande directe", () => {
+    render(<PaymentRequestView initial={paymentRequest({ ...KIT, status: "cancelled", nextResendAt: null })} />);
+    expect(screen.getByRole("heading", { name: "Tu as annulé cette demande" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Retour au panier" })).toHaveAttribute("href", "/apprenant/boutique/panier");
+    expect(screen.getByRole("link", { name: "Retour à la boutique" })).toHaveAttribute("href", "/apprenant/boutique");
+    expect(screen.queryByRole("button", { name: "Refaire la demande" })).not.toBeInTheDocument();
+  });
+});
+
+describe("LearnerCart · WK03 → WK08", () => {
+  it("crée la demande de kit avec les lignes du panier puis ouvre WK08 ; échec renvoyé au panier", async () => {
+    const { LearnerCart } = await import("./LearnerCart");
+    const { CartView } = await import("@/features/shop/CartView");
+    const element = LearnerCart({ zones: "zones" }) as unknown as {
+      type: unknown;
+      props: { context: string; zones: string; onRequestParent: (items: unknown[]) => Promise<string | null> };
+    };
+    expect(element.type).toBe(CartView);
+    expect(element.props).toMatchObject({ context: "learner", zones: "zones" });
+    const items = [{ kitSlug: "steamy-bot-v1", quantity: 2 }];
+
+    browser.POST.mockResolvedValueOnce(ok(paymentRequest({ id: 40, kind: "kit" })));
+    expect(await element.props.onRequestParent(items)).toBeNull();
+    expect(browser.POST).toHaveBeenCalledWith("/api/payments/payment-requests/", { body: { kind: "kit", items } });
+    expect(push).toHaveBeenCalledWith("/apprenant/demandes/40");
+
+    browser.POST.mockResolvedValueOnce(
+      ko(400, "VALIDATION_ERROR", { items: [{ code: "OUT_OF_STOCK", message: "Un kit n'est plus en stock." }] }),
+    );
+    expect(await element.props.onRequestParent(items)).toBe("Un kit n'est plus en stock.");
+    browser.POST.mockRejectedValueOnce(new Error("réseau"));
+    expect(await element.props.onRequestParent(items)).toMatch(/Le serveur est injoignable/);
   });
 });
 
