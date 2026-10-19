@@ -537,7 +537,7 @@ Catalogue des codes métier (extensible, chaque code a son message français) :
 | --- | --- | --- |
 | `GET accounts/me/` (identité, rôle, statut, profil, étape de profil restante `profileStep` pour W11-W14 / WP07-WP09, données du shell : avatar, classe, ville, compteurs ; personnel : `isStaff`, `otpVerified`, `staffGroups`) | tous les shells, redirection après W16, garde de WAD01-WAD05 | à aligner (`user/my-profile`) |
 | `PATCH accounts/me/` | WD17, WPD08, WT08 | à créer |
-| `PATCH accounts/me/learner-profile/` | W11-W14, WD17 | à créer |
+| `GET` · `PATCH accounts/me/learner-profile/` | W11-W14, WD13 (lecture), WD17 | à créer |
 | `PATCH accounts/me/parent-profile/` | WP07-WP09, WPD08 | à créer |
 | `PATCH accounts/me/teacher-profile/` | WT08 | à créer |
 | `POST accounts/me/password/` `{ currentPassword, newPassword }` | WD18, WPD08, WT08 | à aligner (`user/change-password`) |

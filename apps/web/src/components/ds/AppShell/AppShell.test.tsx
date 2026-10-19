@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { FormHTMLAttributes } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -128,6 +128,55 @@ describe("AppShell", () => {
     await user.click(menu);
     await user.click(screen.getByRole("button", { name: "Déconnexion" }));
     expect(menu).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("sous 768 px, le tiroir ouvert est une boîte modale : reste de la page inerte, Tab bouclé", async () => {
+    const user = userEvent.setup();
+    const { container } = renderShell();
+    const menu = screen.getByRole("button", { name: "Ouvrir le menu" });
+    await user.click(menu);
+    const drawer = screen.getByRole("dialog", { name: "Menu" });
+    expect(drawer).toHaveAttribute("aria-modal", "true");
+    expect(container.querySelector("div[inert]")).toContainElement(screen.getByRole("main"));
+    const logo = screen.getByRole("link", { name: "Steamy" });
+    const logout = screen.getByRole("button", { name: "Déconnexion" });
+    expect(logo).toHaveFocus();
+    await user.keyboard("{Shift>}{Tab}{/Shift}");
+    expect(logout).toHaveFocus();
+    await user.keyboard("{Tab}");
+    expect(logo).toHaveFocus();
+    await user.keyboard("{Tab}");
+    expect(logo).not.toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(container.querySelector("[inert]")).toBeNull();
+  });
+
+  it("le tiroir se ferme au passage à 768 px ou plus ; le lien d'évitement est inerte tant qu'il est ouvert", async () => {
+    const user = userEvent.setup();
+    let listener: () => void = () => {};
+    const media = { matches: false, addEventListener: vi.fn((_: string, l: () => void) => (listener = l)), removeEventListener: vi.fn() };
+    vi.stubGlobal("matchMedia", vi.fn(() => media));
+    renderShell();
+    const menu = screen.getByRole("button", { name: "Ouvrir le menu" });
+    await user.click(menu);
+    expect(screen.getByText("Aller au contenu")).toHaveAttribute("inert");
+    media.matches = true;
+    act(() => listener());
+    expect(menu).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByText("Aller au contenu")).not.toHaveAttribute("inert");
+    expect(media.removeEventListener).toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it("WD16 depuis le tiroir : le focus passe au bouton de menu avant l'ouverture de la modale", async () => {
+    const user = userEvent.setup();
+    const { onLogout } = renderShell();
+    const menu = screen.getByRole("button", { name: "Ouvrir le menu" });
+    await user.click(menu);
+    await user.click(screen.getByRole("button", { name: "Déconnexion" }));
+    expect(onLogout).toHaveBeenCalledOnce();
+    expect(menu).toHaveFocus();
   });
 });
 

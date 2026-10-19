@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API), 6.9 (après 6.8) · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : 6.4 et 6.5 (admin Django) ; 6.2 après API-L5 · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -58,16 +58,32 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   - [ ] Tests : Contenu et Finance sans accès aux consentements ni champs sensibles ; Support sans genre/handicap sans permission
   - [ ] Tests : invitation enseignant crée une `TeacherInvitation` et aucun `User` actif ; dernier Super-admin non supprimable ; changement de parent sans acceptation = lien inchangé
   - [ ] Recette sur le jeu D2 : retrouver Léa Adjovi, voir son parent et ses consentements, relancer une demande, inviter un enseignant rattaché à une école
-- [ ] **6.3** Contenu des parcours · `feature/lot6-contenu-parcours` (requiert 6.1, API-L1, API-L3a)
-  - [ ] WAD09 Contenu (admin Django) : `CourseAdmin` (colonnes, filtres, slug prérempli, couverture S3, `trailerVimeoId`)
-  - [ ] Hiérarchie par inlines chaînés : `Project` dans `Course`, `Level` dans `Project`, `Mission` dans `Level` (fil d'Ariane, ordre éditable)
-  - [ ] `QuizAdmin` + `Question`, `QuestionAdmin` + `Choice` ; contrainte « exactement un de `level` / `project` » en `clean()` et `CheckConstraint`, seuils 70 / 80
-  - [ ] Mission : `vimeoId` validé avec aperçu, blocs de contenu
-  - [ ] Action « Publier » (refus si arbre incomplet ou parcours payant sans prix ; confirmation pour dépublier avec inscrits)
-  - [ ] `CategoryAdmin` et `BadgeAdmin`
-  - [ ] Tests : groupe Contenu seul en écriture ; publication refusée sur arbre incomplet ; quiz sur les deux ou aucun = erreur
-  - [ ] Tests : `isCorrect` absent des réponses de l'API (S8) ; changement de prix sans effet sur les `OrderItem` existants
+- [x] **6.3** Contenu des parcours · `feature/lot6-contenu-parcours` · PR #113 (requiert 6.1, API-L1, API-L3a)
+  - [x] WAD09 Contenu (admin Django) : `CourseAdmin` (colonnes, filtres, slug prérempli, couverture S3, `trailerVimeoId`)
+  - [x] Hiérarchie par inlines chaînés : `Project` dans `Course`, `Level` dans `Project`, `Mission` dans `Level` (fil d'Ariane, ordre éditable)
+  - [x] `QuizAdmin` + `Question`, `QuestionAdmin` + `Choice` ; contrainte « exactement un de `level` / `project` » en `clean()` et `CheckConstraint`, seuils 70 / 80
+  - [x] Mission : `vimeoId` validé avec aperçu, blocs de contenu
+  - [x] Action « Publier » (refus si arbre incomplet ou parcours payant sans prix ; confirmation pour dépublier avec inscrits)
+  - [x] `CategoryAdmin` et `BadgeAdmin`
+  - [x] Tests : groupe Contenu seul en écriture ; publication refusée sur arbre incomplet ; quiz sur les deux ou aucun = erreur
+  - [x] Tests : `isCorrect` absent des réponses de l'API (S8) ; changement de prix sans effet sur les `OrderItem` existants
   - [ ] Recette : créer un parcours complet (2 projets, niveaux, missions Vimeo, quiz), le publier, le voir dans `WL22` et `WC`
+  > Notes : une grande partie de WAD09 existait (API-L1, API-L3a : inlines triables, quiz, `SingleCorrectChoiceFormSet`,
+  > `CategoryAdmin`, `BadgeAdmin`). Ajouts : colonnes accès (gratuit / payant + prix), kit requis et inscrits
+  > (annotation), filtre « kit » ; statut en lecture seule, modifié seulement par « Publier » (`catalog/publication.py` :
+  > projet, niveau, mission, formative et sommative avec questions exigés ; raisons affichées) et « Repasser en
+  > brouillon » (confirmation cochée s'il y a des inscrits : ils n'ouvrent plus le contenu), journalisés dans
+  > `AuditLog`. « Payant sans prix » est déjà impossible (contrainte `course_free_iff_no_price`). Fil d'Ariane des pages
+  > chaînées par un champ « Dans » (liens vers les parents) ; aperçu Vimeo en lecteur intégré. « Quiz sur les deux ou
+  > aucun » : contrainte `quiz_kind_matches_target` validée par le formulaire. `isCorrect` : test S8 existant
+  > (`learning/tests/test_quiz.py`). Le prix d'un parcours ne touche pas les `OrderItem` (prix figé à la commande).
+  > Recette manuelle à faire par le produit ; le test Playwright parcourt l'arbre en lecture (jeu D2 non modifié).
+  > Suites de relecture : liste sans requête par ligne (`list_select_related`) ; aperçu Vimeo conforme à l'ADR 0004
+  > (`dnt=1`, `referrerpolicy="strict-origin-when-cross-origin"`, `allow="fullscreen; picture-in-picture"`) ; l'URL de
+  > partage collée dans un champ identifiant (parcours, niveau, mission) en extrait l'identifiant et le hachage ;
+  > « Publier » et « Repasser en brouillon » sans effet ni journal sur un parcours déjà dans l'état visé ; fil d'Ariane
+  > par titre. Écart : l'admin Django n'a pas de CSP (le lecteur Vimeo y est intégré sans `frame-src`) ; à poser avec
+  > celle du front (ADR 0004 §5).
 - [ ] **6.4** Boutique, commandes, paiements · `feature/lot6-boutique-paiements` (requiert 6.1, API-L3b)
   - [ ] WAD10 Kits (admin Django) : `KitAdmin` (stock avec badge à 3 seuils, parcours compatibles), `DeliveryZoneAdmin`, `RestockAlertAdmin` en lecture seule
   - [ ] WAD10 Commandes (admin Django) : `OrderAdmin` (montants, statut, payeur en lecture seule), action *changer le statut de livraison* (`preparing → shipped → delivered`, notifie le payeur)
@@ -113,11 +129,11 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > Super-admin. Échéance du rapport : 15 jours après la fin du trimestre (hypothèse d'API-L6.4).
   > Contraste : le texte secondaire des primitives de 6.6 passe de `ink-500` (4,44:1 sur blanc) à `ink-600`, relevé par
   > axe une fois les données affichées.
-- [ ] **6.8** Impact Tracker : tableau de bord et détail · `feature/lot6-impact-kpi` · PR #100 (requiert 6.6, API-L6.4)
+- [x] **6.8** Impact Tracker : tableau de bord et détail · `feature/lot6-impact-kpi` · PR #100 (requiert 6.6, API-L6.4)
   - [x] Vérifier les prérequis `API-L6` : 30 `KpiDefinition` en 8 groupes, calcul nocturne, statut D73, KPI d'inclusion, « Nouvelles institutions »
-  - [ ] WAD02 (Next.js) `/backoffice/impact?periode=` : boutons vers WAD05 et WAD04, légende des sources, `SegmentedControl` synchronisé avec l'URL, KPI principaux, cartes démographiques, groupes de KPI (`Sparkline`, `KpiStatusBadge`)
+  - [x] WAD02 (Next.js) `/backoffice/impact?periode=` : boutons vers WAD05 et WAD04, légende des sources, `SegmentedControl` synchronisé avec l'URL, KPI principaux, cartes démographiques, groupes de KPI (`Sparkline`, `KpiStatusBadge`)
     - [x] Légende des sources, `SegmentedControl` synchronisé avec l'URL, KPI principaux, cartes démographiques, groupes de KPI
-    - [ ] Boutons « Saisie manuelle » (WAD05) et « Rapport trimestriel » (WAD04) : avec leurs pages, étape 6.9
+    - [x] Boutons « Saisie manuelle » (WAD05) et « Rapport trimestriel » (WAD04) : livrés avec leurs pages, étape 6.9 (PR #106)
   - [x] WAD03 (Next.js) `/backoffice/impact/indicateurs/[code]` : statut, valeur, cible, taux d'atteinte, `BarChart` par période, historique, composition (`DonutChart`), définition serveur
   - [x] Branchement API : `backoffice/kpis/?period=` et `kpis/{code}/` ; pas de recalcul du statut côté front ni de tuiles « Activer / Configurer la collecte » (D75)
   - [x] Tests pytest (API-L6) : valeurs de référence de chaque KPI `auto` sur un jeu de test dédié (D2 non chargé par les tests), table de vérité de `kpiStatus`, bornes de période
@@ -131,18 +147,40 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 à 6.5 (selon les étapes d'API
   > sous-indicateurs (`baseCode`) s'affichent en carte d'inclusion (anneaux, base, autres indicateurs du groupe), les
   > autres en liste. Les séries omettent les périodes sans valeur. Indicateur inconnu → 404 dans le shell
   > (`backoffice/not-found.tsx`). La période est aussi proposée sur WAD03 et conservée entre WAD02 et WAD03.
-  > `DataTable` (6.6) : zone défilante focalisable et nommée, relevée par axe à 360 px sur WAD03.
-  > Reprise : 6.7 (#93) et 6.8 (#100) fusionnées ; suites de relecture en PR #103 (CI à vérifier). Prochaine étape :
-  > 6.9, avec les boutons WAD04/WAD05 de WAD02 et le lien « Ouvrir le rapport » de WAD01.
-- [ ] **6.9** Rapport trimestriel, saisie manuelle, exports · `feature/lot6-impact-rapport` (requiert 6.8, API-L6.4)
-  - [ ] WAD04 (Next.js) `/backoffice/impact/rapports/[periode]` : en-tête, `DataTable`, exports CSV / PDF, « Soumettre » avec modale de confirmation et verrouillage
-  - [ ] Redirection `/backoffice/impact/rapports` vers le trimestre courant
-  - [ ] WAD05 (Next.js) `…/[periode]/saisie` : groupes, champs typés selon `unit`, « Enregistrer le brouillon », « Valider la saisie », lecture seule si soumis (D74)
-  - [ ] Exports asynchrones : `POST …/exports/`, interrogation de `backoffice/exports/{id}/` jusqu'à `ready`, lien présigné, notification, PDF par WeasyPrint
-  - [ ] Gestion des erreurs `REPORT_LOCKED`, `VALIDATION_ERROR` par champ, `PERMISSION_DENIED`, `OTP_REQUIRED`
-  - [ ] Tests pytest (API-L6) : soumission idempotente, `REPORT_LOCKED`, export d'autrui refusé, CSV identique à WAD04
-  - [ ] Playwright (parcours critique) : Finance via WAD15 (TOTP de développement), brouillon WAD05, validation, export CSV WAD04, soumission, champs en lecture seule ; Support sur la même URL = accès refusé
+  > `DataTable` (6.6) : zone défilante nommée par la légende du tableau, focalisable seulement quand son contenu
+  > déborde (`ScrollRegion`, #103), relevée par axe à 360 px sur WAD03.
+  > Reprise : 6.7 (#93), 6.8 (#100), 6.9 (#106) et leurs suites fusionnées ; exports de 6.9 en PR #111 (API : #110).
+  > Suite : 6.3 à 6.5 (admin Django), 6.2 après API-L5.
+- [x] **6.9** Rapport trimestriel, saisie manuelle, exports · `feature/lot6-impact-rapport` · PR #106, puis `feature/lot6-impact-exports` · PR #111 (requiert 6.8, API-L6.4)
+  - [x] WAD04 (Next.js) `/backoffice/impact/rapports/[periode]` : en-tête, `DataTable`, exports CSV / PDF, « Soumettre » avec modale de confirmation et verrouillage
+    - [x] En-tête (trimestre, statut, complétude, échéances), `DataTable` des lignes serveur, « Soumettre » avec confirmation et verrouillage
+    - [x] « Exporter CSV » / « Exporter PDF » (PR #111, endpoints d'API-L6.4 livrés par PR #110)
+  - [x] Redirection `/backoffice/impact/rapports` vers le trimestre courant
+  - [x] WAD05 (Next.js) `…/[periode]/saisie` : groupes, champs typés selon `unit`, « Enregistrer le brouillon », « Valider la saisie », lecture seule si soumis (D74)
+  - [x] Exports asynchrones : `POST …/exports/`, interrogation de `backoffice/exports/{id}/` jusqu'à `ready`, lien présigné, PDF par WeasyPrint ; fin annoncée dans la page (pas de notification : le personnel n'a pas de centre de notifications)
+  - [x] Gestion des erreurs `REPORT_LOCKED`, `VALIDATION_ERROR` par champ, `PERMISSION_DENIED`, `OTP_REQUIRED`
+  - [x] Tests pytest (API-L6) : soumission idempotente, `REPORT_LOCKED`, export d'autrui refusé, CSV identique à WAD04
+    - [x] Soumission idempotente et `REPORT_LOCKED` (`apps/impact/tests/test_reports.py`, API-L6.4)
+    - [x] Export d'autrui refusé, CSV identique à WAD04 (`apps/impact/tests/test_exports.py`, PR #110)
+  - [x] Playwright (parcours critique) : Finance via WAD15 (TOTP de développement), brouillon WAD05, validation, export CSV WAD04, soumission, champs en lecture seule ; Support sur la même URL = accès refusé
+    - [x] Tout le parcours sauf l'export CSV (`e2e/impact-rapport.spec.ts`, refus de Support dans `e2e/backoffice.spec.ts`)
+    - [x] Export CSV téléchargé et vérifié (en-tête, lignes) dans `e2e/impact-rapport.spec.ts` (PR #111)
   - [ ] Confirmation produit du comportement de « Valider la saisie » (point ouvert)
+  > Notes : exports (PR #111) : « Exporter CSV / PDF » demande l'export, interroge son état toutes les 2 s (2 min au
+  > plus), puis annonce le lien de téléchargement (redirection de l'API vers une URL présignée) ; pas de notification au
+  > personnel, sans centre de notifications. « Valider la saisie » (hypothèse de travail, sans champ serveur) :
+  > enregistre, puis signale chaque indicateur manuel encore vide ; « Soumettre » ne l'exige pas (l'API ne l'impose pas)
+  > mais la modale annonce les indicateurs manquants. Carte « Indicateurs non collectés » omise (SPEC-ECRANS-3 mise à
+  > jour) : les institutions sont calculées (D75). WAD01 : « Ouvrir le rapport » ajouté, réservé comme l'Impact Tracker
+  > à Finance et Super-admin. Les notes des valeurs saisies (`note`) sont renvoyées telles quelles à l'enregistrement,
+  > faute de champ dans la maquette. Monochrome : la modale, les boutons et le fil d'Ariane passent par les variantes «
+  > encre » du design system (`Modal tone="ink"`, `Button variant="ink" | "ink-outline"`, `Breadcrumb tone="ink"`). La
+  > lecture seule de WAD05 dérive du statut serveur à chaque rendu : Next conserve l'état d'une route déjà visitée
+  > (`cacheComponents`), un état local initialisé une fois restait éditable après la soumission. En-tête du back-office
+  > : actions repliables à 360 px (trois actions sur WAD02).
+  > Garde-fou monochrome étendu au rendu (`components/backoffice/monochrome-rendu.test.tsx`) : le HTML de chaque
+  > écran et état du back-office, composants du design system compris, ne contient aucune classe primaire ; `Loader`,
+  > `Mascot` et les états WX ont une variante encre (le hors-ligne la prend sous `/backoffice`).
 - [ ] **Critères de fin du lot 6**
   - [ ] WAD01-WAD05 conformes à la spec et à la définition de « terminé », monochrome sans `--primary-*`, accessibles, responsive, sans donnée en dur
   - [ ] WAD06-WAD14 couverts par l'admin Django (colonnes, filtres, recherches, actions, inlines de §5.14), sans élément de « À ne pas porter », thème monochrome, admin en français
@@ -399,7 +437,7 @@ valeurs rechargées, ouvre un indicateur.
 | --- | --- |
 | Routes | `/backoffice/impact/rapports` → trimestre courant ; `/backoffice/impact/rapports/[periode]` (WAD04) ; `…/[periode]/saisie` (WAD05). Groupes : Finance, Super-admin |
 | WAD04 | En-tête (trimestre, complétude, échéances) ; `DataTable` Indicateur / Du / Au / Réponse / Statut / Source (plages serveur) ; « Exporter CSV » / « Exporter PDF » ; « Soumettre » (modale de confirmation) → rapport verrouillé, statut « Soumis » |
-| WAD05 | Groupes Financement · Produit & innovation · Satisfaction & emploi ; champs typés selon `unit` (nombre, oui/non, texte) ; « Enregistrer le brouillon » ; « Valider la saisie » ; lecture seule si soumis (D74). Carte « Indicateurs non collectés » : vide en v1 si les institutions sont calculées (voir Points ouverts) |
+| WAD05 | Groupes Financement · Produit & innovation · Satisfaction & emploi ; champs typés selon `unit` (nombre, oui/non, texte) ; « Enregistrer le brouillon » ; « Valider la saisie » ; lecture seule si soumis (D74). Pas de carte « Indicateurs non collectés » : aucun KPI n'est indisponible en v1 (institutions calculées, D75) |
 | Exports | `POST …/exports/ { format }` → `GET backoffice/exports/{id}/` interrogé jusqu'à `ready` (pastille `Loader` verbalisée), puis lien de téléchargement présigné ; notification à la fin (D74). PDF par WeasyPrint (déjà dans `requirements.txt`) |
 | API | `GET backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/`, `POST …/exports/`, `GET backoffice/exports/{id}/` (§7.8) |
 | Erreurs | `REPORT_LOCKED` (saisie après soumission), `VALIDATION_ERROR` par champ, `PERMISSION_DENIED`, `OTP_REQUIRED` (renvoi vers WAD15) |

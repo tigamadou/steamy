@@ -2,7 +2,7 @@ import type { Schemas } from "@steamy/api-client";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
-import { CourseCard, Icon, SkeletonBlock, Tag } from "@/components/ds";
+import { CourseCard, Icon, SkeletonBlock, Tag, type CourseCardData } from "@/components/ds";
 import { catalogHref, listHref } from "@/lib/catalog-filters";
 import { cx } from "@/lib/cx";
 import { toCourseCard } from "@/lib/format";
@@ -10,16 +10,43 @@ import { routes } from "@/lib/routes";
 
 // Briques du catalogue public (WL01, WL06, WL16).
 
-/** Grille de cartes parcours, 1 → 3 colonnes. */
-export function CourseGrid({ courses }: { courses: Schemas["CourseList"][] }) {
+export type CourseCardItem = {
+  slug: string;
+  card: CourseCardData;
+  /** Cœur des souhaits (espace apprenant) : état et bascule. */
+  favorited?: boolean;
+  onFav?: () => void;
+};
+
+/**
+ * Grille unique des cartes parcours (catalogue public, WC01, WW01, recommandations), 1 → 3 colonnes. Dans le shell,
+ * plus étroit, la troisième colonne n'apparaît qu'à partir de `xl`.
+ */
+export function CourseCardList({ items, narrow }: { items: CourseCardItem[]; narrow?: boolean }) {
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {courses.map((course) => (
-        <li key={course.slug} className="flex">
-          <CourseCard course={toCourseCard(course)} className="flex-1" />
+    <ul className={cx("grid gap-4 sm:grid-cols-2", narrow ? "xl:grid-cols-3" : "lg:grid-cols-3")}>
+      {items.map(({ slug, card, favorited, onFav }) => (
+        <li key={slug} data-course={slug} className="flex">
+          <CourseCard course={card} favorited={favorited} onFav={onFav} className="flex-1" />
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Grille de parcours de l'API, 1 → 3 colonnes. */
+export function CourseGrid({
+  courses,
+  courseHref,
+}: {
+  courses: Schemas["CourseList"][];
+  /** Lien de chaque carte (fiche WC04 dans l'espace apprenant) ; fiche publique WL22 par défaut. */
+  courseHref?: (slug: string) => string;
+}) {
+  return (
+    <CourseCardList
+      items={courses.map((course) => ({ slug: course.slug, card: toCourseCard(course, courseHref?.(course.slug)) }))}
+    />
   );
 }
 
@@ -118,12 +145,15 @@ export function CatalogPagination({
   page,
   hasNext,
   base = routes.courses,
+  hrefOf = (target) => listHref(base, { category, page: target }),
 }: {
   category?: string;
   page: number;
   hasNext: boolean;
   /** Liste paginée : catalogue des parcours (défaut) ou boutique. */
   base?: string;
+  /** URL d'une page, quand la liste porte d'autres filtres (catalogue de l'apprenant). */
+  hrefOf?: (page: number) => string;
 }) {
   if (page === 1 && !hasNext) {
     return null;
@@ -133,7 +163,7 @@ export function CatalogPagination({
   return (
     <nav aria-label="Pagination" className="mt-8 flex items-center justify-center gap-3">
       {page > 1 && (
-        <Link href={listHref(base, { category, page: page - 1 })} className={link} rel="prev">
+        <Link href={hrefOf(page - 1)} className={link} rel="prev">
           <Icon name="arrow-left" size={16} strokeWidth={2.5} />
           Précédent
         </Link>
@@ -142,7 +172,7 @@ export function CatalogPagination({
         Page {page}
       </p>
       {hasNext && (
-        <Link href={listHref(base, { category, page: page + 1 })} className={link} rel="next">
+        <Link href={hrefOf(page + 1)} className={link} rel="next">
           Suivant
           <Icon name="arrow-right" size={16} strokeWidth={2.5} />
         </Link>
