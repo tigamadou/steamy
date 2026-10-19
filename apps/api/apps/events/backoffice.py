@@ -35,8 +35,6 @@ def paid_payment(application: EventApplication):
 
 def refuse_exceptionally(application: EventApplication, reason: str, user, request=None):
     """Annule la candidature en cours ; renvoie le remboursement créé (candidature payée) ou `None`."""
-    from apps.notifications.models import Category
-    from apps.notifications.services import notify
     from apps.payments.models import Refund
 
     with transaction.atomic():
@@ -51,6 +49,7 @@ def refuse_exceptionally(application: EventApplication, reason: str, user, reque
         application.refusal_reason = reason
         application.ticket = None
         application.save(update_fields=["status", "refusal_reason", "ticket", "updated_at"])
+        cancel_pending_order(application)
 
         payment = paid_payment(application)
         refund = None
@@ -68,30 +67,54 @@ def refuse_exceptionally(application: EventApplication, reason: str, user, reque
         )
 
         event = application.event
+        transaction.on_commit(lambda: tell_refused(application, event, reason, refund is not None))
+    return refund
+
+
+def cancel_pending_order(application: EventApplication) -> None:
+    """
+    Commande d'événement encore en attente : annulée sous verrou (stock rendu), pour qu'un paiement arrivé ensuite ne
+    confirme jamais la candidature mais parte en remboursement (C17).
+    """
+    from apps.payments.models import Order
+    from apps.payments.orders import release_stock
+
+    for order in Order.objects.select_for_update().filter(
+        status=Order.Status.PENDING, items__event_application=application
+    ):
+        release_stock(order)
+        order.status = Order.Status.CANCELLED
+        order.save(update_fields=["status", "updated_at"])
+
+
+def tell_refused(application: EventApplication, event, reason: str, refunded: bool) -> None:
+    """Enfant et parent prévenus, une fois l'annulation enregistrée."""
+    from apps.notifications.models import Category
+    from apps.notifications.services import notify
+
+    notify(
+        application.learner,
+        Category.EVENTS,
+        "event_cancelled",
+        f"Ta candidature à {event.title} est annulée",
+        reason,
+        url="/apprenant/evenements",
+        tone="warning",
+        icon=event.emoji or "🎟️",
+    )
+    link = getattr(application.learner, "parent_link", None)
+    if link is not None:
+        refund_note = " Le paiement vous sera remboursé." if refunded else ""
         notify(
-            application.learner,
+            link.parent,
             Category.EVENTS,
             "event_cancelled",
-            f"Ta candidature à {event.title} est annulée",
-            reason,
-            url="/apprenant/evenements",
+            f"Candidature de {application.learner.first_name} à {event.title} annulée",
+            f"{reason}{refund_note}",
+            url="/parent/evenements",
             tone="warning",
             icon=event.emoji or "🎟️",
         )
-        link = getattr(application.learner, "parent_link", None)
-        if link is not None:
-            refunded = " Le paiement vous sera remboursé." if refund else ""
-            notify(
-                link.parent,
-                Category.EVENTS,
-                "event_cancelled",
-                f"Candidature de {application.learner.first_name} à {event.title} annulée",
-                f"{reason}{refunded}",
-                url="/parent/evenements",
-                tone="warning",
-                icon=event.emoji or "🎟️",
-            )
-    return refund
 
 
 def applicant_age(application: EventApplication) -> int | None:

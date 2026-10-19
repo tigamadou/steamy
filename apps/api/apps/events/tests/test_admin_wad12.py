@@ -8,6 +8,7 @@ import datetime
 
 import pytest
 from django.contrib.messages import get_messages
+from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -60,11 +61,13 @@ def paid(app: EventApplication) -> Payment:
 
 
 def refuse(client, apps, **extra):
-    return client.post(
-        APPLICATIONS,
-        {"action": "refuse", "_selected_action": [a.pk for a in apps], **extra},
-        follow=True,
-    )
+    # Les notifications partent après la transaction (`on_commit`) : exécutées ici comme en production
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        return client.post(
+            APPLICATIONS,
+            {"action": "refuse", "_selected_action": [a.pk for a in apps], **extra},
+            follow=True,
+        )
 
 
 def texts(response):
@@ -138,7 +141,8 @@ def test_no_admin_path_accepts_an_application():
         response = client.get(APPLICATIONS)
         form = response.context["action_form"] if response.status_code == 200 else None
         names = [name for name, _ in form.fields["action"].choices] if form else []
-        assert names in ([], ["", "refuse"])
+        # Seul le Support refuse ; personne n'a d'action qui confirme
+        assert names == (["", "refuse"] if group == SUPPORT else [])
     app.refresh_from_db()
     assert app.status == EventApplication.Status.PENDING_PARENT
 
@@ -182,3 +186,69 @@ def test_age_is_unknown_without_profile():
     LearnerProfile.objects.filter(user=app.learner).delete()
     app.learner.refresh_from_db()
     assert applicant_age(EventApplication.objects.get(pk=app.pk)) is None
+
+
+def test_a_payment_after_a_staff_refusal_is_refunded_never_accepted():
+    """Refus en attente de paiement : la commande est annulée ; un paiement reçu ensuite part en remboursement (C17)."""
+    from apps.payments.fulfillment import settle
+
+    support = member(SUPPORT)
+    app = application(EventApplication.Status.PENDING_PAYMENT, price=2000)
+    order = OrderFactory(kind=Order.Kind.EVENT, items=[], payer=app.learner.parent_link.parent)
+    OrderItem.objects.create(
+        order=order,
+        event=app.event,
+        event_application=app,
+        title=app.event.title,
+        unit_price=2000,
+        quantity=1,
+        total=2000,
+    )
+    refuse(support, [app], apply="1", reason="Comportement")
+    order.refresh_from_db()
+    assert order.status == Order.Status.CANCELLED
+
+    payment = PaymentFactory(order=order, status=Payment.Status.SUCCEEDED, amount=2000)
+    settle(order, payment)
+    app.refresh_from_db()
+    order.refresh_from_db()
+    assert app.status == EventApplication.Status.CANCELLED
+    assert order.status == Order.Status.REFUNDED
+    assert Refund.objects.filter(payment=payment, amount=2000).exists()
+
+
+def test_confirm_and_reacquire_ignore_a_staff_refusal():
+    from apps.events.applications import PAYMENT_TIMEOUT_REASON, confirm, reacquire_seat
+
+    app = application(EventApplication.Status.CANCELLED)
+    app.refusal_reason = "Comportement"
+    app.save()
+    confirm(app)
+    assert reacquire_seat(app) is False
+    app.refresh_from_db()
+    assert app.status == EventApplication.Status.CANCELLED
+    # Un paiement non abouti, lui, se relance
+    app.refusal_reason = PAYMENT_TIMEOUT_REASON
+    app.save()
+    assert reacquire_seat(app) is True
+
+
+def _queries(client, url) -> int:
+    from django.db import connection
+    from django.test.utils import CaptureQueriesContext
+
+    client.get(url)  # échauffement : session, types de contenu
+    with CaptureQueriesContext(connection) as queries:
+        assert client.get(url).status_code == 200
+    return len(queries)
+
+
+def test_the_lists_do_not_query_per_row():
+    support = member(SUPPORT)
+    events = reverse("admin:events_steamyevent_changelist")
+    for _ in range(3):
+        paid(application(EventApplication.Status.ACCEPTED, price=2000))
+    few = (_queries(support, APPLICATIONS), _queries(support, events))
+    for _ in range(3):
+        paid(application(EventApplication.Status.ACCEPTED, price=2000))
+    assert (_queries(support, APPLICATIONS), _queries(support, events)) == few

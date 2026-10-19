@@ -109,6 +109,12 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 après API-L5 ; critères de fi
   > obligatoire) : candidature annulée, place et ticket rendus, enfant et parent prévenus, `Refund` à traiter par la
   > Finance si elle était payée, `AuditLog`. Écart : « mode maintenance » et « inscriptions ouvertes » (WAD14) restent
   > hors réglages, leur comportement d'API n'étant pas spécifié (décision d'API-L6.3, à trancher par le produit).
+  > Suites de relecture : le refus d'une candidature en attente de paiement annule sa commande sous verrou (stock
+  > rendu) ; `confirm` ne confirme qu'une candidature en attente de paiement et `reacquire_seat` ne relance qu'une
+  > candidature annulée faute de paiement : un paiement reçu après un refus part en remboursement (C17), la commande
+  > passant à « remboursée ». Notifications envoyées après la transaction. Listes sans requête par ligne (paiement et
+  > places restantes annotés). Commande d'une candidature payée refusée : reste « payée » jusqu'au traitement du
+  > remboursement par la Finance (WAD10/WAD11, 6.4), qui la passe alors à « remboursée ».
 - [x] **6.6** Socle Next.js du back-office · `feature/lot6-backoffice-shell` · PR #62 (requiert 6.1 ; outillage du lot 1, étape 1.0)
   - [x] Layout serveur `(backoffice)/backoffice/` : garde (`accounts/me/`, staff, `otpVerified`), redirection vers `<API_URL>/admin/login/?next=…`, métadonnées `noindex`
   - [x] Revérification du groupe par page et route `/backoffice/acces-refuse`

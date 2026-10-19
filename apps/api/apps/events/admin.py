@@ -6,6 +6,7 @@ candidature payée. Aucune action ne confirme une candidature (S3 : accord du pa
 
 from django import forms
 from django.contrib import admin, messages
+from django.db.models import Count, Exists, OuterRef, Q
 
 from apps.core.admin_actions import form_action
 
@@ -33,9 +34,22 @@ class SteamyEventAdmin(admin.ModelAdmin):
     date_hierarchy = "starts_at"
     readonly_fields = ("created_at", "updated_at")
 
+    def get_queryset(self, request):
+        # Places occupées comptées avec la liste (comme `SteamyEvent.seats_left`, sans requête par ligne)
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(
+                seats_taken=Count(
+                    "applications",
+                    filter=Q(applications__status__in=EventApplication.HOLDING_A_SEAT),
+                )
+            )
+        )
+
     @admin.display(description="Places restantes")
     def seats_left(self, obj):
-        return obj.seats_left
+        return max(obj.capacity - obj.seats_reserved - obj.seats_taken, 0)
 
     @admin.display(description="Accès", ordering="price")
     def access(self, obj):
@@ -83,6 +97,16 @@ class EventApplicationAdmin(admin.ModelAdmin):
     list_select_related = ("learner__learner_profile", "event")
     actions = ["refuse"]
 
+    def get_queryset(self, request):
+        from apps.payments.models import Order, Payment
+
+        paid = Payment.objects.filter(
+            status=Payment.Status.SUCCEEDED,
+            order__status=Order.Status.PAID,
+            order__items__event_application=OuterRef("pk"),
+        )
+        return super().get_queryset(request).annotate(is_paid=Exists(paid))
+
     def has_add_permission(self, request):
         return False
 
@@ -100,7 +124,7 @@ class EventApplicationAdmin(admin.ModelAdmin):
     def payment(self, obj):
         if obj.event.price == 0 or obj.ticket_id:
             return "Sans paiement"
-        return "Payée" if backoffice.paid_payment(obj) else "Non payée"
+        return "Payée" if obj.is_paid else "Non payée"
 
     def has_refuse_permission(self, request):
         return request.user.has_perm("events.refuse_application")
