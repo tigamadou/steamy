@@ -9,8 +9,8 @@ import { createLearner } from "./support/signup";
 // limitée) → bandeau de WD23 et WD14 → annulation → nouvelle demande → paiement du parent (par l'API, en attendant
 // WPD15 du lot 4) → notification, WA02 « réglée », parcours dans WD23 et WD14. Apprenant et parent neufs : rejouable.
 
-const COURSE = "ia-pour-les-curieux";
-const COURSE_TITLE = "L'IA pour les curieux";
+const COURSE = "capteurs-electroniques";
+const COURSE_TITLE = "Capteurs électroniques";
 
 async function axe(page: Page) {
   const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
@@ -36,7 +36,7 @@ test("P3 · WA02 : demande au parent, relance, annulation, nouvelle demande rég
   const first = requestId(page);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Demande à ton parent");
   await expect(page.getByRole("heading", { level: 2, name: "On a envoyé ta demande à Maman" })).toBeVisible();
-  await expect(page.getByText(/15\s000 F CFA/)).toBeVisible();
+  await expect(page.getByText(/18\s000 F CFA/)).toBeVisible();
   await expect(page.getByText("Demande envoyée à Maman · en attente du paiement…")).toBeVisible();
   // Relance limitée : la première n'est possible qu'après le délai fixé par le serveur (C4)
   await expect(page.getByRole("button", { name: "Relancer mon parent" })).toBeDisabled();
