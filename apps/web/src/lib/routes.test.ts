@@ -47,6 +47,8 @@ describe("routes", () => {
     expect(l.notificationList("non-lues", 3)).toBe("/apprenant/notifications?onglet=non-lues&page=3");
     expect(l.kitCode("robot")).toBe("/apprenant/catalogue/robot/kit-code");
     expect(l.parentRequest("robot")).toBe("/apprenant/catalogue/robot/demande");
+    expect(l.event("atelier")).toBe("/apprenant/evenements/atelier");
+    expect(l.eventApplication("atelier")).toBe("/apprenant/evenements/atelier/candidature");
   });
 });
 

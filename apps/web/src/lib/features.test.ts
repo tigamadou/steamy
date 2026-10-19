@@ -6,7 +6,6 @@ describe("features", () => {
   it("garde fermées les fonctionnalités qui attendent API-L3b et API-L4", () => {
     expect(features).toEqual({
       unlock: false,
-      events: false,
       orders: false,
       deliveryAddress: false,
       parentInfo: false,

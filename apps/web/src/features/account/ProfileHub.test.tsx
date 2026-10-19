@@ -8,7 +8,6 @@ const getCurrentUser = vi.fn();
 const GET = vi.fn();
 const flags = vi.hoisted(() => ({
   unlock: false,
-  events: false,
   orders: false,
   deliveryAddress: false,
   parentInfo: false,
