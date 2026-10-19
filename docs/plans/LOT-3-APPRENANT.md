@@ -153,7 +153,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.7b, 3.8 · Prérequis : API-1 et 
   - [ ] WK07 suivi de commande (`ShippingTimeline`, jeton `X-Guest-Token`, `noindex`, `no-referrer`)
   - [ ] Gestion de `OUT_OF_STOCK`, `ORDER_EXPIRED`, `NETWORK_UNAVAILABLE`
   - [ ] Parcours Playwright P4
-- [x] **3.7c** Demande de kit au parent (requiert API-L3b) · `feature/lot3-boutique-demande-parent` · PR #PR37C
+- [x] **3.7c** Demande de kit au parent (requiert API-L3b) · `feature/lot3-boutique-demande-parent` · PR #120
   - [x] `WK08` demande de kit au parent (`/apprenant/demandes/[id]`, `kind=kit`) : montant des articles seul, livraison ajoutée par le parent (C10), `Loader` inline, annulation ; ni relance, ni « Changer de parent », ni « Renvoyer le lien »
   - [x] Panier `WK03` : « Demander à mon parent » crée la demande (`POST payments/payment-requests/ { kind: "kit", items }`) puis ouvre `WK08` ; échec affiché sous le bouton
   - [x] Parcours Playwright P5 jusqu'à WK08 (annulation, nouvelle demande, paiement du parent par l'API en attendant WPD15)
