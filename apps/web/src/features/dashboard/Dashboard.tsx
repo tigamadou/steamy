@@ -5,7 +5,6 @@ import { Button, Mascot, QuickActionTile, SectionHeader, StatPill } from "@/comp
 import { CourseGrid, CourseGridSkeleton } from "@/components/public/catalog";
 import { getServerApi } from "@/lib/api";
 import { readOrNull } from "@/lib/api-read";
-import { features } from "@/lib/features";
 import { routes } from "@/lib/routes";
 
 import { ResumeCard } from "./ResumeCard";
@@ -42,14 +41,14 @@ export function DashboardStats({ data }: { data: Pick<DashboardData, "streakDays
   );
 }
 
-/** Raccourcis de WD01 : Steamy Events seulement quand le drapeau `events` est levé (3.8), jamais « Bientôt ». */
+/** Raccourcis de WD01 : catalogue, souhaits, quiz et Steamy Events (WD10). */
 export function QuickActions({ wishlist }: { wishlist: number }) {
   return (
     <nav aria-label="Raccourcis" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <QuickActionTile icon="compass" title="Catalogue" href={l.catalog} tone="primary" />
       <QuickActionTile icon="heart" title="Mes souhaits" count={coursesLabel(wishlist)} href={l.wishlist} tone="amber" />
       <QuickActionTile icon="book" title="Mes quiz" href={l.attempts} tone="success" />
-      {features.events && <QuickActionTile icon="trophy" title="Steamy Events" href={l.events} tone="primary" />}
+      <QuickActionTile icon="trophy" title="Steamy Events" href={l.events} tone="primary" />
     </nav>
   );
 }
