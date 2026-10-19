@@ -66,7 +66,8 @@ describe("CourseTree (WC06a/WC06b)", () => {
     GET.mockResolvedValue(ok(tree()));
     render((await CourseTree({ slug: "robot-bluetooth", expandedProjectId: 2 })) as ReactElement);
     const head = screen.getByRole("link", { name: /Capteurs & moteurs/ });
-    expect(head).toHaveAttribute("aria-expanded", "true");
+    expect(head).toHaveAccessibleName(/masquer les étapes/);
+    expect(head).not.toHaveAttribute("aria-expanded");
     expect(head).toHaveAttribute("href", "/apprenant/parcours/robot-bluetooth");
     const panel = document.getElementById("projet-2-etapes") as HTMLElement;
     expect(within(panel).getByRole("link", { name: /Mission 12/ })).toHaveAttribute("aria-current", "step");
@@ -130,9 +131,20 @@ describe("CourseTree (WC06a/WC06b)", () => {
   });
 });
 
+/** Contenu lu par la vue, et arbre du parcours (`next`) qui désigne l'étape en cours. */
+function withTree(content: unknown, next?: Partial<ReturnType<typeof tree>["next"]>) {
+  GET.mockImplementation(async (path: string) =>
+    path === "/api/learning/enrollments/{course_slug}/tree/"
+      ? next
+        ? ok(tree({ next: { ...tree().next, ...next } }))
+        : failure(500)
+      : content,
+  );
+}
+
 describe("ProjectView (WJ01)", () => {
-  it("objectifs, niveaux, progression, reprise du niveau en cours, récompenses", async () => {
-    GET.mockResolvedValue(ok(projectDetail()));
+  it("objectifs, niveaux, progression, reprise du niveau en cours (`next` de l'API), récompenses", async () => {
+    withTree(ok(projectDetail()), { type: "mission", id: 30, projectId: 2, levelId: 22 });
     render((await ProjectView({ slug: "robot-bluetooth", projectId: 2 })) as ReactElement);
     expect(GET).toHaveBeenCalledWith("/api/learning/projects/{id}/", { params: { path: { id: 2 } } });
     expect(screen.getByRole("heading", { level: 2, name: "Capteurs & moteurs" })).toBeInTheDocument();
@@ -151,9 +163,7 @@ describe("ProjectView (WJ01)", () => {
   });
 
   it("projet terminé, sans mission ni niveau ouvert", async () => {
-    GET.mockResolvedValue(
-      ok(projectDetail({ state: "done", missionCount: 0, missionsDone: 1, levels: [projectDetail().levels[0]] })),
-    );
+    withTree(ok(projectDetail({ state: "done", missionCount: 0, missionsDone: 1, levels: [projectDetail().levels[0]] })));
     render((await ProjectView({ slug: "robot-bluetooth", projectId: 2 })) as ReactElement);
     expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0");
     expect(screen.getByText("1 mission terminée sur 0")).toBeInTheDocument();
@@ -173,7 +183,7 @@ describe("ProjectView (WJ01)", () => {
 
 describe("LevelView (WJ02)", () => {
   it("vidéo d'intro, résumé, missions, commencer la 1re mission", async () => {
-    GET.mockResolvedValue(ok(levelDetail()));
+    withTree(ok(levelDetail()), { type: "mission", id: 12, levelId: 21 });
     render((await LevelView({ slug: "robot-bluetooth", levelId: 21 })) as ReactElement);
     expect(screen.getByTestId("video")).toHaveTextContent("Introduction : Brancher les moteurs");
     expect(screen.getByText("Tu vas brancher deux moteurs.")).toBeInTheDocument();
@@ -186,14 +196,15 @@ describe("LevelView (WJ02)", () => {
 
   it("niveau entamé : continuer ; niveau fini : retour au parcours ; sans vidéo ni résumé", async () => {
     const missions = levelDetail().missions;
-    GET.mockResolvedValue(
+    withTree(
       ok(levelDetail({ introVimeoId: null, introSummary: "", missions: [{ ...missions[0], state: "done" }, { ...missions[1], state: "available" }] })),
+      { type: "mission", id: 13, levelId: 21 },
     );
     const { unmount } = render((await LevelView({ slug: "robot-bluetooth", levelId: 21 })) as ReactElement);
     expect(screen.queryByTestId("video")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Continuer la mission 2" })).toBeInTheDocument();
     unmount();
-    GET.mockResolvedValue(ok(levelDetail({ missions: missions.map((m) => ({ ...m, state: "done" as const })) })));
+    withTree(ok(levelDetail({ missions: missions.map((m) => ({ ...m, state: "done" as const })) })), { type: "quiz", id: 201, levelId: 21 });
     render((await LevelView({ slug: "robot-bluetooth", levelId: 21 })) as ReactElement);
     expect(screen.getByRole("link", { name: /Retour à mon parcours/ })).toHaveAttribute(
       "href",

@@ -9,6 +9,7 @@ import { Button, Icon, Mascot, NotifItem, Tabs, Toast } from "@/components/ds";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { formatRelative } from "@/lib/dates";
 import { routes } from "@/lib/routes";
+import { useFocusOnChange } from "@/lib/use-focus-on-change";
 import { notifyNotificationsChanged } from "@/features/shell/unread-count";
 
 import { notificationIcon, notificationTarget } from "./notification-icon";
@@ -34,6 +35,14 @@ const PAGE_LINK =
  * changement du nombre de non-lues est signalé à la cloche du shell.
  */
 export function NotificationList({ tab, page, items: initialItems, unreadCount, hasNext }: NotificationListProps) {
+  // Nouvelle page ou nouvel onglet : le focus passe à la liste
+  const list = useFocusOnChange<HTMLUListElement>("notifications", `${tab}-${page}`);
+  // Toast fermé alors qu'il avait le focus : le focus passe au contenu principal, pas à `body` (WCAG 2.4.3)
+  const closeToast = () => {
+    const hadFocus = document.activeElement?.closest("[data-toast]") != null;
+    setToast(null);
+    if (hadFocus) document.getElementById("contenu")?.focus();
+  };
   const router = useRouter();
   const [items, setItems] = useState(initialItems);
   const [unread, setUnread] = useState(unreadCount);
@@ -111,7 +120,7 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
           </Link>
         </div>
       ) : (
-        <ul aria-label="Notifications" className="flex flex-col gap-2.5">
+        <ul ref={list} tabIndex={-1} aria-label="Notifications" className="flex flex-col gap-2.5 outline-none">
           {items.map((notification) => (
             <li key={notification.id}>
               <NotifItem
@@ -150,7 +159,7 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
         </nav>
       )}
 
-      {toast && <Toast tone={toast.tone} title={toast.text} onClose={() => setToast(null)} />}
+      {toast && <Toast tone={toast.tone} title={toast.text} onClose={closeToast} />}
     </div>
   );
 }

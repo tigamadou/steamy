@@ -67,7 +67,8 @@ describe("étape suivante", () => {
     const certification = { ...NEXT_MISSION, type: "certification" as const, id: null };
     expect(nextStepHref(certification)).toBe("/apprenant/parcours/robot-bluetooth/certification");
     expect(nextStepLabel(certification)).toBe("Voir ma certification");
-    expect(nextStepHref({ ...NEXT_MISSION, id: null })).toBe("/apprenant/parcours/robot-bluetooth/certification");
+    expect(nextStepHref({ ...NEXT_MISSION, id: null })).toBe("/apprenant/parcours/robot-bluetooth");
+    expect(nextStepLabel({ ...NEXT_MISSION, id: null })).toBe("Voir mon parcours");
   });
 });
 

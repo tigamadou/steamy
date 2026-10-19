@@ -4,10 +4,14 @@ trimestriel. Les définitions sont chargées par migration de données (`0002_kp
 main ; les KPI `auto` sont calculés chaque nuit (`apps.impact.tasks`), les KPI `manual` saisis dans WAD05.
 """
 
+import uuid
+
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+
+from apps.core.storage import private_storage
 
 
 class KpiDefinition(models.Model):
@@ -143,3 +147,58 @@ class ImpactReport(models.Model):
 
     def __str__(self):
         return f"Rapport {self.period}"
+
+
+def export_path(export, filename) -> str:
+    return f"impact-exports/{export.uuid}.{export.format}"
+
+
+class ReportExport(models.Model):
+    """
+    Export CSV ou PDF d'un rapport trimestriel (WAD04, D74), généré en asynchrone par Celery dans le stockage privé
+    (ADR 0005). `snapshot` fige le rapport tel qu'il était à la demande : le fichier reprend exactement WAD04.
+    Seul le membre qui l'a demandé le consulte et le télécharge.
+    """
+
+    class Format(models.TextChoices):
+        CSV = "csv", "CSV"
+        PDF = "pdf", "PDF"
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("En préparation")
+        READY = "ready", _("Prêt")
+        FAILED = "failed", _("Échec")
+
+    report = models.ForeignKey(
+        ImpactReport, models.CASCADE, related_name="exports", verbose_name=_("rapport")
+    )
+    format = models.CharField(_("format"), max_length=3, choices=Format.choices)
+    status = models.CharField(
+        _("état"), max_length=8, choices=Status.choices, default=Status.PENDING
+    )
+    uuid = models.UUIDField(
+        _("identifiant du fichier"), default=uuid.uuid4, unique=True, editable=False
+    )
+    file = models.FileField(
+        _("fichier"), storage=private_storage, upload_to=export_path, blank=True, max_length=200
+    )
+    snapshot = models.JSONField(_("contenu figé"), default=dict)
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        models.CASCADE,
+        related_name="+",
+        verbose_name=_("demandé par"),
+    )
+    created_at = models.DateTimeField(_("demandé le"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("export de rapport")
+        verbose_name_plural = _("exports de rapports")
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self):
+        return f"Export {self.get_format_display()} · {self.report.period}"
+
+    @property
+    def filename(self) -> str:
+        return f"rapport-impact-{self.report.period}.{self.format}"
