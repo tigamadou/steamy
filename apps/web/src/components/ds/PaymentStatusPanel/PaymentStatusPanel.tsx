@@ -36,6 +36,8 @@ export type PaymentStatusPanelProps = {
   onChangeNumber: () => void;
   /** WA07 : nouvel essai avec le même numéro. */
   onRetry: () => void;
+  /** Nouvel essai en cours d'envoi : « Réessayer le paiement » occupé (anti double envoi). */
+  retrying?: boolean;
   /** Issue connue (`succeeded` ou `failed`). */
   onSettled?: (payment: Payment) => void;
 };
@@ -94,6 +96,7 @@ export function PaymentStatusPanel({
   success,
   onChangeNumber,
   onRetry,
+  retrying = false,
   onSettled,
 }: PaymentStatusPanelProps) {
   const texts = TEXTS[register];
@@ -160,7 +163,9 @@ export function PaymentStatusPanel({
           <Button variant="outline" onClick={onChangeNumber}>
             Changer de numéro
           </Button>
-          <Button onClick={onRetry}>Réessayer le paiement</Button>
+          <Button onClick={onRetry} loading={retrying}>
+            Réessayer le paiement
+          </Button>
         </div>
       </Panel>
     );

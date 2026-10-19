@@ -57,6 +57,23 @@ describe("apiCall", () => {
     });
   });
 
+  it("aplatit les erreurs imbriquées (objet, liste d'objets)", async () => {
+    getBrowserApi.mockResolvedValue({});
+    const error = {
+      code: "VALIDATION_ERROR",
+      message: "Données invalides.",
+      fields: {
+        guest: { phone: [{ code: "PHONE_INVALID", message: "Numéro invalide." }] },
+        items: [{}, { kitSlug: [{ code: "REQUIRED", message: "Champ obligatoire." }] }],
+        odd: [null, 3],
+      },
+    };
+    const result = await apiCall(respond(400, { error }));
+    expect(result).toMatchObject({
+      fields: { guest: "Numéro invalide.", items: "Champ obligatoire.", odd: "" },
+    });
+  });
+
   it("se replie sur SERVER_ERROR sans corps d'erreur", async () => {
     getBrowserApi.mockResolvedValue({});
     await expect(apiCall(respond(502))).resolves.toEqual({

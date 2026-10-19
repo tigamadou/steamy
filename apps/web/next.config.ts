@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
   // Liens à jeton (SMS de consentement, email d'invitation) : le jeton ne fuit pas vers un site tiers par le Referer
   async headers() {
     return [
-      ...["/consentement/:path*", "/activation/:path*"].map((source) => ({
+      ...["/consentement/:path*", "/activation/:path*", "/boutique/commandes/:path*"].map((source) => ({
         source,
         headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
       })),

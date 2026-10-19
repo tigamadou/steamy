@@ -55,6 +55,7 @@ export * from "./Section";
 export * from "./SectionHeader";
 export * from "./Select";
 export * from "./SettingsRow";
+export * from "./ShippingTimeline";
 export * from "./SkeletonBlock";
 export * from "./StatPill";
 export * from "./Tabs";

@@ -7,6 +7,7 @@ import {
   formatInstant,
   formatInstantTime,
   formatRelative,
+  formatTime,
   formatTimeRange,
 } from "./dates";
 
@@ -27,6 +28,7 @@ describe("formatDate", () => {
     expect(datePill("2026-06-28T13:00:00Z")).toEqual({ day: "28", month: "JUIN" });
     expect(formatFullDate("2026-11-05T13:00:00Z")).toBe("jeudi 5 novembre 2026");
     expect(formatTimeRange("2026-11-05T13:00:00Z", "2026-11-05T15:30:00Z")).toBe("14:00 – 16:30");
+    expect(formatTime("2026-11-05T13:32:00Z")).toBe("14:32");
   });
 });
 
