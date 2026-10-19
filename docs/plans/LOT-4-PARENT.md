@@ -28,7 +28,7 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation 
   - [x] Recette : toutes variantes et tous états dessinés, aucun prix, réseau ou délai en dur, vouvoiement
   - [x] Compléter d'après §5.11 : kit requis (parcours), adresse de kit modifiée (frais recalculés), mobile 360 du kit et de l'attente de confirmation, âge sur `WPD05` (D20), état « déjà traitée » de `WPD05`, « Payer » en magenta (C1)
   - [ ] Maquette validée par le produit (C18) avant 4.4
-- [x] **4.1** Socle parent, accueil et notifications · `feature/lot4-accueil` (requiert API-L4) · PR #PR41
+- [x] **4.1** Socle parent, accueil et notifications · `feature/lot4-accueil` (requiert API-L4) · PR #122
   - [x] Layout `(parent)` : contrôle du rôle côté serveur, redirection vers `/connexion?next=`, `loading.tsx`, `error.tsx`, `not-found.tsx`
   - [x] `ParentNav` (config de l'`AppShell`) et navigation active correcte sur chaque route
   - [x] `WPD01` Accueil + « À valider »
