@@ -28,7 +28,7 @@ test("P5 panier : WK10 → WK01 → WK02 → WK03, quantité, le panier serveur 
   await page.goto("/apprenant/boutique/panier");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mon panier");
   await expect(visible(page, "heading", "Ton panier est vide")).toBeVisible();
-  await expect(page.getByText("Livraison selon ta zone")).toBeVisible();
+  await expect(page.getByText("Livraison selon ta zone").filter({ visible: true })).toBeVisible();
   await axe(page);
   await visible(page, "link", "Voir les kits").click();
 
@@ -47,7 +47,7 @@ test("P5 panier : WK10 → WK01 → WK02 → WK03, quantité, le panier serveur 
     "href",
     "/apprenant/catalogue/decouverte-robotique",
   );
-  await expect(page.getByText("Livraison selon ta zone")).toBeVisible();
+  await expect(page.getByText("Livraison selon ta zone").filter({ visible: true })).toBeVisible();
   await axe(page);
   await visible(page, "button", "Acheter maintenant").click();
 
@@ -65,17 +65,19 @@ test("P5 panier : WK10 → WK01 → WK02 → WK03, quantité, le panier serveur 
   await expect(page).toHaveURL(/\/connexion/);
   await loginViaApi(page, username, PASSWORD);
   await page.goto("/apprenant/boutique/panier");
-  await expect(page.getByText("Sous-total (3 articles)")).toBeVisible();
+  await expect(page.getByText("Sous-total (3 articles)").filter({ visible: true })).toBeVisible();
 
   // Retrait d'une ligne
   await visible(page, "button", "Retirer Steamy Bot v1").click();
   await expect(page.getByRole("status").filter({ hasText: "« Steamy Bot v1 » retiré du panier." })).toBeVisible();
-  await expect(page.getByText("Sous-total (2 articles)")).toBeVisible();
+  await expect(page.getByText("Sous-total (2 articles)").filter({ visible: true })).toBeVisible();
 });
 
 test("P5 fusion : le panier invité rejoint celui de l'apprenant à la connexion (W16 ?next=)", async ({ page }) => {
   test.setTimeout(180_000);
   const username = await signUpFreshLearner(page);
+  // W15 n'est pas dans le shell : la déconnexion se fait depuis l'espace apprenant
+  await page.goto("/apprenant");
   await logoutFromShell(page);
   await expect(page).toHaveURL(/\/connexion/);
 
@@ -96,7 +98,7 @@ test("P5 fusion : le panier invité rejoint celui de l'apprenant à la connexion
   await page.getByRole("button", { name: "Se connecter" }).click();
   await expect(page).toHaveURL("/apprenant/boutique/panier");
   await expect(visible(page, "link", "Steamy Bot v1")).toBeVisible();
-  await expect(page.getByText("Sous-total (1 article)")).toBeVisible();
+  await expect(page.getByText("Sous-total (1 article)").filter({ visible: true })).toBeVisible();
   expect(await page.evaluate(() => window.localStorage.getItem("steamy:panier"))).toBeNull();
 
   // Le panier public renvoie l'apprenant connecté vers le sien
@@ -107,12 +109,12 @@ test("P5 fusion : le panier invité rejoint celui de l'apprenant à la connexion
 test("WK10 et WK11 invité : panier vide, kit en rupture avec alerte de réassort par SMS", async ({ page }) => {
   await page.goto("/boutique/panier");
   await expect(visible(page, "heading", "Votre panier est vide")).toBeVisible();
-  await expect(page.getByText("Livraison selon votre zone")).toBeVisible();
+  await expect(page.getByText("Livraison selon votre zone").filter({ visible: true })).toBeVisible();
   await axe(page);
 
   await page.goto("/boutique/kit-energie-solaire");
   await expect(page.getByRole("heading", { level: 1, name: "Kit Énergie Solaire" })).toBeVisible();
-  await expect(page.getByText("Indisponible", { exact: true })).toBeVisible();
+  await expect(page.getByText("Indisponible", { exact: true }).filter({ visible: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Ajouter au panier" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Voir des kits similaires" })).toHaveAttribute(
     "href",
