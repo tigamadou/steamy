@@ -2287,6 +2287,98 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/backoffice/exports/{id}/:
+    get:
+      operationId: backoffice_exports_retrieve
+      description: État d'un export, interrogé jusqu'à `ready` (ou `failed`).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportExport'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/exports/{id}/download/:
+    get:
+      operationId: backoffice_exports_download_retrieve
+      description: |-
+        Téléchargement (ADR 0005 §6) : redirection vers une URL présignée de 5 minutes ; sans stockage objet (CI), le
+        fichier est servi directement. Export pas prêt : 409 `EXPORT_NOT_READY`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '302':
+          description: Redirection vers l'URL présignée
+        '200':
+          description: Fichier CSV ou PDF
+        '409':
+          description: EXPORT_NOT_READY
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/backoffice/impact-reports/{period}/:
     get:
       operationId: backoffice_impact_reports_retrieve
@@ -2308,6 +2400,64 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ImpactReport'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/impact-reports/{period}/exports/:
+    post:
+      operationId: backoffice_impact_reports_exports_create
+      description: 'WAD04 « Exporter CSV / PDF » : export demandé, généré en asynchrone
+        (D74), suivi par `exports/{id}/`.'
+      parameters:
+      - in: path
+        name: period
+        schema:
+          type: string
+        required: true
+      tags:
+      - backoffice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportExport'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
         '401':
           content:
@@ -8413,6 +8563,7 @@ components:
       - EVENT_ALREADY_PROPOSED
       - EVENT_CLOSED
       - EVENT_FULL
+      - EXPORT_NOT_READY
       - IMPORT_INVALID_FILE
       - IMPORT_TOO_LARGE
       - INVALID_CREDENTIALS
@@ -8488,6 +8639,7 @@ components:
         * `EVENT_ALREADY_PROPOSED` - EVENT_ALREADY_PROPOSED
         * `EVENT_CLOSED` - EVENT_CLOSED
         * `EVENT_FULL` - EVENT_FULL
+        * `EXPORT_NOT_READY` - EXPORT_NOT_READY
         * `IMPORT_INVALID_FILE` - IMPORT_INVALID_FILE
         * `IMPORT_TOO_LARGE` - IMPORT_TOO_LARGE
         * `INVALID_CREDENTIALS` - INVALID_CREDENTIALS
@@ -8582,6 +8734,13 @@ components:
       - slug
       - startsAt
       - title
+    ExportRequestRequest:
+      type: object
+      properties:
+        format:
+          $ref: '#/components/schemas/FormatEnum'
+      required:
+      - format
     FieldError:
       type: object
       properties:
@@ -8592,6 +8751,14 @@ components:
       required:
       - code
       - message
+    FormatEnum:
+      enum:
+      - csv
+      - pdf
+      type: string
+      description: |-
+        * `csv` - CSV
+        * `pdf` - PDF
     GenderEnum:
       enum:
       - female
@@ -12300,6 +12467,34 @@ components:
       - period
       - status
       - total
+    ReportExport:
+      type: object
+      properties:
+        id:
+          type: integer
+        period:
+          type: string
+          description: 2026-t1
+        format:
+          $ref: '#/components/schemas/FormatEnum'
+        status:
+          $ref: '#/components/schemas/PdfStatusEnum'
+        createdAt:
+          type: string
+          format: date-time
+        downloadPath:
+          type: string
+          nullable: true
+          readOnly: true
+          description: Chemin de téléchargement sur l'API, une fois l'export prêt
+            (redirige vers une URL présignée)
+      required:
+      - createdAt
+      - downloadPath
+      - format
+      - id
+      - period
+      - status
     ReportRow:
       type: object
       properties:

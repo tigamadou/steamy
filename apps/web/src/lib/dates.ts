@@ -50,7 +50,7 @@ const DAY_MS = 24 * HOUR;
 const DAY_KEY = new Intl.DateTimeFormat("fr-CA", { timeZone: TIME_ZONE });
 
 /** Nombre de jours calendaires (fuseau de la plateforme) entre deux instants. */
-function calendarDaysBetween(from: Date, to: Date): number {
+export function calendarDaysBetween(from: Date, to: Date): number {
   const day = (date: Date) => Date.parse(`${DAY_KEY.format(date)}T00:00:00Z`);
   return Math.round((day(to) - day(from)) / DAY_MS);
 }
