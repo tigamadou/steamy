@@ -4,7 +4,7 @@ import type { ReactElement, ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BackofficeGate } from "@/components/backoffice/BackofficeGate";
-import { DASHBOARD, DETAIL } from "@/test/impact-fixtures";
+import { DASHBOARD, DETAIL, REPORT } from "@/test/impact-fixtures";
 
 const requireGroups = vi.fn();
 const requireStaff = vi.fn();
@@ -15,11 +15,19 @@ vi.mock("@/lib/backoffice/guard", () => ({ requireGroups, requireStaff, publicAp
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET: apiGet }) }));
 vi.mock("@/components/backoffice/BackofficeGate", () => ({ BackofficeGate: () => null }));
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ back }),
+  useRouter: () => ({ back, refresh: vi.fn() }),
   usePathname: () => "/backoffice",
   notFound: () => {
     throw new Error("notFound");
   },
+  redirect: (url: string) => {
+    throw new Error(`redirect:${url}`);
+  },
+}));
+vi.mock("next/server", () => ({ connection: async () => {} }));
+vi.mock("@/lib/backoffice/period", async (original) => ({
+  ...(await original<typeof import("@/lib/backoffice/period")>()),
+  currentQuarterKey: () => "2026-t4",
 }));
 
 const OVERVIEW = {
@@ -101,6 +109,50 @@ describe("pages du back-office", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Impact Tracker" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Trimestre" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("region", { name: "Ventes réalisées" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Saisie manuelle" })).toHaveAttribute(
+      "href",
+      "/backoffice/impact/rapports/2026-t4/saisie",
+    );
+    expect(screen.getByRole("link", { name: "Rapport trimestriel" })).toHaveAttribute("href", "/backoffice/impact/rapports");
+  });
+
+  it("les rapports ouvrent le trimestre en cours", async () => {
+    const { default: Page } = await import("./backoffice/impact/rapports/page");
+    await expect(Page()).rejects.toThrow("redirect:/backoffice/impact/rapports/2026-t4");
+    expect(requireGroups).toHaveBeenCalledWith(["Finance", "Super-admin"]);
+  });
+
+  it("WAD04 lit le rapport du trimestre et propose la saisie et la soumission d'un brouillon", async () => {
+    apiGet.mockResolvedValue({ data: REPORT, response: new Response(null, { status: 200 }) });
+    const { default: Page } = await import("./backoffice/impact/rapports/[periode]/page");
+    render(await Page({ params: Promise.resolve({ periode: "2026-t4" }) } as never));
+    expect(requireGroups).toHaveBeenCalledWith(["Finance", "Super-admin"]);
+    expect(apiGet).toHaveBeenCalledWith("/api/backoffice/impact-reports/{period}/", {
+      params: { path: { period: "2026-t4" } },
+    });
+    expect(screen.getByRole("heading", { level: 1, name: "Rapport d'impact trimestriel" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Saisie manuelle" })).toHaveAttribute(
+      "href",
+      "/backoffice/impact/rapports/2026-t4/saisie",
+    );
+    expect(screen.getByRole("button", { name: "Soumettre" })).toBeInTheDocument();
+  });
+
+  it("WAD04 soumis : plus de soumission, saisie en consultation", async () => {
+    apiGet.mockResolvedValue({ data: { ...REPORT, status: "submitted" }, response: new Response(null, { status: 200 }) });
+    const { default: Page } = await import("./backoffice/impact/rapports/[periode]/page");
+    render(await Page({ params: Promise.resolve({ periode: "2026-t4" }) } as never));
+    expect(screen.queryByRole("button", { name: "Soumettre" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Voir la saisie" })).toBeInTheDocument();
+  });
+
+  it("WAD05 ne présente que les indicateurs manuels, en lecture seule si le rapport est soumis", async () => {
+    apiGet.mockResolvedValue({ data: { ...REPORT, status: "submitted" }, response: new Response(null, { status: 200 }) });
+    const { default: Page } = await import("./backoffice/impact/rapports/[periode]/saisie/page");
+    render(await Page({ params: Promise.resolve({ periode: "2026-t4" }) } as never));
+    expect(screen.getByRole("heading", { level: 1, name: "Saisie des indicateurs manuels" })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Ventes réalisées/)).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Financements reçus (FCFA)")).toBeDisabled();
   });
 
   it("WAD03 lit l'indicateur demandé pour la période de l'URL", async () => {
