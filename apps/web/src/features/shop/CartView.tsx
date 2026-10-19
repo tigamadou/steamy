@@ -39,6 +39,8 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
   const { notify, toast } = useUndoableAction();
   const [asking, setAsking] = useState(false);
   const [askError, setAskError] = useState<string | null>(null);
+  // Next garde la page masquée (Activity) après l'ouverture de WK08 : au retour sur le panier, le bouton est libéré
+  useEffect(() => () => setAsking(false), []);
   const listHeading = useRef<HTMLHeadingElement>(null);
   const shop = tu ? routes.learner.shop : routes.shop;
   const kitHref = tu ? routes.learner.shopKit : routes.shopKit;
