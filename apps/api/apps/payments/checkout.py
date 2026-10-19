@@ -28,6 +28,9 @@ log = logging.getLogger(__name__)
 #: Délai après lequel un paiement sans issue est vérifié auprès du prestataire (webhook perdu)
 RECONCILE_AFTER = timedelta(minutes=10)
 
+#: Paiements sans issue : tant qu'il en reste un, la commande n'accepte pas de nouveau paiement
+IN_PROGRESS = (Payment.Status.INITIATED, Payment.Status.PENDING)
+
 
 def check_payable(order: Order) -> None:
     if order.status == Order.Status.PAID:
@@ -55,6 +58,11 @@ def initiate_payment(order: Order, *, country: str, network: str, msisdn: str) -
         # Verrou de la commande jusqu'à l'enregistrement de la transaction : un webhook très rapide attend, puis
         # retrouve ce paiement au lieu d'en créer un second.
         Order.objects.select_for_update().filter(pk=order.pk).first()
+        # Un débit à la fois : un second paiement (double clic, autre onglet) pendant qu'un premier attend sa
+        # validation pourrait débiter deux fois le payeur. Sous le verrou de la commande, deux envois simultanés
+        # ne passent pas tous les deux.
+        if order.payments.filter(status__in=IN_PROGRESS).exists():
+            raise ApiError("PAYMENT_IN_PROGRESS")
         payment = Payment.objects.create(
             order=order,
             provider=provider.name,

@@ -136,6 +136,26 @@ def test_pending_number_stays_pending(parent, course_order, commit):
     assert Payment.objects.get(pk=body["id"]).status == Payment.Status.PENDING
 
 
+@pytest.mark.parametrize("status", [Payment.Status.INITIATED, Payment.Status.PENDING])
+def test_no_second_payment_while_one_is_in_progress(parent, course_order, status):
+    PaymentFactory(order=course_order, status=status)
+    resp = pay(parent, course_order)
+    assert (resp.status_code, resp.json()["code"]) == (409, "PAYMENT_IN_PROGRESS")
+    assert course_order.payments.count() == 1
+
+
+def test_double_submission_creates_a_single_payment(parent, course_order):
+    assert pay(parent, course_order, PENDING).status_code == 201
+    assert pay(parent, course_order, PENDING).json()["code"] == "PAYMENT_IN_PROGRESS"
+    assert course_order.payments.count() == 1
+
+
+def test_a_settled_payment_does_not_block_a_new_one(parent, course_order):
+    PaymentFactory(order=course_order, status=Payment.Status.FAILED)
+    assert pay(parent, course_order).status_code == 201
+    assert course_order.payments.count() == 2
+
+
 @pytest.mark.parametrize(
     ("user_factory", "status", "code"),
     [
