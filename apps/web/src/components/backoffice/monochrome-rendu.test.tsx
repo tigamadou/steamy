@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -16,6 +16,11 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/auth/logout", () => ({ logout: vi.fn() }));
 vi.mock("@/components/backoffice/BackofficeGate", () => ({ BackofficeGate: () => null }));
+const apiCall = vi.fn();
+vi.mock("@/lib/api-call", async (original) => ({
+  ...(await original<typeof import("@/lib/api-call")>()),
+  apiCall: () => apiCall(),
+}));
 
 const { AdminShell } = await import("./AdminShell");
 const { AdminContent, AdminHeader } = await import("./AdminHeader");
@@ -26,6 +31,7 @@ const { ImpactReport } = await import("./ImpactReport");
 const { ManualEntryForm } = await import("./ManualEntryForm");
 const { SubmitReport } = await import("./SubmitReport");
 const { PeriodSwitch } = await import("./PeriodSwitch");
+const { ExportReport } = await import("./ExportReport");
 const { Button } = await import("@/components/ds/Button");
 const { default: Layout } = await import("@/app/(backoffice)/layout");
 const { default: Loading } = await import("@/app/(backoffice)/backoffice/loading");
@@ -69,7 +75,7 @@ const SCREENS: Array<[string, () => ReactElement]> = [
   ["WAD01", () => <Overview overview={OVERVIEW} apiUrl="http://api.test" canOpenImpact />],
   ["WAD02", () => <ImpactDashboard dashboard={DASHBOARD} period="mois" />],
   ["WAD03", () => <KpiDetail kpi={DETAIL} period="mois" />],
-  ["WAD04", () => <ImpactReport report={REPORT} />],
+  ["WAD04", () => <ImpactReport report={REPORT} apiUrl="http://api.test" />],
   [
     "WAD05",
     () => <ManualEntryForm period="2026-t4" label="T4 2026" locked={false} rows={REPORT.rows.filter((r) => r.source === "manual")} />,
@@ -92,6 +98,19 @@ describe("garde-fou monochrome au rendu du back-office", () => {
     await userEvent.click(screen.getByRole("button", { name: "Soumettre" }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(document.body.innerHTML).not.toMatch(PRIMARY);
+  });
+
+  it.each([
+    ["en préparation", "pending", null, "Préparation de l'export CSV"],
+    ["prêt", "ready", "/api/backoffice/exports/1/download/", "Télécharger le CSV"],
+    ["en échec", "failed", null, "n'a pas pu être généré"],
+  ])("l'export %s non plus", async (_, status, downloadPath, shown) => {
+    apiCall.mockResolvedValue({ ok: true, data: { id: 1, format: "csv", status, downloadPath } });
+    const { unmount } = render(<ExportReport period="2026-t4" apiUrl="http://api.test" />);
+    await userEvent.click(screen.getByRole("button", { name: "Exporter CSV" }));
+    await waitFor(() => expect(document.body).toHaveTextContent(shown));
+    expect(document.body.innerHTML).not.toMatch(PRIMARY);
+    unmount();
   });
 
   it("détecte bien une couleur primaire rendue", () => {

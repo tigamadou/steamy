@@ -784,6 +784,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/backoffice/exports/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description État d'un export, interrogé jusqu'à `ready` (ou `failed`). */
+        get: operations["backoffice_exports_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/exports/{id}/download/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Téléchargement (ADR 0005 §6) : redirection vers une URL présignée de 5 minutes ; sans stockage objet (CI), le
+         *     fichier est servi directement. Export pas prêt : 409 `EXPORT_NOT_READY`.
+         */
+        get: operations["backoffice_exports_download_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/backoffice/impact-reports/{period}/": {
         parameters: {
             query?: never;
@@ -795,6 +832,23 @@ export interface paths {
         get: operations["backoffice_impact_reports_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/impact-reports/{period}/exports/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WAD04 « Exporter CSV / PDF » : export demandé, généré en asynchrone (D74), suivi par `exports/{id}/`. */
+        post: operations["backoffice_impact_reports_exports_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3079,6 +3133,7 @@ export interface components {
          *     * `EVENT_ALREADY_PROPOSED` - EVENT_ALREADY_PROPOSED
          *     * `EVENT_CLOSED` - EVENT_CLOSED
          *     * `EVENT_FULL` - EVENT_FULL
+         *     * `EXPORT_NOT_READY` - EXPORT_NOT_READY
          *     * `IMPORT_INVALID_FILE` - IMPORT_INVALID_FILE
          *     * `IMPORT_TOO_LARGE` - IMPORT_TOO_LARGE
          *     * `INVALID_CREDENTIALS` - INVALID_CREDENTIALS
@@ -3130,7 +3185,7 @@ export interface components {
          *     * `VALIDATION_ERROR` - VALIDATION_ERROR
          * @enum {string}
          */
-        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "APPLICATION_ALREADY_RESOLVED" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELETION_ALREADY_RESOLVED" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "IMPORT_INVALID_FILE" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_DAILY_LIMIT" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUEST_CLOSED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SCHOOL_OFFER_EXPIRED" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "APPLICATION_ALREADY_RESOLVED" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELETION_ALREADY_RESOLVED" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "EXPORT_NOT_READY" | "IMPORT_INVALID_FILE" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_DAILY_LIMIT" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUEST_CLOSED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SCHOOL_OFFER_EXPIRED" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
         EventSummary: {
             readonly slug: string;
             /** Titre */
@@ -3153,10 +3208,19 @@ export interface components {
              */
             readonly price: number;
         };
+        ExportRequestRequest: {
+            format: components["schemas"]["FormatEnum"];
+        };
         FieldError: {
             code: string;
             message: string;
         };
+        /**
+         * @description * `csv` - CSV
+         *     * `pdf` - PDF
+         * @enum {string}
+         */
+        FormatEnum: "csv" | "pdf";
         /**
          * @description * `female` - Femme
          *     * `male` - Homme
@@ -4801,6 +4865,17 @@ export interface components {
             entered: number;
             /** @description Indicateurs manuels */
             total: number;
+        };
+        ReportExport: {
+            id: number;
+            /** @description 2026-t1 */
+            period: string;
+            format: components["schemas"]["FormatEnum"];
+            status: components["schemas"]["PdfStatusEnum"];
+            /** Format: date-time */
+            createdAt: string;
+            /** @description Chemin de téléchargement sur l'API, une fois l'export prêt (redirige vers une URL présignée) */
+            readonly downloadPath: string | null;
         };
         ReportRow: {
             code: string;
@@ -7976,6 +8051,125 @@ export interface operations {
             };
         };
     };
+    backoffice_exports_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportExport"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_exports_download_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Fichier CSV ou PDF */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Redirection vers l'URL présignée */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description EXPORT_NOT_READY */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     backoffice_impact_reports_retrieve: {
         parameters: {
             query?: never;
@@ -7993,6 +8187,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ImpactReport"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_impact_reports_exports_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                period: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExportRequestRequest"];
+            };
+        };
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportExport"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             401: {

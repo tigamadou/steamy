@@ -13,7 +13,9 @@ function Harness({ server }: { server: Server }) {
   const { perform, notify, toast } = useUndoableAction();
   return (
     <>
-      <p>{shown ? "Robotique" : "—"}</p>
+      <main id="contenu" tabIndex={-1}>
+        <p>{shown ? "Robotique" : "—"}</p>
+      </main>
       <button
         type="button"
         onClick={() =>
@@ -80,9 +82,20 @@ describe("useUndoableAction (WW03)", () => {
     await user.click(screen.getByRole("button", { name: "Annuler" }));
     expect(screen.getByText("—")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Annulation impossible.");
-    // L'erreur reste jusqu'à sa fermeture
+    // L'erreur reste jusqu'à sa fermeture ; le focus, qui était dans le toast, passe au contenu (pas à `body`)
     await user.click(screen.getByRole("button", { name: "Fermer" }));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("main")).toHaveFocus();
+  });
+
+  it("fermé sans y avoir le focus, le toast ne déplace pas le focus", async () => {
+    const user = userEvent.setup();
+    render(<Harness server={{ commit: ok, undo: ok }} />);
+    await user.click(screen.getByRole("button", { name: "Informer" }));
+    const inform = screen.getByRole("button", { name: "Informer" });
+    inform.focus();
+    act(() => screen.getByRole("button", { name: "Fermer" }).click());
+    expect(inform).toHaveFocus();
   });
 
   it("focus sur « Annuler » quand l'élément disparaît, puis rendu à l'élément rétabli", async () => {

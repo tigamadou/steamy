@@ -751,14 +751,14 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > visé (notification `announcement`, D7), puis figée. Aucun cache serveur à invalider (`PlatformSettings.load()`
   > relit la base ; les référentiels n'ont qu'un cache HTTP d'une heure). « Mode maintenance » et « inscriptions
   > ouvertes » (WAD14) restent hors de cette étape : comportement d'API non spécifié, à trancher avant LOT-6 6.5.
-- [ ] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact-kpi` · PR #65 (1/2), puis `feature/api-l6-4-impact-rapports` · PR #67 (2/2)
-  - [ ] App `impact` : `KpiDefinition` (30 KPI par migration), `KpiValue`, `ImpactReport`, `ReportExport` ; statut D73
+- [x] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact-kpi` · PR #65 (1/3), puis `feature/api-l6-4-impact-rapports` · PR #67 (2/3), puis `feature/api-l6-4-impact-exports` · PR #110 (3/3)
+  - [x] App `impact` : `KpiDefinition` (30 KPI par migration), `KpiValue`, `ImpactReport`, `ReportExport` ; statut D73
     - [x] `KpiDefinition` (30 KPI en 8 groupes, migration `0002_kpi_definitions`), `KpiValue`, `ImpactReport` ; `kpiStatus` D73 (PR #65)
-    - [ ] `ReportExport`
+    - [x] `ReportExport` (migration `0003_report_export`, PR #110)
   - [x] `GET backoffice/overview/`, `backoffice/kpis/…`, `backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/` (`REPORT_LOCKED`, D74)
     - [x] `GET backoffice/overview/`, `GET backoffice/kpis/?period=`, `GET backoffice/kpis/{code}/` (PR #65)
     - [x] `GET backoffice/impact-reports/{period}/`, `PATCH …/values/`, `POST …/submit/` (PR #67)
-  - [ ] `POST …/exports/` + `GET backoffice/exports/{id}/` (CSV/PDF asynchrones, `generate_report_export`) : attend `core/pdf.py` et `PrivateMediaStorage` d'API-L3a.4 (ADR 0005)
+  - [x] `POST …/exports/` + `GET backoffice/exports/{id}/` (CSV/PDF asynchrones, `generate_report_export`) (PR #110)
   - [x] Tâche quotidienne `aggregate_daily_stats` (`DailyAggregatedStat`, D75) (PR #65)
   - [x] Tests : valeurs de référence des KPI `auto`, table de vérité de `kpiStatus`, bornes de période, accès par groupe (PR #65)
   - [x] Tests : rapport soumis non modifiable (PR #67 : `REPORT_LOCKED`, soumission idempotente, lignes figées)
@@ -773,7 +773,16 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > nocturne ne change plus un rapport soumis) ; plages : dernier mois du trimestre pour les KPI `auto`
   > d'acquisition, trimestre sinon ; saisie typée par `unit` (note de 1 à 10). « Valider la saisie » (point ouvert de
   > LOT-6 6.9) n'est pas encore exigée par la soumission.
-  > Reprise : exports CSV/PDF (`ReportExport`, tâche `generate_report_export`, notification) après API-L3a.4.
+  > Décisions (PR #110) : l'export fige le rapport tel que WAD04 l'affiche à la demande (`snapshot`) ; fichier dans
+  > le stockage privé (`impact-exports/<uuid>.<format>`), téléchargé par `GET backoffice/exports/{id}/download/`
+  > (URL présignée de 5 minutes, fichier servi en CI) ; `GET backoffice/exports/{id}/` renvoie l'état et
+  > `downloadPath` une fois prêt ; export visible de son seul demandeur (404 sinon). CSV pour tableur français (`;`,
+  > BOM UTF-8, virgule décimale, dates `jj/mm/aaaa`). Réessais exponentiels, puis `failed` ; code `EXPORT_NOT_READY`
+  > (409). Pas de notification en fin d'export : le personnel n'a pas de centre de notifications, WAD04 interroge
+  > l'état et annonce le fichier prêt. Énumération partagée `PdfStatusEnum` (certificats, factures, exports).
+  > Suites de relecture : réponses texte du CSV neutralisées (apostrophe devant `= + - @`, tabulation, retour chariot ;
+  > nombres intacts) ; rendu hors du verrou de ligne ; `soft_time_limit` de 120 s. Point ouvert : rétention des
+  > fichiers `impact-exports/` (aucune purge en v1, à fixer avec l'exploitation).
 - [ ] **Critères de fin d'API-L6**
   - [ ] Toutes les routes `backoffice/` protégées par `IsStaffVerified`
   - [ ] Seed enrichi, `make openapi` committé
