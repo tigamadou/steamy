@@ -1,6 +1,7 @@
 "use client";
 
-import { CourseCard, type CourseCardData } from "@/components/ds/CourseCard";
+import type { CourseCardData } from "@/components/ds/CourseCard";
+import { CourseCardList } from "@/components/public/catalog";
 
 import { useWishlist } from "./use-wishlist";
 
@@ -17,7 +18,7 @@ export function LearnerCourseGrid({ items, wished }: { items: LearnerCourseItem[
   );
 }
 
-/** Grille de cartes avec cœur (1 → 3 colonnes), partagée par WC01 et WW01. */
+/** Grille de cartes avec cœur, partagée par WC01 et WW01 (grille unique `CourseCardList`). */
 export function CourseList({
   items,
   wished,
@@ -28,12 +29,9 @@ export function CourseList({
   onFav: (slug: string) => void;
 }) {
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {items.map(({ slug, card }) => (
-        <li key={slug} data-course={slug} className="flex">
-          <CourseCard course={card} favorited={wished.has(slug)} onFav={() => onFav(slug)} className="flex-1" />
-        </li>
-      ))}
-    </ul>
+    <CourseCardList
+      narrow
+      items={items.map(({ slug, card }) => ({ slug, card, favorited: wished.has(slug), onFav: () => onFav(slug) }))}
+    />
   );
 }
