@@ -90,3 +90,40 @@ export const DETAIL: Schemas["KpiDetail"] = {
     { code: "na_hand", label: "Situation de handicap", value: null },
   ],
 };
+
+type ReportRow = Schemas["ReportRow"];
+
+export function reportRow(over: Partial<ReportRow> & Pick<ReportRow, "code">): ReportRow {
+  return {
+    label: over.code,
+    group: "sales",
+    unit: "count",
+    source: "manual",
+    start: "2026-10-01",
+    end: "2026-12-31",
+    value: null,
+    status: STATUS.pending,
+    note: "",
+    ...over,
+  };
+}
+
+export const REPORT: Schemas["ImpactReport"] = {
+  period: "2026-t4",
+  label: "T4 2026",
+  start: "2026-10-01",
+  end: "2026-12-31",
+  dueDate: "2027-01-15",
+  status: "draft",
+  submittedAt: null,
+  submittedBy: null,
+  entered: 2,
+  total: 4,
+  rows: [
+    reportRow({ code: "ventes", label: "Ventes réalisées", unit: "fcfa", source: "auto", start: "2026-12-01", value: 44000, status: STATUS.below }),
+    reportRow({ code: "fin_montant", label: "Financements reçus", unit: "fcfa", value: 1951472, status: STATUS.filled, note: "OIF" }),
+    reportRow({ code: "fin_hors", label: "Financement hors programme ?", unit: "yes_no", value: false, status: STATUS.filled }),
+    reportRow({ code: "prod_which", label: "Lesquels ?", group: "product", unit: "text" }),
+    reportRow({ code: "nps", label: "Recommandation du programme (1-10)", group: "satisfaction", unit: "score" }),
+  ],
+};

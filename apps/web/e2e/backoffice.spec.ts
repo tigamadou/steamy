@@ -68,6 +68,7 @@ test("6.6 et 6.7 ouvrent WAD01 au groupe Support, « À traiter » vers l'admin 
   await expect(page.getByRole("region", { name: "Rapport d'impact · prochaine échéance" })).toBeVisible();
   await expect(page.getByRole("progressbar", { name: "Complétude du rapport" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Voir l'Impact Tracker" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Ouvrir le rapport" })).toHaveCount(0);
 
   const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(violations).toEqual([]);
@@ -85,6 +86,10 @@ test("6.6 et 6.7 ouvrent WAD01 au groupe Support, « À traiter » vers l'admin 
   await expect(page).toHaveURL(`${BASE_URL}/backoffice/acces-refuse`);
   await expect(page.getByRole("heading", { level: 1, name: "Accès refusé" })).toBeVisible();
   await expect(page.getByText(/appartient au groupe Support/)).toBeVisible();
+  // 6.9 : la saisie du rapport trimestriel est refusée de même
+  await page.goto("/backoffice/impact/rapports/2026-t4/saisie");
+  await expect(page).toHaveURL(`${BASE_URL}/backoffice/acces-refuse`);
+  await expect(page.getByRole("heading", { level: 1, name: "Accès refusé" })).toBeVisible();
 
   await openMenu(page);
   await page.getByRole("button", { name: "Se déconnecter" }).click();

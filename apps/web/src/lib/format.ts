@@ -18,14 +18,27 @@ export const DIFFICULTY_LABELS: Record<Schemas["DifficultyEnum"], string> = {
   advanced: "Avancé",
 };
 
-/** Carte d'un parcours public : lien vers sa fiche (WL22), couleur et emoji de sa catégorie. */
-export function toCourseCard(course: Schemas["CourseList"]): CourseCardData {
+/** Pastille d'un parcours qui s'obtient avec le Kit Code de son kit : jamais de prix de parcours (D36). */
+export const KIT_CODE_LABEL = "Avec le Kit Code";
+
+/** Durée en minutes saisie par l'équipe Contenu : `8` → « 8 min », `75` → « 1 h 15 ». */
+export function formatMinutes(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const rest = minutes % 60;
+  return rest ? `${Math.floor(minutes / 60)} h ${String(rest).padStart(2, "0")}` : `${minutes / 60} h`;
+}
+
+/**
+ * Carte d'un parcours : lien vers sa fiche (WL22 par défaut, WC04 dans l'espace apprenant), couleur et emoji de sa
+ * catégorie. Un parcours à kit n'affiche pas de prix de parcours : il s'obtient avec le Kit Code (D36).
+ */
+export function toCourseCard(course: Schemas["CourseList"], href = routes.course(course.slug)): CourseCardData {
   return {
-    href: routes.course(course.slug),
+    href,
     title: course.title,
     difficulty: DIFFICULTY_LABELS[course.difficulty],
-    isFree: course.isFree ?? false,
-    priceLabel: formatPrice(course.price ?? 0),
+    isFree: !course.requiredKit && (course.isFree ?? false),
+    priceLabel: course.requiredKit ? KIT_CODE_LABEL : formatPrice(course.price ?? 0),
     color: course.category.color,
     emoji: course.emoji || course.category.icon,
   };

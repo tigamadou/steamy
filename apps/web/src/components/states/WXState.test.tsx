@@ -30,6 +30,18 @@ describe("WXState", () => {
     expect(container.querySelector('[data-pose="sad"]')).toBeInTheDocument();
   });
 
+  it("a une variante monochrome : kicker, mascotte et boutons en encre", () => {
+    const { container } = render(
+      <>
+        <WXState pose="sad" kicker="Erreur 404" title="Introuvable" body="Rien ici." tone="ink" />
+        <ErrorState register="neutre" tone="ink" onRetry={() => {}} onBack={() => {}} />
+        <OfflineState register="neutre" tone="ink" onRetry={() => {}} />
+      </>,
+    );
+    expect(screen.getByText("Erreur 404")).toHaveClass("text-ink-700");
+    expect(container.innerHTML).not.toMatch(/primary/);
+  });
+
   it("se réduit dans le flux d'une page, avec un titre de second niveau", () => {
     render(<WXState pose="sad" title="Titre" body="Corps" headingLevel={2} compact />);
     expect(screen.getByRole("heading", { level: 2, name: "Titre" })).toBeInTheDocument();

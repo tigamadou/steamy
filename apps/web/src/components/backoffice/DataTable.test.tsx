@@ -1,5 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { axe } from "@/test/axe";
 
@@ -20,6 +20,8 @@ const columns: DataColumn<Row>[] = [
 ];
 
 describe("DataTable", () => {
+  afterEach(() => vi.restoreAllMocks());
+
   it("rend un vrai tableau, titré, avec une ligne par entrée", () => {
     render(
       <DataTable
@@ -56,7 +58,6 @@ describe("DataTable", () => {
     const region = screen.getByRole("region", { name: "Indicateurs du trimestre" });
     expect(region).toHaveAttribute("aria-labelledby", screen.getByText("Indicateurs du trimestre").id);
     expect(region).not.toHaveAttribute("aria-label");
-    vi.restoreAllMocks();
   });
 
   it("affiche l'état vide et la légende visible", () => {

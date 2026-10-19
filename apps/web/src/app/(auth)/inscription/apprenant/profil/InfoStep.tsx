@@ -85,7 +85,7 @@ export function InfoStep() {
           onRetry={localities.retry}
         />
       </Field>
-      <Field label="Email" id="email" hint="Facultatif : pour tes factures et les nouvelles de Steamy." error={state.email}>
+      <Field label="Email" id="email" hint="Facultatif : pour recevoir tes notifications par email." error={state.email}>
         <Input type="email" name="email" autoComplete="email" inputMode="email" />
       </Field>
       <Button type="submit" block size="lg" loading={pending} iconRight="arrow-right" className="mt-3">
