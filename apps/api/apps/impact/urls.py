@@ -23,4 +23,15 @@ urlpatterns = [
         views.ImpactReportSubmitView.as_view(),
         name="backoffice-impact-report-submit",
     ),
+    path(
+        "impact-reports/<str:period>/exports/",
+        views.ImpactReportExportsView.as_view(),
+        name="backoffice-impact-report-exports",
+    ),
+    path("exports/<int:pk>/", views.ExportDetailView.as_view(), name="backoffice-export"),
+    path(
+        "exports/<int:pk>/download/",
+        views.ExportDownloadView.as_view(),
+        name="backoffice-export-download",
+    ),
 ]

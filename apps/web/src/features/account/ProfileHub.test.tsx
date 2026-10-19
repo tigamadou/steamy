@@ -7,7 +7,6 @@ import { axe } from "@/test/axe";
 const getCurrentUser = vi.fn();
 const GET = vi.fn();
 const flags = vi.hoisted(() => ({
-  events: false,
   deliveryAddress: false,
   parentInfo: false,
   accountDeletion: false,

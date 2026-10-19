@@ -5,7 +5,7 @@ import { Button } from "@/components/ds/Button";
 import { getServerApi } from "@/lib/api";
 import { PAGE_GROUPS } from "@/lib/backoffice/access";
 import { backofficeData } from "@/lib/backoffice/fetch";
-import { requireGroups } from "@/lib/backoffice/guard";
+import { publicApiUrl, requireGroups } from "@/lib/backoffice/guard";
 import { routes } from "@/lib/routes";
 
 export const metadata = { title: "Rapport d'impact trimestriel · Back-office" };
@@ -35,7 +35,7 @@ export default async function ReportPage({ params }: PageProps<"/backoffice/impa
         }
       />
       <AdminContent>
-        <ImpactReport report={report} />
+        <ImpactReport report={report} apiUrl={publicApiUrl()} />
       </AdminContent>
     </>
   );

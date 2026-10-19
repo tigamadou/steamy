@@ -8,6 +8,7 @@ import { routes } from "@/lib/routes";
 import { CompletenessBar } from "./CompletenessBar";
 import { DataTable } from "./DataTable";
 import { DeadlineTracker } from "./DeadlineTracker";
+import { ExportReport } from "./ExportReport";
 import { KpiStatusBadge } from "./KpiStatusBadge";
 import { REPORT_STATUS, reportSteps } from "./Overview";
 import { SourceTag } from "./SourceTag";
@@ -19,9 +20,9 @@ type Row = ImpactReportData["rows"][number];
 
 /**
  * WAD04 · Rapport trimestriel : lignes, plages, statuts et complétude calculés par le serveur ; figées une fois le
- * rapport soumis (D74). Les exports CSV / PDF attendent leurs endpoints (`POST …/exports/`, API-L6.4).
+ * rapport soumis (D74). Exports CSV / PDF générés en asynchrone (`ExportReport`).
  */
-export function ImpactReport({ report }: { report: ImpactReportData }) {
+export function ImpactReport({ report, apiUrl }: { report: ImpactReportData; apiUrl: string }) {
   const status = REPORT_STATUS[report.status];
   return (
     <div className="flex flex-col gap-4">
@@ -57,9 +58,12 @@ export function ImpactReport({ report }: { report: ImpactReportData }) {
         </div>
       </section>
 
-      <p className="m-0 text-[13px] font-bold text-ink-600">
-        {report.rows.length} indicateurs · format Impact Tracker (Du · Au · Réponse · Statut)
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="m-0 text-[13px] font-bold text-ink-600">
+          {report.rows.length} indicateurs · format Impact Tracker (Du · Au · Réponse · Statut)
+        </p>
+        <ExportReport period={report.period} apiUrl={apiUrl} />
+      </div>
 
       <DataTable<Row>
         dense

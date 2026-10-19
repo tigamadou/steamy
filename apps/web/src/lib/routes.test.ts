@@ -50,6 +50,8 @@ describe("routes", () => {
     expect(l.orderList()).toBe("/apprenant/profil/commandes");
     expect(l.orderList("payees", 2)).toBe("/apprenant/profil/commandes?statut=payees&page=2");
     expect(l.orderList(undefined, 3)).toBe("/apprenant/profil/commandes?page=3");
+    expect(l.event("atelier")).toBe("/apprenant/evenements/atelier");
+    expect(l.eventApplication("atelier")).toBe("/apprenant/evenements/atelier/candidature");
   });
 });
 
