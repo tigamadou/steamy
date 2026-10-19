@@ -15,7 +15,7 @@ const l = routes.learner;
 /**
  * WD13 · Paramètres de l'apprenant : hub de sections. L'identifiant est en lecture seule (C12) ; ni téléphone ni
  * moyen de paiement (D30) ; les préférences de notification vivent dans WD06 seulement. Les lignes dont l'écran
- * n'est pas livré sont absentes (drapeaux de `features.ts`), jamais « Bientôt ».
+ * n'est pas livré sont absentes (drapeau `orders` de `features.ts`), jamais « Bientôt ».
  */
 export async function ProfileHub() {
   const [me, profile] = await Promise.all([getCurrentUser(), getLearnerProfile()]);
@@ -46,15 +46,13 @@ export async function ProfileHub() {
         <SettingsRow label="Mot de passe" description="Change ton mot de passe de connexion." href={l.password} />
       </Section>
 
-      {features.deliveryAddress && (
-        <Section title="Livraison">
-          <SettingsRow
-            label="Adresse de livraison"
-            description="Proposée quand ton parent te commande un kit."
-            href={l.delivery}
-          />
-        </Section>
-      )}
+      <Section title="Livraison">
+        <SettingsRow
+          label="Adresse de livraison"
+          description="Proposée quand ton parent te commande un kit."
+          href={l.delivery}
+        />
+      </Section>
 
       <Section title="Notifications">
         <SettingsRow
@@ -67,21 +65,19 @@ export async function ProfileHub() {
       <Section title="Mon compte">
         {features.orders && <SettingsRow label="Mes commandes" href={l.orders} />}
         <SettingsRow label="Ma progression" href={l.progress} />
-        {features.parentInfo && <SettingsRow label="Mon parent" href={l.parent} />}
+        <SettingsRow label="Mon parent" href={l.parent} />
         <SettingsRow label="CGU et politiques" href={routes.legal("cgu")} />
         <SettingsRow label="Aide" href={l.help} />
       </Section>
 
-      {features.accountDeletion && (
-        <Section title="Zone sensible" tone="danger">
-          <SettingsRow
-            label="Supprimer mon compte"
-            description="La demande est envoyée à ton parent pour accord."
-            href={l.deletion}
-            className="border-error-300"
-          />
-        </Section>
-      )}
+      <Section title="Zone sensible" tone="danger">
+        <SettingsRow
+          label="Supprimer mon compte"
+          description="La demande est envoyée à ton parent pour accord."
+          href={l.deletion}
+          className="border-error-300"
+        />
+      </Section>
     </div>
   );
 }

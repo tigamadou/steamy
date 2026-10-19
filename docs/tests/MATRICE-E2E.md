@@ -18,7 +18,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WL04` | Nouveau mot de passe | 2 | Nouveau mot de passe, rechargement → WL02, sessions fermées | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL05` | Réinitialisé ✓ | 2 | Réinitialisé puis connexion | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL06` | Projets & Parcours | 1 | Filtre par catégorie dans l'URL (rechargement), catégorie vide, sans brouillon | `apps/web/e2e/decouverte.spec.ts` |
-| `WL07` | Boutique de kits | 1 | Vitrine : prix, « Épuisé », sans lien ni panier ; filtre dans l'URL ; catégorie vide | `apps/web/e2e/evenements-boutique.spec.ts` |
+| `WL07` | Boutique de kits | 1 | Prix, « Épuisé », fiches liées, « Ajouter » si en stock ; filtre dans l'URL ; catégorie vide | `apps/web/e2e/evenements-boutique.spec.ts` |
 | `WL08` | Ateliers | 1 |  |  |
 | `WL09` | Pages légales | 1 | Pied de page → CGU#consentement-parental ; onglets adressables par URL | `apps/web/e2e/editorial.spec.ts` |
 | `WL10` | À propos | 1 | Mission, chiffres, équipe, bandeau d'inscription | `apps/web/e2e/editorial.spec.ts` |
@@ -66,18 +66,18 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WD07` | Tentatives de quiz · liste | 3 | Bandeau de l'API, filtre par statut dans l'URL (rechargement) | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD08` | Tentatives de quiz · détail | 3 | Détail : score, seuil appliqué, « Voir le parcours » | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
 | `WD09` | Tentatives de quiz · vide | 3 | Nouvel apprenant sans quiz → Mes parcours | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
-| `WD10` | Steamy Events | 3 |  |  |
-| `WD11` | Demande de participation | 3 |  |  |
+| `WD10` | Steamy Events | 3 | P6 : événements à venir (prix, complet), candidature « En attente de ton parent », plus de « Participer » ; raccourci de WD01 | `apps/web/e2e/apprenant-evenements.spec.ts` |
+| `WD11` | Demande de participation | 3 | P6 : motivation obligatoire, expérience, accord du parent, envoi → WD10 ; second envoi refusé (`ALREADY_APPLIED`) ; événement complet sans formulaire | `apps/web/e2e/apprenant-evenements.spec.ts` |
 | `WD12` | Aide & support | 3 | Recherche locale dans la FAQ, « Contacter le support » → WL24 | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
 | `WD13` | Paramètres (hub) | 3 | Apprenant neuf : identifiant en lecture seule, ni téléphone ni « Bientôt », liens vers WD06, CGU, WD18 et retour par le fil d'Ariane | `apps/web/e2e/profil-parametres.spec.ts` |
 | `WD14` | Historique de commande | 3 |  |  |
-| `WD15` | Supprimer le compte | 3 |  |  |
+| `WD15` | Supprimer le compte | 3 | Règle D40 (J+30, factures conservées), demande envoyée au parent, état conservé au rechargement, annulation | `apps/web/e2e/profil-livraison-parent-suppression.spec.ts` |
 | `WD16` | Déconnexion (modal partagé) | 3 | Shell apprenant : annulation par Échap puis déconnexion, espace refermé | `apps/web/e2e/apprenant-shell.spec.ts` |
 | `WD17` | Éditer le profil | 3 | Formulaire prérempli, date incohérente refusée (D23), modifier le profil puis recharger, classe reprise par WD13 | `apps/web/e2e/profil-parametres.spec.ts` |
 | `WD18` | Modifier la connexion | 3 | Mot de passe actuel faux refusé, changement réussi, session conservée, reconnexion avec le nouveau | `apps/web/e2e/profil-parametres.spec.ts` |
-| `WD19` | Informations de livraison | 3 |  |  |
+| `WD19` | Informations de livraison | 3 | Pays du profil, zone du référentiel (D38), champs obligatoires, enregistrer puis recharger | `apps/web/e2e/profil-livraison-parent-suppression.spec.ts` |
 | `WD21` | Progression & recommandations | 3 | Semaine, histogramme accessible, maîtrise par catégorie | `apps/web/e2e/apprenant-tentatives-progression.spec.ts` |
-| `WD22` | Infos de mon parent | 3 |  |  |
+| `WD22` | Infos de mon parent | 3 | Parent lié, lien de parenté, lien validé ; ni numéro ni changement de parent (D41) | `apps/web/e2e/profil-livraison-parent-suppression.spec.ts` |
 | `WC01` | Par défaut | 3 | Compteur réel, cartes vers la fiche, entrée « Catalogue » active, aucun « Niveau » ; ajout aux souhaits par le cœur (P7) | `apps/web/e2e/catalogue-apprenant.spec.ts` |
 | `WC02` | Filtré (Robotique · Débutant) | 3 | Recherche `q`, catégorie et difficulté dans l'URL, puces retirables, « Effacer les filtres » | `apps/web/e2e/catalogue-apprenant.spec.ts` |
 | `WC02b` | Dropdown Niveau ouvert | 3 | Menu « Difficulté » ouvert (options cochables, axe), choix au clavier | `apps/web/e2e/catalogue-apprenant.spec.ts` |
@@ -133,17 +133,17 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WT10` | Détail parcours encadré | 5 |  |  |
 | `WT11` | Aide & support | 5 |  |  |
 | `WT12` | Notifications | 5 |  |  |
-| `WK01` | Catalogue kits | 3 |  |  |
-| `WK02` | Détail kit | 3 |  |  |
-| `WK03` | Panier | 3 |  |  |
+| `WK01` | Catalogue kits | 3 | Boutique dans le shell (h1 du header), cartes vers la fiche, « Ajouter » → toast ; WL07 invité : « Ajouter » seulement si en stock | `apps/web/e2e/boutique-panier.spec.ts`, `apps/web/e2e/evenements-boutique.spec.ts` |
+| `WK02` | Détail kit | 3 | Fiche dans le shell, parcours compatibles → WC05, délais par zone lus dans l'API, « Acheter maintenant » → WK03 | `apps/web/e2e/boutique-panier.spec.ts` |
+| `WK03` | Panier | 3 | P5 (partie panier) : panier serveur, quantité, retrait, survit à une reconnexion ; panier invité fusionné à la connexion (W16 `?next=`) ; « Commander » invité → WK04 ; panier public → panier de l'apprenant | `apps/web/e2e/boutique-panier.spec.ts` |
 | `WK04` | Informations invité | 3 |  |  |
 | `WK05` | Livraison | 3 |  |  |
 | `WK06` | Paiement | 3 |  |  |
 | `WK07` | Confirmation & suivi | 3 |  |  |
 | `WK08` | Paiement par le parent | 3 |  |  |
 | `WK09` | Paiement échoué | 3 |  |  |
-| `WK10` | Panier vide | 3 |  |  |
-| `WK11` | Stock épuisé | 3 |  |  |
+| `WK10` | Panier vide | 3 | Apprenant neuf et invité : « Voir les kits », délais par zone | `apps/web/e2e/boutique-panier.spec.ts` |
+| `WK11` | Stock épuisé | 3 | Invité : « Indisponible », alerte par SMS (`PhoneInput`), kits similaires ; apprenant : alerte dans l'application sans champ téléphone (D30) | `apps/web/e2e/boutique-panier.spec.ts` |
 | `WAD01` | Vue d'ensemble | 6 | Support : chiffres et échéance du serveur, sans lien vers l'Impact Tracker ; « Consentements en attente » → liste Django filtrée | `apps/web/e2e/backoffice.spec.ts` |
 | `WAD02` | Impact Tracker · dashboard KPI | 6 | Finance : période Mois → Trimestre dans l'URL, valeurs relues côté serveur, rechargement ; sans tuile « Activer la collecte » | `apps/web/e2e/impact-tracker.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
 | `WAD03` | Impact Tracker · détail indicateur | 6 | Finance ouvre un indicateur depuis WAD02 (période conservée) : définition serveur, historique ; fil d'Ariane ; code inconnu → 404 | `apps/web/e2e/impact-tracker.spec.ts` |
@@ -153,8 +153,8 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WAD07` | Détail utilisateur | 6 |  |  |
 | `WAD08` | Modération & consentements | 6 |  |  |
 | `WAD09` | Contenu / Parcours | 6 | Contenu via WAD15 : liste (accès, kit, inscrits), arbre par pages chaînées (fil d'Ariane, aperçu Vimeo), statut en lecture seule, « Publier » | `apps/web/e2e/admin-contenu.spec.ts` |
-| `WAD10` | Boutique & commandes | 6 |  |  |
-| `WAD11` | Paiements Mobile Money | 6 |  |  |
+| `WAD10` | Boutique & commandes | 6 | Support : commandes de kits (articles, livraison par action), Kit Codes sur la fiche, stock des kits à 3 seuils | `apps/web/e2e/admin-commerce.spec.ts` |
+| `WAD11` | Paiements Mobile Money | 6 | Finance : agrégats de la liste, numéro masqué, notification du prestataire visible | `apps/web/e2e/admin-commerce.spec.ts` |
 | `WAD12` | Steamy Events (modération) | 6 |  |  |
 | `WAD13` | Équipe & rôles (RBAC) | 6 |  |  |
 | `WAD14` | Paramètres généraux | 6 |  |  |
@@ -163,7 +163,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WX02` | Erreur réseau | 1 |  |  |
 | `WX03` | Chargement | 1 |  |  |
 | `WL22` | Fiche parcours publique (variante de WC04 sans contenu des missions) | 1 | WL06 → fiche → CTA inscription avec `next` ; sans contenu de mission ni Vimeo ; plan au clavier ; kit requis ; brouillon → 404 | `apps/web/e2e/fiche-parcours.spec.ts` |
-| `WL23` | Fiche événement (publique, réutilisée dans les espaces connectés) | 1 | CTA visiteur → connexion avec `next` ; complet et passé désactivés avec motif ; inconnu → 404 | `apps/web/e2e/evenements-boutique.spec.ts` |
+| `WL23` | Fiche événement (publique, réutilisée dans les espaces connectés) | 1 | CTA visiteur → connexion avec `next` ; complet et passé désactivés avec motif ; inconnu → 404. Dans le shell apprenant (P6) : titre en h2, « Demander à participer » → WD11, complet désactivé avec motif, inconnu → 404 | `apps/web/e2e/evenements-boutique.spec.ts`, `apps/web/e2e/apprenant-evenements.spec.ts` |
 | `WL24` | Aide & contact (FAQ + formulaire) | 1 | Contact : « Rejoindre l'équipe » → `?sujet=candidature` → envoi → confirmation ; FAQ et recherche ; ancres | `apps/web/e2e/formulaires.spec.ts` |
 | `WD23` | Mes parcours (liste des inscriptions) | 3 | Onglets En cours / Terminés adressables, carte → arbre | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WPD15` | Demande de paiement (parcours, kit ou événement demandé par l'enfant ; reprend WA03) | 4 |  |  |

@@ -7,7 +7,7 @@ vi.mock("next/server", () => ({ connection: vi.fn(async () => {}) }));
 const notFound = vi.fn(() => {
   throw new Error("NEXT_NOT_FOUND");
 });
-vi.mock("next/navigation", () => ({ notFound }));
+vi.mock("next/navigation", () => ({ notFound, useRouter: () => ({ push: vi.fn() }) }));
 const getUpcomingEvents = vi.fn();
 const getEvent = vi.fn();
 vi.mock("@/lib/events", () => ({ getUpcomingEvents, getEvent }));
@@ -70,20 +70,33 @@ describe("WL23 · fiche", () => {
   });
 });
 
-describe("WL07 · boutique en vitrine", () => {
-  it("filtres vers /boutique, cartes sans lien ni panier, pagination", async () => {
+describe("WL07 / WK01 · boutique", () => {
+  it("invité : filtres vers /boutique, cartes vers la fiche, « Ajouter » si en stock, pagination", async () => {
     getCategories.mockResolvedValue([CATEGORY]);
-    getKits.mockResolvedValue({ results: [KIT], hasNext: true });
+    getKits.mockResolvedValue({ results: [KIT, { ...KIT, slug: "solaire", name: "Solaire", available: false }], hasNext: true });
     render(await ShopCatalog({ searchParams: Promise.resolve({ categorie: "robotique" }) }));
     expect(getKits).toHaveBeenCalledWith({ category: "robotique", page: 1 });
     expect(screen.getByRole("link", { name: "Tous" })).toHaveAttribute("href", "/boutique");
     expect(screen.getByRole("link", { name: "Robotique" })).toHaveAttribute("aria-current", "true");
     expect(screen.getByRole("heading", { name: "Kits : Robotique" })).toBeInTheDocument();
-    expect(screen.getByText("Steamy Bot v1")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Ajouter/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Steamy Bot v1" })).toHaveAttribute("href", "/boutique/steamy-bot-v1");
+    expect(screen.getByRole("link", { name: "Solaire" })).toHaveAttribute("href", "/boutique/solaire");
+    expect(screen.getAllByRole("button", { name: /Ajouter/ })).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Ajouter Steamy Bot v1 au panier" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Suivant" })).toHaveAttribute(
       "href",
       "/boutique?categorie=robotique&page=2",
+    );
+  });
+
+  it("apprenant : liens et filtres dans son espace", async () => {
+    getCategories.mockResolvedValue([CATEGORY]);
+    getKits.mockResolvedValue({ results: [KIT], hasNext: false });
+    render(await ShopCatalog({ searchParams: Promise.resolve({}), context: "learner" }));
+    expect(screen.getByRole("link", { name: "Tous" })).toHaveAttribute("href", "/apprenant/boutique");
+    expect(screen.getByRole("link", { name: "Steamy Bot v1" })).toHaveAttribute(
+      "href",
+      "/apprenant/boutique/steamy-bot-v1",
     );
   });
 
