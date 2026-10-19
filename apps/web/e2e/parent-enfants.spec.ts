@@ -142,7 +142,11 @@ test("WPD10 : modification du profil, date de naissance incohérente refusée, r
   const birthDate = page.getByLabel(/^Date de naissance/);
   await birthDate.fill(birthDateFor(15));
   await page.getByRole("button", { name: "Enregistrer" }).click();
-  await expect(page.getByRole("alert")).toContainText("La date de naissance ne correspond pas à l'âge indiqué");
+  // Récapitulatif d'erreurs et message sous le champ
+  await expect(
+    page.getByRole("alert").filter({ hasText: "La date de naissance ne correspond pas à l'âge indiqué" }).first(),
+  ).toBeVisible();
+  await expect(birthDate).toHaveAccessibleDescription(/La date de naissance ne correspond pas/);
 
   await birthDate.fill(birthDateFor(12));
   await page.getByRole("textbox", { name: /^Prénom/ }).fill("Inès-Marie");
