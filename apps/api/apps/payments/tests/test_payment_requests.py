@@ -192,6 +192,34 @@ def test_parent_declines_and_the_child_is_told(sms, parent, child, course):
     assert notification.url == f"/apprenant/demandes/{request_id}"
 
 
+def test_parent_declines_with_an_optional_reason_told_to_the_child(sms, parent, child, course):
+    request_id = ask(child, course).json()["id"]
+    resp = client_for(parent).post(
+        f"{URL}{request_id}/decline/",
+        {"reason": "  On en reparle après les examens.  "},
+        format="json",
+    )
+    assert resp.status_code == 200, resp.json()
+    assert resp.json()["declineReason"] == "On en reparle après les examens."
+    notification = Notification.objects.get(user=child, type="payment_request_declined")
+    assert notification.message == "Robotique · « On en reparle après les examens. »"
+    # L'enfant lit aussi le motif sur sa demande (WA02)
+    assert (
+        client_for(child).get(f"{URL}{request_id}/").json()["declineReason"]
+        == "On en reparle après les examens."
+    )
+
+
+def test_decline_reason_is_bounded_and_absent_on_cancel(sms, parent, child, course):
+    request_id = ask(child, course).json()["id"]
+    resp = client_for(parent).post(
+        f"{URL}{request_id}/decline/", {"reason": "x" * 501}, format="json"
+    )
+    assert resp.status_code == 400
+    other = ask(child, CourseFactory(paid=True, price=9000)).json()["id"]
+    assert client_for(child).post(f"{URL}{other}/cancel/").json()["declineReason"] == ""
+
+
 def test_requests_expire_after_seven_days(sms, child, course):
     request_id = ask(child, course).json()["id"]
     assert expire_payment_requests() == 0

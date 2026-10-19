@@ -5007,7 +5007,7 @@ paths:
       description: |-
         Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
         refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
-      summary: Refuser la demande de son enfant (parent)
+      summary: Refuser la demande de son enfant (parent), motif facultatif
       parameters:
       - in: path
         name: id
@@ -5017,6 +5017,11 @@ paths:
         required: true
       tags:
       - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequestDeclineRequest'
       security:
       - cookieAuth: []
       responses:
@@ -10649,15 +10654,26 @@ components:
           readOnly: true
           nullable: true
           title: Traitée le
+        declineReason:
+          type: string
+          readOnly: true
+          title: Motif du refus
         orderReference:
           type: string
           nullable: true
+          readOnly: true
+        pendingOrderReference:
+          type: string
+          nullable: true
+          description: 'Commande du parent en attente de paiement, encore valable
+            (WPD15 : reprise du paiement sans nouvelle réservation) ; null pour l''enfant'
           readOnly: true
       required:
       - amount
       - course
       - createdAt
       - decidedAt
+      - declineReason
       - expiresAt
       - id
       - items
@@ -10667,6 +10683,7 @@ components:
       - nextResendAt
       - orderReference
       - parentFirstName
+      - pendingOrderReference
       - status
     PaymentRequestCreateRequest:
       type: object
@@ -10685,6 +10702,15 @@ components:
             $ref: '#/components/schemas/OrderItemInputRequest'
       required:
       - kind
+    PaymentRequestDeclineRequest:
+      type: object
+      description: 'Refus de la demande par le parent (WPD15) : motif facultatif,
+        transmis à l''enfant.'
+      properties:
+        reason:
+          type: string
+          default: ''
+          maxLength: 500
     PaymentRequestItem:
       type: object
       properties:

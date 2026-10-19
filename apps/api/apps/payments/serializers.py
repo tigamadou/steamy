@@ -4,6 +4,7 @@ champ inconnu est ignoré. Sortie : un serializer par audience (payeur, bénéfi
 l'adresse de livraison (et, en API-L3b.4, les Kit Codes).
 """
 
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail, NotAuthenticated
@@ -452,6 +453,12 @@ class PaymentRequestItemSerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
 
 
+class PaymentRequestDeclineSerializer(serializers.Serializer):
+    """Refus de la demande par le parent (WPD15) : motif facultatif, transmis à l'enfant."""
+
+    reason = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
+
+
 class PaymentRequestSerializer(serializers.ModelSerializer):
     """Demande vue par l'enfant (WA02, WK08) et par son parent (WPD01, WPD15)."""
 
@@ -461,6 +468,7 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
     parent_first_name = serializers.CharField(source="parent.first_name", read_only=True)
     next_resend_at = serializers.SerializerMethodField()
     order_reference = serializers.SerializerMethodField()
+    pending_order_reference = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentRequest
@@ -478,7 +486,9 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
             "last_sent_at",
             "next_resend_at",
             "decided_at",
+            "decline_reason",
             "order_reference",
+            "pending_order_reference",
         )
         read_only_fields = fields
 
@@ -499,4 +509,24 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.CharField(allow_null=True))
     def get_order_reference(self, request):
         order = request.orders.filter(status=Order.Status.PAID).first()
+        return order.reference if order else None
+
+    @extend_schema_field(
+        serializers.CharField(
+            allow_null=True,
+            help_text="Commande du parent en attente de paiement, encore valable (WPD15 : reprise du paiement sans "
+            "nouvelle réservation) ; null pour l'enfant",
+        )
+    )
+    def get_pending_order_reference(self, request):
+        viewer = self.context["request"].user if "request" in self.context else None
+        if viewer is None or viewer.pk != request.parent_id:
+            return None
+        order = (
+            request.orders.filter(
+                status=Order.Status.PENDING, payer=viewer, expires_at__gt=timezone.now()
+            )
+            .order_by("-created_at")
+            .first()
+        )
         return order.reference if order else None

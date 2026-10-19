@@ -110,13 +110,17 @@ def resend(request: PaymentRequest) -> PaymentRequest:
 
 
 @transaction.atomic
-def close(request: PaymentRequest, status: str) -> PaymentRequest:
-    """Annulation par l'enfant ou refus par le parent : la demande doit être encore en attente."""
+def close(request: PaymentRequest, status: str, reason: str = "") -> PaymentRequest:
+    """
+    Annulation par l'enfant ou refus par le parent : la demande doit être encore en attente. Le motif facultatif du
+    refus (WPD15) est transmis à l'enfant dans sa notification.
+    """
     request = PaymentRequest.objects.select_for_update().get(pk=request.pk)
     ensure_pending(request)
     request.status = status
     request.decided_at = timezone.now()
-    request.save(update_fields=["status", "decided_at"])
+    request.decline_reason = reason if status == PaymentRequest.Status.DECLINED else ""
+    request.save(update_fields=["status", "decided_at", "decline_reason"])
     if status == PaymentRequest.Status.DECLINED:
         from apps.notifications.models import Category
         from apps.notifications.services import notify
@@ -126,7 +130,7 @@ def close(request: PaymentRequest, status: str) -> PaymentRequest:
             Category.PAYMENTS,
             "payment_request_declined",
             "Ton parent a refusé ta demande",
-            request.title,
+            f"{request.title} · « {reason} »" if reason else request.title,
             url=f"/apprenant/demandes/{request.pk}",
             tone="warning",
             icon="💬",

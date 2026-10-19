@@ -107,3 +107,26 @@ def test_without_request_kind_and_items_are_required(parent):
     assert resp.json()["fields"]["kind"][0]["code"] == "REQUIRED"
     resp = client_for(parent).post(ORDERS, {"kind": "kit"}, format="json")
     assert resp.json()["fields"]["items"][0]["code"] == "REQUIRED"
+
+
+def test_the_parent_resumes_the_pending_order_of_a_request(parent, child):
+    """WPD15 : la commande en attente de la demande est proposée au parent (reprise du paiement), jamais à l'enfant."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    course = CourseFactory(paid=True, price=15000)
+    request = ask(child, {"kind": "course", "courseSlug": course.slug})
+    url = f"{REQUESTS}{request.pk}/"
+    assert client_for(parent).get(url).json()["pendingOrderReference"] is None
+    reference = (
+        client_for(parent)
+        .post(ORDERS, {"paymentRequestId": request.pk}, format="json")
+        .json()["reference"]
+    )
+    assert client_for(parent).get(url).json()["pendingOrderReference"] == reference
+    assert client_for(child).get(url).json()["pendingOrderReference"] is None
+    Order.objects.filter(reference=reference).update(
+        expires_at=timezone.now() - timedelta(minutes=1)
+    )
+    assert client_for(parent).get(url).json()["pendingOrderReference"] is None

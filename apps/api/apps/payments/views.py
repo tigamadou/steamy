@@ -44,6 +44,7 @@ from .serializers import (
     OrderSerializer,
     PaymentCreateSerializer,
     PaymentRequestCreateSerializer,
+    PaymentRequestDeclineSerializer,
     PaymentRequestSerializer,
     PaymentSerializer,
 )
@@ -480,8 +481,17 @@ class PaymentRequestViewSet(
         payment_request = close(self.owned(learner_only=True), PaymentRequest.Status.CANCELLED)
         return Response(self.get_serializer(payment_request).data)
 
-    @extend_schema(summary="Refuser la demande de son enfant (parent)", request=None)
+    @extend_schema(
+        summary="Refuser la demande de son enfant (parent), motif facultatif",
+        request=PaymentRequestDeclineSerializer,
+    )
     @action(detail=True, methods=["post"])
     def decline(self, request, pk=None):
-        payment_request = close(self.owned(learner_only=False), PaymentRequest.Status.DECLINED)
+        data = PaymentRequestDeclineSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        payment_request = close(
+            self.owned(learner_only=False),
+            PaymentRequest.Status.DECLINED,
+            data.validated_data["reason"].strip(),
+        )
         return Response(self.get_serializer(payment_request).data)
