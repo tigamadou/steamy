@@ -15,9 +15,9 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 3.7a, 3.7b, 3.7c · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
+Statut : 🟡 en cours · Prochaine tâche : 3.7b, 3.7c · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
 
-### Valeur pédagogique (API-L3a) — 🟡 en cours
+### Valeur pédagogique (API-L3a) — ✅ terminé
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
   - [x] `AppShell` (props de §5.5, sidebar repliable en tiroir sous 768 px)
   - [x] `NavItem`, `NotificationBell`, `HeaderSearch`
@@ -93,22 +93,19 @@ Statut : 🟡 en cours · Prochaine tâche : 3.7a, 3.7b, 3.7c · Prérequis : AP
   - [x] Composants `QuizAttemptRow`, `AttemptStatusBadge`, `WeeklyActivityBars`
   - [x] Tests unitaires : statut issu du serveur affiché tel quel (D31)
   - [x] Parcours Playwright : filtre dans l'URL, détail, apprenant sans quiz, progression
-- [ ] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres` · PR #99
+- [x] **3.5** Profil et paramètres (requiert API-L3a, `accounts`) · `feature/lot3-profil-parametres` · PR #99 ; suite `feature/lot3-profil-suite` · PR #118
   - [x] `WD13` profil (hub de `SettingsRow`, identifiant en lecture seule)
   - [x] `WD17` modification du profil (`ProfileForm`, `AvatarPicker`, `GoalChip`)
   - [x] `WD18` mot de passe
-  - [ ] WD19 adresse de livraison (`AddressForm`)
-  - [ ] WD22 parent
-  - [ ] WD15 suppression du compte (texte D40, annulation tant que `pending_parent`)
+  - [x] `WD19` adresse de livraison (`AddressForm` avec le champ « Ville », zones `shop/delivery-zones/?country=`)
+  - [x] `WD22` parent (nom, lien de parenté, lien validé ; ni numéro ni changement de parent)
+  - [x] `WD15` suppression du compte (texte D40, annulation tant que `pending_parent`)
   - [x] Composants `Section`, `InfoCard`, `ProfileForm`, `AddressForm`
   - [x] Lecture du profil : `GET accounts/me/learner-profile/` ajouté à l'API (absent d'API-L2.5, requis pour préremplir WD17)
   - [x] Tests unitaires : erreurs de champ issues de `fields`
   - [x] Parcours Playwright : modifier le profil puis recharger
-  > Reprise : WD19, WD22 et WD15 attendent leurs endpoints, absents de `development` au 2026-10-16 :
-  > `accounts/me/delivery-address/` (API-L3b.3), `accounts/me/parent/` (API-L4.1), `accounts/me/deletion-request/`
-  > (API-L4.3). Leurs lignes du hub WD13 existent derrière les drapeaux `deliveryAddress`, `parentInfo` et
-  > `accountDeletion` de `src/lib/features.ts` : livrer l'écran, passer le drapeau
-  > à `true`, puis le retirer. `AddressForm` (DS) est prêt pour WD19 : zones fournies par l'appelant.
+  - [x] Lignes Livraison, Mon parent et Zone sensible du hub WD13 activées ; drapeaux `deliveryAddress`, `parentInfo` et `accountDeletion` retirés
+  - [x] Parcours Playwright : WD19 enregistrer puis recharger, WD22, WD15 envoi puis annulation (apprenant neuf)
 
 ### Commerce (API-L3b) — 🟡 en cours
 - [x] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage` · PR #119
@@ -123,21 +120,27 @@ Statut : 🟡 en cours · Prochaine tâche : 3.7a, 3.7b, 3.7c · Prérequis : AP
   - [x] Tests unitaires : `KitCodeInput`, `PaymentForm` sans réseau en dur, `PaymentStatusPanel` dans ses 3 états
   - [x] Parcours Playwright P2 (Kit Code)
   - [x] Parcours Playwright P3 (demande de paiement ; paiement du parent par l'API en attendant WPD15)
-  > Écarts d'API signalés (correctifs à faire côté API) : `Retry-After` n'est pas exposé par CORS
-  > (`CORS_EXPOSE_HEADERS`), le délai de `THROTTLED` n'est donc pas lisible par le navigateur (WA06 l'affiche quand il
-  > l'est) ; `PaymentRequest.status` est typé avec l'énumération des paiements dans le schéma OpenAPI (collision
+  > Écarts d'API signalés : `Retry-After` exposé par CORS depuis #124 (compte à rebours de WA06 après
+  > `THROTTLED`) ; `PaymentRequest.status` est typé avec l'énumération des paiements dans le schéma OpenAPI (collision
   > `PaymentStatusEnum`, à fixer dans `ENUM_NAME_OVERRIDES`), le front rétablit le type ; `Order.deliveryZone` n'est pas
   > `nullable` dans le schéma alors qu'il vaut `null` pour un parcours. Filtre « Échouées » de WD14 remplacé par
   > « Annulées » : une commande n'a pas de statut d'échec (D37, statuts `pending`, `paid`, `cancelled`, `refunded`).
-- [ ] **3.7a** Boutique : catalogue, détail et panier (requiert API-L3b) · `feature/lot3-boutique-catalogue-panier`
-  - [ ] WK01 catalogue de la boutique (connecté ; `/boutique` invité = WL07)
-  - [ ] WK02 détail d'un kit
-  - [ ] WK11 kit en rupture (alerte de réassort)
-  - [ ] WK03 panier
-  - [ ] WK10 panier vide
-  - [ ] Composants `WKGallery`, `WKQtyStepper`, `WKCartRow`, `WKSummaryRow`, `RestockAlertForm`, `useCart`
-  - [ ] Panier invité en `localStorage`, panier connecté côté serveur, `mergeGuestCart()` au retour de W16, activation du panier dans `WKKitCard`
-  - [ ] Parcours Playwright P5
+- [x] **3.7a** Boutique : catalogue, détail et panier (requiert API-L3b) · `feature/lot3-boutique-catalogue-panier` · PR #117
+  - [x] `WK01` catalogue de la boutique (connecté ; `/boutique` invité = WL07)
+  - [x] `WK02` détail d'un kit
+  - [x] `WK11` kit en rupture (alerte de réassort)
+  - [x] `WK03` panier
+  - [x] `WK10` panier vide
+  - [x] Composants `WKGallery`, `WKQtyStepper`, `WKCartRow`, `WKSummaryRow`, `RestockAlertForm`, `useCart`
+  - [x] Panier invité en `localStorage`, panier connecté côté serveur, `mergeGuestCart()` au retour de W16, activation du panier dans `WKKitCard`
+  - [x] Parcours Playwright P5, partie panier (WK01 → WK03, reconnexion, fusion du panier invité) ; la fin (WK08) est livrée avec 3.7c
+  - [ ] ~~« Plus que n » et `WKQtyStepper` borné par le stock~~ : l'API n'expose que `available` (stock exact interne) ; la borne est celle du serveur à l'enregistrement (`MAX_QUANTITY`) et `OUT_OF_STOCK` à la commande. Champ à ajouter à `shop/kits/` et `shop/cart/` (signalé)
+  - [ ] ~~Tri de WK01~~ : `shop/kits/` n'a pas de paramètre d'ordre (signalé)
+  > Écarts assumés : « Acheter maintenant » ajoute le kit puis ouvre le panier, sans retirer les autres articles ; le
+  > sous-total du panier invité est la somme des prix unitaires relus dans l'API (aucun endpoint de devis anonyme), le
+  > total fait foi à WK06 ; le schéma OpenAPI de `DELETE shop/cart/items/{id}/` annonce un 204 alors que l'API renvoie
+  > le panier (le front relit le panier sans corps). « Demander à mon parent » est un rappel (`onRequestParent`) que
+  > 3.7c branche ; sans lui, le bouton est absent.
 - [ ] **3.7b** Checkout invité, D12 (requiert API-L3b) · `feature/lot3-boutique-checkout-invite`
   - [ ] WK04 coordonnées de l'invité
   - [ ] WK05 livraison (`AddressForm`, zones `shop/delivery-zones/`)

@@ -59,7 +59,7 @@ describe("KitCodeForm · WA01", () => {
     const { container } = render(<KitCodeForm courseSlug="robot-bluetooth" />);
     expect(screen.getByRole("heading", { level: 2, name: "Ce parcours se débloque avec ton kit" })).toBeInTheDocument();
     expect(screen.getByText("Imprimé sur la notice du kit")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Commander dans la boutique" })).toHaveAttribute("href", "/boutique");
+    expect(screen.getByRole("link", { name: "Commander dans la boutique" })).toHaveAttribute("href", "/apprenant/boutique");
     expect(screen.getByText("Où trouver le code ?")).toBeInTheDocument();
     expect(await axe(container)).toHaveNoViolations();
     await typeCode(user, "ab12cd34");
