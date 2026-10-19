@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 import { errorMessage, type ApiResult, type Register } from "@/lib/api-call";
 import { formatPrice } from "@/lib/format";
@@ -16,6 +16,13 @@ import { initialCountry } from "../PhoneInput/phone";
 import { Select } from "../Select";
 import { WANetworkCardGroup } from "../WANetworkCard";
 
+/** Numéro national d'un numéro E.164 du pays (préremplissage du `PhoneInput`), vide s'il n'en est pas. */
+export function nationalNumber(e164: string, countries: PhoneCountry[], code: string): string {
+  const country = countries.find((c) => c.code === code);
+  const prefix = country ? `+${country.dialCode}` : "";
+  return prefix && e164.startsWith(prefix) ? e164.slice(prefix.length) : "";
+}
+
 /** Corps de `POST payments/orders/{reference}/payments/` (Mobile Money uniquement, D76). */
 export type PaymentFormValues = { country: string; network: string; msisdn: string };
 
@@ -26,6 +33,8 @@ export type PaymentFormProps = {
   countries: PhoneCountry[];
   /** Pays présélectionné (code ISO). */
   defaultCountry?: string;
+  /** Mobile Money préféré du payeur (WPD08), prérempli : pays, réseau et numéro E.164 (WPD15, WK06). */
+  preferred?: { country: string; network: string; phone: string } | null;
   /** Registre des textes : `vous` pour le parent et l'invité (WA03, WK06), `tu` sinon. */
   register?: Register;
   /** Envoi du paiement ; un échec est affiché par le formulaire (erreurs par champ ou message). */
@@ -52,12 +61,29 @@ type Errors = Partial<Record<keyof PaymentFormValues | "form", string>>;
  * (`payment-networks/?country=`) en cartes radio, numéro E.164 au format du pays, « Payer n F CFA » avec le montant du
  * serveur. Aucun pays, réseau ni prix codé en dur. Réutilisé par le checkout invité (WK06) et le parent (WPD15).
  */
-export function PaymentForm({ amount, countries, defaultCountry, register = "vous", onSubmit }: PaymentFormProps) {
+export function PaymentForm({
+  amount,
+  countries,
+  defaultCountry,
+  preferred,
+  register = "vous",
+  onSubmit,
+}: PaymentFormProps) {
   const texts = TEXTS[register];
-  const [country, setCountry] = useState(() => initialCountry(countries, defaultCountry));
+  const [country, setCountry] = useState(() => initialCountry(countries, preferred?.country ?? defaultCountry));
   // Réseau et numéro valent pour un pays : ils repartent à zéro quand le pays change
-  const [choice, setChoice] = useState<{ country: string; network: string }>({ country: "", network: "" });
-  const [phone, setPhone] = useState<PhoneChange | null>(null);
+  const [choice, setChoice] = useState<{ country: string; network: string }>({
+    country: preferred?.country ?? "",
+    network: preferred?.network ?? "",
+  });
+  const preferredNational = preferred ? nationalNumber(preferred.phone, countries, preferred.country) : "";
+  const [phone, setPhone] = useState<PhoneChange | null>(() =>
+    preferred && preferredNational
+      ? { country: preferred.country, national: preferredNational, e164: preferred.phone, valid: true }
+      : null,
+  );
+  // Un seul envoi à la fois, même sur un double clic plus rapide que le rendu du bouton désactivé
+  const sending = useRef(false);
   const [errors, setErrors] = useState<Errors>({});
   const [pending, setPending] = useState(false);
   const { wait, track } = useThrottle();
@@ -78,9 +104,11 @@ export function PaymentForm({ amount, countries, defaultCountry, register = "vou
     if (!network) local.network = texts.network;
     if (!msisdn) local.msisdn = texts.phone;
     setErrors(local);
-    if (local.network || local.msisdn) return;
+    if (local.network || local.msisdn || sending.current) return;
+    sending.current = true;
     setPending(true);
     const result = await onSubmit({ country, network, msisdn: msisdn as string });
+    sending.current = false;
     setPending(false);
     if (result.ok) return;
     track(result);
@@ -131,6 +159,7 @@ export function PaymentForm({ amount, countries, defaultCountry, register = "vou
           key={country}
           countries={countries.filter((c) => c.code === country)}
           defaultCountry={country}
+          defaultValue={preferred?.country === country ? preferredNational : ""}
           onChange={setPhone}
           countryLabel="Indicatif du numéro Mobile Money"
         />
@@ -142,7 +171,7 @@ export function PaymentForm({ amount, countries, defaultCountry, register = "vou
         </p>
       )}
 
-      <Button type="submit" block size="lg" variant="secondary" loading={pending} disabled={noNetwork || wait > 0}>
+      <Button type="submit" block size="lg" loading={pending} disabled={noNetwork || wait > 0}>
         {throttledLabel(wait, `Payer ${formatPrice(amount)}`)}
       </Button>
       <p className="flex items-center justify-center gap-2 text-xs font-bold text-ink-600">
