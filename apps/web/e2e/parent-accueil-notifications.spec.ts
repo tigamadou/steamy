@@ -1,0 +1,109 @@
+import AxeBuilder from "@axe-core/playwright";
+import { expect, test, type Page } from "@playwright/test";
+
+import { createParent } from "./support/api";
+import { DEMO } from "./support/demo";
+import { loginAs, loginViaApi, logoutFromShell, openShellMenu } from "./support/session";
+
+// LOT-4 étape 4.1 · socle de l'espace parent, accueil et « À valider » (WPD01), notifications (WPD14).
+
+async function axe(page: Page) {
+  const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
+  expect(violations).toEqual([]);
+}
+
+const bell = (page: Page) => page.getByRole("link", { name: /notifications? non lues?|aucune non lue/ });
+
+test("l'espace parent refuse un apprenant et un enseignant, renvoyés vers leur espace", async ({ page }) => {
+  await loginAs(page, "learner");
+  await page.goto("/parent");
+  await expect(page).toHaveURL(DEMO.learner.home);
+  await page.context().clearCookies();
+  await loginAs(page, "teacher");
+  await page.goto("/parent/notifications");
+  await expect(page).toHaveURL(DEMO.teacher.home);
+});
+
+test("WPD01 : Marie voit « À valider » conforme au jeu D2, ses statistiques et ses enfants", async ({ page }) => {
+  await loginAs(page, "parent");
+  await page.goto("/parent");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(`Bonjour ${DEMO.parent.firstName} 👋`);
+  await expect(page.getByRole("heading", { level: 2, name: "2 enfants accompagnés sur Steamy" })).toBeVisible();
+
+  // Jeu D2 : suppression demandée par Noé, paiement demandé par Léa, candidature de Léa à un événement
+  const pending = page.getByRole("list", { name: "Demandes à valider" });
+  const deletion = pending.getByRole("article", { name: "Demande de suppression du compte · Noé Adjovi" });
+  await expect(deletion.getByRole("link", { name: /^Examiner/ })).toHaveAttribute(
+    "href",
+    /^\/parent\/enfants\/\d+\/supprimer\?demande=\d+$/,
+  );
+  const payment = pending.getByRole("article", { name: "Demande de paiement · Léa Adjovi" });
+  await expect(payment.getByRole("link", { name: /^Payer/ })).toHaveAttribute("href", /^\/parent\/demandes\/[\w-]+$/);
+  const application = pending.getByRole("article", { name: "Candidature à un Steamy Event · Léa Adjovi" });
+  await expect(application.getByRole("link", { name: /^Examiner/ })).toHaveAttribute("href", "/parent/evenements");
+
+  // Stat « À valider » = longueur de la liste renvoyée par l'API
+  const rows = await pending.getByRole("listitem").count();
+  const stats = page.getByRole("region", { name: "Vos statistiques" });
+  await expect(stats.getByRole("definition")).toHaveText(["2", /^\d+$/, String(rows)]);
+
+  const kids = page.getByRole("list", { name: "Mes enfants" });
+  await expect(kids.getByRole("link", { name: /Léa Adjovi/ })).toHaveAttribute("href", /^\/parent\/enfants\/\d+$/);
+  await expect(kids.getByRole("link", { name: /Noé Adjovi/ })).toBeVisible();
+  // Aucune alerte de connexion (D56)
+  await expect(page.getByText(/alerte/i)).toHaveCount(0);
+  await axe(page);
+});
+
+test("WPD01 et WPD14 : un parent sans enfant voit l'état vide et aucune notification", async ({ page }) => {
+  const { phone } = await createParent({ firstName: "Afi" });
+  await loginViaApi(page, phone);
+  await page.goto("/parent");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Bonjour Afi 👋");
+  await expect(page.getByText(/Aucune demande en attente/)).toBeVisible();
+  const children = page.getByRole("region", { name: "Mes enfants" });
+  await expect(children.getByRole("link", { name: "Ajouter un enfant" })).toHaveAttribute("href", "/parent/enfants/ajouter");
+  await axe(page);
+
+  await bell(page).click();
+  await expect(page).toHaveURL("/parent/notifications");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Notifications");
+  await expect(page.getByText(/Vous n'avez aucune notification/)).toBeVisible();
+  await axe(page);
+});
+
+test("WPD14 : onglets dans l'URL et « Tout marquer comme lu » remet la cloche à 0", async ({ page }) => {
+  await loginAs(page, "parent");
+  await page.goto("/parent/notifications");
+  const tabs = page.getByRole("navigation", { name: "Filtrer les notifications" });
+  await expect(tabs.getByRole("link", { name: "Toutes" })).toHaveAttribute("aria-current", "page");
+  await axe(page);
+  await tabs.getByRole("link", { name: /^Non lues \(\d+\)$/ }).click();
+  await expect(page).toHaveURL("/parent/notifications?onglet=non-lues");
+
+  await page.goto("/parent/notifications");
+  const markAll = page.getByRole("button", { name: "Tout marquer comme lu" });
+  // Rejouable : le jeu de démo est partagé (projets « bureau » et « mobile ») ; sans non-lue, le bouton est inactif
+  if (await markAll.isEnabled()) {
+    await expect(async () => {
+      if (await markAll.isEnabled()) await markAll.click();
+      await expect(bell(page)).toHaveAccessibleName("Notifications, aucune non lue", { timeout: 2_000 });
+    }).toPass();
+  }
+  await expect(page.getByRole("link", { name: "Non lues (0)" })).toBeVisible();
+  await page.reload();
+  await expect(bell(page)).toHaveAccessibleName("Notifications, aucune non lue");
+});
+
+test("shell parent : navigation active, puis déconnexion au vouvoiement", async ({ page }) => {
+  await loginAs(page, "parent");
+  await page.goto("/parent");
+  await openShellMenu(page);
+  const nav = page.getByRole("navigation", { name: "Navigation de votre espace" });
+  await expect(nav.getByRole("link", { name: "Accueil" })).toHaveAttribute("aria-current", "page");
+  await page.keyboard.press("Escape");
+  await logoutFromShell(page);
+  await expect(page).toHaveURL("/connexion");
+  await page.goto("/parent");
+  await expect(page).toHaveURL(/\/connexion\?next=%2Fparent$/);
+});
