@@ -40,7 +40,7 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation 
   - [x] Playwright : accès refusé à un apprenant et à un enseignant (redirection) ; parent du jeu D2 : liste « À valider » conforme au seed
   - [x] Recette : les 4 types mènent à la bonne route, « Tout marquer comme lu » remet le compteur à 0
   > Écarts : « À valider » sans l'objet de la demande (titre du parcours, montant) ni carte de parcours en cours dans `ChildCard` (l'API ne les renvoie pas : `PendingAction` et `Child.activeCourses`) ; les CTA visent les routes des étapes 4.2 à 4.7 (entrées de nav masquées jusqu'à leur livraison) ; WPD14 réutilise `NotificationList` du lot 3, paramétrée par espace ; préférences de notification dans `WPD08` (4.9).
-- [x] **4.2** Enfants · `feature/lot4-enfants` (requiert 4.1, API-L4.1 ; commentaires : API-L5) · PR #PR_NUMBER
+- [x] **4.2** Enfants · `feature/lot4-enfants` (requiert 4.1, API-L4.1 ; commentaires : API-L5) · PR #128
   - [x] `WPD02` Mes enfants (`ChildRow` : actif, demande à examiner, suppression programmée ; CTA « Examiner » vers WPD05, livré en 4.3)
   - [x] `WPD03` Détail enfant (`ChildProfileCard`, `CourseProgressList`, `AttemptList`, `TeacherComments` en lecture seule)
   - [x] `ResetChildPasswordDialog` de `WPD03` (« Communiquez-le à votre enfant », D26)
