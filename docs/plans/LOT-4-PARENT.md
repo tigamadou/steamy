@@ -108,7 +108,7 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation 
   - [ ] Tests unitaires : semaine vide, semaine sans email
   - [ ] Playwright : navigation vers la semaine précédente
   - [ ] Recette : chiffres identiques à ceux de l'API pour le jeu D2
-- [x] **4.9** Paramètres et aide · `feature/lot4-parametres-aide` (requiert 4.1, 4.7, API-L3a) · PR #PR49
+- [x] **4.9** Paramètres et aide · `feature/lot4-parametres-aide` (requiert 4.1, 4.7, API-L3a) · PR #126
   - [x] `WPD08` Paramètres : profil, connexion (`NewPasswordFields`, changement de numéro avec `OTPInput`), livraison et paiement (`AddressForm`), notifications, `DangerZone`
   - [x] `WPD13` Aide : FAQ en `FaqAccordion` avec recherche locale, « Contacter le support » vers `WL24`
   - [x] Branchement API : `accounts/me/` (PATCH), `parent-profile/`, `password/`, `email/`, `phone-change/` + `verify/`, `delivery-address/`, `notifications/preferences/`, `deletion-request/`
