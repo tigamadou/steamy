@@ -3,8 +3,6 @@
  * jamais « Bientôt ». Chaque drapeau est retiré quand sa fonctionnalité est livrée (critères de fin du lot 3).
  */
 export const features = {
-  /** Steamy Events côté apprenant (3.8, API-L3b) : raccourci de WD01, ticket de WJ07. */
-  events: false,
   /** Adresse de livraison (WD19, `accounts/me/delivery-address/`, API-L3b.3) : ligne du hub WD13. */
   deliveryAddress: false,
   /** Mon parent (WD22, `accounts/me/parent/`, API-L4.1) : ligne du hub WD13. */

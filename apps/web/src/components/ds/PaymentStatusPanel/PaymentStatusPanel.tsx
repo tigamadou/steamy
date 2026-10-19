@@ -49,6 +49,9 @@ const TEXTS = {
     stillPending:
       "Le paiement est toujours en attente de validation. Vous pouvez quitter cette page : son issue apparaîtra dans vos commandes.",
     orders: "Voir mes commandes",
+    notDebited: "La transaction n'a pas pu aboutir. Aucun montant n'a été débité.",
+    failedNeutral:
+      "La transaction n'a pas pu aboutir. Vérifiez l'état de la commande dans vos commandes avant de réessayer.",
   },
   tu: {
     pendingTitle: "On confirme ton paiement…",
@@ -58,10 +61,24 @@ const TEXTS = {
     stillPending:
       "Le paiement est toujours en attente de validation. Tu peux quitter cette page : son issue apparaîtra dans tes commandes.",
     orders: "Voir mes commandes",
+    notDebited: "La transaction n'a pas pu aboutir. Aucun montant n'a été débité.",
+    failedNeutral: "La transaction n'a pas pu aboutir. Vérifie l'état de la commande dans tes commandes avant de réessayer.",
   },
 } as const;
 
 const SETTLED: ReadonlySet<Payment["status"]> = new Set(["succeeded", "failed"]);
+
+/**
+ * Codes d'échec de l'API (`Payment.failureCode`, `apps/payments/checkout.py` et `utils.py`) qui établissent qu'aucun
+ * débit n'a eu lieu : initiation refusée ou impossible, ou refus notifié par le prestataire. Tout autre code (montant
+ * incohérent, code inconnu) reçoit un texte neutre : le front n'affirme pas l'absence de débit (WK09).
+ */
+const NOT_DEBITED: ReadonlySet<string> = new Set([
+  "DECLINED",
+  "PROVIDER_REFUSED",
+  "PROVIDER_UNAVAILABLE",
+  "INITIATION_LOST",
+]);
 
 /**
  * WA04 attente, WA05 succès, WA07 échec (composant) : interroge le statut du paiement tant qu'il n'est pas réglé,
@@ -132,7 +149,7 @@ export function PaymentStatusPanel({
         <Mascot pose="sad" size={130} />
         <h2 className="m-0 text-[28px] font-black text-error-700">Paiement échoué</h2>
         <p className="m-0 text-[15px] leading-normal font-semibold text-ink-700">
-          La transaction n&apos;a pas pu aboutir. Aucun montant n&apos;a été débité.
+          {NOT_DEBITED.has(payment.failureCode) ? texts.notDebited : texts.failedNeutral}
         </p>
         {payment.failureReason && (
           <p className="m-0 rounded-[14px] border-2 border-error-100 bg-error-50 px-4 py-3 text-[13px] font-extrabold text-error-700">

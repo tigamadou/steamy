@@ -89,7 +89,7 @@ describe("PaymentStatusPanel", () => {
   it("WA07 échec : raison du prestataire, « Changer de numéro » et « Réessayer le paiement »", async () => {
     const user = userEvent.setup();
     const onSettled = vi.fn();
-    const failed = { ...PENDING, status: "failed" as const, failureReason: "Solde insuffisant." };
+    const failed = { ...PENDING, status: "failed" as const, failureCode: "DECLINED", failureReason: "Solde insuffisant." };
     const { container, rerender } = render(<PaymentStatusPanel {...props} payment={failed} onSettled={onSettled} />);
     expect(screen.getByRole("heading", { level: 2, name: "Paiement échoué" })).toBeInTheDocument();
     expect(screen.getByText(/Aucun montant n'a été débité/)).toBeInTheDocument();
@@ -103,5 +103,27 @@ describe("PaymentStatusPanel", () => {
     expect(GET).not.toHaveBeenCalled();
     rerender(<PaymentStatusPanel {...props} key="sans-raison" payment={{ ...failed, failureReason: "" }} />);
     expect(screen.queryByText(/Raison/)).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["AMOUNT_MISMATCH", "vous", "Vérifiez l'état de la commande"],
+    ["", "tu", "Vérifie l'état de la commande"],
+  ] as const)("échec %s sans confirmation de l'API : pas d'« Aucun montant n'a été débité »", (code, register, text) => {
+    render(
+      <PaymentStatusPanel
+        {...props}
+        register={register}
+        payment={{ ...PENDING, status: "failed", failureCode: code, failureReason: "" }}
+      />,
+    );
+    expect(screen.getByText(new RegExp(text))).toBeInTheDocument();
+    expect(screen.queryByText(/Aucun montant/)).not.toBeInTheDocument();
+  });
+
+  it("échec à l'initiation (code confirmant l'absence de débit), au tutoiement", () => {
+    render(
+      <PaymentStatusPanel {...props} register="tu" payment={{ ...PENDING, status: "failed", failureCode: "PROVIDER_REFUSED" }} />,
+    );
+    expect(screen.getByText(/Aucun montant n'a été débité/)).toBeInTheDocument();
   });
 });
