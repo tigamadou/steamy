@@ -29,8 +29,8 @@ test("WD01 : Léa reprend son parcours, voit ses statistiques et ses raccourcis"
   const stats = page.getByRole("region", { name: "Tes statistiques" });
   await expect(stats.getByRole("term")).toHaveText(["Streak", "Points", "Rang"]);
   const shortcuts = page.getByRole("navigation", { name: "Raccourcis" });
-  await expect(shortcuts.getByRole("link")).toHaveText([/Catalogue/, /Mes souhaits/, /Mes quiz/]);
-  await expect(page.getByText("Steamy Events")).toHaveCount(0);
+  await expect(shortcuts.getByRole("link")).toHaveText([/Catalogue/, /Mes souhaits/, /Mes quiz/, /Steamy Events/]);
+  await expect(shortcuts.getByRole("link", { name: /Steamy Events/ })).toHaveAttribute("href", "/apprenant/evenements");
   await expect(page.getByRole("region", { name: /Pour toi/ }).getByRole("article").first()).toBeVisible();
   await axe(page);
 });

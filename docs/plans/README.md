@@ -64,10 +64,10 @@ plan.
 | [PLAN-API](PLAN-API.md) | 🟡 en cours | API-0 ✅ (PR #5 à #9) · API-1 ✅ (PR #12, #15, #17, #21 à #25) · API-L1 ✅ (PR #33, #37, #40, #41, #43) · API-L2 : L2.0b à L2.7 (PR #29, #32, #34, #39, #42, #44 à #46) ; parcours Playwright avec le lot 2 · API-L3a : L3a.1 à L3a.6 (PR #64, #66, #68 à #71) ; barème C8 à fixer · API-L6 : L6.1 (PR #38), L6.2 comptes (PR #61), L6.3 (PR #63), L6.4 KPI et rapports (PR #65, #67) · API-L3b : L3b.0b à L3b.6 et critères de fin (PR #73, #76, #82, #83, #85, #87, #89 à #91) ; format légal des factures en attente (P1, P2) · API-L4 ✅ (PR #75, #77 à #80, #102, #104, #107) | API-L3b |
 | [LOT-1-PUBLIC](LOT-1-PUBLIC.md) | ✅ terminé | 1.0 à 1.6 fusionnées (PR #18, #19, #30, #36, #47 à #50, #58) · critères de fin et validation C18 (PR #59) | — |
 | [LOT-2-AUTH](LOT-2-AUTH.md) | 🟡 en cours | 2.0 (PR #31) · 2.1 (PR #35) · 2.2 à 2.8 (PR #51 à #57) | Critères de fin du lot (CI, correctifs API signalés) |
-| [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | 🟡 en cours | 3.0 shell (PR #92) · 3.1 accueil, notifications, aide (PR #101) · 3.2 catalogue et souhaits (PR #98) · 3.3a mes parcours et missions (PR #94) · 3.3b quiz et badges (PR #95) · 3.3c certification (PR #96) · 3.4 tentatives et progression (PR #97) · 3.5 profil WD13, WD17, WD18 (PR #99), WD19, WD22, WD15 (PR #118) | 3.6 à 3.8 |
+| [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | 🟡 en cours | 3.0 shell (PR #92) · 3.1 accueil, notifications, aide (PR #101) · 3.2 catalogue et souhaits (PR #98) · 3.3a mes parcours et missions (PR #94) · 3.3b quiz et badges (PR #95) · 3.3c certification (PR #96) · 3.4 tentatives et progression (PR #97) · 3.5 profil WD13, WD17, WD18 (PR #99), WD19, WD22, WD15 (PR #118) · 3.8 Steamy Events (PR #116) | 3.6, 3.7 |
 | [LOT-4-PARENT](LOT-4-PARENT.md) | 🟡 en cours | 4.0 maquette de WPD15 et des états manquants dessinée (PR #72), validation C18 en attente | Validation C18 de WPD15 ; 4.1 après API-L4 |
 | [LOT-5-ENSEIGNANT](LOT-5-ENSEIGNANT.md) | ⬜ à faire | — | 5.1 (après API-L5) |
-| [LOT-6-ADMIN](LOT-6-ADMIN.md) | 🟡 en cours | 6.1 (PR #38) · 6.6 (PR #62) · 6.7 (PR #93) · 6.8 (PR #100) · 6.9 (PR #106, exports PR #111) | 6.3 à 6.5 (admin Django) ; 6.2 après API-L5 |
+| [LOT-6-ADMIN](LOT-6-ADMIN.md) | 🟡 en cours | 6.1 (PR #38) · 6.6 (PR #62) · 6.7 (PR #93) · 6.8 (PR #100) · 6.9 (PR #106, exports PR #111) · 6.3 (PR #113) | 6.4 et 6.5 ; 6.2 après API-L5 |
 
 ## Suivi d'exécution
 
