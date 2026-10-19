@@ -21,6 +21,9 @@ function withNext(path: string, next?: string): string {
   return next ? `${path}?next=${encodeURIComponent(next)}` : path;
 }
 
+/** Confirmation affichée par WPD03 après la création (WPD04) ou la modification (WPD10) du profil d'un enfant. */
+export type ChildConfirmation = "cree" | "modifie";
+
 /** Onglet de la liste des notifications (WD04, WPD14). */
 export type NotificationTab = "toutes" | "non-lues";
 
@@ -110,7 +113,9 @@ export const routes = {
     home: "/parent",
     children: "/parent/enfants",
     addChild: "/parent/enfants/ajouter",
-    child: (id: number | string) => `/parent/enfants/${id}`,
+    /** WPD03 ; `confirmation` : rappel après la création (WPD04) ou la modification (WPD10) du profil. */
+    child: (id: number | string, confirmation?: ChildConfirmation) =>
+      confirmation ? `/parent/enfants/${id}?confirmation=${confirmation}` : `/parent/enfants/${id}`,
     editChild: (id: number | string) => `/parent/enfants/${id}/modifier`,
     /** WPD11 : semaine ISO `AAAA-Www` dans l'URL, la semaine courante sans paramètre. */
     weeklyReport: (id: number | string, week?: string) =>

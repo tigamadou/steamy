@@ -19,6 +19,12 @@ describe("QuizAttemptRow", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
+  it("sans `href` : ligne en lecture seule, sans lien", () => {
+    render(<QuizAttemptRow title="Quiz servo" subtitle="Quiz du niveau" status="ok" score={2} total={2} emoji="📝" />);
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getByText("Quiz servo").closest("div")).toHaveTextContent("Réussi2/2 bonnes réponses");
+  });
+
   it("statuts D31 affichés tels quels", () => {
     render(
       <>

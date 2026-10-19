@@ -12,7 +12,7 @@ describe("parentNav", () => {
       ["help", "book", "Aide"],
       ["settings", "gear", "Paramètres"],
     ]);
-    expect(parentNav.filter((entry) => !entry.hidden).map((entry) => entry.href)).toEqual(["/parent"]);
+    expect(parentNav.filter((entry) => !entry.hidden).map((entry) => entry.href)).toEqual(["/parent", "/parent/enfants"]);
     expect(PARENT_PROFILE_HREF).toBe("/parent");
   });
 });

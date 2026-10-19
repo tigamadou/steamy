@@ -49,7 +49,7 @@ function Hero({ count }: { count: number }) {
 }
 
 /** Aucun enfant rattaché : CTA « Ajouter un enfant » (WPD04) ou acceptation d'une demande reçue. */
-function NoChild() {
+export function NoChild() {
   return (
     <div className="flex flex-col items-center gap-3 rounded-[18px] border-2 border-dashed border-primary-300 bg-primary-50 px-5 py-8 text-center">
       <Mascot pose="idle" size={110} />

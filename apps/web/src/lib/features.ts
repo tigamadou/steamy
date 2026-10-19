@@ -13,6 +13,8 @@ export const features = {
   parentInfo: false,
   /** Suppression du compte (WD15, `accounts/me/deletion-request/`, API-L4.3) : zone sensible du hub WD13. */
   accountDeletion: false,
+  /** Commentaires des enseignants dans le détail d'un enfant (WPD03, `classrooms/comments/?learnerId=`, API-L5). */
+  parentTeacherComments: false,
 } as const;
 
 export type Feature = keyof typeof features;

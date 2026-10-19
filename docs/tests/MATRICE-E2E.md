@@ -108,15 +108,15 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WJ10` | Évaluation sommative (≥ 80 %) | 3 | P1 : sommative ratée puis réussie après le délai | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WJ11` | Projet validé + badge de projet | 3 | P1 : badge de projet, lien vers la certification | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WPD01` | Accueil parent | 4 | Accès refusé à l'apprenant et à l'enseignant ; « À valider » du jeu D2 (suppression, paiement, candidature) avec leurs cibles ; stat « À valider » = longueur de la liste ; état vide sans enfant | `apps/web/e2e/parent-accueil-notifications.spec.ts` |
-| `WPD02` | Mes enfants | 4 |  |  |
-| `WPD03` | Détail enfant | 4 |  |  |
-| `WPD04` | Ajouter un enfant | 4 |  |  |
+| `WPD02` | Mes enfants | 4 | Demande de consentement reçue « à examiner » → WPD05, sans « Relancer l'invitation » ; enfant créé listé avec « Voir le profil » | `apps/web/e2e/parent-enfants.spec.ts` |
+| `WPD03` | Détail enfant | 4 | Rappel de l'identifiant après la création ; réinitialisation du mot de passe (ancien refusé, nouveau accepté sur W16) ; enfant d'un autre parent → « introuvable » | `apps/web/e2e/parent-enfants.spec.ts` |
+| `WPD04` | Ajouter un enfant | 4 | Création par le parent → WPD03 ; l'enfant se connecte sur W16 et arrive sur W11 | `apps/web/e2e/parent-enfants.spec.ts` |
 | `WPD05` | Demande de consentement | 4 |  |  |
 | `WPD06` | Steamy Events | 4 |  |  |
 | `WPD07` | Historique de commande | 4 |  |  |
 | `WPD08` | Paramètres parent | 4 |  |  |
 | `WPD09` | Supprimer un enfant | 4 |  |  |
-| `WPD10` | Modifier le profil enfant | 4 |  |  |
+| `WPD10` | Modifier le profil enfant | 4 | Identifiant non modifiable ; `BIRTHDATE_AGE_MISMATCH` au champ ; enregistrement → WPD03 avec confirmation ; enfant d'un autre parent → « introuvable » | `apps/web/e2e/parent-enfants.spec.ts` |
 | `WPD11` | Rapport hebdomadaire | 4 |  |  |
 | `WPD12` | Faire participer un enfant | 4 |  |  |
 | `WPD13` | Aide & support | 4 |  |  |

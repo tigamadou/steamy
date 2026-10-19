@@ -53,6 +53,7 @@ describe("routes.parent", () => {
   it("construit les URL de l'espace parent (LOT-4, arborescence des routes)", () => {
     const p = routes.parent;
     expect(p.child(7)).toBe("/parent/enfants/7");
+    expect(p.child(7, "cree")).toBe("/parent/enfants/7?confirmation=cree");
     expect(p.editChild(7)).toBe("/parent/enfants/7/modifier");
     expect(p.weeklyReport(7)).toBe("/parent/enfants/7/rapport");
     expect(p.weeklyReport(7, "2026-W42")).toBe("/parent/enfants/7/rapport?semaine=2026-W42");
