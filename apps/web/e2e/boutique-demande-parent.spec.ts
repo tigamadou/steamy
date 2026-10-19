@@ -39,14 +39,14 @@ test("P5 · WK03 → WK08 : demande de kit au parent, annulation, nouvelle deman
   await visible(page, "button", "Demander à mon parent").click();
   await expect(page).toHaveURL(/\/apprenant\/demandes\/\d+$/, { timeout: 20_000 });
   const first = requestId(page);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Demande à ton parent");
+  await expect(page.getByRole("heading", { level: 1 }).filter({ visible: true })).toHaveText("Demande à ton parent");
   await expect(visible(page, "heading", "On a envoyé ta demande à Maman")).toBeVisible();
   await expect(page.getByText("Montant des articles · livraison ajoutée par ton parent").filter({ visible: true })).toBeVisible();
   await expect(page.getByText(/22\s000 F CFA/).filter({ visible: true })).toBeVisible();
   await expect(page.getByText("Demande envoyée à Maman · en attente du paiement…").filter({ visible: true })).toBeVisible();
   // Ni relance, ni « Changer de parent », ni « Renvoyer le lien », ni condition d'âge (S3)
   await expect(visible(page, "button", "Relancer mon parent")).toHaveCount(0);
-  await expect(page.getByText(/Changer de parent|Renvoyer le lien|16 ans/)).toHaveCount(0);
+  await expect(page.getByText(/Changer de parent|Renvoyer le lien|16 ans/).filter({ visible: true })).toHaveCount(0);
   await axe(page);
 
   // Annulation, retour au panier, nouvelle demande
@@ -67,6 +67,6 @@ test("P5 · WK03 → WK08 : demande de kit au parent, annulation, nouvelle deman
   await visible(page, "link", "Voir mes commandes").click();
   await expect(page).toHaveURL("/apprenant/profil/commandes");
   await expect(
-    page.getByRole("list", { name: "Tes commandes" }).getByRole("listitem").filter({ hasText: "Pack Électronique" }),
+    page.getByRole("list", { name: "Tes commandes" }).filter({ visible: true }).getByRole("listitem").filter({ hasText: "Pack Électronique" }),
   ).toContainText("Livraison : En préparation");
 });
