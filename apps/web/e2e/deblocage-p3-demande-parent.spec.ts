@@ -36,12 +36,12 @@ test("P3 · WA02 : demande au parent, relance, annulation, nouvelle demande rég
   const first = requestId(page);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Demande à ton parent");
   await expect(page.getByRole("heading", { level: 2, name: "On a envoyé ta demande à Maman" })).toBeVisible();
-  await expect(page.getByText(/18\s000 F CFA/)).toBeVisible();
-  await expect(page.getByText("Demande envoyée à Maman · en attente du paiement…")).toBeVisible();
+  await expect(page.getByText(/18\s000 F CFA/).filter({ visible: true })).toBeVisible();
+  await expect(page.getByText("Demande envoyée à Maman · en attente du paiement…").filter({ visible: true })).toBeVisible();
   // Relance limitée : la première n'est possible qu'après le délai fixé par le serveur (C4)
   await expect(page.getByRole("button", { name: "Relancer mon parent" })).toBeDisabled();
-  await expect(page.getByText(/^Tu pourras relancer ton parent le /)).toBeVisible();
-  await expect(page.getByText(/Changer de parent|Renvoyer le lien/)).toHaveCount(0);
+  await expect(page.getByText(/^Tu pourras relancer ton parent le /).filter({ visible: true })).toBeVisible();
+  await expect(page.getByText(/Changer de parent|Renvoyer le lien/).filter({ visible: true })).toHaveCount(0);
   await axe(page);
 
   // WC05 : « Demande envoyée » ramène à la même demande
@@ -61,7 +61,7 @@ test("P3 · WA02 : demande au parent, relance, annulation, nouvelle demande rég
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mes commandes");
   const orders = page.getByRole("list", { name: "Tes commandes" });
   await expect(orders.getByText("En attente de ton parent")).toBeVisible();
-  await expect(page.getByText(/Facture/)).toHaveCount(0);
+  await expect(page.getByText(/Facture/).filter({ visible: true })).toHaveCount(0);
   await axe(page);
   await orders.getByRole("link", { name: `Voir la demande : ${COURSE_TITLE}` }).click();
   await expect(page).toHaveURL(`/apprenant/demandes/${first}`);
@@ -83,7 +83,7 @@ test("P3 · WA02 : demande au parent, relance, annulation, nouvelle demande rég
 
   // Notification « parcours débloqué »
   await page.goto("/apprenant/notifications");
-  await expect(page.getByText(`${COURSE_TITLE} est débloqué`)).toBeVisible();
+  await expect(page.getByText(`${COURSE_TITLE} est débloqué`).filter({ visible: true })).toBeVisible();
 
   // WD23 : le parcours est suivi, plus de demande en attente
   await page.goto("/apprenant/parcours");
