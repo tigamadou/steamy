@@ -85,6 +85,13 @@ describe("OfflineGate (WX01)", () => {
     expect(screen.getByRole("alertdialog", { name: "Vous êtes hors ligne" })).toBeInTheDocument();
   });
 
+  it("reste monochrome dans le back-office", () => {
+    pathname = "/backoffice/impact";
+    setNetwork(false);
+    render(<OfflineGate />);
+    expect(screen.getByRole("alertdialog").innerHTML).not.toMatch(/primary/);
+  });
+
   it("se désabonne des événements réseau au démontage", () => {
     const remove = vi.spyOn(window, "removeEventListener");
     const { unmount } = render(<OfflineGate />);

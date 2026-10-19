@@ -6,7 +6,7 @@ const cacheLife = vi.fn();
 const cacheTag = vi.fn();
 vi.mock("next/cache", () => ({ cacheLife, cacheTag }));
 
-const { COURSES_PAGE_SIZE, getCategories, getCourse, getCourseSlugs, getCourses, getHomeCourses } =
+const { COURSES_PAGE_SIZE, getCategories, getCourse, getCourseSlugs, getCourses, getHomeCourses, getStarterCourses } =
   await import("./catalog");
 
 let routes: Record<string, () => Response>;
@@ -76,6 +76,12 @@ describe("catalogue public", () => {
     routes["/api/catalog/courses/?featured=true&page=1&pageSize=3"] = () => json({ results: three });
     expect(await getHomeCourses()).toEqual(three);
     expect(urls).toHaveLength(1);
+  });
+
+  it("WD02 : trois parcours gratuits de difficulté débutant (D27)", async () => {
+    routes["/api/catalog/courses/?price=free&difficulty=beginner&page=1&pageSize=3"] = () =>
+      json({ results: [course({ slug: "a" })] });
+    expect((await getStarterCourses()).map((c) => c.slug)).toEqual(["a"]);
   });
 
   it("sitemap : tous les slugs, page après page", async () => {

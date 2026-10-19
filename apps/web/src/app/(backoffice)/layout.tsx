@@ -16,7 +16,7 @@ export default function BackofficeLayout({ children }: LayoutProps<"/">) {
     <Suspense
       fallback={
         <div className="flex min-h-dvh items-center justify-center bg-ink-50">
-          <Loader label="Ouverture du back-office…" />
+          <Loader tone="ink" label="Ouverture du back-office…" />
         </div>
       }
     >

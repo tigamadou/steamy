@@ -9,6 +9,8 @@ describe("routes", () => {
     expect(routes.article("premier-robot")).toBe("/blog/premier-robot");
     expect(routes.legal("cgu")).toBe("/legal/cgu");
     expect(routes.backoffice.kpi("na_f")).toBe("/backoffice/impact/indicateurs/na_f");
+    expect(routes.backoffice.report("2026-t4")).toBe("/backoffice/impact/rapports/2026-t4");
+    expect(routes.backoffice.reportEntry("2026-t4")).toBe("/backoffice/impact/rapports/2026-t4/saisie");
   });
 
   it("présélectionne le sujet du formulaire de contact", () => {
@@ -36,6 +38,12 @@ describe("routes", () => {
     expect(l.certification("robot")).toBe("/apprenant/parcours/robot/certification");
     expect(l.catalogSearch("robot & co")).toBe("/apprenant/catalogue?q=robot%20%26%20co");
     expect(l.catalogCourse("robot")).toBe("/apprenant/catalogue/robot");
+    expect(l.notificationList()).toBe("/apprenant/notifications");
+    expect(l.notificationList("toutes", 2)).toBe("/apprenant/notifications?page=2");
+    expect(l.notificationList("non-lues")).toBe("/apprenant/notifications?onglet=non-lues");
+    expect(l.notificationList("non-lues", 3)).toBe("/apprenant/notifications?onglet=non-lues&page=3");
+    expect(l.kitCode("robot")).toBe("/apprenant/catalogue/robot/kit-code");
+    expect(l.parentRequest("robot")).toBe("/apprenant/catalogue/robot/demande");
   });
 });
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { course } from "@/test/api-fixtures";
 
-import { DIFFICULTY_LABELS, formatPrice, toCourseCard } from "./format";
+import { DIFFICULTY_LABELS, formatMinutes, formatPrice, toCourseCard } from "./format";
 
 describe("format", () => {
   it("écrit les prix en francs CFA avec des espaces de milliers", () => {
@@ -26,5 +26,23 @@ describe("format", () => {
     expect(paid.isFree).toBe(false);
     expect(paid.priceLabel).toBe("0 F CFA");
     expect(paid.emoji).toBe("🤖");
+  });
+
+  it("vers la fiche de l'espace apprenant, sans prix de parcours pour un parcours à kit (D36)", () => {
+    const kit = toCourseCard(
+      course({ isFree: false, price: 25000, requiredKit: { slug: "bot", name: "Bot" } }),
+      "/apprenant/catalogue/decouverte-robotique",
+    );
+    expect(kit).toMatchObject({ href: "/apprenant/catalogue/decouverte-robotique", isFree: false });
+    expect(kit.priceLabel).toBe("Avec le Kit Code");
+    // Un parcours à kit marqué gratuit par erreur n'est pas annoncé « Gratuit »
+    expect(toCourseCard(course({ requiredKit: { slug: "bot", name: "Bot" } })).isFree).toBe(false);
+  });
+
+  it("écrit les durées de mission", () => {
+    expect(formatMinutes(8)).toBe("8 min");
+    expect(formatMinutes(60)).toBe("1 h");
+    expect(formatMinutes(75)).toBe("1 h 15");
+    expect(formatMinutes(125)).toBe("2 h 05");
   });
 });

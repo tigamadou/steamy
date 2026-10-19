@@ -22,7 +22,13 @@ const VARIANTS = {
   ghost: "bg-transparent font-bold text-primary-600 hover:bg-primary-50 active:translate-y-0",
   danger:
     "bg-error-600 text-white shadow-[0_4px_0_var(--error-700)] hover:bg-error-700 active:shadow-[0_2px_0_var(--error-700)]",
+  // Back-office monochrome (SPEC-TECHNIQUE §2.4) : encre, focus en encre, aucune couleur primaire
+  ink: "bg-ink-900 text-white shadow-[0_4px_0_var(--ink-700)] hover:bg-ink-800 active:shadow-[0_2px_0_var(--ink-700)]",
+  "ink-outline":
+    "border-2 border-ink-200 bg-surface text-ink-900 shadow-[0_4px_0_var(--ink-200)] hover:bg-ink-50 active:shadow-[0_2px_0_var(--ink-200)]",
 } as const;
+
+const INK_VARIANTS: ReadonlySet<string> = new Set(["ink", "ink-outline"]);
 
 const SIZES = {
   sm: "gap-1.5 rounded-md px-4 py-2.5 text-sm",
@@ -69,7 +75,8 @@ export function buttonClasses({
   return cx(
     "inline-flex cursor-pointer items-center justify-center whitespace-nowrap font-extrabold leading-none tracking-[0.01em] select-none",
     "transition-[transform,background-color,box-shadow] duration-100 ease-(--ease-out) active:translate-y-0.5",
-    "focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary-500",
+    "focus-visible:outline-3 focus-visible:outline-offset-2",
+    INK_VARIANTS.has(variant) ? "focus-visible:outline-ink-900" : "focus-visible:outline-primary-500",
     "disabled:cursor-not-allowed disabled:border-transparent disabled:bg-ink-100 disabled:text-ink-500 disabled:shadow-[0_4px_0_var(--ink-200)] disabled:active:translate-y-0",
     VARIANTS[variant],
     SIZES[size],

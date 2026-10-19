@@ -5,6 +5,7 @@ import { cx } from "@/lib/cx";
 
 import { Badge } from "../Badge";
 import { Icon } from "../Icon";
+import { ProgressBar } from "../ProgressBar";
 
 export type CourseCardData = {
   href: string;
@@ -18,6 +19,8 @@ export type CourseCardData = {
   /** Couleur de la catégorie (API) ou token. */
   color?: string;
   emoji?: string;
+  /** Progression de l'apprenant inscrit (API), affichée sous le titre. */
+  progress?: number;
 };
 
 export type CourseCardProps = {
@@ -89,6 +92,9 @@ export function CourseCard({ course, onFav, favorited, className }: CourseCardPr
           </Link>
         </h3>
         {course.author && <p className="text-[13px] font-semibold text-ink-600">Par {course.author}</p>}
+        {course.progress !== undefined && (
+          <ProgressBar value={course.progress} label="Ta progression" showLabel className="mt-auto" />
+        )}
       </div>
     </article>
   );

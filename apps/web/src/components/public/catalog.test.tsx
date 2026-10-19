@@ -45,6 +45,14 @@ describe("CourseGrid", () => {
     expect(screen.getByText("Gratuit")).toBeInTheDocument();
   });
 
+  it("lie les cartes à une autre fiche quand on la fournit (espace apprenant)", () => {
+    render(<CourseGrid courses={[course()]} courseHref={(slug) => `/apprenant/catalogue/${slug}`} />);
+    expect(screen.getByRole("link", { name: "Découverte de la robotique" })).toHaveAttribute(
+      "href",
+      "/apprenant/catalogue/decouverte-robotique",
+    );
+  });
+
   it("skeleton : zone occupée, verbalisée", () => {
     render(<CourseGridSkeleton count={2} label="Chargement…" />);
     expect(screen.getByRole("status", { name: "Chargement…" })).toHaveAttribute("aria-busy", "true");
