@@ -70,6 +70,10 @@ export const routes = {
     attempt: (id: number | string) => `/apprenant/quiz/${id}`,
     help: "/apprenant/aide",
     events: "/apprenant/evenements",
+    /** WL23 dans le shell. */
+    event: (slug: string) => `/apprenant/evenements/${slug}`,
+    /** WD11 · candidature à un événement. */
+    eventApplication: (slug: string) => `/apprenant/evenements/${slug}/candidature`,
     courses: "/apprenant/parcours",
     course: (slug: string) => `/apprenant/parcours/${slug}`,
     project: (slug: string, id: number | string) => `/apprenant/parcours/${slug}/projets/${id}`,

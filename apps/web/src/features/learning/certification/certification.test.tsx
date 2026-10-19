@@ -8,10 +8,8 @@ import { CERTIFICATE, failure, learnerBadge, ok, tree } from "@/test/learning-fi
 const GET = vi.fn();
 const getCurrentUser = vi.fn();
 const apiCall = vi.fn();
-const features = { unlock: false, events: false };
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
 vi.mock("@/lib/auth/session", () => ({ getCurrentUser: () => getCurrentUser() }));
-vi.mock("@/lib/features", () => ({ features }));
 vi.mock("@/lib/api-call", () => ({ apiCall: (request: unknown) => apiCall(request) }));
 vi.mock("next/navigation", () => ({
   notFound: () => {
@@ -49,7 +47,6 @@ beforeEach(() => {
   GET.mockReset();
   getCurrentUser.mockReset();
   getCurrentUser.mockResolvedValue({ firstName: "Léa", lastName: "Adjovi" });
-  features.events = false;
 });
 
 describe("CertificationView (WJ07 / WJ09)", () => {
@@ -73,21 +70,20 @@ describe("CertificationView (WJ07 / WJ09)", () => {
     // D36 : un parcours à kit recommandé n'affiche pas de prix de parcours
     expect(screen.getByText("Avec le Kit Code")).toBeInTheDocument();
     expect(screen.queryByText(/25\s000/)).not.toBeInTheDocument();
-    // Ticket Steamy Events derrière le drapeau `events` (étape 3.8)
-    expect(screen.queryByText(/Ticket Steamy Events/)).not.toBeInTheDocument();
+    // Ticket Steamy Events (D33) → WD10
+    expect(screen.getByRole("link", { name: "Voir les événements" })).toHaveAttribute("href", "/apprenant/evenements");
   });
 
-  it("ticket affiché une fois les événements livrés ; sans badge, sans recommandation, sans session lisible", async () => {
-    features.events = true;
+  it("sans ticket, sans badge, sans recommandation, sans session lisible", async () => {
     getCurrentUser.mockResolvedValue(null);
     mockApi(ok(certified()), { badges: [], recos: [] });
     GET.mockImplementation(async (path: string) => {
       if (path === "/api/learning/badges/") return failure(500);
       if (path === "/api/learning/recommendations/") return failure(500);
-      return ok(certified());
+      return ok(certified({ eventTicket: false }));
     });
     render((await CertificationView({ slug: "robot-bluetooth" })) as ReactElement);
-    expect(screen.getByRole("link", { name: "Voir les événements" })).toHaveAttribute("href", "/apprenant/evenements");
+    expect(screen.queryByRole("link", { name: "Voir les événements" })).not.toBeInTheDocument();
     expect(screen.queryByText("Léa Adjovi")).not.toBeInTheDocument();
     expect(screen.queryByRole("list", { name: "Badges de projet" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Continue ton aventure" })).not.toBeInTheDocument();
