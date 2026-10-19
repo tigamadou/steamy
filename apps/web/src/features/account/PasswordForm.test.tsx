@@ -119,3 +119,29 @@ describe("PasswordForm (WD18)", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Trop de tentatives. Réessaie dans 30 secondes.");
   });
 });
+
+describe("PasswordForm au vouvoiement (WPD08)", () => {
+  beforeEach(() => POST.mockReset());
+
+  it("textes et confirmation du parent", async () => {
+    render(<PasswordForm register="vous" />);
+    await submit();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Indiquez votre mot de passe actuel.");
+    POST.mockResolvedValue(respond(204));
+    await userEvent.type(current(), "Ancien2026");
+    await userEvent.type(next(), "Robot2027x");
+    await userEvent.type(screen.getByLabelText(/^Confirmez votre nouveau mot de passe/), "Robot2027x");
+    await submit();
+    expect(await screen.findByText("Votre mot de passe est mis à jour.")).toBeInTheDocument();
+  });
+
+  it("erreur sans champ au vouvoiement", async () => {
+    POST.mockResolvedValue(failure(500, "SERVER_ERROR"));
+    render(<PasswordForm register="vous" />);
+    await userEvent.type(current(), "Ancien2026");
+    await userEvent.type(next(), "Robot2027x");
+    await userEvent.type(screen.getByLabelText(/^Confirmez votre nouveau mot de passe/), "Robot2027x");
+    await submit();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Réessayez dans quelques instants.");
+  });
+});

@@ -6,12 +6,18 @@ import { describe, expect, it, vi } from "vitest";
 import { AppShellSkeleton } from "@/components/ds/AppShell";
 import { Notifications, NotificationsSkeleton } from "@/features/notifications/Notifications";
 import { ParentHome, ParentHomeSkeleton } from "@/features/parent/home/ParentHome";
+import { ParentSettings, ParentSettingsSkeleton } from "@/features/parent/settings/ParentSettings";
 import { ParentShell } from "@/features/parent/shell/ParentShell";
+import { axe } from "@/test/axe";
 
 const back = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ back }) }));
 vi.mock("@/features/parent/shell/ParentShell", () => ({ ParentShell: () => null }));
 vi.mock("@/features/parent/home/ParentHome", () => ({ ParentHome: () => null, ParentHomeSkeleton: () => null }));
+vi.mock("@/features/parent/settings/ParentSettings", () => ({
+  ParentSettings: () => null,
+  ParentSettingsSkeleton: () => null,
+}));
 vi.mock("@/features/notifications/Notifications", () => ({
   Notifications: () => null,
   NotificationsSkeleton: () => null,
@@ -23,6 +29,8 @@ const { default: ParentLoading } = await import("./loading");
 const { default: ParentError } = await import("./error");
 const { default: ParentNotFound } = await import("./not-found");
 const { default: NotificationsPage } = await import("./notifications/page");
+const { default: SettingsPage } = await import("./parametres/page");
+const { default: HelpPage } = await import("./aide/page");
 
 type Boundary = ReactElement<{
   fallback: ReactElement<{ label?: string; space?: string; navCount?: number }>;
@@ -53,6 +61,24 @@ describe("pages de l'espace parent", () => {
     expect(tree.props.fallback.props.space).toBe("parent");
     expect(tree.props.children.type).toBe(Notifications);
     expect(tree.props.children.props).toMatchObject({ space: "parent", searchParams });
+  });
+});
+
+describe("WPD08 et WPD13", () => {
+  it("WPD08 : paramètres sous Suspense, avec leur squelette", () => {
+    const tree = SettingsPage() as Boundary;
+    expect(tree.props.fallback.type).toBe(ParentSettingsSkeleton);
+    expect(tree.props.children.type).toBe(ParentSettings);
+  });
+
+  it("WPD13 : FAQ du parent avec recherche locale et « Contacter le support » vers WL24", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<HelpPage />);
+    expect(screen.getByRole("heading", { level: 2, name: "Questions fréquentes" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Contacter le support" })).toHaveAttribute("href", "/aide#contact");
+    expect(await axe(container)).toHaveNoViolations();
+    await user.type(screen.getByRole("searchbox", { name: "Rechercher une question" }), "zzzz");
+    expect(screen.getByText(/Aucune question ne correspond/)).toBeInTheDocument();
   });
 });
 
