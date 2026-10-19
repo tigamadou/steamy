@@ -63,8 +63,9 @@ test("WPD08 : email du profil, rapport hebdomadaire coupé par email et conserv�
   await clickUntil(page, /^Modifier/, () =>
     expect(page.getByRole("form", { name: "Mes informations" })).toBeVisible({ timeout: 2_000 }),
   );
-  await page.getByRole("textbox", { name: /^Email/ }).fill("sena.test@steamy.test");
-  await page.getByRole("button", { name: "Enregistrer" }).click();
+  const profile = page.getByRole("form", { name: "Mes informations" });
+  await profile.getByRole("textbox", { name: /^Email/ }).fill("sena.test@steamy.test");
+  await profile.getByRole("button", { name: "Enregistrer", exact: true }).click();
   await expect(page.getByText("Vos informations sont enregistrées.")).toBeVisible();
 
   const progress = page.getByRole("switch", { name: /^Progression\s*par email$/ });
