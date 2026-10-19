@@ -42,6 +42,8 @@ export function OrderPayment({ amount, reference, countries, preferred, success,
   const [payment, setPayment] = useState<Payment | null>(null);
   const [round, setRound] = useState(0);
   const last = useRef<PaymentFormValues | null>(null);
+  // Valeurs du dernier envoi, reprises par le formulaire quand le parent revient changer de numéro
+  const [lastValues, setLastValues] = useState<PaymentFormValues | null>(null);
 
   async function pay(values: PaymentFormValues): Promise<ApiResult<unknown>> {
     last.current = values;
@@ -63,6 +65,7 @@ export function OrderPayment({ amount, reference, countries, preferred, success,
   }
 
   function backToForm() {
+    setLastValues(last.current);
     setPayment(null);
     setRound((n) => n + 1);
     onState?.("pending");
@@ -90,7 +93,18 @@ export function OrderPayment({ amount, reference, countries, preferred, success,
   return (
     <div className="flex flex-col gap-4 rounded-[22px] border-2 border-ink-100 bg-surface p-4 sm:p-5.5">
       <h2 className="m-0 text-lg font-black text-ink-900">Payer par Mobile Money</h2>
-      <PaymentForm key={round} amount={amount} countries={countries} preferred={preferred} onSubmit={pay} />
+      <PaymentForm
+        key={round}
+        amount={amount}
+        countries={countries}
+        // Retour au formulaire après un échec : le pays, le réseau et le numéro saisis restent préremplis
+        preferred={
+          lastValues
+            ? { country: lastValues.country, network: lastValues.network, phone: lastValues.msisdn }
+            : preferred
+        }
+        onSubmit={pay}
+      />
     </div>
   );
 }

@@ -60,18 +60,20 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation 
   - [ ] Playwright : refus de consentement (SMS, `WPD05`, refus avec motif, `W18` côté enfant, `CONSENT_COOLDOWN` à la nouvelle demande)
   - [ ] Playwright : acceptation, l'enfant poursuit en `W08`/`W10`
   - [ ] Recette : aucune information au-delà de D20 ; demande d'un autre numéro = « Demande introuvable »
-- [ ] **4.4** `WPD15` Demande de paiement · `feature/lot4-demande-paiement` (requiert 4.0, 4.1, API-L3b)
-  - [ ] `WPD15` selon la maquette de 4.0, accès réservé au parent du bénéficiaire (sinon « Demande introuvable »)
-  - [ ] `PaymentRequestSummary` (carte enfant + objet parcours / kit / événement) et `DeclineRequestDialog`
-  - [ ] Réutilisation du lot 3 au registre `vous` : `AddressForm` (kit : préremplie, zone, frais serveur), `PaymentForm` (`WA03`), `PaymentStatusPanel` (`WA04` avec interrogation du statut, `WA05`, `WA07`)
-  - [ ] Branchement API : `payment-requests/{id}/` et `decline/`, `payments/orders/`, `orders/{reference}/payments/`, `payments/{id}/`, `shop/delivery-zones/`, `accounts/me/delivery-address/`, `countries/`, `payment-networks/`
-  - [ ] Règles : montants tels que reçus (D37), succès affiché uniquement sur `succeeded` (S9), paiement tardif (C17), expiration à 7 jours et annulation par l'enfant en lecture seule, Mobile Money préféré prérempli
-  - [ ] Gestion du kit : réservation du stock, libération après 30 min, rupture = paiement impossible et refus proposé
-  - [ ] Tests unitaires : rendu des 3 objets et des 8 états, aucun montant calculé côté client
-  - [ ] Tests unitaires : `OUT_OF_STOCK`, `ORDER_EXPIRED`, `ORDER_ALREADY_PAID`, `NETWORK_UNAVAILABLE`, `PAYMENT_FAILED` traduits ; double clic sur « Payer » sans double initiation
-  - [ ] Playwright : l'enfant demande un parcours, le parent paie, l'enfant accède (`WC05`, `WA02`, SMS, `W16`, `WPD15`, webhook simulé, `WD23`, `WC06a`)
+- [x] **4.4** `WPD15` Demande de paiement · `feature/lot4-demande-paiement` (requiert 4.0, 4.1, API-L3b) · PR #PR44
+  - [x] `WPD15` selon la maquette de 4.0, accès réservé au parent du bénéficiaire (sinon « Demande introuvable »)
+  - [x] `PaymentRequestSummary` (carte enfant + objet parcours / kit / événement) et `DeclineRequestDialog`
+  - [x] Réutilisation du lot 3 au registre `vous` : `AddressForm` (kit : préremplie, zone, frais serveur), `PaymentForm` (`WA03`), `PaymentStatusPanel` (`WA04` avec interrogation du statut, `WA05`, `WA07`)
+  - [x] Branchement API : `payment-requests/{id}/` et `decline/`, `payments/orders/`, `orders/{reference}/payments/`, `payments/{id}/`, `shop/delivery-zones/`, `accounts/me/delivery-address/`, `countries/`, `payment-networks/`
+  - [x] Règles : montants tels que reçus (D37), succès affiché uniquement sur `succeeded` (S9), paiement tardif (C17), expiration à 7 jours et annulation par l'enfant en lecture seule, Mobile Money préféré prérempli
+  - [x] Gestion du kit : réservation du stock, libération après 30 min, rupture = paiement impossible et refus proposé
+  - [x] Tests unitaires : rendu des 3 objets et des 8 états, aucun montant calculé côté client
+  - [x] Tests unitaires : `OUT_OF_STOCK`, `ORDER_EXPIRED`, `ORDER_ALREADY_PAID`, `NETWORK_UNAVAILABLE`, `PAYMENT_FAILED` traduits ; double clic sur « Payer » sans double initiation
+  - [x] Playwright : l'enfant demande un parcours, le parent paie, l'enfant accède (`WC05`, `WA02`, SMS, `W16`, `WPD15`, webhook simulé, `WD23`, `WC06a`)
   - [ ] Playwright : variantes échec puis réessai, demande de kit avec adresse visible en `WPD07`, refus (`WA02` « refusée »)
-  - [ ] Recette : un autre parent obtient « Demande introuvable » ; aucun numéro complet dans les journaux front ; échec avec la raison du prestataire et « Réessayer »
+    > Fait : échec puis réessai, kit avec adresse (commande payée vérifiée par l'API), refus motivé. Reste : la commande affichée dans `WPD07` (4.5).
+  - [x] Recette : un autre parent obtient « Demande introuvable » ; aucun numéro complet dans les journaux front ; échec avec la raison du prestataire et « Réessayer »
+  > Écarts : maquette de WPD15 non encore validée par le produit (C18) ; l'événement payant passe par la commande d'événement de 4.6 (D53 amendé), pas par une demande ; parcours de l'enfant (WC05, WA02, WD23, WC06a) vérifié par l'API dans l'e2e, ses écrans relevant du lot 3 (#119) ; commande de kit visible en `WPD07` vérifiée par l'API (WPD07 livré en 4.5) ; API ajoutée : motif du refus et commande en attente reprise (#129), énumération des statuts (#127) ; `PaymentForm` (#119) : Mobile Money préféré prérempli, bouton « Payer » en magenta (C1), double envoi bloqué.
 - [ ] **4.5** Commandes, factures et Kit Codes · `feature/lot4-commandes` (requiert 4.4, API-L3b)
   - [ ] `WPD07` Commandes (`OrderRow`, `OrderStatusFilter`, `?statut=`)
   - [ ] Suivi `/parent/commandes/[reference]` (type `WK07`, `ShippingTimeline`, `KitCodeList`)
