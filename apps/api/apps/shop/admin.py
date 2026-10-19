@@ -11,11 +11,8 @@ from .models import DeliveryZone, Kit, RestockAlert, StockReservation
 #: Sous ce stock, un kit est signalé « stock bas » (badge à 3 seuils : rupture / < 10 / en stock)
 LOW_STOCK = 10
 
-STOCK_BADGES = {
-    "out": ("Rupture", "#B42318", "#FEE4E2"),
-    "low": ("Stock bas", "#93370D", "#FEF0C7"),
-    "ok": ("En stock", "#05603A", "#D1FADF"),
-}
+#: Libellé de chaque niveau ; couleurs dans `admin/shop/stock.css` (variables CSS, thèmes clair et sombre)
+STOCK_LABELS = {"out": "Rupture", "low": "Stock bas", "ok": "En stock"}
 
 
 def stock_level(quantity: int) -> str:
@@ -42,14 +39,14 @@ class KitAdmin(admin.ModelAdmin):
     filter_horizontal = ("compatible_courses",)
     readonly_fields = ("created_at", "updated_at")
 
+    class Media:
+        css = {"all": ("admin/shop/stock.css",)}
+
     @admin.display(description="Stock", ordering="stock_quantity")
     def stock_badge(self, obj):
-        label, color, background = STOCK_BADGES[stock_level(obj.stock_quantity)]
+        level = stock_level(obj.stock_quantity)
         return format_html(
-            '<span style="color:{};background:{};padding:2px 8px;border-radius:999px;font-weight:700">{}</span>',
-            color,
-            background,
-            label,
+            '<span class="stock-badge stock-badge--{}">{}</span>', level, STOCK_LABELS[level]
         )
 
 

@@ -8,7 +8,8 @@ traitement d'un remboursement (Finance).
 from django import forms
 from django.contrib import admin, messages
 from django.db import transaction
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, F, Q, Sum
+from django.db.models.functions import Coalesce
 from django.http import FileResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
@@ -90,6 +91,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ("kind", "status", "shipping_status")
     search_fields = ("reference", "payer__phone", "guest_phone", "beneficiary__username")
     date_hierarchy = "created_at"
+    list_select_related = ("payer", "beneficiary")
     inlines = [OrderItemInline, PaymentInline]
     actions = ["set_shipping_status"]
     # Tout est en lecture seule : la livraison avance par l'action, jamais par le formulaire
@@ -347,9 +349,13 @@ class RefundForm(forms.ModelForm):
         if (
             "payment" in self.fields
         ):  # absent de la fiche en lecture seule (remboursement déjà demandé)
-            self.fields["payment"].queryset = Payment.objects.filter(
-                status=Payment.Status.SUCCEEDED
-            ).select_related("order")
+            # Paiements réussis encore remboursables (pas déjà entièrement remboursés)
+            self.fields["payment"].queryset = (
+                Payment.objects.filter(status=Payment.Status.SUCCEEDED)
+                .annotate(refunded=Coalesce(Sum("refunds__amount"), 0))
+                .filter(refunded__lt=F("amount"))
+                .select_related("order")
+            )
             self.fields["reason"].required = True
 
     def clean(self):
@@ -379,6 +385,7 @@ class RefundAdmin(admin.ModelAdmin):
     list_display = ("id", "order", "payment", "amount", "reason", "processed", "created_at")
     list_filter = ("processed",)
     search_fields = ("payment__order__reference",)
+    list_select_related = ("payment__order",)
     form = RefundForm
     actions = ["process"]
 
@@ -393,14 +400,29 @@ class RefundAdmin(admin.ModelAdmin):
         return obj.payment.order.reference
 
     def save_model(self, request, obj, form, change):
-        refund = backoffice.request_refund(
-            form.cleaned_data["payment"],
-            form.cleaned_data["amount"],
-            form.cleaned_data["reason"],
-            request.user,
-            request,
-        )
+        try:
+            refund = backoffice.request_refund(
+                form.cleaned_data["payment"],
+                form.cleaned_data["amount"],
+                form.cleaned_data["reason"],
+                request.user,
+                request,
+            )
+        except backoffice.BackofficeError as error:
+            # Entre la validation et l'enregistrement, le paiement a changé (autre remboursement) : rien n'est créé
+            self.message_user(request, str(error), messages.ERROR)
+            request.refund_refused = True
+            return
         obj.pk = refund.pk
+
+    def log_addition(self, request, obj, message):
+        if not getattr(request, "refund_refused", False):
+            super().log_addition(request, obj, message)
+
+    def response_add(self, request, obj, post_url_continue=None):
+        if getattr(request, "refund_refused", False):
+            return HttpResponseRedirect(reverse("admin:payments_refund_changelist"))
+        return super().response_add(request, obj, post_url_continue)
 
     def has_process_permission(self, request):
         return request.user.has_perm("payments.process_refund")
@@ -440,6 +462,7 @@ class KitCodeAdmin(admin.ModelAdmin):
     )
     list_filter = ("kit",)
     search_fields = ("code", "order_item__order__reference")
+    list_select_related = ("kit", "order_item__order", "redeemed_by", "redeemed_course")
     actions = ["revoke"]
 
     def has_add_permission(self, request):

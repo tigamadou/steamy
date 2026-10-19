@@ -91,7 +91,7 @@ Statut : 🟡 en cours · Prochaine tâche : 6.5 (admin Django) ; 6.2 après API
   - [x] WAD11 Paiements (admin Django) : `PaymentAdmin` entièrement en lecture seule, filtres, `date_hierarchy`, agrégats en tête, `msisdn` masqué, `payload` réservé à Finance
   - [x] `RefundAdmin` (Finance : création depuis un paiement réussi, action *traiter* avec double confirmation) et `InvoiceAdmin` (lecture, téléchargement)
   - [x] Tests : aucune voie de l'admin ne passe une commande à `paid` ; transitions de livraison non monotones refusées ; révocation d'un code utilisé refusée
-  - [x] Tests : Support sans `payload` ; Contenu sans accès aux paiements ; agrégats égaux à un calcul de référence sur D2
+  - [x] Tests : Support sans `payload` ; Contenu sans accès aux paiements ; agrégats égaux à un calcul de référence (jeu de test dédié, D2 non chargé par les tests)
   > Notes : écritures du personnel dans `payments/backoffice.py`, journalisées dans `AuditLog` ; aucune ne passe une
   > commande à « payée » (formulaires des commandes et paiements en lecture seule, S9). Livraison : action « Changer le
   > statut de livraison » (Support, `set_shipping_status`), une étape à la fois sur une commande payée, payeur prévenu.
@@ -103,6 +103,14 @@ Statut : 🟡 en cours · Prochaine tâche : 6.5 (admin Django) ; 6.2 après API
   > confirmation (commande « remboursée », payeur prévenu). Factures : téléchargement par URL présignée. Le stock d'un
   > kit garde sa saisie en liste ; badge à 3 seuils (rupture, stock bas sous 10, en stock). Selon la matrice D71, Super-
   > admin lit les commandes sans changer la livraison (droit propre au Support).
+  > Suites de relecture : « Traiter » ne passe la commande à « remboursée » que si le paiement remboursé est celui
+  > qui l'a réglée et que les remboursements traités en couvrent le total (un doublon ou un remboursement partiel la
+  > laissent payée), sous verrous commande puis paiement ; ses Kit Codes non utilisés sont alors révoqués (`AuditLog`).
+  > Paiements déjà entièrement remboursés exclus de la demande ; refus de dernier instant affiché sans erreur 500.
+  > Listes commandes, paiements, Kit Codes et remboursements sans requête par ligne. Badge de stock en variables CSS
+  > (`shop/static/admin/shop/stock.css`, thèmes clair et sombre).
+  > Point ouvert : après un remboursement complet, le stock d'un kit n'est pas réintégré (kit expédié ou non : à
+  > décider avec la logistique) et une inscription à un parcours payé reste active ; règle à fixer par le produit.
 - [ ] **6.5** Steamy Events et réglages · `feature/lot6-events-reglages` (requiert 6.1, API-L3b)
   - [ ] WAD12 Événements (admin Django) : `SteamyEventAdmin` (Contenu)
   - [ ] WAD12 Candidatures (admin Django) : `EventApplicationAdmin` avec statut en lecture seule et action unique *refus exceptionnel* (motif obligatoire, notifications, `Refund` si payée)

@@ -8,6 +8,7 @@ puis traités par la Finance avec double confirmation ; factures téléchargeabl
 import pytest
 from django.contrib.messages import get_messages
 from django.core.files.base import ContentFile
+from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
@@ -44,11 +45,13 @@ def member(group):
 
 
 def act(client, url, action, objects, **extra):
-    return client.post(
-        url,
-        {"action": action, "_selected_action": [obj.pk for obj in objects], **extra},
-        follow=True,
-    )
+    # Les messages au payeur partent après la transaction (`on_commit`) : exécutés ici comme en production
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        return client.post(
+            url,
+            {"action": action, "_selected_action": [obj.pk for obj in objects], **extra},
+            follow=True,
+        )
 
 
 def texts(response):
@@ -366,3 +369,115 @@ def test_kit_stock_badge_has_three_levels():
 def test_an_invalid_filter_redirects_without_totals():
     response = member(FINANCE).get(PAYMENTS, {"inconnu": "1"})
     assert response.status_code == 302 and "e=1" in response["Location"]
+
+
+# --- Traitement des remboursements : commande remboursée seulement si elle l'est vraiment ----------------------------
+
+
+def process(refund):
+    from apps.payments import backoffice
+
+    staff = verified_client(APIClient(), FINANCE)
+    with TestCase.captureOnCommitCallbacks(execute=True):
+        return backoffice.process_refund(refund, staff)
+
+
+def test_refunding_a_duplicate_payment_keeps_the_order_paid():
+    order = OrderFactory(paid=True)
+    first = PaymentFactory(
+        order=order, status=Payment.Status.SUCCEEDED, confirmed_at=timezone.now()
+    )
+    duplicate = PaymentFactory(
+        order=order, status=Payment.Status.SUCCEEDED, confirmed_at=timezone.now()
+    )
+    assert process(Refund.objects.create(payment=duplicate, amount=duplicate.amount)) is False
+    order.refresh_from_db()
+    assert order.status == Order.Status.PAID
+    assert first.refunds.count() == 0
+
+
+def test_a_partial_refund_keeps_the_order_paid_until_the_total_is_covered():
+    order = kit_order(paid=True)
+    item = order.items.get()
+    unused = KitCode.objects.create(kit=item.kit, order_item=item, code="STEAMY-AAAA-BBBB")
+    used = KitCode.objects.create(
+        kit=item.kit, order_item=item, code="STEAMY-CCCC-DDDD", redeemed_at=timezone.now()
+    )
+    payment = PaymentFactory(order=order, status=Payment.Status.SUCCEEDED, amount=order.total)
+    assert process(Refund.objects.create(payment=payment, amount=order.total - 5000)) is False
+    order.refresh_from_db()
+    unused.refresh_from_db()
+    assert order.status == Order.Status.PAID and unused.revoked_at is None
+
+    assert process(Refund.objects.create(payment=payment, amount=5000)) is True
+    order.refresh_from_db()
+    unused.refresh_from_db()
+    used.refresh_from_db()
+    assert order.status == Order.Status.REFUNDED
+    # Les codes encore utilisables sont révoqués ; un code déjà utilisé reste tel quel
+    assert unused.revoked_at is not None and used.revoked_at is None
+    log = AuditLog.objects.get(action="kitcode.revoked")
+    assert log.data == {"codes": ["STEAMY-AAAA-BBBB"], "reason": "Commande remboursée"}
+
+
+def test_a_refused_refund_request_redirects_with_its_reason(monkeypatch):
+    from django.contrib.admin.models import LogEntry
+
+    from apps.payments import backoffice
+
+    finance = member(FINANCE)
+    payment = PaymentFactory(status=Payment.Status.SUCCEEDED, amount=15000)
+
+    def refused(*args, **kwargs):
+        raise backoffice.BackofficeError("Montant remboursable : 0 FCFA au plus.")
+
+    monkeypatch.setattr(backoffice, "request_refund", refused)
+    response = finance.post(
+        reverse("admin:payments_refund_add"),
+        {"payment": payment.pk, "amount": 100, "reason": "x"},
+        follow=True,
+    )
+    assert response.redirect_chain[-1][0] == REFUNDS
+    assert "Montant remboursable : 0 FCFA au plus." in texts(response)
+    assert not Refund.objects.exists() and not LogEntry.objects.exists()
+
+
+def test_a_fully_refunded_payment_is_not_offered_again():
+    finance = member(FINANCE)
+    refunded = PaymentFactory(status=Payment.Status.SUCCEEDED, amount=15000)
+    Refund.objects.create(payment=refunded, amount=15000)
+    partly = PaymentFactory(status=Payment.Status.SUCCEEDED, amount=15000)
+    Refund.objects.create(payment=partly, amount=5000)
+    form = finance.get(reverse("admin:payments_refund_add")).context["adminform"].form
+    assert list(form.fields["payment"].queryset) == [partly]
+
+
+# --- Listes sans requête par ligne ------------------------------------------------------------------------------------
+
+
+def _queries(client, url) -> int:
+    from django.db import connection
+    from django.test.utils import CaptureQueriesContext
+
+    client.get(url)  # échauffement : session, types de contenu
+    with CaptureQueriesContext(connection) as queries:
+        assert client.get(url).status_code == 200
+    return len(queries)
+
+
+def _commerce(count: int) -> None:
+    for _ in range(count):
+        order = kit_order(paid=True)
+        item = order.items.get()
+        KitCode.objects.create(kit=item.kit, order_item=item, redeemed_at=timezone.now())
+        payment = PaymentFactory(order=order, status=Payment.Status.SUCCEEDED, amount=order.total)
+        Refund.objects.create(payment=payment, amount=1000)
+
+
+@pytest.mark.parametrize("url", [ORDERS, PAYMENTS, KIT_CODES, REFUNDS])
+def test_the_commerce_lists_do_not_query_per_row(url):
+    finance = member(FINANCE)
+    _commerce(3)
+    few = _queries(finance, url)
+    _commerce(3)
+    assert _queries(finance, url) == few

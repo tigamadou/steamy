@@ -95,29 +95,84 @@ def request_refund(payment: Payment, amount: int, reason: str, user, request=Non
     return refund
 
 
-def process_refund(refund: Refund, user, request=None) -> None:
-    """Remboursement effectué auprès de l'opérateur : marqué traité, commande « remboursée », payeur prévenu."""
+def settling_payment(order: Order) -> Payment | None:
+    """Paiement qui a réglé la commande : le premier réussi (les suivants sont des doublons, remboursés)."""
+    return (
+        order.payments.filter(status=Payment.Status.SUCCEEDED)
+        .order_by("confirmed_at", "id")
+        .first()
+    )
+
+
+def process_refund(refund: Refund, user, request=None) -> bool:
+    """
+    Remboursement effectué auprès de l'opérateur : marqué traité, payeur prévenu. La commande ne passe à « remboursée »
+    que si le paiement remboursé est celui qui l'a réglée et que les remboursements traités en couvrent le total (un
+    doublon ou un remboursement partiel la laissent payée) ; ses Kit Codes non utilisés sont alors révoqués. Verrous
+    dans l'ordre du webhook : commande, puis paiement. Renvoie si la commande est passée à « remboursée ».
+    """
     with transaction.atomic():
-        refund = (
-            Refund.objects.select_for_update().select_related("payment__order").get(pk=refund.pk)
+        order_id = (
+            Refund.objects.filter(pk=refund.pk).values_list("payment__order_id", flat=True).get()
         )
+        order = Order.objects.select_for_update().get(pk=order_id)
+        refund = Refund.objects.select_for_update().get(pk=refund.pk)
+        payment = Payment.objects.select_for_update().get(pk=refund.payment_id)
         if refund.processed:
             raise BackofficeError(f"Remboursement n° {refund.pk} : déjà traité.")
         refund.processed = True
         refund.save(update_fields=["processed"])
-        order = refund.payment.order
-        Order.objects.filter(pk=order.pk).update(
-            status=Order.Status.REFUNDED, updated_at=timezone.now()
+
+        settled_by = settling_payment(order)
+        processed_total = (
+            payment.refunds.filter(processed=True).aggregate(total=Sum("amount"))["total"] or 0
         )
+        refunded = (
+            order.status == Order.Status.PAID
+            and settled_by is not None
+            and settled_by.pk == payment.pk
+            and processed_total >= order.total
+        )
+        revoked = []
+        if refunded:
+            order.status = Order.Status.REFUNDED
+            order.save(update_fields=["status", "updated_at"])
+            revoked = revoke_unused_codes(order, user, request)
         audit(
             "refund.processed",
             request=request,
             actor=user,
             target=order,
-            data={"refund": refund.pk, "amount": refund.amount},
+            data={
+                "refund": refund.pk,
+                "amount": refund.amount,
+                "order_refunded": refunded,
+                "revoked_codes": revoked,
+            },
         )
-        tell_payer(
-            order,
-            "Remboursement effectué",
-            f"Votre paiement de {refund.amount} FCFA pour la commande {order.reference} est remboursé.",
+        transaction.on_commit(
+            lambda: tell_payer(
+                order,
+                "Remboursement effectué",
+                f"Votre paiement de {refund.amount} FCFA pour la commande {order.reference} est remboursé.",
+            )
         )
+    return refunded
+
+
+def revoke_unused_codes(order: Order, user, request=None) -> list[str]:
+    """Commande remboursée : ses Kit Codes encore utilisables sont révoqués (les codes déjà utilisés restent)."""
+    codes = KitCode.objects.select_for_update().filter(
+        order_item__order=order, redeemed_at__isnull=True, revoked_at__isnull=True
+    )
+    revoked = list(codes.values_list("code", flat=True))
+    if revoked:
+        codes.update(revoked_at=timezone.now())
+        audit(
+            "kitcode.revoked",
+            request=request,
+            actor=user,
+            target=order,
+            data={"codes": revoked, "reason": "Commande remboursée"},
+        )
+    return revoked
