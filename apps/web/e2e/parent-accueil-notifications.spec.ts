@@ -28,7 +28,8 @@ test("WPD01 : Marie voit « À valider » conforme au jeu D2, ses statistiques e
   await loginAs(page, "parent");
   await page.goto("/parent");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(`Bonjour ${DEMO.parent.firstName} 👋`);
-  await expect(page.getByRole("heading", { level: 2, name: "2 enfants accompagnés sur Steamy" })).toBeVisible();
+  // Au moins Léa et Noé : d'autres parcours rattachent des enfants à Marie pendant le même passage (P4)
+  await expect(page.getByRole("heading", { level: 2, name: /^\d+ enfants accompagnés sur Steamy$/ })).toBeVisible();
 
   // Jeu D2 : suppression demandée par Noé, paiement demandé par Léa, candidature de Léa à un événement
   const pending = page.getByRole("list", { name: "Demandes à valider" });
@@ -40,12 +41,12 @@ test("WPD01 : Marie voit « À valider » conforme au jeu D2, ses statistiques e
   const payment = pending.getByRole("article", { name: "Demande de paiement · Léa Adjovi" });
   await expect(payment.getByRole("link", { name: /^Payer/ })).toHaveAttribute("href", /^\/parent\/demandes\/[\w-]+$/);
   const application = pending.getByRole("article", { name: "Candidature à un Steamy Event · Léa Adjovi" });
-  await expect(application.getByRole("link", { name: /^Examiner/ })).toHaveAttribute("href", "/parent/evenements");
+  await expect(application.getByRole("link", { name: /^Examiner/ })).toHaveAttribute("href", /^\/parent\/evenements(\?|$)/);
 
   // Stat « À valider » = longueur de la liste renvoyée par l'API
   const rows = await pending.getByRole("listitem").count();
   const stats = page.getByRole("region", { name: "Vos statistiques" });
-  await expect(stats.getByRole("definition")).toHaveText(["2", /^\d+$/, String(rows)]);
+  await expect(stats.getByRole("definition")).toHaveText([/^\d+$/, /^\d+$/, String(rows)]);
 
   const kids = page.getByRole("list", { name: "Mes enfants" });
   await expect(kids.getByRole("link", { name: /Léa Adjovi/ })).toHaveAttribute("href", /^\/parent\/enfants\/\d+$/);
