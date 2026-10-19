@@ -477,7 +477,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > Décisions : `POST …/payments/` `{country, network, msisdn}` : parent payeur (apprenant → `PARENT_APPROVAL_REQUIRED`,
   > autre parent → 404) ou invité avec `X-Guest-Token` (CSRF) ; throttle `payments` (20/h) ; réseau = `PaymentNetwork`
   > activé et actif du pays (sinon `NETWORK_UNAVAILABLE` sur `network`), numéro du même pays (sinon `PHONE_INVALID`
-  > sur `msisdn`) ; commande payée → 409 `ORDER_ALREADY_PAID`, annulée ou échue → 410 `ORDER_EXPIRED`. Réponse 201
+  > sur `msisdn`) ; commande payée → 409 `ORDER_ALREADY_PAID`, paiement déjà en cours → 409 `PAYMENT_IN_PROGRESS`, annulée ou échue → 410 `ORDER_EXPIRED`. Réponse 201
   > avec le paiement `pending`, ou `failed` si le prestataire refuse (`failureCode` `PROVIDER_REFUSED` /
   > `PROVIDER_UNAVAILABLE`) ; plusieurs essais possibles. `GET payments/payments/{id}/` : payeur ou invité (jeton),
   > jamais le bénéficiaire (C12) ; numéro masqué (`msisdnMasked`). La commande est verrouillée pendant l'initiation
