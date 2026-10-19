@@ -102,8 +102,15 @@ describe("NotificationList (WD04)", () => {
     expect(push).not.toHaveBeenCalled();
     expect(notifyNotificationsChanged).not.toHaveBeenCalled();
     expect(screen.getByRole("status")).toHaveTextContent("Le serveur est injoignable");
+    const main = document.createElement("main");
+    main.id = "contenu";
+    main.tabIndex = -1;
+    document.body.append(main);
     await userEvent.click(screen.getByRole("button", { name: "Fermer" }));
     expect(screen.queryByRole("status")).toBeNull();
+    // Le focus, qui était sur « Fermer », passe au contenu principal
+    expect(main).toHaveFocus();
+    main.remove();
   });
 
   it("« Tout marquer comme lu » remet le compteur du shell à 0", async () => {

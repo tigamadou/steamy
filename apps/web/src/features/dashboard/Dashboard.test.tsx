@@ -17,7 +17,6 @@ vi.mock("./StarterSuggestions", () => ({ StarterSuggestions: () => <p>suggestion
 
 const { Dashboard, coursesLabel, daysLabel } = await import("./Dashboard");
 const { StarterSuggestions } = await vi.importActual<typeof import("./StarterSuggestions")>("./StarterSuggestions");
-const { resumeAction } = await import("./ResumeCard");
 
 const respond = (status: number, data?: object) => ({ data, response: new Response(null, { status }) });
 
@@ -164,22 +163,6 @@ describe("libellés et reprise", () => {
   it("accorde jours et parcours", () => {
     expect([0, 1, 2].map(daysLabel)).toEqual(["0 jour", "1 jour", "2 jours"]);
     expect([0, 1, 3].map(coursesLabel)).toEqual(["Aucun parcours", "1 parcours", "3 parcours"]);
-  });
-
-  it("suit l'étape suivante renvoyée par l'API : mission, quiz, certification ou parcours", () => {
-    const next = enrollment().next;
-    expect(resumeAction({ ...next, type: "quiz", id: 7 })).toEqual({
-      href: "/apprenant/parcours/robot-bluetooth/quiz/7",
-      label: "Passer le quiz",
-    });
-    expect(resumeAction({ ...next, type: "certification", id: null })).toEqual({
-      href: "/apprenant/parcours/robot-bluetooth/certification",
-      label: "Voir ma certification",
-    });
-    expect(resumeAction({ ...next, id: null })).toEqual({
-      href: "/apprenant/parcours/robot-bluetooth",
-      label: "Voir mon parcours",
-    });
   });
 
   it("carte de reprise d'un quiz, sans projet ni niveau en cours", async () => {

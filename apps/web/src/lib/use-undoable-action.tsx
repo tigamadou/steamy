@@ -53,6 +53,16 @@ export function useUndoableAction({ undoLabel = "Annuler" }: { undoLabel?: strin
     setToast({ ...state, id: nextId.current });
   }, []);
 
+  /**
+   * Ferme le toast. S'il avait le focus, celui-ci passe au contenu principal (`#contenu`) au lieu de retomber sur
+   * `body` (WCAG 2.4.3).
+   */
+  const dismiss = useCallback(() => {
+    const hadFocus = document.activeElement?.closest("[data-toast]") != null;
+    setToast(null);
+    if (hadFocus) document.getElementById("contenu")?.focus();
+  }, []);
+
   /** Toast sans annulation (confirmation ou erreur). */
   const notify = useCallback((title: string, tone: ToastTone = "success") => show({ title, tone }), [show]);
 
@@ -106,7 +116,7 @@ export function useUndoableAction({ undoLabel = "Annuler" }: { undoLabel?: strin
       key={toast.id}
       tone={toast.tone}
       title={toast.title}
-      onClose={() => setToast(null)}
+      onClose={dismiss}
       onHoldChange={setHeld}
       action={
         toast.onUndo && (

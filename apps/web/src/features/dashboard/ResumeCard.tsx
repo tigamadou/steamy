@@ -1,18 +1,9 @@
 import type { Schemas } from "@steamy/api-client";
 
 import { Button, Mascot, ProgressBar } from "@/components/ds";
-import { routes } from "@/lib/routes";
+import { nextStepHref, nextStepLabel } from "@/features/learning/next-step";
 
 type Enrollment = Schemas["Enrollment"];
-
-/** Cible et libellé du bouton de reprise, d'après l'étape suivante renvoyée par l'API (rien n'est déduit ici). */
-export function resumeAction(next: Schemas["NextStep"]): { href: string; label: string } {
-  const l = routes.learner;
-  if (next.type === "certification") return { href: l.certification(next.courseSlug), label: "Voir ma certification" };
-  if (next.id === null) return { href: l.course(next.courseSlug), label: "Voir mon parcours" };
-  if (next.type === "quiz") return { href: l.quiz(next.courseSlug, next.id), label: "Passer le quiz" };
-  return { href: l.mission(next.courseSlug, next.id), label: "Continuer la mission" };
-}
 
 /**
  * Carte de reprise de WD01 (design/screens-dashboard-web.jsx, `.dash-hero`) : parcours en cours le plus récent,
@@ -22,7 +13,6 @@ export function resumeAction(next: Schemas["NextStep"]): { href: string; label: 
 export function ResumeCard({ enrollment }: { enrollment: Enrollment }) {
   const { course, currentProject, currentLevel, progressPct, next } = enrollment;
   const kicker = [currentProject?.title, currentLevel?.title].filter(Boolean).join(" · ");
-  const action = resumeAction(next);
   return (
     <section
       aria-labelledby="reprise-titre"
@@ -49,8 +39,8 @@ export function ResumeCard({ enrollment }: { enrollment: Enrollment }) {
           </span>
         </div>
         <div className="mt-2">
-          <Button href={action.href} variant="amber" size="lg" icon="play">
-            {action.label}
+          <Button href={nextStepHref(next)} variant="amber" size="lg" icon="play">
+            {nextStepLabel(next)}
           </Button>
         </div>
       </div>
