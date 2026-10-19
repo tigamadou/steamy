@@ -16,11 +16,17 @@ import { LockedContentState } from "./LockedContentState";
 // WJ01 · Projet : objectifs, prérequis, matériel, niveaux, progression et récompenses, lus dans l'API.
 export async function ProjectView({ slug, projectId }: { slug: string; projectId: number }) {
   const api = await getServerApi();
-  const content = readContent(await api.GET("/api/learning/projects/{id}/", { params: { path: { id: projectId } } }));
+  const [projectResult, treeResult] = await Promise.all([
+    api.GET("/api/learning/projects/{id}/", { params: { path: { id: projectId } } }),
+    api.GET("/api/learning/enrollments/{course_slug}/tree/", { params: { path: { course_slug: slug } } }),
+  ]);
+  const content = readContent(projectResult);
   if (!content.ok) return <LockedContentState code={content.code} courseSlug={slug} />;
   const project = content.data;
   const course = project.course;
-  const current = project.levels.find((level) => level.state === "available");
+  // Niveau en cours : celui de l'étape suivante renvoyée par l'API (`next`), jamais déduit des états
+  const next = treeResult.data?.next;
+  const current = next?.projectId === project.id ? project.levels.find((level) => level.id === next.levelId) : undefined;
   return (
     <div className="flex flex-col gap-5">
       <Breadcrumb
