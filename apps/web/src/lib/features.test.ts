@@ -7,9 +7,6 @@ describe("features", () => {
     expect(features).toEqual({
       unlock: false,
       orders: false,
-      deliveryAddress: false,
-      parentInfo: false,
-      accountDeletion: false,
     });
   });
 });
