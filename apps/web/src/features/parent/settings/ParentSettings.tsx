@@ -1,4 +1,6 @@
 import { Section, SettingsRow, SkeletonBlock } from "@/components/ds";
+import { getDeliveryAddress } from "@/features/account/api";
+import { DeliveryForm } from "@/features/account/DeliveryForm";
 import { PreferencesForm } from "@/features/notifications/PreferencesForm";
 import { getServerApi } from "@/lib/api";
 import { readOrNull } from "@/lib/api-read";
@@ -8,6 +10,7 @@ import { routes, type LegalDoc } from "@/lib/routes";
 
 import { ConnectionCard } from "./ConnectionCard";
 import { DangerZone } from "./DangerZone";
+import { MobileMoneyCard } from "./MobileMoneyCard";
 import { ProfileCard } from "./ProfileCard";
 
 /** Libellés des liens « Légal » de WPD08 vers WL09. */
@@ -18,17 +21,18 @@ const LEGAL_LINKS: Array<[LegalDoc, string]> = [
 ];
 
 /**
- * WPD08 · paramètres du parent : profil, connexion, notifications (D7), légal et zone sensible (D54). Données lues
- * côté serveur à chaque requête.
+ * WPD08 · paramètres du parent : profil, connexion, livraison et Mobile Money (D38, D76), notifications (D7), légal
+ * et zone sensible (D54). Données lues côté serveur à chaque requête.
  */
 export async function ParentSettings() {
   const api = await getServerApi();
-  const [me, profile, preferences, children, countries] = await Promise.all([
+  const [me, profile, preferences, children, countries, address] = await Promise.all([
     getCurrentUser(),
     api.GET("/api/accounts/me/parent-profile/"),
     api.GET("/api/notifications/preferences/"),
     api.GET("/api/accounts/children/", { params: { query: { pageSize: 1 } } }),
     getCountries(),
+    getDeliveryAddress(),
   ]);
   const parent = readOrNull(profile);
   const prefs = readOrNull(preferences);
@@ -48,6 +52,17 @@ export async function ParentSettings() {
           }}
         />
         <ConnectionCard phone={me.phone} countries={countries} />
+      </Section>
+
+      <Section title="Livraison et paiement">
+        <h3 className="m-0 text-sm font-black text-ink-900">Adresse de livraison par défaut</h3>
+        <DeliveryForm
+          address={address}
+          defaultCountry={parent.locality?.country ?? ""}
+          recipientName={`${me.firstName} ${me.lastName}`.trim()}
+          register="vous"
+        />
+        <MobileMoneyCard value={parent.mobileMoney} countries={countries} />
       </Section>
 
       <section id="notifications" aria-labelledby="notifications-titre" className="flex scroll-mt-20 flex-col gap-2">

@@ -15,6 +15,9 @@ vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
 vi.mock("@/lib/auth/session", () => ({ getCurrentUser: () => getCurrentUser() }));
 vi.mock("@/lib/referentials", () => ({ getCountries: async () => COUNTRIES }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
+vi.mock("@/features/account/api", () => ({ getDeliveryAddress: async () => null }));
+vi.mock("@/features/account/DeliveryForm", () => ({ DeliveryForm: () => <p>Adresse de livraison</p> }));
+vi.mock("./MobileMoneyCard", () => ({ MobileMoneyCard: () => <p>Mobile Money</p> }));
 
 const COUNTRIES = [
   { code: "BJ", label: "Bénin", dialCode: "229", phoneFormat: "XX XX XX XX XX", phoneRegex: "^01[0-9]{8}$" },
@@ -246,11 +249,15 @@ describe("DangerZone (WPD08, D54)", () => {
     await user.click(screen.getByRole("button", { name: "Annuler" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(router.replace).not.toHaveBeenCalled();
+    // Échap ferme aussi la modale
+    await user.click(screen.getByRole("button", { name: "Supprimer" }));
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });
 
 describe("ParentSettings (WPD08)", () => {
-  const PROFILE = { email: "marie.adjovi@steamy.test", profession: "Infirmière" };
+  const PROFILE = { email: "marie.adjovi@steamy.test", profession: "Infirmière", locality: null, mobileMoney: null };
   const PREFS = { emailAddress: "marie.adjovi@steamy.test", categories: [] };
 
   function routeApi(children: ReturnType<typeof respond>) {
@@ -266,7 +273,7 @@ describe("ParentSettings (WPD08)", () => {
     routeApi(respond(200, { data: { count: 2, results: [] } }));
     const { container } = render((await ParentSettings()) as ReactElement);
     expect(GET).toHaveBeenCalledWith("/api/accounts/children/", { params: { query: { pageSize: 1 } } });
-    for (const name of ["Profil", "Notifications", "Légal", "Zone sensible"]) {
+    for (const name of ["Profil", "Livraison et paiement", "Notifications", "Légal", "Zone sensible"]) {
       expect(screen.getByRole("heading", { level: 2, name })).toBeInTheDocument();
     }
     expect(screen.getByRole("link", { name: "Mentions légales" })).toHaveAttribute("href", "/legal/mentions-legales");
@@ -276,6 +283,7 @@ describe("ParentSettings (WPD08)", () => {
 
   it("sans compte d'enfants dans la réponse, la suppression reste possible", async () => {
     getCurrentUser.mockResolvedValue({ firstName: "Afi", lastName: "Test", phone: null });
+    PROFILE.locality = { country: "BJ" } as never;
     routeApi(respond(200, { data: { results: [] } }));
     render((await ParentSettings()) as ReactElement);
     expect(screen.getByRole("button", { name: "Supprimer" })).toBeEnabled();
