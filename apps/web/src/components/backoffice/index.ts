@@ -19,3 +19,9 @@ export { ImpactDashboard, KpiList, MAIN_KPIS, SOURCE_LEGEND, targetText } from "
 export { type ImpactDashboardProps, type KpiDashboard, type KpiSummary } from "./ImpactDashboard";
 export { KpiDetail, PERIODICITY, SOURCE_TEXT, type KpiDetailData, type KpiDetailProps } from "./KpiDetail";
 export { PeriodSwitch } from "./PeriodSwitch";
+export { CompletenessBar, completeness } from "./CompletenessBar";
+export { ImpactReport, type ImpactReportData } from "./ImpactReport";
+export { ENTRY_CARDS, ManualEntryForm, toField, toValue, type ManualEntryFormProps } from "./ManualEntryForm";
+export { SubmitReport, type SubmitReportProps } from "./SubmitReport";
+export { ScrollRegion, type ScrollRegionProps } from "./ScrollRegion";
+export { ExportReport, MAX_POLLS, POLL_MS, type ExportReportProps } from "./ExportReport";

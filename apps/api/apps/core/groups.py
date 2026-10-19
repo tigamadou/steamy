@@ -80,6 +80,11 @@ PERMISSIONS: dict[str, dict[str, tuple[str, ...]]] = {
         SUPPORT: ("v", "resend", "flag_dispute"),
     },
     "accounts.publicprofilereview": {SUPER_ADMIN: ("vc",), SUPPORT: ("vc",)},
+    # Suppressions programmées (D40, D54) : suivi, annulation par le support
+    "accounts.deletionrequest": {
+        SUPER_ADMIN: ("v", "cancel_deletion"),
+        SUPPORT: ("v", "cancel_deletion"),
+    },
     # Contenu (WAD09)
     **{
         f"catalog.{model}": {SUPER_ADMIN: ("vacd",), CONTENT: ("vacd",), SUPPORT: ("v",)}

@@ -31,6 +31,18 @@ export async function getKits({ category, page = 1 }: { category?: string; page?
   }
 }
 
+/** Détail d'un kit (prix et disponibilité lus dans la boutique, D37) ; `null` s'il n'est plus en vente. */
+export async function getKit(slug: string): Promise<Schemas["KitDetail"] | null> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("shop");
+  const result = await getPublicApi().GET("/api/shop/kits/{slug}/", { params: { path: { slug } } });
+  if (result.response.status === 404) {
+    return null;
+  }
+  return unwrap(result);
+}
+
 /** Carte vitrine d'un kit : prix serveur, disponibilité booléenne (le stock exact reste interne). */
 export function toKitCard(kit: Schemas["Kit"]): KitCardData {
   return {

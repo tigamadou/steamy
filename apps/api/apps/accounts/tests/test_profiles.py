@@ -88,6 +88,16 @@ def test_learner_profile_steps(learner, cotonou):
     assert body["profileStep"] is None
     assert body["avatar"]["code"] == "hibou"
     assert client.get(ME).json()["profileStep"] is None
+    # WD13, WD17 : relecture du profil complet
+    body = client.get(LEARNER_URL).json()
+    assert body["avatar"]["code"] == "hibou" and body["locality"]["city"] == "Cotonou"
+    assert body["email"] == "kofi@exemple.bj" and body["profileStep"] is None
+
+
+def test_learner_profile_is_read_by_its_owner_only(learner):
+    assert APIClient().get(LEARNER_URL).status_code == 401
+    assert client_for(ParentFactory()).get(LEARNER_URL).status_code == 403
+    assert client_for(learner).get(LEARNER_URL).json()["profileStep"] == "learner-info"
 
 
 def test_birth_date_must_match_the_declared_age(learner):
