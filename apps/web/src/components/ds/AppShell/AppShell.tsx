@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { flushSync } from "react-dom";
 
 import { cx } from "@/lib/cx";
 
@@ -62,23 +63,62 @@ export function AppShell({
   const menuButton = useRef<HTMLButtonElement>(null);
   const drawer = useRef<HTMLElement>(null);
   const close = () => setOpen(false);
+  // Ferme le tiroir et rend le focus au bouton de menu : la fermeture est appliquée tout de suite, car le bouton
+  // est dans la partie `inert` de la page tant que le tiroir est ouvert (un focus y serait ignoré).
+  const closeToMenu = () => {
+    flushSync(() => setOpen(false));
+    menuButton.current?.focus();
+  };
 
-  // Tiroir : focus sur sa première entrée à l'ouverture, Échap le ferme et rend le focus au bouton de menu.
+  // Tiroir (sous 768 px, seul cas où il s'ouvre) : boîte modale. Focus sur sa première entrée, Tab et Maj+Tab
+  // restent dans le tiroir, Échap le ferme et rend le focus au bouton de menu ; le reste de la page est inerte.
   useEffect(() => {
     if (!open) return;
-    drawer.current?.querySelector<HTMLElement>("a, button")?.focus();
+    const box = drawer.current as HTMLElement;
+    box.querySelector<HTMLElement>("a, button")?.focus();
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      menuButton.current?.focus();
+      if (event.key === "Escape") {
+        closeToMenu();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = Array.from(box.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), input"));
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // Passage à 768 px ou plus (rotation, fenêtre agrandie) : le tiroir n'a plus lieu d'être, il se ferme.
+  useEffect(() => {
+    if (!open) return;
+    const wide = window.matchMedia("(min-width: 768px)");
+    const onChange = () => {
+      if (wide.matches) setOpen(false);
+    };
+    onChange();
+    wide.addEventListener("change", onChange);
+    return () => wide.removeEventListener("change", onChange);
+  }, [open]);
+
+  // Déconnexion depuis le tiroir : il se ferme et le focus passe au bouton de menu, que la modale WD16 lui rendra.
+  const requestLogout = () => {
+    if (open) closeToMenu();
+    onLogout();
+  };
+
   return (
     <div className="flex min-h-dvh bg-bg font-sans text-ink-900">
       <a
+        inert={open || undefined}
         href="#contenu"
         className="sr-only z-50 rounded-md bg-primary-600 px-4 py-3 font-extrabold text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >
@@ -88,6 +128,9 @@ export function AppShell({
       <aside
         ref={drawer}
         id={drawerId}
+        role={open ? "dialog" : undefined}
+        aria-modal={open || undefined}
+        aria-label={open ? "Menu" : undefined}
         className={cx(
           "flex w-62 shrink-0 flex-col border-r border-ink-100 bg-surface px-4 py-6",
           "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40 max-md:overflow-y-auto max-md:transition-transform max-md:duration-200 motion-reduce:transition-none",
@@ -105,10 +148,7 @@ export function AppShell({
           </Link>
           <button
             type="button"
-            onClick={() => {
-              close();
-              menuButton.current?.focus();
-            }}
+            onClick={closeToMenu}
             className="flex size-10 cursor-pointer items-center justify-center rounded-md text-ink-700 hover:bg-ink-100 focus-visible:outline-3 focus-visible:outline-primary-500 md:hidden"
           >
             <Icon name="x" size={20} title="Fermer le menu" />
@@ -131,10 +171,7 @@ export function AppShell({
         </div>
         <button
           type="button"
-          onClick={() => {
-            close();
-            onLogout();
-          }}
+          onClick={requestLogout}
           className="flex cursor-pointer items-center justify-between gap-2 rounded-[10px] px-2.5 py-2 text-xs font-bold text-ink-600 hover:bg-ink-100 hover:text-ink-700 focus-visible:outline-3 focus-visible:outline-primary-500"
         >
           Déconnexion
@@ -142,7 +179,7 @@ export function AppShell({
         </button>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div inert={open || undefined} className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-ink-100 bg-surface px-4 md:gap-6 md:px-7">
           <div className="flex min-w-0 items-center gap-2">
             <button

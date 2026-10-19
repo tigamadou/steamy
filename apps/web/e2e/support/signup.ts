@@ -1,6 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 
-import { uniqueSuffix } from "./api";
+import { apiSession, decideConsent, uniquePhone, uniqueSuffix } from "./api";
+import { DEMO_PASSWORD } from "./demo";
 import { extractCode, extractLink, waitForSms } from "./mailpit";
 
 // Étapes de l'inscription de l'apprenant rejouées par plusieurs parcours (2.3 à 2.8)
@@ -61,6 +62,37 @@ export function birthDateFor(age: number): string {
   date.setFullYear(date.getFullYear() - age);
   date.setMonth(date.getMonth() - 2);
   return date.toISOString().slice(0, 10);
+}
+
+/**
+ * Apprenant neuf au profil complet, créé par l'API (W03-W14) : inscription, accord d'un parent neuf, mot de passe,
+ * puis les quatre étapes du profil. Pour les parcours qui modifient un compte (profil, mot de passe) sans toucher
+ * aux comptes partagés du jeu de démo.
+ */
+export async function createLearner({
+  firstName = "Kofi",
+  password = DEMO_PASSWORD,
+  age = 14,
+}: { firstName?: string; password?: string; age?: number } = {}): Promise<{ username: string; password: string }> {
+  const username = `kofi.${uniqueSuffix()}`;
+  const phone = uniquePhone();
+  const { post, patch, get, api } = await apiSession();
+  await post("/api/auth/learner-signup/", { firstName, lastName: "Test", username, age, privacyAccepted: true });
+  const [relationship] = (await get("/api/referentials/relationships/")) as { code: string }[];
+  const since = new Date();
+  await post("/api/accounts/consent-requests/", { parentPhone: phone, relationship: relationship.code });
+  await decideConsent(extractLink(await waitForSms(phone, { since }), "/consentement/"), phone, { accept: true });
+  await post("/api/auth/learner-signup/password/", { password });
+  const [locality] = (await get("/api/referentials/localities/?country=BJ")) as { id: number }[];
+  const [grade] = (await get("/api/referentials/school-grades/")) as { code: string }[];
+  const goals = (await get("/api/referentials/goals/")) as { code: string }[];
+  const [avatar] = (await get("/api/referentials/avatars/")) as { code: string }[];
+  await patch("/api/accounts/me/learner-profile/", { birthDate: birthDateFor(age), locality: locality.id });
+  await patch("/api/accounts/me/learner-profile/", { schoolGrade: grade.code });
+  await patch("/api/accounts/me/learner-profile/", { goals: goals.slice(0, 2).map((goal) => goal.code) });
+  await patch("/api/accounts/me/learner-profile/", { avatar: avatar.code });
+  await api.dispose();
+  return { username, password };
 }
 
 /** W10 → W15 : mot de passe puis profil complet (âge de W05 : 14 ans avec `startLearnerSignup`). */

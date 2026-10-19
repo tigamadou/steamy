@@ -24,13 +24,23 @@ export type ToastProps = {
   /** Affiche le bouton de fermeture. */
   onClose?: () => void;
   closeLabel?: string;
+  /** Survol ou focus dans le toast (`true`), puis sortie (`false`) : permet de suspendre sa disparition (WCAG 2.2.1). */
+  onHoldChange?: (held: boolean) => void;
   className?: string;
 };
 
 const subscribe = () => () => {};
 
 // Notification éphémère, rendue dans un portail en `position: fixed`, annoncée poliment (`aria-live`).
-export function Toast({ tone = "success", title, action, onClose, closeLabel = "Fermer", className }: ToastProps) {
+export function Toast({
+  tone = "success",
+  title,
+  action,
+  onClose,
+  closeLabel = "Fermer",
+  className,
+  onHoldChange,
+}: ToastProps) {
   // Le portail n'existe qu'une fois dans le navigateur (pas de `document` au rendu serveur)
   const mounted = useSyncExternalStore(
     subscribe,
@@ -43,6 +53,7 @@ export function Toast({ tone = "success", title, action, onClose, closeLabel = "
   return createPortal(
     <div
       role="status"
+      data-toast
       aria-live="polite"
       className="fixed inset-x-4 bottom-4 z-50 flex justify-center sm:inset-x-auto sm:right-6 sm:bottom-6"
     >
@@ -51,6 +62,13 @@ export function Toast({ tone = "success", title, action, onClose, closeLabel = "
           "flex w-full max-w-sm items-center gap-3 rounded-lg bg-ink-900 px-4.5 py-3.5 font-bold text-white shadow-modal",
           className,
         )}
+        onPointerEnter={() => onHoldChange?.(true)}
+        onPointerLeave={() => onHoldChange?.(false)}
+        onFocus={() => onHoldChange?.(true)}
+        onBlur={(event) => {
+          // Le focus passe d'un bouton du toast à l'autre : toujours tenu
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) onHoldChange?.(false);
+        }}
       >
         <span aria-hidden className={cx("flex size-7 shrink-0 items-center justify-center rounded-pill", toneClasses)}>
           <Icon name={icon} size={16} strokeWidth={3} />

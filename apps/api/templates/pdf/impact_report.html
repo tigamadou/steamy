@@ -1,0 +1,45 @@
+{% extends "pdf/base.html" %}
+{% block title %}Rapport d'impact {{ label }}{% endblock %}
+{% block page %}@page { size: A4 landscape; margin: 14mm; }{% endblock %}
+{% block style %}
+  header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8mm; }
+  .brand { font-size: 18pt; }
+  h1 { font-size: 16pt; margin: 0 0 1mm; }
+  .meta { font-size: 9.5pt; color: #4A4670; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+  th { text-align: left; border-bottom: 2px solid #1F1B3A; padding: 1.6mm 1mm; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.04em; }
+  td { border-bottom: 1px solid #E4E2F0; padding: 1.6mm 1mm; vertical-align: top; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  td.date { white-space: nowrap; }
+  tr { page-break-inside: avoid; }
+{% endblock %}
+{% block content %}
+<header>
+  <div>
+    <div class="brand">STEAMY</div>
+    <h1>Rapport d'impact trimestriel · {{ label }}</h1>
+    <div class="meta">Du {{ start }} au {{ end }} · {{ status }}{% if submitted_by %} par {{ submitted_by }}{% endif %}</div>
+  </div>
+  <div class="meta">{{ entered }} / {{ total }} indicateurs manuels renseignés</div>
+</header>
+<table>
+  <thead>
+    <tr>
+      {% for header in headers %}<th{% if forloop.counter == 4 %} class="num"{% endif %}>{{ header }}</th>{% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for line in lines %}
+    <tr>
+      <td>{{ line.0 }}</td>
+      <td class="date">{{ line.1 }}</td>
+      <td class="date">{{ line.2 }}</td>
+      <td class="num">{{ line.3|default:"—" }}</td>
+      <td>{{ line.4 }}</td>
+      <td>{{ line.5 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+{% block footer %}Rapport d'impact {{ label }}{% endblock %}

@@ -49,10 +49,19 @@ export const routes = {
   learner: {
     home: "/apprenant",
     notifications: "/apprenant/notifications",
+    /** WD04 : onglet « Non lues » et page de la liste dans l'URL (la page 1 et « Toutes » n'y figurent pas). */
+    notificationList: (tab: "toutes" | "non-lues" = "toutes", page = 1) => {
+      const query = new URLSearchParams();
+      if (tab === "non-lues") query.set("onglet", tab);
+      if (page > 1) query.set("page", String(page));
+      const search = query.toString();
+      return search ? `/apprenant/notifications?${search}` : "/apprenant/notifications";
+    },
     notificationPreferences: "/apprenant/notifications/preferences",
     attempts: "/apprenant/quiz",
     attempt: (id: number | string) => `/apprenant/quiz/${id}`,
     help: "/apprenant/aide",
+    events: "/apprenant/evenements",
     courses: "/apprenant/parcours",
     course: (slug: string) => `/apprenant/parcours/${slug}`,
     project: (slug: string, id: number | string) => `/apprenant/parcours/${slug}/projets/${id}`,
@@ -65,9 +74,15 @@ export const routes = {
     projectBadge: (slug: string, id: number | string) => `/apprenant/parcours/${slug}/projets/${id}/badge`,
     certification: (slug: string) => `/apprenant/parcours/${slug}/certification`,
     catalog: "/apprenant/catalogue",
+    /** Catalogue filtré sur les parcours gratuits (WD02, W15, D27). */
+    freeCatalog: "/apprenant/catalogue?prix=gratuit",
     /** Catalogue filtré par une recherche (`q`, recherche du header). */
     catalogSearch: (q: string) => `/apprenant/catalogue?q=${encodeURIComponent(q)}`,
     catalogCourse: (slug: string) => `/apprenant/catalogue/${slug}`,
+    /** WA01 · saisie du Kit Code (3.6, derrière le drapeau `unlock`). */
+    kitCode: (slug: string) => `/apprenant/catalogue/${slug}/kit-code`,
+    /** Demande de déblocage au parent (3.6, derrière le drapeau `unlock`), qui mène ensuite à WA02. */
+    parentRequest: (slug: string) => `/apprenant/catalogue/${slug}/demande`,
     wishlist: "/apprenant/souhaits",
     profile: "/apprenant/profil",
     editProfile: "/apprenant/profil/modifier",
@@ -83,6 +98,9 @@ export const routes = {
     home: "/backoffice",
     impact: "/backoffice/impact",
     kpi: (code: string) => `/backoffice/impact/indicateurs/${encodeURIComponent(code)}`,
+    reports: "/backoffice/impact/rapports",
+    report: (period: string) => `/backoffice/impact/rapports/${encodeURIComponent(period)}`,
+    reportEntry: (period: string) => `/backoffice/impact/rapports/${encodeURIComponent(period)}/saisie`,
     accessDenied: "/backoffice/acces-refuse",
   },
 } as const;
