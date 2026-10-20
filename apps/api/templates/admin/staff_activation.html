@@ -1,0 +1,34 @@
+{% extends "admin/login.html" %}
+{% comment %}
+  WAD13 · Lien d'activation d'un membre invité : choix du mot de passe, puis enrôlement du TOTP (D72). Lien périmé,
+  déjà utilisé ou inconnu : renvoi vers la connexion, sans dire si le compte existe.
+{% endcomment %}
+
+{% block content %}
+<div id="content-main" class="steamy-login__card">
+  <p class="steamy-login__eyebrow">Espace administration</p>
+  <h1 class="steamy-login__title">Activer votre accès</h1>
+
+  {% if form %}
+    {% if form.errors %}<p class="errornote" role="alert">Le mot de passe n'a pas été accepté.</p>{% endif %}
+    <p>Choisissez le mot de passe du compte <strong>{{ email }}</strong>. Vous configurerez ensuite votre application
+      d'authentification.</p>
+    <form method="post" id="activation-form" novalidate>{% csrf_token %}
+      {% for field in form %}
+        <div class="form-row">
+          {{ field.errors }}
+          {{ field.label_tag }} {{ field }}
+          {% if field.help_text %}<div class="help" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <div class="submit-row">
+        <input type="submit" value="Enregistrer et continuer">
+      </div>
+    </form>
+  {% else %}
+    <p class="errornote" role="alert">Ce lien d'activation n'est plus valable : il a expiré ou a déjà servi.</p>
+    <p>Demandez un nouveau lien à un Super-admin, ou <a href="{% url 'admin:login' %}">connectez-vous</a> si votre
+      accès est déjà activé.</p>
+  {% endif %}
+</div>
+{% endblock %}

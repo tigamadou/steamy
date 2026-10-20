@@ -7,6 +7,8 @@ Connexion du personnel à l'admin Django (WAD15, D72) : email, mot de passe et c
 - Session du personnel limitée à 8 h (C20) ; elle tombe si le compte est désactivé ou le TOTP réinitialisé
   (`User._get_session_auth_hash`).
 - `next` : chemins de l'admin, ou `WEB_URL/backoffice` (pages Next.js du back-office), aucun autre hôte.
+- Invitation d'un membre (WAD13) : compte sans mot de passe utilisable, lien d'activation par email ; le membre y
+  choisit son mot de passe, puis enrôle son TOTP avant toute page de l'admin.
 """
 
 import hashlib
@@ -19,12 +21,17 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.forms import AdminAuthenticationForm
 from django.contrib.auth import login as auth_login
+from django.contrib.auth.forms import SetPasswordForm
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from django.db import transaction
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from django_otp.qr import write_qrcode_image
 from rest_framework.throttling import SimpleRateThrottle
@@ -312,3 +319,97 @@ def totp_enrollment(site, request):
     }
     request.current_app = site.name
     return TemplateResponse(request, "admin/totp_enrollment.html", context)
+
+
+# --- Invitation d'un membre (WAD13) -------------------------------------------------------------------------------
+
+
+class ActivationTokenGenerator(PasswordResetTokenGenerator):
+    """Jeton du lien d'activation : périme avec `PASSWORD_RESET_TIMEOUT` et dès que le mot de passe change."""
+
+    key_salt = "apps.core.staff_auth.ActivationTokenGenerator"
+
+
+activation_token = ActivationTokenGenerator()
+
+ACTIVATION_SUBJECT = "Votre accès au back-office Steamy"
+ACTIVATION_BODY = """Bonjour{name},
+
+Un accès au back-office Steamy vient de vous être ouvert. Choisissez votre mot de passe avec ce lien, valable
+{days} jours :
+
+{url}
+
+Vous configurerez ensuite votre application d'authentification (double authentification obligatoire).
+
+L'équipe Steamy
+"""
+
+
+def awaiting_activation(user) -> bool:
+    """Membre invité qui n'a pas encore choisi son mot de passe."""
+    return user.is_staff and user.is_active and not user.has_usable_password()
+
+
+def send_activation(member: User, request) -> None:
+    """
+    (Re)envoie le lien d'activation : un nouveau mot de passe inutilisable invalide le lien précédent.
+    Un membre déjà activé n'en reçoit pas (sa réinitialisation passe par le TOTP et l'équipe).
+    """
+    if not awaiting_activation(member):
+        raise ValueError(f"{member} : compte déjà activé.")
+    member.set_unusable_password()
+    member.save(update_fields=["password", "updated_at"])
+    path = reverse(
+        "admin:staff_activation",
+        args=[urlsafe_base64_encode(force_bytes(member.pk)), activation_token.make_token(member)],
+    )
+    body = ACTIVATION_BODY.format(
+        name=f" {member.first_name}" if member.first_name else "",
+        days=settings.PASSWORD_RESET_TIMEOUT // 86400,
+        url=request.build_absolute_uri(path),
+    )
+    send_mail(ACTIVATION_SUBJECT, body, settings.DEFAULT_FROM_EMAIL, [member.email])
+    audit("staff.invitation_sent", request=request, target=member, data={"email": member.email})
+
+
+def activation_user(uidb64: str, token: str) -> User | None:
+    try:
+        pk = int(urlsafe_base64_decode(uidb64).decode())
+    except (ValueError, UnicodeDecodeError):
+        return None
+    user = User.objects.filter(pk=pk).first()
+    if (
+        user is None
+        or not awaiting_activation(user)
+        or not activation_token.check_token(user, token)
+    ):
+        return None
+    return user
+
+
+def staff_activation(site, request, uidb64, token):
+    """
+    Lien d'activation : le membre choisit son mot de passe (mêmes règles que partout), puis passe directement à
+    l'enrôlement du TOTP ; la session vérifiée ne s'ouvre qu'au premier code confirmé.
+    """
+    user = activation_user(uidb64, token)
+    form = SetPasswordForm(user, request.POST or None) if user else None
+    if user and request.method == "POST" and form.is_valid():
+        form.save()
+        audit("staff.activated", actor=user, request=request)
+        request.session[ENROLLMENT_SESSION_KEY] = {
+            "user": user.pk,
+            "started": time.time(),
+            "next": "",
+        }
+        audit("staff.totp_enrollment_started", actor=user, request=request)
+        return redirect("admin:totp_enrollment")
+    context = {
+        **site.each_context(request),
+        "title": "Activer votre accès",
+        "form": form,
+        "email": user.email if user else "",
+    }
+    request.current_app = site.name
+    return TemplateResponse(request, "admin/staff_activation.html", context)

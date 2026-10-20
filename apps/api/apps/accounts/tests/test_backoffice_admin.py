@@ -425,14 +425,13 @@ def test_the_team_lists_staff_only_and_creates_staff(client):
             "email": "nouveau@steamy.test",
             "first_name": "Ama",
             "last_name": "Zinsou",
-            "password1": "Steamy2026x",
-            "password2": "Steamy2026x",
             "groups": [Group.objects.get(name=CONTENT).pk],
         },
     )
     assert response.status_code == 302, response.context["adminform"].form.errors
     created = User.objects.get(email="nouveau@steamy.test")
     assert (created.role, created.is_staff) == (None, True)
+    assert not created.has_usable_password()  # mot de passe choisi par le lien d'activation
     assert "delete_selected" not in page.context["action_form"].fields["action"].choices
 
 
