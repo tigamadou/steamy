@@ -4,7 +4,7 @@ import { json, KIT } from "@/test/api-fixtures";
 
 vi.mock("next/cache", () => ({ cacheLife: vi.fn(), cacheTag: vi.fn() }));
 
-const { getKit, getKits, KITS_PAGE_SIZE, toKitCard } = await import("./shop");
+const { getDeliveryZones, getKit, getKits, KITS_PAGE_SIZE, toKitCard } = await import("./shop");
 
 let handler: () => Response;
 let urls: string[];
@@ -48,6 +48,13 @@ describe("boutique publique", () => {
     expect(urls[0]).toBe("/api/shop/kits/steamy-bot-v1/");
     handler = () => json({ code: "NOT_FOUND", message: "Introuvable" }, 404);
     expect(await getKit("disparu")).toBeNull();
+  });
+
+  it("zones de livraison avec frais et délai", async () => {
+    const zone = { id: 1, country: "BJ", name: "Cotonou", fee: 1000, delayLabel: "24 à 48 h" };
+    handler = () => json([zone]);
+    expect(await getDeliveryZones()).toEqual([zone]);
+    expect(urls[0]).toBe("/api/shop/delivery-zones/");
   });
 
   it("carte vitrine : prix serveur et disponibilité sans stock exact", () => {

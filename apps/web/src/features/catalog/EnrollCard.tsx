@@ -159,6 +159,7 @@ export function EnrollCard({ course, progress, wished, kit }: EnrollCardProps) {
             priceLabel={formatPrice(kit.price)}
             available={kit.available}
             emoji={kit.emoji || kit.category.icon}
+            href={routes.learner.shopKit(kit.slug)}
           />
         </>
       )}

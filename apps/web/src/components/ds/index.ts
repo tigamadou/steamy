@@ -63,4 +63,8 @@ export * from "./UserTypeCard";
 export * from "./VimeoPlayer";
 export * from "./WebShell";
 export * from "./WeeklyActivityBars";
+export * from "./WKCartRow";
+export * from "./WKGallery";
 export * from "./WKKitCard";
+export * from "./WKQtyStepper";
+export * from "./WKSummaryRow";
