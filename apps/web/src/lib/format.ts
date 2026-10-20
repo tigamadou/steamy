@@ -11,6 +11,11 @@ export function formatPrice(amount: number): string {
   return `${FCFA.format(amount)} F CFA`;
 }
 
+/** Ligne de commande ou de panier : « Steamy Bot v1 × 2 », le titre seul pour une unité. */
+export function quantityLabel(title: string, quantity: number): string {
+  return quantity > 1 ? `${title} × ${quantity}` : title;
+}
+
 /** Libellés de difficulté (S2 : « difficulté », jamais « niveau »). */
 export const DIFFICULTY_LABELS: Record<Schemas["DifficultyEnum"], string> = {
   beginner: "Débutant",

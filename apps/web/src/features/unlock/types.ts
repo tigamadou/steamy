@@ -1,6 +1,6 @@
 import type { Schemas } from "@steamy/api-client";
 
-import { formatPrice } from "@/lib/format";
+import { formatPrice, quantityLabel } from "@/lib/format";
 
 /** Statuts d'une demande de paiement (`PaymentRequestStatusEnum` du schéma OpenAPI, C4). */
 export type RequestStatus = Schemas["PaymentRequestStatusEnum"];
@@ -10,7 +10,7 @@ export type PaymentRequest = Schemas["PaymentRequest"];
 /** Libellé de ce qui est demandé : le parcours, ou les kits du panier (« Steamy Bot v1 × 2, Pack Électronique »). */
 export function requestTitle(request: Pick<PaymentRequest, "course" | "items">): string {
   if (request.course) return request.course.title;
-  return request.items.map((item) => (item.quantity > 1 ? `${item.title} × ${item.quantity}` : item.title)).join(", ");
+  return request.items.map((item) => quantityLabel(item.title, item.quantity)).join(", ");
 }
 
 /** Montant demandé, calculé par le serveur (hors livraison pour un kit, C10). */

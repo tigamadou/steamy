@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { Avatar, Badge } from "@/components/ds";
 import type { PaymentRequest } from "@/features/unlock/types";
 import { formatInstant } from "@/lib/dates";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, quantityLabel } from "@/lib/format";
 
 import { STATE_BADGES, type ScreenState } from "./messages";
 
@@ -114,7 +114,7 @@ export function PaymentRequestSummary({ request, child, state, requiredKit, orde
             {order.items.map((item) => (
               <Line
                 key={item.id}
-                label={item.quantity > 1 ? `${item.title} × ${item.quantity}` : item.title}
+                label={quantityLabel(item.title, item.quantity)}
                 value={formatPrice(item.total)}
               />
             ))}
@@ -129,7 +129,7 @@ export function PaymentRequestSummary({ request, child, state, requiredKit, orde
           request.items.map((item) => (
             <Line
               key={item.kitSlug}
-              label={item.quantity > 1 ? `${item.title} × ${item.quantity}` : item.title}
+              label={quantityLabel(item.title, item.quantity)}
               value={item.quantity > 1 ? `${formatPrice(item.unitPrice)} l'unité` : formatPrice(item.unitPrice)}
             />
           ))

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { course } from "@/test/api-fixtures";
 
-import { DIFFICULTY_LABELS, formatMinutes, formatPrice, toCourseCard } from "./format";
+import { DIFFICULTY_LABELS, formatMinutes, formatPrice, quantityLabel, toCourseCard } from "./format";
 
 describe("format", () => {
   it("écrit les prix en francs CFA avec des espaces de milliers", () => {
@@ -44,5 +44,10 @@ describe("format", () => {
     expect(formatMinutes(60)).toBe("1 h");
     expect(formatMinutes(75)).toBe("1 h 15");
     expect(formatMinutes(125)).toBe("2 h 05");
+  });
+
+  it("écrit une ligne de commande avec sa quantité au-delà d'une unité", () => {
+    expect(quantityLabel("Steamy Bot v1", 2)).toBe("Steamy Bot v1 × 2");
+    expect(quantityLabel("Steamy Bot v1", 1)).toBe("Steamy Bot v1");
   });
 });

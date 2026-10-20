@@ -2,7 +2,7 @@ import type { Schemas } from "@steamy/api-client";
 
 import { Badge, Button } from "@/components/ds";
 import { formatInstant } from "@/lib/dates";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, quantityLabel } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
 import { InvoiceLink } from "./InvoiceLink";
@@ -12,7 +12,7 @@ type Order = Schemas["Order"];
 
 /** Libellé d'une commande : ses articles, tels que l'API les nomme. */
 export function orderTitle(order: Pick<Order, "items">): string {
-  return order.items.map((item) => (item.quantity > 1 ? `${item.title} × ${item.quantity}` : item.title)).join(", ");
+  return order.items.map((item) => quantityLabel(item.title, item.quantity)).join(", ");
 }
 
 /**
