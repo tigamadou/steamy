@@ -62,6 +62,13 @@ describe("CheckoutGate", () => {
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/apprenant/boutique/panier"));
     expect(screen.queryByText("contenu")).not.toBeInTheDocument();
   });
+
+  it("parent connecté : pas de tunnel invité, renvoyé vers le panier public", async () => {
+    useCart.mockReturnValue(ready(undefined, "parent"));
+    render(<CheckoutGate>{() => <p>contenu</p>}</CheckoutGate>);
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/boutique/panier"));
+    expect(screen.queryByText("contenu")).not.toBeInTheDocument();
+  });
 });
 
 describe("étapes et cadre du tunnel", () => {
