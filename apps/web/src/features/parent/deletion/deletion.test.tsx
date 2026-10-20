@@ -99,6 +99,7 @@ describe("DeleteChildForm (WPD09, initiative du parent)", () => {
 
     await user.click(screen.getByRole("button", { name: "Supprimer le compte" }));
     expect(await screen.findByRole("link", { name: "Choisissez le motif de la suppression." })).toBeInTheDocument();
+    expect(screen.getByText("Corrigez les erreurs suivantes :")).toBeInTheDocument();
     expect(POST).not.toHaveBeenCalled();
 
     POST.mockResolvedValueOnce(respond(200, childDetail()));
