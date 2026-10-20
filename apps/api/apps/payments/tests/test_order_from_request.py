@@ -107,3 +107,168 @@ def test_without_request_kind_and_items_are_required(parent):
     assert resp.json()["fields"]["kind"][0]["code"] == "REQUIRED"
     resp = client_for(parent).post(ORDERS, {"kind": "kit"}, format="json")
     assert resp.json()["fields"]["items"][0]["code"] == "REQUIRED"
+
+
+def test_the_parent_resumes_the_pending_order_of_a_request(parent, child):
+    """WPD15 : la commande en attente de la demande est proposée au parent (reprise du paiement), jamais à l'enfant."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    course = CourseFactory(paid=True, price=15000)
+    request = ask(child, {"kind": "course", "courseSlug": course.slug})
+    url = f"{REQUESTS}{request.pk}/"
+    assert client_for(parent).get(url).json()["pendingOrderReference"] is None
+    reference = (
+        client_for(parent)
+        .post(ORDERS, {"paymentRequestId": request.pk}, format="json")
+        .json()["reference"]
+    )
+    assert client_for(parent).get(url).json()["pendingOrderReference"] == reference
+    assert client_for(child).get(url).json()["pendingOrderReference"] is None
+    Order.objects.filter(reference=reference).update(
+        expires_at=timezone.now() - timedelta(minutes=1)
+    )
+    assert client_for(parent).get(url).json()["pendingOrderReference"] is None
+
+
+def kit_request(child, stock=5):
+    kit = KitFactory(price=20000, stock_quantity=stock)
+    request = ask(child, {"kind": "kit", "items": [{"kitSlug": kit.slug, "quantity": 1}]})
+    return kit, request
+
+
+def address(zone, line="Rue 12"):
+    return {
+        "zoneId": zone.pk,
+        "recipientName": "Marie Test",
+        "city": "Cotonou",
+        "addressLine": line,
+    }
+
+
+def test_two_posts_for_a_course_request_give_a_single_order(parent, child):
+    """Double clic, deux onglets : la même commande en attente est reprise, jamais une seconde."""
+    course = CourseFactory(paid=True, price=15000)
+    request = ask(child, {"kind": "course", "courseSlug": course.slug})
+    first = client_for(parent).post(ORDERS, {"paymentRequestId": request.pk}, format="json")
+    second = client_for(parent).post(ORDERS, {"paymentRequestId": request.pk}, format="json")
+    assert first.status_code == second.status_code == 201
+    assert first.json()["reference"] == second.json()["reference"]
+    assert Order.objects.filter(payment_request=request).count() == 1
+
+
+def test_two_posts_for_a_kit_request_reserve_the_stock_once(parent, child):
+    from apps.shop.models import StockReservation
+
+    kit, request = kit_request(child)
+    zone = DeliveryZoneFactory()
+    body = {"paymentRequestId": request.pk, "deliveryAddress": address(zone)}
+    refs = {
+        client_for(parent).post(ORDERS, body, format="json").json()["reference"] for _ in range(2)
+    }
+    assert len(refs) == 1
+    kit.refresh_from_db()
+    assert kit.stock_quantity == 4
+    assert StockReservation.objects.filter(kit=kit, released_at__isnull=True).count() == 1
+
+
+def test_a_new_address_cancels_the_pending_order_and_gives_its_stock_back(parent, child):
+    kit, request = kit_request(child, stock=1)
+    zone = DeliveryZoneFactory()
+    first = (
+        client_for(parent)
+        .post(
+            ORDERS,
+            {"paymentRequestId": request.pk, "deliveryAddress": address(zone)},
+            format="json",
+        )
+        .json()["reference"]
+    )
+    # Le seul kit en stock est réservé : la nouvelle adresse le reprend après l'annulation de l'ancienne commande
+    resp = client_for(parent).post(
+        ORDERS,
+        {"paymentRequestId": request.pk, "deliveryAddress": address(zone, "Rue 13")},
+        format="json",
+    )
+    assert resp.status_code == 201, resp.json()
+    assert resp.json()["reference"] != first
+    assert Order.objects.get(reference=first).status == Order.Status.CANCELLED
+    kit.refresh_from_db()
+    assert kit.stock_quantity == 0
+
+
+def test_an_expired_pending_order_is_replaced(parent, child):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    course = CourseFactory(paid=True, price=15000)
+    request = ask(child, {"kind": "course", "courseSlug": course.slug})
+    first = (
+        client_for(parent)
+        .post(ORDERS, {"paymentRequestId": request.pk}, format="json")
+        .json()["reference"]
+    )
+    Order.objects.filter(reference=first).update(expires_at=timezone.now() - timedelta(minutes=1))
+    second = (
+        client_for(parent)
+        .post(ORDERS, {"paymentRequestId": request.pk}, format="json")
+        .json()["reference"]
+    )
+    assert second != first
+    assert Order.objects.get(reference=first).status == Order.Status.CANCELLED
+
+
+def test_declining_cancels_the_pending_order_and_gives_the_stock_back(parent, child):
+    kit, request = kit_request(child)
+    zone = DeliveryZoneFactory()
+    reference = (
+        client_for(parent)
+        .post(
+            ORDERS,
+            {"paymentRequestId": request.pk, "deliveryAddress": address(zone)},
+            format="json",
+        )
+        .json()["reference"]
+    )
+    resp = client_for(parent).post(f"{REQUESTS}{request.pk}/decline/", {}, format="json")
+    assert resp.status_code == 200
+    assert resp.json()["pendingOrderReference"] is None
+    assert Order.objects.get(reference=reference).status == Order.Status.CANCELLED
+    kit.refresh_from_db()
+    assert kit.stock_quantity == 5
+    # La demande close ne se règle plus
+    resp = client_for(parent).post(
+        ORDERS, {"paymentRequestId": request.pk, "deliveryAddress": address(zone)}, format="json"
+    )
+    assert resp.json()["code"] == "PAYMENT_REQUEST_CLOSED"
+
+
+def test_a_late_payment_never_reopens_a_declined_request(parent, child):
+    from apps.payments.requests import mark_paid
+
+    course = CourseFactory(paid=True, price=15000)
+    request = ask(child, {"kind": "course", "courseSlug": course.slug})
+    order = Order.objects.get(
+        reference=client_for(parent)
+        .post(ORDERS, {"paymentRequestId": request.pk}, format="json")
+        .json()["reference"]
+    )
+    PaymentRequest.objects.filter(pk=request.pk).update(status=PaymentRequest.Status.DECLINED)
+    mark_paid(order)
+    assert PaymentRequest.objects.get(pk=request.pk).status == PaymentRequest.Status.DECLINED
+    PaymentRequest.objects.filter(pk=request.pk).update(status=PaymentRequest.Status.EXPIRED)
+    mark_paid(order)
+    assert PaymentRequest.objects.get(pk=request.pk).status == PaymentRequest.Status.PAID
+
+
+def test_the_request_list_reads_orders_without_one_query_per_request(
+    parent, child, django_assert_max_num_queries
+):
+    for _ in range(3):
+        ask(child, {"kind": "course", "courseSlug": CourseFactory(paid=True, price=9000).slug})
+    client = client_for(parent)
+    with django_assert_max_num_queries(8):
+        resp = client.get(REQUESTS)
+    assert len(resp.json()["results"]) == 3
