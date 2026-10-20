@@ -6,6 +6,7 @@ import { localityLabel } from "@/features/account/locality";
 import { SavedToast } from "@/features/account/SavedToast";
 import { quizStep } from "@/features/learning/tree";
 import { CancelDeletionButton } from "@/features/parent/deletion/CancelDeletionButton";
+import { FocusOnMount } from "@/features/parent/deletion/FocusOnMount";
 import { childMeta } from "@/features/parent/home/ChildCard";
 import { formatDate, formatInstant } from "@/lib/dates";
 import { routes, type ChildConfirmation } from "@/lib/routes";
@@ -156,7 +157,7 @@ export function ChildProfileCard({ child }: { child: Child }) {
     >
       <Avatar name={name} emoji={child.avatar?.emoji} color={avatarColor} size={88} ring decorative />
       <div>
-        <h2 id="profil-enfant" className="m-0 text-lg font-black text-ink-900">
+        <h2 id="profil-enfant" tabIndex={-1} className="m-0 text-lg font-black text-ink-900 outline-none">
           {name}
         </h2>
         {meta && <p className="m-0 text-[13px] font-semibold text-ink-600">{meta}</p>}
@@ -213,7 +214,11 @@ function DeletionZone({ child }: { child: Child }) {
             "Compte désactivé : suppression programmée."
           )}
         </p>
-        <CancelDeletionButton childId={child.id} firstName={child.firstName} />
+        <CancelDeletionButton
+          childId={child.id}
+          firstName={child.firstName}
+          redirectTo={p.child(child.id, "suppression-annulee")}
+        />
       </div>
     );
   }
@@ -232,6 +237,17 @@ function Confirmation({ child, confirmation }: { child: Child; confirmation?: Ch
   if (confirmation === "modifie") return <SavedToast title={`Le profil de ${child.firstName} est enregistré.`} />;
   if (confirmation === "supprime") {
     return <SavedToast title={`Le compte de ${child.firstName} est désactivé : la suppression reste annulable 30 jours.`} />;
+  }
+  if (confirmation === "suppression-annulee") {
+    return (
+      <>
+        <SavedToast
+          title={`La suppression est annulée : ${child.firstName} peut de nouveau se connecter.`}
+          clearParam="confirmation"
+        />
+        <FocusOnMount targetId="profil-enfant" />
+      </>
+    );
   }
   if (confirmation === "demande-refusee") {
     return <SavedToast title={`La demande de suppression est refusée : ${child.firstName} en est informé·e.`} />;
@@ -285,7 +301,8 @@ export function ChildDetailView({
 
 /** Confirmation lue dans l'URL (`?confirmation=`), ignorée si inconnue. */
 export function parseConfirmation(value: string | string[] | undefined): ChildConfirmation | undefined {
-  return value === "cree" || value === "modifie" || value === "supprime" || value === "demande-refusee" ? value : undefined;
+  const known: readonly ChildConfirmation[] = ["cree", "modifie", "supprime", "demande-refusee", "suppression-annulee"];
+  return known.find((confirmation) => confirmation === value);
 }
 
 /** WPD03 · Détail d'un enfant du parent connecté ; celui d'un autre parent → « Enfant introuvable ». */

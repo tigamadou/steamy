@@ -4,7 +4,7 @@ import type { Schemas } from "@steamy/api-client";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
-import { Button } from "@/components/ds";
+import { Button, Modal } from "@/components/ds";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { formatInstant } from "@/lib/dates";
 import { routes } from "@/lib/routes";
@@ -15,12 +15,14 @@ type Decision = "approve" | "refuse";
 
 /**
  * WPD09 · demande de suppression envoyée par l'enfant (WD15, `?demande=<id>`) : motif et précisions de l'enfant,
- * règle D54, « Refuser la demande » (l'enfant est notifié) ou « Valider la suppression » (compte désactivé aussitôt).
+ * règle D54, « Refuser la demande » (l'enfant est notifié) ou « Valider la suppression », confirmée en modale (compte
+ * désactivé aussitôt).
  */
 export function ChildDeletionRequest({ request }: { request: Schemas["DeletionRequest"] }) {
   const router = useRouter();
   const [pending, setPending] = useState<Decision | null>(null);
   const [error, setError] = useState<string>();
+  const [confirming, setConfirming] = useState(false);
   // Une seule décision à la fois, même sur un double clic plus rapide que le rendu du bouton occupé
   const inFlight = useRef(false);
 
@@ -35,12 +37,14 @@ export function ChildDeletionRequest({ request }: { request: Schemas["DeletionRe
         ? api.POST("/api/accounts/deletion-requests/{id}/approve/", path)
         : api.POST("/api/accounts/deletion-requests/{id}/refuse/", path),
     );
-    inFlight.current = false;
-    setPending(null);
     if (result.ok) {
+      // Le verrou et l'état occupé restent posés jusqu'à la navigation vers WPD03
       router.push(routes.parent.child(request.accountId, decision === "approve" ? "supprime" : "demande-refusee"));
       return;
     }
+    inFlight.current = false;
+    setPending(null);
+    setConfirming(false);
     if (result.code === "NOT_FOUND") router.refresh();
     setError(errorMessage(result, "vous"));
   }
@@ -80,10 +84,32 @@ export function ChildDeletionRequest({ request }: { request: Schemas["DeletionRe
         <Button variant="outline" block loading={pending === "refuse"} onClick={() => void decide("refuse")}>
           Refuser la demande
         </Button>
-        <Button variant="danger" block loading={pending === "approve"} onClick={() => void decide("approve")}>
+        <Button variant="danger" block disabled={pending !== null} onClick={() => setConfirming(true)}>
           Valider la suppression
         </Button>
       </div>
+      <Modal
+        open={confirming}
+        onClose={() => setConfirming(false)}
+        variant="danger"
+        icon="⚠️"
+        title={`Valider la suppression du compte de ${request.firstName} ?`}
+        actions={
+          <>
+            <Button variant="outline" onClick={() => setConfirming(false)}>
+              Annuler
+            </Button>
+            <Button variant="danger" loading={pending === "approve"} onClick={() => void decide("approve")}>
+              Valider la suppression
+            </Button>
+          </>
+        }
+      >
+        <p className="m-0">
+          Le compte est désactivé immédiatement, puis anonymisé 30 jours plus tard. Vous pourrez annuler la suppression
+          d&apos;ici là depuis « Mes enfants ».
+        </p>
+      </Modal>
     </section>
   );
 }

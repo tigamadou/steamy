@@ -68,7 +68,11 @@ export async function DeleteChild({ params, searchParams }: { params: Promise<{ 
           . Vous pouvez encore annuler la suppression.
         </p>
         <div className="self-start">
-          <CancelDeletionButton childId={child.id} firstName={child.firstName} />
+          <CancelDeletionButton
+            childId={child.id}
+            firstName={child.firstName}
+            redirectTo={routes.parent.child(child.id, "suppression-annulee")}
+          />
         </div>
       </Notice>
     );

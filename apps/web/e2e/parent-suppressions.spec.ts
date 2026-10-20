@@ -47,13 +47,13 @@ test("WPD09 : le parent supprime le compte, l'enfant ne peut plus se connecter, 
   await expect(form).toContainText("anonymisé 30 jours plus tard");
   await expect(form).not.toContainText(/définitivement|irréversible/i);
   const reason = form.getByRole("combobox", { name: /Motif de la suppression/ });
-  await expect(reason.locator("option").nth(1)).toBeAttached();
+  await expect(reason.getByRole("option", { name: "Le compte n'est plus utilisé" })).toBeAttached();
   await axe(page);
 
   // Motif requis
   await form.getByRole("button", { name: "Supprimer le compte" }).click();
   await expect(page.getByRole("link", { name: "Choisissez le motif de la suppression." })).toBeVisible();
-  await reason.selectOption({ index: 1 });
+  await reason.selectOption({ label: "Le compte n'est plus utilisé" });
   await form.getByRole("button", { name: "Supprimer le compte" }).click();
 
   // Désactivation immédiate (D54)
@@ -61,14 +61,32 @@ test("WPD09 : le parent supprime le compte, l'enfant ne peut plus se connecter, 
   await expect(page.getByText(/suppression programmée le/)).toBeVisible();
   expect(await childLogin(family)).toBe("ACCOUNT_DEACTIVATED");
 
-  // WPD02 : « Supprimé le … » puis « Annuler la suppression » ; l'enfant se connecte de nouveau
+  // WPD02 : « Supprimé le … » puis « Annuler la suppression » : annonce, focus sur la ligne ; l'enfant se reconnecte
   await page.goto("/parent/enfants");
   const row = page.getByRole("article", { name: "Yao Test" });
   await expect(row.getByText(/Supprimé le/)).toBeVisible();
   await axe(page);
   await row.getByRole("button", { name: /^Annuler la suppression/ }).click();
+  await expect(page.getByText("La suppression du compte de Yao Test est annulée : Yao peut de nouveau se connecter.")).toBeVisible();
+  await expect(row).toBeFocused();
   await expect(row.getByText(/Supprimé le/)).toHaveCount(0);
+  await expect(page).toHaveURL("/parent/enfants");
   await expect.poll(() => childLogin(family)).toBeNull();
+  await closeFamily(family);
+});
+
+test("WPD03 : suppression annulée depuis le profil de l'enfant, focus sur son titre", async ({ page }) => {
+  const family = await createFamily();
+  const [reason] = (await family.parentSession.get("/api/referentials/deletion-reasons/")) as { code: string }[];
+  await family.parentSession.post(`/api/accounts/children/${family.child.id}/deletion/`, { reason: reason.code });
+  await loginViaApi(page, family.parentPhone);
+  await page.goto(`/parent/enfants/${family.child.id}`);
+  await expect(page.getByText(/suppression programmée le/)).toBeVisible();
+  await page.getByRole("button", { name: /^Annuler la suppression/ }).click();
+  await expect(page.getByText("La suppression est annulée : Yao peut de nouveau se connecter.")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Yao Test" })).toBeFocused();
+  await expect(page.getByRole("link", { name: "Supprimer le compte" })).toBeVisible();
+  expect(await childLogin(family)).toBeNull();
   await closeFamily(family);
 });
 
@@ -86,6 +104,8 @@ test("WPD09 : la demande de suppression de l'enfant (WD15) est validée depuis �
   await expect(request.getByText("« Je n'utilise plus Steamy. »")).toBeVisible();
   await axe(page);
   await request.getByRole("button", { name: "Valider la suppression" }).click();
+  const confirm = page.getByRole("dialog", { name: "Valider la suppression du compte de Yao ?" });
+  await confirm.getByRole("button", { name: "Valider la suppression" }).click();
 
   await expect(page).toHaveURL(`/parent/enfants/${family.child.id}?confirmation=supprime`);
   expect(await childLogin(family)).toBe("ACCOUNT_DEACTIVATED");

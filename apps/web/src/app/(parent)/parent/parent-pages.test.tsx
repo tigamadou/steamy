@@ -184,9 +184,11 @@ describe("WPD15", () => {
 
 describe("pages des enfants (4.2)", () => {
   it("WPD02 : liste sous Suspense, avec son squelette", () => {
-    const tree = ChildrenPage() as Boundary;
+    const searchParams = Promise.resolve({ annulation: "7" });
+    const tree = ChildrenPage({ searchParams } as never) as Boundary;
     expect(tree.props.fallback.type).toBe(ChildrenListSkeleton);
     expect(tree.props.children.type).toBe(ChildrenList);
+    expect(tree.props.children.props).toMatchObject({ searchParams });
   });
 
   it("WPD04 : fil d'Ariane et formulaire de création", () => {

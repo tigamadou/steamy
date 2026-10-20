@@ -21,8 +21,11 @@ function withNext(path: string, next?: string): string {
   return next ? `${path}?next=${encodeURIComponent(next)}` : path;
 }
 
-/** Rappel sur WPD03 : enfant créé (WPD04), profil modifié (WPD10), compte désactivé ou demande refusée (WPD09). */
-export type ChildConfirmation = "cree" | "modifie" | "supprime" | "demande-refusee";
+/**
+ * Rappel sur WPD03 : enfant créé (WPD04), profil modifié (WPD10), compte désactivé, demande refusée ou suppression
+ * annulée (WPD09).
+ */
+export type ChildConfirmation = "cree" | "modifie" | "supprime" | "demande-refusee" | "suppression-annulee";
 
 /** Onglet de la liste des notifications (WD04, WPD14). */
 export type NotificationTab = "toutes" | "non-lues";
@@ -137,6 +140,8 @@ export const routes = {
     home: "/parent",
     children: "/parent/enfants",
     addChild: "/parent/enfants/ajouter",
+    /** WPD02 après « Annuler la suppression » : confirmation et focus sur la ligne de l'enfant. */
+    deletionCancelled: (id: number | string) => `/parent/enfants?annulation=${id}`,
     /** WPD03 ; `confirmation` : rappel après WPD04, WPD10 ou WPD09. */
     child: (id: number | string, confirmation?: ChildConfirmation) =>
       confirmation ? `/parent/enfants/${id}?confirmation=${confirmation}` : `/parent/enfants/${id}`,

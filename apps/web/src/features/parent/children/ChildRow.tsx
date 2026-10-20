@@ -55,8 +55,10 @@ function RowFrame({
 }) {
   return (
     <article
+      id={`${titleId}-ligne`}
+      tabIndex={-1}
       aria-labelledby={titleId}
-      className="flex flex-col gap-3 rounded-[18px] border-[1.5px] border-ink-100 bg-surface p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-4.5"
+      className="flex flex-col gap-3 rounded-[18px] border-[1.5px] border-ink-100 bg-surface p-4 outline-none focus:ring-4 focus:ring-primary-100 sm:flex-row sm:items-center sm:gap-4 sm:p-4.5"
     >
       <div className="flex min-w-0 flex-1 items-center gap-4">
         <Avatar name={name} emoji={emoji} size={56} ring={ring} decorative />
@@ -115,7 +117,13 @@ export function ChildRow({ item }: { item: ChildListItem }) {
       badge={deletion && <DeletionBadge deletion={deletion} />}
       actions={
         <>
-          {deletion?.status === "scheduled" && <CancelDeletionButton childId={child.id} firstName={child.firstName} />}
+          {deletion?.status === "scheduled" && (
+            <CancelDeletionButton
+              childId={child.id}
+              firstName={child.firstName}
+              redirectTo={routes.parent.deletionCancelled(child.id)}
+            />
+          )}
           {deletion?.status === "pending_parent" && (
             <Button href={routes.parent.deleteChild(child.id, deletion.id)} variant="secondary">
               Examiner<span className="sr-only"> la demande de suppression de {name}</span>

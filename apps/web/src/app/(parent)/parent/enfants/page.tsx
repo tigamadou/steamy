@@ -6,10 +6,10 @@ import { ChildrenList, ChildrenListSkeleton } from "@/features/parent/children/C
 export const metadata: Metadata = { title: "Mes enfants" };
 
 /** WPD02 · Mes enfants : enfants rattachés et demandes reçues à examiner. */
-export default function ChildrenPage() {
+export default function ChildrenPage({ searchParams }: PageProps<"/parent/enfants">) {
   return (
     <Suspense fallback={<ChildrenListSkeleton />}>
-      <ChildrenList />
+      <ChildrenList searchParams={searchParams} />
     </Suspense>
   );
 }

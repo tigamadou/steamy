@@ -70,16 +70,16 @@ beforeEach(() => {
 });
 
 describe("CancelDeletionButton (WPD02, WPD03)", () => {
-  it("annule la suppression et relit l'écran ; erreur annoncée", async () => {
+  it("annule la suppression puis mène à la page qui l'annonce ; erreur annoncée", async () => {
     const user = userEvent.setup();
     DELETE.mockResolvedValueOnce(failure(500, "SERVER_ERROR")).mockResolvedValueOnce(respond(204));
-    render(<CancelDeletionButton childId={7} firstName="Léa" />);
+    render(<CancelDeletionButton childId={7} firstName="Léa" redirectTo="/parent/enfants?annulation=7" />);
     const button = screen.getByRole("button", { name: /^Annuler la suppression\s*du compte de Léa$/ });
     await user.click(button);
     expect(await screen.findByRole("alert")).not.toBeEmptyDOMElement();
-    expect(router.refresh).not.toHaveBeenCalled();
+    expect(router.push).not.toHaveBeenCalled();
     await user.click(button);
-    await waitFor(() => expect(router.refresh).toHaveBeenCalled());
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/parent/enfants?annulation=7"));
     expect(DELETE).toHaveBeenCalledWith("/api/accounts/children/{id}/deletion/", { params: { path: { id: "7" } } });
   });
 });
@@ -128,7 +128,7 @@ describe("DeleteChildForm (WPD09, initiative du parent)", () => {
 });
 
 describe("ChildDeletionRequest (WPD09, demande de l'enfant)", () => {
-  it("motif et précisions de l'enfant ; « Valider la suppression » désactive le compte", async () => {
+  it("motif et précisions de l'enfant ; « Valider la suppression », confirmée en modale, désactive le compte", async () => {
     const user = userEvent.setup();
     POST.mockResolvedValueOnce(respond(200, deletionRequest({ status: "scheduled" })));
     const { container } = render(<ChildDeletionRequest request={deletionRequest()} />);
@@ -137,8 +137,18 @@ describe("ChildDeletionRequest (WPD09, demande de l'enfant)", () => {
     expect(within(section).getByText("« Je n'ai plus le temps. »")).toBeInTheDocument();
     expect(section.textContent).not.toMatch(/définitivement|irréversible/i);
     expect(await axe(container)).toHaveNoViolations();
+    // Modale de confirmation : « Annuler » la referme sans appel
     await user.click(screen.getByRole("button", { name: "Valider la suppression" }));
+    let dialog = screen.getByRole("dialog", { name: "Valider la suppression du compte de Léa ?" });
+    await user.click(within(dialog).getByRole("button", { name: "Annuler" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(POST).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Valider la suppression" }));
+    dialog = screen.getByRole("dialog", { name: "Valider la suppression du compte de Léa ?" });
+    await user.click(within(dialog).getByRole("button", { name: "Valider la suppression" }));
     await waitFor(() => expect(router.push).toHaveBeenCalledWith("/parent/enfants/7?confirmation=supprime"));
+    // Verrou gardé jusqu'à la navigation : le bouton reste occupé
+    expect(within(dialog).getByRole("button", { name: "Valider la suppression" })).toHaveAttribute("aria-busy", "true");
     expect(POST).toHaveBeenCalledWith("/api/accounts/deletion-requests/{id}/approve/", { params: { path: { id: "9" } } });
   });
 
@@ -162,7 +172,8 @@ describe("ChildDeletionRequest (WPD09, demande de l'enfant)", () => {
     let finish: (value: unknown) => void = () => {};
     POST.mockImplementationOnce(() => new Promise((resolve) => (finish = resolve)));
     render(<ChildDeletionRequest request={deletionRequest()} />);
-    await user.dblClick(screen.getByRole("button", { name: "Valider la suppression" }));
+    await user.click(screen.getByRole("button", { name: "Valider la suppression" }));
+    await user.dblClick(within(screen.getByRole("dialog")).getByRole("button", { name: "Valider la suppression" }));
     expect(POST).toHaveBeenCalledTimes(1);
     finish(respond(200, deletionRequest({ status: "scheduled" })));
     await waitFor(() => expect(router.push).toHaveBeenCalledTimes(1));

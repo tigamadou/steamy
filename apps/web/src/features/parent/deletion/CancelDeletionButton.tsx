@@ -7,10 +7,19 @@ import { Button } from "@/components/ds";
 import { apiCall, errorMessage } from "@/lib/api-call";
 
 /**
- * « Annuler la suppression » (WPD02, WPD03) : pendant les 30 jours qui précèdent l'anonymisation (D54),
- * `DELETE accounts/children/{id}/deletion/` réactive le compte ; l'enfant peut de nouveau se connecter.
+ * « Annuler la suppression » (WPD02, WPD03, WPD09) : pendant les 30 jours qui précèdent l'anonymisation (D54),
+ * `DELETE accounts/children/{id}/deletion/` réactive le compte ; l'enfant peut de nouveau se connecter. Le succès
+ * mène à `redirectTo`, qui l'annonce et rend le focus à l'enfant (sa ligne de WPD02, ou son titre sur WPD03).
  */
-export function CancelDeletionButton({ childId, firstName }: { childId: number; firstName: string }) {
+export function CancelDeletionButton({
+  childId,
+  firstName,
+  redirectTo,
+}: {
+  childId: number;
+  firstName: string;
+  redirectTo: string;
+}) {
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
@@ -21,7 +30,7 @@ export function CancelDeletionButton({ childId, firstName }: { childId: number; 
         api.DELETE("/api/accounts/children/{id}/deletion/", { params: { path: { id: String(childId) } } }),
       );
       if (result.ok) {
-        router.refresh();
+        router.push(redirectTo);
         return;
       }
       setError(errorMessage(result, "vous"));

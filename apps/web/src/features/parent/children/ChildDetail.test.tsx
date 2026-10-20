@@ -144,6 +144,12 @@ describe("ChildDetailView (WPD03)", () => {
     expect(await screen.findByText("La demande de suppression est refusée : Léa en est informé·e.")).toBeInTheDocument();
   });
 
+  it("suppression annulée : confirmation annoncée, focus sur le titre de l'enfant", async () => {
+    render(<ChildDetailView child={childDetail()} confirmation="suppression-annulee" />);
+    expect(await screen.findByText("La suppression est annulée : Léa peut de nouveau se connecter.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Léa Adjovi" })).toHaveFocus();
+  });
+
   it("suppression programmée : rappel daté au lieu du lien « Supprimer le compte »", () => {
     render(
       <ChildDetailView child={childDetail({ deletion: { id: 4, status: "scheduled", scheduledFor: "2026-11-18T10:00:00Z" } })} />,
@@ -307,6 +313,7 @@ describe("ChildDetail (serveur) et getChild", () => {
     expect(parseConfirmation("modifie")).toBe("modifie");
     expect(parseConfirmation("supprime")).toBe("supprime");
     expect(parseConfirmation("demande-refusee")).toBe("demande-refusee");
+    expect(parseConfirmation("suppression-annulee")).toBe("suppression-annulee");
     expect(parseConfirmation(["cree"])).toBeUndefined();
     expect(parseConfirmation("autre")).toBeUndefined();
     render(<ChildDetailSkeleton />);
