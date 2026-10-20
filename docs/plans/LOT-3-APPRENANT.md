@@ -15,7 +15,7 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 3.7b, 3.7c · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) fixé le 2026-10-19 : pastilles Points/Rang débloquées
+Statut : 🟡 en cours · Prochaine tâche : 3.7b · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) fixé le 2026-10-19 : pastilles Points/Rang débloquées
 
 ### Valeur pédagogique (API-L3a) — ✅ terminé
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
@@ -149,8 +149,10 @@ Statut : 🟡 en cours · Prochaine tâche : 3.7b, 3.7c · Prérequis : API-1 et
   - [ ] WK07 suivi de commande (`ShippingTimeline`, jeton `X-Guest-Token`, `noindex`, `no-referrer`)
   - [ ] Gestion de `OUT_OF_STOCK`, `ORDER_EXPIRED`, `NETWORK_UNAVAILABLE`
   - [ ] Parcours Playwright P4
-- [ ] **3.7c** Demande de kit au parent (requiert API-L3b) · `feature/lot3-boutique-demande-parent`
-  - [ ] WK08 demande de kit au parent (`/apprenant/demandes/[id]`, `kind=kit`)
+- [x] **3.7c** Demande de kit au parent (requiert API-L3b) · `feature/lot3-boutique-demande-parent` · PR #120
+  - [x] `WK08` demande de kit au parent (`/apprenant/demandes/[id]`, `kind=kit`) : montant des articles seul, livraison ajoutée par le parent (C10), `Loader` inline, annulation ; ni relance, ni « Changer de parent », ni « Renvoyer le lien »
+  - [x] Panier `WK03` : « Demander à mon parent » crée la demande (`POST payments/payment-requests/ { kind: "kit", items }`) puis ouvre `WK08` ; échec affiché sous le bouton
+  - [x] Parcours Playwright P5 jusqu'à WK08 (annulation, nouvelle demande, paiement du parent par l'API en attendant WPD15)
 - [x] **3.8** Steamy Events côté apprenant (requiert API-L3b, `events`) · `feature/lot3-steamy-events` · PR #116
   - [x] `WD10` événements et candidatures (ticket libre signalé, C12)
   - [x] `WL23` fiche événement dans le shell (`EventDetail` du lot 1 en h2, `EVENT_FULL`, `EVENT_CLOSED`)
