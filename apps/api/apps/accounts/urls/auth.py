@@ -20,6 +20,8 @@ from apps.accounts.views.password_reset import (
 from apps.accounts.views.session import CsrfView, LoginView, LogoutView
 from apps.accounts.views.teacher_activation import (
     TeacherInvitationAcceptView,
+    TeacherInvitationLookupView,
+    TeacherInvitationTokenAcceptView,
     TeacherInvitationView,
 )
 
@@ -64,6 +66,17 @@ urlpatterns = [
         "parent-signup/password/",
         ParentSignupPasswordView.as_view(),
         name="auth-parent-signup-password",
+    ),
+    # Jeton dans le corps : avant les anciennes routes, où `lookup` et `accept` passeraient pour un jeton
+    path(
+        "teacher-invitations/lookup/",
+        TeacherInvitationLookupView.as_view(),
+        name="auth-teacher-invitation-lookup",
+    ),
+    path(
+        "teacher-invitations/accept/",
+        TeacherInvitationTokenAcceptView.as_view(),
+        name="auth-teacher-invitation-token-accept",
     ),
     path(
         "teacher-invitations/<str:token>/",

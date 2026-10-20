@@ -1,5 +1,6 @@
 """
-Journaux d'accès sans secret : le jeton d'un lien d'activation du personnel (WAD13) est masqué avant écriture.
+Journaux d'accès sans secret : le jeton d'un lien d'activation est masqué avant écriture, pour le personnel (WAD13)
+comme pour les anciennes routes de l'activation enseignant (C6, jeton désormais dans le corps des requêtes).
 Filtre posé sur les journaux d'accès d'uvicorn et de gunicorn (`project/gunicorn.py`).
 """
 
@@ -7,7 +8,9 @@ import logging
 import re
 
 #: Chemins dont le dernier segment est un secret
-SECRET_PATHS = re.compile(r"(/admin/activation/)(?!definir/)[^/?\s\"]+")
+SECRET_PATHS = re.compile(
+    r"(/admin/activation/(?!definir/)|/auth/teacher-invitations/(?!(?:lookup|accept)/))[^/?\s\"]+"
+)
 MASK = r"\1•••"
 ACCESS_LOGGERS = ("uvicorn.access", "gunicorn.access")
 
