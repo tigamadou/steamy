@@ -2,8 +2,8 @@
 Réglages de la plateforme et journal d'audit (SPEC-TECHNIQUE §3.7).
 
 `PlatformSettings` est un singleton (une seule ligne, `pk = 1`) édité dans l'admin Django (WAD14) ; ses valeurs
-par défaut viennent des arbitrages (D24, D32, D66). Le barème de points et les paliers de rang (C8) restent vides
-jusqu'à leur saisie, avant API-L3a.3.
+par défaut viennent des arbitrages (D24, D32, D66, C8). Barème de points et paliers de rang : barème standard (C8,
+arbitré le 2026-10-19), modifiable par le personnel.
 """
 
 from django.conf import settings
@@ -17,6 +17,26 @@ from django.utils.translation import gettext_lazy as _
 def bounds(low: int, high: int) -> list:
     """Bornes d'un réglage numérique (WAD14) : une valeur hors bornes est refusée à l'enregistrement."""
     return [MinValueValidator(low), MaxValueValidator(high)]
+
+
+#: Barème standard (C8) : points par événement, accordés une seule fois.
+DEFAULT_POINTS_SCALE = {"mission": 10, "formative": 20, "summative": 50, "course": 100}
+#: Paliers de rang standard (C8), aux points strictement croissants.
+DEFAULT_RANK_THRESHOLDS = [
+    {"rank": "Explorateur", "points": 0},
+    {"rank": "Apprenti", "points": 100},
+    {"rank": "Bâtisseur", "points": 300},
+    {"rank": "Inventeur", "points": 700},
+    {"rank": "Ingénieur", "points": 1500},
+]
+
+
+def default_points_scale() -> dict:
+    return dict(DEFAULT_POINTS_SCALE)
+
+
+def default_rank_thresholds() -> list:
+    return [dict(item) for item in DEFAULT_RANK_THRESHOLDS]
 
 
 class PlatformSettings(models.Model):
@@ -48,16 +68,16 @@ class PlatformSettings(models.Model):
     dropout_threshold_days = models.PositiveSmallIntegerField(
         _("jours sans activité avant l'alerte de décrochage"), default=7, validators=bounds(1, 60)
     )
-    # Gamification (C8) : à saisir avant API-L3a.3
+    # Gamification (C8) : barème standard par défaut ; vide, les pastilles Points et Rang sont masquées
     points_scale = models.JSONField(
         _("barème de points"),
-        default=dict,
+        default=default_points_scale,
         blank=True,
         help_text='Points par événement, ex. {"mission": 10, "formative": 20, "summative": 50}',
     )
     rank_thresholds = models.JSONField(
         _("paliers de rang"),
-        default=list,
+        default=default_rank_thresholds,
         blank=True,
         help_text='Liste ordonnée, ex. [{"rank": "Explorateur", "points": 0}, …]',
     )

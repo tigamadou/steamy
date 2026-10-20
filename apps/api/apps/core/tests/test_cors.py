@@ -31,3 +31,15 @@ def test_preflight_does_not_reach_the_view():
     assert resp.status_code == 200
     assert resp["Access-Control-Allow-Origin"] == FRONT
     assert "x-csrftoken" in resp["Access-Control-Allow-Headers"]
+
+
+def test_guest_token_allowed_and_retry_after_exposed():
+    """Commande invitée (D12) : `X-Guest-Token` accepté ; délai `Retry-After` lisible par le front."""
+    resp = APIClient().options(
+        "/api/health/",
+        HTTP_ORIGIN=FRONT,
+        HTTP_ACCESS_CONTROL_REQUEST_METHOD="GET",
+        HTTP_ACCESS_CONTROL_REQUEST_HEADERS="x-guest-token",
+    )
+    assert "x-guest-token" in resp["Access-Control-Allow-Headers"]
+    assert resp["Access-Control-Expose-Headers"] == "retry-after"

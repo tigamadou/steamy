@@ -154,8 +154,17 @@ def event_order(application: EventApplication, *, payer):
     return order
 
 
+#: Motif d'une candidature annulée faute de paiement à l'échéance : la seule qu'un paiement tardif relance (C17)
+PAYMENT_TIMEOUT_REASON = "Paiement non abouti."
+
+
 def confirm(application: EventApplication) -> None:
-    """Exécution post-paiement : la place réservée est confirmée."""
+    """
+    Exécution post-paiement : la place réservée est confirmée. Une candidature qui n'attend plus son paiement (annulée
+    par le personnel, par exemple) n'est jamais confirmée (S3, C3).
+    """
+    if application.status != EventApplication.Status.PENDING_PAYMENT:
+        return
     application.status = EventApplication.Status.ACCEPTED
     application.save(update_fields=["status", "updated_at"])
     tell_learner_confirmed(application)
@@ -166,7 +175,7 @@ def release(application: EventApplication) -> None:
     if application.status != EventApplication.Status.PENDING_PAYMENT:
         return
     application.status = EventApplication.Status.CANCELLED
-    application.refusal_reason = "Paiement non abouti."
+    application.refusal_reason = PAYMENT_TIMEOUT_REASON
     application.save(update_fields=["status", "refusal_reason", "updated_at"])
 
 
@@ -175,6 +184,12 @@ def reacquire_seat(application: EventApplication) -> bool:
     event = SteamyEvent.objects.select_for_update().get(pk=application.event_id)
     if application.status == EventApplication.Status.PENDING_PAYMENT:
         return True
+    # Seule une candidature annulée faute de paiement se relance ; un refus (parent ou personnel) est définitif
+    if (
+        application.status != EventApplication.Status.CANCELLED
+        or application.refusal_reason != PAYMENT_TIMEOUT_REASON
+    ):
+        return False
     if (
         event.seats_left <= 0
         or EventApplication.objects.filter(
