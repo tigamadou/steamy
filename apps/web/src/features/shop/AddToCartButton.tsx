@@ -5,17 +5,10 @@ import { useState } from "react";
 
 import { Button } from "@/components/ds";
 import { errorMessage } from "@/lib/api-call";
-import { routes } from "@/lib/routes";
 import { useUndoableAction } from "@/lib/use-undoable-action";
 
-import { addToCart, type Shopper } from "./api";
-
-export type ShopContext = "learner" | "public";
-
-/** Panier de qui regarde : celui de l'apprenant dans son espace, sinon celui de la boutique publique. */
-export function cartHref(shopper: Shopper): string {
-  return shopper === "learner" ? routes.learner.cart : routes.cart;
-}
+import { addToCart } from "./api";
+import { cartHref, type ShopContext } from "./shop-routes";
 
 export type AddToCartButtonProps = {
   slug: string;

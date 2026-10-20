@@ -5,17 +5,9 @@ import type { Me } from "@/lib/auth/home-for-role";
 import { PATH_HEADER } from "@/lib/auth/path-header";
 import { getCurrentUser } from "@/lib/auth/session";
 import { routes } from "@/lib/routes";
+import { publicApiUrl } from "@/lib/runtime-config";
 
 import { adminLoginUrl, hasGroup, isVerifiedStaff, type StaffGroup } from "./access";
-
-/** URL publique de l'API (admin Django, WAD15), lue à l'exécution comme `/runtime-config`. */
-export function publicApiUrl(): string {
-  const url = process.env.PUBLIC_API_URL;
-  if (!url) {
-    throw new Error("PUBLIC_API_URL n'est pas défini");
-  }
-  return url;
-}
 
 /** Origine publique du front telle que le navigateur l'a demandée (proxy inverse compris). */
 function requestOrigin(h: Pick<Headers, "get">): string {

@@ -36,6 +36,17 @@ vi.mock("@/features/parent/settings/ParentSettings", () => ({
   ParentSettings: () => null,
   ParentSettingsSkeleton: () => null,
 }));
+vi.mock("@/features/parent/orders/ParentOrders", () => ({ ParentOrders: () => null, ParentOrdersSkeleton: () => null }));
+vi.mock("@/features/parent/orders/OrderDetail", () => ({ OrderDetail: () => null, OrderDetailSkeleton: () => null }));
+vi.mock("@/features/parent/shop/ParentKitCheckoutScreen", () => ({
+  ParentKitCheckoutScreen: () => null,
+  ParentKitCheckoutSkeleton: () => null,
+}));
+vi.mock("@/components/public/shop-sections", () => ({ ShopCatalog: () => null, ShopCatalogSkeleton: () => null }));
+vi.mock("@/features/shop/KitDetailView", () => ({ KitDetailView: () => null, KitDetailSkeleton: () => null }));
+vi.mock("@/features/shop/CartView", () => ({ CartView: () => null }));
+vi.mock("@/features/shop/DeliveryZonesSlot", () => ({ DeliveryZonesSlot: () => null }));
+vi.mock("@/lib/shop", () => ({ getKit: async (slug: string) => (slug === "bot" ? { name: "Steamy Bot v1" } : null) }));
 vi.mock("@/features/notifications/Notifications", () => ({
   Notifications: () => null,
   NotificationsSkeleton: () => null,
@@ -48,6 +59,18 @@ const { default: ParentError } = await import("./error");
 const { default: ParentNotFound } = await import("./not-found");
 const { default: NotificationsPage } = await import("./notifications/page");
 const { default: PaymentRequestPage } = await import("./demandes/[id]/page");
+const { default: OrdersPage } = await import("./commandes/page");
+const { default: OrderPage } = await import("./commandes/[reference]/page");
+const { default: OrderNotFound } = await import("./commandes/[reference]/not-found");
+const ShopPage = await import("./boutique/page");
+const KitPage = await import("./boutique/[slug]/page");
+const { default: KitNotFound } = await import("./boutique/[slug]/not-found");
+const { default: CartPage } = await import("./boutique/panier/page");
+const { default: CheckoutPage } = await import("./boutique/commande/page");
+const { ParentOrders, ParentOrdersSkeleton } = await import("@/features/parent/orders/ParentOrders");
+const { OrderDetail, OrderDetailSkeleton } = await import("@/features/parent/orders/OrderDetail");
+const { ParentKitCheckoutScreen, ParentKitCheckoutSkeleton } = await import("@/features/parent/shop/ParentKitCheckoutScreen");
+const { CartView } = await import("@/features/shop/CartView");
 const { default: PaymentRequestNotFound } = await import("./demandes/[id]/not-found");
 const { default: ChildrenPage } = await import("./enfants/page");
 const { default: AddChildPage } = await import("./enfants/ajouter/page");
@@ -99,6 +122,44 @@ describe("pages de l'espace parent", () => {
     expect(tree.props.fallback.props.space).toBe("parent");
     expect(tree.props.children.type).toBe(Notifications);
     expect(tree.props.children.props).toMatchObject({ space: "parent", searchParams });
+  });
+});
+
+describe("commandes et boutique du parent (4.5)", () => {
+  it("WPD07, suivi et commande d'un achat direct sous Suspense", () => {
+    const searchParams = Promise.resolve({});
+    const params = Promise.resolve({ reference: "CMD-1" });
+    const orders = OrdersPage({ searchParams } as never) as Boundary;
+    expect(orders.props.fallback.type).toBe(ParentOrdersSkeleton);
+    expect(orders.props.children.type).toBe(ParentOrders);
+    const detail = OrderPage({ params } as never) as Boundary;
+    expect(detail.props.fallback.type).toBe(OrderDetailSkeleton);
+    expect(detail.props.children.type).toBe(OrderDetail);
+    const checkout = CheckoutPage() as Boundary;
+    expect(checkout.props.fallback.type).toBe(ParentKitCheckoutSkeleton);
+    expect(checkout.props.children.type).toBe(ParentKitCheckoutScreen);
+  });
+
+  it("boutique, fiche et panier en contexte parent", async () => {
+    render(ShopPage.default({ searchParams: Promise.resolve({}) } as never));
+    expect(screen.getByRole("link", { name: "Mon panier" })).toHaveAttribute("href", "/parent/boutique/panier");
+    expect(KitPage.default({ params: Promise.resolve({ slug: "bot" }) } as never)).toBeTruthy();
+    expect(await KitPage.generateMetadata({ params: Promise.resolve({ slug: "bot" }) } as never)).toEqual({
+      title: "Steamy Bot v1",
+    });
+    expect(await KitPage.generateMetadata({ params: Promise.resolve({ slug: "x" }) } as never)).toEqual({
+      title: "Kit introuvable",
+    });
+    const cart = CartPage() as ReactElement<{ context: string }>;
+    expect(cart.type).toBe(CartView);
+    expect(cart.props.context).toBe("parent");
+  });
+
+  it("commande et kit introuvables au vouvoiement", () => {
+    render(<OrderNotFound />);
+    expect(screen.getByRole("heading", { level: 2, name: "Commande introuvable" })).toBeInTheDocument();
+    render(<KitNotFound />);
+    expect(screen.getByRole("link", { name: "Retour à la boutique" })).toHaveAttribute("href", "/parent/boutique");
   });
 });
 

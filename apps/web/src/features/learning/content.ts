@@ -1,6 +1,8 @@
 import type { Schemas } from "@steamy/api-client";
 import { notFound } from "next/navigation";
 
+import { publicApiUrl } from "@/lib/runtime-config";
+
 /** Refus d'accès au contenu (§4.4) : pas inscrit, ou étape pas encore ouverte. */
 export type LockedCode = "CONTENT_LOCKED" | "NOT_ENROLLED";
 
@@ -22,5 +24,5 @@ export function readContent<T>({ data, error, response }: ApiResponse<T>): Conte
 
 /** URL de téléchargement d'un certificat, servie par l'API (redirection vers une URL présignée, ADR 0005). */
 export function certificateDownloadUrl(id: number): string {
-  return `${process.env.PUBLIC_API_URL ?? ""}/api/learning/certificates/${id}/download/`;
+  return `${publicApiUrl()}/api/learning/certificates/${id}/download/`;
 }

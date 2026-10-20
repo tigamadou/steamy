@@ -7,21 +7,14 @@ import { stringList } from "@/components/public/course-detail";
 import { listHref } from "@/lib/catalog-filters";
 import { cx } from "@/lib/cx";
 import { DIFFICULTY_LABELS, formatPrice } from "@/lib/format";
-import { routes } from "@/lib/routes";
 import { getDeliveryZones, getKit } from "@/lib/shop";
 
-import { AddToCartButton, type ShopContext } from "./AddToCartButton";
+import { AddToCartButton } from "./AddToCartButton";
 import { DeliveryZonesNote } from "./DeliveryZonesNote";
 import { RestockAlertForm } from "./RestockAlertForm";
+import { shopRoutes, type ShopContext } from "./shop-routes";
 
 type CompatibleCourse = { slug: string; title: string };
-
-/** Boutique et fiche parcours du contexte : espace apprenant (WC05) ou site public (WL22). */
-function links(context: ShopContext) {
-  return context === "learner"
-    ? { shop: routes.learner.shop, course: routes.learner.catalogCourse }
-    : { shop: routes.shop, course: routes.course };
-}
 
 /**
  * WK02 / WK11 · Fiche d'un kit, sous `<Suspense>` : fiche publique en cache (prix et disponibilité de l'API, D37),
@@ -35,11 +28,11 @@ export async function KitDetailView({ params, context }: { params: Promise<{ slu
   if (!kit) notFound();
   // Zones en panne : la fiche s'affiche sans le délai de livraison
   const zones = await getDeliveryZones().catch(() => null);
-  const { shop, course } = links(context);
-  const inShell = context === "learner";
+  const { shop, course } = shopRoutes(context);
+  const inShell = context !== "public";
   const Title = inShell ? "h2" : "h1";
   const Section = inShell ? "h3" : "h2";
-  const tu = inShell;
+  const tu = context === "learner";
   const contents = stringList(kit.contents);
   const compatible = kit.compatibleCourses as CompatibleCourse[];
 
@@ -86,9 +79,15 @@ export async function KitDetailView({ params, context }: { params: Promise<{ slu
               <ul className="flex flex-wrap gap-3">
                 {compatible.map((c) => (
                   <li key={c.slug}>
-                    <Button variant="outline" size="sm" href={course(c.slug)} iconRight="arrow-right">
-                      {c.title}
-                    </Button>
+                    {course ? (
+                      <Button variant="outline" size="sm" href={course(c.slug)} iconRight="arrow-right">
+                        {c.title}
+                      </Button>
+                    ) : (
+                      <span className="inline-flex rounded-full border-2 border-ink-100 px-3.5 py-1.5 text-[13px] font-extrabold text-ink-800">
+                        {c.title}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>,

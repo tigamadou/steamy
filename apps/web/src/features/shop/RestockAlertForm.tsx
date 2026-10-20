@@ -8,7 +8,7 @@ import { useReferential } from "@/lib/use-referential";
 import { throttledLabel, useThrottle } from "@/components/ds/RetryCountdown";
 
 import { probeShopper, requestRestockAlert, type Shopper } from "./api";
-import type { ShopContext } from "./AddToCartButton";
+import type { ShopContext } from "./shop-routes";
 
 const COPY: Record<Shopper, { intro: string; done: string }> = {
   learner: {
@@ -33,14 +33,14 @@ export function RestockAlertForm({ slug, context }: { slug: string; context: Sho
   // Boutique publique en cache : la session est lue dans le navigateur
   const [probed, setProbed] = useState<Shopper | null>(null);
   useEffect(() => {
-    if (context === "learner") return;
+    if (context !== "public") return;
     let current = true;
     probeShopper().then((shopper) => current && setProbed(shopper));
     return () => {
       current = false;
     };
   }, [context]);
-  const shopper = context === "learner" ? "learner" : probed;
+  const shopper = context === "public" ? probed : context;
 
   const [phone, setPhone] = useState<PhoneChange | null>(null);
   const [error, setError] = useState<string>();

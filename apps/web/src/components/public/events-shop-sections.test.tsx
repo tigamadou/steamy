@@ -100,6 +100,14 @@ describe("WL07 / WK01 · boutique", () => {
     );
   });
 
+  it("parent : liens et filtres dans son espace (achat direct, C10)", async () => {
+    getCategories.mockResolvedValue([CATEGORY]);
+    getKits.mockResolvedValue({ results: [KIT], hasNext: false });
+    render(await ShopCatalog({ searchParams: Promise.resolve({}), context: "parent" }));
+    expect(screen.getByRole("link", { name: "Tous" })).toHaveAttribute("href", "/parent/boutique");
+    expect(screen.getByRole("link", { name: "Steamy Bot v1" })).toHaveAttribute("href", "/parent/boutique/steamy-bot-v1");
+  });
+
   it("catégorie inconnue : tous les kits ; aucun kit : état vide", async () => {
     getCategories.mockResolvedValue([CATEGORY]);
     getKits.mockResolvedValue({ results: [], hasNext: false });

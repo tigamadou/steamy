@@ -156,7 +156,11 @@ export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
           </p>
         )}
         <KitAddressStep
-          requestId={request.id}
+          createOrder={(deliveryAddress) =>
+            apiCall((api) =>
+              api.POST("/api/payments/orders/", { body: { paymentRequestId: request.id, deliveryAddress } }),
+            )
+          }
           address={address}
           defaultCountry={defaultCountry}
           recipientName={parentName}

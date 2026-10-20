@@ -15,6 +15,7 @@ describe("parentNav", () => {
     expect(parentNav.filter((entry) => !entry.hidden).map((entry) => entry.href)).toEqual([
       "/parent",
       "/parent/enfants",
+      "/parent/commandes",
       "/parent/aide",
       "/parent/parametres",
     ]);
@@ -42,6 +43,7 @@ describe("parentSection", () => {
     ["/parent/boutique", "orders", "Boutique de kits"],
     ["/parent/boutique/kit-zeti", "orders", "Boutique de kits"],
     ["/parent/boutique/panier", "orders", "Mon panier"],
+    ["/parent/boutique/commande", "orders", "Commande de kits"],
     ["/parent/aide", "help", "Aide & support"],
     ["/parent/parametres", "settings", "Paramètres"],
   ])("%s → %s", (pathname, active, title) => {

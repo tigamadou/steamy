@@ -4,9 +4,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const requireStaff = vi.fn();
 vi.mock("@/lib/backoffice/guard", () => ({
   requireStaff,
-  publicApiUrl: () => "http://api.test",
   backofficeLoginUrl: async (path: string) => `http://api.test/admin/login/?next=${path}`,
 }));
+vi.mock("@/lib/runtime-config", () => ({ publicApiUrl: () => "http://api.test" }));
 
 const { BackofficeGate } = await import("./BackofficeGate");
 const { AdminShell } = await import("./AdminShell");

@@ -11,7 +11,7 @@ export const parentNav: NavEntry[] = [
   { id: "home", icon: "home", label: "Accueil", href: p.home },
   { id: "children", icon: "user", label: "Mes enfants", href: p.children },
   { id: "events", icon: "trophy", label: "Événements", href: p.events, hidden: true },
-  { id: "orders", icon: "cart", label: "Commandes", href: p.orders, hidden: true },
+  { id: "orders", icon: "cart", label: "Commandes", href: p.orders },
   { id: "help", icon: "book", label: "Aide", href: p.help },
   { id: "settings", icon: "gear", label: "Paramètres", href: p.settings },
 ];
@@ -42,6 +42,7 @@ const SECTIONS: Array<[pattern: RegExp, section: ParentSection]> = [
   [new RegExp(`^/parent/evenements/${ID}/inscription$`), { active: "events", title: "Inscrire un enfant" }],
   [/^\/parent\/evenements(\/.*)?$/, { active: "events", title: "Steamy Events" }],
   [/^\/parent\/boutique\/panier$/, { active: "orders", title: "Mon panier" }],
+  [/^\/parent\/boutique\/commande$/, { active: "orders", title: "Commande de kits" }],
   [/^\/parent\/boutique(\/.*)?$/, { active: "orders", title: "Boutique de kits" }],
   [/^\/parent\/commandes(\/.*)?$/, { active: "orders", title: "Commandes" }],
   [/^\/parent\/aide$/, { active: "help", title: "Aide & support" }],

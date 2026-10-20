@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
 import { backofficeNav } from "@/lib/backoffice/access";
-import { backofficeLoginUrl, publicApiUrl, requireStaff } from "@/lib/backoffice/guard";
+import { backofficeLoginUrl, requireStaff } from "@/lib/backoffice/guard";
+import { publicApiUrl } from "@/lib/runtime-config";
 import { routes } from "@/lib/routes";
 
 import { AdminShell } from "./AdminShell";

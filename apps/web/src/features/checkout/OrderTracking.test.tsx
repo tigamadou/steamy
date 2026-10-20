@@ -104,11 +104,12 @@ describe("WK07 · suivi de commande", () => {
     expect(cancelled.container.querySelector(".bg-success-50")).toBeNull();
   });
 
-  it("commande remboursée (C17) : paiement reçu après le délai, remboursement automatique, ni suivi ni reçu", async () => {
+  it("commande remboursée : message neutre (motif non exposé par l'API), ni suivi ni reçu", async () => {
     getOrder.mockResolvedValueOnce({ ok: true, data: { ...ORDER, status: "refunded" } });
     render(<OrderTracking reference="KT-7042" />);
-    expect(await screen.findByRole("heading", { level: 1, name: "Paiement reçu après le délai" })).toBeInTheDocument();
-    expect(screen.getByText(/il vous est remboursé automatiquement/)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "Commande remboursée" })).toBeInTheDocument();
+    expect(screen.getByText(/elle vous a été remboursée\./)).toBeInTheDocument();
+    expect(screen.queryByText(/après le délai/)).not.toBeInTheDocument();
     expect(screen.queryByRole("list", { name: "Suivi de livraison" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Télécharger le reçu" })).not.toBeInTheDocument();
   });

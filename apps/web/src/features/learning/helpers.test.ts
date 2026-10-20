@@ -34,9 +34,7 @@ describe("readContent", () => {
   it("construit l'URL de téléchargement du certificat sur l'API publique", () => {
     vi.stubEnv("PUBLIC_API_URL", "https://api.steamy.test");
     expect(certificateDownloadUrl(7)).toBe("https://api.steamy.test/api/learning/certificates/7/download/");
-    vi.stubEnv("PUBLIC_API_URL", "");
     vi.unstubAllEnvs();
-    expect(certificateDownloadUrl(7)).toMatch(/\/api\/learning\/certificates\/7\/download\/$/);
   });
 });
 

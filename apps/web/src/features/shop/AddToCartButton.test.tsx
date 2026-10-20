@@ -7,7 +7,8 @@ vi.mock("next/navigation", () => ({ useRouter: () => router }));
 const addToCart = vi.fn();
 vi.mock("./api", () => ({ addToCart }));
 
-const { AddToCartButton, cartHref } = await import("./AddToCartButton");
+const { AddToCartButton } = await import("./AddToCartButton");
+const { cartHref, shopRoutes } = await import("./shop-routes");
 
 beforeEach(() => {
   addToCart.mockReset();
@@ -53,8 +54,16 @@ describe("AddToCartButton", () => {
     expect(router.push).not.toHaveBeenCalled();
   });
 
-  it("panier de l'invité et du parent : celui de la boutique publique", () => {
+  it("panier de l'invité : celui de la boutique publique ; du parent : celui de son espace", () => {
     expect(cartHref("guest")).toBe("/boutique/panier");
-    expect(cartHref("parent")).toBe("/boutique/panier");
+    expect(cartHref("parent")).toBe("/parent/boutique/panier");
+  });
+
+  it("shopRoutes : catalogue, fiche, panier et parcours de chaque contexte", () => {
+    expect(shopRoutes("learner")).toMatchObject({ shop: "/apprenant/boutique", cart: "/apprenant/boutique/panier" });
+    expect(shopRoutes("parent").shopKit("bot")).toBe("/parent/boutique/bot");
+    expect(shopRoutes("parent").course).toBeNull();
+    expect(shopRoutes("public").course?.("robot")).toBe("/parcours/robot");
+    expect(shopRoutes("public")).toMatchObject({ shop: "/boutique", cart: "/boutique/panier" });
   });
 });

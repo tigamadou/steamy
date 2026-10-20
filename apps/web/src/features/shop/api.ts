@@ -68,11 +68,11 @@ export function requestRestockAlert(slug: string, phone?: string): Promise<ApiRe
  * panier invité après avoir relu la fiche, la page publique étant en cache (prix et stock relus au moment d'ajouter).
  */
 export async function addToCart(
-  context: "learner" | "public",
+  context: "learner" | "parent" | "public",
   kitSlug: string,
   quantity = 1,
 ): Promise<ApiResult<{ shopper: Shopper }>> {
-  const shopper = context === "learner" ? "learner" : await probeShopper();
+  const shopper = context === "public" ? await probeShopper() : context;
   if (shopper !== "guest") {
     const result = await addCartItem(kitSlug, quantity);
     return result.ok ? { ok: true, data: { shopper } } : result;

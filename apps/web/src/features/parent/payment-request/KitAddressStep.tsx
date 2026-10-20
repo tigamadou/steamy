@@ -10,6 +10,8 @@ import { useReferential } from "@/lib/use-referential";
 
 type Address = Schemas["DeliveryAddress"];
 type Order = Schemas["OrderCreated"];
+/** Adresse envoyée à la commande (`deliveryAddress`). */
+export type DeliveryAddressInput = Schemas["DeliveryAddressInputRequest"];
 
 const REQUIRED: Record<Exclude<AddressField, "country">, string> = {
   zone: "Choisissez la zone de livraison.",
@@ -39,7 +41,8 @@ const IDS: Record<AddressField, string> = {
 };
 
 export type KitAddressStepProps = {
-  requestId: number;
+  /** Crée la commande à cette adresse (demande de l'enfant en WPD15, panier en achat direct). */
+  createOrder: (deliveryAddress: DeliveryAddressInput) => Promise<ApiResult<Order>>;
   /** Adresse par défaut (WPD08), préremplie et modifiable. */
   address: Address | null;
   /** Pays de la localité du parent, faute d'adresse enregistrée. */
@@ -52,11 +55,18 @@ export type KitAddressStepProps = {
 };
 
 /**
- * Adresse de livraison d'une demande de kit (WPD15, C10, D38) : préremplie depuis WPD08, zone du référentiel, option
+ * Adresse de livraison d'une commande de kit (WPD15, achat direct ; C10, D38) : préremplie depuis WPD08, zone du référentiel, option
  * « Enregistrer comme adresse par défaut ». « Continuer vers le paiement » crée la commande, qui réserve le stock
  * 30 minutes et calcule frais et total (serveur).
  */
-export function KitAddressStep({ requestId, address, defaultCountry, recipientName, onOrder, onOutOfStock }: KitAddressStepProps) {
+export function KitAddressStep({
+  createOrder,
+  address,
+  defaultCountry,
+  recipientName,
+  onOrder,
+  onOutOfStock,
+}: KitAddressStepProps) {
   const countries = useReferential("countries");
   const [country, setCountry] = useState(address?.zone.country ?? defaultCountry);
   const zones = useDeliveryZones(country);
@@ -91,9 +101,7 @@ export function KitAddressStep({ requestId, address, defaultCountry, recipientNa
       // L'enregistrement de l'adresse par défaut est un confort : son échec n'empêche pas la commande
       await apiCall((api) => api.PUT("/api/accounts/me/delivery-address/", { body: deliveryAddress }));
     }
-    const result: ApiResult<Order> = await apiCall((api) =>
-      api.POST("/api/payments/orders/", { body: { paymentRequestId: requestId, deliveryAddress } }),
-    );
+    const result = await createOrder(deliveryAddress);
     setPending(false);
     if (result.ok) return onOrder(result.data);
     if (result.code === "OUT_OF_STOCK") return onOutOfStock();

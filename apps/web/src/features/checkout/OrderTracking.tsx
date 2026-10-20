@@ -11,6 +11,7 @@ import { routes } from "@/lib/routes";
 
 import { getInvoice, getOrder } from "./api";
 import { readOrderToken, saveOrderToken } from "./checkout-storage";
+import { ORDER_STATUS_MESSAGES } from "./order-status";
 import { shippingSteps } from "./shipping";
 
 const FRAGMENT = /^#jeton=([\w-]+)$/;
@@ -30,20 +31,6 @@ function takeToken(reference: string): string | null {
 }
 
 type Loaded = { order: Schemas["Order"]; token: string | null } | { failure: ApiFailure };
-
-/** Titre et message de WK07 selon le statut de la commande (D37) ; `refunded` : paiement arrivé après le délai (C17). */
-const STATUS: Record<Schemas["OrderStatusEnum"], { title: string; body: string }> = {
-  paid: {
-    title: "Merci, c'est commandé !",
-    body: "un reçu vous a été envoyé par SMS. Vous êtes prévenu à chaque étape de la livraison.",
-  },
-  pending: { title: "Paiement en attente", body: "le paiement n'est pas encore confirmé." },
-  cancelled: { title: "Commande annulée", body: "elle n'a pas été payée à temps et le stock a été libéré." },
-  refunded: {
-    title: "Paiement reçu après le délai",
-    body: "la réservation avait expiré quand votre paiement est arrivé : il vous est remboursé automatiquement.",
-  },
-};
 
 /**
  * WK07 · Confirmation et suivi d'une commande de kits (C10) : référence, `ShippingTimeline` issue de
@@ -133,9 +120,9 @@ export function OrderTracking({ reference }: { reference: string }) {
       >
         <Mascot pose={paid ? "cheer" : "focus"} size={100} />
         <div>
-          <h1 className="text-[26px] font-black text-ink-900">{STATUS[order.status].title}</h1>
+          <h1 className="text-[26px] font-black text-ink-900">{ORDER_STATUS_MESSAGES[order.status].title}</h1>
           <p className="mt-1.5 text-sm font-semibold text-ink-700">
-            Commande <strong>{order.reference}</strong> · {STATUS[order.status].body}
+            Commande <strong>{order.reference}</strong> · {ORDER_STATUS_MESSAGES[order.status].body}
           </p>
         </div>
       </div>

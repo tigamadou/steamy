@@ -25,8 +25,8 @@ function Notice({ children, action }: { children: ReactNode; action: ReactNode }
 
 /**
  * Garde du tunnel invité : le panier doit être lu, non vide et entièrement disponible. Un apprenant connecté est
- * renvoyé vers son panier (il demande à son parent, S3) ; un parent connecté vers le panier public, qui le mène à son
- * espace (le tunnel invité lui redemanderait nom et téléphone). Rend `children` avec le panier prêt.
+ * renvoyé vers son panier (il demande à son parent, S3) ; un parent connecté vers le panier de son espace, où il
+ * commande (le tunnel invité lui redemanderait nom et téléphone). Rend `children` avec le panier prêt.
  */
 export function CheckoutGate({ children }: { children: (cart: ReadyCart) => ReactNode }) {
   const router = useRouter();
@@ -35,7 +35,7 @@ export function CheckoutGate({ children }: { children: (cart: ReadyCart) => Reac
   const away = shopper === "learner" || shopper === "parent";
   useEffect(() => {
     if (shopper === "learner") router.replace(routes.learner.cart);
-    else if (shopper === "parent") router.replace(routes.cart);
+    else if (shopper === "parent") router.replace(routes.parent.cart);
   }, [shopper, router]);
 
   if (state.status === "loading" || away) {
