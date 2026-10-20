@@ -169,3 +169,59 @@ describe("NotificationList (WD04)", () => {
     expect(within(nav).queryByRole("link", { name: "Précédent" })).toBeNull();
   });
 });
+
+describe("NotificationList (WPD14, espace parent)", () => {
+  const PAYMENT = notification({
+    id: 3,
+    type: "payment_request",
+    category: "payments",
+    title: "Léa vous demande un paiement",
+    message: "",
+    url: "/parent/demandes/12",
+  });
+
+  beforeEach(() => {
+    push.mockReset();
+    apiCall.mockReset();
+    notifyNotificationsChanged.mockReset();
+  });
+
+  it("routes du parent, réglages dans WPD08, cible de notificationHref et compteur de la cloche décrémenté", async () => {
+    const api = fakeApi();
+    result = { ok: true, data: { ...PAYMENT, readAt: "2026-10-16T10:00:00Z" } };
+    const { container } = render(
+      <NotificationList space="parent" tab="toutes" page={1} items={[PAYMENT]} unreadCount={3} hasNext={false} />,
+    );
+    expect(screen.getByRole("link", { name: "Non lues (3)" })).toHaveAttribute("href", "/parent/notifications?onglet=non-lues");
+    expect(screen.getByRole("link", { name: "Régler les notifications" })).toHaveAttribute(
+      "href",
+      "/parent/parametres#notifications",
+    );
+    expect(await axe(container)).toHaveNoViolations();
+    await userEvent.click(screen.getByRole("button", { name: /Léa vous demande un paiement/ }));
+    expect(api.POST).toHaveBeenCalledWith("/api/notifications/{id}/read/", { params: { path: { id: 3 } } });
+    expect(notifyNotificationsChanged).toHaveBeenCalledWith(2);
+    expect(push).toHaveBeenCalledWith("/parent/demandes/12");
+    expect(screen.getByRole("link", { name: "Non lues (2)" })).toBeInTheDocument();
+  });
+
+  it("« Tout marquer comme lu » au vouvoiement, puis « Vous avez tout lu »", async () => {
+    fakeApi();
+    result = { ok: true, data: { updated: 1 } };
+    render(<NotificationList space="parent" tab="non-lues" page={1} items={[PAYMENT]} unreadCount={1} hasNext={false} />);
+    await userEvent.click(screen.getByRole("button", { name: "Tout marquer comme lu" }));
+    expect(notifyNotificationsChanged).toHaveBeenCalledWith(0);
+    expect(screen.getByRole("status")).toHaveTextContent("Toutes vos notifications sont lues.");
+    expect(screen.getByText("Vous avez tout lu, rien de neuf.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Voir toutes mes notifications" })).toHaveAttribute("href", "/parent/notifications");
+  });
+
+  it("erreur de lecture au vouvoiement", async () => {
+    fakeApi();
+    result = { ok: false, code: "NETWORK_UNAVAILABLE", message: "", fields: {} };
+    render(<NotificationList space="parent" tab="toutes" page={1} items={[PAYMENT]} unreadCount={1} hasNext={false} />);
+    await userEvent.click(screen.getByRole("button", { name: /Léa vous demande un paiement/ }));
+    expect(screen.getByRole("status")).toHaveTextContent("Vérifiez votre connexion");
+    expect(push).not.toHaveBeenCalled();
+  });
+});

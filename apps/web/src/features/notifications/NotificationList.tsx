@@ -8,16 +8,19 @@ import { useState } from "react";
 import { Button, Icon, Mascot, NotifItem, Tabs, Toast } from "@/components/ds";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { formatRelative } from "@/lib/dates";
-import { routes } from "@/lib/routes";
+import type { NotificationTab } from "@/lib/routes";
 import { useFocusOnChange } from "@/lib/use-focus-on-change";
 import { notifyNotificationsChanged } from "@/features/shell/unread-count";
 
-import { notificationIcon, notificationTarget } from "./notification-icon";
+import { notificationIcon } from "./notification-icon";
+import { NOTIFICATION_SPACES, type NotificationSpaceId } from "./spaces";
 
 type Notification = Schemas["Notification"];
-export type NotificationTab = "toutes" | "non-lues";
+export type { NotificationTab };
 
 export type NotificationListProps = {
+  /** Espace affiché : apprenant (WD04, par défaut) ou parent (WPD14). */
+  space?: NotificationSpaceId;
   tab: NotificationTab;
   page: number;
   items: Notification[];
@@ -25,16 +28,23 @@ export type NotificationListProps = {
   hasNext: boolean;
 };
 
-const l = routes.learner;
 const PAGE_LINK =
   "inline-flex items-center gap-1.5 rounded-pill border-2 border-ink-200 px-4 py-2 text-sm font-extrabold text-ink-800 hover:border-ink-300 focus-visible:outline-3 focus-visible:outline-primary-500";
 
 /**
- * WD04 · liste des notifications : onglets « Toutes » / « Non lues (n) » dans l'URL, lecture au clic
+ * WD04 / WPD14 · liste des notifications : onglets « Toutes » / « Non lues (n) » dans l'URL, lecture au clic
  * (`POST notifications/{id}/read/`) puis navigation vers `url`, « Tout marquer comme lu », pagination. Chaque
  * changement du nombre de non-lues est signalé à la cloche du shell.
  */
-export function NotificationList({ tab, page, items: initialItems, unreadCount, hasNext }: NotificationListProps) {
+export function NotificationList({
+  space: spaceId = "learner",
+  tab,
+  page,
+  items: initialItems,
+  unreadCount,
+  hasNext,
+}: NotificationListProps) {
+  const space = NOTIFICATION_SPACES[spaceId];
   // Nouvelle page ou nouvel onglet : le focus passe à la liste
   const list = useFocusOnChange<HTMLUListElement>("notifications", `${tab}-${page}`);
   // Toast fermé alors qu'il avait le focus : le focus passe au contenu principal, pas à `body` (WCAG 2.4.3)
@@ -58,7 +68,7 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
       );
       setBusyId(null);
       if (!result.ok) {
-        setToast({ tone: "error", text: errorMessage(result, "tu") });
+        setToast({ tone: "error", text: errorMessage(result, space.register) });
         return;
       }
       setItems((current) => current.map((n) => (n.id === notification.id ? result.data : n)));
@@ -66,7 +76,7 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
       setUnread(next);
       notifyNotificationsChanged(next);
     }
-    const target = notificationTarget(notification.url);
+    const target = space.href(notification);
     if (target) router.push(target);
   }
 
@@ -75,7 +85,7 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
     const result = await apiCall((api) => api.POST("/api/notifications/read-all/"));
     setMarking(false);
     if (!result.ok) {
-      setToast({ tone: "error", text: errorMessage(result, "tu") });
+      setToast({ tone: "error", text: errorMessage(result, space.register) });
       return;
     }
     const now = new Date().toISOString();
@@ -83,7 +93,7 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
     setItems((current) => (tab === "non-lues" ? [] : current.map((n) => ({ ...n, readAt: n.readAt ?? now }))));
     setUnread(0);
     notifyNotificationsChanged(0);
-    setToast({ tone: "success", text: "Toutes tes notifications sont lues." });
+    setToast({ tone: "success", text: space.text.allRead });
   }
 
   return (
@@ -91,10 +101,10 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs
           label="Filtrer les notifications"
-          activeHref={l.notificationList(tab)}
+          activeHref={space.list(tab)}
           items={[
-            { href: l.notificationList("toutes"), label: "Toutes" },
-            { href: l.notificationList("non-lues"), label: `Non lues (${unread})` },
+            { href: space.list("toutes"), label: "Toutes" },
+            { href: space.list("non-lues"), label: `Non lues (${unread})` },
           ]}
         />
         <div className="flex items-center gap-2">
@@ -102,7 +112,7 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
             Tout marquer comme lu
           </Button>
           <Link
-            href={l.notificationPreferences}
+            href={space.preferences}
             aria-label="Régler les notifications"
             className="flex size-10 items-center justify-center rounded-md text-ink-700 hover:bg-ink-100 focus-visible:outline-3 focus-visible:outline-primary-500"
           >
@@ -114,8 +124,8 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
       {items.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-10 text-center">
           <Mascot pose="idle" size={120} hue="var(--primary-500)" />
-          <p className="m-0 text-sm font-semibold text-ink-600">Tu as tout lu, rien de neuf.</p>
-          <Link href={l.notificationList("toutes")} className="text-sm font-extrabold text-primary-600 underline">
+          <p className="m-0 text-sm font-semibold text-ink-600">{space.text.nothingUnread}</p>
+          <Link href={space.list("toutes")} className="text-sm font-extrabold text-primary-600 underline">
             Voir toutes mes notifications
           </Link>
         </div>
@@ -142,7 +152,7 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
       {(page > 1 || hasNext) && (
         <nav aria-label="Pagination des notifications" className="flex items-center justify-center gap-3">
           {page > 1 && (
-            <Link href={l.notificationList(tab, page - 1)} className={PAGE_LINK} rel="prev">
+            <Link href={space.list(tab, page - 1)} className={PAGE_LINK} rel="prev">
               <Icon name="arrow-left" size={16} strokeWidth={2.5} />
               Précédent
             </Link>
@@ -151,7 +161,7 @@ export function NotificationList({ tab, page, items: initialItems, unreadCount, 
             Page {page}
           </p>
           {hasNext && (
-            <Link href={l.notificationList(tab, page + 1)} className={PAGE_LINK} rel="next">
+            <Link href={space.list(tab, page + 1)} className={PAGE_LINK} rel="next">
               Suivant
               <Icon name="arrow-right" size={16} strokeWidth={2.5} />
             </Link>

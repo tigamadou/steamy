@@ -12,6 +12,8 @@ export type Referentials = {
   disabilities: Schemas["Disability"];
   goals: Schemas["Goal"];
   localities: Schemas["Locality"];
+  /** Réseaux Mobile Money actifs d'un pays (D76), lus par `PaymentForm`. */
+  "payment-networks": Schemas["PaymentNetwork"];
   "refusal-reasons": Schemas["RefusalReason"];
   relationships: Schemas["Relationship"];
   "school-grades": Schemas["SchoolGrade"];
@@ -66,12 +68,13 @@ type Result<N extends ReferentialName> = {
 };
 
 /**
- * Lit un référentiel côté navigateur. `localities` attend un pays (`country`) : sans lui, le hook reste `idle`.
+ * Lit un référentiel côté navigateur. `localities` et `payment-networks` attendent un pays (`country`) : sans lui, le
+ * hook reste `idle`.
  * Pensé pour `ReferentialSelect` (états chargement et erreur, bouton « Réessayer »).
  */
 export function useReferential<N extends ReferentialName>(name: N, options: { country?: string } = {}): Result<N> {
   const { country } = options;
-  const waiting = name === "localities" && !country;
+  const waiting = (name === "localities" || name === "payment-networks") && !country;
   const [attempt, setAttempt] = useState(0);
   const key = `${keyOf(name, country)}#${attempt}`;
   const [state, setState] = useState<{ key: string; items?: unknown[]; failed?: boolean }>({ key: "" });

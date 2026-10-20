@@ -16,6 +16,8 @@ const getKit = vi.fn();
 vi.mock("@/lib/shop", () => ({ getKit }));
 const getLearnerCourseState = vi.fn();
 vi.mock("./learner-state", () => ({ getLearnerCourseState }));
+const getPendingRequests = vi.fn(async () => [] as unknown[]);
+vi.mock("@/features/unlock/server", () => ({ getPendingRequests }));
 
 const { LearnerCourseView } = await import("./course-view");
 const { CourseDetailSkeleton } = await import("./course-detail");
@@ -99,6 +101,27 @@ describe("WC04 / WC05 · fiche parcours de l'apprenant", () => {
     render(await LearnerCourseView({ params: params("capteurs") }));
     expect(screen.getAllByText(/18\s000 F CFA/)).toHaveLength(2);
     expect(screen.getByText("📜 Certification")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Demander à mon parent" })).toBeInTheDocument();
+  });
+
+  it("parcours payant déjà demandé : « Demande envoyée » vers la demande en cours (WA02)", async () => {
+    getCourse.mockResolvedValue(courseDetail({ slug: "capteurs", isFree: false, price: 18000 }));
+    getLearnerCourseState.mockResolvedValue({ wished: [], progress: {} });
+    getPendingRequests.mockResolvedValueOnce([
+      { id: 3, course: { slug: "autre", title: "Autre" } },
+      { id: 9, course: null },
+      { id: 4, course: { slug: "capteurs", title: "Capteurs" } },
+    ]);
+    render(await LearnerCourseView({ params: params("capteurs") }));
+    expect(screen.getByRole("link", { name: "Demande envoyée" })).toHaveAttribute("href", "/apprenant/demandes/4");
+  });
+
+  it("demandes illisibles : « Demander à mon parent » reste proposé", async () => {
+    getCourse.mockResolvedValue(courseDetail({ slug: "capteurs", isFree: false, price: 18000 }));
+    getLearnerCourseState.mockResolvedValue({ wished: [], progress: {} });
+    getPendingRequests.mockRejectedValueOnce(new Error("panne"));
+    render(await LearnerCourseView({ params: params("capteurs") }));
+    expect(screen.getByRole("button", { name: "Demander à mon parent" })).toBeInTheDocument();
   });
 
   it("boutique, souhaits ou inscriptions en panne : fiche dégradée, pas d'échec", async () => {
