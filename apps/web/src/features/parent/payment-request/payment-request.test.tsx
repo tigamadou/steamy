@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { useEffect } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { apiCall } from "@/lib/api-call";
 import { resetReferentials } from "@/lib/use-referential";
 import { axe } from "@/test/axe";
 import {
@@ -309,7 +310,9 @@ describe("KitAddressStep (adresse d'un kit, C10, D38)", () => {
     const onOutOfStock = vi.fn();
     render(
       <KitAddressStep
-        requestId={12}
+        createOrder={(deliveryAddress) =>
+          apiCall((api) => api.POST("/api/payments/orders/", { body: { paymentRequestId: 12, deliveryAddress } }))
+        }
         address={address}
         defaultCountry="BJ"
         recipientName="Marie Adjovi"

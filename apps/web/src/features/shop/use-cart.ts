@@ -37,8 +37,8 @@ export type CartState =
   | { status: "error"; message: string }
   | ({ status: "ready"; shopper: Shopper } & CartContents);
 
-/** `learner` : espace apprenant, panier serveur. `public` : boutique publique, panier selon la session. */
-export type CartContext = "learner" | "public";
+/** `learner`, `parent` : espace connecté, panier serveur. `public` : boutique publique, panier selon la session. */
+export type CartContext = "learner" | "parent" | "public";
 
 class CartLoadError extends Error {
   constructor(readonly failure: ApiFailure) {
@@ -84,7 +84,7 @@ async function loadGuest(): Promise<CartContents> {
 }
 
 async function load(context: CartContext): Promise<Extract<CartState, { status: "ready" }>> {
-  const shopper = context === "learner" ? "learner" : await probeShopper();
+  const shopper = context === "public" ? await probeShopper() : context;
   if (shopper === "guest") return { status: "ready", shopper, ...(await loadGuest()) };
   // Retour de la connexion : le panier invité rejoint le panier serveur (idempotent, stockage vidé au fil de l'eau)
   if (readGuestCart().length > 0) await mergeGuestCart();

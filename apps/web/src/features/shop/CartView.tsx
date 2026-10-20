@@ -8,7 +8,7 @@ import { formatPrice } from "@/lib/format";
 import { routes } from "@/lib/routes";
 import { useUndoableAction } from "@/lib/use-undoable-action";
 
-import type { ShopContext } from "./AddToCartButton";
+import { cartHref, shopRoutes, type ShopContext } from "./shop-routes";
 import { useCart, type CartLine } from "./use-cart";
 
 export type CartViewProps = {
@@ -37,8 +37,8 @@ function droppedMessage(count: number, tu: boolean): string {
 /**
  * WK03 / WK10 · Panier. Invité : `localStorage`, CTA « Commander » → WK04, sous-total « estimé » (somme des prix
  * relus, le total fait foi à WK06). Apprenant : panier serveur, CTA « Demander à mon parent » (WK08). Parent connecté :
- * pas de tunnel invité, son achat passe par son espace (lot 4). Un apprenant connecté arrivé sur le panier public est
- * renvoyé vers le sien. Prix et sous-total de l'API ; la livraison est calculée à l'étape suivante.
+ * panier serveur dans son espace, « Commander » → livraison et paiement (C10, LOT-4 4.5). Un compte connecté arrivé sur
+ * le panier public est renvoyé vers celui de son espace. Prix et sous-total de l'API ; la livraison est calculée à l'étape suivante.
  */
 export function CartView({ context, zones, onRequestParent }: CartViewProps) {
   const router = useRouter();
@@ -51,15 +51,16 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
   // Next garde la page masquée (Activity) après l'ouverture de WK08 : au retour sur le panier, le bouton est libéré
   useEffect(() => () => setAsking(false), []);
   const listHeading = useRef<HTMLHeadingElement>(null);
-  const shop = tu ? routes.learner.shop : routes.shop;
-  const kitHref = tu ? routes.learner.shopKit : routes.shopKit;
+  const { shop, shopKit: kitHref } = shopRoutes(context);
 
-  const learnerOnPublic = context === "public" && state.status === "ready" && state.shopper === "learner";
+  // Compte connecté arrivé sur le panier public : renvoyé vers le panier de son espace (C10)
+  const away =
+    context === "public" && state.status === "ready" && state.shopper !== "guest" ? state.shopper : null;
   useEffect(() => {
-    if (learnerOnPublic) router.replace(routes.learner.cart);
-  }, [learnerOnPublic, router]);
+    if (away) router.replace(cartHref(away));
+  }, [away, router]);
 
-  if (state.status === "loading" || learnerOnPublic) return <CartSkeleton />;
+  if (state.status === "loading" || away) return <CartSkeleton />;
   if (state.status === "error") {
     return (
       <div role="alert" className="flex flex-col items-center gap-3 rounded-[22px] bg-ink-50 px-6 py-10 text-center">
@@ -197,22 +198,18 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
               Demander à mon parent
             </Button>
           )
-        ) : state.shopper === "parent" ? (
-          // Le tunnel invité demande nom et téléphone : un parent connecté achète depuis son espace (C10, lot 4)
-          <>
-            <p className="text-sm font-semibold text-ink-700">
-              Vous êtes connecté avec votre compte parent : vos commandes se passent depuis votre espace parent.
-            </p>
-            <Button block size="lg" variant="outline" href={routes.parent.home} iconRight="arrow-right">
-              Aller à mon espace parent
-            </Button>
-          </>
         ) : unavailable ? (
           <Button block size="lg" disabled>
             Commander
           </Button>
         ) : (
-          <Button block size="lg" href={routes.checkout.guest} iconRight="arrow-right">
+          // Parent connecté : livraison et paiement dans son espace (C10) ; invité : tunnel WK04 → WK06
+          <Button
+            block
+            size="lg"
+            href={state.shopper === "parent" ? routes.parent.checkout : routes.checkout.guest}
+            iconRight="arrow-right"
+          >
             Commander
           </Button>
         )}

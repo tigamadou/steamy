@@ -216,22 +216,29 @@ describe("panier public vu par un compte connecté", () => {
     expect(screen.getByRole("status", { name: "Chargement du panier…" })).toBeInTheDocument();
   });
 
-  it("parent : panier serveur, sans le tunnel invité ; renvoi vers son espace", async () => {
+  it("parent : panier invité versé puis renvoi vers le panier de son espace (C10)", async () => {
+    writeGuestCart([{ kitSlug: "steamy-bot-v1", quantity: 1 }]);
     api.probeShopper.mockResolvedValue("parent");
     api.getCart.mockResolvedValue({ ok: true, data: cart([{ id: 1, kit: KIT, quantity: 1 }]) });
     render(<CartView context="public" />);
-    expect(await screen.findByRole("link", { name: "Aller à mon espace parent" })).toHaveAttribute("href", "/parent");
-    expect(screen.queryByRole("link", { name: "Commander" })).not.toBeInTheDocument();
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/parent/boutique/panier"));
+    expect(api.mergeGuestCart).toHaveBeenCalled();
+  });
+
+  it("panier du parent dans son espace : panier serveur, « Commander » → livraison et paiement", async () => {
+    api.getCart.mockResolvedValue({ ok: true, data: cart([{ id: 1, kit: KIT, quantity: 1 }]) });
+    const { container } = render(<CartView context="parent" />);
+    expect(await screen.findByRole("link", { name: "Commander" })).toHaveAttribute("href", "/parent/boutique/commande");
     expect(screen.getByText("Sous-total (1 article)")).toBeInTheDocument();
-    expect(api.mergeGuestCart).not.toHaveBeenCalled();
+    expect(api.probeShopper).not.toHaveBeenCalled();
     expect(router.replace).not.toHaveBeenCalled();
+    expect(await axe(container)).toHaveNoViolations();
   });
 
   it("kits refusés à la fusion du panier invité : signalés une fois au vouvoiement", async () => {
     window.sessionStorage.setItem("steamy:panier-ecartes", "2");
-    api.probeShopper.mockResolvedValue("parent");
     api.getCart.mockResolvedValue({ ok: true, data: cart([{ id: 1, kit: KIT, quantity: 1 }]) });
-    render(<CartView context="public" />);
+    render(<CartView context="parent" />);
     expect(
       await screen.findByText("2 kits de votre panier ne sont plus disponibles : ils ont été retirés."),
     ).toBeInTheDocument();

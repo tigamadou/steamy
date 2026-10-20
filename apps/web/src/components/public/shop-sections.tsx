@@ -1,10 +1,10 @@
 import { connection } from "next/server";
 
 import { Button, Mascot, SkeletonBlock, WKKitCard } from "@/components/ds";
-import { AddToCartButton, type ShopContext } from "@/features/shop/AddToCartButton";
+import { AddToCartButton } from "@/features/shop/AddToCartButton";
+import { shopRoutes, type ShopContext } from "@/features/shop/shop-routes";
 import { getCategories } from "@/lib/catalog";
 import { listHref, parseCatalogFilters } from "@/lib/catalog-filters";
-import { routes } from "@/lib/routes";
 import { getKits, toKitCard } from "@/lib/shop";
 
 import { CatalogPagination, CategoryFilters } from "./catalog";
@@ -25,8 +25,7 @@ export async function ShopCatalog({
   const categories = await getCategories();
   const current = categories.find((c) => c.slug === category);
   const kits = await getKits({ category: current?.slug, page });
-  const base = context === "learner" ? routes.learner.shop : routes.shop;
-  const kitHref = context === "learner" ? routes.learner.shopKit : routes.shopKit;
+  const { shop: base, shopKit: kitHref } = shopRoutes(context);
   return (
     <>
       <CategoryFilters categories={categories} active={current?.slug} base={base} />
