@@ -6,13 +6,8 @@ import { axe } from "@/test/axe";
 
 const getCurrentUser = vi.fn();
 const GET = vi.fn();
-const flags = vi.hoisted(() => ({
-  unlock: false,
-  orders: false,
-}));
 vi.mock("@/lib/auth/session", () => ({ getCurrentUser: () => getCurrentUser() }));
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
-vi.mock("@/lib/features", () => ({ features: flags }));
 
 const { ProfileHub, ProfileHubSkeleton } = await import("./ProfileHub");
 
@@ -42,7 +37,6 @@ describe("ProfileHub (WD13)", () => {
   beforeEach(() => {
     getCurrentUser.mockReset().mockResolvedValue(ME);
     GET.mockReset().mockResolvedValue({ data: PROFILE, response: new Response(null, { status: 200 }) });
-    flags.orders = false;
   });
 
   it("affiche le profil lu dans l'API et l'identifiant en lecture seule", async () => {
@@ -66,7 +60,7 @@ describe("ProfileHub (WD13)", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("renvoie vers WD17, WD18, WD19, WD06, WD21, WD22, les CGU, l'aide et WD15 ; WD14 absent, jamais « Bientôt »", async () => {
+  it("renvoie vers WD17, WD18, WD19, WD06, WD21, WD22, WD14, les CGU, l'aide et WD15 ; jamais « Bientôt »", async () => {
     await renderHub();
     const hrefs = screen.getAllByRole("link").map((link) => link.getAttribute("href"));
     expect(hrefs).toEqual([
@@ -74,6 +68,7 @@ describe("ProfileHub (WD13)", () => {
       "/apprenant/profil/mot-de-passe",
       "/apprenant/profil/livraison",
       "/apprenant/notifications/preferences",
+      "/apprenant/profil/commandes",
       "/apprenant/profil/progression",
       "/apprenant/profil/parent",
       "/legal/cgu",
@@ -103,8 +98,7 @@ describe("ProfileHub (WD13)", () => {
     ]);
   });
 
-  it("drapeau `orders` ouvert : « Mes commandes » (WD14)", async () => {
-    flags.orders = true;
+  it("« Mes commandes » (WD14) dans « Mon compte »", async () => {
     await renderHub();
     expect(
       within(screen.getByRole("region", { name: "Mon compte" })).getByRole("link", { name: /Mes commandes/ }),

@@ -39,6 +39,11 @@ export function formatFullDate(isoDateTime: string): string {
   return FULL_DATE.format(new Date(isoDateTime));
 }
 
+/** Heure au fuseau de la plateforme, « 14:32 » (heure limite d'une réservation de stock). */
+export function formatTime(isoInstant: string): string {
+  return TIME.format(new Date(isoInstant));
+}
+
 /** Créneau « 14:00 – 16:30 ». */
 export function formatTimeRange(startIso: string, endIso: string): string {
   return `${TIME.format(new Date(startIso))} – ${TIME.format(new Date(endIso))}`;
@@ -69,4 +74,10 @@ export function formatRelative(isoInstant: string, now: Date = new Date()): stri
   if (days === 1) return "hier";
   if (days < 7) return `il y a ${days} j`;
   return LONG_DATE.format(date);
+}
+
+/** Instant au fuseau de la plateforme, jour et heure : « 17 octobre 2026 à 09:30 » (relance de WA02). */
+export function formatInstantTime(isoInstant: string): string {
+  const date = new Date(isoInstant);
+  return `${LONG_DATE.format(date)} à ${TIME.format(date)}`;
 }

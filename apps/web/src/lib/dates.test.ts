@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
 
-import { datePill, formatDate, formatFullDate, formatInstant, formatRelative, formatTimeRange } from "./dates";
+import {
+  datePill,
+  formatDate,
+  formatFullDate,
+  formatInstant,
+  formatInstantTime,
+  formatRelative,
+  formatTime,
+  formatTimeRange,
+} from "./dates";
+
+describe("formatInstantTime", () => {
+  it("donne le jour et l'heure au fuseau de Porto-Novo", () => {
+    expect(formatInstantTime("2026-10-17T08:30:00Z")).toBe("17 octobre 2026 à 09:30");
+  });
+});
 
 describe("formatDate", () => {
   it("écrit la date en toutes lettres, en français", () => {
@@ -13,6 +28,7 @@ describe("formatDate", () => {
     expect(datePill("2026-06-28T13:00:00Z")).toEqual({ day: "28", month: "JUIN" });
     expect(formatFullDate("2026-11-05T13:00:00Z")).toBe("jeudi 5 novembre 2026");
     expect(formatTimeRange("2026-11-05T13:00:00Z", "2026-11-05T15:30:00Z")).toBe("14:00 – 16:30");
+    expect(formatTime("2026-11-05T13:32:00Z")).toBe("14:32");
   });
 });
 

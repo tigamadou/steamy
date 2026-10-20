@@ -70,7 +70,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WD11` | Demande de participation | 3 | P6 : motivation obligatoire, expérience, accord du parent, envoi → WD10 ; second envoi refusé (`ALREADY_APPLIED`) ; événement complet sans formulaire | `apps/web/e2e/apprenant-evenements.spec.ts` |
 | `WD12` | Aide & support | 3 | Recherche locale dans la FAQ, « Contacter le support » → WL24 | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
 | `WD13` | Paramètres (hub) | 3 | Apprenant neuf : identifiant en lecture seule, ni téléphone ni « Bientôt », liens vers WD06, CGU, WD18 et retour par le fil d'Ariane | `apps/web/e2e/profil-parametres.spec.ts` |
-| `WD14` | Historique de commande | 3 |  |  |
+| `WD14` | Historique de commande | 3 | P3 : demande « En attente de ton parent » depuis le hub WD13, sans facture, puis commande payée sous le filtre « Payées » | `apps/web/e2e/deblocage-p3-demande-parent.spec.ts` |
 | `WD15` | Supprimer le compte | 3 | Règle D40 (J+30, factures conservées), demande envoyée au parent, état conservé au rechargement, annulation | `apps/web/e2e/profil-livraison-parent-suppression.spec.ts` |
 | `WD16` | Déconnexion (modal partagé) | 3 | Shell apprenant : annulation par Échap puis déconnexion, espace refermé | `apps/web/e2e/apprenant-shell.spec.ts` |
 | `WD17` | Éditer le profil | 3 | Formulaire prérempli, date incohérente refusée (D23), modifier le profil puis recharger, classe reprise par WD13 | `apps/web/e2e/profil-parametres.spec.ts` |
@@ -83,18 +83,18 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WC02b` | Dropdown Niveau ouvert | 3 | Menu « Difficulté » ouvert (options cochables, axe), choix au clavier | `apps/web/e2e/catalogue-apprenant.spec.ts` |
 | `WC03` | Aucun résultat | 3 | « Aucun parcours ne correspond », « Voir toutes les catégories », « Effacer les filtres » | `apps/web/e2e/catalogue-apprenant.spec.ts` |
 | `WC04` | Détail parcours gratuit | 3 | Titre en h2, programme, sans note (C8), aucun contact Vimeo avant clic (`player.vimeo.com` intercepté), CSP `frame-src` ; « Continuer » si inscrit ; « Commencer le parcours » → WJ01 (apprenant neuf) ; 404 dans le shell | `apps/web/e2e/catalogue-apprenant.spec.ts` |
-| `WC05` | Détail parcours payant + kit | 3 | Parcours à kit : « Débloqué avec le Kit Code », kit et prix lus dans la boutique, pas de prix de parcours ; payant : prix de l'API, CTA de déblocage absents (drapeau `unlock`) | `apps/web/e2e/catalogue-apprenant.spec.ts` |
+| `WC05` | Détail parcours payant + kit | 3 | Parcours à kit : « Débloqué avec le Kit Code », kit et prix lus dans la boutique, pas de prix de parcours ; payant : prix de l'API ; « J'ai un Kit Code » → WA01 ; « Demander à mon parent » → WA02, « Demande envoyée » si une demande est en cours (P2, P3) | `apps/web/e2e/catalogue-apprenant.spec.ts`, `apps/web/e2e/deblocage-p2-kit-code.spec.ts`, `apps/web/e2e/deblocage-p3-demande-parent.spec.ts` |
 | `WC06a` | Vue inscrit · projets repliés | 3 | Arbre du parcours suivi, étape verrouillée non cliquable | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WC06b` | Vue inscrit · projet 2 déplié | 3 | Projet déplié par `?projet=`, prochaine mission « en cours » | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WW01` | Avec items | 3 | Souhaits du jeu de démo, tri dans l'URL ; P7 : retrait optimiste, rechargement | `apps/web/e2e/souhaits-apprenant.spec.ts` |
 | `WW02` | Vide | 3 | Apprenant neuf sans souhait → « Découvrir le catalogue » ; dernier souhait retiré | `apps/web/e2e/souhaits-apprenant.spec.ts` |
 | `WW03` | Toast après retrait | 3 | P7 : toast `aria-live`, « Annuler » rétablit le souhait, conservé après rechargement | `apps/web/e2e/souhaits-apprenant.spec.ts` |
-| `WA01` | Saisie du Kit Code | 3 |  |  |
-| `WA02` | Paiement par le parent | 3 |  |  |
+| `WA01` | Saisie du Kit Code | 3 | P2 : WC05 → WA01, code valide saisi en minuscules sans tirets → WC06a avec le toast « Parcours débloqué » → WD23 | `apps/web/e2e/deblocage-p2-kit-code.spec.ts` |
+| `WA02` | Paiement par le parent | 3 | P3 : WC05 → WA02 en attente, relance limitée, bandeau WD23, annulation, nouvelle demande réglée par le parent (API) → « C'est réglé ! » → WC06a, notification | `apps/web/e2e/deblocage-p3-demande-parent.spec.ts` |
 | `WA03` | Formulaire de paiement Mobile Money | 3 |  |  |
 | `WA04` | Paiement en cours | 3 |  |  |
 | `WA05` | Paiement réussi | 3 |  |  |
-| `WA06` | Kit Code invalide | 3 |  |  |
+| `WA06` | Kit Code invalide | 3 | P2 : code inconnu (`KIT_CODE_INVALID`), code déjà utilisé par un autre apprenant (`KIT_CODE_ALREADY_USED`) | `apps/web/e2e/deblocage-p2-kit-code.spec.ts` |
 | `WA07` | Paiement échoué | 3 |  |  |
 | `WJ01` | Détail projet | 3 | Projet → niveaux, accessibilité | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WJ02` | Intro niveau | 3 | Niveau → missions, vidéo factice | `apps/web/e2e/apprenant-parcours.spec.ts` |
@@ -135,13 +135,13 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WT12` | Notifications | 5 |  |  |
 | `WK01` | Catalogue kits | 3 | Boutique dans le shell (h1 du header), cartes vers la fiche, « Ajouter » → toast ; WL07 invité : « Ajouter » seulement si en stock | `apps/web/e2e/boutique-panier.spec.ts`, `apps/web/e2e/evenements-boutique.spec.ts` |
 | `WK02` | Détail kit | 3 | Fiche dans le shell, parcours compatibles → WC05, délais par zone lus dans l'API, « Acheter maintenant » → WK03 | `apps/web/e2e/boutique-panier.spec.ts` |
-| `WK03` | Panier | 3 | P5 (partie panier) : panier serveur, quantité, retrait, survit à une reconnexion ; panier invité fusionné à la connexion (W16 `?next=`) ; « Commander » invité → WK04 ; panier public → panier de l'apprenant | `apps/web/e2e/boutique-panier.spec.ts` |
-| `WK04` | Informations invité | 3 |  |  |
-| `WK05` | Livraison | 3 |  |  |
-| `WK06` | Paiement | 3 |  |  |
-| `WK07` | Confirmation & suivi | 3 |  |  |
-| `WK08` | Paiement par le parent | 3 |  |  |
-| `WK09` | Paiement échoué | 3 |  |  |
+| `WK03` | Panier | 3 | P5 (partie panier) : panier serveur, quantité, retrait, survit à une reconnexion ; panier invité fusionné à la connexion (W16 `?next=`) ; « Commander » invité → WK04 ; panier public → panier de l'apprenant ; « Demander à mon parent » → WK08 (P5) | `apps/web/e2e/boutique-panier.spec.ts`, `apps/web/e2e/boutique-demande-parent.spec.ts` |
+| `WK04` | Informations invité | 3 | P4 : champs obligatoires, conditions, coordonnées gardées dans l'onglet | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
+| `WK05` | Livraison | 3 | P4 : `AddressForm`, zones du pays, frais et délai lus dans la zone, création de la commande | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
+| `WK06` | Paiement | 3 | P4 : total et heure limite de réservation du serveur, `PaymentForm` (réseau, numéro du faux prestataire) | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
+| `WK07` | Confirmation & suivi | 3 | P4 : `ShippingTimeline`, délai de la zone, Kit Code sur la notice, panier vidé, `Referrer-Policy: no-referrer` | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
+| `WK08` | Paiement par le parent | 3 | P5 (fin) : WK03 → « Demander à mon parent » → WK08 (montant des articles, livraison ajoutée par le parent, sans relance), annulation → panier, nouvelle demande réglée par le parent (API) → « C'est réglé ! » → WD14 | `apps/web/e2e/boutique-demande-parent.spec.ts` |
+| `WK09` | Paiement échoué | 3 | P4 : échec (numéro en `…02`), panier conservé, « Changer de numéro » puis succès | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
 | `WK10` | Panier vide | 3 | Apprenant neuf et invité : « Voir les kits », délais par zone | `apps/web/e2e/boutique-panier.spec.ts` |
 | `WK11` | Stock épuisé | 3 | Invité : « Indisponible », alerte par SMS (`PhoneInput`), kits similaires ; apprenant : alerte dans l'application sans champ téléphone (D30) | `apps/web/e2e/boutique-panier.spec.ts` |
 | `WAD01` | Vue d'ensemble | 6 | Support : chiffres et échéance du serveur, sans lien vers l'Impact Tracker ; « Consentements en attente » → liste Django filtrée | `apps/web/e2e/backoffice.spec.ts` |
@@ -165,6 +165,6 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WL22` | Fiche parcours publique (variante de WC04 sans contenu des missions) | 1 | WL06 → fiche → CTA inscription avec `next` ; sans contenu de mission ni Vimeo ; plan au clavier ; kit requis ; brouillon → 404 | `apps/web/e2e/fiche-parcours.spec.ts` |
 | `WL23` | Fiche événement (publique, réutilisée dans les espaces connectés) | 1 | CTA visiteur → connexion avec `next` ; complet et passé désactivés avec motif ; inconnu → 404. Dans le shell apprenant (P6) : titre en h2, « Demander à participer » → WD11, complet désactivé avec motif, inconnu → 404 | `apps/web/e2e/evenements-boutique.spec.ts`, `apps/web/e2e/apprenant-evenements.spec.ts` |
 | `WL24` | Aide & contact (FAQ + formulaire) | 1 | Contact : « Rejoindre l'équipe » → `?sujet=candidature` → envoi → confirmation ; FAQ et recherche ; ancres | `apps/web/e2e/formulaires.spec.ts` |
-| `WD23` | Mes parcours (liste des inscriptions) | 3 | Onglets En cours / Terminés adressables, carte → arbre | `apps/web/e2e/apprenant-parcours.spec.ts` |
+| `WD23` | Mes parcours (liste des inscriptions) | 3 | Onglets En cours / Terminés adressables, carte → arbre ; bandeau « En attente de ton parent » (P3), parcours débloqué listé (P2, P3) | `apps/web/e2e/apprenant-parcours.spec.ts`, `apps/web/e2e/deblocage-p2-kit-code.spec.ts`, `apps/web/e2e/deblocage-p3-demande-parent.spec.ts` |
 | `WPD15` | Demande de paiement (parcours, kit ou événement demandé par l'enfant ; reprend WA03) | 4 |  |  |
 | `WT13` | Créer une classe (une classe = un parcours, D62) | 5 |  |  |

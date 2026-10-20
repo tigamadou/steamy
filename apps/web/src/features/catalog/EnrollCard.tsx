@@ -6,9 +6,9 @@ import { useState } from "react";
 
 import { Badge, Button, KitMiniCard, ProgressBar } from "@/components/ds";
 import { offerOf, plural, stringList } from "@/components/public/course-detail";
-import { features } from "@/lib/features";
 import { formatPrice } from "@/lib/format";
 import { routes } from "@/lib/routes";
+import { createPaymentRequest } from "@/features/unlock/api";
 
 import { enroll, failureMessage } from "./api";
 import { useWishlist } from "./use-wishlist";
@@ -20,14 +20,17 @@ export type EnrollCardProps = {
   wished: boolean;
   /** Kit requis lu dans la boutique (nom, prix, disponibilité), `null` s'il n'est plus en vente. */
   kit: Schemas["KitDetail"] | null;
+  /** Demande au parent encore en attente pour ce parcours (WA02), sinon absent. */
+  pendingRequestId?: number;
 };
 
 /**
  * Carte d'inscription de WC04/WC05, `sticky` dans sa colonne. Parcours gratuit : « Commencer le parcours » crée
  * l'inscription puis ouvre WJ01 du premier projet ; déjà inscrit : « Continuer » → WC06a. Parcours avec kit : pas de
- * prix de parcours (D36). Les CTA de déblocage attendent l'étape 3.6 (drapeau `unlock`). Aucun prix calculé ici (D37).
+ * prix de parcours (D36), « J'ai un Kit Code » → WA01. Parcours payant : « Demander à mon parent » crée la demande puis
+ * ouvre WA02 ; une demande déjà en cours devient « Demande envoyée » → WA02. Aucun prix calculé ici (D37).
  */
-export function EnrollCard({ course, progress, wished, kit }: EnrollCardProps) {
+export function EnrollCard({ course, progress, wished, kit, pendingRequestId }: EnrollCardProps) {
   const router = useRouter();
   const offer = offerOf(course);
   const enrolled = progress !== undefined;
@@ -47,6 +50,18 @@ export function EnrollCard({ course, progress, wished, kit }: EnrollCardProps) {
     }
     const project = result.data.currentProject;
     router.push(project ? routes.learner.project(course.slug, project.id) : routes.learner.course(course.slug));
+  };
+
+  const askParent = async () => {
+    setPending(true);
+    setError(null);
+    const result = await createPaymentRequest({ kind: "course", courseSlug: course.slug });
+    if (!result.ok) {
+      setError(result.fields.courseSlug || failureMessage(result));
+      setPending(false);
+      return;
+    }
+    router.push(routes.learner.request(result.data.id));
   };
 
   const levels = course.projects.reduce((n, project) => n + project.levels.length, 0);
@@ -91,8 +106,12 @@ export function EnrollCard({ course, progress, wished, kit }: EnrollCardProps) {
                 <p className="text-[30px] leading-none font-black text-ink-900">{formatPrice(course.price ?? 0)}</p>
                 <p className="mt-1.5 text-xs font-bold text-ink-600">Payé par ton parent · accès à vie</p>
               </div>
-              {features.unlock && (
-                <Button block size="lg" icon="user" href={routes.learner.parentRequest(course.slug)}>
+              {pendingRequestId ? (
+                <Button block size="lg" variant="outline" icon="check" href={routes.learner.request(pendingRequestId)}>
+                  Demande envoyée
+                </Button>
+              ) : (
+                <Button block size="lg" icon="user" loading={pending} onClick={askParent}>
                   Demander à mon parent
                 </Button>
               )}
@@ -107,11 +126,9 @@ export function EnrollCard({ course, progress, wished, kit }: EnrollCardProps) {
                   paiement séparé.
                 </span>
               </p>
-              {features.unlock && (
-                <Button block size="lg" icon="gift" href={routes.learner.kitCode(course.slug)}>
-                  J&apos;ai un Kit Code
-                </Button>
-              )}
+              <Button block size="lg" icon="gift" href={routes.learner.kitCode(course.slug)}>
+                J&apos;ai un Kit Code
+              </Button>
             </>
           )}
           {error && (

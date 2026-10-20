@@ -103,10 +103,10 @@ export const routes = {
     /** Catalogue filtré par une recherche (`q`, recherche du header). */
     catalogSearch: (q: string) => `/apprenant/catalogue?q=${encodeURIComponent(q)}`,
     catalogCourse: (slug: string) => `/apprenant/catalogue/${slug}`,
-    /** WA01 · saisie du Kit Code (3.6, derrière le drapeau `unlock`). */
+    /** WA01 / WA06 · saisie du Kit Code. */
     kitCode: (slug: string) => `/apprenant/catalogue/${slug}/kit-code`,
-    /** Demande de déblocage au parent (3.6, derrière le drapeau `unlock`), qui mène ensuite à WA02. */
-    parentRequest: (slug: string) => `/apprenant/catalogue/${slug}/demande`,
+    /** WA02 / WK08 · demande de paiement au parent, créée depuis WC05 ou le panier. */
+    request: (id: number | string) => `/apprenant/demandes/${id}`,
     wishlist: "/apprenant/souhaits",
     /** WK01 · boutique de kits dans le shell. */
     shop: "/apprenant/boutique",
@@ -117,6 +117,14 @@ export const routes = {
     password: "/apprenant/profil/mot-de-passe",
     delivery: "/apprenant/profil/livraison",
     orders: "/apprenant/profil/commandes",
+    /** WD14 : filtre (`?statut=`) et page dans l'URL (« Toutes » et la page 1 n'y figurent pas). */
+    orderList: (status?: string, page = 1) => {
+      const query = new URLSearchParams();
+      if (status) query.set("statut", status);
+      if (page > 1) query.set("page", String(page));
+      const search = query.toString();
+      return search ? `/apprenant/profil/commandes?${search}` : "/apprenant/profil/commandes";
+    },
     progress: "/apprenant/profil/progression",
     parent: "/apprenant/profil/parent",
     deletion: "/apprenant/profil/suppression",

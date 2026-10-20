@@ -29,6 +29,7 @@ urlpatterns = [
     ),
     path("api/accounts/", include("apps.accounts.urls.accounts")),
     path("api/catalog/", include("apps.catalog.urls")),
+    path("api/classrooms/", include("apps.classrooms.urls")),
     path("api/events/", include("apps.events.urls")),
     path("api/learning/", include("apps.learning.urls")),
     path("api/wishlist/", include("apps.wishlist.urls")),
