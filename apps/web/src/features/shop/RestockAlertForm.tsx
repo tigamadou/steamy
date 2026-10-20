@@ -5,7 +5,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Button, Field, PhoneInput, type PhoneChange } from "@/components/ds";
 import { errorMessage } from "@/lib/api-call";
 import { useReferential } from "@/lib/use-referential";
-import { throttledLabel, useThrottle } from "@/lib/use-throttle";
+import { throttledLabel, useThrottle } from "@/components/ds/RetryCountdown";
 
 import { probeShopper, requestRestockAlert, type Shopper } from "./api";
 import type { ShopContext } from "./AddToCartButton";

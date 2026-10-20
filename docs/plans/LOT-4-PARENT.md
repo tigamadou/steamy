@@ -46,13 +46,13 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation 
   - [x] `ResetChildPasswordDialog` de `WPD03` (« Communiquez-le à votre enfant », D26)
   - [x] `WPD04` Ajouter un enfant (`ChildForm` : date de naissance 10-17 ans, lien de parenté, identifiant sans `@` ni chiffres seuls, `PwReq`, redirection vers `WPD03` avec rappel de l'identifiant)
   - [x] `WPD10` Modifier le profil (identifiant non modifiable, genre et handicap facultatifs avec finalité, localité qualifiée, erreur `BIRTHDATE_AGE_MISMATCH`)
-  - [x] Branchement API : `accounts/children/` (GET/POST), `{id}/` (GET/PATCH), `password-reset/`, `auth/username-availability/`, référentiels (`classrooms/comments/?learnerId=` attend API-L5)
-  - [x] Tests unitaires : `ChildForm` (`USERNAME_TAKEN`, `AGE_OUT_OF_RANGE`, `PASSWORD_TOO_WEAK` au champ), `ChildRow` pour les 3 statuts, `TeacherComments` vide tant qu'API-L5 n'est pas livrée
+  - [x] Branchement API : `accounts/children/` (GET/POST), `{id}/` (GET/PATCH), `password-reset/`, `auth/username-availability/`, référentiels, `classrooms/comments/?learnerId=` (API-L5)
+  - [x] Tests unitaires : `ChildForm` (`USERNAME_TAKEN`, `AGE_OUT_OF_RANGE`, `PASSWORD_TOO_WEAK` au champ), `ChildRow` pour les 3 statuts, `TeacherComments` (commentaires lus dans l'API, état vide, lecture en échec)
   - [x] Playwright : le parent crée un enfant, l'enfant se connecte sur `W16` et arrive sur `W11`
   - [x] Playwright : réinitialisation du mot de passe, l'ancien est refusé et le nouveau accepté
   - [x] Recette : `/parent/enfants/<id d'un autre parent>` affiche « introuvable » ; aucune donnée sensible hors `WPD03`/`WPD10`
-  > Écarts : `WPD02` sans nombre de badges ni barre de progression par enfant (la liste `Child` ne renvoie que `activeCourses`, affiché « N parcours en cours ») ; « Annuler la suppression » livré avec `WPD09` (4.7), une suppression demandée par l'enfant (`pending_parent`) mène à `WPD09` par « Examiner » ; commentaires des enseignants derrière `features.parentTeacherComments` (bloc absent tant qu'API-L5 n'est pas livrée, `classrooms/comments/` non branché) ; tentatives de `WPD03` en lecture seule (le détail `WD08` est réservé à l'apprenant) ; h1 « Mes enfants » (titre du header) au lieu de « Profil de Léa », le nom de l'enfant est le h2 de la carte profil ; rappel de l'identifiant après `WPD04` par `?confirmation=cree` (l'identifiant est relu dans l'API, jamais mis dans l'URL) ; `QuizAttemptRow` accepte une ligne sans lien.
-  > API-L5 fusionnée : le drapeau `parentTeacherComments` est retiré (`features.ts` supprimé par development) ; `TeacherComments` lit `classrooms/comments/?learnerId=` (enseignant, classe, date), état vide sinon ; une lecture en échec n'empêche pas l'affichage de l'enfant.
+  > Écarts : `WPD02` sans nombre de badges ni barre de progression par enfant (la liste `Child` ne renvoie que `activeCourses`, affiché « N parcours en cours ») ; « Annuler la suppression » livré avec `WPD09` (4.7), une suppression demandée par l'enfant (`pending_parent`) mène à `WPD09` par « Examiner » ; tentatives de `WPD03` en lecture seule (le détail `WD08` est réservé à l'apprenant) ; h1 « Mes enfants » (titre du header) au lieu de « Profil de Léa », le nom de l'enfant est le h2 de la carte profil ; rappel de l'identifiant après `WPD04` par `?confirmation=cree` (l'identifiant est relu dans l'API, jamais mis dans l'URL) ; `QuizAttemptRow` accepte une ligne sans lien.
+  > Commentaires des enseignants : branchés depuis la fusion d'API-L5 (drapeau `parentTeacherComments` retiré) ; `TeacherComments` lit `classrooms/comments/?learnerId=` (enseignant, classe, date), état vide sinon ; une lecture en échec n'empêche pas l'affichage de l'enfant.
 - [ ] **4.3** Demande de consentement in-app · `feature/lot4-consentement` (requiert 4.1)
   - [ ] `WPD05` avec `ConsentRequestCard` (partagé avec `WP05`) et `ConsentOrigin` (origine enfant)
   - [ ] `RefuseConsentDialog` (reprise de `WP11` : motif obligatoire en liste fermée + précisions, vouvoiement)
@@ -110,14 +110,16 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation 
   - [ ] Tests unitaires : semaine vide, semaine sans email
   - [ ] Playwright : navigation vers la semaine précédente
   - [ ] Recette : chiffres identiques à ceux de l'API pour le jeu D2
-- [ ] **4.9** Paramètres et aide · `feature/lot4-parametres-aide` (requiert 4.1, 4.7, API-L3a)
-  - [ ] `WPD08` Paramètres : profil, connexion (`NewPasswordFields`, changement de numéro avec `OTPInput`), livraison et paiement (`AddressForm`), notifications, `DangerZone`
-  - [ ] `WPD13` Aide : FAQ en `FaqAccordion` avec recherche locale, « Contacter le support » vers `WL24`
-  - [ ] Branchement API : `accounts/me/` (PATCH), `parent-profile/`, `password/`, `email/`, `phone-change/` + `verify/`, `delivery-address/`, `notifications/preferences/`, `deletion-request/`
-  - [ ] Règles : changement de numéro par OTP sur le nouveau numéro (D24), suppression du compte désactivée tant qu'un enfant est rattaché (`CHILDREN_STILL_LINKED`), FAQ versionnée sans invitation par téléphone ni réseaux en dur (D76)
-  - [ ] Tests unitaires : `DangerZone` désactivée avec enfants ; OTP (`OTP_INVALID`, `OTP_RESEND_TOO_EARLY`)
-  - [ ] Playwright : changement de numéro puis connexion avec le nouveau numéro
-  - [ ] Recette : les préférences de notification sont prises en compte (pas de rapport par email si désactivé)
+- [x] **4.9** Paramètres et aide · `feature/lot4-parametres-aide` (requiert 4.1, 4.7, API-L3a) · PR #126
+  - [x] `WPD08` Paramètres : profil, connexion (`NewPasswordFields`, changement de numéro avec `OTPInput`), livraison et paiement (`AddressForm`), notifications, `DangerZone`
+  - [x] `WPD13` Aide : FAQ en `FaqAccordion` avec recherche locale, « Contacter le support » vers `WL24`
+  - [x] Branchement API : `accounts/me/` (PATCH), `parent-profile/`, `password/`, `email/`, `phone-change/` + `verify/`, `delivery-address/`, `notifications/preferences/`, `deletion-request/`
+  - [x] Règles : changement de numéro par OTP sur le nouveau numéro (D24), suppression du compte désactivée tant qu'un enfant est rattaché (`CHILDREN_STILL_LINKED`), FAQ versionnée sans invitation par téléphone ni réseaux en dur (D76)
+  - [x] Tests unitaires : `DangerZone` désactivée avec enfants ; OTP (`OTP_INVALID`, `OTP_RESEND_TOO_EARLY`)
+  - [x] Playwright : changement de numéro puis connexion avec le nouveau numéro
+  - [x] Recette : les préférences de notification sont prises en compte (pas de rapport par email si désactivé)
+  > Écarts : l'email de contact se modifie avec le profil (`PATCH accounts/me/parent-profile/`, effaçable) plutôt que par `POST accounts/me/email/` (qui exige le mot de passe et ne permet pas de le retirer) ; suppression du compte parent annulable par le support seulement (aucun endpoint d'annulation côté parent) ; la recette « pas de rapport par email si désactivé » est vérifiée par la préférence enregistrée (e2e) et par l'API (`email_enabled`), pas par l'envoi lundi ; FAQ propre au parent (`content/faq/parent.ts`).
+  > Point à soumettre au produit : D54 dit la suppression « annulable », mais seul le support peut annuler celle du compte parent (aucun endpoint côté parent, le compte étant désactivé aussitôt).
 - [ ] **4.10** Consentement d'origine enseignant · `feature/lot4-consentement-enseignant` (requiert 4.3, API-L5 ; livrée avec le lot 5, avant l'étape 5.9)
   - [ ] `WPD05` variante enseignant : nom de l'enseignant, classe, établissement, parcours (D60)
   - [ ] Acceptation avec création de l'identifiant (champs de `WPD04` préremplis), puis l'élève rejoint la classe

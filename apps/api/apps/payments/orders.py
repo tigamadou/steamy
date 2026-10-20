@@ -46,8 +46,12 @@ def create_order(
     beneficiary=None,
     delivery_zone=None,
     delivery_address: dict | None = None,
+    payment_request=None,
 ) -> tuple[Order, str | None]:
-    """Crée la commande, ses lignes et ses réservations de stock. Renvoie la commande et le jeton invité éventuel."""
+    """
+    Crée la commande, ses lignes et ses réservations de stock, rattachée à la demande de l'enfant qu'elle règle
+    (WPD15). Renvoie la commande et le jeton invité éventuel.
+    """
     expires_at = timezone.now() + order_ttl()
     kit_lines = [line for line in quote.lines if line.kit is not None]
     _reserve(kit_lines)
@@ -68,6 +72,7 @@ def create_order(
         delivery_address=delivery_address,
         shipping_status=Order.ShippingStatus.PREPARING if kit_lines else "",
         expires_at=expires_at,
+        payment_request=payment_request,
     )
     for line in quote.lines:
         item = OrderItem.objects.create(
@@ -115,6 +120,15 @@ def release_stock(order: Order) -> None:
         reservation.save(update_fields=["released_at"])
 
 
+def cancel_order(order: Order) -> None:
+    """Annule une commande en attente (verrouillée par l'appelant) : stock rendu, places d'événement libérées."""
+    release_stock(order)
+    for item in order.items.filter(event_application__isnull=False):
+        release_application(item.event_application)
+    order.status = Order.Status.CANCELLED
+    order.save(update_fields=["status", "updated_at"])
+
+
 def release_expired_orders() -> int:
     """Annule les commandes non payées à l'échéance et rend leur stock (D38). Renvoie le nombre de commandes."""
     count = 0
@@ -124,11 +138,7 @@ def release_expired_orders() -> int:
             order = Order.objects.select_for_update().get(pk=pk)
             if not order.is_expired:  # payée entre-temps
                 continue
-            release_stock(order)
-            for item in order.items.filter(event_application__isnull=False):
-                release_application(item.event_application)
-            order.status = Order.Status.CANCELLED
-            order.save(update_fields=["status", "updated_at"])
+            cancel_order(order)
             count += 1
     return count
 

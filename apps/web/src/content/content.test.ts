@@ -104,3 +104,14 @@ describe("FAQ", () => {
     expect(answers).not.toMatch(/\b(tu|ton|ta|tes)\b/i);
   });
 });
+
+describe("FAQ du parent (WPD13)", () => {
+  it("n'invite jamais un enfant par téléphone et ne cite aucun réseau Mobile Money (§8.9, D76)", async () => {
+    const { PARENT_FAQ } = await import("./faq/parent");
+    const text = PARENT_FAQ.flatMap((theme) => theme.items.map((item) => `${item.question} ${item.answer}`)).join(" ");
+    expect(text).not.toMatch(/MTN|Moov|Celtiis|Orange|Wave/);
+    expect(text).not.toMatch(/lien d'inscription|saisissez son numéro/i);
+    expect(text).toMatch(/Ajouter un enfant/);
+    expect(text).toMatch(/aucune carte bancaire/i);
+  });
+});

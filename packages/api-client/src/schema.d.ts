@@ -2046,7 +2046,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Refuser la demande de son enfant (parent)
+         * Refuser la demande de son enfant (parent), motif facultatif
          * @description Demandes de paiement (D52, C4). L'apprenant crée, relance (limité) et annule les siennes ; le parent lit et
          *     refuse celles de ses enfants (le paiement passe par une commande, WPD15). Une demande d'autrui répond 404.
          */
@@ -4858,13 +4858,22 @@ export interface components {
              * Format: date-time
              */
             readonly decidedAt: string | null;
+            /** Motif du refus */
+            readonly declineReason: string;
             readonly orderReference: string | null;
+            /** @description Commande du parent en attente de paiement, encore valable (WPD15 : reprise du paiement sans nouvelle réservation) ; null pour l'enfant et pour une demande close */
+            readonly pendingOrderReference: string | null;
         };
         /** @description `kind=course` : `courseSlug`. `kind=kit` : `items` (souvent le panier). Montant recalculé par le serveur. */
         PaymentRequestCreateRequest: {
             kind: components["schemas"]["OrderCreateKindEnum"];
             courseSlug?: string;
             items?: components["schemas"]["OrderItemInputRequest"][];
+        };
+        /** @description Refus de la demande par le parent (WPD15) : motif facultatif, transmis à l'enfant. */
+        PaymentRequestDeclineRequest: {
+            /** @default  */
+            reason: string;
         };
         PaymentRequestItem: {
             kitSlug: string;
@@ -12433,7 +12442,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PaymentRequestDeclineRequest"];
+            };
+        };
         responses: {
             200: {
                 headers: {

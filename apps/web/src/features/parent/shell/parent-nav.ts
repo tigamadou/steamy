@@ -12,12 +12,12 @@ export const parentNav: NavEntry[] = [
   { id: "children", icon: "user", label: "Mes enfants", href: p.children },
   { id: "events", icon: "trophy", label: "Événements", href: p.events, hidden: true },
   { id: "orders", icon: "cart", label: "Commandes", href: p.orders, hidden: true },
-  { id: "help", icon: "book", label: "Aide", href: p.help, hidden: true },
-  { id: "settings", icon: "gear", label: "Paramètres", href: p.settings, hidden: true },
+  { id: "help", icon: "book", label: "Aide", href: p.help },
+  { id: "settings", icon: "gear", label: "Paramètres", href: p.settings },
 ];
 
-/** Lien du profil dans le header : les paramètres (WPD08) une fois livrés (4.9), l'accueil d'ici là. */
-export const PARENT_PROFILE_HREF: string = p.home;
+/** Lien du profil dans le header : les paramètres (WPD08). */
+export const PARENT_PROFILE_HREF: string = p.settings;
 
 export type ParentSectionId = "home" | "children" | "events" | "orders" | "help" | "settings";
 

@@ -4,6 +4,7 @@ champ inconnu est ignoré. Sortie : un serializer par audience (payeur, bénéfi
 l'adresse de livraison (et, en API-L3b.4, les Kit Codes).
 """
 
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail, NotAuthenticated
@@ -452,6 +453,18 @@ class PaymentRequestItemSerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
 
 
+class PaymentRequestDeclineSerializer(serializers.Serializer):
+    """Refus de la demande par le parent (WPD15) : motif facultatif, transmis à l'enfant."""
+
+    reason = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
+
+    def validate_reason(self, value: str) -> str:
+        # Texte brut transmis à l'enfant (notification, email) : aucun caractère de contrôle hors retour à la ligne
+        if any(ord(char) < 32 and char not in "\n\t" for char in value):
+            raise serializers.ValidationError("Caractères non autorisés.", code="invalid")
+        return value
+
+
 class PaymentRequestSerializer(serializers.ModelSerializer):
     """Demande vue par l'enfant (WA02, WK08) et par son parent (WPD01, WPD15)."""
 
@@ -461,6 +474,7 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
     parent_first_name = serializers.CharField(source="parent.first_name", read_only=True)
     next_resend_at = serializers.SerializerMethodField()
     order_reference = serializers.SerializerMethodField()
+    pending_order_reference = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentRequest
@@ -478,7 +492,9 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
             "last_sent_at",
             "next_resend_at",
             "decided_at",
+            "decline_reason",
             "order_reference",
+            "pending_order_reference",
         )
         read_only_fields = fields
 
@@ -497,6 +513,28 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
         return serializers.DateTimeField().to_representation(moment) if moment else None
 
     @extend_schema_field(serializers.CharField(allow_null=True))
+    # Commandes lues dans `request.orders.all()`, préchargées par la vue (aucune requête par demande)
     def get_order_reference(self, request):
-        order = request.orders.filter(status=Order.Status.PAID).first()
-        return order.reference if order else None
+        paid = [order for order in request.orders.all() if order.status == Order.Status.PAID]
+        return max(paid, key=lambda order: order.created_at).reference if paid else None
+
+    @extend_schema_field(
+        serializers.CharField(
+            allow_null=True,
+            help_text="Commande du parent en attente de paiement, encore valable (WPD15 : reprise du paiement sans "
+            "nouvelle réservation) ; null pour l'enfant et pour une demande close",
+        )
+    )
+    def get_pending_order_reference(self, request):
+        viewer = self.context["request"].user
+        if viewer.pk != request.parent_id or request.status != PaymentRequest.Status.PENDING:
+            return None
+        now = timezone.now()
+        pending = [
+            order
+            for order in request.orders.all()
+            if order.status == Order.Status.PENDING
+            and order.payer_id == viewer.pk
+            and order.expires_at > now
+        ]
+        return max(pending, key=lambda order: order.created_at).reference if pending else None

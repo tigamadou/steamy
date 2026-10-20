@@ -10,7 +10,9 @@ import { ChildDetail, ChildDetailSkeleton } from "@/features/parent/children/Chi
 import { ChildForm } from "@/features/parent/children/ChildForm";
 import { ChildrenList, ChildrenListSkeleton } from "@/features/parent/children/ChildrenList";
 import { EditChild, EditChildSkeleton } from "@/features/parent/children/EditChild";
+import { ParentSettings, ParentSettingsSkeleton } from "@/features/parent/settings/ParentSettings";
 import { ParentShell } from "@/features/parent/shell/ParentShell";
+import { axe } from "@/test/axe";
 
 const back = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ back }) }));
@@ -20,6 +22,10 @@ vi.mock("@/features/parent/children/ChildrenList", () => ({ ChildrenList: () => 
 vi.mock("@/features/parent/children/ChildDetail", () => ({ ChildDetail: () => null, ChildDetailSkeleton: () => null }));
 vi.mock("@/features/parent/children/EditChild", () => ({ EditChild: () => null, EditChildSkeleton: () => null }));
 vi.mock("@/features/parent/children/ChildForm", () => ({ ChildForm: () => null }));
+vi.mock("@/features/parent/settings/ParentSettings", () => ({
+  ParentSettings: () => null,
+  ParentSettingsSkeleton: () => null,
+}));
 vi.mock("@/features/notifications/Notifications", () => ({
   Notifications: () => null,
   NotificationsSkeleton: () => null,
@@ -36,6 +42,8 @@ const { default: AddChildPage } = await import("./enfants/ajouter/page");
 const { default: ChildPage } = await import("./enfants/[id]/page");
 const { default: EditChildPage } = await import("./enfants/[id]/modifier/page");
 const { default: ChildNotFound } = await import("./enfants/[id]/not-found");
+const { default: SettingsPage } = await import("./parametres/page");
+const { default: HelpPage } = await import("./aide/page");
 
 type Boundary = ReactElement<{
   fallback: ReactElement<{ label?: string; space?: string; navCount?: number }>;
@@ -100,6 +108,24 @@ describe("pages des enfants (4.2)", () => {
     render(<ChildNotFound />);
     expect(screen.getByRole("heading", { level: 2, name: "Cet enfant est introuvable" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Voir mes enfants" })).toHaveAttribute("href", "/parent/enfants");
+  });
+});
+
+describe("WPD08 et WPD13", () => {
+  it("WPD08 : paramètres sous Suspense, avec leur squelette", () => {
+    const tree = SettingsPage() as Boundary;
+    expect(tree.props.fallback.type).toBe(ParentSettingsSkeleton);
+    expect(tree.props.children.type).toBe(ParentSettings);
+  });
+
+  it("WPD13 : FAQ du parent avec recherche locale et « Contacter le support » vers WL24", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<HelpPage />);
+    expect(screen.getByRole("heading", { level: 2, name: "Questions fréquentes" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Contacter le support" })).toHaveAttribute("href", "/aide#contact");
+    expect(await axe(container)).toHaveNoViolations();
+    await user.type(screen.getByRole("searchbox", { name: "Rechercher une question" }), "zzzz");
+    expect(screen.getByText(/Aucune question ne correspond/)).toBeInTheDocument();
   });
 });
 

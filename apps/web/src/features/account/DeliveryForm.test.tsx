@@ -134,3 +134,34 @@ describe("DeliveryForm (WD19)", () => {
     expect(GET).toHaveBeenCalledTimes(2);
   });
 });
+
+describe("DeliveryForm au vouvoiement (WPD08)", () => {
+  beforeEach(() => {
+    resetReferentials();
+    PUT.mockReset();
+    GET.mockReset().mockImplementation(async (path: string, init?: { params?: { query?: { country?: string } } }) => {
+      if (path === "/api/referentials/countries/") return respond(200, { data: [{ id: 1, code: "BJ", label: "Bénin", dialCode: "229" }] });
+      return respond(200, { data: ZONES[init?.params?.query?.country ?? ""] ?? [] });
+    });
+  });
+
+  it("messages et confirmation du parent, destinataire = le parent", async () => {
+    PUT.mockResolvedValueOnce(failure(500, "SERVER_ERROR")).mockResolvedValueOnce(respond(200, { data: ADDRESS }));
+    render(<DeliveryForm address={null} defaultCountry="BJ" recipientName="Marie Adjovi" register="vous" />);
+    await waitFor(() => expect(screen.getByRole("option", { name: /Cotonou/ })).toBeInTheDocument());
+    await save();
+    expect(await screen.findByRole("link", { name: "Choisissez votre zone de livraison." })).toBeInTheDocument();
+    await userEvent.selectOptions(zone(), "1");
+    await userEvent.type(screen.getByRole("textbox", { name: /^Ville\b/ }), "Cotonou");
+    await userEvent.type(screen.getByRole("textbox", { name: /^Quartier/ }), "Akpakpa");
+    await userEvent.type(screen.getByRole("textbox", { name: /^Rue/ }), "Rue 5");
+    await save();
+    expect(await screen.findByText(/Réessayez dans quelques instants/)).toBeInTheDocument();
+    await save();
+    expect(await screen.findByText("Votre adresse de livraison est enregistrée.")).toBeInTheDocument();
+    expect(PUT).toHaveBeenLastCalledWith("/api/accounts/me/delivery-address/", {
+      body: { zoneId: 1, recipientName: "Marie Adjovi", city: "Cotonou", district: "Akpakpa", addressLine: "Rue 5" },
+    });
+  });
+});
+
