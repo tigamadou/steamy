@@ -47,12 +47,26 @@ vi.mock("@/features/shop/KitDetailView", () => ({ KitDetailView: () => null, Kit
 vi.mock("@/features/shop/CartView", () => ({ CartView: () => null }));
 vi.mock("@/features/shop/DeliveryZonesSlot", () => ({ DeliveryZonesSlot: () => null }));
 vi.mock("@/lib/shop", () => ({ getKit: async (slug: string) => (slug === "bot" ? { name: "Steamy Bot v1" } : null) }));
+vi.mock("@/features/parent/events/ParentEventsHome", () => ({
+  ParentEventsHome: () => null,
+  ParentEventsHomeSkeleton: () => null,
+}));
+vi.mock("@/features/parent/events/ParentEventView", () => ({ ParentEventView: () => null }));
+vi.mock("@/features/parent/events/EventSignup", () => ({ EventSignup: () => null, EventSignupSkeleton: () => null }));
 vi.mock("@/features/notifications/Notifications", () => ({
   Notifications: () => null,
   NotificationsSkeleton: () => null,
 }));
 
 const { default: Layout } = await import("./layout");
+const { default: EventsPage } = await import("./evenements/page");
+const { default: EventPage } = await import("./evenements/[slug]/page");
+const { default: EventSignupPage } = await import("./evenements/[slug]/inscription/page");
+const { default: EventNotFound } = await import("./evenements/[slug]/not-found");
+const { ParentEventsHome, ParentEventsHomeSkeleton } = await import("@/features/parent/events/ParentEventsHome");
+const { ParentEventView } = await import("@/features/parent/events/ParentEventView");
+const { EventSignup, EventSignupSkeleton } = await import("@/features/parent/events/EventSignup");
+const { EventDetailSkeleton } = await import("@/components/public/events");
 const { default: HomePage } = await import("./page");
 const { default: ParentLoading } = await import("./loading");
 const { default: ParentError } = await import("./error");
@@ -259,5 +273,33 @@ describe("états de l'espace parent", () => {
     render(<ParentNotFound />);
     expect(screen.getByRole("heading", { level: 2, name: "Cette page est introuvable" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Retour à l'accueil" })).toHaveAttribute("href", "/parent");
+  });
+});
+
+describe("pages des événements (4.6)", () => {
+  it("WPD06 : événements et candidatures sous Suspense, candidature mise en avant lue dans l'URL", () => {
+    const searchParams = Promise.resolve({ candidature: "4" });
+    const tree = EventsPage({ searchParams } as never) as Boundary;
+    expect(tree.props.fallback.type).toBe(ParentEventsHomeSkeleton);
+    expect(tree.props.children.type).toBe(ParentEventsHome);
+    expect(tree.props.children.props).toMatchObject({ searchParams });
+  });
+
+  it("WL23 et WPD12 : fiche et inscription sous Suspense, paramètres transmis", () => {
+    const params = Promise.resolve({ slug: "defi-robots" });
+    const detail = EventPage({ params } as never) as Boundary;
+    expect(detail.props.fallback.type).toBe(EventDetailSkeleton);
+    expect(detail.props.children.type).toBe(ParentEventView);
+    expect(detail.props.children.props).toMatchObject({ params });
+    const signup = EventSignupPage({ params } as never) as Boundary;
+    expect(signup.props.fallback.type).toBe(EventSignupSkeleton);
+    expect(signup.props.children.type).toBe(EventSignup);
+    expect(signup.props.children.props).toMatchObject({ params });
+  });
+
+  it("événement introuvable : h2 et retour aux événements", () => {
+    render(<EventNotFound />);
+    expect(screen.getByRole("heading", { level: 2, name: "Cet événement est introuvable" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Voir les événements" })).toHaveAttribute("href", "/parent/evenements");
   });
 });
