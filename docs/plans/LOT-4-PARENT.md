@@ -70,19 +70,19 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation 
   - [x] Tests unitaires : rendu des 3 objets et des 8 états, aucun montant calculé côté client
   - [x] Tests unitaires : `OUT_OF_STOCK`, `ORDER_EXPIRED`, `ORDER_ALREADY_PAID`, `NETWORK_UNAVAILABLE`, `PAYMENT_FAILED` traduits ; double clic sur « Payer » sans double initiation
   - [x] Playwright : l'enfant demande un parcours, le parent paie, l'enfant accède (`WC05`, `WA02`, SMS, `W16`, `WPD15`, webhook simulé, `WD23`, `WC06a`)
-  - [ ] Playwright : variantes échec puis réessai, demande de kit avec adresse visible en `WPD07`, refus (`WA02` « refusée »)
-    > Fait : échec puis réessai, kit avec adresse (commande payée vérifiée par l'API), refus motivé. Reste : la commande affichée dans `WPD07` (4.5).
+  - [x] Playwright : variantes échec puis réessai, demande de kit avec adresse visible en `WPD07`, refus (`WA02` « refusée »)
   - [x] Recette : un autre parent obtient « Demande introuvable » ; aucun numéro complet dans les journaux front ; échec avec la raison du prestataire et « Réessayer »
   > Écarts : maquette de WPD15 non encore validée par le produit (C18) ; l'événement payant passe par la commande d'événement de 4.6 (D53 amendé), pas par une demande ; parcours de l'enfant (WC05, WA02, WD23, WC06a) vérifié par l'API dans l'e2e, ses écrans relevant du lot 3 (#119) ; commande de kit visible en `WPD07` vérifiée par l'API (WPD07 livré en 4.5) ; API ajoutée : motif du refus et commande en attente reprise (#129), énumération des statuts (#127) ; `PaymentForm` (#119) : Mobile Money préféré prérempli, bouton « Payer » en magenta (C1), double envoi bloqué.
-- [ ] **4.5** Commandes, factures et Kit Codes · `feature/lot4-commandes` (requiert 4.4, API-L3b)
-  - [ ] `WPD07` Commandes (`OrderRow`, `OrderStatusFilter`, `?statut=`)
-  - [ ] Suivi `/parent/commandes/[reference]` (type `WK07`, `ShippingTimeline`, `KitCodeList`)
-  - [ ] Achat direct de kit `/parent/boutique/…` (`WK01`-`WK03`, `WK05`-`WK06` du lot 3)
-  - [ ] Branchement API : `payments/orders/` (`?status=`), `orders/{reference}/`, `orders/{reference}/invoice/`, endpoints `shop` du lot 3
-  - [ ] Règles : icône par `kind`, « Facture » réservée au payeur d'une commande payée, « Payer » vers `WPD15` ou reprise du paiement, Kit Codes `STEAMY-XXXX-XXXX`
-  - [ ] Tests unitaires : `OrderRow` (3 `kind`, 4 statuts), filtres, `KitCodeList`
-  - [ ] Playwright : achat d'un kit, paiement, commande payée en `WPD07`, facture téléchargée, Kit Code débloquant le parcours côté enfant (`WA06`)
-  - [ ] Recette : commande d'un autre payeur non listée ; factures conservées après suppression d'un enfant
+- [x] **4.5** Commandes, factures et Kit Codes · `feature/lot4-commandes` (requiert 4.4, API-L3b) · PR #PR45
+  - [x] `WPD07` Commandes (`OrderRow`, `OrderStatusFilter`, `?statut=`)
+  - [x] Suivi `/parent/commandes/[reference]` (type `WK07`, `ShippingTimeline`, `KitCodeList`)
+  - [x] Achat direct de kit `/parent/boutique/…` (`WK01`-`WK03`, `WK05`-`WK06` du lot 3)
+  - [x] Branchement API : `payments/orders/` (`?status=`), `orders/{reference}/`, `orders/{reference}/invoice/`, endpoints `shop` du lot 3
+  - [x] Règles : icône par `kind`, « Facture » réservée au payeur d'une commande payée, « Payer » vers `WPD15` ou reprise du paiement, Kit Codes `STEAMY-XXXX-XXXX`
+  - [x] Tests unitaires : `OrderRow` (3 `kind`, 4 statuts), filtres, `KitCodeList`
+  - [x] Playwright : achat d'un kit, paiement, commande payée en `WPD07`, facture téléchargée, Kit Code débloquant le parcours côté enfant (`WA06`)
+  - [x] Recette : commande d'un autre payeur non listée ; factures conservées après suppression d'un enfant
+  > Écarts : priorité donnée à l'achat direct, conséquence de #132 (le panier public renvoie le parent connecté vers le sien, C10) ; « Payer » d'une commande en attente mène toujours au détail de la commande, qui reprend le paiement (l'API ne dit pas si la commande provient d'une demande) ; « Facture » est un lien direct vers l'API, affiché quand le PDF est prêt (`invoice.pdfStatus`) : le téléchargement par `fetch` suivait la redirection signée du stockage, bloquée par le navigateur (même défaut sur le reçu de WK07, lot 3) ; une nouvelle adresse dans l'achat direct n'est pas proposée après la création de la commande (pas d'annulation de commande côté parent).
 - [ ] **4.6** Événements · `feature/lot4-evenements` (requiert 4.4)
   - [ ] `WPD06` Steamy Events + candidatures des enfants (`EventApplicationRow`, `RefuseApplicationDialog`)
   - [ ] `WL23` dans le shell parent (`EventRow`, `EventDetail` du lot 1)

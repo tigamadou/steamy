@@ -113,7 +113,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WPD04` | Ajouter un enfant | 4 |  |  |
 | `WPD05` | Demande de consentement | 4 |  |  |
 | `WPD06` | Steamy Events | 4 |  |  |
-| `WPD07` | Historique de commande | 4 |  |  |
+| `WPD07` | Historique de commande | 4 | Achat direct de kit (boutique, panier, livraison, paiement) → commande payée listée (filtre « Payées », bénéficiaire), facture en lien direct, suivi avec frise et Kit Code qui débloque le parcours compatible ; commande d'un autre payeur non listée et « introuvable » ; commande de kit d'une demande (WPD15) listée | `apps/web/e2e/parent-commandes.spec.ts`, `apps/web/e2e/parent-demande-paiement.spec.ts` |
 | `WPD08` | Paramètres parent | 4 | Changement de numéro par OTP sur le nouveau numéro puis connexion ; email du profil et rapport hebdomadaire coupé par email ; suppression du compte bloquée avec enfants, possible sans enfant | `apps/web/e2e/parent-parametres-aide.spec.ts` |
 | `WPD09` | Supprimer un enfant | 4 |  |  |
 | `WPD10` | Modifier le profil enfant | 4 |  |  |

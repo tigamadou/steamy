@@ -5,7 +5,7 @@ import { formatInstant } from "@/lib/dates";
 import { formatPrice } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
-import { InvoiceButton } from "./InvoiceButton";
+import { InvoiceLink } from "./InvoiceLink";
 import { KIND_ICONS, ORDER_STATUS, SHIPPING_LABELS } from "./status";
 
 type Order = Schemas["Order"];
@@ -49,7 +49,7 @@ export function OrderRow({ order }: { order: Order }) {
         <Badge tone={status.tone}>{status.label}</Badge>
         <p className="m-0 text-base font-black text-ink-900">{formatPrice(order.total)}</p>
         <div className="flex flex-wrap gap-2">
-          {order.status === "paid" && <InvoiceButton reference={order.reference} />}
+          {order.status === "paid" && <InvoiceLink reference={order.reference} invoice={order.invoice} />}
           {order.status === "pending" && (
             <Button size="sm" href={routes.parent.order(order.reference)}>
               Payer<span className="sr-only"> la commande {order.reference}</span>

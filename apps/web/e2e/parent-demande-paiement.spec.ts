@@ -119,6 +119,9 @@ test("WPD15 : demande de kit, adresse de livraison, frais du serveur, commande p
   expect(orders.results.some((order) => order.kind === "kit" && order.beneficiary?.id === family.child.id)).toBe(true);
   const saved = (await family.parentSession.get("/api/accounts/me/delivery-address/")) as { addressLine: string };
   expect(saved.addressLine).toBe("Rue 5, maison bleue");
+  // La commande de kit apparaît dans WPD07, au nom de l'enfant
+  await page.goto("/parent/commandes");
+  await expect(page.getByRole("article", { name: /^Kit : / })).toContainText("Pour Yao");
   await closeFamily(family);
 });
 

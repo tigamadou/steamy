@@ -9,7 +9,7 @@ import { formatPrice } from "@/lib/format";
 import { getCountries } from "@/lib/referentials";
 import { routes } from "@/lib/routes";
 
-import { InvoiceButton } from "./InvoiceButton";
+import { InvoiceLink } from "./InvoiceLink";
 import { KitCodeList } from "./KitCodeList";
 import { orderTitle } from "./OrderRow";
 import { PendingOrderPayment } from "./PendingOrderPayment";
@@ -100,7 +100,7 @@ export async function OrderDetail({ params }: { params: Promise<{ reference: str
             )}
             {order.status === "paid" && (
               <div className="self-start">
-                <InvoiceButton reference={order.reference} label="Télécharger la facture" />
+                <InvoiceLink reference={order.reference} invoice={order.invoice} label="Télécharger la facture" />
               </div>
             )}
           </section>

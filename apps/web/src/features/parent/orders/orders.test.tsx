@@ -7,20 +7,19 @@ import { axe } from "@/test/axe";
 import { COUNTRIES, order } from "@/test/payment-request-fixtures";
 
 const GET = vi.fn();
-const getInvoice = vi.fn();
 const router = { refresh: vi.fn() };
 const notFound = vi.fn(() => {
   throw new Error("NEXT_NOT_FOUND");
 });
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
 vi.mock("@/lib/referentials", () => ({ getCountries: async () => COUNTRIES }));
-vi.mock("@/features/checkout/api", () => ({ getInvoice: (...args: unknown[]) => getInvoice(...args) }));
+vi.stubEnv("PUBLIC_API_URL", "http://api.test/");
 vi.mock("next/navigation", () => ({ useRouter: () => router, notFound: () => notFound() }));
 vi.mock("./PendingOrderPayment", () => ({ PendingOrderPayment: () => <p>Formulaire de paiement</p> }));
 
 const { ORDER_FILTERS, parseOrderFilter, KIND_ICONS } = await import("./status");
 const { OrderRow, orderTitle } = await import("./OrderRow");
-const { InvoiceButton } = await import("./InvoiceButton");
+const { InvoiceLink } = await import("./InvoiceLink");
 const { KitCodeList } = await import("./KitCodeList");
 const { ParentOrders, ParentOrdersSkeleton, parsePage, ORDERS_PAGE_SIZE } = await import("./ParentOrders");
 const { OrderDetail, OrderDetailSkeleton } = await import("./OrderDetail");
@@ -47,7 +46,6 @@ const PENDING_EVENT = order({ reference: "CMD-EVT", kind: "event", status: "pend
 
 beforeEach(() => {
   GET.mockReset();
-  getInvoice.mockReset();
   router.refresh.mockReset();
 });
 
@@ -74,7 +72,7 @@ describe("OrderRow (3 kind, 4 statuts)", () => {
     expect(row).toHaveTextContent("📦");
     expect(row).toHaveTextContent(/N° CMD-ABC123 · .* · Livraison : En préparation/);
     expect(within(row).getByText("Payée")).toBeInTheDocument();
-    expect(within(row).getByRole("button", { name: /^Facture\s*de la commande CMD-ABC123$/ })).toBeInTheDocument();
+    expect(within(row).getByRole("link", { name: /^Facture\s*de la commande CMD-ABC123$/ })).toBeInTheDocument();
     expect(within(row).getByRole("link", { name: /^Suivre\s*la commande CMD-ABC123$/ })).toHaveAttribute(
       "href",
       "/parent/commandes/CMD-ABC123",
@@ -97,7 +95,7 @@ describe("OrderRow (3 kind, 4 statuts)", () => {
       "href",
       "/parent/commandes/CMD-EVT",
     );
-    expect(within(row).queryByRole("button", { name: /Facture/ })).toBeNull();
+    expect(within(row).queryByRole("link", { name: /Facture/ })).toBeNull();
   });
 
   it.each([
@@ -112,32 +110,16 @@ describe("OrderRow (3 kind, 4 statuts)", () => {
   });
 });
 
-describe("InvoiceButton", () => {
-  it("télécharge le PDF ; en préparation ou en panne : message", async () => {
-    const user = userEvent.setup();
-    const createObjectURL = vi.fn(() => "blob:facture");
-    const revokeObjectURL = vi.fn();
-    Object.assign(URL, { createObjectURL, revokeObjectURL });
-    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-    getInvoice
-      .mockResolvedValueOnce({ ok: false, code: "PDF_NOT_READY", message: "", fields: {} })
-      .mockResolvedValueOnce({ ok: false, code: "SERVER_ERROR", message: "", fields: {} })
-      .mockResolvedValueOnce({ ok: true, data: new Blob(["%PDF"]) });
-    render(<InvoiceButton reference="CMD-1" />);
-    const button = screen.getByRole("button", { name: /^Facture\s*de la commande CMD-1$/ });
-    await user.click(button);
-    expect(await screen.findByRole("alert")).toHaveTextContent("en cours de préparation");
-    expect(getInvoice).toHaveBeenCalledWith("CMD-1", null);
-    await user.click(button);
-    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Réessayez dans quelques instants"));
-    await user.click(button);
-    await waitFor(() => expect(click).toHaveBeenCalled());
-    expect(screen.queryByRole("alert")).toBeNull();
-    vi.advanceTimersByTime(1_000);
-    expect(revokeObjectURL).toHaveBeenCalledWith("blob:facture");
-    vi.useRealTimers();
-    click.mockRestore();
+describe("InvoiceLink", () => {
+  it("PDF prêt : lien direct vers l'API ; sinon « en préparation »", () => {
+    render(<InvoiceLink reference="CMD-1" invoice={{ number: "FAC-1", pdfStatus: "ready" }} />);
+    expect(screen.getByRole("link", { name: /^Facture\s*de la commande CMD-1$/ })).toHaveAttribute(
+      "href",
+      "http://api.test/api/payments/orders/CMD-1/invoice/",
+    );
+    render(<InvoiceLink reference="CMD-2" invoice={{ number: "FAC-2", pdfStatus: "pending" }} />);
+    render(<InvoiceLink reference="CMD-3" invoice={null} />);
+    expect(screen.getAllByText("Facture en préparation")).toHaveLength(2);
   });
 });
 
@@ -218,7 +200,7 @@ describe("OrderDetail (suivi, C10)", () => {
     expect(screen.getByText(/Marie Adjovi · Cocotomey, Rue 12.045, Cotonou/)).toBeInTheDocument();
     expect(screen.getByRole("list", { name: "Suivi de livraison" })).toBeInTheDocument();
     expect(screen.getByRole("list", { name: "Kit Codes de la commande" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^Télécharger la facture/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^Télécharger la facture/ })).toBeInTheDocument();
     expect(screen.queryByText("Formulaire de paiement")).toBeNull();
     expect(await axe(container)).toHaveNoViolations();
   });
@@ -238,7 +220,7 @@ describe("OrderDetail (suivi, C10)", () => {
     routeApi(respond(200, order({ status, deliveryAddress: null, deliveryZone: null as never, kind: "course" })));
     render((await OrderDetail({ params: params("CMD-ABC123") })) as ReactElement);
     expect(screen.getByText(text)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /facture/ })).toBeNull();
+    expect(screen.queryByRole("link", { name: /facture/i })).toBeNull();
   });
 
   it("commande d'un autre payeur → introuvable ; session perdue → rien ; squelette", async () => {
