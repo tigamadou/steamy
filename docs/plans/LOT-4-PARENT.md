@@ -40,17 +40,19 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 d
   - [x] Playwright : accès refusé à un apprenant et à un enseignant (redirection) ; parent du jeu D2 : liste « À valider » conforme au seed
   - [x] Recette : les 4 types mènent à la bonne route, « Tout marquer comme lu » remet le compteur à 0
   > Écarts : « À valider » sans l'objet de la demande (titre du parcours, montant) ni carte de parcours en cours dans `ChildCard` (l'API ne les renvoie pas : `PendingAction` et `Child.activeCourses`) ; les CTA visent les routes des étapes 4.2 à 4.7 (entrées de nav masquées jusqu'à leur livraison) ; WPD14 réutilise `NotificationList` du lot 3, paramétrée par espace ; préférences de notification dans `WPD08` (4.9).
-- [ ] **4.2** Enfants · `feature/lot4-enfants` (requiert 4.1, API-L4.1 ; commentaires : API-L5)
-  - [ ] `WPD02` Mes enfants (`ChildRow` : actif, demande à examiner, suppression programmée ; CTA « Examiner » vers `WPD05`)
-  - [ ] `WPD03` Détail enfant (`ChildProfileCard`, `CourseProgressList`, `AttemptList`, `TeacherComments` en lecture seule)
-  - [ ] `ResetChildPasswordDialog` de `WPD03` (« Communiquez-le à votre enfant », D26)
-  - [ ] `WPD04` Ajouter un enfant (`ChildForm` : date de naissance 10-17 ans, lien de parenté, identifiant sans `@` ni chiffres seuls, `PwReq`, redirection vers `WPD03` avec rappel de l'identifiant)
-  - [ ] `WPD10` Modifier le profil (identifiant non modifiable, genre et handicap facultatifs avec finalité, localité qualifiée, erreur `BIRTHDATE_AGE_MISMATCH`)
-  - [ ] Branchement API : `accounts/children/` (GET/POST), `{id}/` (GET/PATCH), `password-reset/`, `auth/username-availability/`, référentiels, `classrooms/comments/?learnerId=`
-  - [ ] Tests unitaires : `ChildForm` (`USERNAME_TAKEN`, `AGE_OUT_OF_RANGE`, `PASSWORD_TOO_WEAK` au champ), `ChildRow` pour les 3 statuts, `TeacherComments` vide tant qu'API-L5 n'est pas livrée
-  - [ ] Playwright : le parent crée un enfant, l'enfant se connecte sur `W16` et arrive sur `W11`
-  - [ ] Playwright : réinitialisation du mot de passe, l'ancien est refusé et le nouveau accepté
-  - [ ] Recette : `/parent/enfants/<id d'un autre parent>` affiche « introuvable » ; aucune donnée sensible hors `WPD03`/`WPD10`
+- [x] **4.2** Enfants · `feature/lot4-enfants` (requiert 4.1, API-L4.1 ; commentaires : API-L5) · PR #128
+  - [x] `WPD02` Mes enfants (`ChildRow` : actif, demande à examiner, suppression programmée ; CTA « Examiner » vers WPD05, livré en 4.3)
+  - [x] `WPD03` Détail enfant (`ChildProfileCard`, `CourseProgressList`, `AttemptList`, `TeacherComments` en lecture seule)
+  - [x] `ResetChildPasswordDialog` de `WPD03` (« Communiquez-le à votre enfant », D26)
+  - [x] `WPD04` Ajouter un enfant (`ChildForm` : date de naissance 10-17 ans, lien de parenté, identifiant sans `@` ni chiffres seuls, `PwReq`, redirection vers `WPD03` avec rappel de l'identifiant)
+  - [x] `WPD10` Modifier le profil (identifiant non modifiable, genre et handicap facultatifs avec finalité, localité qualifiée, erreur `BIRTHDATE_AGE_MISMATCH`)
+  - [x] Branchement API : `accounts/children/` (GET/POST), `{id}/` (GET/PATCH), `password-reset/`, `auth/username-availability/`, référentiels, `classrooms/comments/?learnerId=` (API-L5)
+  - [x] Tests unitaires : `ChildForm` (`USERNAME_TAKEN`, `AGE_OUT_OF_RANGE`, `PASSWORD_TOO_WEAK` au champ), `ChildRow` pour les 3 statuts, `TeacherComments` (commentaires lus dans l'API, état vide, lecture en échec)
+  - [x] Playwright : le parent crée un enfant, l'enfant se connecte sur `W16` et arrive sur `W11`
+  - [x] Playwright : réinitialisation du mot de passe, l'ancien est refusé et le nouveau accepté
+  - [x] Recette : `/parent/enfants/<id d'un autre parent>` affiche « introuvable » ; aucune donnée sensible hors `WPD03`/`WPD10`
+  > Écarts : `WPD02` sans nombre de badges ni barre de progression par enfant (la liste `Child` ne renvoie que `activeCourses`, affiché « N parcours en cours ») ; « Annuler la suppression » livré avec `WPD09` (4.7), une suppression demandée par l'enfant (`pending_parent`) mène à `WPD09` par « Examiner » ; tentatives de `WPD03` en lecture seule (le détail `WD08` est réservé à l'apprenant) ; h1 « Mes enfants » (titre du header) au lieu de « Profil de Léa », le nom de l'enfant est le h2 de la carte profil ; rappel de l'identifiant après `WPD04` par `?confirmation=cree` (l'identifiant est relu dans l'API, jamais mis dans l'URL) ; `QuizAttemptRow` accepte une ligne sans lien.
+  > Commentaires des enseignants : branchés depuis la fusion d'API-L5 (drapeau `parentTeacherComments` retiré) ; `TeacherComments` lit `classrooms/comments/?learnerId=` (enseignant, classe, date), état vide sinon ; une lecture en échec n'empêche pas l'affichage de l'enfant.
 - [x] **4.3** Demande de consentement in-app · `feature/lot4-consentement` (requiert 4.1) · PR #125
   - [x] `WPD05` avec `ConsentRequestCard` (partagé avec `WP05`) et `ConsentOrigin` (origine enfant)
   - [x] `RefuseConsentDialog` (reprise de `WP11` : motif obligatoire en liste fermée + précisions, vouvoiement)

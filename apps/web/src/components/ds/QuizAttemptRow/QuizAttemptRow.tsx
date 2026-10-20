@@ -6,7 +6,8 @@ import { AttemptStatusBadge, type AttemptStatus } from "../AttemptStatusBadge";
 import { Icon } from "../Icon";
 
 export type QuizAttemptRowProps = {
-  href: string;
+  /** Détail de la tentative (WD08) ; absent : ligne en lecture seule (le parent, WPD03). */
+  href?: string;
   title: string;
   /** Contexte (« Quiz du niveau · 14 oct. »). */
   subtitle: string;
@@ -18,18 +19,17 @@ export type QuizAttemptRowProps = {
   className?: string;
 };
 
-// Ligne de tentative (design/screens-dashboard-web.jsx, `QuizAttemptRow`) : un lien vers le détail (WD08).
+// Ligne de tentative (design/screens-dashboard-web.jsx, `QuizAttemptRow`) : un lien vers le détail (WD08), ou une
+// simple ligne sans `href`.
 export function QuizAttemptRow({ href, title, subtitle, status, score, total, emoji = "🎯", className }: QuizAttemptRowProps) {
-  return (
-    <Link
-      href={href}
-      className={cx(
-        "flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[14px] border border-ink-100 bg-surface px-4.5 py-3.5 transition",
-        "hover:translate-x-0.5 hover:border-primary-200 motion-reduce:hover:translate-x-0",
-        "focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary-500",
-        className,
-      )}
-    >
+  const classes = cx(
+    "flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[14px] border border-ink-100 bg-surface px-4.5 py-3.5",
+    href &&
+      "transition hover:translate-x-0.5 hover:border-primary-200 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary-500 motion-reduce:hover:translate-x-0",
+    className,
+  );
+  const content = (
+    <>
       <span aria-hidden className="flex size-11 shrink-0 items-center justify-center rounded-md bg-primary-100 text-[22px]">
         {emoji}
       </span>
@@ -42,6 +42,12 @@ export function QuizAttemptRow({ href, title, subtitle, status, score, total, em
         {score}/{total}
         <span className="sr-only"> bonnes réponses</span>
       </span>
+    </>
+  );
+  if (!href) return <div className={classes}>{content}</div>;
+  return (
+    <Link href={href} className={classes}>
+      {content}
       <Icon name="chevron-right" size={18} className="text-ink-400" />
     </Link>
   );
