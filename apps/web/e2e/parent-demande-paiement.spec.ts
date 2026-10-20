@@ -16,6 +16,12 @@ const KIT = "pack-electronique";
 async function axe(page: Page) {
   const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(violations).toEqual([]);
+  // Aucun défilement horizontal, même à 360 px (une piste de grille trop large décale les clics sur mobile)
+  const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+  }));
+  expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
 }
 
 /** L'enfant demande ; renvoie l'identifiant et le lien reçu par SMS par le parent. */
@@ -105,6 +111,7 @@ test("WPD15 : demande de kit, adresse de livraison, frais du serveur, commande p
   await address.getByRole("textbox", { name: /^Quartier/ }).fill("Akpakpa");
   await address.getByRole("textbox", { name: /^Rue/ }).fill("Rue 5, maison bleue");
   await address.getByRole("checkbox", { name: "Enregistrer comme adresse par défaut" }).check();
+  await axe(page);
   await address.getByRole("button", { name: "Continuer vers le paiement" }).click();
 
   await expect(page.getByText(/^Livraison · /)).toBeVisible();
