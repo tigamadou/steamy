@@ -22,11 +22,6 @@ test.describe("activation enseignante", { tag: "@donnees-uniques" }, () => {
     activationLink = link.pathname + link.hash;
     const token = link.hash.slice("#jeton=".length);
 
-    // Ancien format du lien (emails envoyés avant le fragment) : redirigé vers le fragment, sans consommer l'invitation
-    await page.goto(`/activation/${token}`);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Activer votre compte");
-    await expect(page).toHaveURL("/activation");
-
     const requests: string[] = [];
     page.on("request", (request) => requests.push(request.url().split("#")[0])); // le fragment ne part jamais
     const response = await page.goto(activationLink);
@@ -34,6 +29,14 @@ test.describe("activation enseignante", { tag: "@donnees-uniques" }, () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Activer votre compte");
     await expect(page).toHaveURL("/activation");
     expect(requests.filter((url) => url.includes(token))).toEqual([]);
+
+    // Ancien format du lien (emails envoyés avant le fragment), dans un autre onglet : redirigé vers le fragment,
+    // sans consommer l'invitation
+    const former = await page.context().newPage();
+    await former.goto(`/activation/${token}`);
+    await expect(former.getByRole("heading", { level: 1 })).toHaveText("Activer votre compte");
+    await expect(former).toHaveURL("/activation");
+    await former.close();
     await expect(page.getByText(/n•*@steamy\.test|@steamy\.test/)).toBeVisible();
     const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     expect(violations).toEqual([]);
