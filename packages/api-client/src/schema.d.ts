@@ -4130,7 +4130,7 @@ export interface components {
             /** Type */
             readonly kind: components["schemas"]["OrderKindEnum"];
             /** Statut */
-            readonly status: components["schemas"]["PaymentStatusEnum"];
+            readonly status: components["schemas"]["PaymentRequestStatusEnum"];
             readonly course: components["schemas"]["CourseSummary"] | null;
             readonly items: components["schemas"]["PaymentRequestItem"][];
             /**
@@ -4185,6 +4185,15 @@ export interface components {
             unitPrice: number;
             quantity: number;
         };
+        /**
+         * @description * `pending` - En attente du parent
+         *     * `paid` - Payée
+         *     * `declined` - Refusée
+         *     * `expired` - Expirée
+         *     * `cancelled` - Annulée
+         * @enum {string}
+         */
+        PaymentRequestStatusEnum: "pending" | "paid" | "declined" | "expired" | "cancelled";
         /**
          * @description * `initiated` - Initié
          *     * `pending` - En attente de validation
