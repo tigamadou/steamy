@@ -8,7 +8,12 @@ from rest_framework.test import APIRequestFactory
 from apps.accounts.tests.factories import ParentFactory, StaffFactory
 from apps.core.audit import audit
 from apps.core.groups import STAFF_GROUPS
-from apps.core.models import AuditLog, PlatformSettings
+from apps.core.models import (
+    DEFAULT_POINTS_SCALE,
+    DEFAULT_RANK_THRESHOLDS,
+    AuditLog,
+    PlatformSettings,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -27,8 +32,9 @@ def test_platform_settings_exist_with_the_decided_defaults():
     # D32, D66
     assert settings.summative_retry_cooldown_seconds == 600
     assert settings.dropout_threshold_days == 7
-    # C8 : barème vide jusqu'à sa saisie
-    assert settings.points_scale == {} and settings.rank_thresholds == []
+    # C8 : barème standard (arbitré le 2026-10-19)
+    assert settings.points_scale == DEFAULT_POINTS_SCALE
+    assert settings.rank_thresholds == DEFAULT_RANK_THRESHOLDS
 
 
 def test_platform_settings_is_a_singleton():
