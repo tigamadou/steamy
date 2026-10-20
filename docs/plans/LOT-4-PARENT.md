@@ -96,7 +96,7 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 d
   - [ ] Playwright : accord à un événement payant (`WD11`, `WPD06`, `WPD15`, paiement, « acceptée » en `WD10`)
   - [ ] Playwright : inscription directe par le parent (`WPD12`) à un événement payant
   - [ ] Recette : refus notifié à l'enfant ; événement complet non payable
-- [x] **4.7** Suppressions · `feature/lot4-suppressions` (requiert 4.2) · PR #PR47
+- [x] **4.7** Suppressions · `feature/lot4-suppressions` (requiert 4.2) · PR #143
   - [x] `WPD09` Supprimer (initiative du parent) avec `DeleteChildForm` (motif* + précisions, texte D54)
   - [x] Validation d'une demande `WD15` (`?demande=<id>`, motif prérempli, Accepter / Refuser)
   - [x] Annulation de la suppression depuis `WPD02` (bouton « Annuler la suppression »)
