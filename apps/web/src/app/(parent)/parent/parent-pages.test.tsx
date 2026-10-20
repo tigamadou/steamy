@@ -53,6 +53,7 @@ vi.mock("@/features/parent/events/ParentEventsHome", () => ({
 }));
 vi.mock("@/features/parent/events/ParentEventView", () => ({ ParentEventView: () => null }));
 vi.mock("@/features/parent/events/EventSignup", () => ({ EventSignup: () => null, EventSignupSkeleton: () => null }));
+vi.mock("@/features/parent/report/WeeklyReport", () => ({ WeeklyReport: () => null, WeeklyReportSkeleton: () => null }));
 vi.mock("@/features/notifications/Notifications", () => ({
   Notifications: () => null,
   NotificationsSkeleton: () => null,
@@ -67,6 +68,8 @@ const { ParentEventsHome, ParentEventsHomeSkeleton } = await import("@/features/
 const { ParentEventView } = await import("@/features/parent/events/ParentEventView");
 const { EventSignup, EventSignupSkeleton } = await import("@/features/parent/events/EventSignup");
 const { EventDetailSkeleton } = await import("@/components/public/events");
+const { default: WeeklyReportPage } = await import("./enfants/[id]/rapport/page");
+const { WeeklyReport, WeeklyReportSkeleton } = await import("@/features/parent/report/WeeklyReport");
 const { default: HomePage } = await import("./page");
 const { default: ParentLoading } = await import("./loading");
 const { default: ParentError } = await import("./error");
@@ -301,5 +304,16 @@ describe("pages des événements (4.6)", () => {
     render(<EventNotFound />);
     expect(screen.getByRole("heading", { level: 2, name: "Cet événement est introuvable" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Voir les événements" })).toHaveAttribute("href", "/parent/evenements");
+  });
+});
+
+describe("WPD11 (4.8)", () => {
+  it("rapport hebdomadaire sous Suspense, enfant et semaine transmis", () => {
+    const params = Promise.resolve({ id: "7" });
+    const searchParams = Promise.resolve({ semaine: "2026-W42" });
+    const tree = WeeklyReportPage({ params, searchParams } as never) as Boundary;
+    expect(tree.props.fallback.type).toBe(WeeklyReportSkeleton);
+    expect(tree.props.children.type).toBe(WeeklyReport);
+    expect(tree.props.children.props).toMatchObject({ params, searchParams });
   });
 });

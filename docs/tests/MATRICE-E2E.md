@@ -117,7 +117,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WPD08` | Paramètres parent | 4 | Changement de numéro par OTP sur le nouveau numéro puis connexion ; email du profil et rapport hebdomadaire coupé par email ; suppression du compte bloquée avec enfants, possible sans enfant | `apps/web/e2e/parent-parametres-aide.spec.ts` |
 | `WPD09` | Supprimer un enfant | 4 |  |  |
 | `WPD10` | Modifier le profil enfant | 4 | Identifiant non modifiable ; `BIRTHDATE_AGE_MISMATCH` au champ ; enregistrement → WPD03 avec confirmation ; enfant d'un autre parent → « introuvable » | `apps/web/e2e/parent-enfants.spec.ts` |
-| `WPD11` | Rapport hebdomadaire | 4 |  |  |
+| `WPD11` | Rapport hebdomadaire | 4 | Léa (jeu D2) : temps, missions et quiz identiques à l'API, envoi à l'email de Marie, sans bouton d'envoi ; « Semaine précédente » → `?semaine=` et chiffres de cette semaine ; enfant sans activité et parent sans email : semaine vide, « Ajouter un email » → WPD08 | `apps/web/e2e/parent-rapport-hebdo.spec.ts` |
 | `WPD12` | Faire participer un enfant | 4 | Inscription directe d'un enfant actif à un événement payant, paiement compris → acceptée côté enfant ; événement complet : aucun paiement possible | `apps/web/e2e/parent-evenements.spec.ts` |
 | `WPD13` | Aide & support | 4 | FAQ du parent, recherche locale, « Contacter le support » → WL24 | `apps/web/e2e/parent-parametres-aide.spec.ts` |
 | `WPD14` | Notifications | 4 | Onglets dans l'URL, « Tout marquer comme lu » → cloche à 0, état vide au vouvoiement | `apps/web/e2e/parent-accueil-notifications.spec.ts` |
