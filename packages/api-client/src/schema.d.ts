@@ -4165,7 +4165,7 @@ export interface components {
             /** Motif du refus */
             readonly declineReason: string;
             readonly orderReference: string | null;
-            /** @description Commande du parent en attente de paiement, encore valable (WPD15 : reprise du paiement sans nouvelle réservation) ; null pour l'enfant */
+            /** @description Commande du parent en attente de paiement, encore valable (WPD15 : reprise du paiement sans nouvelle réservation) ; null pour l'enfant et pour une demande close */
             readonly pendingOrderReference: string | null;
         };
         /** @description `kind=course` : `courseSlug`. `kind=kit` : `items` (souvent le panier). Montant recalculé par le serveur. */

@@ -210,6 +210,26 @@ def test_parent_declines_with_an_optional_reason_told_to_the_child(sms, parent, 
     )
 
 
+def test_decline_reason_refuses_control_characters(sms, parent, child, course):
+    request_id = ask(child, course).json()["id"]
+    resp = client_for(parent).post(
+        f"{URL}{request_id}/decline/", {"reason": "Non\x00"}, format="json"
+    )
+    assert resp.status_code == 400
+    ok = client_for(parent).post(
+        f"{URL}{request_id}/decline/", {"reason": "Non,\nplus tard."}, format="json"
+    )
+    assert ok.json()["declineReason"] == "Non,\nplus tard."
+
+
+def test_another_family_cannot_decline_even_with_an_invalid_reason(sms, child, course):
+    request_id = ask(child, course).json()["id"]
+    resp = client_for(ParentFactory()).post(
+        f"{URL}{request_id}/decline/", {"reason": "x" * 600}, format="json"
+    )
+    assert resp.status_code == 404
+
+
 def test_decline_reason_is_bounded_and_absent_on_cancel(sms, parent, child, course):
     request_id = ask(child, course).json()["id"]
     resp = client_for(parent).post(

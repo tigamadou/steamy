@@ -3,6 +3,7 @@ import json
 import logging
 
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Prefetch
 from django.http import FileResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.types import OpenApiTypes
@@ -34,7 +35,7 @@ from .kit_codes import redeem
 from .models import Invoice, Order, Payment, PaymentRequest
 from .orders import GUEST_TOKEN_HEADER, create_order, order_for_guest
 from .providers import PROVIDERS, get_provider
-from .requests import close, create_request, resend
+from .requests import close, create_request, order_for_request, resend
 from .serializers import (
     BeneficiaryOrderSerializer,
     KitCodeRedeemedSerializer,
@@ -161,18 +162,30 @@ class OrderViewSet(
         serializer = OrderCreateSerializer(data=request.data, context={"payer": payer})
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        order, guest_token = create_order(
-            kind=data["kind"],
-            quote=data["quote"],
-            payer=payer,
-            guest=data.get("guest"),
-            beneficiary=data["beneficiary"],
-            delivery_zone=data.get("delivery_zone"),
-            delivery_address=data.get("delivery_address"),
-        )
         if data.get("payment_request") is not None:
-            order.payment_request = data["payment_request"]
-            order.save(update_fields=["payment_request"])
+            # WPD15 : commande en attente reprise, ou nouvelle commande, sous verrou de la demande
+            order, guest_token = (
+                order_for_request(
+                    data["payment_request"],
+                    payer=payer,
+                    kind=data["kind"],
+                    quote=data["quote"],
+                    beneficiary=data["beneficiary"],
+                    delivery_zone=data.get("delivery_zone"),
+                    delivery_address=data.get("delivery_address"),
+                ),
+                None,
+            )
+        else:
+            order, guest_token = create_order(
+                kind=data["kind"],
+                quote=data["quote"],
+                payer=payer,
+                guest=data.get("guest"),
+                beneficiary=data["beneficiary"],
+                delivery_zone=data.get("delivery_zone"),
+                delivery_address=data.get("delivery_address"),
+            )
         if (
             guest_token
         ):  # suivi par lien SMS (C10) : le seul moyen pour l'invité de retrouver sa commande
@@ -433,7 +446,10 @@ class PaymentRequestViewSet(
 
     serializer_class = PaymentRequestSerializer
     permission_classes = [IsLearnerOrParent]
-    queryset = PaymentRequest.objects.select_related("course", "requested_by", "parent")
+    # Commandes de chaque demande chargées en une requête (références payée et en attente, sans N+1)
+    queryset = PaymentRequest.objects.select_related(
+        "course", "requested_by", "parent"
+    ).prefetch_related(Prefetch("orders", queryset=Order.objects.order_by("-created_at")))
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -487,11 +503,10 @@ class PaymentRequestViewSet(
     )
     @action(detail=True, methods=["post"])
     def decline(self, request, pk=None):
+        owned = self.owned(learner_only=False)
         data = PaymentRequestDeclineSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         payment_request = close(
-            self.owned(learner_only=False),
-            PaymentRequest.Status.DECLINED,
-            data.validated_data["reason"].strip(),
+            owned, PaymentRequest.Status.DECLINED, data.validated_data["reason"]
         )
         return Response(self.get_serializer(payment_request).data)

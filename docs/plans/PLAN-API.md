@@ -619,6 +619,19 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `APPLICATION_ALREADY_RESOLVED` (409). Commande avec `paymentRequestId` : type, lignes et bénéficiaire tirés de la
   > demande (seule l'adresse d'un kit est à fournir) ; `kind` et `items` deviennent facultatifs dans ce cas ;
   > `PAYMENT_REQUEST_CLOSED` si la demande n'est plus en attente ; payée, la demande passe à `paid`.
+- [x] **API-L4.2 · suite WPD15** Refus motivé et reprise de commande · `feature/api-l4-demande-paiement-refus` · PR #129
+  - [x] `decline/` avec motif facultatif (`declineReason`), transmis à l'enfant
+  - [x] `pendingOrderReference` et reprise de la commande en attente sous verrou de la demande (idempotence)
+  - [x] Refus ou annulation : commandes en attente annulées, stock rendu ; `mark_paid` sans effet sur une demande refusée ou annulée
+  - [x] Tests : deux envois → une commande et une réservation (parcours, kit), nouvelle adresse, commande expirée, refus après commande, liste sans N+1
+  > Décisions : motif de 500 caractères au plus, texte brut sans caractère de contrôle (hors retour à la ligne et
+  > tabulation), espaces retirés, dans `PaymentRequest.decline_reason` (migration `payments/0010`) et la
+  > notification de l'enfant ; l'appartenance de la demande est vérifiée avant le motif. `pendingOrderReference` :
+  > commande `pending` non expirée du parent pour la demande, `null` pour l'enfant et pour une demande close.
+  > `POST payments/orders/` avec `paymentRequestId` verrouille la demande (`select_for_update`), revérifie qu'elle est
+  > en attente et reprend la commande en attente du même payeur à la même adresse ; une adresse différente (ou une
+  > commande expirée) annule l'ancienne et rend son stock avant d'en créer une nouvelle, rattachée à la demande dans
+  > la même transaction. Une demande expirée réglée tard passe à `paid` (C17), jamais une demande refusée ou annulée.
 - [x] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions` · PR #77
   - [x] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
   - [x] `CHILDREN_STILL_LINKED` (D54)
