@@ -60,7 +60,7 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation 
   - [ ] Playwright : refus de consentement (SMS, `WPD05`, refus avec motif, `W18` côté enfant, `CONSENT_COOLDOWN` à la nouvelle demande)
   - [ ] Playwright : acceptation, l'enfant poursuit en `W08`/`W10`
   - [ ] Recette : aucune information au-delà de D20 ; demande d'un autre numéro = « Demande introuvable »
-- [x] **4.4** `WPD15` Demande de paiement · `feature/lot4-demande-paiement` (requiert 4.0, 4.1, API-L3b) · PR #PR44
+- [x] **4.4** `WPD15` Demande de paiement · `feature/lot4-demande-paiement` (requiert 4.0, 4.1, API-L3b) · PR #135
   - [x] `WPD15` selon la maquette de 4.0, accès réservé au parent du bénéficiaire (sinon « Demande introuvable »)
   - [x] `PaymentRequestSummary` (carte enfant + objet parcours / kit / événement) et `DeclineRequestDialog`
   - [x] Réutilisation du lot 3 au registre `vous` : `AddressForm` (kit : préremplie, zone, frais serveur), `PaymentForm` (`WA03`), `PaymentStatusPanel` (`WA04` avec interrogation du statut, `WA05`, `WA07`)
