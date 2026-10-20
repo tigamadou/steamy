@@ -176,6 +176,8 @@ class EventApplication(models.Model):
         ordering = ["-created_at", "-id"]
         verbose_name = _("candidature")
         verbose_name_plural = _("candidatures")
+        # Groupe Support (D71, matrice `apps.core.groups`) : refus exceptionnel d'une candidature en cours (C3)
+        permissions = [("refuse_application", "Peut refuser exceptionnellement une candidature")]
         constraints = [
             models.UniqueConstraint(
                 fields=["event", "learner"],

@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+
+{% block result_list %}
+{% if payment_totals %}
+<section aria-label="Agrégats des paiements listés" class="module" style="display:flex;gap:24px;flex-wrap:wrap;padding:12px 16px;margin-bottom:12px">
+  <div><strong>{{ payment_totals.volume_label }}</strong><br><span class="help">encaissés (paiements réussis)</span></div>
+  <div><strong>{{ payment_totals.count }}</strong><br><span class="help">paiements listés</span></div>
+  <div><strong>{{ payment_totals.succeeded }} réussis · {{ payment_totals.failed }} échoués</strong><br><span class="help">tentatives abouties</span></div>
+  <div><strong>{% if payment_totals.failure_rate is None %}—{% else %}{{ payment_totals.failure_rate }} %{% endif %}</strong><br><span class="help">taux d'échec</span></div>
+</section>
+{% endif %}
+{{ block.super }}
+{% endblock %}
