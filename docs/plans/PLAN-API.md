@@ -665,6 +665,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Seed enrichi, `make openapi` committé
 
 ### API-L5 · Enseignant et classes — 🟡 en cours
+> Reprise : tout est livré, en PR empilées à fusionner dans l'ordre #74 → #81 → #84 → #86 → #88 (development,
+> API-L3b et API-L4 compris, fusionné dans toute la pile). Après chaque fusion, refusionner `development` dans la PR
+> suivante et régénérer `make openapi`.
 - [x] **API-L5.1** Classes · `feature/api-l5-1-classes` · PR #74
   - [x] `Classroom`, `ClassroomMembership` ; offre de `School` (`offer`, `courses`) ; quotas (`CLASSROOM_QUOTA_EXCEEDED`, D61 ; `LEARNER_QUOTA_EXCEEDED` appliqué aux invitations en API-L5.2)
   - [x] `GET classrooms/school/`, `GET/POST classrooms/` (`COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`), `GET/PATCH classrooms/{id}/`
@@ -707,14 +710,27 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`CLASSROOM_INVITATIONS_PER_PHONE_PER_DAY`, 5, code `INVITATION_DAILY_LIMIT`) ; `join_classroom` : invitation
   > retirée, classe archivée ou membre déjà actif → `CONSENT_REQUEST_EXPIRED`, identifiant pris en concurrence →
   > `USERNAME_TAKEN`. Offre échue (C21) : invitation, import et acceptation par le parent → `SCHOOL_OFFER_EXPIRED`.
-- [ ] **API-L5.3** Suivi · `feature/api-l5-3-suivi`
-  - [ ] `GET classrooms/dashboard/`
-  - [ ] `GET classrooms/learners/{id}/?classroomId=` (serializer sans handicap, localité, date de naissance, téléphone, D64)
-  - [ ] `GET classrooms/reviews/` (D65), `POST classrooms/learners/{id}/comments/` (D63), `GET classrooms/comments/`
-  - [ ] `GET classrooms/courses/{slug}/missions/{id}/` (lecture seule)
-  - [ ] Tests : aucun champ sensible dans les réponses enseignant (clés JSON)
-- [ ] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage`
-  - [ ] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
+- [x] **API-L5.3** Suivi · `feature/api-l5-3-suivi` · PR #86
+  - [x] `GET classrooms/dashboard/`
+  - [x] `GET classrooms/learners/{id}/?classroomId=` (serializer sans handicap, localité, date de naissance, téléphone, D64)
+  - [x] `GET classrooms/reviews/` (D65), `POST classrooms/learners/{id}/comments/` (D63), `GET classrooms/comments/`
+  - [x] `GET classrooms/courses/{slug}/missions/{id}/` (lecture seule)
+  - [x] Compléments WT04 et WT10 : progression, dernière activité et décrochage des membres ; progression moyenne des classes ; missions terminées et taux de réussite du parcours encadré
+  - [x] Tests : aucun champ sensible dans les réponses enseignant (clés JSON)
+  - [x] Seed D2 : tentatives à revoir (Yao, Léa), commentaire à Léa, Sèna en décrochage
+  > Décisions : `TeacherComment` (1 000 caractères, journalisé `classroom.comment`) ; notifiés : l'élève (catégorie
+  > Encadrement, `/apprenant`) et son parent (Progression, `/parent/enfants/<id>`). « À revoir » =
+  > `reviews/?status=to_review` (tentatives `ko` sans commentaire) ; `status` accepte aussi `ok|warn|ko`, `type`
+  > `formative|summative`. Paramètres d'URL en camelCase (`classroomId`, `learnerId`). Sans `classroomId`, la
+  > classe la plus récemment rejointe. Décrochage calculé à la lecture (`follow_up.dropouts`, seuil
+  > `PlatformSettings`, date d'adhésion avant toute activité, parcours terminé exclu). WT10 : `completedCount` par
+  > mission, `passRate` par niveau et projet (« missions les plus échouées » : niveaux au plus faible taux),
+  > `formativePassRate`, `summativePassRate`. WT05 : badges obtenus sur le parcours de la classe (API-L3a.3).
+- [x] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage` · PR #88
+  - [x] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
+  > Décisions : tous les jours à 7 h (heure du Bénin) ; une notification à l'enseignant par élève et par période
+  > d'inactivité (`ClassroomMembership.dropout_notified_at`), lien vers WT05 (`/enseignant/eleves/<id>?classe=<id>`).
+  > Même règle que l'affichage (`follow_up.dropouts`, API-L5.3). Sur le seed, la tâche signale Sèna.
 - [x] **API-L5.5** Événements de classe · `feature/api-l5-5-evenements-classe` · PR #84
   - [x] `EventProposal` ; `POST events/{slug}/proposals/` (`EVENT_ALREADY_PROPOSED`)
   - [x] Seed D2 : « Défi robots » déjà proposé à la classe « 4e B »
@@ -725,9 +741,10 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`/parent/evenements`), catégorie Steamy Events. `event-applications` : candidatures des élèves actifs des classes
   > actives de l'enseignant (statut, événement, élève, classe), sans motivation ni paiement. Migration
   > `events/0005_propositions` (après `0004_application_refuse_permission`).
-- [ ] **Critères de fin d'API-L5**
-  - [ ] Un enseignant ne peut pas créer de contenu (S5)
-  - [ ] Seed enrichi, `make openapi` committé
+- [x] **Critères de fin d'API-L5**
+  - [x] Un enseignant ne peut pas créer de contenu (S5)
+  - [x] Seed enrichi, `make openapi` committé
+  - [x] `GET classrooms/event-applications/` livré
 
 ### API-L6 · Back-office — 🟡 en cours
 - [x] **API-L6.1** 2FA (D72) · réalisée par LOT-6-ADMIN 6.1 (`feature/lot6-socle-staff`, PR #38)
