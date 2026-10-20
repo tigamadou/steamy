@@ -188,7 +188,7 @@ export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
   }
 
   return (
-    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
+    <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
       <PaymentRequestSummary
         request={request}
         child={child}

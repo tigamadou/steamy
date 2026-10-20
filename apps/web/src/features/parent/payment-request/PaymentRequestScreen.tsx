@@ -43,7 +43,7 @@ export async function PaymentRequestScreen({ params }: { params: Promise<{ id: s
 
   if (request.status !== "pending") {
     return (
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
         <PaymentRequestSummary
           request={request}
           child={child}
@@ -88,7 +88,7 @@ export function PaymentRequestSkeleton() {
       role="status"
       aria-busy="true"
       aria-label="Chargement de la demande…"
-      className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_420px]"
+      className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-[minmax(0,1fr)_420px]"
     >
       <SkeletonBlock className="h-110 rounded-[22px]" />
       <SkeletonBlock className="h-96 rounded-[22px]" />
