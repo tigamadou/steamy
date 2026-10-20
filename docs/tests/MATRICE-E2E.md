@@ -149,14 +149,14 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WAD03` | Impact Tracker · détail indicateur | 6 | Finance ouvre un indicateur depuis WAD02 (période conservée) : définition serveur, historique ; fil d'Ariane ; code inconnu → 404 | `apps/web/e2e/impact-tracker.spec.ts` |
 | `WAD04` | Impact Tracker · rapport trimestriel | 6 | Finance : WAD02 → trimestre en cours ; relecture après saisie, export CSV téléchargé, soumission confirmée, rapport verrouillé « Soumis » | `apps/web/e2e/impact-rapport.spec.ts` |
 | `WAD05` | Impact Tracker · saisie manuelle | 6 | Finance : brouillon, validation (vides signalés puis saisie complète), lecture seule après soumission ; Support refusé | `apps/web/e2e/impact-rapport.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
-| `WAD06` | Utilisateurs | 6 |  |  |
-| `WAD07` | Détail utilisateur | 6 |  |  |
-| `WAD08` | Modération & consentements | 6 |  |  |
+| `WAD06` | Utilisateurs | 6 | Support : recherche de Léa Adjovi par identifiant, colonnes, « Inviter un enseignant » | `apps/web/e2e/admin-comptes.spec.ts` |
+| `WAD07` | Détail utilisateur | 6 | Support : identifiants en lecture seule, lien vers le parent, enfants du parent | `apps/web/e2e/admin-comptes.spec.ts` |
+| `WAD08` | Modération & consentements | 6 | Support : consentements en suivi, relance proposée, aucune action d'acceptation (D70) | `apps/web/e2e/admin-comptes.spec.ts` |
 | `WAD09` | Contenu / Parcours | 6 | Contenu via WAD15 : liste (accès, kit, inscrits), arbre par pages chaînées (fil d'Ariane, aperçu Vimeo), statut en lecture seule, « Publier » | `apps/web/e2e/admin-contenu.spec.ts` |
 | `WAD10` | Boutique & commandes | 6 | Support : commandes de kits (articles, livraison par action), Kit Codes sur la fiche, stock des kits à 3 seuils | `apps/web/e2e/admin-commerce.spec.ts` |
 | `WAD11` | Paiements Mobile Money | 6 | Finance : agrégats de la liste, numéro masqué, notification du prestataire visible | `apps/web/e2e/admin-commerce.spec.ts` |
 | `WAD12` | Steamy Events (modération) | 6 | Super-admin : événements (places, accès, fin des candidatures), candidatures (âge, paiement) sans action de confirmation | `apps/web/e2e/admin-evenements-reglages.spec.ts` |
-| `WAD13` | Équipe & rôles (RBAC) | 6 |  |  |
+| `WAD13` | Équipe & rôles (RBAC) | 6 | Super-admin : membres, groupes, action « Réinitialiser le TOTP » | `apps/web/e2e/admin-comptes.spec.ts` |
 | `WAD14` | Paramètres généraux | 6 | Super-admin : la liste ouvre l'unique fiche de réglages ; réseaux par pays (Celtiis) ; annonce diffusable | `apps/web/e2e/admin-evenements-reglages.spec.ts` |
 | `WAD15` | Connexion admin (2FA) | 6 | Connexion du personnel par TOTP, code faux refusé, index de l'admin ; anonyme et parent renvoyés depuis `/backoffice` avec retour à la page demandée | `apps/web/e2e/admin-connexion.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
 | `WX01` | Hors ligne | 1 | Hors ligne → page recouverte, « Réessayer » sans réseau, retour du réseau → rétablie | `apps/web/e2e/socle-public.spec.ts` |
