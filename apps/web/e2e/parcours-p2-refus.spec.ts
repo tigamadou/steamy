@@ -11,7 +11,8 @@ test("P2 : refus motivé par le parent, W18 côté enfant, identifiant libéré,
   test.slow();
   const username = await startLearnerSignup(page, "Fifa");
   const phone = uniquePhone();
-  await createParent({ phone, password: "Parent2026x" });
+  // Profil parent inachevé : refus par WP11-WP12 (parcours du lot 2) ; profil complet → WPD05, voir parent-consentement
+  await createParent({ phone, password: "Parent2026x", completeProfile: false });
   const link = await sendConsentRequest(page, phone);
 
   const parent = await (await browser.newContext()).newPage();

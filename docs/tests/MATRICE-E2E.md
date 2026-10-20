@@ -49,7 +49,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WP02` | OTP | 2 | Code SMS, essais épuisés, numéro déjà inscrit (C13) | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP03` | Mot de passe | 2 | Mot de passe du parent | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP04` | Invitation enfant ? | 2 | Demande reçue ? aucune demande, création directe | `apps/web/e2e/inscription-parent.spec.ts` |
-| `WP05` | Demande de l'enfant | 2 | Demande de l'enfant (D20) après le lien SMS, parent nouveau ou déjà inscrit | `apps/web/e2e/decision-parent.spec.ts` |
+| `WP05` | Demande de l'enfant | 2 | Demande de l'enfant (D20) après le lien SMS, parent nouveau ou au profil inachevé (profil complet → `WPD05`) | `apps/web/e2e/decision-parent.spec.ts` |
 | `WP06` | Demande acceptée | 2 | Demande acceptée puis profil | `apps/web/e2e/decision-parent.spec.ts` |
 | `WP07` | Profil 1 · localisation | 2 | Localisation | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP08` | Profil 2 · à propos | 2 | À propos, tout facultatif | `apps/web/e2e/inscription-parent.spec.ts` |
@@ -111,7 +111,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WPD02` | Mes enfants | 4 | Demande de consentement reçue « à examiner » → WPD05, sans « Relancer l'invitation » ; enfant créé listé avec « Voir le profil » | `apps/web/e2e/parent-enfants.spec.ts` |
 | `WPD03` | Détail enfant | 4 | Rappel de l'identifiant après la création ; réinitialisation du mot de passe (ancien refusé, nouveau accepté sur W16) ; enfant d'un autre parent → « introuvable » | `apps/web/e2e/parent-enfants.spec.ts` |
 | `WPD04` | Ajouter un enfant | 4 | Création par le parent → WPD03 ; l'enfant se connecte sur W16 et arrive sur W11 | `apps/web/e2e/parent-enfants.spec.ts` |
-| `WPD05` | Demande de consentement | 4 |  |  |
+| `WPD05` | Demande de consentement | 4 | Lien SMS → connexion d'un parent déjà inscrit → `WPD05` (D20) ; refus motivé en modale → lecture seule, `W18` côté enfant, `CONSENT_COOLDOWN` à la nouvelle demande ; acceptation → `WPD01` avec confirmation, l'enfant poursuit en `W08`/`W10` ; autre parent → « Demande introuvable » | `apps/web/e2e/parent-consentement.spec.ts`, `apps/web/e2e/parcours-p4-parent-existant.spec.ts` |
 | `WPD06` | Steamy Events | 4 |  |  |
 | `WPD07` | Historique de commande | 4 |  |  |
 | `WPD08` | Paramètres parent | 4 | Changement de numéro par OTP sur le nouveau numéro puis connexion ; email du profil et rapport hebdomadaire coupé par email ; suppression du compte bloquée avec enfants, possible sans enfant | `apps/web/e2e/parent-parametres-aide.spec.ts` |

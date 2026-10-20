@@ -7,13 +7,15 @@ import { Loader } from "@/components/ds/Loader";
 import { Mascot } from "@/components/ds/Mascot";
 import { WebShell } from "@/components/ds/WebShell";
 import { formatInstant } from "@/lib/dates";
+import { routes } from "@/lib/routes";
 
 import { AcceptForm } from "./AcceptForm";
 import { requestPath, RequestGate } from "./RequestGate";
 
 export const metadata: Metadata = { title: "Demande de votre enfant" };
 
-// WP05 · Demande de l'enfant : seulement ce que D20 autorise
+// WP05 · Demande de l'enfant : seulement ce que D20 autorise. Un parent au profil complet (déjà inscrit) la traite
+// dans son espace (WPD05) : le lien SMS (`claim`) y aboutit.
 export default function ConsentRequestPage({ params }: PageProps<"/inscription/parent/demande/[id]">) {
   return (
     <WebShell
@@ -24,7 +26,8 @@ export default function ConsentRequestPage({ params }: PageProps<"/inscription/p
     >
       <Suspense fallback={<Loader label="Chargement de la demande…" />}>
         <RequestGate params={params}>
-          {(request) => {
+          {(request, me) => {
+            if (!me.profileStep) redirect(routes.parent.consent(request.id));
             if (request.status !== "pending") {
               const path = requestPath(request.id, request.status);
               if (path !== requestPath(request.id, "pending")) redirect(path);

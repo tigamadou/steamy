@@ -1,7 +1,7 @@
 import { cx } from "@/lib/cx";
 
 import { Avatar } from "../Avatar";
-import { Badge } from "../Badge";
+import { Badge, type BadgeTone } from "../Badge";
 
 export type ConsentRequestCardProps = {
   /** Champs autorisés par D20, et eux seuls : prénom, nom, identifiant, âge, lien de parenté. */
@@ -11,14 +11,16 @@ export type ConsentRequestCardProps = {
   age: number | null;
   /** Lien de parenté vu par le parent (« Vous êtes sa mère », référentiel `relationships`). */
   relationship: string;
-  /** Date d'expiration de la demande, déjà mise en forme. */
-  expiresOn: string;
+  /** Date d'expiration de la demande, déjà mise en forme ; absente une fois la demande close (WPD05). */
+  expiresOn?: string;
+  /** Statut affiché : « En attente » par défaut (WP05), sinon celui de la demande close (WPD05 en lecture seule). */
+  badge?: { label: string; tone: BadgeTone };
   className?: string;
 };
 
 /**
  * Carte de la demande de consentement (WP05, réutilisée par WPD05 au lot 4) : initiales (pas d'avatar), identité,
- * identifiant, âge et lien de parenté — rien d'autre n'existe à ce stade (D20) —, badge « En attente », expiration
+ * identifiant, âge et lien de parenté — rien d'autre n'existe à ce stade (D20) —, badge de statut, expiration
  * et engagement sur l'usage des données.
  */
 export function ConsentRequestCard({
@@ -28,6 +30,7 @@ export function ConsentRequestCard({
   age,
   relationship,
   expiresOn,
+  badge = { label: "En attente", tone: "amber" },
   className,
 }: ConsentRequestCardProps) {
   const name = `${firstName} ${lastName}`;
@@ -44,10 +47,12 @@ export function ConsentRequestCard({
             {[username && `@${username}`, age && `${age} ans`].filter(Boolean).join(" · ")}
           </p>
         </div>
-        <Badge tone="amber">En attente</Badge>
+        <Badge tone={badge.tone}>{badge.label}</Badge>
       </div>
       <p className="font-bold text-ink-800">{relationship}</p>
-      <p className="text-sm font-semibold text-ink-600">Demande valable jusqu&apos;au {expiresOn}.</p>
+      {expiresOn && (
+        <p className="text-sm font-semibold text-ink-600">Demande valable jusqu&apos;au {expiresOn}.</p>
+      )}
       <p className="flex items-start gap-2.5 rounded-lg bg-info-50 p-3.5 text-sm font-bold text-info-700">
         <span aria-hidden>🔒</span>
         Les données ne servent qu&apos;au suivi pédagogique, jamais à du marketing.

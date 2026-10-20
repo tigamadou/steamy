@@ -64,19 +64,36 @@ export function NoChild() {
   );
 }
 
+/** Confirmation après l'acceptation d'une demande (WPD05 → WPD01). */
+function AcceptedNotice({ firstName }: { firstName: string }) {
+  return (
+    <p
+      role="status"
+      className="m-0 flex items-start gap-3 rounded-lg border-2 border-success-200 bg-success-50 p-4 font-bold text-success-800"
+    >
+      <span aria-hidden>✅</span>
+      Demande acceptée : {firstName} peut terminer son inscription.
+    </p>
+  );
+}
+
 /** WPD01 · contenu, une fois les données lues. */
 export function ParentHomeView({
   kids,
   count,
   actions,
+  acceptedFirstName,
 }: {
   kids: Child[];
   count: number;
   actions: Schemas["PendingAction"][];
+  /** Prénom de l'enfant dont la demande vient d'être acceptée (`?consentement=<id>`). */
+  acceptedFirstName?: string;
 }) {
   const courses = kids.reduce((total, child) => total + child.activeCourses, 0);
   return (
     <div className="flex flex-col gap-5">
+      {acceptedFirstName && <AcceptedNotice firstName={acceptedFirstName} />}
       <Hero count={count} />
       <PendingActionList actions={actions} />
       <section aria-label="Vos statistiques" className="flex flex-col gap-4 sm:flex-row">
@@ -106,18 +123,39 @@ export function ParentHomeView({
   );
 }
 
+/**
+ * Prénom de l'enfant dont la demande `?consentement=<id>` est acceptée, relu dans l'API : le paramètre ne porte
+ * aucune donnée personnelle et une demande inconnue, d'un autre numéro ou non acceptée n'affiche rien.
+ */
+async function acceptedFirstName(
+  api: Awaited<ReturnType<typeof getServerApi>>,
+  consent: string | string[] | undefined,
+): Promise<string | undefined> {
+  if (typeof consent !== "string" || !/^\d+$/.test(consent)) return undefined;
+  const { data } = await api.GET("/api/accounts/consent-requests/{id}/", { params: { path: { id: consent } } });
+  return data?.status === "accepted" ? data.firstName : undefined;
+}
+
 /** WPD01 · accueil du parent : enfants et « À valider », lus côté serveur à chaque requête. */
-export async function ParentHome() {
-  const api = await getServerApi();
-  const [children, actions] = await Promise.all([
+export async function ParentHome({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const [api, { consentement }] = await Promise.all([getServerApi(), searchParams]);
+  const [children, actions, accepted] = await Promise.all([
     api.GET("/api/accounts/children/", { params: { query: { pageSize: HOME_CHILDREN_PAGE_SIZE } } }),
     api.GET("/api/accounts/pending-actions/"),
+    acceptedFirstName(api, consentement),
   ]);
   const list = readOrNull(children);
   const pending = readOrNull(actions);
   if (!list || !pending) return null;
   const results = list.results ?? [];
-  return <ParentHomeView kids={results} count={list.count ?? results.length} actions={pending} />;
+  return (
+    <ParentHomeView
+      kids={results}
+      count={list.count ?? results.length}
+      actions={pending}
+      acceptedFirstName={accepted}
+    />
+  );
 }
 
 /** Squelette de WPD01 : bandeau, « À valider », pastilles et cartes des enfants. */
