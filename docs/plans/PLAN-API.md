@@ -646,6 +646,12 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > en attente et reprend la commande en attente du même payeur à la même adresse ; une adresse différente (ou une
   > commande expirée) annule l'ancienne et rend son stock avant d'en créer une nouvelle, rattachée à la demande dans
   > la même transaction. Une demande expirée réglée tard passe à `paid` (C17), jamais une demande refusée ou annulée.
+- [x] **API-L4.2 · suite WPD07** Kit Codes révoqués visibles du payeur · `feature/api-l4-kit-codes-revoques` · PR #PRKC
+  - [x] `kitCodes` de la commande : tous les codes, révoqués compris, avec `revoked`
+  - [x] Tests : code révoqué listé et marqué, les autres non ; l'activation d'un code révoqué reste refusée (`KIT_CODE_INVALID`)
+  > Décisions : un code révoqué par le Support (6.4) restait masqué, alors que l'enfant a pu le recevoir ; le payeur le
+  > voit désormais marqué « révoqué », sans l'action « Copier ». Codes triés par création ; l'apprenant ne voit
+  > toujours pas les codes.
 - [x] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions` · PR #77
   - [x] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
   - [x] `CHILDREN_STILL_LINKED` (D54)

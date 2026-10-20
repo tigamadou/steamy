@@ -3560,6 +3560,8 @@ export interface components {
             readonly code: string;
             readonly kitSlug: string;
             readonly redeemed: boolean;
+            /** @description Révoqué par le Support : refusé à l'activation, gardé dans la liste pour l'expliquer */
+            readonly revoked: boolean;
         };
         KitCodeRedeemRequest: {
             /** @description STEAMY-XXXX-XXXX, casse et tirets indifférents */
