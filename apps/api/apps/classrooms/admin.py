@@ -2,14 +2,45 @@ from django.contrib import admin, messages
 from django.utils.translation import ngettext
 
 from .invitations import send_invitation
-from .models import School, TeacherInvitation
+from .models import Classroom, ClassroomMembership, School, TeacherInvitation
 
 
 @admin.register(School)
 class SchoolAdmin(admin.ModelAdmin):
-    list_display = ("name", "city", "country", "learner_quota", "classroom_quota", "valid_until")
+    list_display = (
+        "name",
+        "city",
+        "country",
+        "offer",
+        "learner_quota",
+        "classroom_quota",
+        "valid_until",
+    )
     list_filter = ("country",)
     search_fields = ("name", "city")
+    filter_horizontal = ("courses",)
+
+
+class MembershipInline(admin.TabularInline):
+    model = ClassroomMembership
+    fields = ("learner", "status", "consent_request", "joined_at", "left_at")
+    readonly_fields = fields
+    extra = 0
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Classroom)
+class ClassroomAdmin(admin.ModelAdmin):
+    """Suivi par le support : les classes sont créées par les enseignants (WT13)."""
+
+    list_display = ("name", "teacher", "school", "course", "archived_at")
+    list_filter = ("school",)
+    search_fields = ("name", "teacher__email")
+    raw_id_fields = ("teacher",)
+    inlines = [MembershipInline]
 
 
 @admin.register(TeacherInvitation)

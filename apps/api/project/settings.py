@@ -331,6 +331,9 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "ErrorCodeEnum": "libs.errors.ERROR_CODES",
         "RoleEnum": "apps.accounts.models.User.Role",
+        "ConsentStatusEnum": "apps.accounts.models.ConsentRequest.Status",
+        "MembershipStatusEnum": "apps.classrooms.models.ClassroomMembership.Status",
+        "ApplicationStatusEnum": "apps.events.models.EventApplication.Status",
         "UserStatusEnum": "apps.accounts.models.User.Status",
         "DeletionRequestStatusEnum": "apps.accounts.models.DeletionRequest.Status",
         "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
@@ -412,6 +415,12 @@ SMS_PROVIDER = os.getenv("SMS_PROVIDER", "twilio" if DEPLOYED else "fake")
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
 TWILIO_SENDER = os.getenv("TWILIO_SENDER", "STEAMY")
+# Invitations d'élèves par enseignant et par jour (WT06) : plafond des SMS de consentement envoyés par une classe
+CLASSROOM_INVITATIONS_PER_DAY = int(os.getenv("CLASSROOM_INVITATIONS_PER_DAY", 300))
+# … et par numéro de parent (fratrie, plusieurs classes), toutes classes confondues
+CLASSROOM_INVITATIONS_PER_PHONE_PER_DAY = int(
+    os.getenv("CLASSROOM_INVITATIONS_PER_PHONE_PER_DAY", 5)
+)
 # URL publique du webhook de statut (`/api/notifications/sms/status/`) ; vide : pas d'accusés de réception
 TWILIO_STATUS_CALLBACK_URL = os.getenv("TWILIO_STATUS_CALLBACK_URL", "")
 
@@ -590,6 +599,10 @@ CELERY_BEAT_SCHEDULE = {
     "expire-payment-requests": {
         "task": "apps.payments.tasks.expire_payment_requests",
         "schedule": crontab(minute=45),
+    },
+    "detect-dropouts": {
+        "task": "apps.classrooms.tasks.detect_dropouts",
+        "schedule": crontab(minute=0, hour=7),
     },
 }
 # optional default task time limits

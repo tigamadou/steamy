@@ -23,4 +23,5 @@ urlpatterns = [
         views.ApplicationCreateView.as_view(),
         name="events-application-create",
     ),
+    path("<slug:slug>/proposals/", views.EventProposalView.as_view(), name="events-proposals"),
 ]

@@ -179,11 +179,19 @@ CATALOG: dict[str, tuple[int, str]] = {
         S.HTTP_409_CONFLICT,
         "Le nombre maximal d'élèves de votre offre est atteint.",
     ),
+    "SCHOOL_OFFER_EXPIRED": (
+        S.HTTP_403_FORBIDDEN,
+        "L'offre de votre école a expiré : contactez l'équipe Steamy pour la renouveler.",
+    ),
     "COURSE_NOT_IN_OFFER": (
         S.HTTP_400_BAD_REQUEST,
         "Ce parcours ne fait pas partie de votre offre.",
     ),
     "CLASSROOM_NAME_TAKEN": (S.HTTP_409_CONFLICT, "Une de vos classes porte déjà ce nom."),
+    "INVITATION_DAILY_LIMIT": (
+        S.HTTP_429_TOO_MANY_REQUESTS,
+        "Nombre maximal d'invitations atteint pour aujourd'hui. Réessayez demain.",
+    ),
     "REPORT_LOCKED": (S.HTTP_409_CONFLICT, "Ce rapport est soumis : il n'est plus modifiable."),
     "EXPORT_NOT_READY": (
         S.HTTP_409_CONFLICT,
@@ -196,6 +204,10 @@ CATALOG: dict[str, tuple[int, str]] = {
     "IMPORT_TOO_LARGE": (
         S.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
         "Le fichier dépasse 200 lignes : découpez-le en plusieurs imports.",
+    ),
+    "IMPORT_INVALID_FILE": (
+        S.HTTP_400_BAD_REQUEST,
+        "Fichier illisible : envoyez un fichier CSV ou Excel (.xlsx).",
     ),
 }
 
