@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 import { Button, Mascot, SkeletonBlock } from "@/components/ds";
 import { getServerApi } from "@/lib/api";
 import { readOrNull } from "@/lib/api-read";
-import { routes } from "@/lib/routes";
 
 import { NotificationList, type NotificationTab } from "./NotificationList";
+import { NOTIFICATION_SPACES, type NotificationSpaceId } from "./spaces";
 
 /** Notifications par page de WD04. */
 export const NOTIFICATIONS_PAGE_SIZE = 20;
@@ -25,8 +25,9 @@ export function parseNotificationParams(searchParams: SearchParams): { tab: Noti
   };
 }
 
-/** WD05 · aucune notification : état vide, renvoi vers les préférences (WD06). */
-export function NotificationsEmpty() {
+/** WD05 · aucune notification : état vide, renvoi vers les préférences (WD06, ou WPD08 pour le parent). */
+export function NotificationsEmpty({ space = "learner" }: { space?: NotificationSpaceId }) {
+  const { preferences, text } = NOTIFICATION_SPACES[space];
   return (
     <section
       aria-labelledby="notifications-vide"
@@ -37,22 +38,22 @@ export function NotificationsEmpty() {
         Tout est calme par ici
       </h2>
       <p className="m-0 text-sm leading-normal font-semibold text-ink-600">
-        Tu n&apos;as aucune notification. On te prévient dès qu&apos;il se passe quelque chose d&apos;important.
+        {text.empty}
       </p>
-      <Button href={routes.learner.notificationPreferences} variant="outline" icon="gear" className="mt-2">
+      <Button href={preferences} variant="outline" icon="gear" className="mt-2">
         Régler les notifications
       </Button>
     </section>
   );
 }
 
-/** Squelette de WD04 : onglets et cinq notifications. */
-export function NotificationsSkeleton() {
+/** Squelette de WD04 / WPD14 : onglets et cinq notifications. */
+export function NotificationsSkeleton({ space = "learner" }: { space?: NotificationSpaceId }) {
   return (
     <div
       role="status"
       aria-busy="true"
-      aria-label="Chargement de tes notifications…"
+      aria-label={NOTIFICATION_SPACES[space].text.loading}
       className="mx-auto flex w-full max-w-180 flex-col gap-5"
     >
       <SkeletonBlock className="h-10 w-56 rounded-pill" />
@@ -65,8 +66,14 @@ export function NotificationsSkeleton() {
   );
 }
 
-/** WD04 / WD05 · notifications de l'apprenant, lues côté serveur à chaque requête. */
-export async function Notifications({ searchParams }: { searchParams: Promise<SearchParams> }) {
+/** WD04 / WD05 (apprenant) et WPD14 (parent) · notifications, lues côté serveur à chaque requête. */
+export async function Notifications({
+  searchParams,
+  space = "learner",
+}: {
+  searchParams: Promise<SearchParams>;
+  space?: NotificationSpaceId;
+}) {
   const { tab, page } = parseNotificationParams(await searchParams);
   const api = await getServerApi();
   const [list, count] = await Promise.all([
@@ -76,15 +83,16 @@ export async function Notifications({ searchParams }: { searchParams: Promise<Se
     api.GET("/api/notifications/unread-count/"),
   ]);
   // Page au-delà de la dernière (après lecture ou URL saisie à la main) : retour à la première
-  if (list.response.status === 404 && page > 1) redirect(routes.learner.notificationList(tab));
+  if (list.response.status === 404 && page > 1) redirect(NOTIFICATION_SPACES[space].list(tab));
   const data = readOrNull(list);
   const unread = readOrNull(count);
   if (!data || !unread) return null;
   const items = data.results ?? [];
-  if (tab === "toutes" && items.length === 0 && page === 1) return <NotificationsEmpty />;
+  if (tab === "toutes" && items.length === 0 && page === 1) return <NotificationsEmpty space={space} />;
   return (
     <NotificationList
       key={`${tab}-${page}`}
+      space={space}
       tab={tab}
       page={page}
       items={items}

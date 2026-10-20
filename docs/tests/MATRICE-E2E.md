@@ -107,7 +107,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WJ09` | Parcours incomplet | 3 | Reste à faire, reprise, aucune mention du parent | `apps/web/e2e/apprenant-certification.spec.ts` |
 | `WJ10` | Évaluation sommative (≥ 80 %) | 3 | P1 : sommative ratée puis réussie après le délai | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WJ11` | Projet validé + badge de projet | 3 | P1 : badge de projet, lien vers la certification | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
-| `WPD01` | Accueil parent | 4 |  |  |
+| `WPD01` | Accueil parent | 4 | Accès refusé à l'apprenant et à l'enseignant ; « À valider » du jeu D2 (suppression, paiement, candidature) avec leurs cibles ; stat « À valider » = longueur de la liste ; état vide sans enfant | `apps/web/e2e/parent-accueil-notifications.spec.ts` |
 | `WPD02` | Mes enfants | 4 |  |  |
 | `WPD03` | Détail enfant | 4 |  |  |
 | `WPD04` | Ajouter un enfant | 4 |  |  |
@@ -120,7 +120,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WPD11` | Rapport hebdomadaire | 4 |  |  |
 | `WPD12` | Faire participer un enfant | 4 |  |  |
 | `WPD13` | Aide & support | 4 |  |  |
-| `WPD14` | Notifications | 4 |  |  |
+| `WPD14` | Notifications | 4 | Onglets dans l'URL, « Tout marquer comme lu » → cloche à 0, état vide au vouvoiement | `apps/web/e2e/parent-accueil-notifications.spec.ts` |
 | `WT01` | Accueil formateur | 5 |  |  |
 | `WT02` | Mes parcours encadrés | 5 |  |  |
 | `WT03` | Mes classes | 5 |  |  |

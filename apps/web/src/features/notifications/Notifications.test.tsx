@@ -99,6 +99,41 @@ describe("Notifications (WD04 / WD05)", () => {
   });
 });
 
+describe("Notifications (WPD14, espace parent)", () => {
+  beforeEach(() => {
+    GET.mockReset();
+    redirect.mockClear();
+  });
+
+  it("passe l'espace parent à la liste", async () => {
+    routeApi(respond(200, { count: 1, next: null, results: [notification()] }));
+    const tree = (await Notifications({ space: "parent", searchParams: Promise.resolve({}) })) as ListElement;
+    expect(tree.props).toMatchObject({ space: "parent", tab: "toutes", page: 1 });
+  });
+
+  it("aucune notification : état vide au vouvoiement, réglages dans WPD08", async () => {
+    routeApi(respond(200, { count: 0, results: [] }), respond(200, { count: 0 }));
+    render((await Notifications({ space: "parent", searchParams: Promise.resolve({}) }))!);
+    expect(screen.getByText(/Vous n'avez aucune notification/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Régler les notifications" })).toHaveAttribute(
+      "href",
+      "/parent/parametres#notifications",
+    );
+  });
+
+  it("page disparue : retour à la première page de l'onglet du parent", async () => {
+    routeApi(respond(404));
+    await expect(
+      Notifications({ space: "parent", searchParams: Promise.resolve({ onglet: "non-lues", page: "2" }) }),
+    ).rejects.toThrow("redirect:/parent/notifications?onglet=non-lues");
+  });
+
+  it("squelette annoncé au vouvoiement", () => {
+    render(<NotificationsSkeleton space="parent" />);
+    expect(screen.getByRole("status", { name: "Chargement de vos notifications…" })).toBeInTheDocument();
+  });
+});
+
 describe("Preferences (WD06)", () => {
   beforeEach(() => GET.mockReset());
 
