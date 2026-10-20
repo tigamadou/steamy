@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : 6.2 « Inviter un membre » par lien d'activation (à concevoir) ; critères de fin du lot · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -45,7 +45,7 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot · Prérequ
   > visible une fois l'appareil confirmé (ni secret ni QR code dans l'admin des appareils). `/api/backoffice/overview/`
   > n'existant pas encore (API-L6.4), le refus `OTP_REQUIRED` est testé sur une route factice protégée par
   > `IsStaffVerified`. Ancien catalogue `courses` (dont `Path`) retiré de l'admin ; `messaging` était déjà supprimé.
-- [x] **6.2** Utilisateurs, consentements, équipe · `feature/lot6-comptes-consentements` · PR #PR62 (requiert 6.1, API-L2, API-L4, API-L5)
+- [ ] **6.2** Utilisateurs, consentements, équipe · `feature/lot6-comptes-consentements` · PR #133 (requiert 6.1, API-L2, API-L4, API-L5)
   - [x] WAD06 Utilisateurs (admin Django) : `UserAdmin` (colonnes, filtres, recherche, `role` en lecture seule après création)
   - [x] WAD06 action « Inviter un enseignant » (email + `School` vers `TeacherInvitation`) et désactiver / réactiver avec motif et audit
   - [x] WAD07 Fiche utilisateur (admin Django) : inlines lecture seule, genre et handicap soumis à *view_sensitive_profile*
