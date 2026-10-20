@@ -48,8 +48,3 @@ const REASON_OF_STATE: Record<EventState, ClosedReason | null> = {
 export function closedReason(state: EventState): ClosedReason | null {
   return REASON_OF_STATE[state];
 }
-
-/** Prix affiché : « Gratuit » ou le montant servi par l'API. */
-export function isFreeEvent(event: { price?: number }): boolean {
-  return !event.price;
-}

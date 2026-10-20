@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import { Button, Field, KitCodeInput } from "@/components/ds";
-import { formatCountdown } from "@/components/ds/RetryCountdown";
 import { errorMessage, type ApiFailure } from "@/lib/api-call";
 import { routes } from "@/lib/routes";
+import { throttledLabel, useThrottle } from "@/lib/use-throttle";
 
 import { redeemKitCode } from "./api";
 import { UNLOCKED_PARAM } from "./types";
@@ -42,15 +42,10 @@ export function kitCodeFailure(failure: ApiFailure): Failure {
   }
 }
 
-/** Secondes restantes avant `until` (horodatage), arrondies au-dessus ; 0 une fois passé. */
-function secondsLeft(until: number): number {
-  return Math.max(0, Math.ceil((until - Date.now()) / 1000));
-}
-
 /**
  * WA01 / WA06 · Saisie du Kit Code d'un parcours avec kit. Le serveur juge le code (aucune validation métier ici,
  * D35) ; succès → WC06a avec le toast « Parcours débloqué ». Après `THROTTLED`, l'envoi reste bloqué le temps annoncé
- * par l'API (`Retry-After`) quand elle le communique.
+ * par l'API (`Retry-After`) quand elle le communique. Le titre de l'échec s'efface dès que le code est modifié.
  */
 export function KitCodeForm({ courseSlug }: { courseSlug: string }) {
   const router = useRouter();
@@ -58,18 +53,7 @@ export function KitCodeForm({ courseSlug }: { courseSlug: string }) {
   const [failure, setFailure] = useState<Failure | null>(null);
   const [empty, setEmpty] = useState(false);
   const [pending, setPending] = useState(false);
-  const [blockedUntil, setBlockedUntil] = useState(0);
-  const [, setTick] = useState(0);
-  const wait = secondsLeft(blockedUntil);
-
-  useEffect(() => {
-    if (!blockedUntil) return;
-    const timer = window.setInterval(() => {
-      setTick((n) => n + 1);
-      if (secondsLeft(blockedUntil) === 0) window.clearInterval(timer);
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [blockedUntil]);
+  const { wait, track } = useThrottle();
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -84,7 +68,7 @@ export function KitCodeForm({ courseSlug }: { courseSlug: string }) {
     }
     setPending(false);
     setFailure(kitCodeFailure(result));
-    if (result.code === "THROTTLED" && result.retryAfter) setBlockedUntil(Date.now() + result.retryAfter * 1000);
+    track(result);
   };
 
   const fieldError = empty ? "Saisis le code imprimé sur la notice de ton kit." : failure?.message;
@@ -113,7 +97,15 @@ export function KitCodeForm({ courseSlug }: { courseSlug: string }) {
       </div>
 
       <Field label="Code Kit" required hint="Imprimé sur la notice du kit" error={fieldError}>
-        <KitCodeInput value={code} onValueChange={setCode} />
+        <KitCodeInput
+          value={code}
+          onValueChange={(value) => {
+            setCode(value);
+            // Nouvelle saisie : l'échec précédent (titre et message) ne s'applique plus
+            setFailure(null);
+            setEmpty(false);
+          }}
+        />
       </Field>
 
       <details className="text-[13px] font-semibold text-ink-700">
@@ -125,15 +117,7 @@ export function KitCodeForm({ courseSlug }: { courseSlug: string }) {
       </details>
 
       <Button type="submit" block size="lg" loading={pending} disabled={wait > 0}>
-        {wait > 0 ? (
-          <>
-            Réessayer dans <span className="tabular-nums">{formatCountdown(wait)}</span>
-          </>
-        ) : failure ? (
-          "Réessayer"
-        ) : (
-          "Valider le code"
-        )}
+        {throttledLabel(wait, failure ? "Réessayer" : "Valider le code")}
       </Button>
 
       <p className="m-0 text-center text-[13px] font-bold text-ink-600">

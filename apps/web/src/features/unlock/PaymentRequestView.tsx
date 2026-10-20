@@ -59,12 +59,15 @@ function resendState(request: PaymentRequest, now: number): { allowed: boolean; 
 }
 
 /**
- * WA02 · Demande de paiement d'un parcours au parent (D52, C4) : récapitulatif et montant du serveur, attente avec
- * interrogation du statut toutes les 10 s (onglet visible), relance limitée, annulation, puis issue (réglée → WC06a,
- * refusée, expirée, annulée → nouvelle demande).
+ * Demande de paiement au parent (D52, C4), une seule vue pour `/apprenant/demandes/[id]`, que la demande vise un
+ * parcours ou des kits. Récapitulatif et montant du serveur, attente avec interrogation du statut
+ * (`REQUEST_POLL_MS`, onglet visible), annulation confirmée, puis issue.
  *
- * WK08 · Variante `kind=kit` (demande créée depuis le panier) : montant des articles seul, la livraison étant ajoutée
- * par le parent (C10) ; ni relance, ni « Changer de parent », ni « Renvoyer le lien » ; issue réglée → WD14.
+ * - WA02 · `kind=course` (depuis WC05) : relance limitée par le serveur (`nextResendAt`) ; issue réglée → WC06a ;
+ *   refusée, expirée ou annulée → « Refaire la demande » (nouvelle demande du même parcours) ou retour au catalogue.
+ * - WK08 · `kind=kit` (depuis le panier WK03) : montant des articles seul, la livraison étant ajoutée par le parent
+ *   (C10) ; ni relance, ni « Changer de parent », ni « Renvoyer le lien » ; issue réglée → WD14 ; refusée, expirée ou
+ *   annulée → retour au panier ou à la boutique (la nouvelle demande part du panier).
  */
 export function PaymentRequestView({ initial }: { initial: PaymentRequest }) {
   const router = useRouter();

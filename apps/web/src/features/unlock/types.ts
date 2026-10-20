@@ -2,18 +2,10 @@ import type { Schemas } from "@steamy/api-client";
 
 import { formatPrice } from "@/lib/format";
 
-/**
- * Statuts d'une demande de paiement (`PaymentRequest.Status` de l'API, C4). Le schéma OpenAPI les type à tort avec
- * l'énumération des paiements (`PaymentStatusEnum`, collision de noms de drf-spectacular) : ce type les rétablit.
- */
-export type RequestStatus = "pending" | "paid" | "declined" | "expired" | "cancelled";
+/** Statuts d'une demande de paiement (`PaymentRequestStatusEnum` du schéma OpenAPI, C4). */
+export type RequestStatus = Schemas["PaymentRequestStatusEnum"];
 
-export type PaymentRequest = Omit<Schemas["PaymentRequest"], "status"> & { status: RequestStatus };
-
-/** Demande lue dans l'API, avec ses vrais statuts. */
-export function asRequest(data: Schemas["PaymentRequest"]): PaymentRequest {
-  return data as unknown as PaymentRequest;
-}
+export type PaymentRequest = Schemas["PaymentRequest"];
 
 /** Libellé de ce qui est demandé : le parcours, ou les kits du panier (« Steamy Bot v1 × 2, Pack Électronique »). */
 export function requestTitle(request: Pick<PaymentRequest, "course" | "items">): string {

@@ -5,9 +5,9 @@ import { Button } from "@/components/ds/Button";
 import { EventAvailability, EventDetail, eventState } from "@/components/public/events";
 import { routes } from "@/lib/routes";
 
-import { getEvent, getMyApplications } from "./api";
+import { getEvent, getMyApplications, getMyTickets } from "./api";
 import { ApplicationStatusBadge, ParentNotice } from "./parts";
-import { activeApplication, CLOSED_REASONS, closedReason } from "./status";
+import { activeApplication, CLOSED_REASONS, closedReason, freeTicket } from "./status";
 
 const l = routes.learner;
 
@@ -25,13 +25,16 @@ export function eventBreadcrumb(event: Pick<Schemas["SteamyEvent"], "slug" | "ti
 /**
  * Encart d'action de l'apprenant sur WL23 : prix et places du serveur, puis « Demander à participer » (→ WD11),
  * le statut de sa candidature en cours, ou le CTA désactivé avec le motif (`EVENT_FULL`, `EVENT_CLOSED`, passé).
+ * Un ticket Steamy Events libre rend gratuit un événement payant (C12) : le parent ne donne alors que son accord.
  */
 export function LearnerEventAction({
   event,
   application,
+  ticket,
 }: {
   event: Schemas["SteamyEventDetail"];
   application?: Schemas["Application"];
+  ticket?: Schemas["Ticket"];
 }) {
   const reason = closedReason(eventState(event));
   return (
@@ -60,7 +63,7 @@ export function LearnerEventAction({
           <Button block size="lg" href={l.eventApplication(event.slug)}>
             Demander à participer
           </Button>
-          <ParentNotice paid={!event.isFree} />
+          <ParentNotice paid={!event.isFree && !ticket} />
         </>
       )}
     </>
@@ -70,7 +73,7 @@ export function LearnerEventAction({
 /** WL23 dans le shell : la fiche publique du lot 1 (titre en h2 sous le h1 du header), avec l'encart de l'apprenant. */
 export async function LearnerEventView({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [event, applications] = await Promise.all([getEvent(slug), getMyApplications()]);
+  const [event, applications, tickets] = await Promise.all([getEvent(slug), getMyApplications(), getMyTickets()]);
   if (!event) notFound();
   return (
     <EventDetail
@@ -78,7 +81,13 @@ export async function LearnerEventView({ params }: { params: Promise<{ slug: str
       headingLevel={2}
       embedded
       breadcrumb={eventBreadcrumb(event)}
-      action={<LearnerEventAction event={event} application={activeApplication(applications, event.slug)} />}
+      action={
+        <LearnerEventAction
+          event={event}
+          application={activeApplication(applications, event.slug)}
+          ticket={freeTicket(tickets)}
+        />
+      }
     />
   );
 }

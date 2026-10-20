@@ -98,6 +98,9 @@ flowchart LR
 - **Upload direct depuis le navigateur** : les URLs pré-signées pointent vers `http://steamy-rustfs:9000`,
   injoignable depuis l'extérieur. Il faut exposer RustFS (sous-domaine `media.` + ingress) avant
   d'utiliser `/api/core/presign/`.
+- **Téléchargement des documents privés** (certificat, reçu invité) : redirection vers une URL présignée de
+  `media.<domaine>`, jamais parcourue en CI. Le reçu invité est lu par `fetch`, donc soumis au CORS du stockage :
+  vérification à faire en staging, voir [Mise en place §10](mise-en-place.md#10-vérifier-les-documents-privés-staging).
 - **WebSockets en local** : `runserver` ne les sert pas (ils fonctionnent en staging/prod via gunicorn + uvicorn).
 - **Un seul nœud par environnement** : une panne du VPS interrompt le service jusqu'à son retour
   ou sa reconstruction (Ansible + restauration depuis Wasabi). C'est le compromis assumé du mono-nœud.

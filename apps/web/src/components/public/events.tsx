@@ -32,11 +32,31 @@ export function eventState(event: SteamyEvent): EventState {
   return event.applicationsOpen ? "open" : "closed";
 }
 
-function PriceBadge({ event }: { event: SteamyEvent }) {
+/** Prix d'un événement : « Gratuit » (`isFree` de l'API) ou le montant servi par l'API, en FCFA. */
+export function PriceBadge({ event }: { event: Pick<SteamyEvent, "isFree" | "price"> }) {
   return event.isFree ? (
     <Badge tone="success">Gratuit</Badge>
   ) : (
     <Badge tone="primary">{formatPrice(event.price ?? 0)}</Badge>
+  );
+}
+
+/** Vignette d'un événement à sa couleur, avec son emoji (WD10, WD11, puis l'espace parent). */
+export function EventThumb({
+  event,
+  className,
+}: {
+  event: Pick<SteamyEvent, "color" | "emoji">;
+  className: string;
+}) {
+  return (
+    <span
+      aria-hidden
+      className={`relative flex shrink-0 items-center justify-center overflow-hidden bg-(--event) ${className}`}
+      style={{ "--event": event.color } as CSSProperties}
+    >
+      <span className="relative">{event.emoji || "🎟️"}</span>
+    </span>
   );
 }
 

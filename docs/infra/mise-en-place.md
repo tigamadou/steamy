@@ -14,6 +14,7 @@ plus le temps de propagation DNS.
 - [ ] 7. Environnement GitHub et secrets configurés
 - [ ] 8. Premier déploiement réussi
 - [ ] 9. Restauration de sauvegarde testée (staging)
+- [ ] 10. Téléchargement des documents privés vérifié depuis le navigateur (staging)
 
 ---
 
@@ -165,3 +166,33 @@ sudo k3s kubectl -n steamy exec -it deploy/steamy-api -- python manage.py create
 
 Une sauvegarde jamais restaurée n'est pas une sauvegarde. Suivre la procédure
 [Restaurer PostgreSQL](donnees-et-sauvegardes.md#restaurer-postgresql) en staging, et noter le temps qu'elle prend.
+
+## 10. Vérifier les documents privés (staging)
+
+Certificats (WJ07) et reçus (WK07) sont servis par une **redirection vers une URL présignée** du stockage
+(`AWS_S3_PUBLIC_ENDPOINT_URL`, `https://media.<domaine>`, ADR 0005 P5). Ce chemin n'est jamais parcouru en CI : le
+stockage y est un dossier local servi par l'API elle-même.
+
+Le reçu de l'invité est le cas sensible : le front le lit par `fetch` (en-tête `X-Guest-Token`, cookies inclus),
+puis le propose au téléchargement. Le navigateur suit alors la redirection vers une **autre origine** : la réponse du
+stockage doit porter les en-têtes CORS, faute de quoi « Télécharger le reçu » échoue (« Le serveur est injoignable »).
+Après une redirection entre origines, le navigateur envoie `Origin: null` : une règle CORS limitée à l'origine du
+front ne suffit pas.
+
+1. En staging, passer une commande invitée avec le faux prestataire, puis ouvrir WK07 et cliquer « Télécharger le
+   reçu » : le PDF doit s'enregistrer, sans erreur CORS dans la console du navigateur.
+2. Contrôler la réponse du stockage à une requête redirigée :
+
+   ```bash
+   # URL présignée lue dans l'en-tête Location de l'API (valable 5 minutes)
+   curl -sI -H "X-Guest-Token: <jeton>" https://api.staging.<domaine>/api/payments/orders/<référence>/invoice/ | grep -i location
+   curl -sI -H "Origin: null" "<URL présignée>" | grep -i access-control
+   ```
+
+   Attendu : `Access-Control-Allow-Origin` présent (et `Access-Control-Allow-Credentials: true` tant que le client
+   navigateur envoie les cookies).
+3. Si la vérification échoue, deux corrections possibles, à trancher avant la production :
+   - côté stockage : règle CORS du bucket (ou en-têtes posés par l'ingress `media.`) qui accepte la lecture `GET`
+     redirigée ;
+   - côté API et front, plus sûr : l'API renvoie l'URL présignée en JSON au lieu de rediriger, et le front y navigue
+     (une navigation n'est pas soumise au CORS, l'URL porte déjà sa signature).
