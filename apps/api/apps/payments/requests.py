@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
-from apps.accounts.models import ParentChildLink
+from apps.accounts.models import ParentChildLink, User
 from libs.errors import ApiError
 
 from .models import Order, PaymentRequest
@@ -37,21 +37,37 @@ def next_resend_at(request: PaymentRequest):
     return request.last_sent_at + RESEND_DELAY
 
 
+def kit_lines(items) -> list[tuple[str, int]]:
+    """Lignes d'une demande de kits, comparables quel que soit leur ordre."""
+    return sorted((item["kit_slug"], item["quantity"]) for item in items)
+
+
 @transaction.atomic
 def create_request(learner, *, kind: str, amount: int, course=None, items=None):
-    """Crée la demande et prévient le parent. Une demande en attente pour le même parcours est réutilisée."""
+    """
+    Crée la demande et prévient le parent. Une demande en attente pour le même parcours, ou pour les mêmes kits en
+    mêmes quantités (ordre indifférent), est réutilisée.
+    """
     parent = parent_of(learner)
     if (
         parent is None
     ):  # pragma: no cover - un apprenant actif a toujours un parent (consentement, S3)
         raise ApiError("PERMISSION_DENIED")
+    # Verrou de l'apprenant : deux demandes simultanées ne créent pas deux demandes ni deux SMS
+    User.objects.select_for_update().filter(pk=learner.pk).first()
+    now = timezone.now()
+    open_requests = PaymentRequest.objects.filter(
+        requested_by=learner, status=PaymentRequest.Status.PENDING, expires_at__gt=now
+    )
     if course is not None:
-        existing = PaymentRequest.objects.filter(
-            requested_by=learner, course=course, status=PaymentRequest.Status.PENDING
-        ).first()
+        existing = open_requests.filter(course=course).first()
         if existing:
             return existing, False
-    now = timezone.now()
+    elif items:
+        wanted = kit_lines(items)
+        for existing in open_requests.filter(kind=PaymentRequest.Kind.KIT, course__isnull=True):
+            if kit_lines(existing.items) == wanted:
+                return existing, False
     request = PaymentRequest.objects.create(
         requested_by=learner,
         parent=parent,
@@ -109,14 +125,55 @@ def resend(request: PaymentRequest) -> PaymentRequest:
     return request
 
 
+def _pending_orders(request: PaymentRequest, payer=None):
+    """Commandes en attente qui règlent la demande, verrouillées (dans une transaction)."""
+    orders = Order.objects.select_for_update().filter(
+        payment_request=request, status=Order.Status.PENDING
+    )
+    return orders.filter(payer=payer) if payer is not None else orders
+
+
 @transaction.atomic
-def close(request: PaymentRequest, status: str) -> PaymentRequest:
-    """Annulation par l'enfant ou refus par le parent : la demande doit être encore en attente."""
+def order_for_request(request: PaymentRequest, *, payer, delivery_zone=None, **order) -> Order:
+    """
+    Commande du parent qui règle la demande de l'enfant (WPD15), sous verrou de la demande : une commande en attente
+    encore valable, à la même adresse de livraison, est reprise (pas de seconde réservation ni de second paiement) ;
+    une adresse différente annule l'ancienne commande et rend son stock avant d'en créer une nouvelle.
+    """
+    from .orders import cancel_order, create_order
+
+    request = PaymentRequest.objects.select_for_update().get(pk=request.pk)
+    ensure_pending(request)
+    for pending in _pending_orders(request, payer).order_by("-created_at"):
+        same_address = pending.delivery_zone_id == (
+            delivery_zone.pk if delivery_zone else None
+        ) and pending.delivery_address == order.get("delivery_address")
+        if same_address and not pending.is_expired:
+            return pending
+        cancel_order(pending)
+    created, _ = create_order(
+        payer=payer, delivery_zone=delivery_zone, payment_request=request, **order
+    )
+    return created
+
+
+@transaction.atomic
+def close(request: PaymentRequest, status: str, reason: str = "") -> PaymentRequest:
+    """
+    Annulation par l'enfant ou refus par le parent : la demande doit être encore en attente. Le motif facultatif du
+    refus (WPD15) est transmis à l'enfant dans sa notification.
+    """
     request = PaymentRequest.objects.select_for_update().get(pk=request.pk)
     ensure_pending(request)
     request.status = status
     request.decided_at = timezone.now()
-    request.save(update_fields=["status", "decided_at"])
+    request.decline_reason = reason if status == PaymentRequest.Status.DECLINED else ""
+    request.save(update_fields=["status", "decided_at", "decline_reason"])
+    # Plus rien à régler : les commandes en attente sont annulées et leur stock rendu
+    from .orders import cancel_order
+
+    for order in _pending_orders(request):
+        cancel_order(order)
     if status == PaymentRequest.Status.DECLINED:
         from apps.notifications.models import Category
         from apps.notifications.services import notify
@@ -126,7 +183,7 @@ def close(request: PaymentRequest, status: str) -> PaymentRequest:
             Category.PAYMENTS,
             "payment_request_declined",
             "Ton parent a refusé ta demande",
-            request.title,
+            f"{request.title} · « {reason} »" if reason else request.title,
             url=f"/apprenant/demandes/{request.pk}",
             tone="warning",
             icon="💬",
@@ -135,10 +192,12 @@ def close(request: PaymentRequest, status: str) -> PaymentRequest:
 
 
 def mark_paid(order: Order) -> None:
-    """Exécution post-paiement : la demande réglée par cette commande passe à `paid`."""
+    """Exécution post-paiement : la demande réglée par cette commande passe à `paid` (sauf refusée ou annulée)."""
     if order.payment_request_id:
-        PaymentRequest.objects.filter(pk=order.payment_request_id).exclude(
-            status=PaymentRequest.Status.PAID
+        # Une demande refusée ou annulée le reste ; une demande expirée réglée tard est honorée (C17)
+        PaymentRequest.objects.filter(
+            pk=order.payment_request_id,
+            status__in=[PaymentRequest.Status.PENDING, PaymentRequest.Status.EXPIRED],
         ).update(status=PaymentRequest.Status.PAID, decided_at=timezone.now())
 
 

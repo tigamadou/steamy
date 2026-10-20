@@ -65,9 +65,9 @@ plan.
 | [LOT-1-PUBLIC](LOT-1-PUBLIC.md) | ✅ terminé | 1.0 à 1.6 fusionnées (PR #18, #19, #30, #36, #47 à #50, #58) · critères de fin et validation C18 (PR #59) | — |
 | [LOT-2-AUTH](LOT-2-AUTH.md) | 🟡 en cours | 2.0 (PR #31) · 2.1 (PR #35) · 2.2 à 2.8 (PR #51 à #57) | Critères de fin du lot (CI, correctifs API signalés) |
 | [LOT-3-APPRENANT](LOT-3-APPRENANT.md) | ✅ terminé | 3.0 shell (PR #92) · 3.1 accueil, notifications, aide (PR #101) · 3.2 catalogue et souhaits (PR #98) · 3.3a mes parcours et missions (PR #94) · 3.3b quiz et badges (PR #95) · 3.3c certification (PR #96) · 3.4 tentatives et progression (PR #97) · 3.5 profil WD13, WD17, WD18 (PR #99), WD19, WD22, WD15 (PR #118) · 3.6 déblocage WA01, WA02, WA06, WD14 (PR #119) · 3.7a boutique, fiche et panier (PR #117) · 3.7b checkout invité (PR #121) · 3.7c demande de kit WK08 (PR #120) · 3.8 Steamy Events (PR #116) · critères de fin et suivis de relecture | — |
-| [LOT-4-PARENT](LOT-4-PARENT.md) | 🟡 en cours | 4.0 maquette de WPD15 et des états manquants dessinée (PR #72), validation C18 en attente · 4.1 socle, accueil et notifications (PR #122) · 4.3 demande de consentement WPD05 (PR #125) | 4.2, 4.4 à 4.9 ; validation C18 de WPD15 avant 4.4 |
+| [LOT-4-PARENT](LOT-4-PARENT.md) | 🟡 en cours | 4.0 maquette de WPD15 et des états manquants dessinée (PR #72), validation C18 en attente · 4.1 socle, accueil et notifications (PR #122) · 4.3 demande de consentement WPD05 (PR #125) · 4.9 paramètres et aide (PR #126) | 4.2, 4.4 à 4.8 ; validation C18 de WPD15 |
 | [LOT-5-ENSEIGNANT](LOT-5-ENSEIGNANT.md) | ⬜ à faire | — | 5.1 (après API-L5) |
-| [LOT-6-ADMIN](LOT-6-ADMIN.md) | 🟡 en cours | 6.1 (PR #38) · 6.6 (PR #62) · 6.7 (PR #93) · 6.8 (PR #100) · 6.9 (PR #106, exports PR #111) · 6.3 (PR #113) · 6.4 (PR #114) · 6.5 (PR #115) | 6.2 après API-L5 ; critères de fin |
+| [LOT-6-ADMIN](LOT-6-ADMIN.md) | 🟡 en cours | 6.1 (PR #38) · 6.6 (PR #62) · 6.7 (PR #93) · 6.8 (PR #100) · 6.9 (PR #106, exports PR #111) · 6.3 (PR #113) · 6.4 (PR #114) · 6.5 (PR #115) · 6.2 sans invitation par lien (PR #133) | Invitation d'un membre par lien (WAD13) ; critères de fin du lot |
 
 ## Suivi d'exécution
 

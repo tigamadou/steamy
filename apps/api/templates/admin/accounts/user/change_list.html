@@ -1,0 +1,8 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+{% if teacher_invitation_url and perms.accounts.invite_teacher and perms.classrooms.add_teacherinvitation %}
+<li><a href="{{ teacher_invitation_url }}" class="addlink">Inviter un enseignant</a></li>
+{% endif %}
+{{ block.super }}
+{% endblock %}

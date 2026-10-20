@@ -91,7 +91,7 @@ describe("PaymentStatusPanel", () => {
   it("WA07 échec : raison du prestataire, « Changer de numéro » et « Réessayer le paiement »", async () => {
     const user = userEvent.setup();
     const onSettled = vi.fn();
-    const failed = { ...PENDING, status: "failed" as const, failureCode: "DECLINED", failureReason: "Solde insuffisant." };
+    const failed = { ...PENDING, status: "failed" as const, failureCode: "DECLINED" as const, failureReason: "Solde insuffisant." };
     const { container, rerender } = render(<PaymentStatusPanel {...props} payment={failed} onSettled={onSettled} />);
     expect(screen.getByRole("heading", { level: 2, name: "Paiement échoué" })).toBeInTheDocument();
     expect(screen.getByText(/Aucun montant n'a été débité/)).toBeInTheDocument();

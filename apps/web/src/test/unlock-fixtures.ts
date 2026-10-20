@@ -18,7 +18,9 @@ export function paymentRequest(overrides: Partial<PaymentRequest> = {}): Payment
     lastSentAt: "2026-10-13T09:00:00Z",
     nextResendAt: "2026-10-14T09:00:00Z",
     decidedAt: null,
+    declineReason: "",
     orderReference: null,
+    pendingOrderReference: null,
     ...overrides,
   };
 }
@@ -47,7 +49,7 @@ export function order(overrides: Partial<Schemas["Order"]> = {}): Schemas["Order
       },
     ],
     beneficiary: { id: 3, firstName: "Léa" },
-    deliveryZone: null as unknown as Schemas["Order"]["deliveryZone"],
+    deliveryZone: null,
     expiresAt: "2026-10-13T09:30:00Z",
     paidAt: "2026-10-13T09:05:00Z",
     createdAt: "2026-10-13T09:00:00Z",

@@ -1,9 +1,12 @@
 """Demandes de paiement (API-L3b.5, D52, C4) : création par l'enfant, relance limitée, annulation, refus, expiration."""
 
+import threading
 from datetime import timedelta
 
 import pytest
+from django.core import mail
 from django.core.management import CommandError, call_command
+from django.db import connection
 from django.utils import timezone
 from rest_framework.test import APIClient
 
@@ -12,12 +15,12 @@ from apps.catalog.tests.factories import CourseFactory
 from apps.learning.models import Enrollment
 from apps.notifications.models import Notification
 from apps.payments.models import Order, PaymentRequest
-from apps.payments.requests import MAX_SENDS
+from apps.payments.requests import MAX_SENDS, create_request
 from apps.payments.tasks import expire_payment_requests
 from apps.shop.models import DeliveryAddress
 from apps.shop.tests.factories import DeliveryZoneFactory, KitFactory
 
-from .factories import link_child
+from .factories import link_child, load_referentials
 
 pytestmark = pytest.mark.django_db
 URL = "/api/payments/payment-requests/"
@@ -109,6 +112,94 @@ def test_child_asks_for_kits_without_reserving_stock(sms, parent, child):
     assert "Steamy Bot × 2" in sms.last(parent.phone)
 
 
+def ask_kits(child, *lines):
+    items = [{"kitSlug": slug, "quantity": quantity} for slug, quantity in lines]
+    return client_for(child).post(URL, {"kind": "kit", "items": items}, format="json")
+
+
+@pytest.fixture
+def kits():
+    return KitFactory(slug="bot"), KitFactory(slug="lab")
+
+
+def test_pending_request_for_the_same_kits_is_reused_whatever_the_order(sms, child, kits):
+    first = ask_kits(child, ("bot", 2), ("lab", 1)).json()
+    again = ask_kits(child, ("lab", 1), ("bot", 2))
+    assert again.status_code == 200 and again.json()["id"] == first["id"]
+    assert PaymentRequest.objects.count() == 1
+
+
+@pytest.mark.parametrize(
+    "lines",
+    [
+        [("bot", 3), ("lab", 1)],  # autre quantité
+        [("bot", 2)],  # kit en moins
+        [("bot", 2), ("lab", 1), ("kit3", 1)],  # kit en plus
+    ],
+)
+def test_other_kits_or_quantities_make_a_new_request(sms, child, kits, lines):
+    KitFactory(slug="kit3")
+    first = ask_kits(child, ("bot", 2), ("lab", 1)).json()
+    other = ask_kits(child, *lines)
+    assert other.status_code == 201 and other.json()["id"] != first["id"]
+
+
+def test_cancelled_kit_request_is_not_reused(sms, child, kits):
+    first = ask_kits(child, ("bot", 2)).json()
+    assert client_for(child).post(f"{URL}{first['id']}/cancel/").status_code == 200
+    again = ask_kits(child, ("bot", 2))
+    assert again.status_code == 201 and again.json()["id"] != first["id"]
+
+
+def test_expired_but_still_pending_request_is_not_reused(sms, child, course, kits):
+    course_request = ask(child, course).json()
+    kit_request = ask_kits(child, ("bot", 2)).json()
+    PaymentRequest.objects.update(expires_at=timezone.now() - timedelta(minutes=1))
+    assert ask(child, course).json()["id"] != course_request["id"]
+    assert ask_kits(child, ("bot", 2)).json()["id"] != kit_request["id"]
+    assert PaymentRequest.objects.filter(status=PaymentRequest.Status.PENDING).count() == 4
+
+
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.parametrize("kind", ["course", "kit"])
+def test_simultaneous_requests_create_one_request_and_one_sms(kind):
+    """Deux demandes identiques simultanées : le verrou de l'apprenant n'en crée qu'une et n'envoie qu'un SMS."""
+    load_referentials()
+    parent = ParentFactory()
+    child = link_child(parent)
+    course = CourseFactory(paid=True, price=15000)
+    kit = KitFactory(slug="bot", price=35000)
+    if kind == "course":
+        data = {"kind": "course", "amount": 15000, "course": course, "items": []}
+    else:
+        line = {"kit_slug": kit.slug, "title": kit.name, "unit_price": 35000, "quantity": 2}
+        data = {"kind": "kit", "amount": 70000, "course": None, "items": [line]}
+    barrier = threading.Barrier(2)
+    created = []
+
+    def ask_once():
+        try:
+            barrier.wait()
+            created.append(create_request(child, **data)[1])
+        finally:
+            connection.close()
+
+    threads = [threading.Thread(target=ask_once) for _ in range(2)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    assert sorted(created) == [False, True]
+    assert PaymentRequest.objects.count() == 1
+    assert [m.to for m in mail.outbox] == [[f"{parent.phone}@sms.test"]]
+
+
+def test_kit_request_of_another_learner_is_not_reused(sms, parent, child, kits):
+    first = ask_kits(child, ("bot", 2)).json()
+    again = ask_kits(link_child(parent), ("bot", 2))
+    assert again.status_code == 201 and again.json()["id"] != first["id"]
+
+
 @pytest.mark.parametrize(
     ("items", "code"),
     [
@@ -190,6 +281,55 @@ def test_parent_declines_and_the_child_is_told(sms, parent, child, course):
     assert resp.json()["status"] == "declined"
     notification = Notification.objects.get(user=child, type="payment_request_declined")
     assert notification.url == f"/apprenant/demandes/{request_id}"
+
+
+def test_parent_declines_with_an_optional_reason_told_to_the_child(sms, parent, child, course):
+    request_id = ask(child, course).json()["id"]
+    resp = client_for(parent).post(
+        f"{URL}{request_id}/decline/",
+        {"reason": "  On en reparle après les examens.  "},
+        format="json",
+    )
+    assert resp.status_code == 200, resp.json()
+    assert resp.json()["declineReason"] == "On en reparle après les examens."
+    notification = Notification.objects.get(user=child, type="payment_request_declined")
+    assert notification.message == "Robotique · « On en reparle après les examens. »"
+    # L'enfant lit aussi le motif sur sa demande (WA02)
+    assert (
+        client_for(child).get(f"{URL}{request_id}/").json()["declineReason"]
+        == "On en reparle après les examens."
+    )
+
+
+def test_decline_reason_refuses_control_characters(sms, parent, child, course):
+    request_id = ask(child, course).json()["id"]
+    resp = client_for(parent).post(
+        f"{URL}{request_id}/decline/", {"reason": "Non\x07"}, format="json"
+    )
+    assert resp.status_code == 400
+    assert resp.json()["fields"]["reason"][0]["code"] == "INVALID"
+    ok = client_for(parent).post(
+        f"{URL}{request_id}/decline/", {"reason": "Non,\nplus tard."}, format="json"
+    )
+    assert ok.json()["declineReason"] == "Non,\nplus tard."
+
+
+def test_another_family_cannot_decline_even_with_an_invalid_reason(sms, child, course):
+    request_id = ask(child, course).json()["id"]
+    resp = client_for(ParentFactory()).post(
+        f"{URL}{request_id}/decline/", {"reason": "x" * 600}, format="json"
+    )
+    assert resp.status_code == 404
+
+
+def test_decline_reason_is_bounded_and_absent_on_cancel(sms, parent, child, course):
+    request_id = ask(child, course).json()["id"]
+    resp = client_for(parent).post(
+        f"{URL}{request_id}/decline/", {"reason": "x" * 501}, format="json"
+    )
+    assert resp.status_code == 400
+    other = ask(child, CourseFactory(paid=True, price=9000)).json()["id"]
+    assert client_for(child).post(f"{URL}{other}/cancel/").json()["declineReason"] == ""
 
 
 def test_requests_expire_after_seven_days(sms, child, course):

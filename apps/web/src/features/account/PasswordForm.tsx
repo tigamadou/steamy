@@ -8,7 +8,7 @@ import { Field } from "@/components/ds/Field";
 import { NewPasswordFields } from "@/components/ds/NewPasswordFields";
 import { PasswordInput } from "@/components/ds/PasswordInput";
 import { isPasswordValid } from "@/components/ds/PwReq";
-import { apiCall, errorMessage } from "@/lib/api-call";
+import { apiCall, errorMessage, type Register } from "@/lib/api-call";
 import { submitWith } from "@/lib/form";
 
 import { SavedToast } from "./SavedToast";
@@ -22,11 +22,27 @@ type State = {
   saved: number;
 };
 
+const TEXTS = {
+  tu: {
+    current: "Indique ton mot de passe actuel.",
+    next: "Choisis un nouveau mot de passe qui respecte les règles, saisi deux fois à l'identique.",
+    confirm: "Confirme ton nouveau mot de passe",
+    saved: "Ton mot de passe est mis à jour.",
+  },
+  vous: {
+    current: "Indiquez votre mot de passe actuel.",
+    next: "Choisissez un nouveau mot de passe qui respecte les règles, saisi deux fois à l'identique.",
+    confirm: "Confirmez votre nouveau mot de passe",
+    saved: "Votre mot de passe est mis à jour.",
+  },
+} as const;
+
 /**
- * WD18 · Changer son mot de passe : mot de passe actuel, nouveau mot de passe avec les règles `PwReq` (D25) et sa
+ * WD18 (apprenant) et WPD08 (parent, `register="vous"`) · Changer son mot de passe : mot de passe actuel, nouveau mot de passe avec les règles `PwReq` (D25) et sa
  * confirmation. La session reste ouverte. Pas de changement de numéro (D30).
  */
-export function PasswordForm() {
+export function PasswordForm({ register = "tu" }: { register?: Register } = {}) {
+  const texts = TEXTS[register];
   const [state, action, pending] = useActionState(
     async (previous: State, form: FormData): Promise<State> => {
       const attempt = previous.attempt + 1;
@@ -34,9 +50,9 @@ export function PasswordForm() {
       const currentPassword = String(form.get("currentPassword") ?? "");
       const newPassword = String(form.get("newPassword") ?? "");
       const errors: State = { attempt, saved };
-      if (!currentPassword) errors.current = "Indique ton mot de passe actuel.";
+      if (!currentPassword) errors.current = texts.current;
       if (!isPasswordValid(newPassword) || newPassword !== form.get("newPasswordConfirm")) {
-        errors.next = "Choisis un nouveau mot de passe qui respecte les règles, saisi deux fois à l'identique.";
+        errors.next = texts.next;
       }
       if (errors.current || errors.next) return errors;
 
@@ -46,7 +62,7 @@ export function PasswordForm() {
       if (result.ok) return { attempt, saved: saved + 1 };
       const { currentPassword: current, newPassword: next } = result.fields;
       if (current || next) return { attempt, saved, current, next };
-      return { attempt, saved, error: errorMessage(result, "tu") };
+      return { attempt, saved, error: errorMessage(result, register) };
     },
     { attempt: 0, saved: 0 },
   );
@@ -73,7 +89,7 @@ export function PasswordForm() {
         <div id="nouveau-mot-de-passe" tabIndex={-1} className="outline-none">
           <NewPasswordFields
             label="Nouveau mot de passe"
-            confirmLabel="Confirme ton nouveau mot de passe"
+            confirmLabel={texts.confirm}
             name="newPassword"
             confirmName="newPasswordConfirm"
             error={state.next}
@@ -84,7 +100,7 @@ export function PasswordForm() {
           Mettre à jour le mot de passe
         </Button>
       </form>
-      {state.saved > 0 && <SavedToast key={state.saved} title="Ton mot de passe est mis à jour." />}
+      {state.saved > 0 && <SavedToast key={state.saved} title={texts.saved} />}
     </>
   );
 }

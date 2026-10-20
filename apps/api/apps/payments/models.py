@@ -72,6 +72,8 @@ class PaymentRequest(models.Model):
     last_sent_at = models.DateTimeField(_("dernier envoi"))
     expires_at = models.DateTimeField(_("expire le"))
     decided_at = models.DateTimeField(_("traitée le"), null=True, blank=True)
+    #: Motif facultatif du refus par le parent (WPD15), transmis à l'enfant
+    decline_reason = models.CharField(_("motif du refus"), max_length=500, blank=True)
     created_at = models.DateTimeField(_("créée le"), auto_now_add=True)
 
     class Meta:
@@ -257,6 +259,15 @@ class Payment(models.Model):
         PENDING = "pending", _("En attente de validation")
         SUCCEEDED = "succeeded", _("Réussi")
         FAILED = "failed", _("Échoué")
+
+    class FailureCode(models.TextChoices):
+        """Codes d'échec posés par l'initiation, la réconciliation et le webhook (vide tant que rien n'a échoué)."""
+
+        PROVIDER_UNAVAILABLE = "PROVIDER_UNAVAILABLE", _("Prestataire indisponible")
+        PROVIDER_REFUSED = "PROVIDER_REFUSED", _("Initiation refusée par le prestataire")
+        INITIATION_LOST = "INITIATION_LOST", _("Initiation jamais aboutie")
+        AMOUNT_MISMATCH = "AMOUNT_MISMATCH", _("Montant ou devise incohérents")
+        DECLINED = "DECLINED", _("Paiement refusé")
 
     order = models.ForeignKey(Order, models.PROTECT, related_name="payments")
     provider = models.CharField(_("prestataire"), max_length=16, choices=PaymentProvider)

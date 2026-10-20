@@ -1,7 +1,7 @@
 import { act, render, renderHook, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { throttledLabel, useThrottle } from "./use-throttle";
+import { throttledLabel, useThrottle } from "./useThrottle";
 
 beforeEach(() => {
   vi.useFakeTimers();

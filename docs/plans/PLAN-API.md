@@ -594,6 +594,13 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > commande de kit payée par Marie pour Léa (expédiée, Kit Code, reçu), une demande de paiement de Léa en attente,
   > une candidature de Léa à un événement payant (en attente de Marie, couverte par son ticket). Le kit en rupture
   > existait déjà (L1.5). Reste ouvert : la validation du format des factures par la comptabilité (L3b.0a, P1/P2).
+- [x] **API-L3b.7** Schéma et demandes de kits · `feature/api-l3b-schema-demandes-kit` · PR #131
+  - [x] Demande de kits en attente réutilisée si mêmes kits et quantités (ordre indifférent), 200 comme un parcours
+  - [x] Verrou de l'apprenant dans `create_request` : deux demandes simultanées, une seule demande et un seul SMS
+  - [x] Demande en attente mais échue (`expiresAt` passé, pas encore expirée par la tâche) jamais réutilisée
+  - [x] `Order.deliveryZone` nullable ; `Payment.failureCode` en `PaymentFailureCodeEnum` (liste `Payment.FailureCode`)
+  > Décisions : pas de contrainte d'unicité sur les demandes en attente : le verrou suffit, et une demande échue
+  > encore `pending` (avant le passage horaire de `expire_payment_requests`) la violerait.
 
 ### API-L4 · Espace parent — ✅ terminé
 - [x] **API-L4.1** Enfants · `feature/api-l4-1-enfants` · PR #75, #80
@@ -626,6 +633,19 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `APPLICATION_ALREADY_RESOLVED` (409). Commande avec `paymentRequestId` : type, lignes et bénéficiaire tirés de la
   > demande (seule l'adresse d'un kit est à fournir) ; `kind` et `items` deviennent facultatifs dans ce cas ;
   > `PAYMENT_REQUEST_CLOSED` si la demande n'est plus en attente ; payée, la demande passe à `paid`.
+- [x] **API-L4.2 · suite WPD15** Refus motivé et reprise de commande · `feature/api-l4-demande-paiement-refus` · PR #129
+  - [x] `decline/` avec motif facultatif (`declineReason`), transmis à l'enfant
+  - [x] `pendingOrderReference` et reprise de la commande en attente sous verrou de la demande (idempotence)
+  - [x] Refus ou annulation : commandes en attente annulées, stock rendu ; `mark_paid` sans effet sur une demande refusée ou annulée
+  - [x] Tests : deux envois → une commande et une réservation (parcours, kit), nouvelle adresse, commande expirée, refus après commande, liste sans N+1
+  > Décisions : motif de 500 caractères au plus, texte brut sans caractère de contrôle (hors retour à la ligne et
+  > tabulation), espaces retirés, dans `PaymentRequest.decline_reason` (migration `payments/0010`) et la
+  > notification de l'enfant ; l'appartenance de la demande est vérifiée avant le motif. `pendingOrderReference` :
+  > commande `pending` non expirée du parent pour la demande, `null` pour l'enfant et pour une demande close.
+  > `POST payments/orders/` avec `paymentRequestId` verrouille la demande (`select_for_update`), revérifie qu'elle est
+  > en attente et reprend la commande en attente du même payeur à la même adresse ; une adresse différente (ou une
+  > commande expirée) annule l'ancienne et rend son stock avant d'en créer une nouvelle, rattachée à la demande dans
+  > la même transaction. Une demande expirée réglée tard passe à `paid` (C17), jamais une demande refusée ou annulée.
 - [x] **API-L4.3** Suppressions · `feature/api-l4-3-suppressions` · PR #77
   - [x] `DeletionRequest` ; `POST/DELETE accounts/me/deletion-request/`, `accounts/children/{id}/deletion/`, `accounts/deletion-requests/{id}/approve|refuse/`
   - [x] `CHILDREN_STILL_LINKED` (D54)
