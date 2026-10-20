@@ -213,9 +213,10 @@ def test_parent_declines_with_an_optional_reason_told_to_the_child(sms, parent, 
 def test_decline_reason_refuses_control_characters(sms, parent, child, course):
     request_id = ask(child, course).json()["id"]
     resp = client_for(parent).post(
-        f"{URL}{request_id}/decline/", {"reason": "Non\x00"}, format="json"
+        f"{URL}{request_id}/decline/", {"reason": "Non\x07"}, format="json"
     )
     assert resp.status_code == 400
+    assert resp.json()["fields"]["reason"][0]["code"] == "INVALID"
     ok = client_for(parent).post(
         f"{URL}{request_id}/decline/", {"reason": "Non,\nplus tard."}, format="json"
     )
