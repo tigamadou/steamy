@@ -173,6 +173,8 @@ class ClassroomMembership(models.Model):
     )
     joined_at = models.DateTimeField(_("a rejoint le"), null=True, blank=True)
     left_at = models.DateTimeField(_("retiré le"), null=True, blank=True)
+    #: Dernière alerte de décrochage envoyée à l'enseignant (D66) : une seule par période d'inactivité.
+    dropout_notified_at = models.DateTimeField(_("décrochage signalé le"), null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -190,3 +192,44 @@ class ClassroomMembership(models.Model):
 
     def __str__(self):
         return f"{self.learner or 'Invitation'} · {self.classroom} ({self.status})"
+
+
+class TeacherComment(models.Model):
+    """
+    Commentaire de l'enseignant sur le travail d'un élève (WT05, D63) : à sens unique, sans réponse possible (S11),
+    notifié et toujours visible de l'élève **et** de son parent. Rattachable à une tentative du parcours de la classe.
+    """
+
+    teacher = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="+",
+        verbose_name=_("enseignant"),
+    )
+    learner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="teacher_comments",
+        verbose_name=_("élève"),
+    )
+    classroom = models.ForeignKey(
+        Classroom, on_delete=models.CASCADE, related_name="comments", verbose_name=_("classe")
+    )
+    attempt = models.ForeignKey(
+        "learning.QuizAttempt",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="teacher_comments",
+        verbose_name=_("tentative"),
+    )
+    body = models.TextField(_("commentaire"), max_length=1000)
+    created_at = models.DateTimeField(_("envoyé le"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("commentaire d'enseignant")
+        verbose_name_plural = _("commentaires d'enseignants")
+        ordering = ["-created_at", "-id"]
+
+    def __str__(self):
+        return f"Commentaire à {self.learner} ({self.created_at:%Y-%m-%d})"

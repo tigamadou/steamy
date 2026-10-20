@@ -3,6 +3,8 @@ Jeu de démonstration de l'encadrement (D2), appelé par `seed_demo` après le c
 M. Adékambi, ses deux classes, leurs élèves et des invitations dans chaque état. Idempotent : relancer le seed remet les classes dans cet état.
 """
 
+from datetime import timedelta
+
 from django.utils import timezone
 
 from apps.accounts.models import (
@@ -12,12 +14,14 @@ from apps.accounts.models import (
     ParentProfile,
     User,
 )
-from apps.catalog.models import Course
+from apps.catalog.models import Course, Quiz
+from apps.events.models import EventProposal, SteamyEvent
+from apps.learning.models import Enrollment, QuizAttempt
 from apps.referentials.models import Avatar, Relationship, SchoolGrade
 
 from .joining import enroll
 from .learner_invitations import Invitee, invite
-from .models import Classroom, ClassroomMembership, School
+from .models import Classroom, ClassroomMembership, School, TeacherComment
 
 Status = ClassroomMembership.Status
 
@@ -109,3 +113,58 @@ def seed_members(classrooms: list[Classroom], teacher, lea: User, password: str)
             ConsentRequest.objects.filter(pk=membership.consent_request_id).update(
                 status=status, resolved_at=now, token_hash=""
             )
+
+
+#: Événement déjà proposé à la classe « 4e B » (WT09) : une seconde proposition répond `EVENT_ALREADY_PROPOSED`.
+PROPOSED_EVENT = "defi-robots-cotonou"
+
+
+def seed_proposals(classroom: Classroom, teacher) -> None:
+    event = SteamyEvent.objects.get(slug=PROPOSED_EVENT)
+    EventProposal.objects.get_or_create(event=event, classroom=classroom, teacher=teacher)
+
+
+#: Commentaire de Koffi à Léa, sur sa tentative `warn` (visible côté apprenant WD01 et parent WPD03).
+LEA_COMMENT = "Bon début, Léa ! Revois la mission sur les capteurs avant de repasser le quiz."
+#: Sèna n'a rien fait depuis 10 jours : signalée en décrochage (seuil de 7 jours, D66).
+DROPOUT_DAYS = 10
+
+
+def seed_follow_up(classrooms: list[Classroom], teacher) -> None:
+    """Une tentative `ko` de Yao à revoir, un commentaire à Léa, Sèna en décrochage (WT01, WT05, WT07)."""
+    robotics, code = classrooms
+    TeacherComment.objects.filter(teacher=teacher).delete()
+    yao = User.objects.get(username="yao.kpade")
+    enrollment = Enrollment.objects.get(learner=yao, course=robotics.course)
+    enrollment.attempts.all().delete()
+    quiz = Quiz.objects.filter(level__project__course=robotics.course).order_by(
+        "level__project__order", "level__order"
+    )[0]
+    QuizAttempt.objects.create(
+        learner=yao,
+        enrollment=enrollment,
+        quiz=quiz,
+        score=0,
+        total=2,
+        percentage=0,
+        threshold=quiz.pass_threshold,
+        status=QuizAttempt.Status.KO,
+        duration_sec=90,
+    )
+    Enrollment.objects.filter(pk=enrollment.pk).update(last_activity_at=timezone.now())
+    lea_warn = QuizAttempt.objects.filter(
+        learner__username="lea.adjovi",
+        enrollment__course=robotics.course,
+        status=QuizAttempt.Status.WARN,
+    ).first()
+    TeacherComment.objects.create(
+        teacher=teacher,
+        learner=lea_warn.learner,
+        classroom=robotics,
+        attempt=lea_warn,
+        body=LEA_COMMENT,
+    )
+    sena = User.objects.get(username="sena.kpade")
+    Enrollment.objects.filter(learner=sena, course=code.course).update(
+        last_activity_at=timezone.now() - timedelta(days=DROPOUT_DAYS), progress_pct=10
+    )

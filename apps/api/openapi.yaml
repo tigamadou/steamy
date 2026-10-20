@@ -3328,6 +3328,58 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/classrooms/comments/:
+    get:
+      operationId: classrooms_comments_list
+      description: 'Commentaires des enseignants : l''apprenant voit les siens (WD01),
+        le parent ceux de ses enfants (WPD03).'
+      parameters:
+      - in: query
+        name: learnerId
+        schema:
+          type: integer
+        description: 'Parent : un de ses enfants'
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLearnerCommentList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/classrooms/courses/:
     get:
       operationId: classrooms_courses_list
@@ -3410,6 +3462,338 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/courses/{slug}/missions/{id}/:
+    get:
+      operationId: classrooms_courses_missions_retrieve
+      description: Mission d'un parcours encadré, en lecture seule (WT10) ; mission
+        d'un autre parcours → 404.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionRead'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/dashboard/:
+    get:
+      operationId: classrooms_dashboard_retrieve
+      description: 'WT01 : compteurs, classes, « À revoir » (D65) et « Décrochage
+        » (D66).'
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherDashboard'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/event-applications/:
+    get:
+      operationId: classrooms_event_applications_list
+      description: |-
+        WT09 « Candidatures de mes élèves » : candidatures des élèves actifs des classes de l'enseignant, en lecture
+        seule (chaque élève candidate seul, son parent décide, S8, C3). Filtres `classroomId`, `event`. Paginé.
+      parameters:
+      - in: query
+        name: classroomId
+        schema:
+          type: integer
+      - in: query
+        name: event
+        schema:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        description: Slug de l'événement
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedClassroomEventApplicationList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/learners/{id}/:
+    get:
+      operationId: classrooms_learners_retrieve
+      description: |-
+        WT05 : un élève d'une classe de l'enseignant, sur le parcours de cette classe (`classroomId` si l'élève est dans
+        plusieurs classes). Ni âge, ni handicap, ni localité, ni téléphone (D64). Élève d'un autre enseignant → 404.
+      parameters:
+      - in: query
+        name: classroomId
+        schema:
+          type: integer
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnerFollowUp'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/learners/{id}/comments/:
+    post:
+      operationId: classrooms_learners_comments_create
+      description: 'WT05 « Envoyer le commentaire » : notifié, visible de l''élève
+        et de son parent, sans réponse (D63, S11).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - classrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherComment'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/classrooms/reviews/:
+    get:
+      operationId: classrooms_reviews_list
+      description: 'WT07 : tentatives des élèves, filtrables ; `status=to_review`
+        = « À revoir » (D65). Paginé.'
+      parameters:
+      - in: query
+        name: classroomId
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: pageSize
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          enum:
+          - to_review
+          - ok
+          - warn
+          - ko
+          type: string
+          minLength: 1
+        description: |-
+          `to_review` : tentatives `ko` non commentées (D65)
+
+          * `to_review` - to_review
+          * `ok` - ok
+          * `warn` - warn
+          * `ko` - ko
+      - in: query
+        name: type
+        schema:
+          enum:
+          - formative
+          - summative
+          type: string
+          minLength: 1
+        description: |-
+          * `formative` - formative
+          * `summative` - summative
+      tags:
+      - classrooms
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReviewList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
           content:
             application/json:
               schema:
@@ -3605,6 +3989,65 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Application'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/events/{slug}/proposals/:
+    post:
+      operationId: events_proposals_create
+      description: |-
+        WT09 « Proposer à une classe » : notifie les élèves actifs et leurs parents (notification seulement, S8).
+        `EVENT_ALREADY_PROPOSED` si la classe l'a déjà reçu, `EVENT_CLOSED` après la fin des candidatures.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposalRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proposal'
           description: ''
         '400':
           content:
@@ -7606,11 +8049,16 @@ components:
           type: boolean
           readOnly: true
           description: 'Parcours figé : la classe a déjà eu un membre'
+        averageProgress:
+          type: integer
+          readOnly: true
+          description: Progression moyenne des élèves actifs sur le parcours (%)
         createdAt:
           type: string
           format: date-time
           readOnly: true
       required:
+      - averageProgress
       - color
       - course
       - createdAt
@@ -7655,6 +8103,41 @@ components:
       - emoji
       - slug
       - title
+    ClassroomEventApplication:
+      type: object
+      description: 'Candidature d''un élève vue par son enseignant : statut seulement,
+        ni motivation ni paiement (S8, D64).'
+      properties:
+        id:
+          type: integer
+        status:
+          $ref: '#/components/schemas/ApplicationStatusEnum'
+        event:
+          $ref: '#/components/schemas/EventSummary'
+        learner:
+          $ref: '#/components/schemas/MemberLearner'
+        classroom:
+          $ref: '#/components/schemas/ClassroomRef'
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - classroom
+      - createdAt
+      - event
+      - id
+      - learner
+      - status
+    ClassroomRef:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+      - id
+      - name
     ClassroomWriteRequest:
       type: object
       description: 'WT13 : nom*, parcours* (de l''offre), niveau scolaire facultatif,
@@ -7682,6 +8165,21 @@ components:
       required:
       - courseSlug
       - name
+    CommentRequestRequest:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        attemptId:
+          type: integer
+          nullable: true
+        classroomId:
+          type: integer
+          description: Classe concernée si l'élève est dans plusieurs de vos classes
+      required:
+      - body
     CompositionPart:
       type: object
       properties:
@@ -8433,6 +8931,43 @@ components:
       required:
       - code
       - id
+      - label
+    Dropout:
+      type: object
+      properties:
+        learner:
+          $ref: '#/components/schemas/MemberLearner'
+        classroom:
+          $ref: '#/components/schemas/ClassroomRef'
+        lastActivityAt:
+          type: string
+          format: date-time
+      required:
+      - classroom
+      - lastActivityAt
+      - learner
+    EarnedBadge:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/BadgeKindEnum'
+        label:
+          type: string
+        icon:
+          type: string
+        description:
+          type: string
+        awardedAt:
+          type: string
+          format: date-time
+      required:
+      - awardedAt
+      - description
+      - icon
+      - id
+      - kind
       - label
     EmailChangeRequest:
       type: object
@@ -9500,6 +10035,43 @@ components:
       - label
       - levelId
       - projectId
+    LearnerComment:
+      type: object
+      description: 'Commentaire vu par l''apprenant (WD01) et son parent (WPD03) :
+        lecture seule, pas de réponse (S11).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+          title: Commentaire
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Envoyé le
+        teacherName:
+          type: string
+          readOnly: true
+        classroomName:
+          type: string
+        learnerId:
+          type: integer
+        attempt:
+          allOf:
+          - $ref: '#/components/schemas/TeacherAttempt'
+          nullable: true
+          readOnly: true
+      required:
+      - attempt
+      - body
+      - classroomName
+      - createdAt
+      - id
+      - learnerId
+      - teacherName
     LearnerConsentRequestRequest:
       type: object
       properties:
@@ -9533,6 +10105,53 @@ components:
       - certificates
       - completedEnrollments
       - wishlist
+    LearnerFollowUp:
+      type: object
+      description: 'WT05 : l''élève sur le parcours de la classe seulement, sans donnée
+        sensible (D64).'
+      properties:
+        learner:
+          $ref: '#/components/schemas/MemberLearner'
+        classroom:
+          $ref: '#/components/schemas/Classroom'
+        joinedAt:
+          type: string
+          format: date-time
+        progressPct:
+          type: integer
+        lastActivityAt:
+          type: string
+          format: date-time
+        isDropout:
+          type: boolean
+        averagePercentage:
+          type: integer
+          nullable: true
+          description: Moyenne des tentatives du parcours (%)
+        badges:
+          type: array
+          items:
+            $ref: '#/components/schemas/EarnedBadge'
+          description: Badges du parcours de la classe
+        attempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeacherAttempt'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeacherComment'
+      required:
+      - attempts
+      - averagePercentage
+      - badges
+      - classroom
+      - comments
+      - isDropout
+      - joinedAt
+      - lastActivityAt
+      - learner
+      - progressPct
     LearnerPasswordRequest:
       type: object
       properties:
@@ -9757,6 +10376,8 @@ components:
       - title
     LevelNode:
       type: object
+      description: Compteurs du parcours chez l'enseignant (WT10), calculés par la
+        vue et passés en contexte.
       properties:
         id:
           type: integer
@@ -9775,6 +10396,12 @@ components:
           maximum: 32767
           minimum: 0
           title: Durée (minutes)
+        passRate:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: Part des tentatives réussies à la formative du niveau (%),
+            null sans tentative
         missions:
           type: array
           items:
@@ -9783,6 +10410,7 @@ components:
       required:
       - id
       - missions
+      - passRate
       - title
     LevelSummary:
       type: object
@@ -10022,6 +10650,21 @@ components:
           format: date-time
           nullable: true
           readOnly: true
+        progressPct:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: 'Élève actif : progression sur le parcours'
+        lastActivityAt:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          description: 'Élève actif : dernière activité sur le parcours, ou date d''adhésion'
+        isDropout:
+          type: boolean
+          readOnly: true
+          description: Élève actif en décrochage (D66)
         joinedAt:
           type: string
           format: date-time
@@ -10038,9 +10681,12 @@ components:
       - id
       - invitationExpiresAt
       - invitationStatus
+      - isDropout
       - joinedAt
+      - lastActivityAt
       - lastName
       - learner
+      - progressPct
       - status
     MemberLearner:
       type: object
@@ -10190,6 +10836,8 @@ components:
       - title
     MissionNode:
       type: object
+      description: Compteurs du parcours chez l'enseignant (WT10), calculés par la
+        vue et passés en contexte.
       properties:
         id:
           type: integer
@@ -10212,9 +10860,66 @@ components:
           type: string
           title: Icône
           maxLength: 16
+        completedCount:
+          type: integer
+          readOnly: true
+          description: Élèves actifs de l'enseignant ayant terminé la mission
       required:
+      - completedCount
       - id
       - title
+    MissionRead:
+      type: object
+      description: 'Mission en lecture seule (WT10) : le contenu, sans progression
+        ni quiz.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        order:
+          type: integer
+          readOnly: true
+          title: Ordre
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        durationMin:
+          type: integer
+          readOnly: true
+          title: Durée (minutes)
+        icon:
+          type: string
+          readOnly: true
+          title: Icône
+        vimeoId:
+          type: string
+          readOnly: true
+          title: Identifiant Vimeo
+        vimeoHash:
+          type: string
+          readOnly: true
+          title: Hachage Vimeo
+        blocks:
+          readOnly: true
+          title: Blocs
+          description: 'Liste de blocs : {"type": "text"|"tip", "text": …} ou {"type":
+            "media", "src": …, "alt": …, "caption": …}'
+        level:
+          $ref: '#/components/schemas/NodeRef'
+        project:
+          $ref: '#/components/schemas/NodeRef'
+      required:
+      - blocks
+      - durationMin
+      - icon
+      - id
+      - level
+      - order
+      - project
+      - title
+      - vimeoHash
+      - vimeoId
     MissionSummary:
       type: object
       properties:
@@ -10347,6 +11052,16 @@ components:
         * `mission` - Mission
         * `quiz` - Quiz
         * `certification` - Certification
+    NodeRef:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+      required:
+      - id
+      - title
     Notification:
       type: object
       properties:
@@ -10960,6 +11675,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Child'
+    PaginatedClassroomEventApplicationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassroomEventApplication'
     PaginatedClassroomList:
       type: object
       properties:
@@ -11100,6 +11835,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LearnerBadge'
+    PaginatedLearnerCommentList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearnerComment'
     PaginatedMemberList:
       type: object
       properties:
@@ -11180,6 +11935,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PaymentRequest'
+    PaginatedReviewList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
     PaginatedSteamyEventList:
       type: object
       properties:
@@ -12044,6 +12819,8 @@ components:
       - title
     ProjectNode:
       type: object
+      description: Compteurs du parcours chez l'enseignant (WT10), calculés par la
+        vue et passés en contexte.
       properties:
         id:
           type: integer
@@ -12062,6 +12839,12 @@ components:
           maximum: 32767
           minimum: 0
           title: Durée (heures)
+        passRate:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: Part des tentatives réussies à la sommative du projet (%),
+            null sans tentative
         levels:
           type: array
           items:
@@ -12070,6 +12853,7 @@ components:
       required:
       - id
       - levels
+      - passRate
       - title
     ProjectSummary:
       type: object
@@ -12102,6 +12886,36 @@ components:
       required:
       - levels
       - title
+    Proposal:
+      type: object
+      properties:
+        id:
+          type: integer
+        event:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        classroomId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        notifiedCount:
+          type: integer
+          description: Élèves actifs et parents notifiés
+      required:
+      - classroomId
+      - createdAt
+      - event
+      - id
+      - notifiedCount
+    ProposalRequestRequest:
+      type: object
+      properties:
+        classroomId:
+          type: integer
+          description: Une classe de l'enseignant connecté
+      required:
+      - classroomId
     Question:
       type: object
       properties:
@@ -12239,6 +13053,28 @@ components:
       description: |-
         * `formative` - Formative (niveau)
         * `summative` - Sommative (projet)
+    QuizRef:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/QuizKindEnum'
+        title:
+          type: string
+        projectTitle:
+          type: string
+          readOnly: true
+        levelTitle:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - id
+      - kind
+      - levelTitle
+      - projectTitle
+      - title
     QuoteRequestRequest:
       type: object
       properties:
@@ -12601,6 +13437,40 @@ components:
       required:
       - resumeCode
       - username
+    Review:
+      type: object
+      description: Ligne de WT07 et de « À revoir » (WT01).
+      properties:
+        id:
+          type: integer
+        quiz:
+          $ref: '#/components/schemas/QuizRef'
+        percentage:
+          type: integer
+        status:
+          $ref: '#/components/schemas/AttemptStatusEnum'
+        passed:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        commented:
+          type: boolean
+          description: L'enseignant l'a déjà commentée (sort de « À revoir »)
+        learner:
+          $ref: '#/components/schemas/MemberLearner'
+        classroom:
+          $ref: '#/components/schemas/ClassroomRef'
+      required:
+      - classroom
+      - commented
+      - createdAt
+      - id
+      - learner
+      - passed
+      - percentage
+      - quiz
+      - status
     RoleEnum:
       enum:
       - learner
@@ -13036,6 +13906,14 @@ components:
           items:
             $ref: '#/components/schemas/Classroom'
           readOnly: true
+        formativePassRate:
+          type: integer
+          nullable: true
+          readOnly: true
+        summativePassRate:
+          type: integer
+          nullable: true
+          readOnly: true
         projects:
           type: array
           items:
@@ -13049,9 +13927,11 @@ components:
       - difficulty
       - durationHours
       - emoji
+      - formativePassRate
       - learnerCount
       - projects
       - slug
+      - summativePassRate
       - title
     TeacherActivationRequest:
       type: object
@@ -13062,6 +13942,96 @@ components:
           maxLength: 128
       required:
       - password
+    TeacherAttempt:
+      type: object
+      description: 'Tentative vue par l''enseignant (WT05, WT07) : statut serveur
+        (D31), jamais les réponses ni le corrigé.'
+      properties:
+        id:
+          type: integer
+        quiz:
+          $ref: '#/components/schemas/QuizRef'
+        percentage:
+          type: integer
+        status:
+          $ref: '#/components/schemas/AttemptStatusEnum'
+        passed:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        commented:
+          type: boolean
+          description: L'enseignant l'a déjà commentée (sort de « À revoir »)
+      required:
+      - commented
+      - createdAt
+      - id
+      - passed
+      - percentage
+      - quiz
+      - status
+    TeacherComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+          title: Commentaire
+        attemptId:
+          type: integer
+          readOnly: true
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Envoyé le
+      required:
+      - attemptId
+      - body
+      - createdAt
+      - id
+    TeacherDashboard:
+      type: object
+      description: 'WT01 : compteurs, cartes de classes, « À revoir » et « Décrochage
+        » (5 premiers de chaque).'
+      properties:
+        classroomCount:
+          type: integer
+        learnerCount:
+          type: integer
+          description: Élèves actifs, comptés une fois
+        pendingInvitationCount:
+          type: integer
+        toReviewCount:
+          type: integer
+        dropoutCount:
+          type: integer
+        classrooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Classroom'
+        toReview:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+        dropouts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dropout'
+      required:
+      - classroomCount
+      - classrooms
+      - dropoutCount
+      - dropouts
+      - learnerCount
+      - pendingInvitationCount
+      - toReview
+      - toReviewCount
     TeacherInvitation:
       type: object
       description: 'En-tête de l''écran d''activation : école et email masqué.'
