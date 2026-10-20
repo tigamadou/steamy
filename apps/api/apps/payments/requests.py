@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
-from apps.accounts.models import ParentChildLink
+from apps.accounts.models import ParentChildLink, User
 from libs.errors import ApiError
 
 from .models import Order, PaymentRequest
@@ -53,24 +53,21 @@ def create_request(learner, *, kind: str, amount: int, course=None, items=None):
         parent is None
     ):  # pragma: no cover - un apprenant actif a toujours un parent (consentement, S3)
         raise ApiError("PERMISSION_DENIED")
+    # Verrou de l'apprenant : deux demandes simultanées ne créent pas deux demandes ni deux SMS
+    User.objects.select_for_update().filter(pk=learner.pk).first()
+    now = timezone.now()
+    open_requests = PaymentRequest.objects.filter(
+        requested_by=learner, status=PaymentRequest.Status.PENDING, expires_at__gt=now
+    )
     if course is not None:
-        existing = PaymentRequest.objects.filter(
-            requested_by=learner, course=course, status=PaymentRequest.Status.PENDING
-        ).first()
+        existing = open_requests.filter(course=course).first()
         if existing:
             return existing, False
     elif items:
         wanted = kit_lines(items)
-        pending = PaymentRequest.objects.filter(
-            requested_by=learner,
-            kind=PaymentRequest.Kind.KIT,
-            course__isnull=True,
-            status=PaymentRequest.Status.PENDING,
-        )
-        for existing in pending:
+        for existing in open_requests.filter(kind=PaymentRequest.Kind.KIT, course__isnull=True):
             if kit_lines(existing.items) == wanted:
                 return existing, False
-    now = timezone.now()
     request = PaymentRequest.objects.create(
         requested_by=learner,
         parent=parent,
