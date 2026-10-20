@@ -3557,7 +3557,7 @@ export interface components {
             readonly currency: string;
             readonly items: components["schemas"]["OrderItem"][];
             readonly beneficiary: components["schemas"]["Beneficiary"] | null;
-            readonly deliveryZone: components["schemas"]["DeliveryZoneSummary"];
+            readonly deliveryZone: components["schemas"]["DeliveryZoneSummary"] | null;
             /**
              * Expire le
              * Format: date-time
@@ -3624,7 +3624,7 @@ export interface components {
             readonly currency: string;
             readonly items: components["schemas"]["OrderItem"][];
             readonly beneficiary: components["schemas"]["Beneficiary"] | null;
-            readonly deliveryZone: components["schemas"]["DeliveryZoneSummary"];
+            readonly deliveryZone: components["schemas"]["DeliveryZoneSummary"] | null;
             /**
              * Expire le
              * Format: date-time
@@ -4096,8 +4096,7 @@ export interface components {
             readonly amount: number;
             /** Devise */
             readonly currency: string;
-            /** Code d'échec */
-            readonly failureCode: string;
+            readonly failureCode: components["schemas"]["PaymentFailureCodeEnum"] | components["schemas"]["BlankEnum"];
             /** Raison de l'échec */
             readonly failureReason: string;
             /** Format: date-time */
@@ -4117,6 +4116,15 @@ export interface components {
             /** @description Numéro Mobile Money qui validera le paiement */
             msisdn: string;
         };
+        /**
+         * @description * `PROVIDER_UNAVAILABLE` - Prestataire indisponible
+         *     * `PROVIDER_REFUSED` - Initiation refusée par le prestataire
+         *     * `INITIATION_LOST` - Initiation jamais aboutie
+         *     * `AMOUNT_MISMATCH` - Montant ou devise incohérents
+         *     * `DECLINED` - Paiement refusé
+         * @enum {string}
+         */
+        PaymentFailureCodeEnum: "PROVIDER_UNAVAILABLE" | "PROVIDER_REFUSED" | "INITIATION_LOST" | "AMOUNT_MISMATCH" | "DECLINED";
         PaymentNetwork: {
             readonly id: number;
             code: string;

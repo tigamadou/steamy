@@ -109,6 +109,51 @@ def test_child_asks_for_kits_without_reserving_stock(sms, parent, child):
     assert "Steamy Bot × 2" in sms.last(parent.phone)
 
 
+def ask_kits(child, *lines):
+    items = [{"kitSlug": slug, "quantity": quantity} for slug, quantity in lines]
+    return client_for(child).post(URL, {"kind": "kit", "items": items}, format="json")
+
+
+@pytest.fixture
+def kits():
+    return KitFactory(slug="bot"), KitFactory(slug="lab")
+
+
+def test_pending_request_for_the_same_kits_is_reused_whatever_the_order(sms, child, kits):
+    first = ask_kits(child, ("bot", 2), ("lab", 1)).json()
+    again = ask_kits(child, ("lab", 1), ("bot", 2))
+    assert again.status_code == 200 and again.json()["id"] == first["id"]
+    assert PaymentRequest.objects.count() == 1
+
+
+@pytest.mark.parametrize(
+    "lines",
+    [
+        [("bot", 3), ("lab", 1)],  # autre quantité
+        [("bot", 2)],  # kit en moins
+        [("bot", 2), ("lab", 1), ("kit3", 1)],  # kit en plus
+    ],
+)
+def test_other_kits_or_quantities_make_a_new_request(sms, child, kits, lines):
+    KitFactory(slug="kit3")
+    first = ask_kits(child, ("bot", 2), ("lab", 1)).json()
+    other = ask_kits(child, *lines)
+    assert other.status_code == 201 and other.json()["id"] != first["id"]
+
+
+def test_cancelled_kit_request_is_not_reused(sms, child, kits):
+    first = ask_kits(child, ("bot", 2)).json()
+    assert client_for(child).post(f"{URL}{first['id']}/cancel/").status_code == 200
+    again = ask_kits(child, ("bot", 2))
+    assert again.status_code == 201 and again.json()["id"] != first["id"]
+
+
+def test_kit_request_of_another_learner_is_not_reused(sms, parent, child, kits):
+    first = ask_kits(child, ("bot", 2)).json()
+    again = ask_kits(link_child(parent), ("bot", 2))
+    assert again.status_code == 201 and again.json()["id"] != first["id"]
+
+
 @pytest.mark.parametrize(
     ("items", "code"),
     [

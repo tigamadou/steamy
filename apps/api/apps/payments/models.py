@@ -258,6 +258,15 @@ class Payment(models.Model):
         SUCCEEDED = "succeeded", _("Réussi")
         FAILED = "failed", _("Échoué")
 
+    class FailureCode(models.TextChoices):
+        """Codes d'échec posés par l'initiation, la réconciliation et le webhook (vide tant que rien n'a échoué)."""
+
+        PROVIDER_UNAVAILABLE = "PROVIDER_UNAVAILABLE", _("Prestataire indisponible")
+        PROVIDER_REFUSED = "PROVIDER_REFUSED", _("Initiation refusée par le prestataire")
+        INITIATION_LOST = "INITIATION_LOST", _("Initiation jamais aboutie")
+        AMOUNT_MISMATCH = "AMOUNT_MISMATCH", _("Montant ou devise incohérents")
+        DECLINED = "DECLINED", _("Paiement refusé")
+
     order = models.ForeignKey(Order, models.PROTECT, related_name="payments")
     provider = models.CharField(_("prestataire"), max_length=16, choices=PaymentProvider)
     provider_transaction_id = models.CharField(max_length=128, null=True, blank=True)

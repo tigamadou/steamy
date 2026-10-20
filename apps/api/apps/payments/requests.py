@@ -37,9 +37,17 @@ def next_resend_at(request: PaymentRequest):
     return request.last_sent_at + RESEND_DELAY
 
 
+def kit_lines(items) -> list[tuple[str, int]]:
+    """Lignes d'une demande de kits, comparables quel que soit leur ordre."""
+    return sorted((item["kit_slug"], item["quantity"]) for item in items)
+
+
 @transaction.atomic
 def create_request(learner, *, kind: str, amount: int, course=None, items=None):
-    """Crée la demande et prévient le parent. Une demande en attente pour le même parcours est réutilisée."""
+    """
+    Crée la demande et prévient le parent. Une demande en attente pour le même parcours, ou pour les mêmes kits en
+    mêmes quantités (ordre indifférent), est réutilisée.
+    """
     parent = parent_of(learner)
     if (
         parent is None
@@ -51,6 +59,17 @@ def create_request(learner, *, kind: str, amount: int, course=None, items=None):
         ).first()
         if existing:
             return existing, False
+    elif items:
+        wanted = kit_lines(items)
+        pending = PaymentRequest.objects.filter(
+            requested_by=learner,
+            kind=PaymentRequest.Kind.KIT,
+            course__isnull=True,
+            status=PaymentRequest.Status.PENDING,
+        )
+        for existing in pending:
+            if kit_lines(existing.items) == wanted:
+                return existing, False
     now = timezone.now()
     request = PaymentRequest.objects.create(
         requested_by=learner,

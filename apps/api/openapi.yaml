@@ -9466,6 +9466,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/DeliveryZoneSummary'
           readOnly: true
+          nullable: true
         expiresAt:
           type: string
           format: date-time
@@ -9605,6 +9606,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/DeliveryZoneSummary'
           readOnly: true
+          nullable: true
         expiresAt:
           type: string
           format: date-time
@@ -10508,9 +10510,10 @@ components:
           readOnly: true
           title: Devise
         failureCode:
-          type: string
           readOnly: true
-          title: Code d'échec
+          oneOf:
+          - $ref: '#/components/schemas/PaymentFailureCodeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
         failureReason:
           type: string
           readOnly: true
@@ -10563,6 +10566,20 @@ components:
       - country
       - msisdn
       - network
+    PaymentFailureCodeEnum:
+      enum:
+      - PROVIDER_UNAVAILABLE
+      - PROVIDER_REFUSED
+      - INITIATION_LOST
+      - AMOUNT_MISMATCH
+      - DECLINED
+      type: string
+      description: |-
+        * `PROVIDER_UNAVAILABLE` - Prestataire indisponible
+        * `PROVIDER_REFUSED` - Initiation refusée par le prestataire
+        * `INITIATION_LOST` - Initiation jamais aboutie
+        * `AMOUNT_MISMATCH` - Montant ou devise incohérents
+        * `DECLINED` - Paiement refusé
     PaymentNetwork:
       type: object
       properties:

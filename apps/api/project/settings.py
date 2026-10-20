@@ -359,6 +359,7 @@ SPECTACULAR_SETTINGS = {
         # à tort de l'énumération du paiement (`initiated`… au lieu de `paid`, `declined`…)
         "PaymentStatusEnum": "apps.payments.models.Payment.Status",
         "PaymentRequestStatusEnum": "apps.payments.models.PaymentRequest.Status",
+        "PaymentFailureCodeEnum": "apps.payments.models.Payment.FailureCode",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }

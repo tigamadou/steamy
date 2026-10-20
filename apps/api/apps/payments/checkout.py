@@ -97,14 +97,14 @@ def initiate_payment(order: Order, *, country: str, network: str, msisdn: str) -
         except PaymentTemporaryError:
             log.exception("Initiation du paiement %s : prestataire indisponible", payment.pk)
             payment.status = Payment.Status.FAILED
-            payment.failure_code = "PROVIDER_UNAVAILABLE"
+            payment.failure_code = Payment.FailureCode.PROVIDER_UNAVAILABLE
             payment.failure_reason = (
                 "Le service de paiement est indisponible. Réessayez dans un instant."
             )
         except PaymentProviderError:
             log.exception("Initiation du paiement %s refusée", payment.pk)
             payment.status = Payment.Status.FAILED
-            payment.failure_code = "PROVIDER_REFUSED"
+            payment.failure_code = Payment.FailureCode.PROVIDER_REFUSED
             payment.failure_reason = "Le paiement a été refusé. Vérifiez le numéro et le réseau."
         else:
             payment.provider_transaction_id = result.provider_tx_id
@@ -125,7 +125,7 @@ def reconcile_pending_payments() -> int:
     for payment in stale:
         if not payment.provider_transaction_id:  # l'initiation n'a jamais abouti
             payment.status = Payment.Status.FAILED
-            payment.failure_code = "INITIATION_LOST"
+            payment.failure_code = Payment.FailureCode.INITIATION_LOST
             payment.failure_reason = "Le paiement n'a pas pu être lancé."
             payment.save(update_fields=["status", "failure_code", "failure_reason"])
             settled += 1

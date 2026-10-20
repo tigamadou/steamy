@@ -60,7 +60,7 @@ def handle_payment_event(provider_name: str, event: PaymentEvent) -> bool:
     payment.payload = {"status": event.status, "amount": event.amount, "currency": event.currency}
     if event.amount != order.total or event.currency != order.currency:
         payment.status = Payment.Status.FAILED
-        payment.failure_code = "AMOUNT_MISMATCH"
+        payment.failure_code = Payment.FailureCode.AMOUNT_MISMATCH
         payment.failure_reason = "Montant ou devise différents de la commande."
         payment.save()
         audit(
@@ -82,7 +82,7 @@ def handle_payment_event(provider_name: str, event: PaymentEvent) -> bool:
         settle(order, payment)
     elif event.status == PaymentStatus.FAILED:
         payment.status = Payment.Status.FAILED
-        payment.failure_code = "DECLINED"
+        payment.failure_code = Payment.FailureCode.DECLINED
         payment.failure_reason = event.failure_reason or "Paiement refusé."
         payment.save()
     else:

@@ -234,7 +234,7 @@ class BeneficiaryOrderSerializer(serializers.ModelSerializer):
 
     items = OrderItemSerializer(many=True, read_only=True)
     beneficiary = serializers.SerializerMethodField()
-    delivery_zone = DeliveryZoneSummarySerializer(read_only=True)
+    delivery_zone = DeliveryZoneSummarySerializer(read_only=True, allow_null=True)
 
     class Meta:
         model = Order
@@ -345,6 +345,9 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     order_reference = serializers.CharField(source="order.reference", read_only=True)
     msisdn_masked = serializers.SerializerMethodField()
+    failure_code = serializers.ChoiceField(
+        choices=Payment.FailureCode.choices, allow_blank=True, read_only=True
+    )
 
     class Meta:
         model = Payment
