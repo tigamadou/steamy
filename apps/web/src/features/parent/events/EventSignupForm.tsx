@@ -105,7 +105,7 @@ export function EventSignupForm({ event, kids, countries, preferred }: EventSign
       aria-label="Inscrire un enfant"
       className="flex flex-col gap-4 rounded-[22px] border-2 border-ink-100 bg-surface p-4 sm:p-5.5"
     >
-      <ErrorSummary errors={error ? [error] : []} focusKey={attempt} />
+      <ErrorSummary title="Corrigez les erreurs suivantes :" errors={error ? [error] : []} focusKey={attempt} />
       <Field label="Enfant" id="inscription-enfant" required error={error?.field ? error.message : undefined}>
         <Select value={childId} onChange={(change) => setChildId(change.target.value)}>
           <option value="">Choisissez l&apos;enfant</option>

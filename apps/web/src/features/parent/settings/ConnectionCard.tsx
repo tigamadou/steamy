@@ -96,7 +96,7 @@ function PhoneChange({
 
   return (
     <form onSubmit={submitWith(action)} noValidate aria-label="Changer de numéro" className="flex flex-col gap-4">
-      <ErrorSummary errors={errors} focusKey={state.attempt} />
+      <ErrorSummary title="Corrigez les erreurs suivantes :" errors={errors} focusKey={state.attempt} />
       <Field
         label="Nouveau numéro"
         id="connexion-telephone"

@@ -151,6 +151,7 @@ describe("DeliveryForm au vouvoiement (WPD08)", () => {
     await waitFor(() => expect(screen.getByRole("option", { name: /Cotonou/ })).toBeInTheDocument());
     await save();
     expect(await screen.findByRole("link", { name: "Choisissez votre zone de livraison." })).toBeInTheDocument();
+    expect(screen.getByText("Corrigez les erreurs suivantes :")).toBeInTheDocument();
     await userEvent.selectOptions(zone(), "1");
     await userEvent.type(screen.getByRole("textbox", { name: /^Ville\b/ }), "Cotonou");
     await userEvent.type(screen.getByRole("textbox", { name: /^Quartier/ }), "Akpakpa");

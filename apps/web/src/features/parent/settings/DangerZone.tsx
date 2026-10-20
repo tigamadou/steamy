@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -48,9 +49,9 @@ export function DangerZone({ childrenCount }: { childrenCount: number }) {
           {blocked ? (
             <>
               Supprimez d&apos;abord le compte de chacun de vos enfants, ou demandez son transfert à un autre parent en{" "}
-              <a href={routes.contact("changement-parent")} className="font-extrabold text-primary-600 underline">
+              <Link href={routes.contact("changement-parent")} className="font-extrabold text-primary-600 underline">
                 contactant le support
-              </a>
+              </Link>
               .
             </>
           ) : (

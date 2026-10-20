@@ -131,7 +131,7 @@ export function KitAddressStep({
       aria-label="Adresse de livraison"
       className="flex flex-col gap-4 rounded-[14px] border-2 border-primary-200 bg-primary-50 p-3.5"
     >
-      <ErrorSummary errors={summary} focusKey={attempt} />
+      <ErrorSummary title="Corrigez les erreurs suivantes :" errors={summary} focusKey={attempt} />
       <AddressForm
         legend="🚚 Adresse de livraison"
         idPrefix="livraison"

@@ -26,4 +26,14 @@ describe("Section", () => {
     expect(screen.getByRole("heading", { level: 3, name: "Zone sensible" })).toHaveClass("text-error-600");
     expect(screen.getByRole("region")).toHaveClass("mt-4");
   });
+
+  it("ancre facultative, sous le header collant", () => {
+    render(
+      <Section title="Notifications" id="notifications">
+        <p>Réglages</p>
+      </Section>,
+    );
+    expect(screen.getByRole("region", { name: "Notifications" })).toHaveAttribute("id", "notifications");
+    expect(screen.getByRole("region")).toHaveClass("scroll-mt-20");
+  });
 });

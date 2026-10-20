@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { shortName } from "@/features/shell/LearnerShell";
+import { shortName } from "@/features/shell/short-name";
 import { getServerApi } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/session";
 

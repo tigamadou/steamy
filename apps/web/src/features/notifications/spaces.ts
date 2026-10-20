@@ -55,9 +55,13 @@ const PARENT_TARGETS: Record<string, string> = {
  * type, sinon aucune.
  */
 export function notificationHref({ type, url }: Notification): string | null {
+  return parentTarget(url) ?? PARENT_TARGETS[type] ?? null;
+}
+
+/** Chemin de ce site tiré d'une `url` de l'API, hors des autres espaces que celui du parent ; `null` sinon. */
+export function parentTarget(url: string): string | null {
   const target = notificationTarget(url);
-  if (target && !OTHER_SPACES.some((prefix) => target === prefix || target.startsWith(`${prefix}/`))) return target;
-  return PARENT_TARGETS[type] ?? null;
+  return target && !OTHER_SPACES.some((prefix) => target === prefix || target.startsWith(`${prefix}/`)) ? target : null;
 }
 
 export const NOTIFICATION_SPACES: Record<NotificationSpaceId, NotificationSpace> = {

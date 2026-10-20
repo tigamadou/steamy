@@ -12,6 +12,9 @@ vi.mock("next/navigation", () => ({
   notFound: () => {
     throw new Error("NEXT_NOT_FOUND");
   },
+  redirect: (url: string) => {
+    throw new Error(`NEXT_REDIRECT ${url}`);
+  },
 }));
 
 const { WeeklyReport, WeeklyReportSkeleton, WeeklyReportView, WeeklyEmailNotice, parseWeek } = await import(
@@ -53,8 +56,10 @@ describe("WeeklyReportView (WPD11)", () => {
       "href",
       "/parent/enfants/7/rapport?semaine=2026-W42",
     );
-    // Semaine en cours : pas de semaine suivante
+    // Semaine en cours : pas de semaine suivante, ni « Cette semaine »
     expect(within(nav).queryByRole("link", { name: "Semaine suivante" })).toBeNull();
+    expect(within(nav).queryByRole("link", { name: "Cette semaine" })).toBeNull();
+    expect(screen.getByRole("link", { name: /^Voir le profil\s*de Léa Adjovi$/ })).toHaveAttribute("href", "/parent/enfants/7");
     expect(within(nav).getByText("Semaine suivante")).toHaveAttribute("aria-disabled", "true");
     // Pastilles (`dt` / `dd`) : valeur servie par l'API sous chaque libellé
     const stat = (label: string) => screen.getAllByText(label).find((element) => element.tagName === "DT")?.nextElementSibling;
@@ -69,9 +74,10 @@ describe("WeeklyReportView (WPD11)", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("semaine vide : message au lieu de l'histogramme ; semaine passée : « Semaine suivante » en lien", () => {
+  it("semaine vide : message au lieu de l'histogramme ; semaine passée : « Semaine suivante » et « Cette semaine »", () => {
     render(
       <WeeklyReportView
+        chosen
         child={CHILD}
         report={report({
           seconds: 0,
@@ -91,6 +97,7 @@ describe("WeeklyReportView (WPD11)", () => {
       "/parent/enfants/7/rapport?semaine=2026-W44",
     );
     expect(screen.getByText("Semaine précédente")).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("link", { name: "Cette semaine" })).toHaveAttribute("href", "/parent/enfants/7/rapport");
     expect(screen.getByText("Aucun parcours commencé pour l'instant.")).toBeInTheDocument();
   });
 
@@ -133,13 +140,16 @@ describe("WeeklyReport (WPD11, serveur)", () => {
     expect(GET).toHaveBeenCalledWith("/api/accounts/children/{id}/weekly-report/", { params: { path: { id: "7" }, query: {} } });
   });
 
-  it("semaine refusée par l'API : semaine en cours", async () => {
-    routeApi(respond(200, childDetail()), respond(400), respond(200, report()));
-    const tree = (await WeeklyReport({ params: params(), searchParams: Promise.resolve({ semaine: "2099-W60" }) })) as ReactElement<
+  it("semaine à venir acceptée par l'API (2099-W10) ; semaine refusée : retour à l'URL sans `?semaine=`", async () => {
+    routeApi(respond(200, childDetail()), respond(200, report({ week: "2099-W10", previousWeek: "2099-W09", nextWeek: null })));
+    const future = (await WeeklyReport({ params: params(), searchParams: Promise.resolve({ semaine: "2099-W10" }) })) as ReactElement<
       Parameters<typeof WeeklyReportView>[0]
     >;
-    expect(tree.props.report.week).toBe("2026-W43");
-    expect(GET).toHaveBeenLastCalledWith("/api/accounts/children/{id}/weekly-report/", { params: { path: { id: "7" }, query: {} } });
+    expect(future.props).toMatchObject({ chosen: true, report: { week: "2099-W10" } });
+    routeApi(respond(200, childDetail()), respond(400));
+    await expect(WeeklyReport({ params: params(), searchParams: Promise.resolve({ semaine: "1999-W10" }) })).rejects.toThrow(
+      "NEXT_REDIRECT /parent/enfants/7/rapport",
+    );
   });
 
   it("enfant d'un autre parent → introuvable ; session perdue → rien ; squelette", async () => {

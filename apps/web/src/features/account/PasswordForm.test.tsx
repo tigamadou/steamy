@@ -126,7 +126,10 @@ describe("PasswordForm au vouvoiement (WPD08)", () => {
   it("textes et confirmation du parent", async () => {
     render(<PasswordForm register="vous" />);
     await submit();
-    expect(await screen.findByRole("alert")).toHaveTextContent("Indiquez votre mot de passe actuel.");
+    const summary = await screen.findByRole("alert");
+    expect(summary).toHaveTextContent("Indiquez votre mot de passe actuel.");
+    // Résumé d'erreurs au vouvoiement dans l'espace parent
+    expect(summary).toHaveTextContent("Corrigez les erreurs suivantes :");
     POST.mockResolvedValue(respond(204));
     await userEvent.type(current(), "Ancien2026");
     await userEvent.type(next(), "Robot2027x");

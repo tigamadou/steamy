@@ -146,7 +146,7 @@ export const routes = {
       week ? `/parent/enfants/${id}/rapport?semaine=${week}` : `/parent/enfants/${id}/rapport`,
     /** WPD09 : `?demande=<id>` pour valider la demande de suppression de l'enfant (WD15). */
     deleteChild: (id: number | string, request?: number | string) =>
-      request ? `/parent/enfants/${id}/supprimer?demande=${request}` : `/parent/enfants/${id}/supprimer`,
+      request !== undefined ? `/parent/enfants/${id}/supprimer?demande=${request}` : `/parent/enfants/${id}/supprimer`,
     consent: (id: number | string) => `/parent/consentements/${id}`,
     /** WPD01 après l'acceptation d'une demande (WPD05) : confirmation lue côté serveur, aucun prénom dans l'URL. */
     consentAccepted: (id: number | string) => `/parent?consentement=${id}`,

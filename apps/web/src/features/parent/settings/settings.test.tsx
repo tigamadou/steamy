@@ -95,6 +95,7 @@ describe("ProfileCard (WPD08, profil)", () => {
     const summary = await screen.findByRole("alert");
     expect(summary).toHaveTextContent("Indiquez votre prénom.");
     expect(summary).toHaveTextContent("Indiquez votre nom.");
+    expect(summary).toHaveTextContent("Corrigez les erreurs suivantes :");
     expect(PATCH).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Annuler" }));
     expect(screen.getByRole("button", { name: /^Modifier/ })).toBeInTheDocument();
@@ -115,6 +116,23 @@ describe("ProfileCard (WPD08, profil)", () => {
     await user.click(screen.getByRole("button", { name: "Enregistrer" }));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Réessayez dans quelques instants."));
     expect(PATCH).toHaveBeenCalledTimes(3);
+    expect(screen.getByRole("alert")).not.toHaveTextContent("Votre nom est enregistré");
+  });
+
+  it("nom enregistré mais second PATCH en échec : nom relu, l'erreur dit ce qui manque", async () => {
+    const user = userEvent.setup();
+    PATCH.mockResolvedValueOnce(respond(200, { data: {} })).mockResolvedValueOnce(failure(500, "SERVER_ERROR"));
+    render(<ProfileCard identity={IDENTITY} />);
+    await user.click(screen.getByRole("button", { name: /^Modifier/ }));
+    await user.click(screen.getByRole("button", { name: "Enregistrer" }));
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /Votre nom est enregistré, mais pas l.email ni la profession\. .*Réessayez dans quelques instants\./,
+      ),
+    );
+    expect(router.refresh).toHaveBeenCalledTimes(1);
+    // Le formulaire reste ouvert pour réessayer
+    expect(screen.getByRole("form", { name: "Mes informations" })).toBeInTheDocument();
   });
 });
 

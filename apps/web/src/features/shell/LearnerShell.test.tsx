@@ -7,7 +7,8 @@ vi.mock("@/lib/auth/session", () => ({ getCurrentUser: () => getCurrentUser() })
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
 vi.mock("./LearnerShellFrame", () => ({ LearnerShellFrame: () => null }));
 
-const { LearnerShell, shortName } = await import("./LearnerShell");
+const { LearnerShell } = await import("./LearnerShell");
+const { shortName } = await import("./short-name");
 const { LearnerShellFrame } = await import("./LearnerShellFrame");
 
 type Frame = ReactElement<{ user: Record<string, unknown>; unreadCount: number; children: unknown }>;
