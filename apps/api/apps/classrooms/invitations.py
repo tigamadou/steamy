@@ -30,7 +30,8 @@ def hash_token(token: str) -> str:
 
 
 def activation_url(token: str) -> str:
-    return f"{settings.WEB_URL}/activation/{token}"
+    """Jeton dans le fragment : jamais envoyé au serveur, absent des journaux d'accès et de l'en-tête Referer."""
+    return f"{settings.WEB_URL}/activation#jeton={token}"
 
 
 def send_invitation(invitation: TeacherInvitation, invited_by=None) -> str:

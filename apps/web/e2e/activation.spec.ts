@@ -11,16 +11,32 @@ const INVITED = "nadia.houngbo@steamy.test";
 test.describe.configure({ mode: "serial" });
 
 test.describe("activation enseignante", { tag: "@donnees-uniques" }, () => {
-  let activationPath = "";
+  let activationLink = "";
 
   test("une enseignante invitée active son compte depuis le lien de l'email", async ({ page }) => {
     const invitation = await waitForMessage(INVITED, { contains: "Activez votre compte" });
-    activationPath = extractLink(invitation, "/activation/").pathname;
+    const link = extractLink(invitation, "/activation");
+    // Jeton dans le fragment : jamais envoyé au serveur (journaux d'accès, en-tête Referer)
+    expect(link.pathname).toBe("/activation");
+    expect(link.hash).toMatch(/^#jeton=[\w-]+$/);
+    activationLink = link.pathname + link.hash;
+    const token = link.hash.slice("#jeton=".length);
 
-    const response = await page.goto(activationPath);
+    const requests: string[] = [];
+    page.on("request", (request) => requests.push(request.url().split("#")[0])); // le fragment ne part jamais
+    const response = await page.goto(activationLink);
     expect(response?.headers()["referrer-policy"]).toBe("no-referrer");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Activer votre compte");
     await expect(page).toHaveURL("/activation");
+    expect(requests.filter((url) => url.includes(token))).toEqual([]);
+
+    // Ancien format du lien (emails envoyés avant le fragment), dans un autre onglet : redirigé vers le fragment,
+    // sans consommer l'invitation
+    const former = await page.context().newPage();
+    await former.goto(`/activation/${token}`);
+    await expect(former.getByRole("heading", { level: 1 })).toHaveText("Activer votre compte");
+    await expect(former).toHaveURL("/activation");
+    await former.close();
     await expect(page.getByText(/n•*@steamy\.test|@steamy\.test/)).toBeVisible();
     const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     expect(violations).toEqual([]);
@@ -34,7 +50,7 @@ test.describe("activation enseignante", { tag: "@donnees-uniques" }, () => {
 
   test("le lien d'activation déjà utilisé est refusé", async ({ browser }) => {
     const page = await browser.newPage();
-    await page.goto(activationPath);
+    await page.goto(activationLink);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Lien expiré ou déjà utilisé");
     await expect(page.getByRole("link", { name: "Contacter l'équipe Steamy" })).toBeVisible();
   });

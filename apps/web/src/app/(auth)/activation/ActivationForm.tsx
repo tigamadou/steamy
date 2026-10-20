@@ -2,7 +2,7 @@
 
 import type { Schemas } from "@steamy/api-client";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect } from "react";
+import { useActionState } from "react";
 
 import { Button } from "@/components/ds/Button";
 import { ErrorSummary } from "@/components/ds/ErrorSummary";
@@ -13,20 +13,17 @@ import { WebShell } from "@/components/ds/WebShell";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { submitWith } from "@/lib/form";
 
-import { InvalidInvitation } from "../InvalidInvitation";
+import { forgetActivationToken } from "./activation-token";
+import { InvalidInvitation } from "./InvalidInvitation";
 
 type State = { attempt: number; password?: string; error?: string; invalid?: boolean };
 
 /**
  * Activation du compte enseignant (C6, variante de WL04) : mot de passe choisi, compte créé et session ouverte,
- * puis espace enseignant. Le jeton est retiré de l'historique dès l'affichage.
+ * puis espace enseignant. Le jeton (lu dans le fragment du lien) voyage dans le corps de `POST …/accept/`.
  */
 export function ActivationForm({ token, invitation }: { token: string; invitation: Schemas["TeacherInvitation"] }) {
   const router = useRouter();
-
-  useEffect(() => {
-    window.history.replaceState(window.history.state, "", "/activation");
-  }, []);
 
   const [state, action, pending] = useActionState(async (previous: State, form: FormData): Promise<State> => {
     const attempt = previous.attempt + 1;
@@ -35,17 +32,18 @@ export function ActivationForm({ token, invitation }: { token: string; invitatio
       return { attempt, password: "Choisissez un mot de passe qui respecte les règles, saisi deux fois à l'identique." };
     }
     const result = await apiCall((api) =>
-      api.POST("/api/auth/teacher-invitations/{token}/accept/", {
-        params: { path: { token } },
-        body: { password },
-      }),
+      api.POST("/api/auth/teacher-invitations/accept/", { body: { token, password } }),
     );
     if (result.ok) {
+      forgetActivationToken();
       router.replace("/enseignant");
       router.refresh();
       return { attempt };
     }
-    if (result.code === "INVITATION_INVALID") return { attempt, invalid: true };
+    if (result.code === "INVITATION_INVALID") {
+      forgetActivationToken();
+      return { attempt, invalid: true };
+    }
     if (result.code === "PASSWORD_TOO_WEAK" || result.fields.password) {
       return { attempt, password: result.fields.password ?? result.message };
     }

@@ -10,6 +10,7 @@ vi.mock("@/lib/api-browser", () => ({ getBrowserApi: async () => ({ POST }) }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
 const { ActivationForm } = await import("./ActivationForm");
+const { ACTIVATION_TOKEN_KEY } = await import("./activation-token");
 
 const respond = (status: number, body: object = {}) => ({ ...body, response: new Response(null, { status }) });
 const invitation = { firstName: "Awa", schoolName: "CEG Akpakpa", emailMasked: "a•••@ecole.bj" };
@@ -31,15 +32,12 @@ async function submit(password: string, confirm = password) {
 describe("ActivationForm (C6)", () => {
   beforeEach(() => {
     POST.mockReset();
+    window.sessionStorage.setItem(ACTIVATION_TOKEN_KEY, "jeton-invitation");
     Object.values(router).forEach((fn) => fn.mockReset());
   });
 
-  it("retire le jeton de l'historique et salue l'enseignant", () => {
-    const replaceState = vi.spyOn(window.history, "replaceState");
+  it("salue l'enseignant", () => {
     renderForm();
-    expect(replaceState).toHaveBeenCalledWith(window.history.state, "", "/activation");
-    expect(window.location.pathname).toBe("/activation");
-    replaceState.mockRestore();
     expect(screen.getByText(/Bonjour Awa, choisissez votre mot de passe pour rejoindre Steamy avec CEG Akpakpa\./)).toBeInTheDocument();
     expect(screen.getByText("a•••@ecole.bj").tagName).toBe("STRONG");
   });
@@ -66,10 +64,10 @@ describe("ActivationForm (C6)", () => {
     await submit("Steamy2026");
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/enseignant"));
     expect(router.refresh).toHaveBeenCalled();
-    expect(POST).toHaveBeenCalledWith("/api/auth/teacher-invitations/{token}/accept/", {
-      params: { path: { token: "jeton-invitation" } },
-      body: { password: "Steamy2026" },
+    expect(POST).toHaveBeenCalledWith("/api/auth/teacher-invitations/accept/", {
+      body: { token: "jeton-invitation", password: "Steamy2026" },
     });
+    expect(window.sessionStorage.getItem(ACTIVATION_TOKEN_KEY)).toBeNull();
   });
 
   it("bascule sur le lien expiré quand l'invitation n'est plus valable", async () => {
@@ -78,6 +76,7 @@ describe("ActivationForm (C6)", () => {
     await submit("Steamy2026");
     expect(await screen.findByRole("heading", { name: "Lien expiré ou déjà utilisé" })).toBeInTheDocument();
     expect(router.replace).not.toHaveBeenCalled();
+    expect(window.sessionStorage.getItem(ACTIVATION_TOKEN_KEY)).toBeNull();
   });
 
   it.each([

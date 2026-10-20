@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 
-import { InvalidInvitation } from "./InvalidInvitation";
+import { TeacherActivation } from "./TeacherActivation";
 
 export const metadata: Metadata = { title: "Activation du compte" };
 
-// `/activation` sans jeton : lien incomplet, ou page rechargée après le retrait du jeton de l'historique.
-export default function ActivationWithoutToken() {
-  return <InvalidInvitation />;
+// Lien de l'email d'invitation (C6) : `/activation#jeton=…`, fragment lu côté client ; `Referrer-Policy:
+// no-referrer` posé par next.config.ts. Sans jeton (lien incomplet) : lien expiré ou déjà utilisé.
+export default function ActivationPage() {
+  return <TeacherActivation />;
 }

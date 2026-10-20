@@ -1,23 +1,9 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
-import { Loader } from "@/components/ds/Loader";
-
-import { InvitationGate } from "./InvitationGate";
-
-export const metadata: Metadata = { title: "Activation du compte" };
-
-// Lien de l'email d'invitation (C6) : `Referrer-Policy: no-referrer` posé par next.config.ts.
-export default function ActivationPage({ params }: PageProps<"/activation/[token]">) {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-dvh items-center justify-center">
-          <Loader label="Vérification de votre invitation…" />
-        </div>
-      }
-    >
-      <InvitationGate params={params} />
-    </Suspense>
-  );
+// Ancien format du lien d'invitation (`/activation/<jeton>`), encore dans les emails envoyés avant le passage au
+// fragment : le jeton quitte aussitôt le chemin pour le fragment, lu côté client. À retirer quand ces liens ont
+// expiré (7 jours après le déploiement, PLAN-API API-L2.7).
+export default async function FormerActivationLink({ params }: PageProps<"/activation/[token]">) {
+  const { token } = await params;
+  redirect(`/activation#jeton=${encodeURIComponent(token)}`);
 }

@@ -276,14 +276,17 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Plafonds d'inscription séparés : création (`signup`) et étapes suivantes (`signup-step`), testé par le parcours d'une famille depuis une même IP
   - [ ] Jeton hors des URL et des journaux (suite de la relecture de LOT-6 #137)
     - [x] API · `feature/api-activation-enseignant-post` : `POST auth/teacher-invitations/lookup/` et `POST …/accept/`, jeton dans le corps ; anciennes routes `{token}/` et `{token}/accept/` gardées, dépréciées, masquées dans les journaux d'accès (`libs/access_log.py`)
-    - [ ] Front : lien `/activation#jeton=…` lu côté client puis retiré (`replaceState`), `Referrer-Policy: no-referrer`, ancien lien `/activation/<jeton>` redirigé ; email au nouveau format
-    - [ ] Retrait des anciennes routes de l'API, une fois le front déployé et les liens déjà envoyés expirés (7 jours)
+    - [x] Front · `feature/lot2-activation-enseignant-fragment` : lien `/activation#jeton=…` lu côté client puis retiré (`replaceState`), `Referrer-Policy: no-referrer`, ancien lien `/activation/<jeton>` redirigé ; email au nouveau format
+    - [ ] Retrait des routes `legacy` de l'API (`{token}/`, `{token}/accept/`) et de la redirection `/activation/[token]` du front, 7 jours après le déploiement en production du front (liens déjà envoyés expirés) ; masquage correspondant de `libs/access_log.py` à retirer avec
   > Notes (jeton hors URL) : un jeton dans le chemin finit dans les journaux d'accès (API, Next, proxy) et dans
   > l'en-tête Referer. L'API lit désormais le jeton dans le corps d'un POST, `lookup/` pour l'en-tête de l'écran et
   > `accept/` pour l'activation, avec les mêmes plafonds (`invitation`) et le même contrôle CSRF. Les anciennes
   > routes restent le temps du déploiement : le front en service les appelle encore. Elles sont marquées
   > `deprecated` dans le contrat (`operationId` en `legacy`) et leur jeton est masqué dans les journaux d'accès.
-  > L'email garde l'ancien lien jusqu'à la PR du front, qui bascule le lien et la page ensemble.
+  > Front : l'email porte désormais `/activation#jeton=…` ; la page lit le fragment, le retire de l'adresse
+  > (`replaceState`) et le garde dans l'onglet (`sessionStorage`) pour un rechargement, relit l'invitation par
+  > `lookup/`, puis active par `accept/`. `Referrer-Policy: no-referrer` reste posé sur `/activation`. L'ancien lien
+  > `/activation/<jeton>` redirige vers le fragment le temps que les liens déjà envoyés expirent.
 - [x] **Tâches Celery d'API-L2**
   - [x] `send_sms`, `expire_consent_requests` (7 j), `purge_refused_requests` (30 j), `purge_signup_sessions`
   - [x] Planifiées dans `CELERY_BEAT_SCHEDULE`, exécutables à la main (`manage.py <tâche>`)
