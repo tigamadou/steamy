@@ -7,6 +7,9 @@ export type GuestLine = { kitSlug: string; quantity: number };
 
 export const GUEST_CART_KEY = "steamy:panier";
 
+/** Nombre de lignes écartées à la fusion du panier invité, affiché une fois par le panier qui suit (onglet courant). */
+export const DROPPED_LINES_KEY = "steamy:panier-ecartes";
+
 const SLUG = /^[-a-z0-9_]+$/i;
 
 function isLine(value: unknown): value is GuestLine {
@@ -63,4 +66,25 @@ export function setGuestQuantity(kitSlug: string, quantity: number): void {
 /** Retire une ligne. */
 export function removeGuestLine(kitSlug: string): void {
   writeGuestCart(readGuestCart().filter((l) => l.kitSlug !== kitSlug));
+}
+
+/** Retient des lignes écartées à la fusion (cumulées) pour que le panier le signale. */
+export function noteDroppedLines(count: number): void {
+  try {
+    const previous = Number(window.sessionStorage.getItem(DROPPED_LINES_KEY)) || 0;
+    window.sessionStorage.setItem(DROPPED_LINES_KEY, String(previous + count));
+  } catch {
+    // Stockage refusé : le panier ne signalera pas les lignes écartées
+  }
+}
+
+/** Lignes écartées à la fusion depuis le dernier affichage du panier (0 sinon) ; le compteur est remis à zéro. */
+export function takeDroppedLines(): number {
+  try {
+    const count = Number(window.sessionStorage.getItem(DROPPED_LINES_KEY)) || 0;
+    window.sessionStorage.removeItem(DROPPED_LINES_KEY);
+    return count;
+  } catch {
+    return 0;
+  }
 }

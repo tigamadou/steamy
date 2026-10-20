@@ -18,7 +18,10 @@ export async function ParentInfo() {
     return (
       <p className="m-0 rounded-[18px] border-2 border-ink-100 bg-surface p-5 text-sm font-bold text-ink-700">
         Aucun parent n&apos;est lié à ton compte pour l&apos;instant. Si c&apos;est une erreur,{" "}
-        <Link href={routes.learner.help} className="font-black text-primary-600 underline-offset-2 hover:underline">
+        <Link
+          href={routes.learner.help}
+          className="rounded-sm font-black text-primary-600 underline-offset-2 hover:underline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+        >
           demande de l&apos;aide
         </Link>
         .

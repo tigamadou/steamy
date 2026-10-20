@@ -14,7 +14,7 @@ import {
   updateCartItem,
   type Shopper,
 } from "./api";
-import { readGuestCart, removeGuestLine, setGuestQuantity } from "./guest-cart";
+import { readGuestCart, removeGuestLine, setGuestQuantity, takeDroppedLines } from "./guest-cart";
 
 /** Ligne du panier telle que l'écran l'affiche : kit relu dans l'API, `id` de la ligne pour le panier serveur. */
 export type CartLine = { kit: Schemas["Kit"]; quantity: number; total: number; id?: number };
@@ -25,7 +25,10 @@ export type CartContents = {
   count: number;
   /** Somme des lignes hors livraison : celle de l'API pour un panier serveur, celle des prix relus pour l'invité. */
   subtotal: number;
-  /** Kits du panier invité retirés de la vente depuis l'ajout (supprimés du stockage). */
+  /**
+   * Kits retirés du panier : retirés de la vente depuis l'ajout (invité), ou refusés à la fusion du panier invité
+   * dans le panier serveur après la connexion (kit épuisé ou retiré).
+   */
   dropped: number;
 };
 
@@ -43,12 +46,12 @@ class CartLoadError extends Error {
   }
 }
 
-function fromServer(cart: Schemas["Cart"]): CartContents {
+function fromServer(cart: Schemas["Cart"], dropped = 0): CartContents {
   return {
     lines: cart.items.map((item) => ({ kit: item.kit, quantity: item.quantity, total: item.total, id: item.id })),
     count: cart.count,
     subtotal: cart.subtotal,
-    dropped: 0,
+    dropped,
   };
 }
 
@@ -87,7 +90,7 @@ async function load(context: CartContext): Promise<Extract<CartState, { status: 
   if (readGuestCart().length > 0) await mergeGuestCart();
   const cart = await getCart();
   if (!cart.ok) throw new CartLoadError(cart);
-  return { status: "ready", shopper, ...fromServer(cart.data) };
+  return { status: "ready", shopper, ...fromServer(cart.data, takeDroppedLines()) };
 }
 
 /**

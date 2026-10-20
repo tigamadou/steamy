@@ -1,18 +1,18 @@
 import type { Schemas } from "@steamy/api-client";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 
 import { Breadcrumb } from "@/components/ds/Breadcrumb";
 import { Button } from "@/components/ds/Button";
 import { SkeletonBlock } from "@/components/ds/SkeletonBlock";
-import { eventPlace, eventState } from "@/components/public/events";
+import { eventPlace, eventState, EventThumb, PriceBadge } from "@/components/public/events";
 import { formatFullDate } from "@/lib/dates";
 import { routes } from "@/lib/routes";
 
 import { getEvent, getMyApplications, getMyTickets } from "./api";
 import { ApplicationForm } from "./ApplicationForm";
 import { eventBreadcrumb } from "./LearnerEventView";
-import { ApplicationStatusBadge, ParentNotice, PriceBadge, TicketNotice } from "./parts";
+import { ApplicationStatusBadge, ParentNotice, TicketNotice } from "./parts";
 import { activeApplication, CLOSED_REASONS, closedReason, freeTicket } from "./status";
 
 /** Carte de WD11 : rappel de l'événement (date, lieu, prix) puis son contenu. */
@@ -20,17 +20,11 @@ function ApplicationCard({ event, children }: { event: Schemas["SteamyEventDetai
   return (
     <div className="flex flex-col gap-4 rounded-[22px] border-2 border-ink-100 bg-surface p-5 sm:p-7">
       <div className="flex items-center gap-3.5">
-        <span
-          aria-hidden
-          className="flex size-14 shrink-0 items-center justify-center rounded-[16px] bg-(--event) text-[28px]"
-          style={{ "--event": event.color } as CSSProperties}
-        >
-          {event.emoji || "🎟️"}
-        </span>
+        <EventThumb event={event} className="size-14 rounded-[16px] text-[28px]" />
         <div className="min-w-0">
           <h2 className="m-0 text-xl font-black text-ink-900">{event.title}</h2>
           <p className="m-0 flex flex-wrap items-center gap-x-1.5 text-[13px] font-bold text-ink-600">
-            📅 {formatFullDate(event.startsAt)} · 📍 {eventPlace(event)} · <PriceBadge price={event.price} />
+            📅 {formatFullDate(event.startsAt)} · 📍 {eventPlace(event)} · <PriceBadge event={event} />
           </p>
         </div>
       </div>

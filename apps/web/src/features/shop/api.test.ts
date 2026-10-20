@@ -14,7 +14,7 @@ const client = { GET: answer("GET"), POST: answer("POST"), PATCH: answer("PATCH"
 vi.mock("@/lib/api-browser", () => ({ getBrowserApi: async () => client }));
 
 const api = await import("./api");
-const { readGuestCart, writeGuestCart } = await import("./guest-cart");
+const { readGuestCart, takeDroppedLines, writeGuestCart } = await import("./guest-cart");
 
 const CART = { items: [{ id: 7, kit: KIT, quantity: 2, total: 70000 }], count: 2, subtotal: 70000 };
 const failure = (code: string, status: number) => ({ status, error: { code, message: `${code} !` } });
@@ -100,21 +100,29 @@ describe("alerte de réassort", () => {
 });
 
 describe("fusion du panier invité", () => {
-  it("verse chaque ligne, abandonne les refus définitifs, garde les échecs passagers", async () => {
+  it("verse chaque ligne, abandonne et compte les refus définitifs, garde les échecs passagers", async () => {
     writeGuestCart([
       { kitSlug: "bot", quantity: 2 },
       { kitSlug: "epuise", quantity: 1 },
+      { kitSlug: "interdit", quantity: 1 },
       { kitSlug: "coupure", quantity: 1 },
     ]);
     replies.set("POST /api/shop/cart/items/", (init) => {
       const slug = (init as { body: { kitSlug: string } }).body.kitSlug;
       if (slug === "bot") return { status: 201, data: CART };
       if (slug === "epuise") return failure("OUT_OF_STOCK", 409);
+      if (slug === "interdit") return failure("PERMISSION_DENIED", 403);
       return failure("SERVER_ERROR", 500);
     });
     expect(await api.mergeGuestCart()).toBe(1);
     expect(client.POST).toHaveBeenCalledWith("/api/shop/cart/items/", { body: { kitSlug: "bot", quantity: 2 } });
     expect(readGuestCart()).toEqual([{ kitSlug: "coupure", quantity: 1 }]);
+    // Lignes refusées retenues pour l'avis du panier, cumulées d'une fusion à l'autre
+    expect(window.sessionStorage.getItem("steamy:panier-ecartes")).toBe("2");
+    writeGuestCart([{ kitSlug: "epuise", quantity: 1 }]);
+    await api.mergeGuestCart();
+    expect(takeDroppedLines()).toBe(3);
+    expect(takeDroppedLines()).toBe(0);
   });
 
   it("panier vide : aucun appel", async () => {

@@ -19,7 +19,8 @@ async function RequestLoader({ params }: { params: Promise<{ id: string }> }) {
   return <PaymentRequestView initial={request} />;
 }
 
-// WA02 · Demande de paiement au parent (titre du header : « Demande à ton parent »).
+// WA02 (parcours) et WK08 (kits) · Demande de paiement au parent, même vue selon `kind` (titre du header :
+// « Demande à ton parent »).
 export default function PaymentRequestPage({ params }: PageProps<"/apprenant/demandes/[id]">) {
   return (
     <AppStateBoundary>
