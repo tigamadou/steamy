@@ -13,7 +13,7 @@ paiement `WA03`, états `WA04`/`WA05`/`WA07`, suivi `WK07`).
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : PR de fin de lot (suivis de relecture, critères de fin) après la fusion de 4.6 à 4.8 ; 4.10 avec le lot 5 · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
+Statut : 🟡 en cours · Prochaine tâche : validation C18 de la maquette de `WPD15` par le produit ; 4.10 avec le lot 5 · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
 
 ### Lot 4 · Espace parent — 🟡 en cours
 - [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15` · PR #72
@@ -114,7 +114,7 @@ Statut : 🟡 en cours · Prochaine tâche : PR de fin de lot (suivis de relectu
   - [x] Tests unitaires : semaine vide, semaine sans email
   - [x] Playwright : navigation vers la semaine précédente
   - [x] Recette : chiffres identiques à ceux de l'API pour le jeu D2
-  > Écarts : semaine illisible dans l'URL, ou refusée par l'API (hors bornes, à venir) → semaine en cours ; « Semaine suivante » inactive sur la semaine en cours (`nextWeek` nul) ; semaine sans activité : message au lieu de l'histogramme ; `CourseProgressList` de `WPD03` réutilisée ; `WeeklyActivityBars` (lot 3) contient désormais son tableau masqué (défilement horizontal d'un pixel à 360 px).
+  > Écarts : semaine illisible dans l'URL → semaine en cours ; l'API accepte une semaine à venir (`2099-W10`, `nextWeek` nul) et refuse une semaine hors bornes (avant `2000-W01`) : retour à l'URL sans `?semaine=` ; « Cette semaine » quand l'URL demande une semaine, « Voir le profil » en tête ; « Semaine suivante » inactive sur la semaine en cours (`nextWeek` nul) ; semaine sans activité : message au lieu de l'histogramme ; `CourseProgressList` de `WPD03` réutilisée ; `WeeklyActivityBars` (lot 3) contient désormais son tableau masqué (défilement horizontal d'un pixel à 360 px).
 - [x] **4.9** Paramètres et aide · `feature/lot4-parametres-aide` (requiert 4.1, 4.7, API-L3a) · PR #126
   - [x] `WPD08` Paramètres : profil, connexion (`NewPasswordFields`, changement de numéro avec `OTPInput`), livraison et paiement (`AddressForm`), notifications, `DangerZone`
   - [x] `WPD13` Aide : FAQ en `FaqAccordion` avec recherche locale, « Contacter le support » vers `WL24`
@@ -131,15 +131,17 @@ Statut : 🟡 en cours · Prochaine tâche : PR de fin de lot (suivis de relectu
   - [ ] Choix « Rattacher {Prénom} à la classe » sans nouvel identifiant si l'enfant a déjà un compte (C11)
   - [ ] Branchement API : `consent-requests/{id}/accept/` avec `{ username, password }` ou `{ learnerId }` (API-L5.2)
   - [ ] Playwright (lot 5 disponible) : invitation `WT06`, SMS, le parent accepte, l'élève apparaît dans `WT04`
-- [ ] **Critères de fin du lot 4**
+- [ ] **Critères de fin du lot 4** · PR de fin de lot #PRFIN
   - [ ] `WPD01`-`WPD15` livrés selon la définition de « terminé » du README, au vouvoiement, en 360 px et sur bureau (variante enseignant de `WPD05` livrée avec le lot 5)
-  - [ ] Parcours Playwright verts sur la stack Docker avec `make seed` : enfant demande un parcours, parent paie, enfant accède
-  - [ ] Parcours Playwright verts : refus de consentement
-  - [ ] Parcours Playwright verts : accord à un événement payant, plus achat direct de kit et création d'enfant
-  - [ ] Les 4 types de demandes de « À valider » et tous les types de notification mènent au bon écran
-  - [ ] Aucun élément de « À ne pas porter de la maquette » (§5.11) présent ; aucune donnée de démonstration en dur
-  - [ ] Aucun accès possible aux données d'un enfant, d'une commande ou d'une demande d'une autre famille (tests de refus)
-  - [ ] `make openapi` à jour, client généré seul utilisé, CI verte (`ci-ok`) sur chaque PR
+    > Tous livrés (4.1 à 4.9), e2e sur les projets « bureau » et « mobile » (360 px) avec contrôle du défilement horizontal ; reste la validation C18 de la maquette de `WPD15` (4.0), en attente du produit.
+  - [x] Parcours Playwright verts sur la stack Docker avec `make seed` : enfant demande un parcours, parent paie, enfant accède (`parent-demande-paiement.spec.ts`)
+  - [x] Parcours Playwright verts : refus de consentement (`parent-consentement.spec.ts`)
+  - [x] Parcours Playwright verts : accord à un événement payant, plus achat direct de kit et création d'enfant (`parent-evenements.spec.ts`, `parent-commandes.spec.ts`, `parent-enfants.spec.ts`)
+  - [x] Les 4 types de demandes de « À valider » et tous les types de notification mènent au bon écran (`home.test.tsx`, `spaces.test.ts`, `parent-accueil-notifications.spec.ts` ; liens vers un autre espace écartés pour les deux)
+  - [x] Aucun élément de « À ne pas porter de la maquette » (§5.11) présent ; aucune donnée de démonstration en dur (utilisateur du shell lu dans la session)
+  - [x] Aucun accès possible aux données d'un enfant, d'une commande ou d'une demande d'une autre famille (tests de refus : enfant, commande, demande de paiement, consentement, demande de suppression → « introuvable »)
+  - [x] `make openapi` à jour (`spectacular` identique au fichier versionné), client généré seul utilisé (la facture en lien direct vers l'API), CI verte (`ci-ok`) sur chaque PR
+  > Suivis de relecture regroupés dans la PR de fin de lot : shell d'espace commun (`SpaceShellFrame`, `shortName` partagé) ; « À valider » écarte, comme les notifications, un lien vers un autre espace ; `deleteChild` garde une demande d'identifiant 0 ; résumé d'erreurs au vouvoiement dans l'espace parent (profil, connexion, Mobile Money, livraison, mot de passe, adresse d'un kit, inscription à un événement) ; `ProfileCard` signale un nom enregistré sans l'email ni la profession ; `Section` avec ancre (`#notifications`) ; `DangerZone` en `Link` ; e2e « Tout marquer comme lu » sans condition, sur une famille neuve ; rapport hebdomadaire (semaine à venir, refus de l'API, « Cette semaine », « Voir le profil », e2e en `finally`). Les suivis de #125, #135, #136, #142 et #143 ont été traités dans leurs PR.
 
 ## Prérequis
 
@@ -377,3 +379,5 @@ ajoutées au README ; noms des composants alignés sur LOT-3.
 | Point | Bloque |
 | --- | --- |
 | Choix du prestataire de paiement après comparaison (S9, ADR-Paiement) | Branchement réel (le faux prestataire suffit au lot) |
+| Réservation du stock d'un kit dès « Continuer vers le paiement » (WPD15, achat direct), gardée en attendant la décision de l'utilisateur | Rien : comportement actuel conservé |
+| Validation C18 de la maquette de `WPD15` (4.0) par le produit | Critère « `WPD01`-`WPD15` livrés » du lot |
