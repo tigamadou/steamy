@@ -4,7 +4,7 @@ import { API_URL, STAFF, staffLogin } from "./support/staff";
 
 // LOT-6 · 6.2 comptes dans l'admin Django : WAD06-WAD08 par le Support (recette D2 : retrouver Léa Adjovi, voir son
 // parent et ses consentements), WAD13 par le Super-admin. Lecture seule sur le jeu D2 : les écritures (statut, relance,
-// litige, changement de parent, mot de passe, invitation) sont couvertes par pytest. Un code TOTP ne sert qu'une fois
+// litige, changement de parent, mot de passe, invitations, activation d'un membre) sont couvertes par pytest. Un code TOTP ne sert qu'une fois
 // par compte : attente possible de plusieurs fenêtres de 30 s.
 
 test("6.2 Support retrouve Léa Adjovi, son parent et les consentements (WAD06-WAD08)", async ({ page }) => {
@@ -41,4 +41,12 @@ test("6.2 Super-admin consulte l'équipe et ses appareils TOTP (WAD13)", async (
   await expect(results).toContainText(STAFF.support);
   await expect(results.getByRole("columnheader", { name: "Groupes" })).toBeVisible();
   await expect(page.locator('select[name="action"] option[value="reset_totp"]')).toHaveCount(1);
+  await expect(page.locator('select[name="action"] option[value="send_activation"]')).toHaveCount(1);
+  await expect(page.locator('select[name="action"] option[value="revoke_invitation"]')).toHaveCount(1);
+
+  // « Inviter un membre » : email, identité et groupes ; le mot de passe se choisit par le lien d'activation
+  await page.goto(`${API_URL}/admin/accounts/staffmember/add/`);
+  await expect(page.locator('input[name="email"]')).toBeVisible();
+  await expect(page.locator('input[name="password1"]')).toHaveCount(0);
+  await expect(page.getByText("Le membre reçoit par email un lien d'activation")).toBeVisible();
 });

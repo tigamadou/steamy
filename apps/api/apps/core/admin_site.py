@@ -2,7 +2,7 @@
 Site de l'admin Django du back-office (LOT-6 6.1) : remplace `admin.site` (`SteamyAdminConfig`).
 
 - Accès réservé au personnel dont la session est vérifiée par TOTP (`OTPAdminSite`, D72).
-- Connexion WAD15 et enrôlement du TOTP : `apps.core.staff_auth`.
+- Connexion WAD15, activation d'un membre invité (WAD13) et enrôlement du TOTP : `apps.core.staff_auth`.
 - Tout `ModelAdmin` enregistré hérite d'`AuditedAdminMixin` (journal d'audit).
 """
 
@@ -49,13 +49,23 @@ class SteamyAdminSite(OTPAdminSite):
 
     def get_urls(self):
         enrollment = csrf_protect(never_cache(self.totp_enrollment))
+        activation = never_cache(self.staff_activation)
+        password = csrf_protect(never_cache(self.staff_activation_password))
         return [
             path("totp/configuration/", enrollment, name="totp_enrollment"),
+            path("activation/definir/", password, name="staff_activation_password"),
+            path("activation/<str:token>/", activation, name="staff_activation"),
             *super().get_urls(),
         ]
 
     def totp_enrollment(self, request):
         return staff_auth.totp_enrollment(self, request)
+
+    def staff_activation(self, request, token):
+        return staff_auth.staff_activation(self, request, token)
+
+    def staff_activation_password(self, request):
+        return staff_auth.staff_activation_password(self, request)
 
     @method_decorator(never_cache)
     def login(self, request, extra_context=None):

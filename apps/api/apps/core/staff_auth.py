@@ -7,11 +7,16 @@ Connexion du personnel à l'admin Django (WAD15, D72) : email, mot de passe et c
 - Session du personnel limitée à 8 h (C20) ; elle tombe si le compte est désactivé ou le TOTP réinitialisé
   (`User._get_session_auth_hash`).
 - `next` : chemins de l'admin, ou `WEB_URL/backoffice` (pages Next.js du back-office), aucun autre hôte.
+- Invitation d'un membre (WAD13) : compte sans mot de passe utilisable, lien d'activation par email (jeton haché
+  dans `StaffInvitation`, plafonné par IP, retiré de l'URL dès la première visite) ; le membre y choisit son mot de
+  passe, puis enrôle son TOTP avant toute page de l'admin. Renvoi espacé, révocation possible.
 """
 
 import hashlib
+import secrets
 import time
 from base64 import b32encode
+from datetime import timedelta
 from urllib.parse import urlsplit
 
 from django import forms
@@ -19,17 +24,22 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.forms import AdminAuthenticationForm
 from django.contrib.auth import login as auth_login
+from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from django.db import transaction
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from django_otp.qr import write_qrcode_image
 from rest_framework.throttling import SimpleRateThrottle
 
-from apps.accounts.models import User
+from apps.accounts.models import StaffInvitation, User
+from libs.phone import mask_email
 
 from .audit import audit
 
@@ -312,3 +322,165 @@ def totp_enrollment(site, request):
     }
     request.current_app = site.name
     return TemplateResponse(request, "admin/totp_enrollment.html", context)
+
+
+# --- Invitation d'un membre (WAD13) -------------------------------------------------------------------------------
+
+#: Durée de validité d'un lien d'activation
+ACTIVATION_LIFETIME = timedelta(hours=72)
+#: Délai minimal entre deux envois du lien au même membre
+RESEND_COOLDOWN = timedelta(minutes=10)
+#: Clé de session du jeton validé : il quitte l'URL dès la première visite (absent des journaux d'accès)
+ACTIVATION_SESSION_KEY = "staff_activation_token"
+
+ACTIVATION_SUBJECT = "Votre accès au back-office Steamy"
+ACTIVATION_BODY = """Bonjour{name},
+
+Un accès au back-office Steamy vient de vous être ouvert. Choisissez votre mot de passe avec ce lien, valable
+jusqu'au {expires} :
+
+{url}
+
+Vous configurerez ensuite votre application d'authentification (double authentification obligatoire).
+
+L'équipe Steamy
+"""
+
+
+class StaffActivationThrottle(SimpleRateThrottle):
+    scope = "staff-activation"
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}
+
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def send_activation(member: User, request) -> None:
+    """
+    (Re)envoie le lien d'activation : un nouveau jeton remplace le précédent. Refusé pour un membre activé ou
+    révoqué, ou moins de `RESEND_COOLDOWN` après le dernier envoi. Email parti après la transaction.
+    """
+    if member.has_usable_password():
+        raise ValueError(f"{member} : compte déjà activé.")
+    invitation, _ = StaffInvitation.objects.get_or_create(member=member)
+    if invitation.revoked_at:
+        raise ValueError(f"{member} : invitation révoquée.")
+    now = timezone.now()
+    if invitation.sent_at and now - invitation.sent_at < RESEND_COOLDOWN:
+        minutes = int(RESEND_COOLDOWN.total_seconds() // 60)
+        raise ValueError(f"{member} : lien déjà envoyé il y a moins de {minutes} minutes.")
+    token = secrets.token_urlsafe(32)
+    invitation.token_hash = hash_token(token)
+    invitation.sent_at = now
+    invitation.expires_at = now + ACTIVATION_LIFETIME
+    invitation.invited_by = request.user
+    invitation.save()
+    body = ACTIVATION_BODY.format(
+        name=f" {member.first_name}" if member.first_name else "",
+        expires=timezone.localtime(invitation.expires_at).strftime("%d/%m/%Y à %H:%M"),
+        url=request.build_absolute_uri(reverse("admin:staff_activation", args=[token])),
+    )
+    email = member.email
+    transaction.on_commit(
+        lambda: send_mail(ACTIVATION_SUBJECT, body, settings.DEFAULT_FROM_EMAIL, [email])
+    )
+    audit("staff.invitation_sent", request=request, target=member, data={"email": email})
+
+
+def revoke_invitation(member: User, request) -> None:
+    """Invalide le lien et désactive le compte, tant que l'invitation n'est pas acceptée."""
+    with transaction.atomic():
+        invitation = StaffInvitation.objects.select_for_update().filter(member=member).first()
+        if invitation is None or not invitation.pending:
+            raise ValueError(f"{member} : aucune invitation en attente.")
+        invitation.revoked_at = timezone.now()
+        invitation.token_hash = ""
+        invitation.save(update_fields=["revoked_at", "token_hash"])
+        member.status = User.Status.DEACTIVATED
+        member.is_active = False
+        member.save(update_fields=["status", "is_active", "updated_at"])
+        audit("staff.invitation_revoked", request=request, target=member)
+
+
+def open_invitation(token: str) -> StaffInvitation | None:
+    """Invitation valable : jeton connu, non expiré, ni acceptée ni révoquée, compte actif sans mot de passe."""
+    if not token:
+        return None
+    return (
+        StaffInvitation.objects.select_related("member")
+        .filter(
+            token_hash=hash_token(token),
+            accepted_at__isnull=True,
+            revoked_at__isnull=True,
+            expires_at__gt=timezone.now(),
+            member__is_staff=True,
+            member__is_active=True,
+        )
+        .first()
+    )
+
+
+def _throttled(request):
+    """Plafond par IP sur les deux pages de l'activation : 429 et `AuditLog`."""
+    if StaffActivationThrottle().allow_request(request, None):
+        return None
+    audit("staff.activation_throttled", request=request)
+    return HttpResponse("Trop de tentatives : réessayez dans quelques minutes.", status=429)
+
+
+def _render(site, request, invitation, form):
+    context = {
+        **site.each_context(request),
+        "title": "Activer votre accès",
+        "form": form,
+        "email": mask_email(invitation.member.email) if invitation else "",
+    }
+    request.current_app = site.name
+    return TemplateResponse(request, "admin/staff_activation.html", context)
+
+
+def staff_activation(site, request, token):
+    """
+    Lien reçu par email : un jeton valable passe en session et l'URL redirige vers la page du mot de passe (sur le
+    modèle de `PasswordResetConfirmView`) ; le jeton n'apparaît qu'une fois dans les journaux, masqué.
+    """
+    if (response := _throttled(request)) is not None:
+        return response
+    if open_invitation(token) is None:
+        return _render(site, request, None, None)
+    request.session[ACTIVATION_SESSION_KEY] = token
+    return redirect("admin:staff_activation_password")
+
+
+def staff_activation_password(site, request):
+    """
+    Choix du mot de passe (validateurs habituels), puis enrôlement du TOTP : la session vérifiée ne s'ouvre qu'au
+    premier code confirmé.
+    """
+    if (response := _throttled(request)) is not None:
+        return response
+    invitation = open_invitation(request.session.get(ACTIVATION_SESSION_KEY, ""))
+    if invitation is None:
+        request.session.pop(ACTIVATION_SESSION_KEY, None)
+        return _render(site, request, None, None)
+    user = invitation.member
+    form = SetPasswordForm(user, request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        with transaction.atomic():
+            form.save()
+            invitation.accepted_at = timezone.now()
+            invitation.token_hash = ""
+            invitation.save(update_fields=["accepted_at", "token_hash"])
+        del request.session[ACTIVATION_SESSION_KEY]
+        audit("staff.activated", actor=user, request=request)
+        request.session[ENROLLMENT_SESSION_KEY] = {
+            "user": user.pk,
+            "started": time.time(),
+            "next": "",
+        }
+        audit("staff.totp_enrollment_started", actor=user, request=request)
+        return redirect("admin:totp_enrollment")
+    return _render(site, request, invitation, form)

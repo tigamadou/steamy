@@ -20,6 +20,7 @@ from django.utils.html import format_html
 from django.utils.translation import ngettext
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
+from apps.core import staff_auth
 from apps.core.admin_actions import form_action
 from apps.core.groups import SUPER_ADMIN
 from apps.referentials.models import Relationship
@@ -676,10 +677,38 @@ class StaffMemberForm(UserChangeForm):
         return groups
 
 
+class StaffInvitationForm(forms.ModelForm):
+    """« Inviter un membre » : email, identité et groupes ; le mot de passe se choisit par le lien d'activation."""
+
+    class Meta:
+        model = StaffMember
+        fields = ("email", "first_name", "last_name", "groups")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].required = True
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("Un compte utilise déjà cette adresse email.")
+        return email
+
+
 @admin.register(StaffMember)
 class StaffMemberAdmin(DjangoUserAdmin):
     form = StaffMemberForm
-    list_display = ("email", "full_name", "staff_groups", "totp", "status", "last_login")
+    add_form = StaffInvitationForm
+    add_form_template = None  # formulaire d'ajout standard : pas de champs de mot de passe
+    list_display = (
+        "email",
+        "full_name",
+        "staff_groups",
+        "activated",
+        "totp",
+        "status",
+        "last_login",
+    )
     list_filter = ("groups", "status")
     search_fields = ("email", "first_name", "last_name")
     ordering = ("email",)
@@ -694,13 +723,15 @@ class StaffMemberAdmin(DjangoUserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "first_name", "last_name", "password1", "password2", "groups"),
+                "fields": ("email", "first_name", "last_name", "groups"),
+                "description": "Le membre reçoit par email un lien d'activation : il y choisit son mot de "
+                "passe, puis configure sa double authentification.",
             },
         ),
     )
     readonly_fields = ("is_superuser", "status", "date_joined", "last_login")
     filter_horizontal = ("groups",)
-    actions = ["reset_totp"]
+    actions = ["send_activation", "revoke_invitation", "reset_totp"]
 
     def get_queryset(self, request):
         confirmed = TOTPDevice.objects.filter(user=OuterRef("pk"), confirmed=True)
@@ -730,7 +761,11 @@ class StaffMemberAdmin(DjangoUserAdmin):
     def save_model(self, request, obj, form, change):
         if not change:
             obj.role, obj.is_staff = None, True
+            obj.set_unusable_password()
         super().save_model(request, obj, form, change)
+        if not change:
+            staff_auth.send_activation(obj, request)
+            self.message_user(request, f"Lien d'activation envoyé à {obj.email}.", messages.SUCCESS)
 
     @admin.display(description="Nom")
     def full_name(self, obj):
@@ -743,6 +778,34 @@ class StaffMemberAdmin(DjangoUserAdmin):
     @admin.display(description="TOTP", boolean=True)
     def totp(self, obj):
         return obj.has_totp
+
+    @admin.display(description="Activé", boolean=True)
+    def activated(self, obj):
+        return obj.has_usable_password()
+
+    @admin.action(
+        description="Révoquer l'invitation (lien invalidé, compte désactivé)", permissions=["add"]
+    )
+    def revoke_invitation(self, request, queryset):
+        for member in queryset:
+            try:
+                staff_auth.revoke_invitation(member, request)
+            except ValueError as error:
+                self.message_user(request, str(error), messages.WARNING)
+            else:
+                self.message_user(request, f"{member} : invitation révoquée.", messages.SUCCESS)
+
+    @admin.action(description="Renvoyer le lien d'activation", permissions=["add"])
+    def send_activation(self, request, queryset):
+        for member in queryset:
+            try:
+                staff_auth.send_activation(member, request)
+            except ValueError as error:
+                self.message_user(request, str(error), messages.WARNING)
+            else:
+                self.message_user(
+                    request, f"Lien d'activation envoyé à {member.email}.", messages.SUCCESS
+                )
 
     @admin.action(description="Réinitialiser le TOTP (ferme les sessions)", permissions=["change"])
     def reset_totp(self, request, queryset):

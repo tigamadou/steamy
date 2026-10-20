@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 6.2 « Inviter un membre » par lien d'activation (à concevoir) ; critères de fin du lot · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -45,16 +45,16 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 « Inviter un membre » par lie
   > visible une fois l'appareil confirmé (ni secret ni QR code dans l'admin des appareils). `/api/backoffice/overview/`
   > n'existant pas encore (API-L6.4), le refus `OTP_REQUIRED` est testé sur une route factice protégée par
   > `IsStaffVerified`. Ancien catalogue `courses` (dont `Path`) retiré de l'admin ; `messaging` était déjà supprimé.
-- [ ] **6.2** Utilisateurs, consentements, équipe · `feature/lot6-comptes-consentements` · PR #133 (requiert 6.1, API-L2, API-L4, API-L5)
+- [x] **6.2** Utilisateurs, consentements, équipe · `feature/lot6-comptes-consentements` · PR #133, invitation d'un membre `feature/lot6-invitation-membre` · PR #137 (requiert 6.1, API-L2, API-L4, API-L5)
   - [x] WAD06 Utilisateurs (admin Django) : `UserAdmin` (colonnes, filtres, recherche, `role` en lecture seule après création)
   - [x] WAD06 action « Inviter un enseignant » (email + `School` vers `TeacherInvitation`) et désactiver / réactiver avec motif et audit
   - [x] WAD07 Fiche utilisateur (admin Django) : inlines lecture seule, genre et handicap soumis à *view_sensitive_profile*
   - [x] WAD07 actions : réinitialiser le mot de passe, « Voir le parent », changement de parent (D22 : lien remplacé à l'acceptation du nouveau parent seulement)
   - [x] WAD08 Consentements (admin Django) : `ConsentRequestAdmin` en suivi seul, actions *relancer le parent* (plafonds de W07) et *marquer en litige* (note obligatoire)
   - [x] WAD08 `PublicProfileReviewAdmin` : approuver / rejeter pseudonyme et avatar (D15)
-  - [ ] WAD13 Équipe (admin Django) : `StaffMemberAdmin`, « Inviter un membre » (lien d'activation + enrôlement TOTP), « Réinitialiser le TOTP », garde-fou sur le dernier Super-admin
+  - [x] WAD13 Équipe (admin Django) : `StaffMemberAdmin`, « Inviter un membre » (lien d'activation + enrôlement TOTP), « Réinitialiser le TOTP », garde-fou sur le dernier Super-admin
     - [x] `StaffMemberAdmin` (groupes, TOTP, dernière connexion), « Réinitialiser le TOTP », garde-fous du dernier Super-admin et de soi-même (API-L6.2)
-    - [ ] « Inviter un membre » par lien d'activation : création avec mot de passe initial, puis enrôlement TOTP obligatoire à la première connexion (6.1) ; lien d'activation à concevoir
+    - [x] « Inviter un membre » par lien d'activation : email, identité et groupes ; le membre choisit son mot de passe par le lien (`StaffInvitation`, jeton haché, usage unique, valable 72 h : `ACTIVATION_LIFETIME`), puis enrôle son TOTP avant toute page de l'admin ; actions « Renvoyer le lien d'activation » (10 min au moins entre deux envois : `RESEND_COOLDOWN`) et « Révoquer l'invitation », colonne « Activé »
   - [x] Groupes et permissions de ces modèles conformes à la matrice
   - [x] Tests : aucune action ne fait passer une `ConsentRequest` à `accepted` ou `refused` (D70) ; relance soumise aux plafonds
   - [x] Tests : Contenu et Finance sans accès aux consentements ni champs sensibles ; Support sans genre/handicap sans permission
@@ -73,6 +73,17 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 « Inviter un membre » par lie
   > ne serait pas utilisable dans ce parcours ; l'apprenant passe par son parent. La colonne « personnel » de WAD06 n'a
   > pas lieu d'être : le personnel est listé à part (WAD13). Recette manuelle à faire par le produit (le test
   > Playwright couvre la recherche de Léa Adjovi, son parent et les consentements, en lecture).
+  > Invitation d'un membre (WAD13), PR #137 : le formulaire d'ajout de l'équipe ne demande plus de mot de passe ; le
+  > compte naît avec un mot de passe inutilisable et une `StaffInvitation` (jeton `token_urlsafe` haché, `sent_at`,
+  > `expires_at`, `invited_by`, `accepted_at`, `revoked_at`, sur le modèle de `TeacherInvitation`). Lien
+  > `admin/activation/<jeton>/` valable 72 h (`ACTIVATION_LIFETIME`), email envoyé après la transaction. Sur le modèle
+  > de `PasswordResetConfirmView`, la première visite place le jeton en session et redirige vers
+  > `admin/activation/definir/` : le jeton ne reste pas dans l'URL, et le filtre `libs/access_log.py` le masque dans les
+  > journaux d'accès d'uvicorn et de gunicorn. Les deux pages sont plafonnées par IP (`staff-activation`, 10/min ;
+  > 429 et `staff.activation_throttled`) et masquent l'email. Le mot de passe passe les validateurs, puis l'enrôlement
+  > TOTP de 6.1 s'enchaîne : aucune session avant le premier code confirmé. Renvoi espacé de 10 min
+  > (`RESEND_COOLDOWN`), qui remplace le lien précédent ; « Révoquer l'invitation » invalide le lien et désactive le
+  > compte. Journal : `staff.invitation_sent`, `staff.activated`, `staff.invitation_revoked`.
 - [x] **6.3** Contenu des parcours · `feature/lot6-contenu-parcours` · PR #113 (requiert 6.1, API-L1, API-L3a)
   - [x] WAD09 Contenu (admin Django) : `CourseAdmin` (colonnes, filtres, slug prérempli, couverture S3, `trailerVimeoId`)
   - [x] Hiérarchie par inlines chaînés : `Project` dans `Course`, `Level` dans `Project`, `Mission` dans `Level` (fil d'Ariane, ordre éditable)

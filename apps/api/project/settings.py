@@ -281,6 +281,8 @@ REST_FRAMEWORK = {
         # Connexion du personnel à l'admin (WAD15), par IP et par email
         "staff-login": os.getenv("THROTTLE_STAFF_LOGIN", "10/min"),
         "staff-login-email": os.getenv("THROTTLE_STAFF_LOGIN_EMAIL", "10/hour"),
+        # Lien d'activation d'un membre invité (WAD13), par IP
+        "staff-activation": os.getenv("THROTTLE_STAFF_ACTIVATION", "10/min"),
         # Création d'un compte en attente (apprenant) ou d'un défi OTP (parent)
         "signup": os.getenv("THROTTLE_SIGNUP", "5/min"),
         # Étapes suivantes (demande au parent, mot de passe) : compteur séparé, sinon un parent et son enfant

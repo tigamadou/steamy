@@ -16,3 +16,10 @@ loglevel = os.getenv("LOG_LEVEL", "info").lower()
 # Recycler les workers limite l'impact d'éventuelles fuites mémoire
 max_requests = 1000
 max_requests_jitter = 100
+
+
+def post_worker_init(worker):
+    """Jetons des liens d'activation masqués dans les journaux d'accès (WAD13)."""
+    from libs.access_log import install
+
+    install()
