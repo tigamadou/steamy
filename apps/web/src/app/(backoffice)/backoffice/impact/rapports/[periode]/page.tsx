@@ -5,7 +5,8 @@ import { Button } from "@/components/ds/Button";
 import { getServerApi } from "@/lib/api";
 import { PAGE_GROUPS } from "@/lib/backoffice/access";
 import { backofficeData } from "@/lib/backoffice/fetch";
-import { publicApiUrl, requireGroups } from "@/lib/backoffice/guard";
+import { requireGroups } from "@/lib/backoffice/guard";
+import { publicApiUrl } from "@/lib/runtime-config";
 import { routes } from "@/lib/routes";
 
 export const metadata = { title: "Rapport d'impact trimestriel · Back-office" };

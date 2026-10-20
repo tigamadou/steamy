@@ -3,7 +3,8 @@ import { Overview } from "@/components/backoffice/Overview";
 import { getServerApi } from "@/lib/api";
 import { hasGroup, PAGE_GROUPS } from "@/lib/backoffice/access";
 import { backofficeData } from "@/lib/backoffice/fetch";
-import { publicApiUrl, requireGroups } from "@/lib/backoffice/guard";
+import { requireGroups } from "@/lib/backoffice/guard";
+import { publicApiUrl } from "@/lib/runtime-config";
 
 export const metadata = { title: "Vue d'ensemble · Back-office" };
 

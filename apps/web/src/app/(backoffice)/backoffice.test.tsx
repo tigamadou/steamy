@@ -11,7 +11,8 @@ const requireStaff = vi.fn();
 const back = vi.fn();
 const publicApiUrl = vi.fn(() => "http://api.steamy.test:8000");
 const apiGet = vi.fn();
-vi.mock("@/lib/backoffice/guard", () => ({ requireGroups, requireStaff, publicApiUrl }));
+vi.mock("@/lib/backoffice/guard", () => ({ requireGroups, requireStaff }));
+vi.mock("@/lib/runtime-config", () => ({ publicApiUrl }));
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET: apiGet }) }));
 vi.mock("@/components/backoffice/BackofficeGate", () => ({ BackofficeGate: () => null }));
 vi.mock("next/navigation", () => ({

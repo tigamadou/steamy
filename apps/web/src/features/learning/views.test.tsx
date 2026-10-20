@@ -15,6 +15,7 @@ import {
 
 const GET = vi.fn();
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
+vi.mock("@/lib/runtime-config", () => ({ publicApiUrl: () => "https://api.steamy.test" }));
 vi.mock("next/navigation", () => ({
   notFound: () => {
     throw new Error("notFound");

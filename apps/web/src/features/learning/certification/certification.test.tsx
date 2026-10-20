@@ -9,6 +9,7 @@ const GET = vi.fn();
 const getCurrentUser = vi.fn();
 const apiCall = vi.fn();
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
+vi.mock("@/lib/runtime-config", () => ({ publicApiUrl: () => "https://api.steamy.test" }));
 vi.mock("@/lib/auth/session", () => ({ getCurrentUser: () => getCurrentUser() }));
 vi.mock("@/lib/api-call", () => ({ apiCall: (request: unknown) => apiCall(request) }));
 vi.mock("next/navigation", () => ({
