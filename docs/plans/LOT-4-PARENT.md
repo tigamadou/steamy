@@ -97,15 +97,16 @@ Statut : 🟡 en cours · Prochaine tâche : validation C18 de la maquette de `W
   - [x] Playwright : inscription directe par le parent (`WPD12`) à un événement payant
   - [x] Recette : refus notifié à l'enfant ; événement complet non payable
   > Écarts : `WPD06` réunit « Demandes de mes enfants » (toutes les candidatures, la mise en avant `?candidature=<id>` venant de « À valider ») et « Événements à venir » ; le paiement d'un événement accepté reprend `OrderPayment` de `WPD15` (réessai unique, paiement tardif remboursé C17) sur la commande d'événement créée par l'API (`orderReference`), sans demande de paiement (D53 amendé) ; `WL23` du lot 1 dans le shell parent, avec « Inscrire un enfant » ou le motif (complet, clos, passé) ; un refus met la ligne à jour avec la candidature renvoyée par l'API ; côté enfant, la candidature (`WD11`) et son statut (`WD10`) sont faits ou lus par l'API dans l'e2e, ces écrans relevant du lot 3 (`apprenant-evenements.spec.ts`) ; notification de l'enfant vérifiée par l'API ; « À valider » mène à `WPD06` avec la candidature mise en avant (`?candidature=<id>`), même sans `url` de l'API ; le focus passe à la ligne après un accord ou un refus ; WPD12 annonce qu'un ticket de l'enfant remplace le paiement.
-- [ ] **4.7** Suppressions · `feature/lot4-suppressions` (requiert 4.2)
-  - [ ] `WPD09` Supprimer (initiative du parent) avec `DeleteChildForm` (motif* + précisions, texte D54)
-  - [ ] Validation d'une demande `WD15` (`?demande=<id>`, motif prérempli, Accepter / Refuser)
-  - [ ] Annulation de la suppression depuis `WPD02` (bouton « Annuler la suppression »)
-  - [ ] Branchement API : `children/{id}/deletion/` (POST, DELETE), `deletion-requests/{id}/approve/` et `refuse/`
-  - [ ] Règles : désactivation immédiate, anonymisation à J+30, factures conservées, ni « définitivement » ni « irréversible »
-  - [ ] Tests unitaires : texte D54, motif requis
-  - [ ] Playwright : suppression puis annulation (l'enfant peut de nouveau se connecter) ; demande `WD15` validée depuis « À valider »
-  - [ ] Recette : pendant les 30 jours, l'enfant ne peut plus se connecter (`ACCOUNT_DEACTIVATED`)
+- [x] **4.7** Suppressions · `feature/lot4-suppressions` (requiert 4.2) · PR #143
+  - [x] `WPD09` Supprimer (initiative du parent) avec `DeleteChildForm` (motif* + précisions, texte D54)
+  - [x] Validation d'une demande `WD15` (`?demande=<id>`, motif prérempli, Accepter / Refuser)
+  - [x] Annulation de la suppression depuis `WPD02` (bouton « Annuler la suppression »)
+  - [x] Branchement API : `children/{id}/deletion/` (POST, DELETE), `deletion-requests/{id}/approve/` et `refuse/`
+  - [x] Règles : désactivation immédiate, anonymisation à J+30, factures conservées, ni « définitivement » ni « irréversible »
+  - [x] Tests unitaires : texte D54, motif requis
+  - [x] Playwright : suppression puis annulation (l'enfant peut de nouveau se connecter) ; demande `WD15` validée depuis « À valider »
+  - [x] Recette : pendant les 30 jours, l'enfant ne peut plus se connecter (`ACCOUNT_DEACTIVATED`)
+  > Écarts : `WPD09` sert aussi la demande de l'enfant sans `?demande=` quand sa suppression attend le parent ; une suppression déjà programmée y affiche le rappel daté et « Annuler la suppression » ; l'annulation est aussi proposée sur `WPD03` ; la décision (suppression, validation ou refus) ramène sur `WPD03` avec une confirmation lue dans l'URL ; demande d'un autre enfant ou d'une autre famille → « introuvable ». Recette `ACCOUNT_DEACTIVATED` vérifiée par l'API dans l'e2e. « Annuler la suppression » mène à `WPD02` (`?annulation=<id>`, focus sur la ligne de l'enfant) ou à `WPD03` (`?confirmation=suppression-annulee`, focus sur son titre), qui annoncent la réactivation ; « Valider la suppression » d'une demande de l'enfant est confirmé dans une modale.
 - [x] **4.8** Rapport hebdomadaire · `feature/lot4-rapport-hebdo` (requiert 4.2, API-L3a) · PR #144
   - [x] `WPD11` Rapport hebdomadaire (`?semaine=AAAA-Www`)
   - [x] Composants `WeekNavigator`, `WeeklyStats`, `WeeklyActivityBars` (lot 3, tableau de données en alternative), `CourseProgressList`, `WeeklyEmailNotice`

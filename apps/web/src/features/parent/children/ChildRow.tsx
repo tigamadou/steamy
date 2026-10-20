@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { Avatar, Badge, Button } from "@/components/ds";
 import { activeCoursesLabel, childMeta } from "@/features/parent/home/ChildCard";
+import { CancelDeletionButton } from "@/features/parent/deletion/CancelDeletionButton";
 import { pendingActionHref, type PendingAction } from "@/features/parent/home/PendingActionRow";
 import { formatInstant } from "@/lib/dates";
 import { routes } from "@/lib/routes";
@@ -54,8 +55,10 @@ function RowFrame({
 }) {
   return (
     <article
+      id={`${titleId}-ligne`}
+      tabIndex={-1}
       aria-labelledby={titleId}
-      className="flex flex-col gap-3 rounded-[18px] border-[1.5px] border-ink-100 bg-surface p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-4.5"
+      className="flex flex-col gap-3 rounded-[18px] border-[1.5px] border-ink-100 bg-surface p-4 outline-none focus:ring-4 focus:ring-primary-100 sm:flex-row sm:items-center sm:gap-4 sm:p-4.5"
     >
       <div className="flex min-w-0 flex-1 items-center gap-4">
         <Avatar name={name} emoji={emoji} size={56} ring={ring} decorative />
@@ -77,7 +80,7 @@ function RowFrame({
 /**
  * Ligne de WPD02 (§5.11) : enfant **actif** (âge · classe, parcours en cours, « Voir le profil » → WPD03), **demande
  * à examiner** (consentement reçu, « Examiner » → WPD05, sans progression) ou **suppression programmée** (badge
- * « Supprimé le … » ; l'annulation est livrée avec WPD09). Pas de « Relancer l'invitation » (D50).
+ * « Supprimé le … », « Annuler la suppression »). Pas de « Relancer l'invitation » (D50).
  */
 export function ChildRow({ item }: { item: ChildListItem }) {
   if (item.kind === "consent") {
@@ -114,6 +117,13 @@ export function ChildRow({ item }: { item: ChildListItem }) {
       badge={deletion && <DeletionBadge deletion={deletion} />}
       actions={
         <>
+          {deletion?.status === "scheduled" && (
+            <CancelDeletionButton
+              childId={child.id}
+              firstName={child.firstName}
+              redirectTo={routes.parent.deletionCancelled(child.id)}
+            />
+          )}
           {deletion?.status === "pending_parent" && (
             <Button href={routes.parent.deleteChild(child.id, deletion.id)} variant="secondary">
               Examiner<span className="sr-only"> la demande de suppression de {name}</span>

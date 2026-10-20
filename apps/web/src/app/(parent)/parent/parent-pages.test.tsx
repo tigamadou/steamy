@@ -47,6 +47,7 @@ vi.mock("@/features/shop/KitDetailView", () => ({ KitDetailView: () => null, Kit
 vi.mock("@/features/shop/CartView", () => ({ CartView: () => null }));
 vi.mock("@/features/shop/DeliveryZonesSlot", () => ({ DeliveryZonesSlot: () => null }));
 vi.mock("@/lib/shop", () => ({ getKit: async (slug: string) => (slug === "bot" ? { name: "Steamy Bot v1" } : null) }));
+vi.mock("@/features/parent/deletion/DeleteChild", () => ({ DeleteChild: () => null, DeleteChildSkeleton: () => null }));
 vi.mock("@/features/parent/events/ParentEventsHome", () => ({
   ParentEventsHome: () => null,
   ParentEventsHomeSkeleton: () => null,
@@ -60,6 +61,8 @@ vi.mock("@/features/notifications/Notifications", () => ({
 }));
 
 const { default: Layout } = await import("./layout");
+const { default: DeleteChildPage } = await import("./enfants/[id]/supprimer/page");
+const { DeleteChild, DeleteChildSkeleton } = await import("@/features/parent/deletion/DeleteChild");
 const { default: EventsPage } = await import("./evenements/page");
 const { default: EventPage } = await import("./evenements/[slug]/page");
 const { default: EventSignupPage } = await import("./evenements/[slug]/inscription/page");
@@ -198,9 +201,11 @@ describe("WPD15", () => {
 
 describe("pages des enfants (4.2)", () => {
   it("WPD02 : liste sous Suspense, avec son squelette", () => {
-    const tree = ChildrenPage() as Boundary;
+    const searchParams = Promise.resolve({ annulation: "7" });
+    const tree = ChildrenPage({ searchParams } as never) as Boundary;
     expect(tree.props.fallback.type).toBe(ChildrenListSkeleton);
     expect(tree.props.children.type).toBe(ChildrenList);
+    expect(tree.props.children.props).toMatchObject({ searchParams });
   });
 
   it("WPD04 : fil d'Ariane et formulaire de création", () => {
@@ -276,6 +281,16 @@ describe("états de l'espace parent", () => {
     render(<ParentNotFound />);
     expect(screen.getByRole("heading", { level: 2, name: "Cette page est introuvable" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Retour à l'accueil" })).toHaveAttribute("href", "/parent");
+  });
+});
+
+describe("WPD09 (4.7)", () => {
+  it("suppression du compte d'un enfant sous Suspense, paramètres et demande transmis", () => {
+    const params = Promise.resolve({ id: "7" });
+    const searchParams = Promise.resolve({ demande: "9" });
+    const tree = DeleteChildPage({ params, searchParams } as never) as Boundary;
+    expect(tree.props.fallback.type).toBe(DeleteChildSkeleton);
+    expect(tree.props.children.type).toBe(DeleteChild);
   });
 });
 
