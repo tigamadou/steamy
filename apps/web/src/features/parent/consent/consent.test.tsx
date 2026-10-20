@@ -292,6 +292,12 @@ describe("ConsentRequestScreen", () => {
     expect(notFound).toHaveBeenCalled();
   });
 
+  it("identifiant illisible : « Demande introuvable » sans appel à l'API", async () => {
+    GET.mockClear();
+    await expect(ConsentRequestScreen({ params: Promise.resolve({ id: "abc" }) })).rejects.toThrow("not-found");
+    expect(GET).not.toHaveBeenCalled();
+  });
+
   it("session perdue : ne rend rien (la garde redirige)", async () => {
     GET.mockResolvedValue(respond(401, { error: { code: "NOT_AUTHENTICATED" } }));
     expect(await ConsentRequestScreen({ params })).toBeNull();

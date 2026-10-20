@@ -39,9 +39,10 @@ export function RefuseConsentDialog({
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    setAttempt((n) => n + 1);
     if (!reason) {
       setReasonError("Choisissez un motif.");
+      // Une incrémentation par envoi : le récapitulatif des erreurs reprend le focus
+      setAttempt((n) => n + 1);
       return;
     }
     setPending(true);

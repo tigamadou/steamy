@@ -100,6 +100,8 @@ export function ConsentRequestView({ request }: { request: ConsentRequest }) {
 /** WPD05 · demande adressée au numéro du parent, lue côté serveur ; celle d'un autre numéro est « introuvable ». */
 export async function ConsentRequestScreen({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  // Identifiant illisible : « Demande introuvable », sans appeler l'API
+  if (!/^\d+$/.test(id)) notFound();
   const api = await getServerApi();
   const result = await api.GET("/api/accounts/consent-requests/{id}/", { params: { path: { id } } });
   if (result.response.status === 404) notFound();
