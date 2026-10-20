@@ -15,7 +15,7 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 3 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) fixé le 2026-10-19 : pastilles Points/Rang débloquées
+Statut : ✅ terminé · Prochaine tâche : — (suivis côté API et préproduction ci-dessous) · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) fixé le 2026-10-19 : pastilles Points/Rang débloquées
 
 ### Valeur pédagogique (API-L3a) — ✅ terminé
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
@@ -107,7 +107,7 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 3 · Prére
   - [x] Lignes Livraison, Mon parent et Zone sensible du hub WD13 activées ; drapeaux `deliveryAddress`, `parentInfo` et `accountDeletion` retirés
   - [x] Parcours Playwright : WD19 enregistrer puis recharger, WD22, WD15 envoi puis annulation (apprenant neuf)
 
-### Commerce (API-L3b) — 🟡 en cours
+### Commerce (API-L3b) — ✅ terminé
 - [x] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage` · PR #119
   - [x] `WA01` saisie du Kit Code (`KitCodeInput`), toast « Parcours débloqué » sur `WC06a`
   - [x] `WA06` erreur de Kit Code (`KIT_CODE_INVALID`, `KIT_CODE_ALREADY_USED`, `KIT_CODE_NOT_COMPATIBLE`, `THROTTLED`)
@@ -121,9 +121,9 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 3 · Prére
   - [x] Parcours Playwright P2 (Kit Code)
   - [x] Parcours Playwright P3 (demande de paiement ; paiement du parent par l'API en attendant WPD15)
   > Écarts d'API signalés : `Retry-After` exposé par CORS depuis #124 (compte à rebours de WA06 après
-  > `THROTTLED`) ; `PaymentRequest.status` est typé avec l'énumération des paiements dans le schéma OpenAPI (collision
-  > `PaymentStatusEnum`, à fixer dans `ENUM_NAME_OVERRIDES`), le front rétablit le type ; `Order.deliveryZone` n'est pas
-  > `nullable` dans le schéma alors qu'il vaut `null` pour un parcours. Filtre « Échouées » de WD14 remplacé par
+  > `THROTTLED`) ; `PaymentRequest.status` a désormais son énumération (`PaymentRequestStatusEnum`, contournement du
+  > front retiré en fin de lot) ; `Order.deliveryZone` non `nullable` et `Payment.failureCode` sans énumération dans
+  > le schéma : corrigés côté API en fin de lot (PR API séparée). Filtre « Échouées » de WD14 remplacé par
   > « Annulées » : une commande n'a pas de statut d'échec (D37, statuts `pending`, `paid`, `cancelled`, `refunded`).
 - [x] **3.7a** Boutique : catalogue, détail et panier (requiert API-L3b) · `feature/lot3-boutique-catalogue-panier` · PR #117
   - [x] `WK01` catalogue de la boutique (connecté ; `/boutique` invité = WL07)
@@ -150,13 +150,16 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 3 · Prére
   - [x] Gestion de `OUT_OF_STOCK`, `ORDER_EXPIRED`, `NETWORK_UNAVAILABLE`
   - [x] Parcours Playwright P4
   > Écarts : la commande est créée en quittant WK05 (« Continuer vers le paiement ») pour afficher le total serveur et
-  > l'heure limite sur WK06 ; une nouvelle commande est créée à chaque passage (l'ancienne expire et rend le stock).
+  > l'heure limite sur WK06 ; un nouveau passage sans changement (panier, coordonnées, adresse) reprend la commande
+  > encore en attente, sinon une nouvelle est créée (l'ancienne expire et rend le stock).
   > `city` de l'adresse = nom de la zone (`AddressForm` n'a pas de champ ville). Le jeton du lien SMS (`#jeton=`) est
   > rangé dans le `sessionStorage` de l'onglet puis retiré de l'adresse. « Télécharger le reçu » lit le PDF avec le
-  > jeton (redirection vers une URL présignée : CORS du stockage à vérifier en préproduction). Commande `refunded`
+  > jeton (redirection vers une URL présignée : CORS du stockage à vérifier en staging, procédure dans
+  > [Mise en place §10](../infra/mise-en-place.md#10-vérifier-les-documents-privés-staging)). Commande `refunded`
   > (paiement arrivé après le délai, C17) : état dédié de WK07, panier et tunnel conservés. `apiCall` aplatit
   > désormais les erreurs de champ imbriquées (`guest.phone`).
-  > Reste pour la fin de lot : réutiliser la commande `pending` quand le panier et l'adresse n'ont pas changé.
+  > Fait en fin de lot : la commande `pending` est reprise quand le panier, les coordonnées et l'adresse n'ont pas
+  > changé (empreinte gardée dans l'onglet, aucun prix), vérifié dans P4.
 - [x] **3.7c** Demande de kit au parent (requiert API-L3b) · `feature/lot3-boutique-demande-parent` · PR #120
   - [x] `WK08` demande de kit au parent (`/apprenant/demandes/[id]`, `kind=kit`) : montant des articles seul, livraison ajoutée par le parent (C10), `Loader` inline, annulation ; ni relance, ni « Changer de parent », ni « Renvoyer le lien »
   - [x] Panier `WK03` : « Demander à mon parent » crée la demande (`POST payments/payment-requests/ { kind: "kit", items }`) puis ouvre `WK08` ; échec affiché sous le bouton
@@ -168,15 +171,19 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 3 · Prére
   - [x] Drapeau `events` activé puis retiré (raccourci de WD01, ticket de WJ07)
   - [x] Parcours Playwright P6 (apprenant neuf ; second envoi refusé depuis une seconde page)
 
-- [ ] **Critères de fin du lot 3**
-  - [ ] Les 62 écrans respectent la définition de « terminé » du README
-  - [ ] `AppShell` dans le DS, paramétré uniquement par ses props, prêt pour les navigations parent et enseignant
-  - [ ] Composants promus et testés : `StatPill`, `SectionHeader`, `ProgressBar`, `QuickActionTile`, `SettingsRow`, `Toggle`, `Section`, `InfoCard`, `MissionItem`, `Quiz`, `QuizAttemptRow`, `NotifItem`, `Medal`, `WANetworkCard`, `PaymentForm`, `PaymentStatusPanel`, `ShippingTimeline`, `VimeoPlayer`, `AddressForm`, `KitCodeInput`
-  - [ ] Aucun calcul de règle métier côté front (aucun seuil, délai, barème ni montant codé en dur)
-  - [ ] Parcours Playwright P1 à P7 verts en CI sur la stack Docker avec le jeu D2
-  - [ ] Aucun appel hors du client généré ; `make openapi` à jour
-  - [ ] Drapeaux `unlock` et `events` retirés
-  - [ ] Lots 4 et 5 démarrables : `AppShell`, `PaymentForm`, `PaymentStatusPanel`, `AddressForm`, `Section`, `InfoCard`, `ShippingTimeline` et composants de tunnel boutique réutilisables sans modification
+- [x] **Critères de fin du lot 3** · `feature/lot3-fin-de-lot`
+  - [x] Les 62 écrans respectent la définition de « terminé » du README : 62 lignes du lot 3 dans la matrice, toutes avec leur test e2e (WD13 et WA03 à WA07 complétées en fin de lot)
+  - [x] `AppShell` dans le DS, paramétré uniquement par ses props (aucun import apprenant), déjà réutilisé par l'espace parent (4.1)
+  - [x] Composants promus et testés : `StatPill`, `SectionHeader`, `ProgressBar`, `QuickActionTile`, `SettingsRow`, `Toggle`, `Section`, `InfoCard`, `MissionItem`, `Quiz`, `QuizAttemptRow`, `NotifItem`, `Medal`, `WANetworkCard`, `PaymentForm`, `PaymentStatusPanel`, `ShippingTimeline`, `VimeoPlayer`, `AddressForm`, `KitCodeInput` (chacun dans `components/ds/`, exporté et testé)
+  - [x] Aucun calcul de règle métier côté front : seuils, délais, montants et points lus dans l'API. Restent, assumés : le texte de D40 (« anonymisé 30 jours plus tard », règle arbitrée, aussi dans la politique de confidentialité ; la date réelle vient de `scheduledFor`) et le sous-total du panier invité, somme des prix relus faute de devis anonyme, désormais affiché « estimé » (le total fait foi à WK06)
+  - [x] Parcours Playwright P1 à P7 verts en CI sur la stack Docker avec le jeu D2 (P6 stabilisé : `<title>` attendu avant l'analyse axe)
+  - [x] Aucun appel hors du client généré (seul le lien de téléchargement du certificat est une URL, ouverte par navigation) ; `make openapi` à jour
+  - [x] Drapeaux `unlock` et `events` retirés (`src/lib/features.ts` supprimé)
+  - [x] Lots 4 et 5 démarrables : `AppShell`, `PaymentForm`, `PaymentStatusPanel`, `AddressForm`, `Section`, `InfoCard`, `ShippingTimeline` et composants de tunnel boutique réutilisables sans modification ; `PriceBadge` et `EventThumb` exportés par `components/public/events` pour WPD06
+  - [x] Suivis de relecture regroupés : #116 (prix et vignette publics, ticket sur WL23, toast de candidature à usage unique), #118 (focus après annulation de WD15, état `scheduled`, focus visible de WD22), #117/#119/#121 (sous-total estimé, kits refusés à la fusion signalés et retirés, pas de tunnel invité pour un parent connecté, attente du paiement sans téléphone pour l'apprenant, compte à rebours après `THROTTLED` sur WK05, WK06 et WK11, échec du Kit Code effacé à la saisie, commande `pending` reprise), #120 (commentaires WA02/WK08)
+  > Suivis hors front : une seule demande de kit en attente pour des lignes identiques, `Order.deliveryZone` `nullable`
+  > et `Payment.failureCode` en énumération (PR API séparée) ; CORS du stockage pour le reçu invité à vérifier en
+  > staging ([Mise en place §10](../infra/mise-en-place.md#10-vérifier-les-documents-privés-staging)).
 
 ## 1. Périmètre
 

@@ -110,6 +110,20 @@ describe("KitCodeForm · WA06", () => {
     expect(push).not.toHaveBeenCalled();
   });
 
+  it("nouvelle saisie après un échec : titre et message de l'échec effacés", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValue(reply(400, failure("KIT_CODE_INVALID")));
+    render(<KitCodeForm courseSlug="robot-bluetooth" />);
+    await typeCode(user, "ab12cd34");
+    await user.click(screen.getByRole("button", { name: "Valider le code" }));
+    expect(screen.getByRole("heading", { level: 2, name: "Code Kit invalide" })).toBeInTheDocument();
+    await user.type(screen.getByRole("textbox", { name: /Code Kit/ }), "5");
+    expect(screen.getByRole("heading", { level: 2, name: "Ce parcours se débloque avec ton kit" })).toBeInTheDocument();
+    expect(screen.queryByText(/n'existe pas/)).not.toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: /Code Kit/ })).not.toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("button", { name: "Valider le code" })).toBeEnabled();
+  });
+
   it("THROTTLED avec délai : envoi bloqué le temps annoncé, puis « Réessayer »", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });

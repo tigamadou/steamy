@@ -69,7 +69,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WD10` | Steamy Events | 3 | P6 : événements à venir (prix, complet), candidature « En attente de ton parent », plus de « Participer » ; raccourci de WD01 | `apps/web/e2e/apprenant-evenements.spec.ts` |
 | `WD11` | Demande de participation | 3 | P6 : motivation obligatoire, expérience, accord du parent, envoi → WD10 ; second envoi refusé (`ALREADY_APPLIED`) ; événement complet sans formulaire | `apps/web/e2e/apprenant-evenements.spec.ts` |
 | `WD12` | Aide & support | 3 | Recherche locale dans la FAQ, « Contacter le support » → WL24 | `apps/web/e2e/apprenant-accueil-notifications.spec.ts` |
-| `WD13` | Paramètres (hub) | 3 | Apprenant neuf : identifiant en lecture seule, ni téléphone ni « Bientôt », liens vers WD06, CGU, WD18 et retour par le fil d'Ariane | `apps/web/e2e/profil-parametres.spec.ts` |
+| `WD13` | Paramètres (hub) | 3 | Apprenant neuf : identifiant en lecture seule, ni téléphone ni « Bientôt », liens vers WD06, CGU, WD18 et retour par le fil d'Ariane ; lignes Livraison (WD19), Mon parent (WD22), Zone sensible (WD15) et Mes commandes (WD14, P3) ouvertes depuis le hub | `apps/web/e2e/profil-parametres.spec.ts`, `apps/web/e2e/profil-livraison-parent-suppression.spec.ts`, `apps/web/e2e/deblocage-p3-demande-parent.spec.ts` |
 | `WD14` | Historique de commande | 3 | P3 : demande « En attente de ton parent » depuis le hub WD13, sans facture, puis commande payée sous le filtre « Payées » | `apps/web/e2e/deblocage-p3-demande-parent.spec.ts` |
 | `WD15` | Supprimer le compte | 3 | Règle D40 (J+30, factures conservées), demande envoyée au parent, état conservé au rechargement, annulation | `apps/web/e2e/profil-livraison-parent-suppression.spec.ts` |
 | `WD16` | Déconnexion (modal partagé) | 3 | Shell apprenant : annulation par Échap puis déconnexion, espace refermé | `apps/web/e2e/apprenant-shell.spec.ts` |
@@ -91,11 +91,11 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WW03` | Toast après retrait | 3 | P7 : toast `aria-live`, « Annuler » rétablit le souhait, conservé après rechargement | `apps/web/e2e/souhaits-apprenant.spec.ts` |
 | `WA01` | Saisie du Kit Code | 3 | P2 : WC05 → WA01, code valide saisi en minuscules sans tirets → WC06a avec le toast « Parcours débloqué » → WD23 | `apps/web/e2e/deblocage-p2-kit-code.spec.ts` |
 | `WA02` | Paiement par le parent | 3 | P3 : WC05 → WA02 en attente, relance limitée, bandeau WD23, annulation, nouvelle demande réglée par le parent (API) → « C'est réglé ! » → WC06a, notification | `apps/web/e2e/deblocage-p3-demande-parent.spec.ts` |
-| `WA03` | Formulaire de paiement Mobile Money | 3 |  |  |
-| `WA04` | Paiement en cours | 3 |  |  |
-| `WA05` | Paiement réussi | 3 |  |  |
+| `WA03` | Formulaire de paiement Mobile Money | 3 | `PaymentForm` livré au lot 3, écran du parent au lot 4 (WPD15) : P4, réseau choisi par sa carte, numéro du faux prestataire, « Changer de numéro » | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
+| `WA04` | Paiement en cours | 3 | `PaymentStatusPanel` en attente : P4, « On confirme votre paiement… » jusqu'à la notification du faux prestataire | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
+| `WA05` | Paiement réussi | 3 | `PaymentStatusPanel` réussi : P4, paiement accepté (`…01`) → commande relue → WK07 (le panneau, bref avant la redirection, est vérifié en unitaire) ; P3 et P5 : demande réglée par le parent (API) | `apps/web/e2e/boutique-checkout-p4.spec.ts`, `apps/web/e2e/deblocage-p3-demande-parent.spec.ts` |
 | `WA06` | Kit Code invalide | 3 | P2 : code inconnu (`KIT_CODE_INVALID`), code déjà utilisé par un autre apprenant (`KIT_CODE_ALREADY_USED`) | `apps/web/e2e/deblocage-p2-kit-code.spec.ts` |
-| `WA07` | Paiement échoué | 3 |  |  |
+| `WA07` | Paiement échoué | 3 | `PaymentStatusPanel` échoué : P4, refus (`…02`), « Aucun montant n'a été débité », panier conservé, « Changer de numéro » | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
 | `WJ01` | Détail projet | 3 | Projet → niveaux, accessibilité | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WJ02` | Intro niveau | 3 | Niveau → missions, vidéo factice | `apps/web/e2e/apprenant-parcours.spec.ts` |
 | `WJ03` | Contenu mission | 3 | Mission ouverte, « Marquer comme terminée » → étape suivante de l'API, mission verrouillée → état dédié | `apps/web/e2e/apprenant-parcours.spec.ts` |

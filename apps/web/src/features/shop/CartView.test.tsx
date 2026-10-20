@@ -138,7 +138,9 @@ describe("WK03 · panier de l'invité (localStorage)", () => {
     api.probeShopper.mockResolvedValue("guest");
     api.getKitDetail.mockImplementation(async (slug: string) => ({ ok: true, data: slug === "pack" ? PACK : KIT }));
     render(<CartView context="public" />);
-    expect(await screen.findByText("Sous-total (3 articles)")).toBeInTheDocument();
+    // Sous-total additionné à partir des prix relus : estimé, le total fait foi à WK06
+    expect(await screen.findByText("Sous-total estimé (3 articles)")).toBeInTheDocument();
+    expect(screen.getByText("Total estimé hors livraison")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Commander" })).toHaveAttribute("href", "/boutique/commande/coordonnees");
     expect(screen.getByRole("link", { name: "Steamy Bot v1" })).toHaveAttribute("href", "/boutique/steamy-bot-v1");
 
@@ -147,7 +149,7 @@ describe("WK03 · panier de l'invité (localStorage)", () => {
       { kitSlug: "steamy-bot-v1", quantity: 1 },
       { kitSlug: "pack", quantity: 1 },
     ]);
-    expect(screen.getByText("Sous-total (2 articles)")).toBeInTheDocument();
+    expect(screen.getByText("Sous-total estimé (2 articles)")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Retirer Pack Électronique" }));
     expect(readGuestCart()).toEqual([{ kitSlug: "steamy-bot-v1", quantity: 1 }]);
     expect(api.updateCartItem).not.toHaveBeenCalled();
@@ -163,7 +165,7 @@ describe("WK03 · panier de l'invité (localStorage)", () => {
       slug === "disparu" ? failure("NOT_FOUND") : { ok: true, data: { ...KIT, available: false } },
     );
     render(<CartView context="public" />);
-    expect(await screen.findByText(/n'est plus en vente : il a été retiré/)).toBeInTheDocument();
+    expect(await screen.findByText("Un kit de votre panier n'est plus disponible : il a été retiré.")).toBeInTheDocument();
     expect(readGuestCart()).toEqual([{ kitSlug: "steamy-bot-v1", quantity: 1 }]);
     expect(screen.getByText("Retirez les kits indisponibles pour continuer.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Commander" })).toBeDisabled();
@@ -175,7 +177,7 @@ describe("WK03 · panier de l'invité (localStorage)", () => {
     api.getKitDetail.mockResolvedValue(failure("NOT_FOUND"));
     render(<CartView context="public" />);
     expect(await screen.findByRole("heading", { name: "Votre panier est vide" })).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent("Un kit de votre panier n'est plus en vente");
+    expect(screen.getByRole("status")).toHaveTextContent("Un kit de votre panier n'est plus disponible");
     expect(screen.getByRole("link", { name: "Voir les kits" })).toHaveAttribute("href", "/boutique");
   });
 
@@ -198,7 +200,7 @@ describe("WK03 · panier de l'invité (localStorage)", () => {
     api.probeShopper.mockResolvedValue("guest");
     api.getKitDetail.mockResolvedValue({ ok: true, data: KIT });
     const { container } = render(<CartView context="public" />);
-    await screen.findByText("Sous-total (1 article)");
+    await screen.findByText("Sous-total estimé (1 article)");
     expect(await axe(container)).toHaveNoViolations();
   });
 });
@@ -214,13 +216,26 @@ describe("panier public vu par un compte connecté", () => {
     expect(screen.getByRole("status", { name: "Chargement du panier…" })).toBeInTheDocument();
   });
 
-  it("parent : panier serveur et « Commander »", async () => {
+  it("parent : panier serveur, sans le tunnel invité ; renvoi vers son espace", async () => {
     api.probeShopper.mockResolvedValue("parent");
     api.getCart.mockResolvedValue({ ok: true, data: cart([{ id: 1, kit: KIT, quantity: 1 }]) });
     render(<CartView context="public" />);
-    expect(await screen.findByRole("link", { name: "Commander" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Aller à mon espace parent" })).toHaveAttribute("href", "/parent");
+    expect(screen.queryByRole("link", { name: "Commander" })).not.toBeInTheDocument();
+    expect(screen.getByText("Sous-total (1 article)")).toBeInTheDocument();
     expect(api.mergeGuestCart).not.toHaveBeenCalled();
     expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("kits refusés à la fusion du panier invité : signalés une fois au vouvoiement", async () => {
+    window.sessionStorage.setItem("steamy:panier-ecartes", "2");
+    api.probeShopper.mockResolvedValue("parent");
+    api.getCart.mockResolvedValue({ ok: true, data: cart([{ id: 1, kit: KIT, quantity: 1 }]) });
+    render(<CartView context="public" />);
+    expect(
+      await screen.findByText("2 kits de votre panier ne sont plus disponibles : ils ont été retirés."),
+    ).toBeInTheDocument();
+    expect(window.sessionStorage.getItem("steamy:panier-ecartes")).toBeNull();
   });
 
   it("démonté avant la réponse : rien n'est mis à jour", async () => {

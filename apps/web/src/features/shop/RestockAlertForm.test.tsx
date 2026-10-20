@@ -63,6 +63,7 @@ describe("RestockAlertForm (WK11)", () => {
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(requestRestockAlert).toHaveBeenCalledWith("solaire", undefined);
     expect(await screen.findByRole("alert")).toHaveTextContent("Réessayez dans 30 secondes");
+    expect(screen.getByRole("button", { name: "Réessayer dans 0:30" })).toBeDisabled();
   });
 
   it("démonté avant la lecture de la session : rien n'est mis à jour", async () => {

@@ -20,7 +20,7 @@ const { getEvent, getMyApplications, getMyTickets, getUpcomingEvents } = await i
 const { EventsHome, EventsHomeSkeleton } = await import("./EventsHome");
 const { LearnerEventAction, LearnerEventView, eventBreadcrumb } = await import("./LearnerEventView");
 const { EventApplication, EventApplicationSkeleton } = await import("./EventApplication");
-const { activeApplication, closedReason, freeTicket, isFreeEvent } = await import("./status");
+const { activeApplication, closedReason, freeTicket } = await import("./status");
 
 const respond = (status: number, data?: unknown) => ({ data, response: new Response(null, { status }) });
 const page = <T,>(results: T[], next: string | null = null) => respond(200, { count: results.length, next, results });
@@ -84,16 +84,13 @@ describe("règles d'affichage (status.ts)", () => {
     expect(activeApplication([application()], "autre")).toBeUndefined();
   });
 
-  it("ticket libre, motif d'un événement fermé, gratuité", () => {
+  it("ticket libre, motif d'un événement fermé", () => {
     expect(freeTicket([ticket({ used: true }), ticket({ id: 9 })])?.id).toBe(9);
     expect(freeTicket([ticket({ used: true })])).toBeUndefined();
     expect(closedReason("open")).toBeNull();
     expect(closedReason("full")).toBe("EVENT_FULL");
     expect(closedReason("closed")).toBe("EVENT_CLOSED");
     expect(closedReason("past")).toBe("EVENT_PAST");
-    expect(isFreeEvent({ price: 0 })).toBe(true);
-    expect(isFreeEvent({})).toBe(true);
-    expect(isFreeEvent({ price: 5000 })).toBe(false);
   });
 });
 
@@ -209,6 +206,13 @@ describe("LearnerEventView (WL23 dans le shell)", () => {
   it("payant : le parent règle aussi l'inscription", () => {
     render(<LearnerEventAction event={steamyEvent({ price: 5000, isFree: false })} />);
     expect(screen.getByText(/qui réglera aussi l'inscription/)).toBeInTheDocument();
+  });
+
+  it("payant avec un ticket libre : le parent donne seulement son accord (C12)", async () => {
+    mockApi({ event: steamyEvent({ price: 5000, isFree: false }), tickets: [ticket()] });
+    render((await LearnerEventView({ params: params() })) as ReactElement);
+    expect(screen.getByText("Ta candidature sera envoyée à ton parent pour accord.")).toBeInTheDocument();
+    expect(screen.queryByText(/qui réglera aussi l'inscription/)).not.toBeInTheDocument();
   });
 
   it("fil d'Ariane jusqu'à la candidature", () => {
