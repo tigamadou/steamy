@@ -59,12 +59,14 @@ describe("routes.parent", () => {
   it("construit les URL de l'espace parent (LOT-4, arborescence des routes)", () => {
     const p = routes.parent;
     expect(p.child(7)).toBe("/parent/enfants/7");
+    expect(p.child(7, "cree")).toBe("/parent/enfants/7?confirmation=cree");
     expect(p.editChild(7)).toBe("/parent/enfants/7/modifier");
     expect(p.weeklyReport(7)).toBe("/parent/enfants/7/rapport");
     expect(p.weeklyReport(7, "2026-W42")).toBe("/parent/enfants/7/rapport?semaine=2026-W42");
     expect(p.deleteChild(7)).toBe("/parent/enfants/7/supprimer");
     expect(p.deleteChild(7, 9)).toBe("/parent/enfants/7/supprimer?demande=9");
     expect(p.consent("ab12")).toBe("/parent/consentements/ab12");
+    expect(p.consentAccepted(7)).toBe("/parent?consentement=7");
     expect(p.paymentRequest(12)).toBe("/parent/demandes/12");
     expect(p.event("robot-cup")).toBe("/parent/evenements/robot-cup");
     expect(p.eventSignup("robot-cup")).toBe("/parent/evenements/robot-cup/inscription");

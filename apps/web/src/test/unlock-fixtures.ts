@@ -49,7 +49,7 @@ export function order(overrides: Partial<Schemas["Order"]> = {}): Schemas["Order
       },
     ],
     beneficiary: { id: 3, firstName: "Léa" },
-    deliveryZone: null as unknown as Schemas["Order"]["deliveryZone"],
+    deliveryZone: null,
     expiresAt: "2026-10-13T09:30:00Z",
     paidAt: "2026-10-13T09:05:00Z",
     createdAt: "2026-10-13T09:00:00Z",

@@ -49,7 +49,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WP02` | OTP | 2 | Code SMS, essais épuisés, numéro déjà inscrit (C13) | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP03` | Mot de passe | 2 | Mot de passe du parent | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP04` | Invitation enfant ? | 2 | Demande reçue ? aucune demande, création directe | `apps/web/e2e/inscription-parent.spec.ts` |
-| `WP05` | Demande de l'enfant | 2 | Demande de l'enfant (D20) après le lien SMS, parent nouveau ou déjà inscrit | `apps/web/e2e/decision-parent.spec.ts` |
+| `WP05` | Demande de l'enfant | 2 | Demande de l'enfant (D20) après le lien SMS, parent nouveau ou au profil inachevé (profil complet → `WPD05`) | `apps/web/e2e/decision-parent.spec.ts` |
 | `WP06` | Demande acceptée | 2 | Demande acceptée puis profil | `apps/web/e2e/decision-parent.spec.ts` |
 | `WP07` | Profil 1 · localisation | 2 | Localisation | `apps/web/e2e/inscription-parent.spec.ts` |
 | `WP08` | Profil 2 · à propos | 2 | À propos, tout facultatif | `apps/web/e2e/inscription-parent.spec.ts` |
@@ -108,15 +108,15 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WJ10` | Évaluation sommative (≥ 80 %) | 3 | P1 : sommative ratée puis réussie après le délai | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WJ11` | Projet validé + badge de projet | 3 | P1 : badge de projet, lien vers la certification | `apps/web/e2e/pedagogie-p1-quiz.spec.ts` |
 | `WPD01` | Accueil parent | 4 | Accès refusé à l'apprenant et à l'enseignant ; « À valider » du jeu D2 (suppression, paiement, candidature) avec leurs cibles ; stat « À valider » = longueur de la liste ; état vide sans enfant | `apps/web/e2e/parent-accueil-notifications.spec.ts` |
-| `WPD02` | Mes enfants | 4 |  |  |
-| `WPD03` | Détail enfant | 4 |  |  |
-| `WPD04` | Ajouter un enfant | 4 |  |  |
-| `WPD05` | Demande de consentement | 4 |  |  |
+| `WPD02` | Mes enfants | 4 | Demande de consentement reçue « à examiner » → WPD05, sans « Relancer l'invitation » ; enfant créé listé avec « Voir le profil » | `apps/web/e2e/parent-enfants.spec.ts` |
+| `WPD03` | Détail enfant | 4 | Rappel de l'identifiant après la création ; réinitialisation du mot de passe (ancien refusé, nouveau accepté sur W16) ; enfant d'un autre parent → « introuvable » | `apps/web/e2e/parent-enfants.spec.ts` |
+| `WPD04` | Ajouter un enfant | 4 | Création par le parent → WPD03 ; l'enfant se connecte sur W16 et arrive sur W11 | `apps/web/e2e/parent-enfants.spec.ts` |
+| `WPD05` | Demande de consentement | 4 | Lien SMS → connexion d'un parent déjà inscrit → `WPD05` (D20) ; refus motivé en modale → lecture seule, `W18` côté enfant, `CONSENT_COOLDOWN` à la nouvelle demande ; acceptation → `WPD01` avec confirmation, l'enfant poursuit en `W08`/`W10` ; autre parent → « Demande introuvable » | `apps/web/e2e/parent-consentement.spec.ts`, `apps/web/e2e/parcours-p4-parent-existant.spec.ts` |
 | `WPD06` | Steamy Events | 4 |  |  |
 | `WPD07` | Historique de commande | 4 |  |  |
 | `WPD08` | Paramètres parent | 4 | Changement de numéro par OTP sur le nouveau numéro puis connexion ; email du profil et rapport hebdomadaire coupé par email ; suppression du compte bloquée avec enfants, possible sans enfant | `apps/web/e2e/parent-parametres-aide.spec.ts` |
 | `WPD09` | Supprimer un enfant | 4 |  |  |
-| `WPD10` | Modifier le profil enfant | 4 |  |  |
+| `WPD10` | Modifier le profil enfant | 4 | Identifiant non modifiable ; `BIRTHDATE_AGE_MISMATCH` au champ ; enregistrement → WPD03 avec confirmation ; enfant d'un autre parent → « introuvable » | `apps/web/e2e/parent-enfants.spec.ts` |
 | `WPD11` | Rapport hebdomadaire | 4 |  |  |
 | `WPD12` | Faire participer un enfant | 4 |  |  |
 | `WPD13` | Aide & support | 4 | FAQ du parent, recherche locale, « Contacter le support » → WL24 | `apps/web/e2e/parent-parametres-aide.spec.ts` |
@@ -149,14 +149,14 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WAD03` | Impact Tracker · détail indicateur | 6 | Finance ouvre un indicateur depuis WAD02 (période conservée) : définition serveur, historique ; fil d'Ariane ; code inconnu → 404 | `apps/web/e2e/impact-tracker.spec.ts` |
 | `WAD04` | Impact Tracker · rapport trimestriel | 6 | Finance : WAD02 → trimestre en cours ; relecture après saisie, export CSV téléchargé, soumission confirmée, rapport verrouillé « Soumis » | `apps/web/e2e/impact-rapport.spec.ts` |
 | `WAD05` | Impact Tracker · saisie manuelle | 6 | Finance : brouillon, validation (vides signalés puis saisie complète), lecture seule après soumission ; Support refusé | `apps/web/e2e/impact-rapport.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
-| `WAD06` | Utilisateurs | 6 |  |  |
-| `WAD07` | Détail utilisateur | 6 |  |  |
-| `WAD08` | Modération & consentements | 6 |  |  |
+| `WAD06` | Utilisateurs | 6 | Support : recherche de Léa Adjovi par identifiant, colonnes, « Inviter un enseignant » | `apps/web/e2e/admin-comptes.spec.ts` |
+| `WAD07` | Détail utilisateur | 6 | Support : identifiants en lecture seule, lien vers le parent, enfants du parent | `apps/web/e2e/admin-comptes.spec.ts` |
+| `WAD08` | Modération & consentements | 6 | Support : consentements en suivi, relance proposée, aucune action d'acceptation (D70) | `apps/web/e2e/admin-comptes.spec.ts` |
 | `WAD09` | Contenu / Parcours | 6 | Contenu via WAD15 : liste (accès, kit, inscrits), arbre par pages chaînées (fil d'Ariane, aperçu Vimeo), statut en lecture seule, « Publier » | `apps/web/e2e/admin-contenu.spec.ts` |
 | `WAD10` | Boutique & commandes | 6 | Support : commandes de kits (articles, livraison par action), Kit Codes sur la fiche, stock des kits à 3 seuils | `apps/web/e2e/admin-commerce.spec.ts` |
 | `WAD11` | Paiements Mobile Money | 6 | Finance : agrégats de la liste, numéro masqué, notification du prestataire visible | `apps/web/e2e/admin-commerce.spec.ts` |
 | `WAD12` | Steamy Events (modération) | 6 | Super-admin : événements (places, accès, fin des candidatures), candidatures (âge, paiement) sans action de confirmation | `apps/web/e2e/admin-evenements-reglages.spec.ts` |
-| `WAD13` | Équipe & rôles (RBAC) | 6 |  |  |
+| `WAD13` | Équipe & rôles (RBAC) | 6 | Super-admin : membres, groupes, action « Réinitialiser le TOTP » | `apps/web/e2e/admin-comptes.spec.ts` |
 | `WAD14` | Paramètres généraux | 6 | Super-admin : la liste ouvre l'unique fiche de réglages ; réseaux par pays (Celtiis) ; annonce diffusable | `apps/web/e2e/admin-evenements-reglages.spec.ts` |
 | `WAD15` | Connexion admin (2FA) | 6 | Connexion du personnel par TOTP, code faux refusé, index de l'admin ; anonyme et parent renvoyés depuis `/backoffice` avec retour à la page demandée | `apps/web/e2e/admin-connexion.spec.ts`, `apps/web/e2e/backoffice.spec.ts` |
 | `WX01` | Hors ligne | 1 | Hors ligne → page recouverte, « Réessayer » sans réseau, retour du réseau → rétablie | `apps/web/e2e/socle-public.spec.ts` |

@@ -9,7 +9,9 @@ const redirect = vi.fn((url: string) => {
 });
 vi.mock("next/navigation", () => ({ redirect }));
 
-const PARENT = { role: "parent", profileStep: null, firstName: "Koffi" };
+// Parent en cours d'inscription (WP01-WP03) : le profil (WP07-WP09) reste à faire
+const PARENT = { role: "parent", profileStep: "parent-location", firstName: "Koffi" };
+let me: object = PARENT;
 const REQUEST = {
   id: 7,
   status: "pending",
@@ -26,7 +28,7 @@ vi.mock("./RequestGate", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./RequestGate")>()),
   RequestGate: ({ children, ...props }: { params: unknown; children: (r: object, me: object) => ReactNode }) => {
     gate(props);
-    return children(request, PARENT);
+    return children(request, me);
   },
 }));
 vi.mock("./AcceptForm", () => ({ AcceptForm: ({ id }: { id: number }) => <p>Actions de la demande {id}</p> }));
@@ -38,7 +40,15 @@ const props = { params: Promise.resolve({ id: "7" }), searchParams: Promise.reso
 describe("ConsentRequestPage (WP05)", () => {
   beforeEach(() => {
     request = REQUEST;
+    me = PARENT;
     redirect.mockClear();
+  });
+
+  it("envoie un parent déjà inscrit (profil complet) vers WPD05, quel que soit l'état de la demande", () => {
+    me = { ...PARENT, profileStep: null };
+    expect(() => render(<ConsentRequestPage {...props} />)).toThrow("redirect:/parent/consentements/7");
+    request = { ...REQUEST, status: "refused" };
+    expect(() => render(<ConsentRequestPage {...props} />)).toThrow("redirect:/parent/consentements/7");
   });
 
   it("présente la demande en attente avec le lien vu par le parent", async () => {
