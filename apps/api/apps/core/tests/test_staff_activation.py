@@ -289,3 +289,13 @@ def test_the_access_log_masks_activation_tokens():
     for name in ("uvicorn.access", "gunicorn.access"):
         filters = logging.getLogger(name).filters
         assert sum(isinstance(f, MaskSecretsFilter) for f in filters) == 1
+
+
+def test_gunicorn_installs_the_filter_in_each_worker():
+    from project import gunicorn
+
+    logging.getLogger("uvicorn.access").filters.clear()
+    gunicorn.post_worker_init(worker=None)
+    assert any(
+        isinstance(f, MaskSecretsFilter) for f in logging.getLogger("uvicorn.access").filters
+    )
