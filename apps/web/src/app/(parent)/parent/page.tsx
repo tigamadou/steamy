@@ -1,6 +1,15 @@
-import { SpaceWaiting } from "@/components/auth/SpaceWaiting";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 
-// Page d'attente de l'espace, remplacée par son accueil dans le lot qui le livre.
-export default function ParentHome() {
-  return <SpaceWaiting role="parent" />;
+import { ParentHome, ParentHomeSkeleton } from "@/features/parent/home/ParentHome";
+
+export const metadata: Metadata = { title: "Accueil" };
+
+/** WPD01 · accueil du parent et « À valider ». */
+export default function ParentHomePage() {
+  return (
+    <Suspense fallback={<ParentHomeSkeleton />}>
+      <ParentHome />
+    </Suspense>
+  );
 }

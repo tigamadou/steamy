@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 import { DEMO } from "./support/demo";
-import { loginAs } from "./support/session";
+import { loginAs, logoutFromShell } from "./support/session";
 
 // Socle du lot 2 (étape 2.0) : garde optimiste (`proxy.ts`), garde de rôle des layouts et cookies de session
 // partagés entre le web et l'API, validés par un vrai `POST auth/login/`.
@@ -38,7 +38,7 @@ test("une session invalide est traitée comme expirée", async ({ page, context,
 test("la déconnexion ferme la session et l'espace redevient inaccessible", async ({ page }) => {
   await loginAs(page, "parent");
   await page.goto("/parent");
-  await page.getByRole("button", { name: "Se déconnecter" }).click();
+  await logoutFromShell(page);
   await expect(page).toHaveURL("/connexion");
   await page.goto("/parent");
   await expect(page).toHaveURL(/\/connexion\?next=%2Fparent$/);
