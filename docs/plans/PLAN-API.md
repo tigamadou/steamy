@@ -478,7 +478,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > Décisions : `POST …/payments/` `{country, network, msisdn}` : parent payeur (apprenant → `PARENT_APPROVAL_REQUIRED`,
   > autre parent → 404) ou invité avec `X-Guest-Token` (CSRF) ; throttle `payments` (20/h) ; réseau = `PaymentNetwork`
   > activé et actif du pays (sinon `NETWORK_UNAVAILABLE` sur `network`), numéro du même pays (sinon `PHONE_INVALID`
-  > sur `msisdn`) ; commande payée → 409 `ORDER_ALREADY_PAID`, annulée ou échue → 410 `ORDER_EXPIRED`. Réponse 201
+  > sur `msisdn`) ; commande payée → 409 `ORDER_ALREADY_PAID`, paiement déjà en cours → 409 `PAYMENT_IN_PROGRESS`, annulée ou échue → 410 `ORDER_EXPIRED`. Réponse 201
   > avec le paiement `pending`, ou `failed` si le prestataire refuse (`failureCode` `PROVIDER_REFUSED` /
   > `PROVIDER_UNAVAILABLE`) ; plusieurs essais possibles. `GET payments/payments/{id}/` : payeur ou invité (jeton),
   > jamais le bénéficiaire (C12) ; numéro masqué (`msisdnMasked`). La commande est verrouillée pendant l'initiation
@@ -516,6 +516,13 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `Cart`/`CartItem`, `DeliveryAddress`, `RestockAlert` (`StockReservation` et `DeliveryZone` : L3b.1)
   - [x] `shop/cart/*`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`
   - [x] Tests : panier par utilisateur, alerte de réassort unique
+  - [x] Un paiement à la fois par commande (WK09 « Réessayer ») : `PAYMENT_IN_PROGRESS` · `feature/api-l3b-paiement-en-cours` · PR #130
+  > Paiement en cours : sous le verrou de la commande, `check_payable` est relu (un webhook qui vient de payer ne
+  > laisse pas passer un débit), puis un paiement `initiated`/`pending` de moins de `PAYMENT_IN_PROGRESS_TTL`
+  > (5 min) répond 409 `PAYMENT_IN_PROGRESS`. Au-delà, il est tenu pour abandonné (demande USSD ignorée) et le
+  > payeur peut réessayer, sans attendre l'expiration de la commande (30 min) ; si l'ancien paiement aboutit quand
+  > même, le second débit est remboursé à l'exécution (paiement en double, C17). Tests : deux envois concurrents
+  > (un 201, un 409, un paiement), paiement abandonné, commande payée entre la vérification et le verrou.
   > Décisions : panier et adresse pour le parent **et** l'apprenant (l'apprenant prépare la demande de kit qu'il
   > enverra à son parent, L3b.5) ; enseignant → 403. `GET shop/cart/` → `{items[{id, kit, quantity, total}],
   > count, subtotal}` (prix courants ; le total définitif est celui de la commande) ; `POST shop/cart/items/`
@@ -677,32 +684,87 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `Notification.url` pointe vers les routes front des plans
   - [x] Seed enrichi, `make openapi` committé
 
-### API-L5 · Enseignant et classes — ⬜ à faire
-- [ ] **API-L5.1** Classes · `feature/api-l5-1-classes`
-  - [ ] `Classroom`, `ClassroomMembership` ; quotas `School` (`CLASSROOM_QUOTA_EXCEEDED`, `LEARNER_QUOTA_EXCEEDED`, D61)
-  - [ ] `GET classrooms/school/`, `GET/POST classrooms/` (`COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`), `GET/PATCH classrooms/{id}/`
-  - [ ] `…/members/`, `POST …/members/{memberId}/remove/`, `GET classrooms/courses/`, `…/{slug}/`
-  - [ ] Tests : enseignant A ne voit ni la classe ni les élèves de B, quota dépassé
-- [ ] **API-L5.2** Invitations · `feature/api-l5-2-invitations`
-  - [ ] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
-  - [ ] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; `Enrollment` `source=classroom` (D62)
-  - [ ] `POST …/invitations/import/` (C19 : CSV/Excel, 200 lignes, 1 Mo, import partiel, codes d'erreur par ligne)
-  - [ ] SMS par Celery, plafond par enseignant et par jour
-  - [ ] Tests : invitation non acceptée → aucun accès au parcours
-- [ ] **API-L5.3** Suivi · `feature/api-l5-3-suivi`
-  - [ ] `GET classrooms/dashboard/`
-  - [ ] `GET classrooms/learners/{id}/?classroomId=` (serializer sans handicap, localité, date de naissance, téléphone, D64)
-  - [ ] `GET classrooms/reviews/` (D65), `POST classrooms/learners/{id}/comments/` (D63), `GET classrooms/comments/`
-  - [ ] `GET classrooms/courses/{slug}/missions/{id}/` (lecture seule)
-  - [ ] Tests : aucun champ sensible dans les réponses enseignant (clés JSON)
-- [ ] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage`
-  - [ ] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
-- [ ] **API-L5.5** Événements de classe · `feature/api-l5-5-evenements-classe`
-  - [ ] `EventProposal` ; `POST events/{slug}/proposals/` (`EVENT_ALREADY_PROPOSED`)
-  - [ ] `GET classrooms/event-applications/` (lecture seule)
-- [ ] **Critères de fin d'API-L5**
-  - [ ] Un enseignant ne peut pas créer de contenu (S5)
-  - [ ] Seed enrichi, `make openapi` committé
+### API-L5 · Enseignant et classes — 🟡 en cours
+> Reprise : tout est livré, en PR empilées à fusionner dans l'ordre #74 → #81 → #84 → #86 → #88 (development,
+> API-L3b et API-L4 compris, fusionné dans toute la pile). Après chaque fusion, refusionner `development` dans la PR
+> suivante et régénérer `make openapi`.
+- [x] **API-L5.1** Classes · `feature/api-l5-1-classes` · PR #74
+  - [x] `Classroom`, `ClassroomMembership` ; offre de `School` (`offer`, `courses`) ; quotas (`CLASSROOM_QUOTA_EXCEEDED`, D61 ; `LEARNER_QUOTA_EXCEEDED` appliqué aux invitations en API-L5.2)
+  - [x] `GET classrooms/school/`, `GET/POST classrooms/` (`COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`), `GET/PATCH classrooms/{id}/`
+  - [x] `…/members/`, `POST …/members/{memberId}/remove/`, `GET classrooms/courses/`, `…/{slug}/`
+  - [x] Tests : enseignant A ne voit ni la classe ni les élèves de B, quota dépassé
+  - [x] Seed D2 : offre de l'école de Koffi (3 parcours) et ses deux classes
+  - [x] Offre échue bloquée (C21) : `SCHOOL_OFFER_EXPIRED` à la création d'une classe
+  > Décisions : la demande de consentement est reliée à la classe par `ClassroomMembership.consent_request`
+  > (pas de champ `classroom` sur `ConsentRequest`) ; une invitation est un membre `invited` sans compte
+  > apprenant. Quota d'élèves : élèves actifs distincts de l'école + invitations en attente non échues (C19).
+  > Parcours figé dès que la classe a eu un membre (`VALIDATION_ERROR` sur `courseSlug`). Retirer une invitation
+  > en attente annule la demande au parent. Progression, dernière activité et compteurs de missions terminées
+  > (WT04, WT10) arrivent avec API-L5.3, après API-L3a. Énumérations `ConsentStatusEnum` et
+  > `MembershipStatusEnum` nommées dans `ENUM_NAME_OVERRIDES`. Sérialiseur de parcours nommé `ClassroomCourse`
+  > (`CourseSummary` est pris par `payments`).
+  > Offre échue (C21, 2026-10-16) : école bloquée, `SCHOOL_OFFER_EXPIRED` (403) à la création d'une classe ;
+  > `classrooms/school/` expose `offerExpired`.
+- [x] **API-L5.2** Invitations · `feature/api-l5-2-invitations` · PR #81
+  - [x] `POST classrooms/{id}/invitations/` → `ConsentRequest` origine `teacher` (D60)
+  - [x] Acceptation par le parent (`{ username, password }`) ou rattachement d'un enfant existant (`{ learnerId }`, C11) ; l'élève devient membre actif, l'enseignant est notifié
+  - [x] `Enrollment` `source=classroom` à l'adhésion (D62), sans paiement ; une inscription antérieure au même parcours est gardée
+  - [x] `POST …/invitations/import/` (C19 : CSV/Excel, 200 lignes, 1 Mo, import partiel, codes d'erreur par ligne)
+  - [x] SMS par Celery, plafond par enseignant et par jour
+  - [x] Refus et expiration : place libérée, enseignant notifié (WT04, WT12)
+  - [x] Seed D2 : élèves actifs (Léa, Yao, Sèna) et invitations en attente, refusée et expirée
+  - [x] Tests : invitation non acceptée → aucun accès au parcours
+  > Décisions : import en fichier (`multipart`, champ `file`) **ou** en lignes JSON (`rows`, liste collée et lignes
+  > corrigées, `line` facultatif pour garder le numéro d'origine) ; réponse `{created[], errors[{line, code, message,
+  > data}]}`. Codes par ligne en plus de C19 : `CONSENT_COOLDOWN` (refus de ce parent depuis moins de 30 jours, C9)
+  > et `INVITATION_DAILY_LIMIT` (`CLASSROOM_INVITATIONS_PER_DAY`, 300 par défaut) ; fichier illisible :
+  > `IMPORT_INVALID_FILE`. Doublon dans la classe : même prénom et nom pour le même numéro de parent, invitation en
+  > attente ou élève actif (`ALREADY_IN_CLASSROOM`). Le compte créé par le parent est actif ; l'enfant complète son
+  > profil à la première connexion (comme D51). `GET accounts/consent-requests/{id}/` expose `classroom` (classe,
+  > enseignant, école, parcours) pour WPD05. Pas de plafond OTP par IP pour ces SMS : le plafond par enseignant le
+  > remplace. Pas de champ `classroom` sur `Enrollment` (pas de migration `learning`) : la classe se retrouve par
+  > `ClassroomMembership` ; l'inscription reste après un retrait de la classe (progression conservée).
+  > Relecture (#81) : CSV illisible (octet NUL, champ démesuré) → `IMPORT_INVALID_FILE` ; Excel lu en flux et borné
+  > (8 colonnes, arrêt à 202 lignes non vides ou 5 000 lignes parcourues → `IMPORT_TOO_LARGE`), XML lu par
+  > `defusedxml` ; `rows` limité à 200 ; noms comparés sans accents ; plafond par numéro de parent
+  > (`CLASSROOM_INVITATIONS_PER_PHONE_PER_DAY`, 5, code `INVITATION_DAILY_LIMIT`) ; `join_classroom` : invitation
+  > retirée, classe archivée ou membre déjà actif → `CONSENT_REQUEST_EXPIRED`, identifiant pris en concurrence →
+  > `USERNAME_TAKEN`. Offre échue (C21) : invitation, import et acceptation par le parent → `SCHOOL_OFFER_EXPIRED`.
+- [x] **API-L5.3** Suivi · `feature/api-l5-3-suivi` · PR #86
+  - [x] `GET classrooms/dashboard/`
+  - [x] `GET classrooms/learners/{id}/?classroomId=` (serializer sans handicap, localité, date de naissance, téléphone, D64)
+  - [x] `GET classrooms/reviews/` (D65), `POST classrooms/learners/{id}/comments/` (D63), `GET classrooms/comments/`
+  - [x] `GET classrooms/courses/{slug}/missions/{id}/` (lecture seule)
+  - [x] Compléments WT04 et WT10 : progression, dernière activité et décrochage des membres ; progression moyenne des classes ; missions terminées et taux de réussite du parcours encadré
+  - [x] Tests : aucun champ sensible dans les réponses enseignant (clés JSON)
+  - [x] Seed D2 : tentatives à revoir (Yao, Léa), commentaire à Léa, Sèna en décrochage
+  > Décisions : `TeacherComment` (1 000 caractères, journalisé `classroom.comment`) ; notifiés : l'élève (catégorie
+  > Encadrement, `/apprenant`) et son parent (Progression, `/parent/enfants/<id>`). « À revoir » =
+  > `reviews/?status=to_review` (tentatives `ko` sans commentaire) ; `status` accepte aussi `ok|warn|ko`, `type`
+  > `formative|summative`. Paramètres d'URL en camelCase (`classroomId`, `learnerId`). Sans `classroomId`, la
+  > classe la plus récemment rejointe. Décrochage calculé à la lecture (`follow_up.dropouts`, seuil
+  > `PlatformSettings`, date d'adhésion avant toute activité, parcours terminé exclu). WT10 : `completedCount` par
+  > mission, `passRate` par niveau et projet (« missions les plus échouées » : niveaux au plus faible taux),
+  > `formativePassRate`, `summativePassRate`. WT05 : badges obtenus sur le parcours de la classe (API-L3a.3).
+- [x] **API-L5.4** Décrochage · `feature/api-l5-4-decrochage` · PR #88
+  - [x] Tâche `detect_dropouts` quotidienne (seuil `PlatformSettings`, D66) et commande `manage.py detect_dropouts`
+  > Décisions : tous les jours à 7 h (heure du Bénin) ; une notification à l'enseignant par élève et par période
+  > d'inactivité (`ClassroomMembership.dropout_notified_at`), lien vers WT05 (`/enseignant/eleves/<id>?classe=<id>`).
+  > Même règle que l'affichage (`follow_up.dropouts`, API-L5.3). Sur le seed, la tâche signale Sèna.
+- [x] **API-L5.5** Événements de classe · `feature/api-l5-5-evenements-classe` · PR #84
+  - [x] `EventProposal` ; `POST events/{slug}/proposals/` (`EVENT_ALREADY_PROPOSED`)
+  - [x] Seed D2 : « Défi robots » déjà proposé à la classe « 4e B »
+  - [x] `GET classrooms/event-applications/` (lecture seule, `?classroomId=&event=`)
+  > Décisions : `{ classroomId }` d'une classe active de l'enseignant (sinon 404, `fields.classroomId`) ; événement
+  > publié, candidatures ouvertes (sinon `EVENT_CLOSED`) ; réponse `{ id, event, classroomId, createdAt,
+  > notifiedCount }`. Notifiés : élèves actifs (tutoiement, `/apprenant/evenements/<slug>`) et leurs parents
+  > (`/parent/evenements`), catégorie Steamy Events. `event-applications` : candidatures des élèves actifs des classes
+  > actives de l'enseignant (statut, événement, élève, classe), sans motivation ni paiement. Migration
+  > `events/0005_propositions` (après `0004_application_refuse_permission`).
+- [x] **Critères de fin d'API-L5**
+  - [x] Un enseignant ne peut pas créer de contenu (S5)
+  - [x] Seed enrichi, `make openapi` committé
+  - [x] `GET classrooms/event-applications/` livré
 
 ### API-L6 · Back-office — 🟡 en cours
 - [x] **API-L6.1** 2FA (D72) · réalisée par LOT-6-ADMIN 6.1 (`feature/lot6-socle-staff`, PR #38)

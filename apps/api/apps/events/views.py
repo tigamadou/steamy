@@ -3,6 +3,7 @@ Steamy Events en lecture (§7.6) : anonymes, publiés seulement, indépendants d
 Candidatures et tickets (API-L3b.6) : connectés, apprenant ou parent, jamais de candidature d'autrui.
 """
 
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
@@ -13,11 +14,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.models import ParentChildLink
+from apps.classrooms.services import teacher_classrooms
 from libs.errors import ApiError
-from libs.permissions import IsLearner, IsParent
+from libs.permissions import IsLearner, IsParent, IsTeacher
 
 from .applications import accept, apply, children_of, refuse
 from .models import EventApplication, EventTicket, SteamyEvent
+from .proposals import propose
 from .serializers import (
     ApplicationCreateSerializer,
     ApplicationSerializer,
@@ -181,3 +184,44 @@ class ApplicationRefuseView(APIView):
         body.is_valid(raise_exception=True)
         application = refuse(request.user, pk, body.validated_data["reason"])
         return Response(ApplicationSerializer(application).data)
+
+
+class ProposalRequestSerializer(serializers.Serializer):
+    classroom_id = serializers.IntegerField(help_text="Une classe de l'enseignant connecté")
+
+
+class ProposalSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    event = serializers.SlugField(source="event.slug")
+    classroom_id = serializers.IntegerField()
+    created_at = serializers.DateTimeField()
+    notified_count = serializers.IntegerField(help_text="Élèves actifs et parents notifiés")
+
+
+class EventProposalView(generics.GenericAPIView):
+    """
+    WT09 « Proposer à une classe » : notifie les élèves actifs et leurs parents (notification seulement, S8).
+    `EVENT_ALREADY_PROPOSED` si la classe l'a déjà reçu, `EVENT_CLOSED` après la fin des candidatures.
+    """
+
+    permission_classes = [IsTeacher]
+    filter_backends = []
+    serializer_class = ProposalSerializer
+
+    @extend_schema(request=ProposalRequestSerializer, responses={201: ProposalSerializer})
+    def post(self, request, slug):
+        payload = ProposalRequestSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        event = get_object_or_404(
+            SteamyEvent.objects.filter(status=SteamyEvent.Status.PUBLISHED), slug=slug
+        )
+        classroom = (
+            teacher_classrooms(request.user)
+            .filter(pk=payload.validated_data["classroom_id"])
+            .first()
+        )
+        if classroom is None:
+            raise ApiError("NOT_FOUND", fields={"classroomId": "NOT_FOUND"})
+        proposal, notified = propose(event, classroom, request.user)
+        proposal.notified_count = notified
+        return Response(ProposalSerializer(proposal).data, status=status.HTTP_201_CREATED)

@@ -13,7 +13,16 @@ vi.mock("@/features/learning/MyCourses", () => ({
   ),
   MyCoursesSkeleton: () => <p>squelette</p>,
 }));
-vi.mock("@/features/learning/CourseTree", () => ({ CourseTree: () => null, CourseTreeSkeleton: () => null }));
+vi.mock("@/features/learning/CourseTree", () => ({
+  CourseTree: ({ slug, expandedProjectId }: { slug: string; expandedProjectId: number | null }) => (
+    <p data-testid="arbre">
+      {slug} {String(expandedProjectId)}
+    </p>
+  ),
+  CourseTreeSkeleton: () => null,
+}));
+vi.mock("@/features/unlock/PendingRequestsBanner", () => ({ PendingRequestsBanner: () => <p>bandeau des demandes</p> }));
+vi.mock("@/features/unlock/UnlockedToast", () => ({ UnlockedToast: () => <p>Parcours débloqué</p> }));
 vi.mock("@/features/learning/ProjectView", () => ({ ProjectView: () => null }));
 vi.mock("@/features/learning/LevelView", () => ({ LevelView: () => null }));
 vi.mock("@/features/learning/MissionView", () => ({ MissionView: () => null }));
@@ -33,6 +42,7 @@ describe("WD23 /apprenant/parcours", () => {
     expect(screen.getByRole("link", { name: "En cours (2)" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: "Terminés (1)" })).toHaveAttribute("href", "/apprenant/parcours?onglet=termines");
     expect(document.querySelector("[data-tab]")).toHaveAttribute("data-tab", "active");
+    expect(screen.getByText("bandeau des demandes")).toBeInTheDocument();
   });
 
   it("onglet « Terminés » adressable par l'URL", async () => {
@@ -48,11 +58,19 @@ describe("WD23 /apprenant/parcours", () => {
 });
 
 describe("pages de contenu", () => {
-  it("WC06 lit le projet déplié dans `?projet=`", async () => {
-    let tree = (await CourseTreePage({ params: Promise.resolve({ slug: "robot" }), searchParams: Promise.resolve({ projet: "2" }) } as never)) as Boundary;
-    expect(tree.props.children.props).toEqual({ slug: "robot", expandedProjectId: 2 });
-    tree = (await CourseTreePage({ params: Promise.resolve({ slug: "robot" }), searchParams: Promise.resolve({}) } as never)) as Boundary;
-    expect(tree.props.children.props.expandedProjectId).toBeNull();
+  it("WC06 lit le projet déplié dans `?projet=`, et le toast « Parcours débloqué » dans `?debloque=1`", async () => {
+    const { unmount } = render(
+      await CourseTreePage({
+        params: Promise.resolve({ slug: "robot" }),
+        searchParams: Promise.resolve({ projet: "2", debloque: "1" }),
+      } as never),
+    );
+    expect(screen.getByTestId("arbre")).toHaveTextContent("robot 2");
+    expect(screen.getByText("Parcours débloqué")).toBeInTheDocument();
+    unmount();
+    render(await CourseTreePage({ params: Promise.resolve({ slug: "robot" }), searchParams: Promise.resolve({}) } as never));
+    expect(screen.getByTestId("arbre")).toHaveTextContent("robot null");
+    expect(screen.queryByText("Parcours débloqué")).not.toBeInTheDocument();
   });
 
   it.each([

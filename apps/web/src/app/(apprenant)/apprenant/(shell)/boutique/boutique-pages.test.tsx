@@ -9,6 +9,7 @@ vi.mock("@/lib/shop", () => ({ getKit }));
 vi.mock("@/components/public/shop-sections", () => ({ ShopCatalog: () => null, ShopCatalogSkeleton: () => null }));
 vi.mock("@/features/shop/KitDetailView", () => ({ KitDetailView: () => null, KitDetailSkeleton: () => null }));
 vi.mock("@/features/shop/CartView", () => ({ CartView: () => null }));
+vi.mock("@/features/unlock/LearnerCart", () => ({ LearnerCart: () => null }));
 vi.mock("@/features/shop/DeliveryZonesSlot", () => ({ DeliveryZonesSlot: () => null }));
 
 const shopPage = await import("./page");
@@ -17,7 +18,7 @@ const { default: KitNotFound } = await import("./[slug]/not-found");
 const cartPage = await import("./panier/page");
 const { ShopCatalog, ShopCatalogSkeleton } = await import("@/components/public/shop-sections");
 const { KitDetailSkeleton, KitDetailView } = await import("@/features/shop/KitDetailView");
-const { CartView } = await import("@/features/shop/CartView");
+const { LearnerCart } = await import("@/features/unlock/LearnerCart");
 const { DeliveryZonesSlot } = await import("@/features/shop/DeliveryZonesSlot");
 
 type Suspended = ReactElement<{
@@ -59,14 +60,12 @@ describe("boutique de l'apprenant", () => {
     expect(screen.getByRole("link", { name: "Retour à la boutique" })).toHaveAttribute("href", "/apprenant/boutique");
   });
 
-  it("WK03 : panier serveur, délais par zone au tutoiement", () => {
+  it("WK03 : panier serveur avec la demande au parent (WK08), délais par zone au tutoiement", () => {
     const view = cartPage.default() as ReactElement<{
-      context: string;
       zones: ReactElement<{ children: ReactElement<{ register: string }> }>;
     }>;
     expect(cartPage.metadata).toEqual({ title: "Mon panier" });
-    expect(view.type).toBe(CartView);
-    expect(view.props.context).toBe("learner");
+    expect(view.type).toBe(LearnerCart);
     expect(view.props.zones.props.children.type).toBe(DeliveryZonesSlot);
     expect(view.props.zones.props.children.props.register).toBe("tu");
   });

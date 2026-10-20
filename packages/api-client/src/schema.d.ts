@@ -145,7 +145,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description WP05 « Accepter » → WP06 : l'enfant est rattaché au parent et peut choisir son mot de passe (W10). */
+        /**
+         * @description WP05 « Accepter » → WP06 : l'enfant est rattaché au parent et peut choisir son mot de passe (W10). Invitation
+         *     d'un enseignant (WPD05) : le parent crée l'identifiant de l'enfant ou rattache un enfant existant, puis
+         *     l'élève rejoint la classe (D60, C11).
+         */
         post: operations["accounts_consent_requests_accept_create"];
         delete?: never;
         options?: never;
@@ -987,6 +991,294 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/classrooms/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Classes de l'enseignant connecté (WT03, WT04, WT13). */
+        get: operations["classrooms_list"];
+        put?: never;
+        /** @description WT13 : `CLASSROOM_QUOTA_EXCEEDED`, `COURSE_NOT_IN_OFFER`, `CLASSROOM_NAME_TAKEN`. */
+        post: operations["classrooms_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Classes de l'enseignant connecté (WT03, WT04, WT13). */
+        get: operations["classrooms_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description WT13 en édition : le parcours est figé dès que la classe a eu un membre. */
+        patch: operations["classrooms_partial_update"];
+        trace?: never;
+    };
+    "/api/classrooms/{id}/invitations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description WT06 onglet Individuel : demande de consentement d'origine enseignant, SMS au parent (D60).
+         *     `LEARNER_QUOTA_EXCEEDED` (invitations en attente comprises, C19), `ALREADY_IN_CLASSROOM`, `CONSENT_COOLDOWN`,
+         *     `INVITATION_DAILY_LIMIT`.
+         */
+        post: operations["classrooms_invitations_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/{id}/invitations/import/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description WT06 onglet Import par lot (C19) : import partiel. Les lignes valides partent dans la limite du quota ; les
+         *     autres reviennent avec leur numéro et leur code (`DUPLICATE_ROW`, `MALFORMED_ROW`, `PHONE_INVALID`,
+         *     `ALREADY_IN_CLASSROOM`, `LEARNER_QUOTA_EXCEEDED`…). Plus de 200 lignes : `IMPORT_TOO_LARGE`.
+         */
+        post: operations["classrooms_invitations_import_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/{id}/members/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WT04 : élèves actifs et invitations (en attente, refusées, expirées) ; les retirés n'y sont plus. */
+        get: operations["classrooms_members_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/{id}/members/{member_id}/remove/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WT04 « Retirer de la classe » : statut `left`, place libérée ; une invitation en attente est annulée. */
+        post: operations["classrooms_members_remove_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/comments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Commentaires des enseignants : l'apprenant voit les siens (WD01), le parent ceux de ses enfants (WPD03). */
+        get: operations["classrooms_comments_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/courses/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WT02 : parcours encadrés, avec le nombre de classes et d'élèves actifs. */
+        get: operations["classrooms_courses_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/courses/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WT10 : un parcours encadré, ses classes et son arbre ; un parcours non encadré → 404. */
+        get: operations["classrooms_courses_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/courses/{slug}/missions/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Mission d'un parcours encadré, en lecture seule (WT10) ; mission d'un autre parcours → 404. */
+        get: operations["classrooms_courses_missions_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/dashboard/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WT01 : compteurs, classes, « À revoir » (D65) et « Décrochage » (D66). */
+        get: operations["classrooms_dashboard_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/event-applications/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description WT09 « Candidatures de mes élèves » : candidatures des élèves actifs des classes de l'enseignant, en lecture
+         *     seule (chaque élève candidate seul, son parent décide, S8, C3). Filtres `classroomId`, `event`. Paginé.
+         */
+        get: operations["classrooms_event_applications_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/learners/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description WT05 : un élève d'une classe de l'enseignant, sur le parcours de cette classe (`classroomId` si l'élève est dans
+         *     plusieurs classes). Ni âge, ni handicap, ni localité, ni téléphone (D64). Élève d'un autre enseignant → 404.
+         */
+        get: operations["classrooms_learners_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/learners/{id}/comments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description WT05 « Envoyer le commentaire » : notifié, visible de l'élève et de son parent, sans réponse (D63, S11). */
+        post: operations["classrooms_learners_comments_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/reviews/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WT07 : tentatives des élèves, filtrables ; `status=to_review` = « À revoir » (D65). Paginé. */
+        get: operations["classrooms_reviews_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/classrooms/school/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WT03, WT06, WT13 : école, offre, parcours de l'offre et quotas restants. */
+        get: operations["classrooms_school_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/core/presign/": {
         parameters: {
             query?: never;
@@ -1057,6 +1349,26 @@ export interface paths {
          *     `ALREADY_APPLIED`.
          */
         post: operations["events_applications_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events/{slug}/proposals/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description WT09 « Proposer à une classe » : notifie les élèves actifs et leurs parents (notification seulement, S8).
+         *     `EVENT_ALREADY_PROPOSED` si la classe l'a déjà reçu, `EVENT_CLOSED` après la fin des candidatures.
+         */
+        post: operations["events_proposals_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2181,6 +2493,15 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * @description Invitation d'un enseignant seulement (C11) : `{ username, password }` crée le compte de l'enfant, ou `{ learnerId }`
+         *     rattache un enfant déjà lié au parent. Ignoré pour les autres origines.
+         */
+        AcceptRequest: {
+            username?: string;
+            password?: string;
+            learnerId?: number;
+        };
         Activity: {
             /** @description Secondes retenues après plafonnement */
             secondsCounted: number;
@@ -2546,11 +2867,80 @@ export interface components {
             id: number;
             text: string;
         };
+        /** @description Carte de classe (WT01, WT03) et en-tête de WT04. */
+        Classroom: {
+            readonly id: number;
+            /** Nom */
+            readonly name: string;
+            /** Couleur */
+            readonly color: string;
+            readonly course: components["schemas"]["ClassroomCourse"];
+            readonly schoolGrade: components["schemas"]["SchoolGrade"] | null;
+            /** @description Élèves actifs */
+            readonly memberCount: number;
+            /** @description Invitations en attente du parent */
+            readonly pendingInvitationCount: number;
+            /** @description Parcours figé : la classe a déjà eu un membre */
+            readonly hasMembers: boolean;
+            /** @description Progression moyenne des élèves actifs sur le parcours (%) */
+            readonly averageProgress: number;
+            /** Format: date-time */
+            readonly createdAt: string;
+        };
+        ClassroomCourse: {
+            readonly slug: string;
+            /** Titre */
+            readonly title: string;
+            /** @description Visuel des cartes */
+            readonly emoji: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Difficulté */
+            readonly difficulty: components["schemas"]["DifficultyEnum"];
+            /** Durée (heures) */
+            readonly durationHours: number;
+        };
+        /** @description Candidature d'un élève vue par son enseignant : statut seulement, ni motivation ni paiement (S8, D64). */
+        ClassroomEventApplication: {
+            id: number;
+            status: components["schemas"]["ApplicationStatusEnum"];
+            event: components["schemas"]["EventSummary"];
+            learner: components["schemas"]["MemberLearner"];
+            classroom: components["schemas"]["ClassroomRef"];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ClassroomRef: {
+            id: number;
+            name: string;
+        };
+        /** @description WT13 : nom*, parcours* (de l'offre), niveau scolaire facultatif, couleur facultative. */
+        ClassroomWriteRequest: {
+            name: string;
+            /** @description Parcours de l'offre de l'école (`classrooms/school/`) */
+            courseSlug: string;
+            /** @description Code du référentiel `school-grades` */
+            schoolGrade?: string | null;
+            /** @description #RRGGBB */
+            color?: string;
+        };
+        CommentRequestRequest: {
+            body: string;
+            attemptId?: number | null;
+            /** @description Classe concernée si l'élève est dans plusieurs de vos classes */
+            classroomId?: number;
+        };
         CompositionPart: {
             code: string;
             label: string;
             /** @description Nombre (unités count, fcfa, score), booléen (yes_no) ou texte ; null si absente */
             value: (number | boolean | string) | null;
+        };
+        /** @description Classe d'une invitation d'enseignant (WPD05, D60) : ce que le parent accepte. */
+        ConsentClassroom: {
+            name: string;
+            teacherName: string;
+            schoolName: string;
+            courseTitle: string;
         };
         /** @description Ce que montre le lien SMS avant toute connexion : le numéro masqué, rien de l'enfant. */
         ConsentPreview: {
@@ -2561,6 +2951,8 @@ export interface components {
             readonly id: number;
             /** Origine */
             readonly origin: components["schemas"]["OriginEnum"];
+            /** @description Invitation d'un enseignant (origine `teacher`) : la classe proposée */
+            readonly classroom: components["schemas"]["ConsentClassroom"] | null;
             readonly status: string;
             readonly firstName: string;
             readonly lastName: string;
@@ -2581,7 +2973,7 @@ export interface components {
         ConsentRequestState: {
             readonly id: number;
             /** Statut */
-            readonly status: components["schemas"]["ConsentRequestStateStatusEnum"];
+            readonly status: components["schemas"]["ConsentStatusEnum"];
             readonly parentPhoneMasked: string;
             readonly relationship: string;
             /** Format: date-time */
@@ -2597,7 +2989,7 @@ export interface components {
          *     * `cancelled` - Annulée
          * @enum {string}
          */
-        ConsentRequestStateStatusEnum: "pending" | "accepted" | "refused" | "expired" | "cancelled";
+        ConsentStatusEnum: "pending" | "accepted" | "refused" | "expired" | "cancelled";
         ContactMessageRequest: {
             /** Nom */
             name: string;
@@ -2841,6 +3233,21 @@ export interface components {
             /** Libellé */
             label: string;
         };
+        Dropout: {
+            learner: components["schemas"]["MemberLearner"];
+            classroom: components["schemas"]["ClassroomRef"];
+            /** Format: date-time */
+            lastActivityAt: string;
+        };
+        EarnedBadge: {
+            id: number;
+            kind: components["schemas"]["BadgeKindEnum"];
+            label: string;
+            icon: string;
+            description: string;
+            /** Format: date-time */
+            awardedAt: string;
+        };
         EmailChangeRequest: {
             password: string;
             /** Format: email */
@@ -2909,8 +3316,10 @@ export interface components {
          *     * `EVENT_CLOSED` - EVENT_CLOSED
          *     * `EVENT_FULL` - EVENT_FULL
          *     * `EXPORT_NOT_READY` - EXPORT_NOT_READY
+         *     * `IMPORT_INVALID_FILE` - IMPORT_INVALID_FILE
          *     * `IMPORT_TOO_LARGE` - IMPORT_TOO_LARGE
          *     * `INVALID_CREDENTIALS` - INVALID_CREDENTIALS
+         *     * `INVITATION_DAILY_LIMIT` - INVITATION_DAILY_LIMIT
          *     * `INVITATION_INVALID` - INVITATION_INVALID
          *     * `KIT_CODE_ALREADY_USED` - KIT_CODE_ALREADY_USED
          *     * `KIT_CODE_INVALID` - KIT_CODE_INVALID
@@ -2938,6 +3347,7 @@ export interface components {
          *     * `PASSWORD_RESET_BY_PARENT` - PASSWORD_RESET_BY_PARENT
          *     * `PASSWORD_TOO_WEAK` - PASSWORD_TOO_WEAK
          *     * `PAYMENT_FAILED` - PAYMENT_FAILED
+         *     * `PAYMENT_IN_PROGRESS` - PAYMENT_IN_PROGRESS
          *     * `PAYMENT_REQUEST_CLOSED` - PAYMENT_REQUEST_CLOSED
          *     * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
          *     * `PDF_NOT_READY` - PDF_NOT_READY
@@ -2948,6 +3358,7 @@ export interface components {
          *     * `REPORT_LOCKED` - REPORT_LOCKED
          *     * `RESET_TOKEN_INVALID` - RESET_TOKEN_INVALID
          *     * `RESUME_CODE_INVALID` - RESUME_CODE_INVALID
+         *     * `SCHOOL_OFFER_EXPIRED` - SCHOOL_OFFER_EXPIRED
          *     * `SERVER_ERROR` - SERVER_ERROR
          *     * `SIGNUP_EXPIRED` - SIGNUP_EXPIRED
          *     * `THROTTLED` - THROTTLED
@@ -2957,7 +3368,7 @@ export interface components {
          *     * `VALIDATION_ERROR` - VALIDATION_ERROR
          * @enum {string}
          */
-        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "APPLICATION_ALREADY_RESOLVED" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELETION_ALREADY_RESOLVED" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "EXPORT_NOT_READY" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_REQUEST_CLOSED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "APPLICATION_ALREADY_RESOLVED" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELETION_ALREADY_RESOLVED" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "EXPORT_NOT_READY" | "IMPORT_INVALID_FILE" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_DAILY_LIMIT" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_IN_PROGRESS" | "PAYMENT_REQUEST_CLOSED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SCHOOL_OFFER_EXPIRED" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
         EventSummary: {
             readonly slug: string;
             /** Titre */
@@ -3071,6 +3482,60 @@ export interface components {
          * @enum {string}
          */
         ImpactReportStatusEnum: "draft" | "submitted";
+        ImportError: {
+            line: number;
+            code: components["schemas"]["ImportErrorCodeEnum"];
+            message: string;
+            /** @description Valeurs lues, pour corriger la ligne en place */
+            data: components["schemas"]["ImportRowData"];
+        };
+        /**
+         * @description * `DUPLICATE_ROW` - DUPLICATE_ROW
+         *     * `MALFORMED_ROW` - MALFORMED_ROW
+         *     * `PHONE_INVALID` - PHONE_INVALID
+         *     * `ALREADY_IN_CLASSROOM` - ALREADY_IN_CLASSROOM
+         *     * `LEARNER_QUOTA_EXCEEDED` - LEARNER_QUOTA_EXCEEDED
+         *     * `CONSENT_COOLDOWN` - CONSENT_COOLDOWN
+         *     * `INVITATION_DAILY_LIMIT` - INVITATION_DAILY_LIMIT
+         * @enum {string}
+         */
+        ImportErrorCodeEnum: "DUPLICATE_ROW" | "MALFORMED_ROW" | "PHONE_INVALID" | "ALREADY_IN_CLASSROOM" | "LEARNER_QUOTA_EXCEEDED" | "CONSENT_COOLDOWN" | "INVITATION_DAILY_LIMIT";
+        /** @description Un fichier CSV ou Excel (.xlsx, 1 Mo, 200 lignes) **ou** des lignes (liste collée, lignes corrigées). */
+        ImportRequestRequest: {
+            /** Format: binary */
+            file?: string;
+            rows?: components["schemas"]["ImportRowRequest"][];
+        };
+        ImportResult: {
+            created: components["schemas"]["Member"][];
+            errors: components["schemas"]["ImportError"][];
+        };
+        ImportRowData: {
+            firstName?: string;
+            lastName?: string;
+            parentPhone?: string;
+            relationship?: string;
+        };
+        /** @description Ligne saisie ou corrigée dans le front ; `line` garde son numéro d'origine dans le rapport. */
+        ImportRowRequest: {
+            line?: number;
+            /** @default  */
+            firstName: string;
+            /** @default  */
+            lastName: string;
+            /** @default  */
+            parentPhone: string;
+            /** @default  */
+            relationship: string;
+        };
+        /** @description WT06 onglet Individuel : l'élève n'a pas de téléphone (D30), seul son parent est contacté. */
+        InvitationRequest: {
+            firstName: string;
+            lastName: string;
+            parentPhone: string;
+            /** @description Code du référentiel `relationships` */
+            relationship: string;
+        };
         InvoiceSummary: {
             number: string;
             pdfStatus: components["schemas"]["PdfStatusEnum"];
@@ -3250,6 +3715,21 @@ export interface components {
             projectId: number | null;
             levelId: number | null;
         };
+        /** @description Commentaire vu par l'apprenant (WD01) et son parent (WPD03) : lecture seule, pas de réponse (S11). */
+        LearnerComment: {
+            readonly id: number;
+            /** Commentaire */
+            readonly body: string;
+            /**
+             * Envoyé le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+            readonly teacherName: string;
+            classroomName: string;
+            learnerId: number;
+            readonly attempt: components["schemas"]["TeacherAttempt"] | null;
+        };
         LearnerConsentRequestRequest: {
             parentPhone: string;
             relationship: string;
@@ -3261,6 +3741,23 @@ export interface components {
             badges: number;
             /** @description Parcours dans « Mes souhaits » */
             wishlist: number;
+        };
+        /** @description WT05 : l'élève sur le parcours de la classe seulement, sans donnée sensible (D64). */
+        LearnerFollowUp: {
+            learner: components["schemas"]["MemberLearner"];
+            classroom: components["schemas"]["Classroom"];
+            /** Format: date-time */
+            joinedAt: string;
+            progressPct: number;
+            /** Format: date-time */
+            lastActivityAt: string;
+            isDropout: boolean;
+            /** @description Moyenne des tentatives du parcours (%) */
+            averagePercentage: number | null;
+            /** @description Badges du parcours de la classe */
+            badges: components["schemas"]["EarnedBadge"][];
+            attempts: components["schemas"]["TeacherAttempt"][];
+            comments: components["schemas"]["TeacherComment"][];
         };
         LearnerPasswordRequest: {
             password: string;
@@ -3338,6 +3835,19 @@ export interface components {
             /** @description Formative du niveau */
             quiz: components["schemas"]["QuizItem"] | null;
         };
+        /** @description Compteurs du parcours chez l'enseignant (WT10), calculés par la vue et passés en contexte. */
+        LevelNode: {
+            readonly id: number;
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (minutes) */
+            durationMin?: number;
+            /** @description Part des tentatives réussies à la formative du niveau (%), null sans tentative */
+            readonly passRate: number | null;
+            readonly missions: components["schemas"]["MissionNode"][];
+        };
         LevelSummary: {
             /** Ordre */
             order?: number;
@@ -3410,6 +3920,51 @@ export interface components {
             /** @description Compteurs du shell de l'apprenant (parcours, certificats, badges), null pour les autres rôles */
             readonly counters: components["schemas"]["LearnerCounters"] | null;
         };
+        /**
+         * @description Ligne de WT04 : élève actif (`MemberRow`) ou invitation (`InvitationRow`). Une invitation montre le prénom et le
+         *     nom saisis par l'enseignant et l'état de la demande au parent, jamais son numéro.
+         */
+        Member: {
+            readonly id: number;
+            /** Statut */
+            readonly status: components["schemas"]["MembershipStatusEnum"];
+            readonly firstName: string;
+            readonly lastName: string;
+            readonly learner: components["schemas"]["MemberLearner"] | null;
+            /** @description État de la demande au parent (`invited` seulement) ; `refused` et `expired` sont à signaler */
+            readonly invitationStatus: (components["schemas"]["ConsentStatusEnum"] | components["schemas"]["NullEnum"]) | null;
+            /** Format: date-time */
+            readonly invitationExpiresAt: string | null;
+            /** @description Élève actif : progression sur le parcours */
+            readonly progressPct: number | null;
+            /**
+             * Format: date-time
+             * @description Élève actif : dernière activité sur le parcours, ou date d'adhésion
+             */
+            readonly lastActivityAt: string | null;
+            /** @description Élève actif en décrochage (D66) */
+            readonly isDropout: boolean;
+            /**
+             * A rejoint le
+             * Format: date-time
+             */
+            readonly joinedAt: string | null;
+            /** Format: date-time */
+            readonly createdAt: string;
+        };
+        MemberLearner: {
+            id: number;
+            firstName: string;
+            lastName: string;
+            readonly avatar: components["schemas"]["Avatar"] | null;
+        };
+        /**
+         * @description * `invited` - Invité
+         *     * `active` - Actif
+         *     * `left` - Retiré
+         * @enum {string}
+         */
+        MembershipStatusEnum: "invited" | "active" | "left";
         MissionBlock: {
             type: components["schemas"]["MissionBlockTypeEnum"];
             text?: string;
@@ -3456,6 +4011,43 @@ export interface components {
             durationMin: number;
             icon: string;
             state: components["schemas"]["StateEnum"];
+        };
+        /** @description Compteurs du parcours chez l'enseignant (WT10), calculés par la vue et passés en contexte. */
+        MissionNode: {
+            readonly id: number;
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (minutes) */
+            durationMin?: number;
+            /** Icône */
+            icon?: string;
+            /** @description Élèves actifs de l'enseignant ayant terminé la mission */
+            readonly completedCount: number;
+        };
+        /** @description Mission en lecture seule (WT10) : le contenu, sans progression ni quiz. */
+        MissionRead: {
+            readonly id: number;
+            /** Ordre */
+            readonly order: number;
+            /** Titre */
+            readonly title: string;
+            /** Durée (minutes) */
+            readonly durationMin: number;
+            /** Icône */
+            readonly icon: string;
+            /** Identifiant Vimeo */
+            readonly vimeoId: string;
+            /** Hachage Vimeo */
+            readonly vimeoHash: string;
+            /**
+             * Blocs
+             * @description Liste de blocs : {"type": "text"|"tip", "text": …} ou {"type": "media", "src": …, "alt": …, "caption": …}
+             */
+            readonly blocks: unknown;
+            level: components["schemas"]["NodeRef"];
+            project: components["schemas"]["NodeRef"];
         };
         MissionSummary: {
             /** Ordre */
@@ -3516,6 +4108,10 @@ export interface components {
          * @enum {string}
          */
         NextStepTypeEnum: "mission" | "quiz" | "certification";
+        NodeRef: {
+            id: number;
+            title: string;
+        };
         Notification: {
             readonly id: number;
             readonly type: string;
@@ -3805,6 +4401,36 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["Child"][];
         };
+        PaginatedClassroomEventApplicationList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["ClassroomEventApplication"][];
+        };
+        PaginatedClassroomList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["Classroom"][];
+        };
         PaginatedConsentRequestList: {
             /** @example 123 */
             count?: number;
@@ -3895,6 +4521,36 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["LearnerBadge"][];
         };
+        PaginatedLearnerCommentList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["LearnerComment"][];
+        };
+        PaginatedMemberList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["Member"][];
+        };
         PaginatedNotificationList: {
             /** @example 123 */
             count?: number;
@@ -3940,6 +4596,21 @@ export interface components {
             previous?: string | null;
             results?: components["schemas"]["PaymentRequest"][];
         };
+        PaginatedReviewList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["Review"][];
+        };
         PaginatedSteamyEventList: {
             /** @example 123 */
             count?: number;
@@ -3954,6 +4625,21 @@ export interface components {
              */
             previous?: string | null;
             results?: components["schemas"]["SteamyEvent"][];
+        };
+        PaginatedSupervisedCourseList: {
+            /** @example 123 */
+            count?: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results?: components["schemas"]["SupervisedCourse"][];
         };
         PaginatedWishlistItemList: {
             /** @example 123 */
@@ -4032,6 +4718,16 @@ export interface components {
             gender?: (components["schemas"]["GenderEnum"] | components["schemas"]["NullEnum"]) | null;
             disability?: string | null;
             publicDisplayAllowed?: boolean;
+        };
+        /** @description WT13 : nom*, parcours* (de l'offre), niveau scolaire facultatif, couleur facultative. */
+        PatchedClassroomWriteRequest: {
+            name?: string;
+            /** @description Parcours de l'offre de l'école (`classrooms/school/`) */
+            courseSlug?: string;
+            /** @description Code du référentiel `school-grades` */
+            schoolGrade?: string | null;
+            /** @description #RRGGBB */
+            color?: string;
         };
         PatchedLearnerProfileUpdateRequest: {
             /**
@@ -4306,6 +5002,19 @@ export interface components {
             quiz: components["schemas"]["QuizItem"] | null;
             levels: components["schemas"]["LevelItem"][];
         };
+        /** @description Compteurs du parcours chez l'enseignant (WT10), calculés par la vue et passés en contexte. */
+        ProjectNode: {
+            readonly id: number;
+            /** Ordre */
+            order?: number;
+            /** Titre */
+            title: string;
+            /** Durée (heures) */
+            durationHours?: number;
+            /** @description Part des tentatives réussies à la sommative du projet (%), null sans tentative */
+            readonly passRate: number | null;
+            readonly levels: components["schemas"]["LevelNode"][];
+        };
         ProjectSummary: {
             /** Ordre */
             order?: number;
@@ -4320,6 +5029,19 @@ export interface components {
             /** Matériel */
             materials?: unknown;
             readonly levels: components["schemas"]["LevelSummary"][];
+        };
+        Proposal: {
+            id: number;
+            event: string;
+            classroomId: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description Élèves actifs et parents notifiés */
+            notifiedCount: number;
+        };
+        ProposalRequestRequest: {
+            /** @description Une classe de l'enseignant connecté */
+            classroomId: number;
         };
         Question: {
             id: number;
@@ -4382,6 +5104,13 @@ export interface components {
          * @enum {string}
          */
         QuizKindEnum: "formative" | "summative";
+        QuizRef: {
+            id: number;
+            kind: components["schemas"]["QuizKindEnum"];
+            title: string;
+            readonly projectTitle: string;
+            readonly levelTitle: string | null;
+        };
         QuoteRequestRequest: {
             /** Établissement */
             schoolName: string;
@@ -4531,6 +5260,20 @@ export interface components {
             username: string;
             resumeCode: string;
         };
+        /** @description Ligne de WT07 et de « À revoir » (WT01). */
+        Review: {
+            id: number;
+            quiz: components["schemas"]["QuizRef"];
+            percentage: number;
+            status: components["schemas"]["AttemptStatusEnum"];
+            passed: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description L'enseignant l'a déjà commentée (sort de « À revoir ») */
+            commented: boolean;
+            learner: components["schemas"]["MemberLearner"];
+            classroom: components["schemas"]["ClassroomRef"];
+        };
         /**
          * @description * `learner` - Apprenant
          *     * `parent` - Parent
@@ -4538,6 +5281,35 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "learner" | "parent" | "teacher";
+        /** @description WT03, WT06, WT13 : l'école, son offre et ce qui reste des quotas (invitations en attente comprises, C19). */
+        School: {
+            /** Nom */
+            readonly name: string;
+            /** Ville */
+            readonly city: string;
+            readonly country: string;
+            /**
+             * Offre
+             * @description Nom de l'offre B2B
+             */
+            readonly offer: string;
+            /**
+             * Offre valable jusqu'au
+             * Format: date
+             */
+            readonly validUntil: string | null;
+            /** @description Offre échue : création de classes et ajout d'élèves bloqués (`SCHOOL_OFFER_EXPIRED`) */
+            readonly offerExpired: boolean;
+            /** Quota d'élèves */
+            readonly learnerQuota: number;
+            readonly learnersUsed: number;
+            readonly learnersLeft: number;
+            /** Quota de classes */
+            readonly classroomQuota: number;
+            readonly classroomsUsed: number;
+            readonly classroomsLeft: number;
+            readonly courses: components["schemas"]["ClassroomCourse"][];
+        };
         SchoolGrade: {
             readonly id: number;
             code: string;
@@ -4683,8 +5455,78 @@ export interface components {
          * @enum {string}
          */
         SubjectEnum: "question" | "paiement" | "livraison" | "changement-parent" | "candidature" | "autre";
+        /** @description Parcours encadré (WT02) : ses classes et ses élèves actifs chez l'enseignant. */
+        SupervisedCourse: {
+            readonly slug: string;
+            /** Titre */
+            readonly title: string;
+            /** @description Visuel des cartes */
+            readonly emoji: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Difficulté */
+            readonly difficulty: components["schemas"]["DifficultyEnum"];
+            /** Durée (heures) */
+            readonly durationHours: number;
+            readonly classroomCount: number;
+            readonly learnerCount: number;
+        };
+        /** @description WT10 : l'arbre Projet → Niveau → Mission, en lecture seule (S5). */
+        SupervisedCourseDetail: {
+            readonly slug: string;
+            /** Titre */
+            readonly title: string;
+            /** @description Visuel des cartes */
+            readonly emoji: string;
+            readonly category: components["schemas"]["CategorySummary"];
+            /** Difficulté */
+            readonly difficulty: components["schemas"]["DifficultyEnum"];
+            /** Durée (heures) */
+            readonly durationHours: number;
+            readonly classroomCount: number;
+            readonly learnerCount: number;
+            readonly description: string;
+            readonly classrooms: components["schemas"]["Classroom"][];
+            readonly formativePassRate: number | null;
+            readonly summativePassRate: number | null;
+            readonly projects: components["schemas"]["ProjectNode"][];
+        };
         TeacherActivationRequest: {
             password: string;
+        };
+        /** @description Tentative vue par l'enseignant (WT05, WT07) : statut serveur (D31), jamais les réponses ni le corrigé. */
+        TeacherAttempt: {
+            id: number;
+            quiz: components["schemas"]["QuizRef"];
+            percentage: number;
+            status: components["schemas"]["AttemptStatusEnum"];
+            passed: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description L'enseignant l'a déjà commentée (sort de « À revoir ») */
+            commented: boolean;
+        };
+        TeacherComment: {
+            readonly id: number;
+            /** Commentaire */
+            readonly body: string;
+            readonly attemptId: number | null;
+            /**
+             * Envoyé le
+             * Format: date-time
+             */
+            readonly createdAt: string;
+        };
+        /** @description WT01 : compteurs, cartes de classes, « À revoir » et « Décrochage » (5 premiers de chaque). */
+        TeacherDashboard: {
+            classroomCount: number;
+            /** @description Élèves actifs, comptés une fois */
+            learnerCount: number;
+            pendingInvitationCount: number;
+            toReviewCount: number;
+            dropoutCount: number;
+            classrooms: components["schemas"]["Classroom"][];
+            toReview: components["schemas"]["Review"][];
+            dropouts: components["schemas"]["Dropout"][];
         };
         /** @description En-tête de l'écran d'activation : école et email masqué. */
         TeacherInvitation: {
@@ -5486,7 +6328,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AcceptRequest"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -8240,6 +9086,1003 @@ export interface operations {
             };
         };
     };
+    classrooms_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedClassroomList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClassroomWriteRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Classroom"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Classroom"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedClassroomWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Classroom"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_invitations_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Member"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_invitations_import_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": components["schemas"]["ImportRequestRequest"];
+                "application/json": components["schemas"]["ImportRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportResult"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_members_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedMemberList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_members_remove_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                member_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Member"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_comments_list: {
+        parameters: {
+            query?: {
+                /** @description Parent : un de ses enfants */
+                learnerId?: number;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedLearnerCommentList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_courses_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSupervisedCourseList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_courses_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupervisedCourseDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_courses_missions_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MissionRead"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_dashboard_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherDashboard"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_event_applications_list: {
+        parameters: {
+            query?: {
+                classroomId?: number;
+                /** @description Slug de l'événement */
+                event?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedClassroomEventApplicationList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_learners_retrieve: {
+        parameters: {
+            query?: {
+                classroomId?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnerFollowUp"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_learners_comments_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherComment"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_reviews_list: {
+        parameters: {
+            query?: {
+                classroomId?: number;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                pageSize?: number;
+                /**
+                 * @description `to_review` : tentatives `ko` non commentées (D65)
+                 *
+                 *     * `to_review` - to_review
+                 *     * `ok` - ok
+                 *     * `warn` - warn
+                 *     * `ko` - ko
+                 */
+                status?: "to_review" | "ok" | "warn" | "ko";
+                /**
+                 * @description * `formative` - formative
+                 *     * `summative` - summative
+                 */
+                type?: "formative" | "summative";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedReviewList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    classrooms_school_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["School"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     core_presign_create: {
         parameters: {
             query?: never;
@@ -8387,6 +10230,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Application"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    events_proposals_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProposalRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Proposal"];
                 };
             };
             400: {
