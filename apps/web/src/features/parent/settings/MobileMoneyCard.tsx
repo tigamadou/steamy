@@ -4,8 +4,15 @@ import type { Schemas } from "@steamy/api-client";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import { Button, ErrorSummary, Field, PhoneInput, ReferentialSelect, type PhoneCountry } from "@/components/ds";
-import { initialCountry } from "@/components/ds/PhoneInput/phone";
+import {
+  Button,
+  ErrorSummary,
+  Field,
+  initialCountry,
+  PhoneInput,
+  ReferentialSelect,
+  type PhoneCountry,
+} from "@/components/ds";
 import { SavedToast } from "@/features/account/SavedToast";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { useReferential } from "@/lib/use-referential";
@@ -34,6 +41,15 @@ export function MobileMoneyCard({ value, countries }: { value: MobileMoney | nul
   const [phone, setPhone] = useState<string | null>(value?.phone ?? null);
   const [errors, setErrors] = useState<Errors>({});
   const [attempt, setAttempt] = useState(0);
+
+  /** Ouvre le formulaire depuis la valeur enregistrée : rien de ce qui a été annulé ou retiré n'est renvoyé. */
+  function open() {
+    setCountry(value?.country ?? initialCountry(countries));
+    setNetwork(value?.network ?? "");
+    setPhone(value?.phone ?? null);
+    setErrors({});
+    setEditing(true);
+  }
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(0);
   const networks = useReferential("payment-networks", { country });
@@ -81,7 +97,7 @@ export function MobileMoneyCard({ value, countries }: { value: MobileMoney | nul
       <EditableCard
         title="Mobile Money"
         editing={editing}
-        onEdit={() => setEditing(true)}
+        onEdit={open}
         rows={[
           { label: "Pays", value: savedCountry?.label ?? value?.country },
           {

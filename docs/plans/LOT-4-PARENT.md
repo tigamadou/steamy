@@ -117,6 +117,7 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation 
   - [x] Playwright : changement de numéro puis connexion avec le nouveau numéro
   - [x] Recette : les préférences de notification sont prises en compte (pas de rapport par email si désactivé)
   > Écarts : l'email de contact se modifie avec le profil (`PATCH accounts/me/parent-profile/`, effaçable) plutôt que par `POST accounts/me/email/` (qui exige le mot de passe et ne permet pas de le retirer) ; suppression du compte parent annulable par le support seulement (aucun endpoint d'annulation côté parent) ; la recette « pas de rapport par email si désactivé » est vérifiée par la préférence enregistrée (e2e) et par l'API (`email_enabled`), pas par l'envoi lundi ; FAQ propre au parent (`content/faq/parent.ts`).
+  > Point à soumettre au produit : D54 dit la suppression « annulable », mais seul le support peut annuler celle du compte parent (aucun endpoint côté parent, le compte étant désactivé aussitôt).
 - [ ] **4.10** Consentement d'origine enseignant · `feature/lot4-consentement-enseignant` (requiert 4.3, API-L5 ; livrée avec le lot 5, avant l'étape 5.9)
   - [ ] `WPD05` variante enseignant : nom de l'enseignant, classe, établissement, parcours (D60)
   - [ ] Acceptation avec création de l'identifiant (champs de `WPD04` préremplis), puis l'élève rejoint la classe

@@ -109,6 +109,36 @@ describe("MobileMoneyCard (WPD08, D76)", () => {
     expect(PATCH).toHaveBeenLastCalledWith("/api/accounts/me/parent-profile/", { body: { mobileMoney: null } });
   });
 
+  it("modifier, annuler, rouvrir, enregistrer : seule la valeur enregistrée repart au serveur", async () => {
+    const user = userEvent.setup();
+    PATCH.mockResolvedValue(respond(200, { data: {} }));
+    render(<MobileMoneyCard value={SAVED} countries={COUNTRIES} />);
+    await user.click(screen.getByRole("button", { name: /^Modifier/ }));
+    await waitFor(() => expect(network()).toHaveValue("mtn"));
+    // Changement annulé : autre pays, autre numéro
+    await user.selectOptions(screen.getByRole("combobox", { name: "Pays du compte Mobile Money" }), "TG");
+    await user.type(number(), "90000000");
+    await user.click(screen.getByRole("button", { name: "Annuler" }));
+    await user.click(screen.getByRole("button", { name: /^Modifier/ }));
+    await waitFor(() => expect(network()).toHaveValue("mtn"));
+    await user.click(screen.getByRole("button", { name: "Enregistrer" }));
+    expect(PATCH).toHaveBeenCalledWith("/api/accounts/me/parent-profile/", { body: { mobileMoney: SAVED } });
+  });
+
+  it("après « Retirer ce compte », la réouverture ne renvoie pas l'ancien numéro", async () => {
+    const user = userEvent.setup();
+    PATCH.mockResolvedValue(respond(200, { data: {} }));
+    const { rerender } = render(<MobileMoneyCard value={SAVED} countries={COUNTRIES} />);
+    await user.click(screen.getByRole("button", { name: /^Modifier/ }));
+    await user.click(screen.getByRole("button", { name: "Retirer ce compte" }));
+    // La page relue renvoie un compte effacé
+    rerender(<MobileMoneyCard value={null} countries={COUNTRIES} />);
+    await user.click(await screen.findByRole("button", { name: /^Modifier/ }));
+    await user.click(screen.getByRole("button", { name: "Enregistrer" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Saisissez un numéro Mobile Money valide");
+    expect(PATCH).toHaveBeenCalledTimes(1);
+  });
+
   it("nationalOf : numéro national d'un E.164 du pays", () => {
     expect(nationalOf("+2290190000001", COUNTRIES[0])).toBe("0190000001");
     expect(nationalOf("+22890000000", COUNTRIES[0])).toBe("");
