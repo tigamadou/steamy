@@ -7,7 +7,8 @@ import { Badge, Button } from "@/components/ds";
 
 /**
  * Kit Codes d'une commande de kits payée (C10, D35 : `STEAMY-XXXX-XXXX`), visibles du payeur seul : chacun se copie
- * pour être transmis à l'enfant, qui débloque le parcours compatible (WA01) ; un code saisi est marqué « Utilisé ».
+ * pour être transmis à l'enfant, qui débloque le parcours compatible (WA01) ; un code saisi est marqué « Utilisé », un
+ * code révoqué par le Support (6.4) « Révoqué », sans « Copier » : il reste listé, l'enfant a pu le recevoir.
  */
 export function KitCodeList({ codes, kitNames }: { codes: Schemas["KitCode"][]; kitNames: Record<string, string> }) {
   const [copied, setCopied] = useState<string | null>(null);
@@ -41,7 +42,9 @@ export function KitCodeList({ codes, kitNames }: { codes: Schemas["KitCode"][]; 
               <p className="m-0 font-mono text-base font-black tracking-wider text-ink-900">{item.code}</p>
               <p className="m-0 text-xs font-bold text-ink-600">{kitNames[item.kitSlug] ?? item.kitSlug}</p>
             </div>
-            {item.redeemed ? (
+            {item.revoked ? (
+              <Badge tone="error">Révoqué</Badge>
+            ) : item.redeemed ? (
               <Badge tone="neutral">Utilisé</Badge>
             ) : (
               <Button variant="outline" size="sm" icon="copy" onClick={() => void copy(item.code)}>

@@ -30,8 +30,8 @@ const PAID_KIT = order({
   status: "paid",
   paidAt: "2026-10-19T10:00:00Z",
   kitCodes: [
-    { code: "STEAMY-K4G3-MVJF", kitSlug: "steamy-bot", redeemed: false },
-    { code: "STEAMY-AAAA-BBBB", kitSlug: "inconnu", redeemed: true },
+    { code: "STEAMY-K4G3-MVJF", kitSlug: "steamy-bot", redeemed: false, revoked: false },
+    { code: "STEAMY-AAAA-BBBB", kitSlug: "inconnu", redeemed: true, revoked: false },
   ],
   invoice: { number: "FAC-1", pdfStatus: "ready" },
 });
@@ -141,6 +141,21 @@ describe("KitCodeList (C10, D35)", () => {
     expect(screen.getByText("Code STEAMY-K4G3-MVJF copié.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /^Copié/ }));
     expect(screen.getByRole("button", { name: /^Copier/ })).toBeInTheDocument();
+  });
+
+  it("code révoqué par le Support : listé avec « Révoqué », sans « Copier »", async () => {
+    const codes = [
+      { code: "STEAMY-K4G3-MVJF", kitSlug: "steamy-bot", redeemed: false, revoked: false },
+      { code: "STEAMY-RRRR-VVVV", kitSlug: "steamy-bot", redeemed: false, revoked: true },
+    ];
+    const { container } = render(<KitCodeList codes={codes} kitNames={{ "steamy-bot": "Steamy Bot v1" }} />);
+    const revoked = within(screen.getByRole("list", { name: "Kit Codes de la commande" }))
+      .getByText("STEAMY-RRRR-VVVV")
+      .closest("li") as HTMLElement;
+    expect(within(revoked).getByText("Révoqué")).toBeInTheDocument();
+    expect(within(revoked).queryByRole("button")).toBeNull();
+    expect(screen.getAllByRole("button", { name: /^Copier/ })).toHaveLength(1);
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
 
