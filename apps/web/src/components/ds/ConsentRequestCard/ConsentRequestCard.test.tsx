@@ -39,6 +39,13 @@ describe("ConsentRequestCard", () => {
     expect(screen.queryByText(/ans/)).not.toBeInTheDocument();
   });
 
+  it("affiche le statut d'une demande close, sans date d'expiration", () => {
+    render(<ConsentRequestCard {...PROPS} expiresOn={undefined} badge={{ label: "Refusée", tone: "error" }} />);
+    expect(screen.getByText("Refusée")).toBeInTheDocument();
+    expect(screen.queryByText("En attente")).not.toBeInTheDocument();
+    expect(screen.queryByText(/valable jusqu/)).not.toBeInTheDocument();
+  });
+
   it("ne présente aucune violation d'accessibilité", async () => {
     const { container } = render(<ConsentRequestCard {...PROPS} />);
     expect(await axe(container)).toHaveNoViolations();

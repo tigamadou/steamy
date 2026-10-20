@@ -9,7 +9,7 @@ const p = routes.parent;
  */
 export const parentNav: NavEntry[] = [
   { id: "home", icon: "home", label: "Accueil", href: p.home },
-  { id: "children", icon: "user", label: "Mes enfants", href: p.children, hidden: true },
+  { id: "children", icon: "user", label: "Mes enfants", href: p.children },
   { id: "events", icon: "trophy", label: "Événements", href: p.events, hidden: true },
   { id: "orders", icon: "cart", label: "Commandes", href: p.orders },
   { id: "help", icon: "book", label: "Aide", href: p.help },

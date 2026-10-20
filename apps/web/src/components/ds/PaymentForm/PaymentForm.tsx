@@ -88,7 +88,11 @@ export function PaymentForm({
   const [pending, setPending] = useState(false);
   const { wait, track } = useThrottle();
   const networks = useReferential("payment-networks", { country });
-  const network = choice.country === country ? choice.network : "";
+  // Le réseau préféré (WPD08) n'est retenu que s'il est encore proposé pour ce pays
+  const network =
+    choice.country === country && (networks.items ?? []).some((item) => item.code === choice.network)
+      ? choice.network
+      : "";
   const msisdn = phone?.country === country ? phone.e164 : null;
   const noNetwork = networks.status === "ready" && networks.items?.length === 0;
 

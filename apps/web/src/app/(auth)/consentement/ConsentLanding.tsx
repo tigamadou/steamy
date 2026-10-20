@@ -39,7 +39,8 @@ const LINK_INVALID = {
 };
 
 /**
- * Atterrissage du lien SMS (2.7) : un parent connecté rattache la demande (`claim`) et l'ouvre (WP05). Sinon, il
+ * Atterrissage du lien SMS (2.7) : un parent connecté rattache la demande (`claim`) et l'ouvre (WP05, qui renvoie
+ * vers WPD05 un parent au profil complet). Sinon, il
  * choisit entre la connexion (retour ici) et la création de son compte (WP01, numéro rappelé).
  */
 export function ConsentLanding() {

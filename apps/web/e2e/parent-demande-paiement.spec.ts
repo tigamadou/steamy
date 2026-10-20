@@ -45,8 +45,11 @@ async function openFromSms(page: Page, family: Family, link: URL) {
 
 /** Choisit le premier réseau du pays et saisit le numéro de test, puis « Payer ». */
 async function pay(page: Page, national: string) {
-  // Carte de réseau : la case radio est masquée sous son libellé
-  await page.getByRole("radio").first().check({ force: true });
+  // Carte de réseau : clic sur la carte visible (la case radio est masquée sous son libellé)
+  const radio = page.getByRole("radio").first();
+  const network = (await radio.getAttribute("aria-labelledby")) as string;
+  await page.locator(`[id="${network}"]`).click();
+  await expect(radio).toBeChecked();
   await page.getByRole("textbox", { name: /Numéro Mobile Money/ }).fill(national);
   await page.getByRole("button", { name: /^Payer/ }).click();
 }

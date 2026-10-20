@@ -48,10 +48,12 @@ test("lien SMS → WP01-WP03 → WP05 accepter → WP06 → profil", async ({ pa
   await expect(parent).toHaveURL("/inscription/parent/profil/localisation");
 });
 
-test("parent déjà inscrit : lien → connexion → WP05 → WP11 refus confirmé → WP12", async ({ page, browser }) => {
+// Parent au profil inachevé (WP07-WP09 à faire) : la demande reste dans le parcours d'inscription. Un parent au profil
+// complet aboutit sur WPD05 (parent-consentement.spec.ts).
+test("parent au profil inachevé : lien → connexion → WP05 → WP11 refus confirmé → WP12", async ({ page, browser }) => {
   await startLearnerSignup(page, "Sena");
   const phone = uniquePhone();
-  await createParent({ phone, password: "Parent2026x" });
+  await createParent({ phone, password: "Parent2026x", completeProfile: false });
   const link = await sendConsentRequest(page, phone);
 
   const parent = await (await browser.newContext()).newPage();

@@ -1,10 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useEffect } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { resetReferentials } from "@/lib/use-referential";
-import { COUNTRIES, NETWORKS, payment } from "@/test/payment-request-fixtures";
+import { COUNTRIES, NETWORKS, order, payment } from "@/test/payment-request-fixtures";
 
 const GET = vi.fn();
 const POST = vi.fn();
@@ -32,7 +32,9 @@ describe("PendingOrderPayment : reprise depuis /parent/commandes/[reference]", (
     GET.mockImplementation(async (path: string) =>
       path === "/api/referentials/payment-networks/"
         ? respond(200, NETWORKS)
-        : respond(200, payment({ status: "succeeded" })),
+        : path === "/api/payments/orders/{reference}/"
+          ? respond(200, order({ status: "paid" }))
+          : respond(200, payment({ status: "succeeded" })),
     );
   });
 
@@ -56,6 +58,6 @@ describe("PendingOrderPayment : reprise depuis /parent/commandes/[reference]", (
     POST.mockResolvedValueOnce(respond(201, payment()));
     await user.click(screen.getByRole("button", { name: /^Payer/ }));
     expect(await screen.findByRole("heading", { name: "Paiement réussi !" })).toBeInTheDocument();
-    expect(router.refresh).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(router.refresh).toHaveBeenCalledTimes(1));
   });
 });

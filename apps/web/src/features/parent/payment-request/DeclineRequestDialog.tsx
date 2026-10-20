@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button, Field, Modal, Textarea } from "@/components/ds";
@@ -28,6 +29,7 @@ export function DeclineRequestDialog({
   summary,
   onDeclined,
 }: DeclineRequestDialogProps) {
+  const router = useRouter();
   const [reason, setReason] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
@@ -43,6 +45,8 @@ export function DeclineRequestDialog({
     );
     setPending(false);
     if (!result.ok) {
+      // Réglée, annulée ou expirée entre-temps : l'écran se relit (lecture seule) derrière le message
+      if (result.code === "PAYMENT_REQUEST_CLOSED") router.refresh();
       setError(
         result.code === "PAYMENT_REQUEST_CLOSED"
           ? "Cette demande n'est plus en attente : elle a été réglée, annulée ou a expiré."

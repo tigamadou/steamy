@@ -36,5 +36,7 @@ describe("PendingOrderPayment (WPD07, reprise du paiement)", () => {
     expect(refresh).toHaveBeenCalledTimes(1);
     props.onState("paid");
     expect(refresh).toHaveBeenCalledTimes(2);
+    props.onState("refunded");
+    expect(refresh).toHaveBeenCalledTimes(3);
   });
 });

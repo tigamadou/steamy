@@ -108,12 +108,30 @@ def test_the_user_list_has_only_personas_and_no_add(client):
     assert client.get(f"{USERS}add/").status_code == 403
 
 
+def inline_management(client, url) -> dict:
+    """Champs de gestion des inlines (en lecture seule) de la fiche, à renvoyer avec le formulaire."""
+    data = {}
+    for inline in client.get(url).context["inline_admin_formsets"]:
+        management = inline.formset.management_form
+        data.update(
+            {management.add_prefix(name): value for name, value in management.initial.items()}
+        )
+    return data
+
+
 def test_role_status_and_identifiers_are_read_only(client):
     verified_client(client, SUPPORT)
     learner = LearnerFactory(first_name="Léa")
+    change = f"{USERS}{learner.pk}/change/"
     response = client.post(
-        f"{USERS}{learner.pk}/change/",
-        {"first_name": "Lina", "last_name": "Adjovi", "role": "parent", "status": "suspended"},
+        change,
+        {
+            **inline_management(client, change),
+            "first_name": "Lina",
+            "last_name": "Adjovi",
+            "role": "parent",
+            "status": "suspended",
+        },
     )
     assert response.status_code == 302
     learner.refresh_from_db()

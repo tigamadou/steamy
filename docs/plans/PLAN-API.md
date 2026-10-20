@@ -594,6 +594,13 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > commande de kit payée par Marie pour Léa (expédiée, Kit Code, reçu), une demande de paiement de Léa en attente,
   > une candidature de Léa à un événement payant (en attente de Marie, couverte par son ticket). Le kit en rupture
   > existait déjà (L1.5). Reste ouvert : la validation du format des factures par la comptabilité (L3b.0a, P1/P2).
+- [x] **API-L3b.7** Schéma et demandes de kits · `feature/api-l3b-schema-demandes-kit` · PR #131
+  - [x] Demande de kits en attente réutilisée si mêmes kits et quantités (ordre indifférent), 200 comme un parcours
+  - [x] Verrou de l'apprenant dans `create_request` : deux demandes simultanées, une seule demande et un seul SMS
+  - [x] Demande en attente mais échue (`expiresAt` passé, pas encore expirée par la tâche) jamais réutilisée
+  - [x] `Order.deliveryZone` nullable ; `Payment.failureCode` en `PaymentFailureCodeEnum` (liste `Payment.FailureCode`)
+  > Décisions : pas de contrainte d'unicité sur les demandes en attente : le verrou suffit, et une demande échue
+  > encore `pending` (avant le passage horaire de `expire_payment_requests`) la violerait.
 
 ### API-L4 · Espace parent — ✅ terminé
 - [x] **API-L4.1** Enfants · `feature/api-l4-1-enfants` · PR #75, #80

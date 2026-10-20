@@ -3,7 +3,7 @@ import { errorMessage, type ApiFailure } from "@/lib/api-call";
 import type { RequestStatus } from "@/features/unlock/types";
 
 /** États affichés par WPD15 : statuts de la demande (API) et états propres au paiement en cours. */
-export type ScreenState = RequestStatus | "confirming" | "failed" | "outofstock";
+export type ScreenState = RequestStatus | "confirming" | "failed" | "outofstock" | "refunded";
 
 /** Pastille d'état de la demande (maquette de 4.0, `WPDACStatusBadge`). */
 export const STATE_BADGES: Record<ScreenState, { tone: BadgeTone; label: string }> = {
@@ -15,6 +15,7 @@ export const STATE_BADGES: Record<ScreenState, { tone: BadgeTone; label: string 
   expired: { tone: "neutral", label: "Expirée" },
   cancelled: { tone: "neutral", label: "Annulée" },
   outofstock: { tone: "amber", label: "Rupture" },
+  refunded: { tone: "info", label: "Remboursé" },
 };
 
 /**

@@ -53,7 +53,10 @@ test("achat direct : boutique, panier, livraison, paiement, WPD07, facture et Ki
   await axe(page);
 
   // Paiement (faux prestataire : …01 succès) → suivi
-  await page.getByRole("radio").first().check({ force: true });
+  // Carte de réseau : clic sur la carte visible (la case radio est masquée sous son libellé)
+  const radio = page.getByRole("radio").first();
+  await page.locator(`[id="${(await radio.getAttribute("aria-labelledby")) as string}"]`).click();
+  await expect(radio).toBeChecked();
   await page.getByRole("textbox", { name: /Numéro Mobile Money/ }).fill("0197000001");
   await page.getByRole("button", { name: /^Payer/ }).click();
   await expect(page.getByRole("heading", { name: "Paiement réussi !" })).toBeVisible({ timeout: 30_000 });
