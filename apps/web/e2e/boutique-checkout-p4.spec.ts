@@ -69,6 +69,8 @@ test("P4 : checkout invité, échec du paiement puis réussite, suivi de la comm
   await choose(page, "MTN Mobile Money");
   await role(page, "textbox", { name: /^Numéro Mobile Money/ }).fill("0197123402");
   await role(page, "button", { name: /^Payer/ }).click();
+  // Attente de l'issue (WA04) : le faux prestataire notifie après `FAKE_PAYMENT_DELAY` secondes
+  await expect(role(page, "heading", { name: "On confirme votre paiement…" })).toBeVisible();
   await expect(role(page, "heading", { name: "Paiement échoué" })).toBeVisible({ timeout: 30_000 });
   // Refus notifié par le prestataire (`DECLINED`) : l'API confirme qu'aucun débit n'a eu lieu
   await expect(text(page, /Aucun montant n'a été débité/)).toBeVisible();
