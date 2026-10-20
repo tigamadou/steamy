@@ -4,7 +4,6 @@ import { SettingsRow } from "@/components/ds/SettingsRow";
 import { SkeletonBlock } from "@/components/ds/SkeletonBlock";
 import { getCurrentUser } from "@/lib/auth/session";
 import { formatDate } from "@/lib/dates";
-import { features } from "@/lib/features";
 import { routes } from "@/lib/routes";
 
 import { getLearnerProfile } from "./api";
@@ -14,8 +13,8 @@ const l = routes.learner;
 
 /**
  * WD13 · Paramètres de l'apprenant : hub de sections. L'identifiant est en lecture seule (C12) ; ni téléphone ni
- * moyen de paiement (D30) ; les préférences de notification vivent dans WD06 seulement. Les lignes dont l'écran
- * n'est pas livré sont absentes (drapeau `orders` de `features.ts`), jamais « Bientôt ».
+ * moyen de paiement (D30) ; les préférences de notification vivent dans WD06 seulement. Aucune ligne
+ * « Bientôt » : tous les écrans du hub sont livrés.
  */
 export async function ProfileHub() {
   const [me, profile] = await Promise.all([getCurrentUser(), getLearnerProfile()]);
@@ -63,7 +62,7 @@ export async function ProfileHub() {
       </Section>
 
       <Section title="Mon compte">
-        {features.orders && <SettingsRow label="Mes commandes" href={l.orders} />}
+        <SettingsRow label="Mes commandes" href={l.orders} />
         <SettingsRow label="Ma progression" href={l.progress} />
         <SettingsRow label="Mon parent" href={l.parent} />
         <SettingsRow label="CGU et politiques" href={routes.legal("cgu")} />

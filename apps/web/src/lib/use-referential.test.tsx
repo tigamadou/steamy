@@ -40,6 +40,17 @@ describe("useReferential", () => {
     expect(GET).toHaveBeenCalledWith("/api/referentials/localities/", { params: { query: { country: "BJ" } } });
   });
 
+  it("attend aussi un pays pour les réseaux Mobile Money (D76)", async () => {
+    GET.mockResolvedValue(ok([{ id: 1, code: "mtn", label: "MTN", country: "BJ" }]));
+    const { result, rerender } = renderHook(({ country }) => useReferential("payment-networks", { country }), {
+      initialProps: { country: undefined as string | undefined },
+    });
+    expect(result.current.status).toBe("idle");
+    rerender({ country: "BJ" });
+    await waitFor(() => expect(result.current.status).toBe("ready"));
+    expect(GET).toHaveBeenCalledWith("/api/referentials/payment-networks/", { params: { query: { country: "BJ" } } });
+  });
+
   it("signale l'échec puis réessaie à la demande", async () => {
     GET.mockResolvedValueOnce(ko()).mockResolvedValueOnce(ok([{ id: 2, code: "cm2", label: "CM2" }]));
     const { result } = renderHook(() => useReferential("school-grades"));

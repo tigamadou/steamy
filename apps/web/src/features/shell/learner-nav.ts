@@ -42,8 +42,12 @@ const SECTIONS: Array<[prefix: string, section: LearnerSection]> = [
   [l.wishlist, { active: "wishlist", title: "Mes souhaits" }],
 ];
 
+/** WA01 / WA06 : la saisie du Kit Code, sous la fiche d'un parcours du catalogue, a son propre titre. */
+const KIT_CODE_PATH = /^\/apprenant\/catalogue\/[^/]+\/kit-code$/;
+
 /** Entrée active et titre du header pour un chemin de l'espace apprenant. */
 export function learnerSection(pathname: string, firstName: string): LearnerSection {
+  if (KIT_CODE_PATH.test(pathname)) return { active: "catalog", title: "Débloquer le parcours" };
   const match = SECTIONS.find(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   if (match) return match[1];
   return { active: "home", title: firstName ? `Salut ${firstName} 👋` : "Accueil" };

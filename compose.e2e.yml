@@ -41,6 +41,8 @@ services:
       THROTTLE_PASSWORD_RESET: 1000/hour
       # Formulaires publics (devis, contact, newsletter) : 10/heure par IP en production, épuisé par les reprises
       THROTTLE_PUBLIC_FORM: 1000/hour
+      # Kit Codes (D35) : 30/heure par IP en production, partagés par tous les apprenants des parcours (P2)
+      THROTTLE_KIT_CODE_IP: 1000/hour
     networks:
       default:
         aliases: [api.steamy.test]
