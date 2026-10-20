@@ -69,6 +69,11 @@ describe("routes.parent", () => {
     expect(p.event("robot-cup")).toBe("/parent/evenements/robot-cup");
     expect(p.eventSignup("robot-cup")).toBe("/parent/evenements/robot-cup/inscription");
     expect(p.order("STM-1")).toBe("/parent/commandes/STM-1");
+    expect(p.orderList()).toBe("/parent/commandes");
+    expect(p.orderList("payees", 2)).toBe("/parent/commandes?statut=payees&page=2");
+    expect(p.shopKit("bot")).toBe("/parent/boutique/bot");
+    expect(p.cart).toBe("/parent/boutique/panier");
+    expect(p.checkout).toBe("/parent/boutique/commande");
     expect(p.notificationList()).toBe("/parent/notifications");
     expect(p.notificationList("non-lues", 2)).toBe("/parent/notifications?onglet=non-lues&page=2");
   });

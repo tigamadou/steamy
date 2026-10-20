@@ -32,6 +32,13 @@ describe("RestockAlertForm (WK11)", () => {
     expect(probeShopper).not.toHaveBeenCalled();
   });
 
+  it("espace parent : SMS sur son numéro, sans champ ni lecture de la session", async () => {
+    requestRestockAlert.mockResolvedValue({ ok: true, data: { ok: true } });
+    render(<RestockAlertForm slug="solaire" context="parent" />);
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(probeShopper).not.toHaveBeenCalled();
+  });
+
   it("invité : numéro obligatoire et valide, envoyé en E.164", async () => {
     probeShopper.mockResolvedValue("guest");
     requestRestockAlert.mockResolvedValueOnce({
