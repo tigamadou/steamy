@@ -355,6 +355,10 @@ SPECTACULAR_SETTINGS = {
         "OrderKindEnum": "apps.payments.models.Order.Kind",
         "OrderCreateKindEnum": "apps.payments.serializers.ORDER_CREATE_KINDS",
         "OrderStatusEnum": "apps.payments.models.Order.Status",
+        # Statuts distincts d'un paiement et d'une demande de paiement (WPD15, WA02) : sans ces noms, la demande héritait
+        # à tort de l'énumération du paiement (`initiated`… au lieu de `paid`, `declined`…)
+        "PaymentStatusEnum": "apps.payments.models.Payment.Status",
+        "PaymentRequestStatusEnum": "apps.payments.models.PaymentRequest.Status",
     },
     # Schéma d'auth (cookieAuth) déduit de DEFAULT_AUTHENTICATION_CLASSES
 }

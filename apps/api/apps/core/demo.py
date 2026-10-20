@@ -683,16 +683,6 @@ LEA_ENROLLMENTS = [
 ]
 
 
-#: Barème de points et paliers de rang de DÉMONSTRATION (C8 : les valeurs réelles restent à fixer par l'équipe dans
-#: l'admin). Saisis seulement s'ils sont vides, pour ne pas écraser un réglage fait à la main.
-DEMO_POINTS_SCALE = {"mission": 10, "formative": 20, "summative": 50, "course": 100}
-DEMO_RANK_THRESHOLDS = [
-    {"rank": "Explorateur", "points": 0},
-    {"rank": "Bricoleur", "points": 100},
-    {"rank": "Inventeur", "points": 300},
-    {"rank": "Ingénieur", "points": 600},
-    {"rank": "Maître Steamy", "points": 1000},
-]
 #: « Mes souhaits » de Léa (WW01) : un parcours à kit et un parcours payant
 LEA_WISHLIST = ["robot-bluetooth", "capteurs-electroniques"]
 #: Secondes de vidéo de Léa, d'aujourd'hui (0) aux jours précédents : un streak de 5 jours (WD01, WD21).
@@ -700,7 +690,7 @@ LEA_ACTIVITY = [600, 1200, 900, 300, 1500]
 
 
 def seed_learning(accounts: dict[str, User]) -> None:
-    from apps.core.models import PlatformSettings
+    from apps.core.models import PlatformSettings, default_points_scale, default_rank_thresholds
     from apps.learning.certification import complete_if_done
     from apps.learning.gamification import award_badge, award_points, badge_of, streak_days
     from apps.learning.models import (
@@ -712,9 +702,10 @@ def seed_learning(accounts: dict[str, User]) -> None:
     )
     from apps.learning.progression import Progression
 
+    # Barème standard (C8), remis seulement s'il a été vidé : un réglage fait à la main est gardé
     platform = PlatformSettings.load()
-    platform.points_scale = platform.points_scale or DEMO_POINTS_SCALE
-    platform.rank_thresholds = platform.rank_thresholds or DEMO_RANK_THRESHOLDS
+    platform.points_scale = platform.points_scale or default_points_scale()
+    platform.rank_thresholds = platform.rank_thresholds or default_rank_thresholds()
     platform.save()
 
     lea = accounts["lea"]
