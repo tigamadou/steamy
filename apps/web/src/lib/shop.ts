@@ -43,6 +43,14 @@ export async function getKit(slug: string): Promise<Schemas["KitDetail"] | null>
   return unwrap(result);
 }
 
+/** Zones de livraison actives avec leurs frais et leur délai (D38), en cache : jamais de délai écrit en dur. */
+export async function getDeliveryZones(): Promise<Schemas["DeliveryZone"][]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("shop");
+  return unwrap(await getPublicApi().GET("/api/shop/delivery-zones/"));
+}
+
 /** Carte vitrine d'un kit : prix serveur, disponibilité booléenne (le stock exact reste interne). */
 export function toKitCard(kit: Schemas["Kit"]): KitCardData {
   return {

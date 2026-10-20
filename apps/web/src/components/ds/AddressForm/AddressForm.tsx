@@ -15,7 +15,7 @@ export type AddressOptions = {
   onRetry?: () => void;
 };
 
-export type AddressField = "country" | "zone" | "district" | "street";
+export type AddressField = "country" | "zone" | "city" | "district" | "street";
 
 export type AddressFormProps = {
   legend: ReactNode;
@@ -36,8 +36,10 @@ export type AddressFormProps = {
   names?: Partial<Record<AddressField, string>>;
   /** Champ de la zone envoyé comme valeur : `code` (défaut) ou `id`. */
   zoneValueKey?: "code" | "id";
-  /** Préfixe des identifiants des champs, pour le résumé d'erreurs (`<préfixe>-pays`, `-zone`, `-quartier`, `-rue`). */
+  /** Préfixe des identifiants des champs, pour le résumé d'erreurs (`<préfixe>-pays`, `-zone`, `-ville`, `-quartier`, `-rue`). */
   idPrefix?: string;
+  /** Champ « Ville » après la zone, quand l'adresse enregistrée l'exige (WD19, `accounts/me/delivery-address/`). */
+  withCity?: boolean;
   /** Registre de l'aide (C2) : tutoiement de l'apprenant, vouvoiement du parent et de l'invité. */
   register?: "tu" | "vous";
   disabled?: boolean;
@@ -60,6 +62,7 @@ export function AddressForm({
   names = {},
   zoneValueKey = "code",
   idPrefix = "adresse",
+  withCity = false,
   register = "tu",
   disabled,
   className,
@@ -98,6 +101,11 @@ export function AddressForm({
           placeholder={tu ? "Choisis ta zone" : "Choisissez votre zone"}
         />
       </Field>
+      {withCity && (
+        <Field label="Ville" id={`${idPrefix}-ville`} required error={errors.city}>
+          <Input name={names.city ?? "city"} defaultValue={defaultValues.city} autoComplete="address-level2" />
+        </Field>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Quartier" id={`${idPrefix}-quartier`} required error={errors.district}>
           <Input name={names.district ?? "district"} defaultValue={defaultValues.district} autoComplete="address-level3" />

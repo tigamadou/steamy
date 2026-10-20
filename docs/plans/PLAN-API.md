@@ -10,7 +10,7 @@ Taille des PR : **S** ≤ 1 jour · **M** 2-3 jours · **L** ≤ 1 semaine (au-d
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : API-L3b (API-L3a : reste le barème C8 à fixer)
+Statut : 🟡 en cours · Prochaine tâche : API-L3b
 
 Source de vérité de l'exécution (convention : [README](README.md#suivi-dexécution)). Le reste du document décrit le *comment*.
 
@@ -288,10 +288,11 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `test_signup_journey.py`.
 
 ### API-L3a · Pédagogie — 🟡 en cours
-- [ ] **Préalables**
-  - [ ] Barème de points et paliers de rang saisis dans `PlatformSettings` (C8)
-    > Le code est prêt (L3a.3) et le seed met des valeurs de démonstration ; les valeurs réelles restent à fixer
-    > par l'équipe (point ouvert « Reste à décider »), à saisir dans l'admin.
+- [x] **Préalables**
+  - [x] Barème de points et paliers de rang saisis dans `PlatformSettings` (C8) · `feature/api-c8-bareme`
+    > Arbitré le 2026-10-19 : barème standard (mission 10, formative 20, sommative 50, parcours terminé 100 ; rangs Explorateur 0, Apprenti 100, Bâtisseur 300, Inventeur 700, Ingénieur 1500).
+    > Défaut du singleton ; la migration `core.0005_bareme_c8` ne remplit que les champs vides, sans écraser un
+    > réglage du personnel ; le seed s'en sert. Modifiable dans l'admin.
   - [x] **ADR-Médias (Vimeo)** : vidéos non listées, hachage, restriction de domaine, exposition conditionnelle, pas de hors ligne (D16)
 - [x] **API-L3a.1** Inscriptions et arbre · `feature/api-l3a-1-inscriptions` · PR #64
   - [x] `Enrollment` (`source`), `MissionProgress`
@@ -345,7 +346,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `POST learning/activity/` (secondes plafonnées, anti-gonflage)
   - [x] Streak (fuseau `TIME_ZONE`), rang dérivé, `GET learning/badges/`
   - [x] Points et badge dans les réponses de `missions/{id}/complete/` (`pointsEarned`) et des tentatives (`pointsEarned`, `badge`)
-  - [x] Seed : badge par niveau, projet et parcours ; barème et paliers de démonstration ; points, badges et streak de 5 jours de Léa
+  - [x] Seed : badge par niveau, projet et parcours ; barème et paliers standard (C8) ; points, badges et streak de 5 jours de Léa
   > Décisions : `Badge` dans `catalog` (contenu, matrice des groupes), un par niveau, projet ou parcours
   > (contrainte « la cible de son type, et elle seule ») ; `LearnerBadge`, `PointsEntry`, `LearningActivity` dans
   > `learning`. Barème `points_scale` : clés `mission`, `formative`, `summative`, `course` ; un événement
@@ -739,7 +740,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > notifiedCount }`. Notifiés : élèves actifs (tutoiement, `/apprenant/evenements/<slug>`) et leurs parents
   > (`/parent/evenements`), catégorie Steamy Events. `event-applications` : candidatures des élèves actifs des classes
   > actives de l'enseignant (statut, événement, élève, classe), sans motivation ni paiement. Migration
-  > `events/0004_propositions` (après `0003_candidatures`).
+  > `events/0005_propositions` (après `0004_application_refuse_permission`).
 - [x] **Critères de fin d'API-L5**
   - [x] Un enseignant ne peut pas créer de contenu (S5)
   - [x] Seed enrichi, `make openapi` committé
@@ -822,7 +823,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] SMS (S10), avant API-L2 : voir API-L2.0a
   - [x] Paiement (S9), avant API-L3b : voir API-L3b.0a
 - [ ] **Points ouverts** (« Reste à décider »)
-  - [ ] Valeurs du barème de points et des paliers de rang (C8), avant L3a.3
+  - [x] Valeurs du barème de points et des paliers de rang (C8), avant L3a.3 : barème standard, arbitré le 2026-10-19
   - [ ] Format des factures validé par la comptabilité, avant L3b.2
   - [ ] Texte de finalité des données sensibles (D6) validé juridiquement, avant L2.5
 
@@ -1238,6 +1239,6 @@ validateurs de mot de passe D25) sont tranchés et intégrés aux étapes ci-des
 | --- | --- | --- |
 | Fournisseur SMS | ADR après comparaison (S10) | Branchement réel L2 |
 | Prestataire de paiement | Tranché : FedaPay (ADR 0003) ; contrat, KYC et frais négociés à obtenir | Branchement réel L3b |
-| Valeurs du barème de points et des paliers de rang (C8) | À saisir dans `PlatformSettings` | L3a.3 |
+| Valeurs du barème de points et des paliers de rang (C8) | Tranché le 2026-10-19 : barème standard, défaut de `PlatformSettings` | L3a.3 |
 | Format des factures (obligations fiscales locales) | Validation par la comptabilité | L3b.2 |
 | Texte de finalité des données sensibles (D6) | Validation juridique | L2.5 (texte front) |

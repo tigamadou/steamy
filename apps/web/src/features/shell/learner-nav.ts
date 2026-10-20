@@ -30,13 +30,15 @@ const SECTIONS: Array<[prefix: string, section: LearnerSection]> = [
   [l.progress, { active: "profile", title: "Ma progression" }],
   [l.orders, { active: "profile", title: "Mes commandes" }],
   [l.parent, { active: "profile", title: "Mon parent" }],
+  [l.delivery, { active: "profile", title: "Adresse de livraison" }],
+  [l.deletion, { active: "profile", title: "Supprimer mon compte" }],
   [l.editProfile, { active: "profile", title: "Modifier mon profil" }],
   [l.password, { active: "profile", title: "Mot de passe" }],
   [l.profile, { active: "profile", title: "Profil" }],
   [l.courses, { active: "courses", title: "Mes parcours" }],
   [l.catalog, { active: "catalog", title: "Catalogue" }],
-  ["/apprenant/boutique/panier", { active: "catalog", title: "Mon panier" }],
-  ["/apprenant/boutique", { active: "catalog", title: "Boutique de kits" }],
+  [l.cart, { active: "catalog", title: "Mon panier" }],
+  [l.shop, { active: "catalog", title: "Boutique de kits" }],
   [l.wishlist, { active: "wishlist", title: "Mes souhaits" }],
 ];
 
