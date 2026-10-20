@@ -45,7 +45,7 @@ export const PENDING_KINDS: Record<PendingActionType, Kind> = {
     body: (name) => `${name} souhaite participer à un événement et attend votre accord.`,
     cta: "Examiner",
     variant: "secondary",
-    fallback: () => p.events,
+    fallback: ({ id }) => p.eventApplication(id),
   },
   deletion_request: {
     icon: "🗑️",
