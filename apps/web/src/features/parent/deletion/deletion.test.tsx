@@ -143,6 +143,10 @@ describe("ChildDeletionRequest (WPD09, demande de l'enfant)", () => {
     await user.click(within(dialog).getByRole("button", { name: "Annuler" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(POST).not.toHaveBeenCalled();
+    // Échap la referme aussi
+    await user.click(screen.getByRole("button", { name: "Valider la suppression" }));
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
     await user.click(screen.getByRole("button", { name: "Valider la suppression" }));
     dialog = screen.getByRole("dialog", { name: "Valider la suppression du compte de Léa ?" });
     await user.click(within(dialog).getByRole("button", { name: "Valider la suppression" }));
