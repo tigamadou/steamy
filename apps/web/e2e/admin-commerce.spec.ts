@@ -11,7 +11,8 @@ test("6.4 Support suit les commandes de kits, leurs Kit Codes et le stock (WAD10
   test.setTimeout(180_000);
   await page.goto(`${API_URL}/admin/login/?next=/admin/payments/order/`);
   await staffLogin(page, STAFF.support);
-  await page.goto(`${API_URL}/admin/payments/order/?kind__exact=kit`);
+  // Commandes payées seulement : P4 crée des commandes invitées, pas encore payées pendant ce test
+  await page.goto(`${API_URL}/admin/payments/order/?kind__exact=kit&status__exact=paid`);
 
   const results = page.locator("#result_list");
   await expect(results.getByRole("columnheader", { name: "Articles" })).toBeVisible();

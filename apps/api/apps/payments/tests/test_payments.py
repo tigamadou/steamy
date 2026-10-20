@@ -18,7 +18,8 @@ from apps.catalog.tests.factories import CourseFactory
 from apps.core.models import AuditLog
 from apps.learning.models import Enrollment
 from apps.notifications.models import Notification
-from apps.payments.checkout import reconcile_pending_payments
+from apps.payments import checkout
+from apps.payments.checkout import PAYMENT_IN_PROGRESS_TTL, reconcile_pending_payments
 from apps.payments.fulfillment import refund
 from apps.payments.models import Order, Payment, Refund
 from apps.payments.providers import (
@@ -134,6 +135,75 @@ def test_failed_payment_keeps_the_order_payable(parent, course_order, commit):
 def test_pending_number_stays_pending(parent, course_order, commit):
     body = pay(parent, course_order, PENDING, commit=commit).json()
     assert Payment.objects.get(pk=body["id"]).status == Payment.Status.PENDING
+
+
+@pytest.mark.parametrize("status", [Payment.Status.INITIATED, Payment.Status.PENDING])
+def test_no_second_payment_while_one_is_in_progress(parent, course_order, status):
+    PaymentFactory(order=course_order, status=status)
+    resp = pay(parent, course_order)
+    assert (resp.status_code, resp.json()["code"]) == (409, "PAYMENT_IN_PROGRESS")
+    assert course_order.payments.count() == 1
+
+
+def test_double_submission_creates_a_single_payment(parent, course_order):
+    assert pay(parent, course_order, PENDING).status_code == 201
+    assert pay(parent, course_order, PENDING).json()["code"] == "PAYMENT_IN_PROGRESS"
+    assert course_order.payments.count() == 1
+
+
+def test_a_settled_payment_does_not_block_a_new_one(parent, course_order):
+    PaymentFactory(order=course_order, status=Payment.Status.FAILED)
+    assert pay(parent, course_order).status_code == 201
+    assert course_order.payments.count() == 2
+
+
+def test_an_abandoned_payment_no_longer_blocks(parent, course_order):
+    """Au-delà de `PAYMENT_IN_PROGRESS_TTL`, un paiement sans issue est tenu pour abandonné."""
+    stale = PaymentFactory(order=course_order, status=Payment.Status.PENDING)
+    Payment.objects.filter(pk=stale.pk).update(
+        created_at=timezone.now() - PAYMENT_IN_PROGRESS_TTL - timedelta(seconds=1)
+    )
+    assert pay(parent, course_order).status_code == 201
+    assert course_order.payments.count() == 2
+
+
+def test_order_paid_meanwhile_is_rechecked_under_the_lock(parent, course_order):
+    """Un webhook paie la commande entre la première vérification et le verrou : aucun nouveau débit."""
+    real_provider = checkout.get_provider
+
+    def provider_after_a_webhook(*args):
+        Order.objects.filter(pk=course_order.pk).update(status=Order.Status.PAID)
+        return real_provider(*args)
+
+    with mock.patch.object(checkout, "get_provider", side_effect=provider_after_a_webhook):
+        resp = pay(parent, course_order)
+    assert (resp.status_code, resp.json()["code"]) == (409, "ORDER_ALREADY_PAID")
+    assert not course_order.payments.exists()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_concurrent_submissions_create_a_single_payment():
+    """Deux envois simultanés (double clic, deux onglets) : un 201, un 409, un seul paiement."""
+    load_referentials()
+    payer = ParentFactory()
+    order = OrderFactory(payer=payer)
+    barrier = threading.Barrier(2)
+    statuses = []
+
+    def submit():
+        try:
+            barrier.wait()
+            statuses.append(pay(payer, order, PENDING).status_code)
+        finally:
+            connection.close()
+
+    threads = [threading.Thread(target=submit) for _ in range(2)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    assert sorted(statuses) == [201, 409]
+    assert Payment.objects.filter(order=order).count() == 1
 
 
 @pytest.mark.parametrize(

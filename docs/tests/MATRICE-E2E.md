@@ -136,12 +136,12 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WK01` | Catalogue kits | 3 | Boutique dans le shell (h1 du header), cartes vers la fiche, « Ajouter » → toast ; WL07 invité : « Ajouter » seulement si en stock | `apps/web/e2e/boutique-panier.spec.ts`, `apps/web/e2e/evenements-boutique.spec.ts` |
 | `WK02` | Détail kit | 3 | Fiche dans le shell, parcours compatibles → WC05, délais par zone lus dans l'API, « Acheter maintenant » → WK03 | `apps/web/e2e/boutique-panier.spec.ts` |
 | `WK03` | Panier | 3 | P5 (partie panier) : panier serveur, quantité, retrait, survit à une reconnexion ; panier invité fusionné à la connexion (W16 `?next=`) ; « Commander » invité → WK04 ; panier public → panier de l'apprenant ; « Demander à mon parent » → WK08 (P5) | `apps/web/e2e/boutique-panier.spec.ts`, `apps/web/e2e/boutique-demande-parent.spec.ts` |
-| `WK04` | Informations invité | 3 |  |  |
-| `WK05` | Livraison | 3 |  |  |
-| `WK06` | Paiement | 3 |  |  |
-| `WK07` | Confirmation & suivi | 3 |  |  |
+| `WK04` | Informations invité | 3 | P4 : champs obligatoires, conditions, coordonnées gardées dans l'onglet | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
+| `WK05` | Livraison | 3 | P4 : `AddressForm`, zones du pays, frais et délai lus dans la zone, création de la commande | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
+| `WK06` | Paiement | 3 | P4 : total et heure limite de réservation du serveur, `PaymentForm` (réseau, numéro du faux prestataire) | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
+| `WK07` | Confirmation & suivi | 3 | P4 : `ShippingTimeline`, délai de la zone, Kit Code sur la notice, panier vidé, `Referrer-Policy: no-referrer` | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
 | `WK08` | Paiement par le parent | 3 | P5 (fin) : WK03 → « Demander à mon parent » → WK08 (montant des articles, livraison ajoutée par le parent, sans relance), annulation → panier, nouvelle demande réglée par le parent (API) → « C'est réglé ! » → WD14 | `apps/web/e2e/boutique-demande-parent.spec.ts` |
-| `WK09` | Paiement échoué | 3 |  |  |
+| `WK09` | Paiement échoué | 3 | P4 : échec (numéro en `…02`), panier conservé, « Changer de numéro » puis succès | `apps/web/e2e/boutique-checkout-p4.spec.ts` |
 | `WK10` | Panier vide | 3 | Apprenant neuf et invité : « Voir les kits », délais par zone | `apps/web/e2e/boutique-panier.spec.ts` |
 | `WK11` | Stock épuisé | 3 | Invité : « Indisponible », alerte par SMS (`PhoneInput`), kits similaires ; apprenant : alerte dans l'application sans champ téléphone (D30) | `apps/web/e2e/boutique-panier.spec.ts` |
 | `WAD01` | Vue d'ensemble | 6 | Support : chiffres et échéance du serveur, sans lien vers l'Impact Tracker ; « Consentements en attente » → liste Django filtrée | `apps/web/e2e/backoffice.spec.ts` |
