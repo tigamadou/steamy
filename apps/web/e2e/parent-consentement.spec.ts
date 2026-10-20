@@ -109,7 +109,8 @@ test("acceptation : WPD05 → retour à l'accueil avec la confirmation, l'enfant
   const url = parent.url();
   await parent.getByRole("button", { name: "Accepter la demande" }).click();
   await expect(parent).toHaveURL(/\/parent\?consentement=\d+$/);
-  await expect(parent.getByRole("status").filter({ hasText: "Demande acceptée" })).toHaveText(
+  // Le pictogramme du bandeau est décoratif : seul le texte compte
+  await expect(parent.getByRole("status").filter({ hasText: "Demande acceptée" })).toContainText(
     "Demande acceptée : Ama peut terminer son inscription.",
   );
   await axe(parent);
