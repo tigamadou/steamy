@@ -2,14 +2,12 @@ import { notFound } from "next/navigation";
 
 import { SkeletonBlock } from "@/components/ds";
 import { getDeliveryAddress } from "@/features/account/api";
-import { asRequest } from "@/features/unlock/types";
 import { getServerApi } from "@/lib/api";
 import { readOrNull } from "@/lib/api-read";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCountries } from "@/lib/referentials";
 
 import { ClosedRequest } from "./ClosedRequest";
-import type { ScreenState } from "./messages";
 import { PaymentRequestFlow } from "./PaymentRequestFlow";
 import { PaymentRequestSummary } from "./PaymentRequestSummary";
 
@@ -29,9 +27,8 @@ export async function PaymentRequestScreen({ params }: { params: Promise<{ id: s
   const api = await getServerApi();
   const response = await api.GET("/api/payments/payment-requests/{id}/", { params: { path: { id } } });
   if (response.response.status === 404) notFound();
-  const data = readOrNull(response);
-  if (!data) return null;
-  const request = asRequest(data);
+  const request = readOrNull(response);
+  if (!request) return null;
 
   const [childResponse, me, course] = await Promise.all([
     api.GET("/api/accounts/children/{id}/", { params: { path: { id: String(request.learner.id) } } }),
@@ -50,7 +47,7 @@ export async function PaymentRequestScreen({ params }: { params: Promise<{ id: s
         <PaymentRequestSummary
           request={request}
           child={child}
-          state={request.status as ScreenState}
+          state={request.status}
           requiredKit={requiredKit}
         />
         <ClosedRequest request={request} firstName={child.firstName} />
