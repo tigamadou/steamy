@@ -57,7 +57,7 @@ export function ShippingTimeline({ steps, label = "Suivi de livraison", classNam
               )}
             </div>
             <div className={cx(!last && "pb-4.5")}>
-              <p className={cx("text-[15px] font-black", step.state === "todo" ? "text-ink-500" : "text-ink-900")}>
+              <p className={cx("text-[15px] font-black", step.state === "todo" ? "text-ink-600" : "text-ink-900")}>
                 {step.label}
                 <span className="sr-only"> : étape {STATE_TEXT[step.state]}</span>
               </p>
