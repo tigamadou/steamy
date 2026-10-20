@@ -45,6 +45,7 @@ def _read_xlsx(content: bytes) -> list[list]:
     dès qu'il est installé).
     """
     from openpyxl import load_workbook
+    from openpyxl.utils.exceptions import InvalidFileException
 
     try:
         sheet = load_workbook(io.BytesIO(content), read_only=True, data_only=True).worksheets[0]
@@ -56,7 +57,17 @@ def _read_xlsx(content: bytes) -> list[list]:
             filled += any(_cell(cell) for cell in row)
             if filled >= MAX_ROWS + 2 or scanned >= MAX_SCANNED:
                 raise ApiError("IMPORT_TOO_LARGE")
-    except (zipfile.BadZipFile, KeyError, OSError, ValueError) as error:
+    except ApiError:
+        raise
+    except (
+        zipfile.BadZipFile,
+        InvalidFileException,
+        KeyError,
+        OSError,
+        ValueError,
+        TypeError,
+    ) as error:
+        # Classeur corrompu ou qui n'en est pas un (zip quelconque, feuille illisible)
         raise ApiError("IMPORT_INVALID_FILE") from error
     return rows
 

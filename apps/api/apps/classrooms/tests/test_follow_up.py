@@ -467,3 +467,22 @@ def test_learner_profile_shows_only_the_badges_of_the_classroom_course(world):
 
     assert [b["label"] for b in body["badges"]] == ["Moteurs", "Robot", "Diplômé"]
     assert set(body["badges"][0]) == {"id", "kind", "label", "icon", "description", "awardedAt"}
+
+
+def test_classroom_id_of_a_colleague_gives_nothing(world):
+    w = world
+    colleague = ClassroomFactory(school=w["school"], course=w["course"])
+    MembershipFactory(classroom=colleague, learner=w["awa"])  # Awa est aussi chez un collègue
+    attempt(w["enrollment"], w["level_quiz"], "ko")
+    api = w["api"]
+    assert api.get(f"{URL}learners/{w['awa'].pk}/?classroomId={colleague.pk}").status_code == 404
+    assert (
+        api.post(
+            f"{URL}learners/{w['awa'].pk}/comments/",
+            {"body": "x", "classroomId": colleague.pk},
+            format="json",
+        ).status_code
+        == 404
+    )
+    assert api.get(f"{URL}reviews/?classroomId={colleague.pk}").json()["count"] == 0
+    assert api.get(f"{URL}event-applications/?classroomId={colleague.pk}").json()["count"] == 0

@@ -677,3 +677,21 @@ def test_csv_of_more_than_200_lines_is_refused(api, classroom):
     content = "".join(f"E{i};Dossou;0197112233;Mère\n" for i in range(201)).encode()
     response = upload(api, classroom, "eleves.csv", content)
     assert (response.status_code, response.json()["code"]) == (413, "IMPORT_TOO_LARGE")
+
+
+def test_any_openpyxl_failure_is_an_invalid_file(api, classroom, monkeypatch):
+    from openpyxl.utils.exceptions import InvalidFileException
+
+    def broken(*args, **kwargs):
+        raise InvalidFileException("format non pris en charge")
+
+    monkeypatch.setattr("openpyxl.load_workbook", broken)
+    response = upload(api, classroom, "eleves.xlsx", b"PK\x03\x04")
+    assert (response.status_code, response.json()["code"]) == (400, "IMPORT_INVALID_FILE")
+
+
+def test_siblings_in_one_import_are_not_held_by_the_refusal_cooldown(api, classroom, sms):
+    """Deux enfants du même parent, sans refus antérieur : les deux invitations partent."""
+    body = import_rows(api, classroom, [row(first="Awa"), row(first="Kémi")]).json()
+    assert [m["firstName"] for m in body["created"]] == ["Awa", "Kémi"]
+    assert body["errors"] == []
