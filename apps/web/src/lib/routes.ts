@@ -158,6 +158,8 @@ export const routes = {
     paymentRequest: (id: number | string) => `/parent/demandes/${id}`,
     events: "/parent/evenements",
     event: (slug: string) => `/parent/evenements/${slug}`,
+    /** WPD06 avec une candidature mise en avant (« À valider », notification). */
+    eventApplication: (id: number | string) => `/parent/evenements?candidature=${id}`,
     eventSignup: (slug: string) => `/parent/evenements/${slug}/inscription`,
     orders: "/parent/commandes",
     /** WPD07 : filtre de statut (`?statut=`) et page dans l'URL (« Toutes » et la page 1 n'y figurent pas). */

@@ -13,7 +13,7 @@ paiement `WA03`, états `WA04`/`WA05`/`WA07`, suivi `WK07`).
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 de `WPD15`) · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
+Statut : 🟡 en cours · Prochaine tâche : PR de fin de lot (suivis de relecture, critères de fin) après la fusion de 4.6 à 4.8 ; 4.10 avec le lot 5 · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
 
 ### Lot 4 · Espace parent — 🟡 en cours
 - [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15` · PR #72
@@ -86,16 +86,17 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 d
   - [x] Playwright : achat d'un kit, paiement, commande payée en `WPD07`, facture téléchargée, Kit Code débloquant le parcours côté enfant (`WA06`)
   - [x] Recette : commande d'un autre payeur non listée ; factures conservées après suppression d'un enfant (e2e : suppression de l'enfant bénéficiaire, commande et facture toujours au parent)
   > Écarts : priorité donnée à l'achat direct, conséquence de #132 (le panier public renvoie le parent connecté vers le sien, C10) ; « Payer » d'une commande en attente mène toujours au détail de la commande, qui reprend le paiement (l'API ne dit pas si la commande provient d'une demande) ; « Facture » est un lien direct vers l'API, affiché quand le PDF est prêt (`invoice.pdfStatus`) : le téléchargement par `fetch` suivait la redirection signée du stockage, bloquée par le navigateur (même défaut sur le reçu de WK07, lot 3) ; une nouvelle adresse dans l'achat direct n'est pas proposée après la création de la commande (pas d'annulation de commande côté parent). Remboursement : message neutre (« Commande remboursée : elle vous a été remboursée. »), partagé avec WK07, l'API n'exposant pas le motif (paiement tardif C17 ou geste du Support, 6.4). Commande de kit déjà en attente et non expirée : l'achat direct propose de la reprendre avant d'en passer une seconde. Parcours compatibles d'un kit en texte dans l'espace parent, qui n'a pas de catalogue de parcours (la fiche publique sortirait du shell). `PAYMENT_IN_PROGRESS` traduit (paiement déjà lancé sur le téléphone). Kit Code révoqué par le Support : badge « Révoqué » à la place de « Copier ».
-- [ ] **4.6** Événements · `feature/lot4-evenements` (requiert 4.4)
-  - [ ] `WPD06` Steamy Events + candidatures des enfants (`EventApplicationRow`, `RefuseApplicationDialog`)
-  - [ ] `WL23` dans le shell parent (`EventRow`, `EventDetail` du lot 1)
-  - [ ] `WPD12` Inscrire un enfant (`EventSignupForm` : enfants actifs, motivation, récapitulatif + `PaymentForm` si payant)
-  - [ ] Branchement API : `events/`, `events/{slug}/`, `events/applications/` (`accept/`, `refuse/`), `events/{slug}/applications/`, `payments/orders/` `kind: "event"`
-  - [ ] Règles : événement payant accepté → paiement de la commande d'événement (`orderReference`, D53 amendé), `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés, ticket Steamy Events gratuit avec accord requis, prix serveur
-  - [ ] Tests unitaires : `EventApplicationRow` par statut, `EventSignupForm` gratuit / payant, enfants non actifs exclus
-  - [ ] Playwright : accord à un événement payant (`WD11`, `WPD06`, `WPD15`, paiement, « acceptée » en `WD10`)
-  - [ ] Playwright : inscription directe par le parent (`WPD12`) à un événement payant
-  - [ ] Recette : refus notifié à l'enfant ; événement complet non payable
+- [x] **4.6** Événements · `feature/lot4-evenements` (requiert 4.4) · PR #142
+  - [x] `WPD06` Steamy Events + candidatures des enfants (`EventApplicationRow`, `RefuseApplicationDialog`)
+  - [x] `WL23` dans le shell parent (`EventRow`, `EventDetail` du lot 1)
+  - [x] `WPD12` Inscrire un enfant (`EventSignupForm` : enfants actifs, motivation, récapitulatif + `PaymentForm` si payant)
+  - [x] Branchement API : `events/`, `events/{slug}/`, `events/applications/` (`accept/`, `refuse/`), `events/{slug}/applications/`, `payments/orders/` `kind: "event"`
+  - [x] Règles : événement payant accepté → paiement de la commande d'événement (`orderReference`, D53 amendé), `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés, ticket Steamy Events gratuit avec accord requis, prix serveur
+  - [x] Tests unitaires : `EventApplicationRow` par statut, `EventSignupForm` gratuit / payant, enfants non actifs exclus
+  - [x] Playwright : accord à un événement payant (`WD11`, `WPD06`, `WPD15`, paiement, « acceptée » en `WD10`)
+  - [x] Playwright : inscription directe par le parent (`WPD12`) à un événement payant
+  - [x] Recette : refus notifié à l'enfant ; événement complet non payable
+  > Écarts : `WPD06` réunit « Demandes de mes enfants » (toutes les candidatures, la mise en avant `?candidature=<id>` venant de « À valider ») et « Événements à venir » ; le paiement d'un événement accepté reprend `OrderPayment` de `WPD15` (réessai unique, paiement tardif remboursé C17) sur la commande d'événement créée par l'API (`orderReference`), sans demande de paiement (D53 amendé) ; `WL23` du lot 1 dans le shell parent, avec « Inscrire un enfant » ou le motif (complet, clos, passé) ; un refus met la ligne à jour avec la candidature renvoyée par l'API ; côté enfant, la candidature (`WD11`) et son statut (`WD10`) sont faits ou lus par l'API dans l'e2e, ces écrans relevant du lot 3 (`apprenant-evenements.spec.ts`) ; notification de l'enfant vérifiée par l'API ; « À valider » mène à `WPD06` avec la candidature mise en avant (`?candidature=<id>`), même sans `url` de l'API ; le focus passe à la ligne après un accord ou un refus ; WPD12 annonce qu'un ticket de l'enfant remplace le paiement.
 - [x] **4.7** Suppressions · `feature/lot4-suppressions` (requiert 4.2) · PR #143
   - [x] `WPD09` Supprimer (initiative du parent) avec `DeleteChildForm` (motif* + précisions, texte D54)
   - [x] Validation d'une demande `WD15` (`?demande=<id>`, motif prérempli, Accepter / Refuser)
@@ -106,14 +107,15 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 d
   - [x] Playwright : suppression puis annulation (l'enfant peut de nouveau se connecter) ; demande `WD15` validée depuis « À valider »
   - [x] Recette : pendant les 30 jours, l'enfant ne peut plus se connecter (`ACCOUNT_DEACTIVATED`)
   > Écarts : `WPD09` sert aussi la demande de l'enfant sans `?demande=` quand sa suppression attend le parent ; une suppression déjà programmée y affiche le rappel daté et « Annuler la suppression » ; l'annulation est aussi proposée sur `WPD03` ; la décision (suppression, validation ou refus) ramène sur `WPD03` avec une confirmation lue dans l'URL ; demande d'un autre enfant ou d'une autre famille → « introuvable ». Recette `ACCOUNT_DEACTIVATED` vérifiée par l'API dans l'e2e. « Annuler la suppression » mène à `WPD02` (`?annulation=<id>`, focus sur la ligne de l'enfant) ou à `WPD03` (`?confirmation=suppression-annulee`, focus sur son titre), qui annoncent la réactivation ; « Valider la suppression » d'une demande de l'enfant est confirmé dans une modale.
-- [ ] **4.8** Rapport hebdomadaire · `feature/lot4-rapport-hebdo` (requiert 4.2, API-L3a)
-  - [ ] `WPD11` Rapport hebdomadaire (`?semaine=AAAA-Www`)
-  - [ ] Composants `WeekNavigator`, `WeeklyStats`, `WeeklyActivityBars` (lot 3, tableau de données en alternative), `CourseProgressList`, `WeeklyEmailNotice`
-  - [ ] Branchement API : `accounts/children/{id}/weekly-report/?week=`
-  - [ ] Règles : encart « Envoyé chaque semaine à <email> » ou lien « Ajouter un email » vers `WPD08`, pas de bouton d'envoi ponctuel
-  - [ ] Tests unitaires : semaine vide, semaine sans email
-  - [ ] Playwright : navigation vers la semaine précédente
-  - [ ] Recette : chiffres identiques à ceux de l'API pour le jeu D2
+- [x] **4.8** Rapport hebdomadaire · `feature/lot4-rapport-hebdo` (requiert 4.2, API-L3a) · PR #144
+  - [x] `WPD11` Rapport hebdomadaire (`?semaine=AAAA-Www`)
+  - [x] Composants `WeekNavigator`, `WeeklyStats`, `WeeklyActivityBars` (lot 3, tableau de données en alternative), `CourseProgressList`, `WeeklyEmailNotice`
+  - [x] Branchement API : `accounts/children/{id}/weekly-report/?week=`
+  - [x] Règles : encart « Envoyé chaque semaine à <email> » ou lien « Ajouter un email » vers `WPD08`, pas de bouton d'envoi ponctuel
+  - [x] Tests unitaires : semaine vide, semaine sans email
+  - [x] Playwright : navigation vers la semaine précédente
+  - [x] Recette : chiffres identiques à ceux de l'API pour le jeu D2
+  > Écarts : semaine illisible dans l'URL, ou refusée par l'API (hors bornes, à venir) → semaine en cours ; « Semaine suivante » inactive sur la semaine en cours (`nextWeek` nul) ; semaine sans activité : message au lieu de l'histogramme ; `CourseProgressList` de `WPD03` réutilisée ; `WeeklyActivityBars` (lot 3) contient désormais son tableau masqué (défilement horizontal d'un pixel à 360 px).
 - [x] **4.9** Paramètres et aide · `feature/lot4-parametres-aide` (requiert 4.1, 4.7, API-L3a) · PR #126
   - [x] `WPD08` Paramètres : profil, connexion (`NewPasswordFields`, changement de numéro avec `OTPInput`), livraison et paiement (`AddressForm`), notifications, `DangerZone`
   - [x] `WPD13` Aide : FAQ en `FaqAccordion` avec recherche locale, « Contacter le support » vers `WL24`

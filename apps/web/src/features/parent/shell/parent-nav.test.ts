@@ -15,6 +15,7 @@ describe("parentNav", () => {
     expect(parentNav.filter((entry) => !entry.hidden).map((entry) => entry.href)).toEqual([
       "/parent",
       "/parent/enfants",
+      "/parent/evenements",
       "/parent/commandes",
       "/parent/aide",
       "/parent/parametres",
