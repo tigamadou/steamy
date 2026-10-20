@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { Tabs } from "@/components/ds/Tabs";
 import { MyCourses, MyCoursesSkeleton, type CoursesTab } from "@/features/learning/MyCourses";
+import { PendingRequestsBanner } from "@/features/unlock/PendingRequestsBanner";
 import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Mes parcours" };
@@ -12,11 +13,15 @@ function tabOf(value: string | string[] | undefined): CoursesTab {
   return value === "termines" ? "completed" : "active";
 }
 
-// WD23 · Mes parcours (D39) : onglets En cours / Terminés, cartes lues dans `learning/enrollments/`.
+// WD23 · Mes parcours (D39) : bandeau des demandes en attente du parent, onglets En cours / Terminés, cartes lues dans
+// `learning/enrollments/`.
 export default async function MyCoursesPage({ searchParams }: PageProps<"/apprenant/parcours">) {
   const tab = tabOf((await searchParams).onglet);
   return (
     <div className="flex flex-col gap-4.5">
+      <Suspense fallback={null}>
+        <PendingRequestsBanner />
+      </Suspense>
       <Suspense fallback={<MyCoursesSkeleton />}>
         <MyCourses tab={tab}>
           {(counts) => (

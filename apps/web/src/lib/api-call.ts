@@ -31,6 +31,17 @@ export function apiErrorBody(error: unknown): Schemas["Error"] | undefined {
 }
 
 /**
+ * Messages d'un champ en erreur, mis bout à bout. Un objet imbriqué (`guest.phone`, `items[0].kitSlug`) donne les
+ * messages de ses sous-champs.
+ */
+function fieldMessage(errors: unknown): string {
+  if (Array.isArray(errors)) return errors.map(fieldMessage).filter(Boolean).join(" ");
+  if (typeof errors !== "object" || errors === null) return "";
+  const { message } = errors as { message?: unknown };
+  return typeof message === "string" ? message : Object.values(errors).map(fieldMessage).filter(Boolean).join(" ");
+}
+
+/**
  * Appel du client navigateur réduit à un résultat : données, ou code d'erreur, message, erreurs par champ et délai.
  * Un réseau injoignable devient `NETWORK_UNAVAILABLE`. Une réponse 204 renvoie `data: undefined`.
  */
@@ -45,7 +56,7 @@ export async function apiCall<T>(request: (api: ApiClient) => Promise<Response_<
   if (response.ok) return { ok: true, data: data as T };
   const error = apiErrorBody(result.error);
   const fields = Object.fromEntries(
-    Object.entries(error?.fields ?? {}).map(([name, errors]) => [name, errors.map((e) => e.message).join(" ")]),
+    Object.entries(error?.fields ?? {}).map(([name, errors]) => [name, fieldMessage(errors)]),
   );
   return {
     ok: false,

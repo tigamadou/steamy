@@ -6,12 +6,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { axe } from "@/test/axe";
 import { attempt, childDetail, enrollment } from "@/test/parent-fixtures";
 
-const { flags, GET, POST } = vi.hoisted(() => ({
-  flags: { parentTeacherComments: false },
+const { GET, POST } = vi.hoisted(() => ({
   GET: vi.fn(),
   POST: vi.fn(),
 }));
-vi.mock("@/lib/features", () => ({ features: flags }));
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
 vi.mock("@/lib/api-browser", () => ({ getBrowserApi: async () => ({ POST }) }));
 vi.mock("next/navigation", () => ({
@@ -22,7 +20,7 @@ vi.mock("next/navigation", () => ({
 
 const { AttemptList, ChildDetail, ChildDetailSkeleton, ChildDetailView, CourseProgressList, TeacherComments, parseConfirmation } =
   await import("./ChildDetail");
-const { getChild } = await import("./api");
+const { getChild, getTeacherComments, TEACHER_COMMENTS_PAGE_SIZE } = await import("./api");
 
 const respond = (status: number, body: object = {}) => ({ ...body, response: new Response(null, { status }) });
 const failure = (status: number, code: string, fields?: Record<string, string>, message = "") =>
@@ -35,10 +33,6 @@ const failure = (status: number, code: string, fields?: Record<string, string>, 
   });
 
 describe("ChildDetailView (WPD03)", () => {
-  beforeEach(() => {
-    flags.parentTeacherComments = false;
-  });
-
   it("fil d'Ariane, carte profil, informations, progression et tentatives", async () => {
     const { container } = render(<ChildDetailView child={childDetail()} />);
     const crumb = screen.getByRole("navigation", { name: "Fil d'Ariane" });
@@ -73,17 +67,36 @@ describe("ChildDetailView (WPD03)", () => {
     expect(attempts).toHaveTextContent("Construis ton robot Bluetooth · Quiz du niveau · 14 octobre 2026");
     expect(attempts).toHaveTextContent("Réussi");
 
-    // Commentaires des enseignants masqués tant qu'API-L5 n'est pas livrée
-    expect(screen.queryByRole("region", { name: "Commentaires des enseignants" })).toBeNull();
+    // Sans commentaire d'enseignant : le bloc l'annonce
+    expect(screen.getByRole("region", { name: "Commentaires des enseignants" })).toHaveTextContent(
+      "Aucun commentaire des enseignants pour l'instant.",
+    );
     expect(screen.queryByRole("status")).toBeNull();
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("drapeau `parentTeacherComments` levé : bloc des commentaires, vide", () => {
-    flags.parentTeacherComments = true;
-    render(<ChildDetailView child={childDetail()} />);
-    const comments = screen.getByRole("region", { name: "Commentaires des enseignants" });
-    expect(comments).toHaveTextContent("Aucun commentaire des enseignants pour l'instant.");
+  it("commentaires des enseignants (D63) : texte et date, en lecture seule", () => {
+    render(
+      <ChildDetailView
+        child={childDetail()}
+        comments={[
+          {
+            id: 1,
+            body: "Très bon travail sur les capteurs.",
+            createdAt: "2026-10-14T10:00:00Z",
+            teacherName: "Koffi Adékambi",
+            classroomName: "4ᵉ A",
+            learnerId: 7,
+            attempt: null,
+          },
+        ]}
+      />,
+    );
+    const comments = screen.getByRole("list", { name: "Commentaires des enseignants" });
+    expect(comments).toHaveTextContent("Très bon travail sur les capteurs.");
+    expect(comments).toHaveTextContent("Koffi Adékambi · 4ᵉ A ·");
+    expect(within(comments).getByText("14 octobre 2026")).toHaveAttribute("datetime", "2026-10-14T10:00:00Z");
+    expect(within(comments).queryByRole("button")).toBeNull();
   });
 
   it("profil incomplet : sans avatar, classe, localité ni identifiant ; lien de parenté sans libellé parent", () => {
@@ -156,7 +169,7 @@ describe("CourseProgressList, AttemptList, TeacherComments", () => {
       <>
         <CourseProgressList courses={[]} />
         <AttemptList attempts={[]} courses={[]} />
-        <TeacherComments />
+        <TeacherComments comments={[]} />
       </>,
     );
     expect(screen.getByText("Aucun parcours commencé pour l'instant.")).toBeInTheDocument();
@@ -286,3 +299,21 @@ describe("ChildDetail (serveur) et getChild", () => {
     expect(screen.getByRole("status", { name: "Chargement du profil de votre enfant…" })).toBeInTheDocument();
   });
 });
+
+describe("getTeacherComments", () => {
+  beforeEach(() => GET.mockReset());
+
+  it("lit les commentaires de l'enfant ; une lecture en échec donne une liste vide", async () => {
+    const comment = { id: 1, body: "Bravo", createdAt: "2026-10-14T10:00:00Z", teacherName: "K. A.", classroomName: "4ᵉ A", learnerId: 7, attempt: null };
+    GET.mockResolvedValueOnce(respond(200, { data: { results: [comment] } }));
+    expect(await getTeacherComments("7")).toEqual([comment]);
+    expect(GET).toHaveBeenCalledWith("/api/classrooms/comments/", {
+      params: { query: { learnerId: 7, pageSize: TEACHER_COMMENTS_PAGE_SIZE } },
+    });
+    GET.mockResolvedValueOnce(respond(200, { data: {} }));
+    expect(await getTeacherComments("7")).toEqual([]);
+    GET.mockResolvedValueOnce(respond(500));
+    expect(await getTeacherComments("7")).toEqual([]);
+  });
+});
+

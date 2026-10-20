@@ -1,3 +1,4 @@
+import type { Schemas } from "@steamy/api-client";
 import Link from "next/link";
 
 import { Avatar, Badge, Breadcrumb, Button, InfoCard, ProgressBar, QuizAttemptRow, SkeletonBlock } from "@/components/ds";
@@ -6,10 +7,9 @@ import { SavedToast } from "@/features/account/SavedToast";
 import { quizStep } from "@/features/learning/tree";
 import { childMeta } from "@/features/parent/home/ChildCard";
 import { formatDate, formatInstant } from "@/lib/dates";
-import { features } from "@/lib/features";
 import { routes, type ChildConfirmation } from "@/lib/routes";
 
-import { getChild, type ChildDetail as Child } from "./api";
+import { getChild, getTeacherComments, type ChildDetail as Child } from "./api";
 import { fullName } from "./ChildRow";
 import { ResetChildPasswordDialog } from "./ResetChildPasswordDialog";
 
@@ -106,19 +106,30 @@ export function AttemptList({ attempts, courses }: { attempts: Child["recentAtte
   );
 }
 
-/**
- * Commentaires des enseignants (D63), en lecture seule. Alimentés par `classrooms/comments/?learnerId=` (API-L5) :
- * vides tant que l'API n'est pas livrée, et le bloc reste masqué derrière `features.parentTeacherComments`.
- */
-export function TeacherComments() {
+/** Commentaires des enseignants (D63), en lecture seule, lus dans `classrooms/comments/?learnerId=` (API-L5). */
+export function TeacherComments({ comments }: { comments: Schemas["LearnerComment"][] }) {
   return (
     <section aria-labelledby="commentaires">
       <h2 id="commentaires" className="m-0 mb-2 text-lg font-black tracking-[-0.01em] text-ink-900">
         Commentaires des enseignants
       </h2>
-      <p className="m-0 rounded-[18px] border-[1.5px] border-dashed border-ink-200 bg-surface px-4.5 py-4 text-sm font-semibold text-ink-600">
-        Aucun commentaire des enseignants pour l&apos;instant.
-      </p>
+      {comments.length === 0 ? (
+        <p className="m-0 rounded-[18px] border-[1.5px] border-dashed border-ink-200 bg-surface px-4.5 py-4 text-sm font-semibold text-ink-600">
+          Aucun commentaire des enseignants pour l&apos;instant.
+        </p>
+      ) : (
+        <ul aria-label="Commentaires des enseignants" className="m-0 flex list-none flex-col gap-2.5 p-0">
+          {comments.map((comment) => (
+            <li key={comment.id} className="rounded-[14px] border-[1.5px] border-ink-100 bg-surface px-4.5 py-3.5">
+              <p className="m-0 text-sm leading-normal font-semibold whitespace-pre-line text-ink-800">{comment.body}</p>
+              <p className="m-0 mt-1 text-xs font-bold text-ink-600">
+                {comment.teacherName} · {comment.classroomName} ·{" "}
+                <time dateTime={comment.createdAt}>{formatInstant(comment.createdAt)}</time>
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
@@ -233,7 +244,15 @@ function Confirmation({ child, confirmation }: { child: Child; confirmation?: Ch
 }
 
 /** WPD03 · contenu, une fois l'enfant lu. */
-export function ChildDetailView({ child, confirmation }: { child: Child; confirmation?: ChildConfirmation }) {
+export function ChildDetailView({
+  child,
+  comments = [],
+  confirmation,
+}: {
+  child: Child;
+  comments?: Schemas["LearnerComment"][];
+  confirmation?: ChildConfirmation;
+}) {
   return (
     <div className="flex flex-col gap-5">
       <Breadcrumb items={[{ label: "Mes enfants", href: p.children }, { label: fullName(child) }]} />
@@ -247,7 +266,7 @@ export function ChildDetailView({ child, confirmation }: { child: Child; confirm
         <div className="flex min-w-0 flex-col gap-6 lg:order-1">
           <CourseProgressList courses={child.courses} />
           <AttemptList attempts={child.recentAttempts} courses={child.courses} />
-          {features.parentTeacherComments && <TeacherComments />}
+          <TeacherComments comments={comments} />
         </div>
       </div>
     </div>
@@ -268,9 +287,9 @@ export async function ChildDetail({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const child = await getChild(id);
+  const [child, comments] = await Promise.all([getChild(id), getTeacherComments(id)]);
   if (!child) return null;
-  return <ChildDetailView child={child} confirmation={parseConfirmation(query.confirmation)} />;
+  return <ChildDetailView child={child} comments={comments} confirmation={parseConfirmation(query.confirmation)} />;
 }
 
 /** Squelette de WPD03. */
