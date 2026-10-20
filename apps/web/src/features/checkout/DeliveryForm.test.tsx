@@ -99,6 +99,11 @@ describe("WK05 · livraison", () => {
     await userEvent.click(submit);
     expect(await screen.findAllByText(/Trop de tentatives. Réessayez/)).not.toHaveLength(0);
     expect(router.push).not.toHaveBeenCalled();
+
+    // Délai annoncé par l'API : envoi bloqué avec compte à rebours
+    createKitOrder.mockResolvedValueOnce({ ...failure("THROTTLED"), retryAfter: 45 });
+    await userEvent.click(submit);
+    expect(await screen.findByRole("button", { name: "Réessayer dans 0:45" })).toBeDisabled();
   });
 
   it("adresse reprise au retour ; zones en panne : « Réessayer »", async () => {

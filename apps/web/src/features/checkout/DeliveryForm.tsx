@@ -9,6 +9,7 @@ import { AddressForm, Button, ErrorSummary, Field, PhoneInput } from "@/componen
 import { errorMessage } from "@/lib/api-call";
 import { formatPrice } from "@/lib/format";
 import { routes } from "@/lib/routes";
+import { throttledLabel, useThrottle } from "@/lib/use-throttle";
 import { useReferential } from "@/lib/use-referential";
 
 import { createKitOrder, getZones } from "./api";
@@ -55,6 +56,7 @@ export function DeliveryForm({ cart }: { cart: ReadyCart }) {
   const [attempt, setAttempt] = useState(0);
   const [pending, setPending] = useState(false);
   const [outOfStock, setOutOfStock] = useState(false);
+  const { wait, track } = useThrottle();
 
   // Coordonnées absentes (onglet neuf, accès direct) : retour à WK04
   useEffect(() => {
@@ -101,6 +103,7 @@ export function DeliveryForm({ cart }: { cart: ReadyCart }) {
       router.push(routes.checkout.payment);
       return;
     }
+    track(result);
     if (result.code === "OUT_OF_STOCK") {
       setOutOfStock(true);
     } else if (result.fields.deliveryAddress) {
@@ -189,8 +192,8 @@ export function DeliveryForm({ cart }: { cart: ReadyCart }) {
         {cart.count} article{cart.count > 1 ? "s" : ""} : le total, livraison comprise, est calculé à l&apos;étape
         suivante.
       </p>
-      <Button type="submit" block size="lg" loading={pending} iconRight="arrow-right">
-        Continuer vers le paiement
+      <Button type="submit" block size="lg" loading={pending} disabled={wait > 0} iconRight="arrow-right">
+        {throttledLabel(wait, "Continuer vers le paiement")}
       </Button>
     </form>
   );
