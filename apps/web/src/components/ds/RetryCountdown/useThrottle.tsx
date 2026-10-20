@@ -2,9 +2,9 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 
-import { formatCountdown } from "@/components/ds/RetryCountdown";
+import type { ApiFailure } from "@/lib/api-call";
 
-import type { ApiFailure } from "./api-call";
+import { formatCountdown } from "./RetryCountdown";
 
 /** Secondes restantes avant `until` (horodatage), arrondies au-dessus ; 0 une fois passé. */
 function secondsLeft(until: number): number {

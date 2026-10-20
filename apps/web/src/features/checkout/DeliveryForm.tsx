@@ -9,7 +9,7 @@ import { AddressForm, Button, ErrorSummary, Field, PhoneInput } from "@/componen
 import { errorMessage } from "@/lib/api-call";
 import { formatPrice } from "@/lib/format";
 import { routes } from "@/lib/routes";
-import { throttledLabel, useThrottle } from "@/lib/use-throttle";
+import { throttledLabel, useThrottle } from "@/components/ds/RetryCountdown";
 import { useReferential } from "@/lib/use-referential";
 
 import { createKitOrder, getOrder, getZones, type KitOrderInput } from "./api";
