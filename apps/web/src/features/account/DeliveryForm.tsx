@@ -6,7 +6,7 @@ import { useActionState, useState } from "react";
 import { AddressForm, type AddressField } from "@/components/ds/AddressForm";
 import { Button } from "@/components/ds/Button";
 import { ErrorSummary } from "@/components/ds/ErrorSummary";
-import { apiCall, errorMessage } from "@/lib/api-call";
+import { apiCall, errorMessage, type Register } from "@/lib/api-call";
 import { submitWith } from "@/lib/form";
 import { useDeliveryZones } from "@/lib/use-delivery-zones";
 import { useReferential } from "@/lib/use-referential";
@@ -32,12 +32,26 @@ const FIELD_IDS: Record<AddressField, string> = {
   street: "rue",
 };
 
-const REQUIRED_MESSAGES: Record<AddressField, string> = {
-  country: "Choisis ton pays.",
-  zone: "Choisis ta zone de livraison.",
-  city: "Indique ta ville.",
-  district: "Indique ton quartier.",
-  street: "Indique ta rue ou un repère.",
+const REQUIRED_MESSAGES: Record<Register, Record<AddressField, string>> = {
+  tu: {
+    country: "Choisis ton pays.",
+    zone: "Choisis ta zone de livraison.",
+    city: "Indique ta ville.",
+    district: "Indique ton quartier.",
+    street: "Indique ta rue ou un repère.",
+  },
+  vous: {
+    country: "Choisissez votre pays.",
+    zone: "Choisissez votre zone de livraison.",
+    city: "Indiquez votre ville.",
+    district: "Indiquez votre quartier.",
+    street: "Indiquez votre rue ou un repère.",
+  },
+};
+
+const SAVED: Record<Register, string> = {
+  tu: "Ton adresse de livraison est enregistrée.",
+  vous: "Votre adresse de livraison est enregistrée.",
 };
 
 type State = {
@@ -49,18 +63,22 @@ type State = {
 };
 
 /**
- * WD19 · Adresse de livraison : pays, zone du référentiel `shop/delivery-zones/?country=` (D38), ville, quartier, rue
- * ou repère. `PUT accounts/me/delivery-address/` ; le destinataire est l'apprenant (adresse proposée pour un kit dont
- * il est bénéficiaire). Ni téléphone ni moyen de paiement (D30).
+ * WD19 (apprenant) et WPD08 (parent, `register="vous"`) · Adresse de livraison : pays, zone du référentiel
+ * `shop/delivery-zones/?country=` (D38), ville, quartier, rue ou repère. `PUT accounts/me/delivery-address/` ; le
+ * destinataire est le titulaire du compte (adresse proposée par défaut à la commande d'un kit). Ni téléphone ni moyen
+ * de paiement (D30).
  */
 export function DeliveryForm({
   address,
   defaultCountry,
   recipientName,
+  register = "tu",
 }: {
   address: Address | null;
   defaultCountry: string;
   recipientName: string;
+  /** Registre : tutoiement de l'apprenant (WD19), vouvoiement du parent (WPD08). */
+  register?: Register;
 }) {
   const countries = useReferential("countries");
   const [country, setCountry] = useState(address?.zone.country ?? defaultCountry);
@@ -79,7 +97,7 @@ export function DeliveryForm({
       };
       const missing = (Object.keys(values) as AddressField[]).filter((field) => !values[field]);
       if (missing.length > 0) {
-        return { attempt, saved, fields: Object.fromEntries(missing.map((field) => [field, REQUIRED_MESSAGES[field]])) };
+        return { attempt, saved, fields: Object.fromEntries(missing.map((field) => [field, REQUIRED_MESSAGES[register][field]])) };
       }
       const result = await apiCall((api) =>
         api.PUT("/api/accounts/me/delivery-address/", {
@@ -99,7 +117,7 @@ export function DeliveryForm({
           .map(([name, message]) => [API_FIELDS[name], message]),
       );
       if (Object.keys(fields).length > 0) return { attempt, saved, fields };
-      return { attempt, saved, fields: {}, error: errorMessage(result, "tu") };
+      return { attempt, saved, fields: {}, error: errorMessage(result, register) };
     },
     { attempt: 0, saved: 0, fields: {} },
   );
@@ -126,6 +144,7 @@ export function DeliveryForm({
           legendHidden
           idPrefix="livraison"
           withCity
+          register={register}
           countries={{ items: countries.items, status: countries.status === "idle" ? "loading" : countries.status, onRetry: countries.retry }}
           zones={zones}
           country={country}
@@ -147,7 +166,7 @@ export function DeliveryForm({
           Enregistrer l&apos;adresse
         </Button>
       </form>
-      {state.saved > 0 && <SavedToast key={state.saved} title="Ton adresse de livraison est enregistrée." />}
+      {state.saved > 0 && <SavedToast key={state.saved} title={SAVED[register]} />}
     </>
   );
 }

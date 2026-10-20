@@ -14,7 +14,7 @@ import {
   updateCartItem,
   type Shopper,
 } from "./api";
-import { readGuestCart, removeGuestLine, setGuestQuantity, takeDroppedLines } from "./guest-cart";
+import { clearDroppedLines, peekDroppedLines, readGuestCart, removeGuestLine, setGuestQuantity } from "./guest-cart";
 
 /** Ligne du panier telle que l'écran l'affiche : kit relu dans l'API, `id` de la ligne pour le panier serveur. */
 export type CartLine = { kit: Schemas["Kit"]; quantity: number; total: number; id?: number };
@@ -90,7 +90,9 @@ async function load(context: CartContext): Promise<Extract<CartState, { status: 
   if (readGuestCart().length > 0) await mergeGuestCart();
   const cart = await getCart();
   if (!cart.ok) throw new CartLoadError(cart);
-  return { status: "ready", shopper, ...fromServer(cart.data, takeDroppedLines()) };
+  // Apprenant sur le panier public : il est renvoyé vers le sien, qui affichera l'avis
+  const dropped = context === "public" && shopper === "learner" ? 0 : peekDroppedLines();
+  return { status: "ready", shopper, ...fromServer(cart.data, dropped) };
 }
 
 /**
@@ -121,6 +123,11 @@ export function useCart(context: CartContext, register: Register) {
   }, [context, attempt, register]);
 
   const state: CartState = loaded.attempt === attempt ? loaded.state : { status: "loading" };
+  // Avis des kits écartés à la fusion affiché : le compteur est remis à zéro (pas avant, pour ne pas le perdre)
+  const shownDropped = loaded.state.status === "ready" && loaded.state.shopper !== "guest" && loaded.state.dropped > 0;
+  useEffect(() => {
+    if (shownDropped) clearDroppedLines();
+  }, [shownDropped]);
   const reload = useCallback(() => setAttempt((n) => n + 1), []);
 
   /** Change la quantité d'une ligne affichée (`null` : la retire) ; appelé seulement quand le panier est prêt. */

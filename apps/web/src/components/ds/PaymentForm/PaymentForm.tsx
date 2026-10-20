@@ -5,7 +5,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { errorMessage, type ApiResult, type Register } from "@/lib/api-call";
 import { formatPrice } from "@/lib/format";
 import { useReferential } from "@/lib/use-referential";
-import { throttledLabel, useThrottle } from "@/lib/use-throttle";
+import { throttledLabel, useThrottle } from "../RetryCountdown";
 
 import { Button } from "../Button";
 import { Field } from "../Field";

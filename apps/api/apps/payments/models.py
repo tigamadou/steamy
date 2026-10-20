@@ -72,6 +72,8 @@ class PaymentRequest(models.Model):
     last_sent_at = models.DateTimeField(_("dernier envoi"))
     expires_at = models.DateTimeField(_("expire le"))
     decided_at = models.DateTimeField(_("traitée le"), null=True, blank=True)
+    #: Motif facultatif du refus par le parent (WPD15), transmis à l'enfant
+    decline_reason = models.CharField(_("motif du refus"), max_length=500, blank=True)
     created_at = models.DateTimeField(_("créée le"), auto_now_add=True)
 
     class Meta:

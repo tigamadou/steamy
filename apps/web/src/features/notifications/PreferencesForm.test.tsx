@@ -91,3 +91,44 @@ describe("PreferencesForm (WD06)", () => {
     expect(screen.getByRole("switch", { name: /^Compte\s*par email$/ })).toBeInTheDocument();
   });
 });
+
+describe("PreferencesForm du parent (section de WPD08)", () => {
+  const PARENT = {
+    emailAddress: "marie.adjovi@steamy.test",
+    categories: [
+      { category: "consents" as const, label: "Consentements et validations", inApp: true, email: true },
+      { category: "progress" as const, label: "Progression", inApp: true, email: true },
+    ],
+  };
+
+  beforeEach(() => {
+    PATCH.mockClear();
+    apiCall.mockReset();
+    apiCall.mockImplementation(async (request: (api: { PATCH: typeof PATCH }) => Promise<unknown>) => {
+      await request({ PATCH });
+      return result;
+    });
+  });
+
+  it("sans onglets, titres en h3, descriptions au vouvoiement", async () => {
+    const { container } = render(<PreferencesForm initial={PARENT} space="parent" />);
+    expect(screen.queryByRole("link", { name: "Paramètres" })).toBeNull();
+    expect(screen.getByRole("heading", { level: 3, name: "Canaux" })).toBeInTheDocument();
+    expect(screen.getByText(/toutes vos notifications s'affichent/)).toBeInTheDocument();
+    expect(screen.getByText(/peuvent aussi vous être envoyées/)).toBeInTheDocument();
+    expect(screen.getByText("Rapport hebdomadaire, badges et progression de vos enfants.")).toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("coupe le rapport hebdomadaire par email ; erreur au vouvoiement", async () => {
+    result = { ok: false, code: "NETWORK_UNAVAILABLE", message: "", fields: {} };
+    render(<PreferencesForm initial={{ ...PARENT, emailAddress: null }} space="parent" />);
+    expect(screen.getByText(/renseignée dans votre profil/)).toBeInTheDocument();
+    render(<PreferencesForm initial={PARENT} space="parent" />);
+    await userEvent.click(screen.getAllByRole("switch", { name: /^Progression\s*par email$/ }).at(-1)!);
+    expect(PATCH).toHaveBeenCalledWith("/api/notifications/preferences/", {
+      body: { categories: [{ category: "progress", email: false }] },
+    });
+    expect(screen.getByText(/Vérifiez votre connexion/)).toBeInTheDocument();
+  });
+});

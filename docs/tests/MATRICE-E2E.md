@@ -114,12 +114,12 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WPD05` | Demande de consentement | 4 |  |  |
 | `WPD06` | Steamy Events | 4 |  |  |
 | `WPD07` | Historique de commande | 4 |  |  |
-| `WPD08` | Paramètres parent | 4 |  |  |
+| `WPD08` | Paramètres parent | 4 | Changement de numéro par OTP sur le nouveau numéro puis connexion ; email du profil et rapport hebdomadaire coupé par email ; suppression du compte bloquée avec enfants, possible sans enfant | `apps/web/e2e/parent-parametres-aide.spec.ts` |
 | `WPD09` | Supprimer un enfant | 4 |  |  |
 | `WPD10` | Modifier le profil enfant | 4 |  |  |
 | `WPD11` | Rapport hebdomadaire | 4 |  |  |
 | `WPD12` | Faire participer un enfant | 4 |  |  |
-| `WPD13` | Aide & support | 4 |  |  |
+| `WPD13` | Aide & support | 4 | FAQ du parent, recherche locale, « Contacter le support » → WL24 | `apps/web/e2e/parent-parametres-aide.spec.ts` |
 | `WPD14` | Notifications | 4 | Onglets dans l'URL, « Tout marquer comme lu » → cloche à 0, état vide au vouvoiement | `apps/web/e2e/parent-accueil-notifications.spec.ts` |
 | `WT01` | Accueil formateur | 5 |  |  |
 | `WT02` | Mes parcours encadrés | 5 |  |  |

@@ -18,7 +18,9 @@ export function paymentRequest(overrides: Partial<PaymentRequest> = {}): Payment
     lastSentAt: "2026-10-13T09:00:00Z",
     nextResendAt: "2026-10-14T09:00:00Z",
     decidedAt: null,
+    declineReason: "",
     orderReference: null,
+    pendingOrderReference: null,
     ...overrides,
   };
 }
