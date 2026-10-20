@@ -5,6 +5,7 @@ import { Avatar, Badge, Breadcrumb, Button, InfoCard, ProgressBar, QuizAttemptRo
 import { localityLabel } from "@/features/account/locality";
 import { SavedToast } from "@/features/account/SavedToast";
 import { quizStep } from "@/features/learning/tree";
+import { CancelDeletionButton } from "@/features/parent/deletion/CancelDeletionButton";
 import { childMeta } from "@/features/parent/home/ChildCard";
 import { formatDate, formatInstant } from "@/lib/dates";
 import { routes, type ChildConfirmation } from "@/lib/routes";
@@ -201,16 +202,19 @@ function DeletionZone({ child }: { child: Child }) {
   const { deletion } = child;
   if (deletion?.status === "scheduled") {
     return (
-      <p className="m-0 rounded-lg bg-error-50 p-3.5 text-sm font-bold text-error-700">
-        {deletion.scheduledFor ? (
-          <>
-            Compte désactivé : suppression programmée le{" "}
-            <time dateTime={deletion.scheduledFor}>{formatInstant(deletion.scheduledFor)}</time>.
-          </>
-        ) : (
-          "Compte désactivé : suppression programmée."
-        )}
-      </p>
+      <div className="flex flex-col gap-3 rounded-lg bg-error-50 p-3.5">
+        <p className="m-0 text-sm font-bold text-error-700">
+          {deletion.scheduledFor ? (
+            <>
+              Compte désactivé : suppression programmée le{" "}
+              <time dateTime={deletion.scheduledFor}>{formatInstant(deletion.scheduledFor)}</time>.
+            </>
+          ) : (
+            "Compte désactivé : suppression programmée."
+          )}
+        </p>
+        <CancelDeletionButton childId={child.id} firstName={child.firstName} />
+      </div>
     );
   }
   return (
@@ -226,6 +230,12 @@ function DeletionZone({ child }: { child: Child }) {
 /** Rappel après la création (WPD04 : identifiant à communiquer) ou la modification du profil (WPD10). */
 function Confirmation({ child, confirmation }: { child: Child; confirmation?: ChildConfirmation }) {
   if (confirmation === "modifie") return <SavedToast title={`Le profil de ${child.firstName} est enregistré.`} />;
+  if (confirmation === "supprime") {
+    return <SavedToast title={`Le compte de ${child.firstName} est désactivé : la suppression reste annulable 30 jours.`} />;
+  }
+  if (confirmation === "demande-refusee") {
+    return <SavedToast title={`La demande de suppression est refusée : ${child.firstName} en est informé·e.`} />;
+  }
   if (confirmation !== "cree") return null;
   return (
     <div role="status" className="flex items-start gap-3 rounded-[18px] border-2 border-success-200 bg-success-50 p-4">
@@ -275,7 +285,7 @@ export function ChildDetailView({
 
 /** Confirmation lue dans l'URL (`?confirmation=`), ignorée si inconnue. */
 export function parseConfirmation(value: string | string[] | undefined): ChildConfirmation | undefined {
-  return value === "cree" || value === "modifie" ? value : undefined;
+  return value === "cree" || value === "modifie" || value === "supprime" || value === "demande-refusee" ? value : undefined;
 }
 
 /** WPD03 · Détail d'un enfant du parent connecté ; celui d'un autre parent → « Enfant introuvable ». */

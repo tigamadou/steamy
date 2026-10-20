@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { Avatar, Badge, Button } from "@/components/ds";
 import { activeCoursesLabel, childMeta } from "@/features/parent/home/ChildCard";
+import { CancelDeletionButton } from "@/features/parent/deletion/CancelDeletionButton";
 import { pendingActionHref, type PendingAction } from "@/features/parent/home/PendingActionRow";
 import { formatInstant } from "@/lib/dates";
 import { routes } from "@/lib/routes";
@@ -77,7 +78,7 @@ function RowFrame({
 /**
  * Ligne de WPD02 (§5.11) : enfant **actif** (âge · classe, parcours en cours, « Voir le profil » → WPD03), **demande
  * à examiner** (consentement reçu, « Examiner » → WPD05, sans progression) ou **suppression programmée** (badge
- * « Supprimé le … » ; l'annulation est livrée avec WPD09). Pas de « Relancer l'invitation » (D50).
+ * « Supprimé le … », « Annuler la suppression »). Pas de « Relancer l'invitation » (D50).
  */
 export function ChildRow({ item }: { item: ChildListItem }) {
   if (item.kind === "consent") {
@@ -114,6 +115,7 @@ export function ChildRow({ item }: { item: ChildListItem }) {
       badge={deletion && <DeletionBadge deletion={deletion} />}
       actions={
         <>
+          {deletion?.status === "scheduled" && <CancelDeletionButton childId={child.id} firstName={child.firstName} />}
           {deletion?.status === "pending_parent" && (
             <Button href={routes.parent.deleteChild(child.id, deletion.id)} variant="secondary">
               Examiner<span className="sr-only"> la demande de suppression de {name}</span>
