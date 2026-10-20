@@ -15,7 +15,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WL01` | Accueil | 1 | Parcours mis en avant, ancre « Comment ça marche » → catalogue | `apps/web/e2e/decouverte.spec.ts` |
 | `WL02` | Mot de passe oublié | 2 | Mot de passe oublié parent (SMS) et enseignant (email), réponse neutre | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL03` | Code OTP | 2 | Code par SMS et par email, essais épuisés | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
-| `WL04` | Nouveau mot de passe | 2 | Nouveau mot de passe, rechargement → WL02, sessions fermées | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
+| `WL04` | Nouveau mot de passe | 2 | Nouveau mot de passe, rechargement → WL02, sessions fermées ; activation enseignant par lien en fragment (`#jeton=`), ancien lien redirigé | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL05` | Réinitialisé ✓ | 2 | Réinitialisé puis connexion | `apps/web/e2e/mot-de-passe-oublie.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WL06` | Projets & Parcours | 1 | Filtre par catégorie dans l'URL (rechargement), catégorie vide, sans brouillon | `apps/web/e2e/decouverte.spec.ts` |
 | `WL07` | Boutique de kits | 1 | Prix, « Épuisé », fiches liées, « Ajouter » si en stock ; filtre dans l'URL ; catégorie vide | `apps/web/e2e/evenements-boutique.spec.ts` |

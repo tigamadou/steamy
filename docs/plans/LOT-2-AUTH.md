@@ -54,7 +54,7 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot (CI des PR 
   - [x] WL03 `/mot-de-passe-oublie/code` (`OTPInput`, `ResendCountdown`, canal masqué)
   - [x] WL04 `/mot-de-passe-oublie/nouveau` (`NewPasswordFields`)
   - [x] WL05 `/mot-de-passe-oublie/termine` (`Celebration`)
-  - [x] Activation enseignant `/activation/[token]` (variante de WL04, `NewPasswordFields`)
+  - [x] Activation enseignant `/activation#jeton=…` (variante de WL04, `NewPasswordFields`) ; ancien lien `/activation/[token]` redirigé vers le fragment
   - [x] État du flux en mémoire (`challengeId`, `resetToken`), retour à WL02 au rechargement de WL04
   - [x] Sécurité : `Referrer-Policy: no-referrer` sur `/activation/*`, jeton retiré de l'historique, sessions fermées après réinitialisation
   - [x] Tests Vitest : bascule SMS/email, erreurs OTP, concordance
@@ -220,7 +220,8 @@ src/app/(auth)/
     code/page.tsx                                WL03
     nouveau/page.tsx                             WL04
     termine/page.tsx                             WL05
-  activation/[token]/page.tsx                    Activation enseignant (variante de WL04, C6)
+  activation/page.tsx                            Activation enseignant (variante de WL04, C6), jeton dans le fragment
+  activation/[token]/page.tsx                    Ancien lien, redirigé vers `/activation#jeton=…` (transition)
 src/app/(apprenant)/layout.tsx, (parent)/layout.tsx, (enseignant)/layout.tsx
                                                  garde de rôle + page d'attente minimale (remplacée aux lots 3, 4, 5)
 src/lib/auth/                                    session.ts (getCurrentUser, server-only), home-for-role.ts,
@@ -228,7 +229,8 @@ src/lib/auth/                                    session.ts (getCurrentUser, ser
 ```
 
 Aucune donnée personnelle, code, `challengeId` ni `resetToken` dans une URL. Seuls les jetons des liens SMS et email
-(`/consentement/[token]`, `/activation/[token]`) apparaissent dans un chemin, imposés par le canal (voir Sécurité).
+(`/consentement/[token]`) apparaissent dans un chemin, imposés par le canal (voir Sécurité). L'activation enseignant
+porte le sien dans le fragment (`/activation#jeton=…`), jamais envoyé au serveur ; l'API le lit dans le corps d'un POST.
 
 ---
 

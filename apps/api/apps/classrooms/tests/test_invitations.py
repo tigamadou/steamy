@@ -26,7 +26,7 @@ PASSWORD = "Tableau2026"
 
 def link_token(address="nadia@ecole.bj"):
     message = [m for m in mail.outbox if m.to == [address]][-1]
-    return re.search(r"/activation/(\S+)", message.body).group(1)
+    return re.search(r"/activation#jeton=([\w-]+)", message.body).group(1)
 
 
 def accept(token, password=PASSWORD, client=None, **extra):
@@ -73,7 +73,7 @@ def test_admin_send_action_emails_a_hashed_link(school_bj):
     model_admin.send(request, TeacherInvitation.objects.filter(pk__in=[invitation.pk, accepted.pk]))
     assert [m.to for m in mail.outbox] == [["nadia@ecole.bj"]]
     body = mail.outbox[0].body
-    assert "Lycée de Porto-Novo" in body and "http://localhost:3000/activation/" in body
+    assert "Lycée de Porto-Novo" in body and "http://localhost:3000/activation#jeton=" in body
     token = link_token()
     invitation.refresh_from_db()
     assert invitation.token_hash == hash_token(token) and token not in invitation.token_hash

@@ -164,7 +164,7 @@ Les URL sont en français, avec un *route group* et un layout par espace :
 | Espace | Groupe | Préfixe d'URL | Exemples |
 | --- | --- | --- | --- |
 | Public | `(public)` | `/` | `/parcours`, `/parcours/[slug]` (WL22), `/boutique`, `/boutique/[slug]`, `/evenements`, `/evenements/[slug]` (WL23), `/ecoles`, `/a-propos`, `/blog`, `/blog/[slug]`, `/guides`, `/categories`, `/legal/[doc]`, `/aide` (WL24) |
-| Authentification | `(auth)` | `/` | `/connexion`, `/inscription`, `/inscription/apprenant/…`, `/inscription/parent/…`, `/mot-de-passe-oublie/…`, `/activation/[token]` |
+| Authentification | `(auth)` | `/` | `/connexion`, `/inscription`, `/inscription/apprenant/…`, `/inscription/parent/…`, `/mot-de-passe-oublie/…`, `/activation` (jeton en fragment) |
 | Apprenant | `(apprenant)` | `/apprenant` | `/apprenant` (WD01), `/apprenant/parcours`, `/apprenant/catalogue`, `/apprenant/parcours/[slug]/…`, `/apprenant/souhaits`, `/apprenant/boutique/…`, `/apprenant/profil/…` |
 | Parent | `(parent)` | `/parent` | `/parent`, `/parent/enfants/[id]`, `/parent/consentements/[id]` (WPD05), `/parent/demandes/[id]` (WPD15), `/parent/evenements`, `/parent/commandes`, `/parent/boutique/…` |
 | Enseignant | `(enseignant)` | `/enseignant` | `/enseignant`, `/enseignant/classes/[id]`, `/enseignant/eleves/[id]` |
