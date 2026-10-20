@@ -10,10 +10,11 @@ const countries = { status: "ready", retry: vi.fn(), items: [{ id: 1, code: "BJ"
 vi.mock("@/lib/use-referential", () => ({ useReferential: () => countries }));
 const getZones = vi.fn();
 const createKitOrder = vi.fn();
-vi.mock("./api", () => ({ getZones, createKitOrder }));
+const getOrder = vi.fn();
+vi.mock("./api", () => ({ getZones, createKitOrder, getOrder }));
 
 const { DeliveryForm } = await import("./DeliveryForm");
-const { readCheckout, readOrderToken, updateCheckout } = await import("./checkout-storage");
+const { readCheckout, readOrderToken, saveOrderToken, updateCheckout } = await import("./checkout-storage");
 
 const ZONES = [
   { id: 1, country: "BJ", name: "Cotonou et Abomey-Calavi", fee: 1000, delayLabel: "24 à 48 h" },
@@ -36,6 +37,7 @@ beforeEach(() => {
   router.replace.mockReset();
   getZones.mockReset();
   createKitOrder.mockReset();
+  getOrder.mockReset();
   getZones.mockResolvedValue({ ok: true, data: ZONES });
   updateCheckout({ guest: GUEST });
 });
@@ -68,6 +70,62 @@ describe("WK05 · livraison", () => {
       reference: "KT-1",
       delivery: { country: "BJ", zoneId: 2, district: "Ouando", addressLine: "Près du marché" },
     });
+    expect(readCheckout().orderKey).toContain('"kitSlug":"steamy-bot-v1"');
+    expect(getOrder).not.toHaveBeenCalled();
+  });
+
+  it("retour à WK05 sans changement : la commande en attente est reprise, sans nouvelle réservation", async () => {
+    const later = new Date(Date.now() + 15 * 60_000).toISOString();
+    const earlier = new Date(Date.now() - 60_000).toISOString();
+    createKitOrder.mockResolvedValue({ ok: true, data: { reference: "KT-1", guestToken: "secret" } });
+    const { unmount } = render(<DeliveryForm cart={CART as never} />);
+    await fill();
+    await userEvent.click(screen.getByRole("button", { name: "Continuer vers le paiement" }));
+    expect(createKitOrder).toHaveBeenCalledTimes(1);
+    unmount();
+
+    const again = async () => {
+      router.push.mockReset();
+      const view = render(<DeliveryForm cart={CART as never} />);
+      await waitFor(() => expect(screen.getByRole("combobox", { name: /zone de livraison/ })).toHaveValue("2"));
+      await userEvent.click(screen.getByRole("button", { name: "Continuer vers le paiement" }));
+      await waitFor(() => expect(router.push).toHaveBeenCalledWith("/boutique/commande/paiement"));
+      view.unmount();
+    };
+
+    // Commande toujours à payer : reprise, lue avec son jeton
+    getOrder.mockResolvedValueOnce({ ok: true, data: { status: "pending", expiresAt: later } });
+    await again();
+    expect(getOrder).toHaveBeenCalledWith("KT-1", "secret");
+    expect(createKitOrder).toHaveBeenCalledTimes(1);
+
+    // Expirée, annulée ou illisible : nouvelle commande
+    getOrder.mockResolvedValueOnce({ ok: true, data: { status: "pending", expiresAt: earlier } });
+    await again();
+    getOrder.mockResolvedValueOnce({ ok: true, data: { status: "cancelled", expiresAt: later } });
+    await again();
+    getOrder.mockResolvedValueOnce({ ok: false, code: "NETWORK_UNAVAILABLE", message: "", fields: {} });
+    await again();
+    expect(createKitOrder).toHaveBeenCalledTimes(4);
+
+    // Jeton perdu : nouvelle commande, sans lecture
+    getOrder.mockClear();
+    updateCheckout({ reference: "KT-2" });
+    await again();
+    expect(getOrder).not.toHaveBeenCalled();
+    expect(createKitOrder).toHaveBeenCalledTimes(5);
+  });
+
+  it("panier, coordonnées ou adresse changés : nouvelle commande", async () => {
+    saveOrderToken("KT-9", "secret");
+    updateCheckout({ reference: "KT-9", orderKey: "{}" });
+    createKitOrder.mockResolvedValue({ ok: true, data: { reference: "KT-10", guestToken: "autre" } });
+    render(<DeliveryForm cart={CART as never} />);
+    await fill();
+    await userEvent.click(screen.getByRole("button", { name: "Continuer vers le paiement" }));
+    await waitFor(() => expect(createKitOrder).toHaveBeenCalledTimes(1));
+    expect(getOrder).not.toHaveBeenCalled();
+    expect(readCheckout().reference).toBe("KT-10");
   });
 
   it("champs obligatoires ; changer de pays vide la zone", async () => {

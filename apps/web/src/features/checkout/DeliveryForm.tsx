@@ -12,11 +12,30 @@ import { routes } from "@/lib/routes";
 import { throttledLabel, useThrottle } from "@/lib/use-throttle";
 import { useReferential } from "@/lib/use-referential";
 
-import { createKitOrder, getZones } from "./api";
+import { createKitOrder, getOrder, getZones, type KitOrderInput } from "./api";
 import { orderItems, type ReadyCart } from "./CheckoutGate";
-import { readCheckout, saveOrderToken, updateCheckout, type DeliveryInfo } from "./checkout-storage";
+import { readCheckout, readOrderToken, saveOrderToken, updateCheckout, type DeliveryInfo } from "./checkout-storage";
 
 type Errors = { country?: string; zone?: string; district?: string; street?: string; phone?: string; form?: string };
+
+/** Empreinte d'une commande : mêmes lignes, coordonnées et adresse (aucun prix, D37). */
+function orderKey(input: KitOrderInput): string {
+  return JSON.stringify(input);
+}
+
+/**
+ * Commande déjà créée par un passage précédent, avec la même empreinte, encore à payer et non expirée (heure limite
+ * du serveur) : elle est reprise, sans nouvelle réservation de stock. Toute autre issue (empreinte changée, jeton
+ * absent, commande payée, annulée ou expirée, lecture impossible) mène à une nouvelle commande.
+ */
+async function reusableOrder(key: string): Promise<boolean> {
+  const { reference, orderKey: saved } = readCheckout();
+  if (!reference || saved !== key) return false;
+  const token = readOrderToken(reference);
+  if (!token) return false;
+  const order = await getOrder(reference, token);
+  return order.ok && order.data.status === "pending" && Date.parse(order.data.expiresAt) > Date.now();
+}
 
 /** Zones de livraison du pays choisi (D38), avec leurs frais et leur délai. */
 function useZones(country: string) {
@@ -42,7 +61,8 @@ function useZones(country: string) {
 /**
  * WK05 · Livraison de l'invité : `AddressForm` du DS, zones du pays (`shop/delivery-zones/?country=`), frais et délai
  * lus dans la zone dès qu'elle est choisie (jamais calculés), téléphone du destinataire prérempli. « Continuer vers
- * le paiement » crée la commande (`POST payments/orders/`), qui calcule le total et réserve le stock (D37, D38).
+ * le paiement » crée la commande (`POST payments/orders/`), qui calcule le total et réserve le stock (D37, D38). Un
+ * retour à WK05 sans rien changer (panier, coordonnées, adresse) reprend la commande en attente au lieu d'en créer une.
  */
 export function DeliveryForm({ cart }: { cart: ReadyCart }) {
   const router = useRouter();
@@ -84,7 +104,7 @@ export function DeliveryForm({ cart }: { cart: ReadyCart }) {
     const delivery: DeliveryInfo = { country, zoneId: zone!.id, district, addressLine: street };
     updateCheckout({ delivery });
     setPending(true);
-    const result = await createKitOrder({
+    const input: KitOrderInput = {
       items: orderItems(cart),
       guest: { firstName: guest.firstName, lastName: guest.lastName, phone: guest.phone },
       deliveryAddress: {
@@ -95,11 +115,19 @@ export function DeliveryForm({ cart }: { cart: ReadyCart }) {
         district,
         addressLine: street,
       },
-    });
+    };
+    const key = orderKey(input);
+    if (await reusableOrder(key)) {
+      // Next garde la page masquée (Activity) : le bouton est libéré pour un retour arrière
+      setPending(false);
+      router.push(routes.checkout.payment);
+      return;
+    }
+    const result = await createKitOrder(input);
     setPending(false);
     if (result.ok) {
       if (result.data.guestToken) saveOrderToken(result.data.reference, result.data.guestToken);
-      updateCheckout({ reference: result.data.reference });
+      updateCheckout({ reference: result.data.reference, orderKey: key });
       router.push(routes.checkout.payment);
       return;
     }
