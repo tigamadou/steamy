@@ -78,13 +78,23 @@ export function noteDroppedLines(count: number): void {
   }
 }
 
-/** Lignes écartées à la fusion depuis le dernier affichage du panier (0 sinon) ; le compteur est remis à zéro. */
-export function takeDroppedLines(): number {
+/**
+ * Lignes écartées à la fusion depuis le dernier affichage du panier (0 sinon), sans remise à zéro : un chargement
+ * abandonné (redirection, double effet de StrictMode) ne les fait pas perdre.
+ */
+export function peekDroppedLines(): number {
   try {
-    const count = Number(window.sessionStorage.getItem(DROPPED_LINES_KEY)) || 0;
-    window.sessionStorage.removeItem(DROPPED_LINES_KEY);
-    return count;
+    return Number(window.sessionStorage.getItem(DROPPED_LINES_KEY)) || 0;
   } catch {
     return 0;
+  }
+}
+
+/** Remet le compteur à zéro, une fois l'avis affiché par le panier. */
+export function clearDroppedLines(): void {
+  try {
+    window.sessionStorage.removeItem(DROPPED_LINES_KEY);
+  } catch {
+    // Stockage refusé : rien à effacer
   }
 }

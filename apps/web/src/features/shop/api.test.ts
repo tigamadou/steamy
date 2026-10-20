@@ -14,7 +14,7 @@ const client = { GET: answer("GET"), POST: answer("POST"), PATCH: answer("PATCH"
 vi.mock("@/lib/api-browser", () => ({ getBrowserApi: async () => client }));
 
 const api = await import("./api");
-const { readGuestCart, takeDroppedLines, writeGuestCart } = await import("./guest-cart");
+const { clearDroppedLines, peekDroppedLines, readGuestCart, writeGuestCart } = await import("./guest-cart");
 
 const CART = { items: [{ id: 7, kit: KIT, quantity: 2, total: 70000 }], count: 2, subtotal: 70000 };
 const failure = (code: string, status: number) => ({ status, error: { code, message: `${code} !` } });
@@ -100,29 +100,40 @@ describe("alerte de réassort", () => {
 });
 
 describe("fusion du panier invité", () => {
-  it("verse chaque ligne, abandonne et compte les refus définitifs, garde les échecs passagers", async () => {
+  it("verse chaque ligne, abandonne et compte les refus définitifs, garde tous les autres échecs", async () => {
     writeGuestCart([
       { kitSlug: "bot", quantity: 2 },
       { kitSlug: "epuise", quantity: 1 },
+      { kitSlug: "retire", quantity: 1 },
+      { kitSlug: "trop", quantity: 99 },
       { kitSlug: "interdit", quantity: 1 },
+      { kitSlug: "session", quantity: 1 },
+      { kitSlug: "csrf", quantity: 1 },
       { kitSlug: "coupure", quantity: 1 },
     ]);
     replies.set("POST /api/shop/cart/items/", (init) => {
       const slug = (init as { body: { kitSlug: string } }).body.kitSlug;
       if (slug === "bot") return { status: 201, data: CART };
       if (slug === "epuise") return failure("OUT_OF_STOCK", 409);
+      if (slug === "retire") return failure("NOT_FOUND", 404);
+      if (slug === "trop") return failure("VALIDATION_ERROR", 400);
       if (slug === "interdit") return failure("PERMISSION_DENIED", 403);
+      if (slug === "session") return failure("NOT_AUTHENTICATED", 401);
+      if (slug === "csrf") return failure("CSRF_FAILED", 403);
       return failure("SERVER_ERROR", 500);
     });
     expect(await api.mergeGuestCart()).toBe(1);
     expect(client.POST).toHaveBeenCalledWith("/api/shop/cart/items/", { body: { kitSlug: "bot", quantity: 2 } });
-    expect(readGuestCart()).toEqual([{ kitSlug: "coupure", quantity: 1 }]);
+    // Session expirée, CSRF, accès refusé ou panne : la ligne reste dans le panier invité
+    expect(readGuestCart().map((line) => line.kitSlug)).toEqual(["interdit", "session", "csrf", "coupure"]);
     // Lignes refusées retenues pour l'avis du panier, cumulées d'une fusion à l'autre
-    expect(window.sessionStorage.getItem("steamy:panier-ecartes")).toBe("2");
+    expect(peekDroppedLines()).toBe(3);
     writeGuestCart([{ kitSlug: "epuise", quantity: 1 }]);
     await api.mergeGuestCart();
-    expect(takeDroppedLines()).toBe(3);
-    expect(takeDroppedLines()).toBe(0);
+    expect(peekDroppedLines()).toBe(4);
+    expect(peekDroppedLines()).toBe(4);
+    clearDroppedLines();
+    expect(peekDroppedLines()).toBe(0);
   });
 
   it("panier vide : aucun appel", async () => {

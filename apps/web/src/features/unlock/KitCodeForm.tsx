@@ -7,7 +7,7 @@ import { useState, type FormEvent } from "react";
 import { Button, Field, KitCodeInput } from "@/components/ds";
 import { errorMessage, type ApiFailure } from "@/lib/api-call";
 import { routes } from "@/lib/routes";
-import { throttledLabel, useThrottle } from "@/lib/use-throttle";
+import { throttledLabel, useThrottle } from "@/components/ds/RetryCountdown";
 
 import { redeemKitCode } from "./api";
 import { UNLOCKED_PARAM } from "./types";

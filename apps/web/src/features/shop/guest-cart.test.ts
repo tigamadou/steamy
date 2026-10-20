@@ -3,11 +3,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   addGuestLine,
   GUEST_CART_KEY,
+  clearDroppedLines,
   noteDroppedLines,
+  peekDroppedLines,
   readGuestCart,
   removeGuestLine,
   setGuestQuantity,
-  takeDroppedLines,
   writeGuestCart,
 } from "./guest-cart";
 
@@ -66,6 +67,10 @@ describe("panier invité (localStorage)", () => {
     expect(() => writeGuestCart([{ kitSlug: "bot", quantity: 1 }])).not.toThrow();
     // Lignes écartées à la fusion : rien n'est retenu, rien n'est signalé
     expect(() => noteDroppedLines(1)).not.toThrow();
-    expect(takeDroppedLines()).toBe(0);
+    expect(peekDroppedLines()).toBe(0);
+    vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+      throw new Error("refusé");
+    });
+    expect(() => clearDroppedLines()).not.toThrow();
   });
 });
