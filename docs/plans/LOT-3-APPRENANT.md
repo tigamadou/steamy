@@ -15,7 +15,7 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 3.6, 3.7b, 3.7c, 3.8 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) fixé le 2026-10-19 : pastilles Points/Rang débloquées
+Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot 3 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) fixé le 2026-10-19 : pastilles Points/Rang débloquées
 
 ### Valeur pédagogique (API-L3a) — ✅ terminé
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
@@ -108,18 +108,23 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6, 3.7b, 3.7c, 3.8 · Prérequis 
   - [x] Parcours Playwright : WD19 enregistrer puis recharger, WD22, WD15 envoi puis annulation (apprenant neuf)
 
 ### Commerce (API-L3b) — 🟡 en cours
-- [ ] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage`
-  - [ ] WA01 saisie du Kit Code (`KitCodeInput`)
-  - [ ] WA06 erreur de Kit Code (`KIT_CODE_INVALID`, `KIT_CODE_ALREADY_USED`, `KIT_CODE_NOT_COMPATIBLE`, `THROTTLED`)
-  - [ ] WA02 suivi de la demande au parent (interrogation 10 s, relance, annulation)
-  - [ ] Drapeau `unlock` activé sur WC05
-  - [ ] WD14 commandes de l'apprenant
-  - [ ] Bandeau des demandes en attente dans WD23
-  - [ ] Composant `PaymentForm` (WA03, `WANetworkCard`)
-  - [ ] Composant `PaymentStatusPanel` (WA04 attente, WA05 succès, WA07 échec ; prop `register`)
-  - [ ] Tests unitaires : `KitCodeInput`, `PaymentForm` sans réseau en dur, `PaymentStatusPanel` dans ses 3 états
-  - [ ] Parcours Playwright P2 (Kit Code)
-  - [ ] Parcours Playwright P3 (demande de paiement)
+- [x] **3.6** Déblocage d'un parcours et demande au parent (requiert API-L3b) · `feature/lot3-deblocage` · PR #119
+  - [x] `WA01` saisie du Kit Code (`KitCodeInput`), toast « Parcours débloqué » sur `WC06a`
+  - [x] `WA06` erreur de Kit Code (`KIT_CODE_INVALID`, `KIT_CODE_ALREADY_USED`, `KIT_CODE_NOT_COMPATIBLE`, `THROTTLED`)
+  - [x] `WA02` suivi de la demande au parent (interrogation 10 s, relance, annulation, nouvelle demande)
+  - [x] Drapeau `unlock` activé puis retiré : CTA de `WC05` « J'ai un Kit Code », « Demander à mon parent » (création de la demande puis `WA02`, route intermédiaire `/catalogue/[slug]/demande` retirée), « Demande envoyée »
+  - [x] `WD14` commandes de l'apprenant ; drapeau `orders` activé puis retiré (ligne du hub `WD13`)
+  - [x] Bandeau des demandes en attente dans `WD23`
+  - [x] Composant `PaymentForm` (WA03, `WANetworkCard`)
+  - [x] Composant `PaymentStatusPanel` (WA04 attente, WA05 succès, WA07 échec ; prop `register`)
+  - [x] Tests unitaires : `KitCodeInput`, `PaymentForm` sans réseau en dur, `PaymentStatusPanel` dans ses 3 états
+  - [x] Parcours Playwright P2 (Kit Code)
+  - [x] Parcours Playwright P3 (demande de paiement ; paiement du parent par l'API en attendant WPD15)
+  > Écarts d'API signalés : `Retry-After` exposé par CORS depuis #124 (compte à rebours de WA06 après
+  > `THROTTLED`) ; `PaymentRequest.status` est typé avec l'énumération des paiements dans le schéma OpenAPI (collision
+  > `PaymentStatusEnum`, à fixer dans `ENUM_NAME_OVERRIDES`), le front rétablit le type ; `Order.deliveryZone` n'est pas
+  > `nullable` dans le schéma alors qu'il vaut `null` pour un parcours. Filtre « Échouées » de WD14 remplacé par
+  > « Annulées » : une commande n'a pas de statut d'échec (D37, statuts `pending`, `paid`, `cancelled`, `refunded`).
 - [x] **3.7a** Boutique : catalogue, détail et panier (requiert API-L3b) · `feature/lot3-boutique-catalogue-panier` · PR #117
   - [x] `WK01` catalogue de la boutique (connecté ; `/boutique` invité = WL07)
   - [x] `WK02` détail d'un kit
@@ -136,16 +141,26 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6, 3.7b, 3.7c, 3.8 · Prérequis 
   > total fait foi à WK06 ; le schéma OpenAPI de `DELETE shop/cart/items/{id}/` annonce un 204 alors que l'API renvoie
   > le panier (le front relit le panier sans corps). « Demander à mon parent » est un rappel (`onRequestParent`) que
   > 3.7c branche ; sans lui, le bouton est absent.
-- [ ] **3.7b** Checkout invité, D12 (requiert API-L3b) · `feature/lot3-boutique-checkout-invite`
-  - [ ] WK04 coordonnées de l'invité
-  - [ ] WK05 livraison (`AddressForm`, zones `shop/delivery-zones/`)
-  - [ ] WK06 paiement
-  - [ ] WK09 échec du paiement (panier conservé)
-  - [ ] WK07 suivi de commande (`ShippingTimeline`, jeton `X-Guest-Token`, `noindex`, `no-referrer`)
-  - [ ] Gestion de `OUT_OF_STOCK`, `ORDER_EXPIRED`, `NETWORK_UNAVAILABLE`
-  - [ ] Parcours Playwright P4
-- [ ] **3.7c** Demande de kit au parent (requiert API-L3b) · `feature/lot3-boutique-demande-parent`
-  - [ ] WK08 demande de kit au parent (`/apprenant/demandes/[id]`, `kind=kit`)
+- [x] **3.7b** Checkout invité, D12 (requiert API-L3b) · `feature/lot3-boutique-checkout-invite` · PR #121
+  - [x] `WK04` coordonnées de l'invité
+  - [x] `WK05` livraison (`AddressForm`, zones `shop/delivery-zones/`)
+  - [x] `WK06` paiement
+  - [x] `WK09` échec du paiement (panier conservé)
+  - [x] `WK07` suivi de commande (`ShippingTimeline`, jeton `X-Guest-Token`, `noindex`, `no-referrer`)
+  - [x] Gestion de `OUT_OF_STOCK`, `ORDER_EXPIRED`, `NETWORK_UNAVAILABLE`
+  - [x] Parcours Playwright P4
+  > Écarts : la commande est créée en quittant WK05 (« Continuer vers le paiement ») pour afficher le total serveur et
+  > l'heure limite sur WK06 ; une nouvelle commande est créée à chaque passage (l'ancienne expire et rend le stock).
+  > `city` de l'adresse = nom de la zone (`AddressForm` n'a pas de champ ville). Le jeton du lien SMS (`#jeton=`) est
+  > rangé dans le `sessionStorage` de l'onglet puis retiré de l'adresse. « Télécharger le reçu » lit le PDF avec le
+  > jeton (redirection vers une URL présignée : CORS du stockage à vérifier en préproduction). Commande `refunded`
+  > (paiement arrivé après le délai, C17) : état dédié de WK07, panier et tunnel conservés. `apiCall` aplatit
+  > désormais les erreurs de champ imbriquées (`guest.phone`).
+  > Reste pour la fin de lot : réutiliser la commande `pending` quand le panier et l'adresse n'ont pas changé.
+- [x] **3.7c** Demande de kit au parent (requiert API-L3b) · `feature/lot3-boutique-demande-parent` · PR #120
+  - [x] `WK08` demande de kit au parent (`/apprenant/demandes/[id]`, `kind=kit`) : montant des articles seul, livraison ajoutée par le parent (C10), `Loader` inline, annulation ; ni relance, ni « Changer de parent », ni « Renvoyer le lien »
+  - [x] Panier `WK03` : « Demander à mon parent » crée la demande (`POST payments/payment-requests/ { kind: "kit", items }`) puis ouvre `WK08` ; échec affiché sous le bouton
+  - [x] Parcours Playwright P5 jusqu'à WK08 (annulation, nouvelle demande, paiement du parent par l'API en attendant WPD15)
 - [x] **3.8** Steamy Events côté apprenant (requiert API-L3b, `events`) · `feature/lot3-steamy-events` · PR #116
   - [x] `WD10` événements et candidatures (ticket libre signalé, C12)
   - [x] `WL23` fiche événement dans le shell (`EventDetail` du lot 1 en h2, `EVENT_FULL`, `EVENT_CLOSED`)

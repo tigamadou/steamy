@@ -7,6 +7,7 @@ import { getCourse } from "@/lib/catalog";
 import { learnerCatalogHref } from "@/lib/catalog-filters";
 import { routes } from "@/lib/routes";
 import { getKit } from "@/lib/shop";
+import { getPendingRequests } from "@/features/unlock/server";
 
 import { CourseHero, Curriculum, DetailSection } from "./course-detail";
 import { EnrollCard } from "./EnrollCard";
@@ -21,7 +22,12 @@ import { getLearnerCourseState } from "./learner-state";
 export async function LearnerCourseView({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   await connection();
-  const [course, state] = await Promise.all([getCourse(slug), getLearnerCourseState()]);
+  // Demandes au parent illisibles : le CTA reste « Demander à mon parent », l'API renvoie alors la demande en cours
+  const [course, state, requests] = await Promise.all([
+    getCourse(slug),
+    getLearnerCourseState(),
+    getPendingRequests().catch(() => []),
+  ]);
   if (!course) {
     notFound();
   }
@@ -75,6 +81,7 @@ export async function LearnerCourseView({ params }: { params: Promise<{ slug: st
           progress={state.progress[course.slug]}
           wished={state.wished.includes(course.slug)}
           kit={kit}
+          pendingRequestId={requests.find((request) => request.course?.slug === course.slug)?.id}
         />
       </div>
     </>

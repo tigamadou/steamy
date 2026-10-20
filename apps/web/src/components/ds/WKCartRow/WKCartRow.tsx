@@ -75,7 +75,7 @@ export function WKCartRow({
         >
           {name}
         </Link>
-        <p className={cx("mt-0.5 text-[13px] font-bold", unavailable ? "text-ink-500" : "text-primary-700")}>
+        <p className={cx("mt-0.5 text-[13px] font-bold", unavailable ? "text-ink-600" : "text-primary-700")}>
           {priceLabel}
           <span className="sr-only"> l&apos;unité</span>
         </p>

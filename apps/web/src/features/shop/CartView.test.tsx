@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Activity } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { KIT } from "@/test/api-fixtures";
@@ -55,12 +56,32 @@ describe("WK03 · panier de l'apprenant (serveur)", () => {
     expect(api.mergeGuestCart).not.toHaveBeenCalled();
   });
 
-  it("« Demander à mon parent » remet les lignes au rappel de l'étape 3.7c", async () => {
+  it("« Demander à mon parent » remet les lignes au rappel (WK08) ; un échec est affiché sous le bouton", async () => {
     api.getCart.mockResolvedValue({ ok: true, data: cart([{ id: 1, kit: KIT, quantity: 2 }]) });
-    const onRequestParent = vi.fn();
+    const onRequestParent = vi.fn().mockResolvedValueOnce("Un kit n'est plus en stock.").mockResolvedValueOnce(null);
     render(<CartView context="learner" onRequestParent={onRequestParent} />);
     await userEvent.click(await screen.findByRole("button", { name: "Demander à mon parent" }));
     expect(onRequestParent).toHaveBeenCalledWith([{ kitSlug: "steamy-bot-v1", quantity: 2 }]);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Un kit n'est plus en stock.");
+    await userEvent.click(screen.getByRole("button", { name: "Demander à mon parent" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Demander à mon parent/ })).toBeDisabled();
+  });
+
+  it("page masquée puis réaffichée (Activity) après l'ouverture de WK08 : le bouton est libéré", async () => {
+    api.getCart.mockResolvedValue({ ok: true, data: cart([{ id: 1, kit: KIT, quantity: 1 }]) });
+    const onRequestParent = vi.fn().mockResolvedValue(null);
+    const view = (mode: "visible" | "hidden") => (
+      <Activity mode={mode}>
+        <CartView context="learner" onRequestParent={onRequestParent} />
+      </Activity>
+    );
+    const { rerender } = render(view("visible"));
+    await userEvent.click(await screen.findByRole("button", { name: "Demander à mon parent" }));
+    expect(screen.getByRole("button", { name: /Demander à mon parent/ })).toBeDisabled();
+    rerender(view("hidden"));
+    rerender(view("visible"));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Demander à mon parent" })).toBeEnabled());
   });
 
   it("quantité et retrait enregistrés sur le serveur ; échec annoncé ; focus rendu à la liste", async () => {
