@@ -85,7 +85,7 @@ export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
   const [notice, setNotice] = useState<string>();
   const [declining, setDeclining] = useState(false);
   const title = request.course?.title ?? request.items.map((item) => item.title).join(", ");
-  const settling = state === "confirming" || state === "paid";
+  const settling = state === "confirming" || state === "paid" || state === "refunded";
 
   /** Référence de la commande à payer : celle en cours, sinon une commande créée pour la demande (parcours). */
   async function reference(): Promise<ApiResult<string>> {

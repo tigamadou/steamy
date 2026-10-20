@@ -170,6 +170,26 @@ describe("PaymentForm · Mobile Money préféré et double clic (WPD15)", () => 
     expect(screen.getByRole("textbox", { name: /Numéro Mobile Money/ })).toHaveValue("");
   });
 
+  it("réseau préféré qui n'est plus proposé pour le pays : aucun réseau présélectionné, choix exigé", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <PaymentForm
+        amount={18000}
+        countries={COUNTRIES}
+        preferred={{ country: "BJ", network: "reseau-retire", phone: "+2290190123401" }}
+        onSubmit={onSubmit}
+      />,
+    );
+    await screen.findByRole("radio", { name: "Réseau A" });
+    expect(screen.getAllByRole("radio").filter((radio) => (radio as HTMLInputElement).checked)).toHaveLength(0);
+    await user.click(screen.getByRole("button", { name: /^Payer/ }));
+    expect(onSubmit).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("radio", { name: "Réseau B" }));
+    await user.click(screen.getByRole("button", { name: /^Payer/ }));
+    expect(onSubmit).toHaveBeenCalledWith({ country: "BJ", network: "reseau-b", msisdn: "+2290190123401" });
+  });
+
   it("un double clic sur « Payer » n'initie qu'un paiement", async () => {
     let finish: (value: unknown) => void = () => {};
     const onSubmit = vi.fn(() => new Promise((resolve) => (finish = resolve)));

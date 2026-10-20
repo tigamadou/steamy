@@ -3,7 +3,7 @@ import { errorMessage, type ApiFailure } from "@/lib/api-call";
 import type { RequestStatus } from "@/features/unlock/types";
 
 /** États affichés par WPD15 : statuts de la demande (API) et états propres au paiement en cours. */
-export type ScreenState = RequestStatus | "confirming" | "failed" | "outofstock";
+export type ScreenState = RequestStatus | "confirming" | "failed" | "outofstock" | "refunded";
 
 /** Pastille d'état de la demande (maquette de 4.0, `WPDACStatusBadge`). */
 export const STATE_BADGES: Record<ScreenState, { tone: BadgeTone; label: string }> = {
@@ -15,6 +15,7 @@ export const STATE_BADGES: Record<ScreenState, { tone: BadgeTone; label: string 
   expired: { tone: "neutral", label: "Expirée" },
   cancelled: { tone: "neutral", label: "Annulée" },
   outofstock: { tone: "amber", label: "Rupture" },
+  refunded: { tone: "info", label: "Remboursé" },
 };
 
 /**
@@ -29,6 +30,8 @@ export function paymentErrorMessage(failure: ApiFailure): string {
       return "Le délai de la commande est dépassé. Relancez le paiement : une nouvelle commande sera créée.";
     case "ORDER_ALREADY_PAID":
       return "Cette commande est déjà payée.";
+    case "PAYMENT_IN_PROGRESS":
+      return "Un paiement de cette commande est déjà en cours : validez-le sur votre téléphone, ou réessayez dans quelques minutes.";
     case "PAYMENT_FAILED":
       return "Le prestataire Mobile Money a refusé le paiement. Vérifiez votre numéro et votre solde, puis réessayez.";
     case "PAYMENT_REQUEST_CLOSED":

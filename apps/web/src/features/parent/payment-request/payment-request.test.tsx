@@ -51,8 +51,9 @@ const failure = (status: number, code: string, fields?: Record<string, string>, 
 const fail = (code: string) => ({ ok: false as const, code: code as never, message: "", fields: {} });
 
 /** Référentiels du navigateur : pays, réseaux, zones de livraison, et statut du paiement interrogé. */
-function browserGet(paymentStatus: unknown = payment({ status: "succeeded" })) {
+function browserGet(paymentStatus: unknown = payment({ status: "succeeded" }), orderStatus = order({ status: "paid" })) {
   GET.mockImplementation(async (path: string) => {
+    if (path === "/api/payments/orders/{reference}/") return respond(200, orderStatus);
     if (path === "/api/referentials/countries/") return respond(200, COUNTRIES);
     if (path === "/api/referentials/payment-networks/") return respond(200, NETWORKS);
     if (path === "/api/shop/delivery-zones/") return respond(200, [ADDRESS.zone]);
@@ -79,13 +80,14 @@ describe("messages de WPD15", () => {
     ["ORDER_ALREADY_PAID", /déjà payée/],
     ["PAYMENT_FAILED", /prestataire Mobile Money a refusé/],
     ["PAYMENT_REQUEST_CLOSED", /n'est plus en attente/],
+    ["PAYMENT_IN_PROGRESS", /déjà en cours : validez-le sur votre téléphone/],
     ["NETWORK_UNAVAILABLE", /Vérifiez votre connexion/],
   ])("%s traduit", (code, text) => {
     expect(paymentErrorMessage(fail(code))).toMatch(text);
     expect(translated(fail(code)).message).toMatch(text);
   });
 
-  it("pastilles des 8 états de la maquette", () => {
+  it("pastilles des 8 états de la maquette, et du paiement remboursé (C17)", () => {
     expect(Object.keys(STATE_BADGES)).toEqual([
       "pending",
       "confirming",
@@ -95,6 +97,7 @@ describe("messages de WPD15", () => {
       "expired",
       "cancelled",
       "outofstock",
+      "refunded",
     ]);
   });
 
@@ -207,9 +210,11 @@ describe("DeclineRequestDialog", () => {
     POST.mockResolvedValueOnce(failure(409, "PAYMENT_REQUEST_CLOSED"));
     await user.click(screen.getByRole("button", { name: "Refuser la demande" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("n'est plus en attente");
+    expect(router.refresh).toHaveBeenCalledTimes(1);
     POST.mockResolvedValueOnce(failure(500, "SERVER_ERROR"));
     await user.click(screen.getByRole("button", { name: "Refuser la demande" }));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Réessayez dans quelques instants"));
+    expect(router.refresh).toHaveBeenCalledTimes(1);
     await user.click(screen.getByRole("button", { name: "Annuler" }));
     expect(onClose).toHaveBeenCalled();
     expect(onDeclined).not.toHaveBeenCalled();
@@ -249,8 +254,40 @@ describe("OrderPayment (WA03 → WA04 → WA05 / WA07)", () => {
     });
     expect(onState).toHaveBeenCalledWith("confirming");
     expect(await screen.findByRole("heading", { name: "Paiement réussi !" })).toBeInTheDocument();
-    expect(onState).toHaveBeenLastCalledWith("paid");
+    await waitFor(() => expect(onState).toHaveBeenLastCalledWith("paid"));
+    expect(GET).toHaveBeenCalledWith("/api/payments/orders/{reference}/", { params: { path: { reference: "CMD-1" } } });
     expect(screen.getByRole("link", { name: /Retour à l'accueil/ })).toHaveAttribute("href", "/parent");
+  });
+
+  it("paiement arrivé après le délai (C17) : commande relue remboursée, « Paiement remboursé » au lieu du succès", async () => {
+    const user = userEvent.setup();
+    browserGet(payment({ status: "succeeded" }), order({ status: "refunded" }));
+    POST.mockResolvedValue(respond(201, payment()));
+    const { onState } = setup();
+    await screen.findByRole("radio", { name: "MTN Mobile Money" });
+    await user.click(payButton());
+    expect(await screen.findByRole("heading", { name: "Paiement remboursé" })).toBeInTheDocument();
+    expect(screen.getByText(/il vous est remboursé automatiquement/)).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Paiement réussi !" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Voir mes commandes" })).toHaveAttribute("href", "/parent/commandes");
+    expect(onState).toHaveBeenLastCalledWith("refunded");
+  });
+
+  it("double clic sur « Réessayer le paiement » : un seul nouvel essai, bouton occupé pendant l'envoi", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValueOnce(respond(201, payment({ status: "failed", failureCode: "DECLINED" })));
+    setup();
+    await screen.findByRole("radio", { name: "MTN Mobile Money" });
+    await user.click(payButton());
+    const retry = await screen.findByRole("button", { name: "Réessayer le paiement" });
+    let finish: (value: unknown) => void = () => {};
+    POST.mockImplementationOnce(() => new Promise((resolve) => (finish = resolve)));
+    await user.dblClick(retry);
+    expect(POST).toHaveBeenCalledTimes(2);
+    expect(retry).toHaveAttribute("aria-busy", "true");
+    await act(async () => finish(failure(409, "PAYMENT_IN_PROGRESS")));
+    expect(await screen.findByRole("alert")).toHaveTextContent(/déjà en cours : validez-le sur votre téléphone/);
+    expect(POST).toHaveBeenCalledTimes(2);
   });
 
   it("échec du prestataire : raison, « Réessayer » rejoue le numéro, « Changer de numéro » revient au formulaire", async () => {
@@ -267,10 +304,8 @@ describe("OrderPayment (WA03 → WA04 → WA05 / WA07)", () => {
     await waitFor(() => expect(POST).toHaveBeenCalledTimes(2));
     POST.mockResolvedValueOnce(failure(503, "NETWORK_UNAVAILABLE"));
     await user.click(await screen.findByRole("button", { name: "Réessayer le paiement" }));
-    // Nouvel essai impossible : retour au formulaire
-    expect(await screen.findByRole("button", { name: /^Payer/ })).toBeInTheDocument();
-    POST.mockResolvedValueOnce(respond(201, payment({ status: "failed", failureCode: "DECLINED" })));
-    await user.click(payButton());
+    // Nouvel essai impossible : l'erreur est annoncée sous le panneau, qui reste affiché
+    expect(await screen.findByRole("alert")).not.toBeEmptyDOMElement();
     await user.click(await screen.findByRole("button", { name: "Changer de numéro" }));
     expect(screen.getByRole("button", { name: /^Payer/ })).toBeInTheDocument();
     expect(onState).toHaveBeenLastCalledWith("pending");
