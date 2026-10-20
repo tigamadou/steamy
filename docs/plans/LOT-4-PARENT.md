@@ -96,15 +96,16 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 d
   - [ ] Playwright : accord à un événement payant (`WD11`, `WPD06`, `WPD15`, paiement, « acceptée » en `WD10`)
   - [ ] Playwright : inscription directe par le parent (`WPD12`) à un événement payant
   - [ ] Recette : refus notifié à l'enfant ; événement complet non payable
-- [ ] **4.7** Suppressions · `feature/lot4-suppressions` (requiert 4.2)
-  - [ ] `WPD09` Supprimer (initiative du parent) avec `DeleteChildForm` (motif* + précisions, texte D54)
-  - [ ] Validation d'une demande `WD15` (`?demande=<id>`, motif prérempli, Accepter / Refuser)
-  - [ ] Annulation de la suppression depuis `WPD02` (bouton « Annuler la suppression »)
-  - [ ] Branchement API : `children/{id}/deletion/` (POST, DELETE), `deletion-requests/{id}/approve/` et `refuse/`
-  - [ ] Règles : désactivation immédiate, anonymisation à J+30, factures conservées, ni « définitivement » ni « irréversible »
-  - [ ] Tests unitaires : texte D54, motif requis
-  - [ ] Playwright : suppression puis annulation (l'enfant peut de nouveau se connecter) ; demande `WD15` validée depuis « À valider »
-  - [ ] Recette : pendant les 30 jours, l'enfant ne peut plus se connecter (`ACCOUNT_DEACTIVATED`)
+- [x] **4.7** Suppressions · `feature/lot4-suppressions` (requiert 4.2) · PR #PR47
+  - [x] `WPD09` Supprimer (initiative du parent) avec `DeleteChildForm` (motif* + précisions, texte D54)
+  - [x] Validation d'une demande `WD15` (`?demande=<id>`, motif prérempli, Accepter / Refuser)
+  - [x] Annulation de la suppression depuis `WPD02` (bouton « Annuler la suppression »)
+  - [x] Branchement API : `children/{id}/deletion/` (POST, DELETE), `deletion-requests/{id}/approve/` et `refuse/`
+  - [x] Règles : désactivation immédiate, anonymisation à J+30, factures conservées, ni « définitivement » ni « irréversible »
+  - [x] Tests unitaires : texte D54, motif requis
+  - [x] Playwright : suppression puis annulation (l'enfant peut de nouveau se connecter) ; demande `WD15` validée depuis « À valider »
+  - [x] Recette : pendant les 30 jours, l'enfant ne peut plus se connecter (`ACCOUNT_DEACTIVATED`)
+  > Écarts : `WPD09` sert aussi la demande de l'enfant sans `?demande=` quand sa suppression attend le parent ; une suppression déjà programmée y affiche le rappel daté et « Annuler la suppression » ; l'annulation est aussi proposée sur `WPD03` ; la décision (suppression, validation ou refus) ramène sur `WPD03` avec une confirmation lue dans l'URL ; demande d'un autre enfant ou d'une autre famille → « introuvable ». Recette `ACCOUNT_DEACTIVATED` vérifiée par l'API dans l'e2e.
 - [ ] **4.8** Rapport hebdomadaire · `feature/lot4-rapport-hebdo` (requiert 4.2, API-L3a)
   - [ ] `WPD11` Rapport hebdomadaire (`?semaine=AAAA-Www`)
   - [ ] Composants `WeekNavigator`, `WeeklyStats`, `WeeklyActivityBars` (lot 3, tableau de données en alternative), `CourseProgressList`, `WeeklyEmailNotice`
