@@ -86,16 +86,17 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 d
   - [x] Playwright : achat d'un kit, paiement, commande payée en `WPD07`, facture téléchargée, Kit Code débloquant le parcours côté enfant (`WA06`)
   - [x] Recette : commande d'un autre payeur non listée ; factures conservées après suppression d'un enfant (e2e : suppression de l'enfant bénéficiaire, commande et facture toujours au parent)
   > Écarts : priorité donnée à l'achat direct, conséquence de #132 (le panier public renvoie le parent connecté vers le sien, C10) ; « Payer » d'une commande en attente mène toujours au détail de la commande, qui reprend le paiement (l'API ne dit pas si la commande provient d'une demande) ; « Facture » est un lien direct vers l'API, affiché quand le PDF est prêt (`invoice.pdfStatus`) : le téléchargement par `fetch` suivait la redirection signée du stockage, bloquée par le navigateur (même défaut sur le reçu de WK07, lot 3) ; une nouvelle adresse dans l'achat direct n'est pas proposée après la création de la commande (pas d'annulation de commande côté parent). Remboursement : message neutre (« Commande remboursée : elle vous a été remboursée. »), partagé avec WK07, l'API n'exposant pas le motif (paiement tardif C17 ou geste du Support, 6.4). Commande de kit déjà en attente et non expirée : l'achat direct propose de la reprendre avant d'en passer une seconde. Parcours compatibles d'un kit en texte dans l'espace parent, qui n'a pas de catalogue de parcours (la fiche publique sortirait du shell). `PAYMENT_IN_PROGRESS` traduit (paiement déjà lancé sur le téléphone). Kit Code révoqué par le Support : badge « Révoqué » à la place de « Copier ».
-- [ ] **4.6** Événements · `feature/lot4-evenements` (requiert 4.4)
-  - [ ] `WPD06` Steamy Events + candidatures des enfants (`EventApplicationRow`, `RefuseApplicationDialog`)
-  - [ ] `WL23` dans le shell parent (`EventRow`, `EventDetail` du lot 1)
-  - [ ] `WPD12` Inscrire un enfant (`EventSignupForm` : enfants actifs, motivation, récapitulatif + `PaymentForm` si payant)
-  - [ ] Branchement API : `events/`, `events/{slug}/`, `events/applications/` (`accept/`, `refuse/`), `events/{slug}/applications/`, `payments/orders/` `kind: "event"`
-  - [ ] Règles : événement payant accepté → paiement de la commande d'événement (`orderReference`, D53 amendé), `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés, ticket Steamy Events gratuit avec accord requis, prix serveur
-  - [ ] Tests unitaires : `EventApplicationRow` par statut, `EventSignupForm` gratuit / payant, enfants non actifs exclus
-  - [ ] Playwright : accord à un événement payant (`WD11`, `WPD06`, `WPD15`, paiement, « acceptée » en `WD10`)
-  - [ ] Playwright : inscription directe par le parent (`WPD12`) à un événement payant
-  - [ ] Recette : refus notifié à l'enfant ; événement complet non payable
+- [x] **4.6** Événements · `feature/lot4-evenements` (requiert 4.4) · PR #PR46
+  - [x] `WPD06` Steamy Events + candidatures des enfants (`EventApplicationRow`, `RefuseApplicationDialog`)
+  - [x] `WL23` dans le shell parent (`EventRow`, `EventDetail` du lot 1)
+  - [x] `WPD12` Inscrire un enfant (`EventSignupForm` : enfants actifs, motivation, récapitulatif + `PaymentForm` si payant)
+  - [x] Branchement API : `events/`, `events/{slug}/`, `events/applications/` (`accept/`, `refuse/`), `events/{slug}/applications/`, `payments/orders/` `kind: "event"`
+  - [x] Règles : événement payant accepté → paiement de la commande d'événement (`orderReference`, D53 amendé), `EVENT_FULL`, `EVENT_CLOSED`, `ALREADY_APPLIED` affichés, ticket Steamy Events gratuit avec accord requis, prix serveur
+  - [x] Tests unitaires : `EventApplicationRow` par statut, `EventSignupForm` gratuit / payant, enfants non actifs exclus
+  - [x] Playwright : accord à un événement payant (`WD11`, `WPD06`, `WPD15`, paiement, « acceptée » en `WD10`)
+  - [x] Playwright : inscription directe par le parent (`WPD12`) à un événement payant
+  - [x] Recette : refus notifié à l'enfant ; événement complet non payable
+  > Écarts : `WPD06` réunit « Demandes de mes enfants » (toutes les candidatures, la mise en avant `?candidature=<id>` venant de « À valider ») et « Événements à venir » ; le paiement d'un événement accepté reprend `OrderPayment` de `WPD15` (réessai unique, paiement tardif remboursé C17) sur la commande d'événement créée par l'API (`orderReference`), sans demande de paiement (D53 amendé) ; `WL23` du lot 1 dans le shell parent, avec « Inscrire un enfant » ou le motif (complet, clos, passé) ; un refus met la ligne à jour avec la candidature renvoyée par l'API ; notification de l'enfant vérifiée par l'API dans l'e2e (écran `WD10` du lot 3).
 - [ ] **4.7** Suppressions · `feature/lot4-suppressions` (requiert 4.2)
   - [ ] `WPD09` Supprimer (initiative du parent) avec `DeleteChildForm` (motif* + précisions, texte D54)
   - [ ] Validation d'une demande `WD15` (`?demande=<id>`, motif prérempli, Accepter / Refuser)
