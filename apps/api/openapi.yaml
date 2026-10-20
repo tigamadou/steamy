@@ -10598,7 +10598,7 @@ components:
           title: Type
         status:
           allOf:
-          - $ref: '#/components/schemas/PaymentStatusEnum'
+          - $ref: '#/components/schemas/PaymentRequestStatusEnum'
           readOnly: true
           title: Statut
         course:
@@ -10701,6 +10701,20 @@ components:
       - quantity
       - title
       - unitPrice
+    PaymentRequestStatusEnum:
+      enum:
+      - pending
+      - paid
+      - declined
+      - expired
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - En attente du parent
+        * `paid` - Payée
+        * `declined` - Refusée
+        * `expired` - Expirée
+        * `cancelled` - Annulée
     PaymentStatusEnum:
       enum:
       - initiated

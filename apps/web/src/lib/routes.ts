@@ -42,6 +42,18 @@ export const routes = {
   course: (slug: string) => `/parcours/${slug}`,
   categories: "/categories",
   shop: "/boutique",
+  /** WK02 / WK11 · fiche d'un kit (invité). */
+  shopKit: (slug: string) => `/boutique/${slug}`,
+  /** WK03 / WK10 · panier de l'invité (un apprenant connecté est renvoyé vers le sien). */
+  cart: "/boutique/panier",
+  /** Tunnel invité (D12) : WK04 → WK05 → WK06. */
+  checkout: {
+    guest: "/boutique/commande/coordonnees",
+    delivery: "/boutique/commande/livraison",
+    payment: "/boutique/commande/paiement",
+  },
+  /** WK07 · suivi d'une commande (lien SMS de l'invité, jeton dans le fragment). */
+  order: (reference: string) => `/boutique/commandes/${encodeURIComponent(reference)}`,
   events: "/evenements",
   event: (slug: string) => `/evenements/${slug}`,
   schools: "/ecoles",
@@ -96,6 +108,10 @@ export const routes = {
     /** Demande de déblocage au parent (3.6, derrière le drapeau `unlock`), qui mène ensuite à WA02. */
     parentRequest: (slug: string) => `/apprenant/catalogue/${slug}/demande`,
     wishlist: "/apprenant/souhaits",
+    /** WK01 · boutique de kits dans le shell. */
+    shop: "/apprenant/boutique",
+    shopKit: (slug: string) => `/apprenant/boutique/${slug}`,
+    cart: "/apprenant/boutique/panier",
     profile: "/apprenant/profil",
     editProfile: "/apprenant/profil/modifier",
     password: "/apprenant/profil/mot-de-passe",

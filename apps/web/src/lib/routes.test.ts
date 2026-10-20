@@ -11,6 +11,9 @@ describe("routes", () => {
     expect(routes.backoffice.kpi("na_f")).toBe("/backoffice/impact/indicateurs/na_f");
     expect(routes.backoffice.report("2026-t4")).toBe("/backoffice/impact/rapports/2026-t4");
     expect(routes.backoffice.reportEntry("2026-t4")).toBe("/backoffice/impact/rapports/2026-t4/saisie");
+    expect(routes.shopKit("steamy-bot")).toBe("/boutique/steamy-bot");
+    expect(routes.order("KT 1")).toBe("/boutique/commandes/KT%201");
+    expect(routes.learner.shopKit("steamy-bot")).toBe("/apprenant/boutique/steamy-bot");
   });
 
   it("présélectionne le sujet du formulaire de contact", () => {
