@@ -29,7 +29,8 @@ def test_seed_demo_twice_creates_no_duplicate():
     first = counts()
     call_command("seed_demo")
     assert counts() == first
-    assert first[0] == 8  # Léa, Noé, Marie, Koffi et un membre du personnel par groupe
+    # Léa, Noé, Marie, Koffi, un membre du personnel par groupe, Bernard Kpadé et ses deux enfants (élèves de Koffi)
+    assert first[0] == 11
 
 
 def test_seed_demo_is_refused_in_production(settings):
@@ -303,3 +304,49 @@ def test_lea_has_two_courses_in_her_wishlist():
         "course__slug", flat=True
     )
     assert sorted(slugs) == ["capteurs-electroniques", "robot-bluetooth"]
+
+
+def test_seed_demo_fills_koffis_classrooms_with_learners_and_invitations(sms):
+    from apps.accounts.models import ConsentRequest
+    from apps.classrooms.demo import INVITATIONS, KPADE_PHONE
+    from apps.classrooms.models import ClassroomMembership
+    from apps.core.demo import KOFFI_EMAIL
+
+    call_command("seed_demo")
+    call_command("seed_demo")  # idempotent
+    koffi = User.objects.get(email=KOFFI_EMAIL)
+    memberships = ClassroomMembership.objects.filter(classroom__teacher=koffi)
+    active = memberships.filter(status="active")
+    assert sorted(active.values_list("learner__first_name", flat=True)) == ["Léa", "Sèna", "Yao"]
+    statuses = sorted(
+        memberships.filter(status="invited").values_list("consent_request__status", flat=True)
+    )
+    assert statuses == sorted(status for *_, status in INVITATIONS)
+    assert ConsentRequest.objects.filter(origin="teacher").count() == len(INVITATIONS)
+    assert User.objects.get(phone=KPADE_PHONE).children_links.count() == 2
+    from apps.events.models import EventProposal
+
+    assert EventProposal.objects.get().classroom.name == "4e B · Robotique"
+    # SMS de l'invitation en attente (faux fournisseur, lisible dans Mailpit)
+    assert "/consentement/" in sms.last(INVITATIONS[0][2])
+
+
+def test_seed_demo_gives_koffi_something_to_review_a_comment_and_a_dropout():
+    from rest_framework.test import APIClient
+
+    from apps.classrooms.demo import LEA_COMMENT
+    from apps.core.demo import KOFFI_EMAIL
+
+    call_command("seed_demo")
+    call_command("seed_demo")  # idempotent
+    client = APIClient()
+    client.force_authenticate(User.objects.get(email=KOFFI_EMAIL))
+    body = client.get("/api/classrooms/dashboard/").json()
+    to_review = {row["learner"]["firstName"] for row in body["toReview"]}
+    assert {"Yao", "Léa"} <= to_review
+    assert [row["learner"]["firstName"] for row in body["dropouts"]] == ["Sèna"]
+    lea = APIClient()
+    lea.force_authenticate(User.objects.get(username="lea.adjovi"))
+    assert [c["body"] for c in lea.get("/api/classrooms/comments/").json()["results"]] == [
+        LEA_COMMENT
+    ]

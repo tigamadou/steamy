@@ -11,7 +11,7 @@ from django.db.models import Count, Exists, OuterRef, Q
 from apps.core.admin_actions import form_action
 
 from . import backoffice
-from .models import EventApplication, EventTicket, SteamyEvent
+from .models import EventApplication, EventProposal, EventTicket, SteamyEvent
 
 
 @admin.register(SteamyEvent)
@@ -162,3 +162,15 @@ class EventApplicationAdmin(admin.ModelAdmin):
             submit_label="Refuser",
             apply=apply,
         )
+
+
+@admin.register(EventProposal)
+class EventProposalAdmin(admin.ModelAdmin):
+    """Suivi seulement : les propositions sont faites par les enseignants (WT09)."""
+
+    list_display = ("event", "classroom", "teacher", "created_at")
+    list_filter = ("event",)
+    readonly_fields = ("event", "classroom", "teacher", "created_at")
+
+    def has_add_permission(self, request):
+        return False
