@@ -214,12 +214,16 @@ describe("OrderDetail (suivi, C10)", () => {
   });
 
   it.each([
-    ["refunded", /remboursé/],
-    ["cancelled", /annulée/],
-  ] as const)("commande %s : message, sans facture", async (status, text) => {
-    routeApi(respond(200, order({ status, deliveryAddress: null, deliveryZone: null as never, kind: "course" })));
+    ["remboursée par le Support après paiement", "refunded", "2026-10-01T10:00:00Z", "Commande remboursée : elle vous a été remboursée."],
+    ["remboursée, paiement arrivé après le délai (C17)", "refunded", null, "Commande remboursée : elle vous a été remboursée."],
+    ["annulée", "cancelled", null, "Commande annulée : elle n'a pas été payée à temps et le stock a été libéré."],
+  ] as const)("commande %s : message sans motif supposé, sans facture", async (_case, status, paidAt, text) => {
+    routeApi(
+      respond(200, order({ status, paidAt, deliveryAddress: null, deliveryZone: null as never, kind: "course" })),
+    );
     render((await OrderDetail({ params: params("CMD-ABC123") })) as ReactElement);
     expect(screen.getByText(text)).toBeInTheDocument();
+    expect(screen.queryByText(/après le délai/)).toBeNull();
     expect(screen.queryByRole("link", { name: /facture/i })).toBeNull();
   });
 

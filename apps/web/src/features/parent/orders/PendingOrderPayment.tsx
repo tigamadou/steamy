@@ -30,6 +30,8 @@ export function PendingOrderPayment({
         action: { label: "Voir mes commandes", href: routes.parent.orders },
       }}
       onOrderClosed={() => router.refresh()}
+      // Payée : le suivi passe en « Payée » avec la facture, la livraison et les Kit Codes
+      onState={(state) => state === "paid" && router.refresh()}
     />
   );
 }

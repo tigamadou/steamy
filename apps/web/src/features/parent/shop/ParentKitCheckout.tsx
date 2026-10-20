@@ -18,7 +18,7 @@ import { OrderPayment } from "@/features/parent/payment-request/OrderPayment";
 import { useCart } from "@/features/shop/use-cart";
 import { apiCall } from "@/lib/api-call";
 import { formatInstantTime } from "@/lib/dates";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, quantityLabel } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
 type Order = Schemas["OrderCreated"];
@@ -33,6 +33,8 @@ export type ParentKitCheckoutProps = {
   kids: Kid[];
   countries: PhoneCountry[];
   preferred: PaymentFormProps["preferred"];
+  /** Commande de kit déjà en attente de paiement (rechargement, autre onglet) : reprise proposée avant d'en créer une autre. */
+  pendingOrder?: Pick<Schemas["Order"], "reference" | "expiresAt"> | null;
 };
 
 /**
@@ -40,11 +42,40 @@ export type ParentKitCheckoutProps = {
  * livraison préremplie (WPD08), commande qui réserve le stock 30 minutes et calcule frais et total (serveur, D37,
  * D38), puis paiement Mobile Money (formulaire de WPD15). Les kits payés quittent le panier (API).
  */
-export function ParentKitCheckout({ address, defaultCountry, parentName, kids, countries, preferred }: ParentKitCheckoutProps) {
+export function ParentKitCheckout(props: ParentKitCheckoutProps) {
+  const { address, defaultCountry, parentName, kids, countries, preferred, pendingOrder } = props;
   const { state, reload } = useCart("parent", "vous");
   const [beneficiary, setBeneficiary] = useState("");
   const [order, setOrder] = useState<Order | null>(null);
   const [notice, setNotice] = useState<string>();
+  // Commande payée entre-temps (autre onglet) : ses kits ont quitté le panier, l'avis ne dépend donc pas du panier
+  const [paid, setPaid] = useState<string | null>(null);
+  const [newOrder, setNewOrder] = useState(false);
+
+  if (paid) {
+    return (
+      <div role="status" className="flex flex-col items-center gap-3 rounded-[22px] bg-success-50 px-6 py-10 text-center">
+        <p className="m-0 text-base font-black text-ink-900">Cette commande est déjà payée.</p>
+        <Button href={routes.parent.order(paid)}>Suivre ma commande</Button>
+      </div>
+    );
+  }
+  if (pendingOrder && !order && !newOrder) {
+    return (
+      <div role="status" className="flex flex-col items-center gap-3 rounded-[22px] bg-amber-50 px-6 py-10 text-center">
+        <p className="m-0 text-base font-black text-ink-900">Une commande de kit attend déjà votre paiement.</p>
+        <p className="m-0 text-sm font-bold text-ink-700">
+          Commande {pendingOrder.reference}, réservée jusqu&apos;au{" "}
+          <time dateTime={pendingOrder.expiresAt}>{formatInstantTime(pendingOrder.expiresAt)}</time> : payez-la plutôt
+          que d&apos;en passer une seconde.
+        </p>
+        <Button href={routes.parent.order(pendingOrder.reference)}>Reprendre le paiement</Button>
+        <Button variant="ghost" onClick={() => setNewOrder(true)}>
+          Passer une nouvelle commande
+        </Button>
+      </div>
+    );
+  }
 
   if (state.status === "loading") {
     return (
@@ -91,7 +122,7 @@ export function ParentKitCheckout({ address, defaultCountry, parentName, kids, c
             {state.lines.map((line) => (
               <WKSummaryRow
                 key={line.kit.slug}
-                label={line.quantity > 1 ? `${line.kit.name} × ${line.quantity}` : line.kit.name}
+                label={quantityLabel(line.kit.name, line.quantity)}
                 value={formatPrice(line.total)}
               />
             ))}
@@ -159,7 +190,7 @@ export function ParentKitCheckout({ address, defaultCountry, parentName, kids, c
           {order.items.map((item) => (
             <WKSummaryRow
               key={item.id}
-              label={item.quantity > 1 ? `${item.title} × ${item.quantity}` : item.title}
+              label={quantityLabel(item.title, item.quantity)}
               value={formatPrice(item.total)}
             />
           ))}
@@ -183,12 +214,12 @@ export function ParentKitCheckout({ address, defaultCountry, parentName, kids, c
           action: { label: "Suivre ma commande", href: routes.parent.order(order.reference) },
         }}
         onOrderClosed={(code) => {
+          if (code === "ORDER_ALREADY_PAID") {
+            setPaid(order.reference);
+            return;
+          }
           setOrder(null);
-          setNotice(
-            code === "ORDER_ALREADY_PAID"
-              ? "Cette commande est déjà payée."
-              : "Le délai de réservation est dépassé : confirmez de nouveau l'adresse pour réserver vos kits.",
-          );
+          setNotice("Le délai de réservation est dépassé : confirmez de nouveau l'adresse pour réserver vos kits.");
           reload();
         }}
       />

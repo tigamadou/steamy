@@ -89,9 +89,18 @@ test("achat direct : boutique, panier, livraison, paiement, WPD07, facture et Ki
     results?: { course: { slug: string } }[];
   };
   expect((enrollments.results ?? []).map((enrollment) => enrollment.course.slug)).toContain(COMPATIBLE_COURSE);
-  await page.reload();
   await page.goto(`/parent/commandes/${reference}`);
   await expect(codes.getByText("Utilisé")).toBeVisible();
+
+  // Suppression de l'enfant bénéficiaire (WPD09, D54) : la commande et sa facture restent au parent
+  const [reason] = (await family.parentSession.get("/api/referentials/deletion-reasons/")) as { code: string }[];
+  await family.parentSession.post(`/api/accounts/children/${family.child.id}/deletion/`, { reason: reason.code });
+  await page.goto("/parent/commandes?statut=payees");
+  await expect(page.getByRole("article", { name: `Kit : ${KIT}` }).getByRole("link", { name: /^Facture/ })).toHaveAttribute(
+    "href",
+    invoice,
+  );
+  expect([200, 302]).toContain((await page.request.get(invoice, { maxRedirects: 0 })).status());
   await closeFamily(family);
 });
 

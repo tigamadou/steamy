@@ -25,11 +25,16 @@ describe("PendingOrderPayment (WPD07, reprise du paiement)", () => {
       preferred: unknown;
       success: { action: { label: string; href: string } };
       onOrderClosed: () => void;
+      onState: (state: string) => void;
     };
     expect(props).toMatchObject({ amount: 25000, preferred, countries: [] });
     await expect(props.reference()).resolves.toEqual({ ok: true, data: "CMD-ABC123" });
     expect(props.success.action).toEqual({ label: "Voir mes commandes", href: "/parent/commandes" });
     props.onOrderClosed();
-    expect(refresh).toHaveBeenCalled();
+    expect(refresh).toHaveBeenCalledTimes(1);
+    props.onState("confirming");
+    expect(refresh).toHaveBeenCalledTimes(1);
+    props.onState("paid");
+    expect(refresh).toHaveBeenCalledTimes(2);
   });
 });

@@ -62,7 +62,8 @@ describe("AddToCartButton", () => {
   it("shopRoutes : catalogue, fiche, panier et parcours de chaque contexte", () => {
     expect(shopRoutes("learner")).toMatchObject({ shop: "/apprenant/boutique", cart: "/apprenant/boutique/panier" });
     expect(shopRoutes("parent").shopKit("bot")).toBe("/parent/boutique/bot");
-    expect(shopRoutes("parent").course("robot")).toBe("/parcours/robot");
+    expect(shopRoutes("parent").course).toBeNull();
+    expect(shopRoutes("public").course?.("robot")).toBe("/parcours/robot");
     expect(shopRoutes("public")).toMatchObject({ shop: "/boutique", cart: "/boutique/panier" });
   });
 });

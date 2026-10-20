@@ -83,16 +83,14 @@ describe("WK02 · fiche kit", () => {
     expect(screen.getByText("Livraison selon ta zone")).toBeInTheDocument();
   });
 
-  it("parent : fiche dans son espace (h2), boutique du parent, parcours public, délais au vouvoiement", async () => {
+  it("parent : fiche dans son espace (h2), boutique du parent, parcours en texte sans sortir de l'espace, vouvoiement", async () => {
     getKit.mockResolvedValue(DETAIL);
     getDeliveryZones.mockResolvedValue(ZONES);
     render(await KitDetailView({ params: params(), context: "parent" }));
     expect(screen.getByRole("heading", { level: 2, name: "Steamy Bot v1" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Boutique" })).toHaveAttribute("href", "/parent/boutique");
-    expect(screen.getByRole("link", { name: "Découverte de la robotique" })).toHaveAttribute(
-      "href",
-      "/parcours/decouverte-robotique",
-    );
+    expect(screen.getByText("Découverte de la robotique")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Découverte de la robotique" })).toBeNull();
     expect(screen.getByText("Livraison selon votre zone")).toBeInTheDocument();
   });
 

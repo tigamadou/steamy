@@ -79,9 +79,15 @@ export async function KitDetailView({ params, context }: { params: Promise<{ slu
               <ul className="flex flex-wrap gap-3">
                 {compatible.map((c) => (
                   <li key={c.slug}>
-                    <Button variant="outline" size="sm" href={course(c.slug)} iconRight="arrow-right">
-                      {c.title}
-                    </Button>
+                    {course ? (
+                      <Button variant="outline" size="sm" href={course(c.slug)} iconRight="arrow-right">
+                        {c.title}
+                      </Button>
+                    ) : (
+                      <span className="inline-flex rounded-full border-2 border-ink-100 px-3.5 py-1.5 text-[13px] font-extrabold text-ink-800">
+                        {c.title}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>,

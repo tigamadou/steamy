@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 
 import { Badge, Breadcrumb, ShippingTimeline, SkeletonBlock, WKSummaryRow } from "@/components/ds";
+import { closedOrderNote } from "@/features/checkout/order-status";
 import { shippingSteps } from "@/features/checkout/shipping";
 import { getServerApi } from "@/lib/api";
 import { readOrNull } from "@/lib/api-read";
 import { formatInstant, formatInstantTime } from "@/lib/dates";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, quantityLabel } from "@/lib/format";
 import { getCountries } from "@/lib/referentials";
 import { routes } from "@/lib/routes";
 
@@ -73,7 +74,7 @@ export async function OrderDetail({ params }: { params: Promise<{ reference: str
               {order.items.map((item) => (
                 <WKSummaryRow
                   key={item.id}
-                  label={item.quantity > 1 ? `${item.title} × ${item.quantity}` : item.title}
+                  label={quantityLabel(item.title, item.quantity)}
                   value={formatPrice(item.total)}
                 />
               ))}
@@ -93,9 +94,7 @@ export async function OrderDetail({ params }: { params: Promise<{ reference: str
             )}
             {(order.status === "refunded" || order.status === "cancelled") && (
               <p className="m-0 rounded-[14px] bg-ink-50 px-4 py-3 text-[13px] font-bold text-ink-700">
-                {order.status === "refunded"
-                  ? "Paiement reçu après le délai de réservation : il vous a été remboursé."
-                  : "Commande annulée : elle n'a pas été payée à temps et le stock a été libéré."}
+                {closedOrderNote(order.status)}
               </p>
             )}
             {order.status === "paid" && (

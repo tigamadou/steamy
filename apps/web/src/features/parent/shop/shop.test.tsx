@@ -117,7 +117,7 @@ describe("ParentKitCheckout (achat direct de kit, C10)", () => {
     expect(POST.mock.calls[0][1].body).not.toHaveProperty("beneficiaryId");
   });
 
-  it("commande expirée ou déjà payée au paiement : retour à l'adresse avec le motif", async () => {
+  it("commande expirée au paiement : retour à l'adresse avec le motif ; déjà payée : suivi, même panier vidé", async () => {
     const user = userEvent.setup();
     POST.mockImplementation(async (path: string) =>
       path === "/api/payments/orders/" ? respond(201, order()) : failure(409, "ORDER_EXPIRED"),
@@ -133,8 +133,31 @@ describe("ParentKitCheckout (achat direct de kit, C10)", () => {
     );
     await user.click(screen.getByRole("button", { name: "Continuer vers le paiement" }));
     await screen.findByRole("radio", { name: "MTN Mobile Money" });
+    // Payée dans un autre onglet : ses kits ont quitté le panier
+    useCart.mockReturnValue(cart([]));
     await user.click(screen.getByRole("button", { name: /^Payer/ }));
     expect(await screen.findByText("Cette commande est déjà payée.")).toBeInTheDocument();
+    expect(screen.queryByText("Votre panier est vide.")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Suivre ma commande" })).toHaveAttribute(
+      "href",
+      "/parent/commandes/CMD-ABC123",
+    );
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("commande de kit déjà en attente : reprise proposée avant d'en créer une seconde", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <ParentKitCheckout {...BASE} pendingOrder={{ reference: "CMD-OLD", expiresAt: "2026-10-20T12:30:00Z" }} />,
+    );
+    expect(screen.getByText("Une commande de kit attend déjà votre paiement.")).toBeInTheDocument();
+    expect(screen.getByText(/Commande CMD-OLD, réservée jusqu'au/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Reprendre le paiement" })).toHaveAttribute("href", "/parent/commandes/CMD-OLD");
+    expect(screen.queryByRole("button", { name: "Continuer vers le paiement" })).not.toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
+    await user.click(screen.getByRole("button", { name: "Passer une nouvelle commande" }));
+    expect(screen.getByRole("button", { name: "Continuer vers le paiement" })).toBeInTheDocument();
+    expect(POST).not.toHaveBeenCalled();
   });
 
   it("chargement, erreur, panier vide, kit indisponible", async () => {
@@ -179,7 +202,27 @@ describe("ParentKitCheckoutScreen", () => {
       path === "/api/accounts/children/" ? respond(200, {}) : respond(200, { locality: null, mobileMoney: null }),
     );
     const bare = (await ParentKitCheckoutScreen()) as ReactElement<Parameters<typeof ParentKitCheckout>[0]>;
-    expect(bare.props).toMatchObject({ defaultCountry: "", kids: [] });
+    expect(bare.props).toMatchObject({ defaultCountry: "", kids: [], pendingOrder: null });
+
+    // Commande de kit en attente et non expirée : proposée à la reprise (parcours ou commande expirée ignorés)
+    const later = new Date(Date.now() + 600_000).toISOString();
+    const earlier = new Date(Date.now() - 600_000).toISOString();
+    serverGET.mockImplementation(async (path: string) =>
+      path === "/api/payments/orders/"
+        ? respond(200, {
+            results: [
+              order({ reference: "CMD-COURSE", kind: "course", expiresAt: later }),
+              order({ reference: "CMD-EXPIRED", expiresAt: earlier }),
+              order({ reference: "CMD-KIT", expiresAt: later }),
+            ],
+          })
+        : path === "/api/accounts/children/"
+          ? respond(200, { results: [] })
+          : respond(200, { locality: null, mobileMoney: null }),
+    );
+    const resumed = (await ParentKitCheckoutScreen()) as ReactElement<Parameters<typeof ParentKitCheckout>[0]>;
+    expect(resumed.props.pendingOrder).toEqual({ reference: "CMD-KIT", expiresAt: later });
+    expect(serverGET).toHaveBeenCalledWith("/api/payments/orders/", { params: { query: { status: "pending" } } });
 
     serverGET.mockResolvedValue(respond(401));
     expect(await ParentKitCheckoutScreen()).toBeNull();

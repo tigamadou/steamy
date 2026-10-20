@@ -80,6 +80,7 @@ describe("messages de WPD15", () => {
     ["ORDER_ALREADY_PAID", /déjà payée/],
     ["PAYMENT_FAILED", /prestataire Mobile Money a refusé/],
     ["PAYMENT_REQUEST_CLOSED", /n'est plus en attente/],
+    ["PAYMENT_IN_PROGRESS", /déjà en cours : validez-le sur votre téléphone/],
     ["NETWORK_UNAVAILABLE", /Vérifiez votre connexion/],
   ])("%s traduit", (code, text) => {
     expect(paymentErrorMessage(fail(code))).toMatch(text);

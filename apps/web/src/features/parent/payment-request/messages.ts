@@ -29,6 +29,8 @@ export function paymentErrorMessage(failure: ApiFailure): string {
       return "Le délai de la commande est dépassé. Relancez le paiement : une nouvelle commande sera créée.";
     case "ORDER_ALREADY_PAID":
       return "Cette commande est déjà payée.";
+    case "PAYMENT_IN_PROGRESS":
+      return "Un paiement de cette commande est déjà en cours : validez-le sur votre téléphone, ou réessayez dans quelques minutes.";
     case "PAYMENT_FAILED":
       return "Le prestataire Mobile Money a refusé le paiement. Vérifiez votre numéro et votre solde, puis réessayez.";
     case "PAYMENT_REQUEST_CLOSED":
