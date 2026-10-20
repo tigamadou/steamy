@@ -515,6 +515,13 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `Cart`/`CartItem`, `DeliveryAddress`, `RestockAlert` (`StockReservation` et `DeliveryZone` : L3b.1)
   - [x] `shop/cart/*`, `GET/PUT accounts/me/delivery-address/`, `POST shop/kits/{slug}/restock-alerts/`
   - [x] Tests : panier par utilisateur, alerte de réassort unique
+  - [x] Un paiement à la fois par commande (WK09 « Réessayer ») : `PAYMENT_IN_PROGRESS` · `feature/api-l3b-paiement-en-cours` · PR #130
+  > Paiement en cours : sous le verrou de la commande, `check_payable` est relu (un webhook qui vient de payer ne
+  > laisse pas passer un débit), puis un paiement `initiated`/`pending` de moins de `PAYMENT_IN_PROGRESS_TTL`
+  > (5 min) répond 409 `PAYMENT_IN_PROGRESS`. Au-delà, il est tenu pour abandonné (demande USSD ignorée) et le
+  > payeur peut réessayer, sans attendre l'expiration de la commande (30 min) ; si l'ancien paiement aboutit quand
+  > même, le second débit est remboursé à l'exécution (paiement en double, C17). Tests : deux envois concurrents
+  > (un 201, un 409, un paiement), paiement abandonné, commande payée entre la vérification et le verrou.
   > Décisions : panier et adresse pour le parent **et** l'apprenant (l'apprenant prépare la demande de kit qu'il
   > enverra à son parent, L3b.5) ; enseignant → 403. `GET shop/cart/` → `{items[{id, kit, quantity, total}],
   > count, subtotal}` (prix courants ; le total définitif est celui de la commande) ; `POST shop/cart/items/`

@@ -5,6 +5,7 @@ prestataire, comme si son webhook arrivait. Exemple : `manage.py simulate_paymen
 
 from django.core.management.base import BaseCommand, CommandError
 
+from apps.payments.checkout import IN_PROGRESS
 from apps.payments.models import Payment
 from apps.payments.tasks import deliver_fake_webhook
 
@@ -23,7 +24,7 @@ class Command(BaseCommand):
             Payment.objects.filter(
                 order__reference=reference,
                 provider="fake",
-                status__in=[Payment.Status.INITIATED, Payment.Status.PENDING],
+                status__in=IN_PROGRESS,
                 provider_transaction_id__isnull=False,
             )
             .order_by("-created_at")

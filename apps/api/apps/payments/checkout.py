@@ -28,8 +28,13 @@ log = logging.getLogger(__name__)
 #: Délai après lequel un paiement sans issue est vérifié auprès du prestataire (webhook perdu)
 RECONCILE_AFTER = timedelta(minutes=10)
 
-#: Paiements sans issue : tant qu'il en reste un, la commande n'accepte pas de nouveau paiement
+#: Paiements sans issue (initiés ou en attente de validation sur le téléphone)
 IN_PROGRESS = (Payment.Status.INITIATED, Payment.Status.PENDING)
+
+#: Durée pendant laquelle un paiement sans issue bloque un nouveau paiement de la commande. Au-delà, il est tenu
+#: pour abandonné (demande USSD ignorée) et le payeur peut réessayer ; si ce paiement aboutit quand même, le second
+#: débit est remboursé à l'exécution (paiement en double, C17).
+PAYMENT_IN_PROGRESS_TTL = timedelta(minutes=5)
 
 
 def check_payable(order: Order) -> None:
@@ -57,11 +62,14 @@ def initiate_payment(order: Order, *, country: str, network: str, msisdn: str) -
     with transaction.atomic():
         # Verrou de la commande jusqu'à l'enregistrement de la transaction : un webhook très rapide attend, puis
         # retrouve ce paiement au lieu d'en créer un second.
-        Order.objects.select_for_update().filter(pk=order.pk).first()
+        locked = Order.objects.select_for_update().get(pk=order.pk)
+        # Relue sous le verrou : un webhook qui vient de payer la commande ne laisse pas passer un nouveau débit
+        check_payable(locked)
         # Un débit à la fois : un second paiement (double clic, autre onglet) pendant qu'un premier attend sa
         # validation pourrait débiter deux fois le payeur. Sous le verrou de la commande, deux envois simultanés
         # ne passent pas tous les deux.
-        if order.payments.filter(status__in=IN_PROGRESS).exists():
+        recent = timezone.now() - PAYMENT_IN_PROGRESS_TTL
+        if locked.payments.filter(status__in=IN_PROGRESS, created_at__gt=recent).exists():
             raise ApiError("PAYMENT_IN_PROGRESS")
         payment = Payment.objects.create(
             order=order,
@@ -110,7 +118,7 @@ def reconcile_pending_payments() -> int:
     from .utils import WebhookRejected, handle_payment_event
 
     stale = Payment.objects.select_related("order").filter(
-        status__in=[Payment.Status.INITIATED, Payment.Status.PENDING],
+        status__in=IN_PROGRESS,
         created_at__lte=timezone.now() - RECONCILE_AFTER,
     )
     settled = 0
