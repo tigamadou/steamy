@@ -1,15 +1,13 @@
 import type { Schemas } from "@steamy/api-client";
 import Link from "next/link";
-import type { CSSProperties } from "react";
 
 import { Badge } from "@/components/ds/Badge";
 import { Button } from "@/components/ds/Button";
-import { eventPlace, eventState } from "@/components/public/events";
+import { eventPlace, eventState, EventThumb, PriceBadge } from "@/components/public/events";
 import { formatFullDate } from "@/lib/dates";
-import { formatPrice } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
-import { APPLICATION_STATUS, CLOSED_REASONS, closedReason, isFreeEvent } from "./status";
+import { APPLICATION_STATUS, CLOSED_REASONS, closedReason } from "./status";
 
 // Morceaux de Steamy Events côté apprenant (WD10, WL23, WD11), sans état : rendus côté serveur.
 
@@ -17,28 +15,10 @@ const l = routes.learner;
 const LINK =
   "rounded-sm text-ink-900 hover:text-primary-700 hover:underline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary-500";
 
-/** Prix d'un événement : « Gratuit » ou le montant servi par l'API, en FCFA. */
-export function PriceBadge({ price }: { price?: number }) {
-  return isFreeEvent({ price }) ? <Badge tone="success">Gratuit</Badge> : <Badge tone="primary">{formatPrice(price ?? 0)}</Badge>;
-}
-
 /** Statut d'une candidature, tel que servi par l'API (C3). */
 export function ApplicationStatusBadge({ status }: { status: Schemas["ApplicationStatusEnum"] }) {
   const { label, tone } = APPLICATION_STATUS[status];
   return <Badge tone={tone}>{label}</Badge>;
-}
-
-/** Vignette d'un événement à sa couleur, avec son emoji. */
-function EventThumb({ event, className }: { event: { color: string; emoji?: string }; className: string }) {
-  return (
-    <span
-      aria-hidden
-      className={`relative flex shrink-0 items-center justify-center overflow-hidden bg-(--event) ${className}`}
-      style={{ "--event": event.color } as CSSProperties}
-    >
-      <span className="relative">{event.emoji || "🎟️"}</span>
-    </span>
-  );
 }
 
 /**
@@ -60,7 +40,7 @@ export function EventCard({ event, application }: { event: Schemas["SteamyEvent"
           📅 {formatFullDate(event.startsAt)} · 📍 {eventPlace(event)}
         </p>
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1.5">
-          <PriceBadge price={event.price} />
+          <PriceBadge event={event} />
           {application ? (
             <ApplicationStatusBadge status={application.status} />
           ) : reason ? (
