@@ -131,7 +131,7 @@ Statut : 🟡 en cours · Prochaine tâche : validation C18 de la maquette de `W
   - [ ] Choix « Rattacher {Prénom} à la classe » sans nouvel identifiant si l'enfant a déjà un compte (C11)
   - [ ] Branchement API : `consent-requests/{id}/accept/` avec `{ username, password }` ou `{ learnerId }` (API-L5.2)
   - [ ] Playwright (lot 5 disponible) : invitation `WT06`, SMS, le parent accepte, l'élève apparaît dans `WT04`
-- [ ] **Critères de fin du lot 4** · PR de fin de lot #PRFIN
+- [ ] **Critères de fin du lot 4** · PR de fin de lot #145
   - [ ] `WPD01`-`WPD15` livrés selon la définition de « terminé » du README, au vouvoiement, en 360 px et sur bureau (variante enseignant de `WPD05` livrée avec le lot 5)
     > Tous livrés (4.1 à 4.9), e2e sur les projets « bureau » et « mobile » (360 px) avec contrôle du défilement horizontal ; reste la validation C18 de la maquette de `WPD15` (4.0), en attente du produit.
   - [x] Parcours Playwright verts sur la stack Docker avec `make seed` : enfant demande un parcours, parent paie, enfant accède (`parent-demande-paiement.spec.ts`)
