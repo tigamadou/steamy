@@ -240,7 +240,7 @@ Statut : 🟡 en cours · Prochaine tâche : réponses du produit aux trois ques
   > Garde-fou monochrome étendu au rendu (`components/backoffice/monochrome-rendu.test.tsx`) : le HTML de chaque
   > écran et état du back-office, composants du design system compris, ne contient aucune classe primaire ; `Loader`,
   > `Mascot` et les états WX ont une variante encre (le hors-ligne la prend sous `/backoffice`).
-- [ ] **Critères de fin du lot 6** · `feature/lot6-fin-de-lot`
+- [ ] **Critères de fin du lot 6** · `feature/lot6-fin-de-lot` · PR #139
   - [x] WAD01-WAD05 conformes à la spec et à la définition de « terminé », monochrome sans `--primary-*`, accessibles, responsive, sans donnée en dur
   - [ ] WAD06-WAD14 couverts par l'admin Django (colonnes, filtres, recherches, actions, inlines de §5.14), sans élément de « À ne pas porter », thème monochrome, admin en français
     - [x] WAD06-WAD13 couverts (6.2 à 6.5), thème monochrome, admin en français
