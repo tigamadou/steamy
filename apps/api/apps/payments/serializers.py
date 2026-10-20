@@ -266,14 +266,20 @@ class BeneficiaryOrderSerializer(serializers.ModelSerializer):
 class KitCodeSerializer(serializers.ModelSerializer):
     kit_slug = serializers.SlugRelatedField(source="kit", slug_field="slug", read_only=True)
     redeemed = serializers.SerializerMethodField()
+    revoked = serializers.SerializerMethodField(
+        help_text="Révoqué par le Support : refusé à l'activation, gardé dans la liste pour l'expliquer"
+    )
 
     class Meta:
         model = KitCode
-        fields = ("code", "kit_slug", "redeemed")
+        fields = ("code", "kit_slug", "redeemed", "revoked")
         read_only_fields = fields
 
     def get_redeemed(self, kit_code) -> bool:
         return kit_code.redeemed_at is not None
+
+    def get_revoked(self, kit_code) -> bool:
+        return kit_code.revoked_at is not None
 
 
 class InvoiceSummarySerializer(serializers.Serializer):
@@ -307,7 +313,7 @@ class OrderSerializer(BeneficiaryOrderSerializer):
 
     @extend_schema_field(KitCodeSerializer(many=True))
     def get_kit_codes(self, order):
-        codes = KitCode.objects.filter(order_item__order=order, revoked_at__isnull=True)
+        codes = KitCode.objects.filter(order_item__order=order).order_by("pk")
         return KitCodeSerializer(codes.select_related("kit"), many=True).data
 
 
