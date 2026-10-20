@@ -9,6 +9,8 @@ import { getBrowserApi } from "@/lib/api-browser";
 export type Referentials = {
   avatars: Schemas["Avatar"];
   countries: Schemas["Country"];
+  /** Motifs de suppression d'un compte enfant (WPD09). */
+  "deletion-reasons": Schemas["DeletionReason"];
   disabilities: Schemas["Disability"];
   goals: Schemas["Goal"];
   localities: Schemas["Locality"];
