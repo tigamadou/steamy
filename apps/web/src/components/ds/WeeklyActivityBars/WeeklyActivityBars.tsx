@@ -22,7 +22,8 @@ export type WeeklyActivityBarsProps = {
 export function WeeklyActivityBars({ days, caption, className }: WeeklyActivityBarsProps) {
   const max = Math.max(1, ...days.map((day) => day.seconds));
   return (
-    <div className={className}>
+    // `relative overflow-hidden` : le tableau masqué (`sr-only`) reste dans la boîte, sans défilement horizontal à 360 px
+    <div className={cx("relative overflow-hidden", className)}>
       <div aria-hidden className="flex h-36 items-end gap-2">
         {days.map((day) => (
           <div key={day.fullLabel} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">

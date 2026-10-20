@@ -105,14 +105,15 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 d
   - [ ] Tests unitaires : texte D54, motif requis
   - [ ] Playwright : suppression puis annulation (l'enfant peut de nouveau se connecter) ; demande `WD15` validée depuis « À valider »
   - [ ] Recette : pendant les 30 jours, l'enfant ne peut plus se connecter (`ACCOUNT_DEACTIVATED`)
-- [ ] **4.8** Rapport hebdomadaire · `feature/lot4-rapport-hebdo` (requiert 4.2, API-L3a)
-  - [ ] `WPD11` Rapport hebdomadaire (`?semaine=AAAA-Www`)
-  - [ ] Composants `WeekNavigator`, `WeeklyStats`, `WeeklyActivityBars` (lot 3, tableau de données en alternative), `CourseProgressList`, `WeeklyEmailNotice`
-  - [ ] Branchement API : `accounts/children/{id}/weekly-report/?week=`
-  - [ ] Règles : encart « Envoyé chaque semaine à <email> » ou lien « Ajouter un email » vers `WPD08`, pas de bouton d'envoi ponctuel
-  - [ ] Tests unitaires : semaine vide, semaine sans email
-  - [ ] Playwright : navigation vers la semaine précédente
-  - [ ] Recette : chiffres identiques à ceux de l'API pour le jeu D2
+- [x] **4.8** Rapport hebdomadaire · `feature/lot4-rapport-hebdo` (requiert 4.2, API-L3a) · PR #144
+  - [x] `WPD11` Rapport hebdomadaire (`?semaine=AAAA-Www`)
+  - [x] Composants `WeekNavigator`, `WeeklyStats`, `WeeklyActivityBars` (lot 3, tableau de données en alternative), `CourseProgressList`, `WeeklyEmailNotice`
+  - [x] Branchement API : `accounts/children/{id}/weekly-report/?week=`
+  - [x] Règles : encart « Envoyé chaque semaine à <email> » ou lien « Ajouter un email » vers `WPD08`, pas de bouton d'envoi ponctuel
+  - [x] Tests unitaires : semaine vide, semaine sans email
+  - [x] Playwright : navigation vers la semaine précédente
+  - [x] Recette : chiffres identiques à ceux de l'API pour le jeu D2
+  > Écarts : semaine illisible dans l'URL, ou refusée par l'API (hors bornes, à venir) → semaine en cours ; « Semaine suivante » inactive sur la semaine en cours (`nextWeek` nul) ; semaine sans activité : message au lieu de l'histogramme ; `CourseProgressList` de `WPD03` réutilisée ; `WeeklyActivityBars` (lot 3) contient désormais son tableau masqué (défilement horizontal d'un pixel à 360 px).
 - [x] **4.9** Paramètres et aide · `feature/lot4-parametres-aide` (requiert 4.1, 4.7, API-L3a) · PR #126
   - [x] `WPD08` Paramètres : profil, connexion (`NewPasswordFields`, changement de numéro avec `OTPInput`), livraison et paiement (`AddressForm`), notifications, `DangerZone`
   - [x] `WPD13` Aide : FAQ en `FaqAccordion` avec recherche locale, « Contacter le support » vers `WL24`

@@ -47,12 +47,15 @@ vi.mock("@/features/shop/KitDetailView", () => ({ KitDetailView: () => null, Kit
 vi.mock("@/features/shop/CartView", () => ({ CartView: () => null }));
 vi.mock("@/features/shop/DeliveryZonesSlot", () => ({ DeliveryZonesSlot: () => null }));
 vi.mock("@/lib/shop", () => ({ getKit: async (slug: string) => (slug === "bot" ? { name: "Steamy Bot v1" } : null) }));
+vi.mock("@/features/parent/report/WeeklyReport", () => ({ WeeklyReport: () => null, WeeklyReportSkeleton: () => null }));
 vi.mock("@/features/notifications/Notifications", () => ({
   Notifications: () => null,
   NotificationsSkeleton: () => null,
 }));
 
 const { default: Layout } = await import("./layout");
+const { default: WeeklyReportPage } = await import("./enfants/[id]/rapport/page");
+const { WeeklyReport, WeeklyReportSkeleton } = await import("@/features/parent/report/WeeklyReport");
 const { default: HomePage } = await import("./page");
 const { default: ParentLoading } = await import("./loading");
 const { default: ParentError } = await import("./error");
@@ -259,5 +262,16 @@ describe("états de l'espace parent", () => {
     render(<ParentNotFound />);
     expect(screen.getByRole("heading", { level: 2, name: "Cette page est introuvable" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Retour à l'accueil" })).toHaveAttribute("href", "/parent");
+  });
+});
+
+describe("WPD11 (4.8)", () => {
+  it("rapport hebdomadaire sous Suspense, enfant et semaine transmis", () => {
+    const params = Promise.resolve({ id: "7" });
+    const searchParams = Promise.resolve({ semaine: "2026-W42" });
+    const tree = WeeklyReportPage({ params, searchParams } as never) as Boundary;
+    expect(tree.props.fallback.type).toBe(WeeklyReportSkeleton);
+    expect(tree.props.children.type).toBe(WeeklyReport);
+    expect(tree.props.children.props).toMatchObject({ params, searchParams });
   });
 });
