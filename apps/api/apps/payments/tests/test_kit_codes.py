@@ -101,7 +101,18 @@ def test_codes_are_generated_at_payment_and_shown_to_the_payer_only(kit):
     url = f"/api/payments/orders/{order.reference}/"
     shown = client_for(parent).get(url).json()["kitCodes"]
     assert sorted(c["code"] for c in shown) == sorted(c.code for c in codes)
-    assert shown[0] == {"code": shown[0]["code"], "kitSlug": kit.slug, "redeemed": False}
+    assert shown[0] == {
+        "code": shown[0]["code"],
+        "kitSlug": kit.slug,
+        "redeemed": False,
+        "revoked": False,
+    }
+    # Un code révoqué par le Support reste listé au payeur, marqué comme tel
+    revoked = codes.first()
+    revoked.revoked_at = revoked.created_at
+    revoked.save()
+    shown = client_for(parent).get(url).json()["kitCodes"]
+    assert {c["code"]: c["revoked"] for c in shown} == {c.code: c.pk == revoked.pk for c in codes}
     assert "kitCodes" not in client_for(child).get(url).json()
     assert "kitCodes" not in client_for(child).get("/api/payments/orders/").json()["results"][0]
 

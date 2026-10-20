@@ -9669,10 +9669,16 @@ components:
         redeemed:
           type: boolean
           readOnly: true
+        revoked:
+          type: boolean
+          readOnly: true
+          description: 'Révoqué par le Support : refusé à l''activation, gardé dans
+            la liste pour l''expliquer'
       required:
       - code
       - kitSlug
       - redeemed
+      - revoked
     KitCodeRedeemRequest:
       type: object
       properties:
