@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   alternates: { canonical: routes.shop },
 };
 
-/** WL07 · Boutique de kits en vitrine : prix et disponibilité, sans panier (lot 3). */
+/** WL07 (= WK01 invité, D12) · Boutique de kits : fiches (WK02) et panier invité (WK03). */
 export default function ShopPage({ searchParams }: PageProps<"/boutique">) {
   return (
     <div className="mx-auto w-full max-w-[1120px] px-4 pt-10 pb-14 sm:px-8">

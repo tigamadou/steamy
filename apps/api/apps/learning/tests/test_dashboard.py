@@ -46,16 +46,22 @@ def set_scale():
     settings_.save()
 
 
+def clear_scale():
+    """Barème et paliers vidés par le personnel : pastilles Points et Rang masquées (D34)."""
+    settings_ = PlatformSettings.load()
+    settings_.points_scale, settings_.rank_thresholds = {}, []
+    settings_.save()
+
+
 # --- Tableau de bord ---------------------------------------------------------------------------------
 
 
 def test_dashboard_without_course_nor_scale_is_wd02(client):
+    clear_scale()
     body = client.get("/api/learning/dashboard/").json()
     assert body["firstName"] == "Léa"
     assert body["resume"] is None
-    assert (
-        body["points"] is None and body["rank"] is None
-    )  # barème non fixé (C8) : pastilles masquées
+    assert body["points"] is None and body["rank"] is None  # barème vidé (C8) : pastilles masquées
     assert body["streakDays"] == 0 and body["secondsToday"] == 0
     assert body["counters"] == {
         "activeEnrollments": 0,
@@ -95,7 +101,7 @@ def test_dashboard_resumes_the_most_recently_active_course(client, learner):
 
 def test_points_without_thresholds_gives_no_rank(client):
     settings_ = PlatformSettings.load()
-    settings_.points_scale = {"mission": 10}
+    settings_.points_scale, settings_.rank_thresholds = {"mission": 10}, []
     settings_.save()
     body = client.get("/api/learning/dashboard/").json()
     assert body["points"] == 0 and body["rank"] is None
@@ -174,7 +180,8 @@ def test_progress_gives_time_points_counters_and_mastery(client, learner):
     assert body["weekSeconds"] == expected_week
     assert [d["seconds"] for d in body["lastDays"]] == [120, 0, 0, 0, 0, 300, 660]
     assert body["lastDays"][-1]["date"] == today.isoformat()
-    assert body["points"] is None and body["rank"] is None
+    # Barème standard par défaut (C8) : 0 point, premier palier
+    assert body["points"] == 0 and body["rank"]["label"] == "Explorateur"
     assert body["streakDays"] == 2
     assert body["counters"]["certificates"] == 1 and body["counters"]["badges"] == 1
     assert [

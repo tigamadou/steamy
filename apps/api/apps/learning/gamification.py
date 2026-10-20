@@ -2,8 +2,8 @@
 Points, badges, rang, temps d'apprentissage et streak (D34, C8, ADR 0004 §7).
 
 - **Points** : barème de `PlatformSettings.points_scale` (`{"mission": 10, "formative": 20, "summative": 50,
-  "course": 100}`) ; un événement ne rapporte qu'une fois. Barème vide (non encore fixé, C8) : aucun point, et les
-  réponses donnent `points` et `rank` à `null` (pastilles masquées, D34).
+  "course": 100}`, barème standard C8 par défaut) ; un événement ne rapporte qu'une fois. Barème vidé par le
+  personnel : aucun point, et les réponses donnent `points` et `rank` à `null` (pastilles masquées, D34).
 - **Rang** : dérivé des points et des paliers de `PlatformSettings.rank_thresholds`, jamais stocké comme source.
 - **Temps** : secondes de vidéo réellement lues, plafonnées par appel et par jour (anti-gonflage).
 - **Streak** : jours consécutifs avec une activité (vidéo, mission terminée, quiz passé), dans le fuseau
