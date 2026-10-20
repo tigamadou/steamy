@@ -18,11 +18,17 @@ export const REQUEST_POLL_MS = 10_000;
 type Outcome = { pose: MascotPose; title: (parent: string) => string; body: (parent: string) => string };
 
 /** Issue d'une demande close, au tutoiement. */
-const OUTCOMES: Record<Exclude<RequestStatus, "pending">, Outcome> = {
+const OUTCOMES: Record<Exclude<RequestStatus, "pending"> | "paidKit", Outcome> = {
   paid: {
     pose: "cheer",
     title: () => "C'est réglé !",
     body: (parent) => `${parent} a réglé ta demande : ton parcours est débloqué.`,
+  },
+  // Variante kit (WK08) : seule l'issue « réglée » diffère
+  paidKit: {
+    pose: "cheer",
+    title: () => "C'est réglé !",
+    body: (parent) => `${parent} a réglé ta commande : ton kit est en préparation.`,
   },
   declined: {
     pose: "sad",
@@ -56,6 +62,9 @@ function resendState(request: PaymentRequest, now: number): { allowed: boolean; 
  * WA02 · Demande de paiement d'un parcours au parent (D52, C4) : récapitulatif et montant du serveur, attente avec
  * interrogation du statut toutes les 10 s (onglet visible), relance limitée, annulation, puis issue (réglée → WC06a,
  * refusée, expirée, annulée → nouvelle demande).
+ *
+ * WK08 · Variante `kind=kit` (demande créée depuis le panier) : montant des articles seul, la livraison étant ajoutée
+ * par le parent (C10) ; ni relance, ni « Changer de parent », ni « Renvoyer le lien » ; issue réglée → WD14.
  */
 export function PaymentRequestView({ initial }: { initial: PaymentRequest }) {
   const router = useRouter();
@@ -67,6 +76,7 @@ export function PaymentRequestView({ initial }: { initial: PaymentRequest }) {
   // Heure de référence de la relance, rafraîchie à chaque interrogation
   const [now, setNow] = useState(() => Date.now());
   const pending = request.status === "pending";
+  const kit = request.kind === "kit";
   const parent = request.parentFirstName;
   const title = requestTitle(request);
 
@@ -115,16 +125,27 @@ export function PaymentRequestView({ initial }: { initial: PaymentRequest }) {
   };
 
   const resendInfo = resendState(request, now);
-  const outcome = request.status === "pending" ? null : OUTCOMES[request.status];
+  const outcome =
+    request.status === "pending" ? null : OUTCOMES[kit && request.status === "paid" ? "paidKit" : request.status];
 
   return (
     <div className="mx-auto flex w-full max-w-140 flex-col gap-3">
       <Breadcrumb
-        items={[
-          { label: "Catalogue", href: routes.learner.catalog },
-          ...(request.course ? [{ label: request.course.title, href: routes.learner.catalogCourse(request.course.slug) }] : []),
-          { label: "Demande à ton parent" },
-        ]}
+        items={
+          kit
+            ? [
+                { label: "Boutique", href: routes.learner.shop },
+                { label: "Mon panier", href: routes.learner.cart },
+                { label: "Demande à ton parent" },
+              ]
+            : [
+                { label: "Catalogue", href: routes.learner.catalog },
+                ...(request.course
+                  ? [{ label: request.course.title, href: routes.learner.catalogCourse(request.course.slug) }]
+                  : []),
+                { label: "Demande à ton parent" },
+              ]
+        }
       />
       <section
         aria-labelledby="demande-titre"
@@ -138,11 +159,17 @@ export function PaymentRequestView({ initial }: { initial: PaymentRequest }) {
           <p className="m-0 max-w-105 text-[15px] leading-normal font-semibold text-ink-600">
             {outcome
               ? outcome.body(parent)
-              : `C'est ${parent} qui règle tes achats. Tu recevras une notification dès que ce sera fait.`}
+              : kit
+                ? `${parent} ajoutera l'adresse et les frais de livraison, puis réglera la commande. Tu recevras une notification dès que ce sera fait.`
+                : `C'est ${parent} qui règle tes achats. Tu recevras une notification dès que ce sera fait.`}
           </p>
         </div>
 
-        <Recap title={title} amount={requestAmount(request)} />
+        <Recap
+          title={title}
+          amount={requestAmount(request)}
+          detail={kit ? "Montant des articles · livraison ajoutée par ton parent" : undefined}
+        />
 
         {pending && (
           <>
@@ -161,19 +188,26 @@ export function PaymentRequestView({ initial }: { initial: PaymentRequest }) {
               >
                 Annuler la demande
               </Button>
-              <Button
-                icon="bell"
-                onClick={resend}
-                loading={busy === "resend"}
-                disabled={busy !== null || !resendInfo.allowed}
-              >
-                Relancer mon parent
-              </Button>
+              {!kit && (
+                <Button
+                  icon="bell"
+                  onClick={resend}
+                  loading={busy === "resend"}
+                  disabled={busy !== null || !resendInfo.allowed}
+                >
+                  Relancer mon parent
+                </Button>
+              )}
             </div>
-            {resendInfo.hint && <p className="m-0 text-[13px] font-bold text-ink-600">{resendInfo.hint}</p>}
+            {!kit && resendInfo.hint && <p className="m-0 text-[13px] font-bold text-ink-600">{resendInfo.hint}</p>}
           </>
         )}
 
+        {request.status === "paid" && kit && (
+          <Button size="lg" variant="secondary" iconRight="arrow-right" href={routes.learner.orders}>
+            Voir mes commandes
+          </Button>
+        )}
         {request.status === "paid" && request.course && (
           <Button size="lg" variant="secondary" iconRight="arrow-right" href={routes.learner.course(request.course.slug)}>
             Accéder au parcours
@@ -181,9 +215,14 @@ export function PaymentRequestView({ initial }: { initial: PaymentRequest }) {
         )}
         {(request.status === "declined" || request.status === "expired" || request.status === "cancelled") && (
           <div className="flex w-full flex-col gap-2.5 sm:flex-row sm:justify-center">
-            <Button variant="outline" href={routes.learner.catalog}>
-              Retour au catalogue
+            <Button variant="outline" href={kit ? routes.learner.shop : routes.learner.catalog}>
+              {kit ? "Retour à la boutique" : "Retour au catalogue"}
             </Button>
+            {kit && (
+              <Button icon="cart" href={routes.learner.cart}>
+                Retour au panier
+              </Button>
+            )}
             {request.course && (
               <Button icon="user" onClick={renew} loading={busy === "renew"}>
                 Refaire la demande

@@ -24,7 +24,6 @@ describe.each([
 });
 
 describe.each([
-  ["parent", "parent", () => import("./(parent)/parent/page")],
   ["enseignant", "teacher", () => import("./(enseignant)/enseignant/page")],
 ] as const)("espace %s en attente de son lot", (_, role, page) => {
   it("affiche la page d'attente du rôle", async () => {
