@@ -2182,7 +2182,7 @@ paths:
           description: ''
   /api/auth/teacher-invitations/{token}/:
     get:
-      operationId: auth_teacher_invitations_retrieve
+      operationId: auth_teacher_invitations_legacy_retrieve
       description: 'Lien `/activation/<jeton>` : invitation valable, sinon `INVITATION_INVALID`.'
       parameters:
       - in: path
@@ -2192,6 +2192,7 @@ paths:
         required: true
       tags:
       - auth
+      deprecated: true
       responses:
         '200':
           content:
@@ -2213,9 +2214,8 @@ paths:
           description: ''
   /api/auth/teacher-invitations/{token}/accept/:
     post:
-      operationId: auth_teacher_invitations_accept_create
-      description: Crée le compte enseignant (email de l'invitation, rattaché à l'école)
-        et ouvre la session.
+      operationId: auth_teacher_invitations_legacy_accept
+      description: 'Ancienne route (jeton dans le chemin) : préférer `teacher-invitations/accept/`.'
       parameters:
       - in: path
         name: token
@@ -2230,6 +2230,7 @@ paths:
             schema:
               $ref: '#/components/schemas/TeacherActivationRequest'
         required: true
+      deprecated: true
       responses:
         '200':
           content:
@@ -2250,6 +2251,82 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/teacher-invitations/accept/:
+    post:
+      operationId: auth_teacher_invitations_accept_create
+      description: Crée le compte enseignant et ouvre la session ; jeton et mot de
+        passe dans le corps.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeacherInvitationAcceptRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/teacher-invitations/lookup/:
+    post:
+      operationId: auth_teacher_invitations_lookup_create
+      description: 'Écran `/activation` : invitation valable pour le jeton du lien,
+        sinon `INVITATION_INVALID`.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationTokenRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherInvitation'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
           content:
             application/json:
               schema:
@@ -9606,6 +9683,15 @@ components:
       - lastName
       - parentPhone
       - relationship
+    InvitationTokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - token
     InvoiceSummary:
       type: object
       properties:
@@ -14106,6 +14192,20 @@ components:
       - expiresAt
       - firstName
       - lastName
+    TeacherInvitationAcceptRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 128
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+      - token
     Ticket:
       type: object
       description: Ticket Steamy Events offert à la certification (D33), utilisable

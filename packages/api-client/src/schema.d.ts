@@ -740,8 +740,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Lien `/activation/<jeton>` : invitation valable, sinon `INVITATION_INVALID`. */
-        get: operations["auth_teacher_invitations_retrieve"];
+        /**
+         * @deprecated
+         * @description Lien `/activation/<jeton>` : invitation valable, sinon `INVITATION_INVALID`.
+         */
+        get: operations["auth_teacher_invitations_legacy_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -759,8 +762,45 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Crée le compte enseignant (email de l'invitation, rattaché à l'école) et ouvre la session. */
+        /**
+         * @deprecated
+         * @description Ancienne route (jeton dans le chemin) : préférer `teacher-invitations/accept/`.
+         */
+        post: operations["auth_teacher_invitations_legacy_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/teacher-invitations/accept/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Crée le compte enseignant et ouvre la session ; jeton et mot de passe dans le corps. */
         post: operations["auth_teacher_invitations_accept_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/teacher-invitations/lookup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Écran `/activation` : invitation valable pour le jeton du lien, sinon `INVITATION_INVALID`. */
+        post: operations["auth_teacher_invitations_lookup_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3536,6 +3576,9 @@ export interface components {
             /** @description Code du référentiel `relationships` */
             relationship: string;
         };
+        InvitationTokenRequest: {
+            token: string;
+        };
         InvoiceSummary: {
             number: string;
             pdfStatus: components["schemas"]["PdfStatusEnum"];
@@ -5546,6 +5589,10 @@ export interface components {
             schoolName?: string | null;
             /** Format: date-time */
             expiresAt: string;
+        };
+        TeacherInvitationAcceptRequest: {
+            token: string;
+            password: string;
         };
         /** @description Ticket Steamy Events offert à la certification (D33), utilisable une fois (C12). */
         Ticket: {
@@ -8332,7 +8379,7 @@ export interface operations {
             };
         };
     };
-    auth_teacher_invitations_retrieve: {
+    auth_teacher_invitations_legacy_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -8369,7 +8416,7 @@ export interface operations {
             };
         };
     };
-    auth_teacher_invitations_accept_create: {
+    auth_teacher_invitations_legacy_accept: {
         parameters: {
             query?: never;
             header?: never;
@@ -8409,6 +8456,100 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_teacher_invitations_accept_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeacherInvitationAcceptRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_teacher_invitations_lookup_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationTokenRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherInvitation"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
