@@ -5,12 +5,9 @@ import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ds/Button";
 import { ErrorSummary } from "@/components/ds/ErrorSummary";
-import { Field } from "@/components/ds/Field";
 import { Modal } from "@/components/ds/Modal";
-import { ReferentialSelect } from "@/components/ds/ReferentialSelect";
-import { Textarea } from "@/components/ds/Textarea";
+import { REFUSAL_REASON_FIELD, RefusalFields } from "@/features/consent/RefusalFields";
 import { apiCall, errorMessage } from "@/lib/api-call";
-import { useReferential } from "@/lib/use-referential";
 
 /**
  * WP11 · Refus : motif obligatoire (référentiel) et précisions facultatives, transmis à l'enfant (W18). Le refus clôt
@@ -18,7 +15,6 @@ import { useReferential } from "@/lib/use-referential";
  */
 export function RefuseForm({ id, firstName }: { id: number; firstName: string }) {
   const router = useRouter();
-  const reasons = useReferential("refusal-reasons");
   const [reason, setReason] = useState("");
   const [reasonError, setReasonError] = useState<string>();
   const [confirming, setConfirming] = useState(false);
@@ -56,36 +52,23 @@ export function RefuseForm({ id, firstName }: { id: number; firstName: string })
   };
 
   const errors = [
-    reasonError && { field: "motif-refus", message: reasonError },
+    reasonError && { field: REFUSAL_REASON_FIELD, message: reasonError },
     error && { message: error },
   ].filter((item) => !!item);
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       <ErrorSummary title="Refus impossible :" errors={errors} focusKey={attempt} />
-      <Field label="Motif du refus" id="motif-refus" required error={reasonError}>
-        <ReferentialSelect
-          name="reason"
-          items={reasons.items}
-          status={reasons.status === "idle" ? "loading" : reasons.status}
-          onRetry={reasons.retry}
-          value={reason}
-          onChange={(value) => {
-            setReason(value);
-            setReasonError(undefined);
-          }}
-          placeholder="Choisissez…"
-        />
-      </Field>
-      <Field label="Précisions (facultatif)" id="precisions-refus">
-        <Textarea
-          name="note"
-          rows={3}
-          value={note}
-          onChange={(event) => setNote(event.target.value)}
-          placeholder="Un mot pour votre enfant…"
-        />
-      </Field>
+      <RefusalFields
+        reason={reason}
+        onReasonChange={(value) => {
+          setReason(value);
+          setReasonError(undefined);
+        }}
+        reasonError={reasonError}
+        note={note}
+        onNoteChange={setNote}
+      />
       <div className="mt-3 flex flex-col gap-3">
         <Button type="submit" variant="danger" block size="lg">
           Confirmer le refus

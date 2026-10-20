@@ -13,7 +13,7 @@ paiement `WA03`, états `WA04`/`WA05`/`WA07`, suivi `WK07`).
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation C18 de `WPD15`) · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
+Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 de `WPD15`) · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
 
 ### Lot 4 · Espace parent — 🟡 en cours
 - [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15` · PR #72
@@ -51,15 +51,16 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation 
   - [ ] Playwright : le parent crée un enfant, l'enfant se connecte sur `W16` et arrive sur `W11`
   - [ ] Playwright : réinitialisation du mot de passe, l'ancien est refusé et le nouveau accepté
   - [ ] Recette : `/parent/enfants/<id d'un autre parent>` affiche « introuvable » ; aucune donnée sensible hors `WPD03`/`WPD10`
-- [ ] **4.3** Demande de consentement in-app · `feature/lot4-consentement` (requiert 4.1)
-  - [ ] `WPD05` avec `ConsentRequestCard` (partagé avec `WP05`) et `ConsentOrigin` (origine enfant)
-  - [ ] `RefuseConsentDialog` (reprise de `WP11` : motif obligatoire en liste fermée + précisions, vouvoiement)
-  - [ ] Branchement API : `consent-requests/{id}/` (GET), `accept/`, `refuse/`, `referentials/refusal-reasons/`, redirection après `claim/` (lot 2)
-  - [ ] Règles : seules les données de D20, texte « nouvelle demande possible dans 30 jours », lecture seule si expirée ou déjà traitée, retour à `WPD01` avec confirmation après acceptation
-  - [ ] Tests unitaires : modale (motif requis, bouton danger, annulation sans appel API), lecture seule pour `accepted`, `refused`, `expired`, `cancelled`
-  - [ ] Playwright : refus de consentement (SMS, `WPD05`, refus avec motif, `W18` côté enfant, `CONSENT_COOLDOWN` à la nouvelle demande)
-  - [ ] Playwright : acceptation, l'enfant poursuit en `W08`/`W10`
-  - [ ] Recette : aucune information au-delà de D20 ; demande d'un autre numéro = « Demande introuvable »
+- [x] **4.3** Demande de consentement in-app · `feature/lot4-consentement` (requiert 4.1) · PR #125
+  - [x] `WPD05` avec `ConsentRequestCard` (partagé avec `WP05`) et `ConsentOrigin` (origine enfant)
+  - [x] `RefuseConsentDialog` (reprise de `WP11` : motif obligatoire en liste fermée + précisions, vouvoiement)
+  - [x] Branchement API : `consent-requests/{id}/` (GET), `accept/`, `refuse/`, `referentials/refusal-reasons/`, redirection après `claim/` (lot 2)
+  - [x] Règles : seules les données de D20, texte « nouvelle demande possible dans 30 jours », lecture seule si expirée ou déjà traitée, retour à `WPD01` avec confirmation après acceptation
+  - [x] Tests unitaires : modale (motif requis, bouton danger, annulation sans appel API), lecture seule pour `accepted`, `refused`, `expired`, `cancelled`
+  - [x] Playwright : refus de consentement (SMS, `WPD05`, refus avec motif, `W18` côté enfant, `CONSENT_COOLDOWN` à la nouvelle demande)
+  - [x] Playwright : acceptation, l'enfant poursuit en `W08`/`W10`
+  - [x] Recette : aucune information au-delà de D20 ; demande d'un autre numéro = « Demande introuvable »
+  > Écarts : le lien SMS aboutit sur `WPD05` pour un parent au profil complet (`profileStep` nul) : `WP05` l'y redirige après le `claim` ; un parent au profil inachevé reste dans le parcours du lot 2 (`WP05`, `WP11`, `WP12`), dont les e2e (`decision-parent`, P2) utilisent désormais un tel parent, et P4 (Marie) accepte dans `WPD05`. Les champs de `WP11` sont extraits dans `features/consent/RefusalFields` (partagés par `WP11` et la modale). Le refus se fait dans la modale en une étape (sans seconde confirmation, la modale en tient lieu) et `WPD05` est relu en lecture seule. Confirmation après acceptation : bandeau `role="status"` sur `WPD01` via `?consentement=<id>` (prénom relu dans l'API, aucune donnée personnelle dans l'URL, rien si la demande n'est pas acceptée). Lecture seule : encart par statut, badge de la carte (`Acceptée`, `Refusée`, `Expirée`, `Annulée`), sans boutons désactivés, « Retour à l'accueil ». `ConsentOrigin` couvre aussi les origines `support` (changement de parent) et `parent` ; l'origine enseignant reste pour 4.10. La page `/consentement` du lot 2 garde son message `CONSENT_PHONE_MISMATCH` (sans détail sur l'enfant) ; `WPD05` d'une demande d'un autre numéro renvoie « Demande introuvable ».
 - [ ] **4.4** `WPD15` Demande de paiement · `feature/lot4-demande-paiement` (requiert 4.0, 4.1, API-L3b)
   - [ ] `WPD15` selon la maquette de 4.0, accès réservé au parent du bénéficiaire (sinon « Demande introuvable »)
   - [ ] `PaymentRequestSummary` (carte enfant + objet parcours / kit / événement) et `DeclineRequestDialog`

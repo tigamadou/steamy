@@ -65,6 +65,7 @@ describe("routes.parent", () => {
     expect(p.deleteChild(7)).toBe("/parent/enfants/7/supprimer");
     expect(p.deleteChild(7, 9)).toBe("/parent/enfants/7/supprimer?demande=9");
     expect(p.consent("ab12")).toBe("/parent/consentements/ab12");
+    expect(p.consentAccepted(7)).toBe("/parent?consentement=7");
     expect(p.paymentRequest(12)).toBe("/parent/demandes/12");
     expect(p.event("robot-cup")).toBe("/parent/evenements/robot-cup");
     expect(p.eventSignup("robot-cup")).toBe("/parent/evenements/robot-cup/inscription");
