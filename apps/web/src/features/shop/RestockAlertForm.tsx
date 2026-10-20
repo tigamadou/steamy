@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Button, Field, PhoneInput, type PhoneChange } from "@/components/ds";
 import { errorMessage } from "@/lib/api-call";
 import { useReferential } from "@/lib/use-referential";
+import { throttledLabel, useThrottle } from "@/lib/use-throttle";
 
 import { probeShopper, requestRestockAlert, type Shopper } from "./api";
 import type { ShopContext } from "./AddToCartButton";
@@ -45,6 +46,7 @@ export function RestockAlertForm({ slug, context }: { slug: string; context: Sho
   const [error, setError] = useState<string>();
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
+  const { wait, track } = useThrottle();
   const countries = useReferential("countries", {});
 
   if (!shopper) return <p className="text-sm font-semibold text-ink-600">Chargement…</p>;
@@ -69,8 +71,12 @@ export function RestockAlertForm({ slug, context }: { slug: string; context: Sho
     setPending(true);
     const result = await requestRestockAlert(slug, shopper === "guest" ? phone!.e164! : undefined);
     setPending(false);
-    if (result.ok) setDone(true);
-    else setError(result.fields.phone ?? errorMessage(result, tu ? "tu" : "vous"));
+    if (result.ok) {
+      setDone(true);
+      return;
+    }
+    track(result);
+    setError(result.fields.phone ?? errorMessage(result, tu ? "tu" : "vous"));
   };
 
   return (
@@ -87,8 +93,8 @@ export function RestockAlertForm({ slug, context }: { slug: string; context: Sho
           </p>
         )
       )}
-      <Button type="submit" variant="amber" icon="bell" block loading={pending}>
-        {tu ? "Préviens-moi" : "Me prévenir"}
+      <Button type="submit" variant="amber" icon="bell" block loading={pending} disabled={wait > 0}>
+        {throttledLabel(wait, tu ? "Préviens-moi" : "Me prévenir")}
       </Button>
     </form>
   );

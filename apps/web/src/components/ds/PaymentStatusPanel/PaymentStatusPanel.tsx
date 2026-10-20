@@ -58,7 +58,7 @@ const TEXTS = {
   tu: {
     pendingTitle: "On confirme ton paiement…",
     pendingBody:
-      "Valide la demande sur ton téléphone (notification ou code USSD). Cela peut prendre quelques secondes : ne ferme pas cette page.",
+      "La demande attend sa validation auprès de l'opérateur Mobile Money. Cela peut prendre quelques secondes : ne ferme pas cette page.",
     sentTo: "Demande envoyée au",
     stillPending:
       "Le paiement est toujours en attente de validation. Tu peux quitter cette page : son issue apparaîtra dans tes commandes.",

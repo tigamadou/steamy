@@ -58,7 +58,9 @@ describe("PaymentStatusPanel", () => {
     render(<PaymentStatusPanel {...props} payment={PENDING} onSettled={onSettled} register="tu" />);
     expect(screen.getByRole("heading", { level: 2, name: "On confirme ton paiement…" })).toBeInTheDocument();
     expect(screen.getByText("Demande envoyée au +229 01 •• •• •• 01")).toBeInTheDocument();
-    expect(screen.getByText(/Valide la demande sur ton téléphone/)).toBeInTheDocument();
+    expect(screen.getByText(/attend sa validation auprès de l.opérateur Mobile Money/)).toBeInTheDocument();
+    // Registre de l'apprenant : jamais de téléphone (D30)
+    expect(screen.queryByText(/téléphone/)).not.toBeInTheDocument();
 
     await act(() => vi.advanceTimersByTimeAsync(3_000));
     expect(GET).toHaveBeenCalledWith("/api/payments/payments/{id}/", { params: { path: { id: 41 }, header: undefined } });

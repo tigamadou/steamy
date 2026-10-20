@@ -21,7 +21,16 @@ export type DeliveryInfo = {
   addressLine: string;
 };
 
-export type CheckoutState = { guest?: GuestInfo; delivery?: DeliveryInfo; reference?: string };
+export type CheckoutState = {
+  guest?: GuestInfo;
+  delivery?: DeliveryInfo;
+  reference?: string;
+  /**
+   * Empreinte de la commande `reference` (lignes du panier, coordonnées, adresse ; aucun prix) : un nouveau passage
+   * par WK05 avec la même empreinte reprend cette commande au lieu d'en créer une autre.
+   */
+  orderKey?: string;
+};
 
 export const CHECKOUT_KEY = "steamy:commande";
 const TOKEN_PREFIX = "steamy:suivi:";
