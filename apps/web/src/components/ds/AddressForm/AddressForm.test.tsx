@@ -104,6 +104,23 @@ describe("AddressForm", () => {
     expect(Object.keys(formValues())).toEqual(["pays", "zoneId", "quartier", "rue"]);
   });
 
+  it("champ « Ville » sur demande (`withCity`) : valeur initiale, nom, erreur", () => {
+    render(
+      <Harness
+        withCity
+        idPrefix="livraison"
+        defaultValues={{ city: "Cotonou" }}
+        names={{ city: "ville" }}
+        errors={{ city: "Ville requise" }}
+      />,
+    );
+    const city = screen.getByRole("textbox", { name: /^Ville\b/ });
+    expect(city).toHaveValue("Cotonou");
+    expect(city).toHaveAttribute("id", "livraison-ville");
+    expect(city).toHaveAccessibleDescription("Ville requise");
+    expect(formValues()).toMatchObject({ ville: "Cotonou" });
+  });
+
   it("vouvoiement de l'aide, listes en chargement ou en erreur, désactivé", () => {
     const onRetry = vi.fn();
     render(
