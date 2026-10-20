@@ -42,17 +42,20 @@ FORMER_PARENT_SMS = (
 
 def set_status(user: User, status: str, reason: str, request) -> bool:
     """Suspendre, désactiver ou réactiver un compte (motif obligatoire). Faux si la transition n'est pas admise."""
-    if user.is_staff or user.status not in STATUS_TRANSITIONS[status]:
-        return False
-    previous = user.status
-    user.status = status
-    user.save(update_fields=["status", "updated_at"])
-    audit(
-        "account.status_changed",
-        request=request,
-        target=user,
-        data={"from": previous, "to": status, "reason": reason},
-    )
+    with transaction.atomic():
+        # Statut relu sous verrou : deux actions simultanées ne s'appliquent pas sur un état périmé
+        user = User.objects.select_for_update().get(pk=user.pk)
+        if user.is_staff or user.status not in STATUS_TRANSITIONS[status]:
+            return False
+        previous = user.status
+        user.status = status
+        user.save(update_fields=["status", "updated_at"])
+        audit(
+            "account.status_changed",
+            request=request,
+            target=user,
+            data={"from": previous, "to": status, "reason": reason},
+        )
     return True
 
 
@@ -174,17 +177,28 @@ def send_password_reset_link(user: User, request) -> str:
     from django.conf import settings
     from django.core.mail import send_mail
 
+    from apps.core.models import PlatformSettings
+
+    from .otp import consume_send_quota
+
     if user.status != User.Status.ACTIVE:
         raise ValueError(f"{user} : compte non actif.")
+    if user.role == User.Role.LEARNER:
+        raise ValueError(f"{user} : un apprenant change de mot de passe par son parent (D26).")
+    # Téléphone du parent et email de l'enseignant garantis par les contraintes du modèle
+    if user.role not in (User.Role.PARENT, User.Role.TEACHER):
+        raise ValueError(f"{user} : réinitialisation réservée aux parents et aux enseignants.")
+    # Mêmes plafonds quotidiens que les codes (D24), par destinataire et par IP du membre du personnel
+    consume_send_quota(user.phone or user.email, client_ip(request), PlatformSettings.load())
     url = f"{settings.WEB_URL.rstrip('/')}/mot-de-passe-oublie"
-    if user.role == User.Role.PARENT and user.phone:
+    if user.role == User.Role.PARENT:
         queue_sms(
             user.phone,
             RESET_LINK_TEXT.format(url=url, identifier="votre numéro"),
             purpose="password_reset",
         )
         channel = "sms"
-    elif user.role == User.Role.TEACHER and user.email:
+    else:
         send_mail(
             "Steamy · nouveau mot de passe",
             RESET_LINK_TEXT.format(url=url, identifier="votre adresse email"),
@@ -192,7 +206,5 @@ def send_password_reset_link(user: User, request) -> str:
             [user.email],
         )
         channel = "email"
-    else:
-        raise ValueError(f"{user} : un apprenant change de mot de passe par son parent (D26).")
     audit("user.password_reset_link", request=request, target=user, data={"channel": channel})
     return channel

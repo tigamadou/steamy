@@ -14,10 +14,11 @@ from django import forms
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.contrib.auth.forms import UserChangeForm
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import ngettext
+from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from apps.core.admin_actions import form_action
 from apps.core.groups import SUPER_ADMIN
@@ -91,6 +92,11 @@ class ReadOnlyInline(admin.TabularInline):
     extra = 0
     can_delete = False
     show_change_link = True
+    #: Relations affichées, chargées avec les lignes
+    related = ()
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(*self.related)
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -102,6 +108,7 @@ class ReadOnlyInline(admin.TabularInline):
 class ChildrenInline(ReadOnlyInline):
     model = ParentChildLink
     fk_name = "parent"
+    related = ("learner", "relationship")
     fields = ("learner", "relationship", "created_at")
     readonly_fields = fields
     verbose_name_plural = "Enfants rattachés"
@@ -124,6 +131,7 @@ def enrollment_inline():
         {
             "model": Enrollment,
             "fk_name": "learner",
+            "related": ("course",),
             "fields": ("course", "source", "status", "created_at"),
             "readonly_fields": ("course", "source", "status", "created_at"),
             "verbose_name_plural": "Inscriptions",
@@ -156,6 +164,7 @@ def membership_inline():
         {
             "model": ClassroomMembership,
             "fk_name": "learner",
+            "related": ("classroom",),
             "fields": ("classroom", "status", "joined_at", "left_at"),
             "readonly_fields": ("classroom", "status", "joined_at", "left_at"),
             "verbose_name_plural": "Classes",
@@ -297,6 +306,8 @@ class UserAdmin(admin.ModelAdmin):
                 channel = backoffice.send_password_reset_link(user, request)
             except ValueError as error:
                 self.message_user(request, str(error), messages.ERROR)
+            except ApiError as error:  # plafond d'envois atteint (D24)
+                self.message_user(request, f"{user} : {error.detail}", messages.WARNING)
             else:
                 via = "par SMS" if channel == "sms" else "par email"
                 self.message_user(
@@ -692,7 +703,14 @@ class StaffMemberAdmin(DjangoUserAdmin):
     actions = ["reset_totp"]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).filter(is_staff=True).prefetch_related("groups")
+        confirmed = TOTPDevice.objects.filter(user=OuterRef("pk"), confirmed=True)
+        return (
+            super()
+            .get_queryset(request)
+            .filter(is_staff=True)
+            .prefetch_related("groups")
+            .annotate(has_totp=Exists(confirmed))
+        )
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -724,7 +742,7 @@ class StaffMemberAdmin(DjangoUserAdmin):
 
     @admin.display(description="TOTP", boolean=True)
     def totp(self, obj):
-        return obj.totpdevice_set.filter(confirmed=True).exists()
+        return obj.has_totp
 
     @admin.action(description="Réinitialiser le TOTP (ferme les sessions)", permissions=["change"])
     def reset_totp(self, request, queryset):

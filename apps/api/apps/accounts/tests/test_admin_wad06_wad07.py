@@ -138,8 +138,15 @@ def test_gender_and_disability_need_the_sensitive_permission():
 
 def test_sensitive_fields_show_a_dash_when_unknown():
     teacher = TeacherFactory()
-    page = member(SUPPORT).get(f"{USERS}{teacher.pk}/change/").content.decode()
-    assert "Genre" in page
+    page = member(SUPPORT).get(f"{USERS}{teacher.pk}/change/")
+    fields = {
+        field.field["label"]: field.contents()
+        for fieldset in page.context["adminform"]
+        for line in fieldset
+        for field in line
+        if field.is_readonly
+    }
+    assert fields["Genre"] == "—" and fields["Handicap"] == "—"
 
 
 # --- Réinitialisation du mot de passe (D26) ----------------------------------------------------------------------
@@ -167,6 +174,30 @@ def test_a_learner_or_inactive_account_gets_no_reset_link():
     assert not AuditLog.objects.filter(action="user.password_reset_link").exists()
 
 
+def test_a_staff_account_is_not_told_about_parents(rf):
+    """Hors liste (comptes du personnel exclus) : le message ne parle pas de parent."""
+    from apps.accounts.backoffice import send_password_reset_link
+    from apps.core.tests.staff import staff_member
+
+    staff = staff_member(SUPPORT)
+    with pytest.raises(ValueError, match="réservée aux parents et aux enseignants"):
+        send_password_reset_link(staff, rf.post("/"))
+
+
+def test_reset_links_respect_the_daily_send_quota(sms):
+    from apps.core.models import PlatformSettings
+
+    config = PlatformSettings.load()
+    config.otp_daily_limit_per_phone = 1
+    config.save()
+    support = member(SUPPORT)
+    parent = ParentFactory(phone="+2290197000888")
+    act(support, "send_password_reset", [parent])
+    response = act(support, "send_password_reset", [parent])
+    assert any(m.startswith(f"{parent} : ") and "lien" not in m for m in texts(response))
+    assert AuditLog.objects.filter(action="user.password_reset_link").count() == 1
+
+
 def test_finance_cannot_send_reset_links():
     form = member(FINANCE).get(USERS).context["action_form"]
     names = [name for name, _ in form.fields["action"].choices] if form else []
@@ -189,6 +220,31 @@ def test_inviting_a_teacher_creates_an_invitation_and_no_account():
     assert invitation.sent_at is not None and invitation.accepted_at is None
     assert any(m.to == ["nouvelle.prof@ecole.bj"] for m in mail.outbox)
     assert not User.objects.filter(email__iexact="nouvelle.prof@ecole.bj").exists()
+    log = AuditLog.objects.get(action="teacher_invitation.sent")
+    assert log.target_id == str(invitation.pk) and log.data["email"] == "nouvelle.prof@ecole.bj"
+
+
+def test_resending_an_invitation_is_audited_too():
+    support = member(SUPPORT)
+    invitation = TeacherInvitation.objects.create(email="prof@ecole.bj", first_name="Afi")
+    support.post(
+        "/admin/classrooms/teacherinvitation/",
+        {"action": "send", "_selected_action": [invitation.pk]},
+        follow=True,
+    )
+    assert AuditLog.objects.filter(
+        action="teacher_invitation.sent", target_id=str(invitation.pk)
+    ).exists()
+
+
+def test_an_invitation_for_a_taken_email_is_refused():
+    TeacherFactory(email="deja@ecole.bj")
+    response = member(SUPPORT).post(
+        "/admin/classrooms/teacherinvitation/add/",
+        {"email": "Deja@ecole.bj", "first_name": "Afi", "last_name": ""},
+    )
+    assert "Un compte utilise déjà cette adresse email." in response.content.decode()
+    assert not TeacherInvitation.objects.exists() and not mail.outbox
 
 
 def test_the_invitation_button_needs_the_permission():
