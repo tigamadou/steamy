@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Activity } from "react";
+import { Activity, StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { KIT } from "@/test/api-fixtures";
@@ -235,7 +235,30 @@ describe("panier public vu par un compte connecté", () => {
     expect(
       await screen.findByText("2 kits de votre panier ne sont plus disponibles : ils ont été retirés."),
     ).toBeInTheDocument();
-    expect(window.sessionStorage.getItem("steamy:panier-ecartes")).toBeNull();
+    await waitFor(() => expect(window.sessionStorage.getItem("steamy:panier-ecartes")).toBeNull());
+  });
+
+  it("kits refusés à la fusion : gardés pendant la redirection d'un apprenant, même sous StrictMode, puis signalés", async () => {
+    window.sessionStorage.setItem("steamy:panier-ecartes", "1");
+    api.probeShopper.mockResolvedValue("learner");
+    api.getCart.mockResolvedValue({ ok: true, data: cart([{ id: 1, kit: KIT, quantity: 1 }]) });
+    const publicView = render(
+      <StrictMode>
+        <CartView context="public" />
+      </StrictMode>,
+    );
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/apprenant/boutique/panier"));
+    expect(window.sessionStorage.getItem("steamy:panier-ecartes")).toBe("1");
+    publicView.unmount();
+
+    // Panier de l'apprenant : l'avis s'affiche, puis le compteur est remis à zéro
+    render(
+      <StrictMode>
+        <CartView context="learner" />
+      </StrictMode>,
+    );
+    expect(await screen.findByText("Un kit de ton panier n'est plus disponible : il a été retiré.")).toBeInTheDocument();
+    await waitFor(() => expect(window.sessionStorage.getItem("steamy:panier-ecartes")).toBeNull());
   });
 
   it("démonté avant la réponse : rien n'est mis à jour", async () => {

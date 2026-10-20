@@ -84,12 +84,16 @@ export async function addToCart(
   return { ok: true, data: { shopper } };
 }
 
-/** Échecs passagers (réseau, panne, plafond) : la ligne reste dans le stockage et sera versée au prochain essai. */
-const TRANSIENT = new Set(["NETWORK_UNAVAILABLE", "SERVER_ERROR", "THROTTLED"]);
+/**
+ * Refus définitifs d'une ligne (kit retiré, épuisé, quantité refusée) : elle quitte le stockage. Tout autre échec
+ * (réseau, panne, plafond, session expirée, jeton CSRF, accès refusé) la garde pour un prochain essai : le panier
+ * invité n'est jamais vidé par une erreur qui ne tient pas au kit.
+ */
+const DEFINITIVE = new Set(["NOT_FOUND", "OUT_OF_STOCK", "VALIDATION_ERROR"]);
 
 /**
  * Verse le panier invité dans le panier serveur, au retour de la connexion (W16, `?next=`), puis vide le stockage
- * local. Chaque ligne versée, ou refusée pour de bon (kit retiré, épuisé, quantité ou accès refusés), quitte aussitôt
+ * local. Chaque ligne versée, ou refusée pour de bon (kit retiré, épuisé, quantité refusée), quitte aussitôt
  * le stockage : une coupure en cours de route ne la versera pas deux fois, et une ligne refusée n'est pas réessayée à
  * chaque affichage. Les lignes refusées sont comptées pour que le panier le signale. Renvoie le nombre de lignes
  * versées.
@@ -99,7 +103,7 @@ export async function mergeGuestCart(): Promise<number> {
   let dropped = 0;
   for (const line of readGuestCart()) {
     const result = await addCartItem(line.kitSlug, line.quantity);
-    if (!result.ok && TRANSIENT.has(result.code)) continue;
+    if (!result.ok && !DEFINITIVE.has(result.code)) continue;
     if (result.ok) merged += 1;
     else dropped += 1;
     writeGuestCart(readGuestCart().filter((l) => l.kitSlug !== line.kitSlug));
