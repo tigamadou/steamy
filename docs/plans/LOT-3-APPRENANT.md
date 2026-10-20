@@ -15,7 +15,7 @@ déroulement pédagogique, déblocage d'un parcours, boutique de kits et Steamy 
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 3.6, 3.7b, 3.7c, 3.8 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) avant les pastilles Points/Rang
+Statut : 🟡 en cours · Prochaine tâche : 3.6, 3.7b, 3.7c, 3.8 · Prérequis : API-1 et API-L3a (3.0 à 3.5), API-L1 (3.2), API-L3b (3.6 à 3.8, après la comparaison S9) ; lots 1 et 2 livrés ; maquette de WD23 validée avant 3.3a (C18) ; barème de points et rangs (C8) fixé le 2026-10-19 : pastilles Points/Rang débloquées
 
 ### Valeur pédagogique (API-L3a) — ✅ terminé
 - [x] **3.0** AppShell unique et navigation (requiert API-1, API-L3a) · `feature/lot3-app-shell` · PR #92
@@ -202,7 +202,7 @@ Statut : 🟡 en cours · Prochaine tâche : 3.6, 3.7b, 3.7c, 3.8 · Prérequis 
 | Maquette de `WD23` dans `design/screens-apprenant-a-concevoir-web.jsx`, validée (C18) | Produit | 3.3a |
 | `API-L3a` publiée et `make openapi` à jour | PLAN-API | 3.1 à 3.5 |
 | `API-L3b` (prestataire choisi après la comparaison S9, faux prestataire en local et CI) | PLAN-API | 3.6 à 3.8 |
-| Barème de points et paliers de rang dans `PlatformSettings` (C8) | Produit, avant le lot 3 | Pastilles Points/Rang |
+| ✅ Barème de points et paliers de rang dans `PlatformSettings` (C8) : barème standard, arbitré le 2026-10-19 | Produit, avant le lot 3 | Pastilles Points/Rang débloquées |
 | Compte Vimeo avec restriction de domaine ; vidéos de démo | Produit | 3.3a |
 | Jeu D2 étendu (§9) | `API-L3a`/`API-L3b` | Parcours Playwright |
 
@@ -534,7 +534,7 @@ Les besoins relevés pendant la rédaction sont intégrés à `API-L3a`/`API-L3b
 | Sous-lot | Étape | Endpoints (§7) | Précisions intégrées |
 | --- | --- | --- | --- |
 | 3.0 | API-1, API-L3a | `accounts/me/`, `auth/logout/`, `notifications/unread-count/` | Données du shell (avatar, classe, ville) dans `accounts/me/` |
-| 3.1 | API-L3a | `learning/dashboard/`, `notifications/*`, `catalog/courses/` | `points`/`rank` à `null` tant que le barème C8 n'est pas saisi |
+| 3.1 | API-L3a | `learning/dashboard/`, `notifications/*`, `catalog/courses/` | `points`/`rank` renseignés (barème C8 standard par défaut) ; `null` seulement si le personnel vide le barème |
 | 3.2 | API-L1, API-L3a | `catalog/*`, `learning/enrollments/`, `wishlist/*` | Le catalogue reste indépendant de la session (cache) : favoris et inscriptions lus une fois par `GET wishlist/` et `GET learning/enrollments/`, fusionnés côté front |
 | 3.3a | API-L3a | `learning/enrollments/{slug}/tree/`, `projects|levels|missions/{id}/`, `missions/{id}/complete/`, `activity/`, `classrooms/comments/` | `next` renvoyé par `complete/` ; `vimeoHash` ; commentaires absents (pas d'erreur) avant API-L5 |
 | 3.3b | API-L3a | `learning/quizzes/{id}/`, `quizzes/{id}/attempts/`, `attempts/{id}/`, `badges/` | Envoi groupé ; `retryInSec` ; `next` après le badge |
@@ -582,7 +582,7 @@ livraison, deux événements (gratuit, payant). Tous les compteurs affichés son
 | Risque | Effet | Parade |
 | --- | --- | --- |
 | Comparaison KKiaPay / FedaPay (S9) tardive | 3.6-3.8 bloqués | Ordre : 3.0-3.5 sur `API-L3a` d'abord ; interface de paiement + faux prestataire suffisent au front |
-| Barème de points et rangs non fixés (C8) | Pastilles vides | API renvoie `null`, pastilles masquées (D34) |
+| Barème de points et rangs vidés par le personnel (C8 fixé le 2026-10-19) | Pastilles vides | API renvoie `null`, pastilles masquées (D34) |
 | Vimeo : offre sans restriction de domaine, vidéos privées | Contenu copiable, lecture refusée | Vérifier l'offre avant 3.3a ; `vimeoHash` ; repli texte |
 | `cacheComponents` et pages personnalisées | Routes bloquantes, avertissements en dev | `<Suspense>` systématique, lecture des guides Next.js 16, revue en 3.0 |
 | Décalage d'horloge sur le délai de sommative | Bouton réactivé trop tôt | Compte à rebours sur `retryInSec` ; le serveur renvoie `QUIZ_COOLDOWN` de toute façon |
@@ -596,7 +596,7 @@ livraison, deux événements (gratuit, payant). Tous les compteurs affichés son
 
 | Point | Bloque |
 | --- | --- |
-| Valeurs du barème de points et des paliers de rang (C8), à saisir dans `PlatformSettings` | Affichage des pastilles Points/Rang (masquées sinon) |
+| ✅ Valeurs du barème de points et des paliers de rang (C8) : barème standard, arbitré le 2026-10-19 | Pastilles Points/Rang débloquées |
 | Choix du prestataire de paiement après comparaison KKiaPay / FedaPay (S9, ADR-Paiement) | Branchement réel (le faux prestataire suffit au lot) |
 | Offre Vimeo permettant la restriction de domaine et vidéos de démo | 3.3a en conditions réelles |
 
