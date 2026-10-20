@@ -172,7 +172,7 @@ describe("PaymentForm · Mobile Money préféré et double clic (WPD15)", () => 
 
   it("réseau préféré qui n'est plus proposé pour le pays : aucun réseau présélectionné, choix exigé", async () => {
     const user = userEvent.setup();
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn().mockResolvedValue({ ok: true, data: {} });
     render(
       <PaymentForm
         amount={18000}
