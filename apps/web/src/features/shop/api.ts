@@ -2,7 +2,7 @@ import type { Schemas } from "@steamy/api-client";
 
 import { apiCall, type ApiResult } from "@/lib/api-call";
 
-import { addGuestLine, readGuestCart, writeGuestCart } from "./guest-cart";
+import { addGuestLine, noteDroppedLines, readGuestCart, writeGuestCart } from "./guest-cart";
 
 // Appels de la boutique par le client navigateur (CSRF automatique) : panier serveur, fiche kit relue au moment
 // d'afficher le panier invité, alerte de réassort, fusion du panier invité à la connexion (D38).
@@ -84,21 +84,26 @@ export async function addToCart(
   return { ok: true, data: { shopper } };
 }
 
-/** Codes qui rendent une ligne invalide pour de bon : elle est abandonnée au lieu d'être réessayée. */
-const DROPPED = new Set(["NOT_FOUND", "OUT_OF_STOCK", "VALIDATION_ERROR"]);
+/** Échecs passagers (réseau, panne, plafond) : la ligne reste dans le stockage et sera versée au prochain essai. */
+const TRANSIENT = new Set(["NETWORK_UNAVAILABLE", "SERVER_ERROR", "THROTTLED"]);
 
 /**
  * Verse le panier invité dans le panier serveur, au retour de la connexion (W16, `?next=`), puis vide le stockage
- * local. Chaque ligne versée (ou refusée pour de bon : kit retiré, épuisé) quitte aussitôt le stockage : une
- * coupure en cours de route ne la versera pas deux fois. Renvoie le nombre de lignes versées.
+ * local. Chaque ligne versée, ou refusée pour de bon (kit retiré, épuisé, quantité ou accès refusés), quitte aussitôt
+ * le stockage : une coupure en cours de route ne la versera pas deux fois, et une ligne refusée n'est pas réessayée à
+ * chaque affichage. Les lignes refusées sont comptées pour que le panier le signale. Renvoie le nombre de lignes
+ * versées.
  */
 export async function mergeGuestCart(): Promise<number> {
   let merged = 0;
+  let dropped = 0;
   for (const line of readGuestCart()) {
     const result = await addCartItem(line.kitSlug, line.quantity);
-    if (!result.ok && !DROPPED.has(result.code)) continue;
+    if (!result.ok && TRANSIENT.has(result.code)) continue;
     if (result.ok) merged += 1;
+    else dropped += 1;
     writeGuestCart(readGuestCart().filter((l) => l.kitSlug !== line.kitSlug));
   }
+  if (dropped > 0) noteDroppedLines(dropped);
   return merged;
 }

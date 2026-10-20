@@ -121,4 +121,17 @@ describe("PaymentForm (WA03)", () => {
       ),
     );
   });
+
+  it("THROTTLED : « Payer » bloqué le temps annoncé par l'API, avec compte à rebours", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, code: "THROTTLED", message: "", fields: {}, retryAfter: 30 });
+    render(<PaymentForm amount={5000} countries={COUNTRIES} onSubmit={onSubmit} />);
+    await user.click(await screen.findByText("Réseau A"));
+    await user.type(screen.getByRole("textbox", { name: /Numéro Mobile Money/ }), "0190123401");
+    await user.click(screen.getByRole("button", { name: /^Payer/ }));
+    expect(await screen.findByRole("button", { name: "Réessayer dans 0:30" })).toBeDisabled();
+    expect(screen.getByRole("alert")).toHaveTextContent("30 secondes");
+  });
 });

@@ -73,6 +73,21 @@ describe("AccountDeletion (WD15)", () => {
     expect(DELETE).toHaveBeenCalledWith("/api/accounts/me/deletion-request/");
     expect(await screen.findByRole("button", { name: "Envoyer la demande" })).toBeInTheDocument();
     expect(screen.getByText("Ta demande de suppression est annulée.")).toBeInTheDocument();
+    // Focus rendu au titre du formulaire (WCAG 2.4.3)
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Supprimer ton compte ?" })).toHaveFocus());
+  });
+
+  it("demande validée par le parent : état dédié, date d'anonymisation de l'API, sans formulaire", () => {
+    const { unmount } = render(
+      <AccountDeletion initial={deletion({ status: "scheduled", scheduledFor: "2026-11-15T10:00:00Z" })} />,
+    );
+    expect(screen.getByRole("heading", { name: "Suppression validée par ton parent" })).toBeInTheDocument();
+    expect(screen.getByText(/sera anonymisé le 15 novembre 2026/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Envoyer la demande" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Annuler ma demande" })).not.toBeInTheDocument();
+    unmount();
+    render(<AccountDeletion initial={deletion({ status: "scheduled", scheduledFor: null })} />);
+    expect(screen.getByText(/sera bientôt anonymisé/)).toBeInTheDocument();
   });
 
   it("annulation refusée : le parent a déjà répondu, ou panne", async () => {

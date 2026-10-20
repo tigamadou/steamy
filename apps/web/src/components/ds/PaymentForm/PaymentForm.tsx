@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { errorMessage, type ApiResult, type Register } from "@/lib/api-call";
 import { formatPrice } from "@/lib/format";
 import { useReferential } from "@/lib/use-referential";
+import { throttledLabel, useThrottle } from "@/lib/use-throttle";
 
 import { Button } from "../Button";
 import { Field } from "../Field";
@@ -59,6 +60,7 @@ export function PaymentForm({ amount, countries, defaultCountry, register = "vou
   const [phone, setPhone] = useState<PhoneChange | null>(null);
   const [errors, setErrors] = useState<Errors>({});
   const [pending, setPending] = useState(false);
+  const { wait, track } = useThrottle();
   const networks = useReferential("payment-networks", { country });
   const network = choice.country === country ? choice.network : "";
   const msisdn = phone?.country === country ? phone.e164 : null;
@@ -81,6 +83,7 @@ export function PaymentForm({ amount, countries, defaultCountry, register = "vou
     const result = await onSubmit({ country, network, msisdn: msisdn as string });
     setPending(false);
     if (result.ok) return;
+    track(result);
     const { fields } = result;
     const byField: Errors = { country: fields.country, network: fields.network, msisdn: fields.msisdn };
     const hasField = Object.values(byField).some(Boolean);
@@ -139,8 +142,8 @@ export function PaymentForm({ amount, countries, defaultCountry, register = "vou
         </p>
       )}
 
-      <Button type="submit" block size="lg" variant="secondary" loading={pending} disabled={noNetwork}>
-        Payer {formatPrice(amount)}
+      <Button type="submit" block size="lg" variant="secondary" loading={pending} disabled={noNetwork || wait > 0}>
+        {throttledLabel(wait, `Payer ${formatPrice(amount)}`)}
       </Button>
       <p className="flex items-center justify-center gap-2 text-xs font-bold text-ink-600">
         <Icon name="lock" size={14} />

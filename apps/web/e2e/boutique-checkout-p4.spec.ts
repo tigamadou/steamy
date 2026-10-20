@@ -66,9 +66,24 @@ test("P4 : checkout invité, échec du paiement puis réussite, suivi de la comm
   await expect(role(page, "heading", { name: /Total à payer · 1 article \+ livraison/ })).toBeVisible();
   await expect(text(page, /réservés jusqu'à \d{2}:\d{2}/)).toBeVisible();
   await axe(page);
+
+  // Retour à WK05 sans rien changer : la commande en attente est reprise, aucune nouvelle n'est créée
+  const reference = () =>
+    page.evaluate(() => (JSON.parse(window.sessionStorage.getItem("steamy:commande") ?? "{}") as { reference?: string }).reference);
+  const created = await reference();
+  expect(created).toBeTruthy();
+  await page.goBack();
+  await expect(page).toHaveURL("/boutique/commande/livraison");
+  await expect(text(page, /Livraison Porto-Novo : .* · délai annoncé 2 à 3 jours/)).toBeVisible();
+  await role(page, "button", { name: "Continuer vers le paiement" }).click();
+  await expect(page).toHaveURL("/boutique/commande/paiement");
+  await expect(role(page, "heading", { name: /Total à payer · 1 article \+ livraison/ })).toBeVisible();
+  expect(await reference()).toBe(created);
   await choose(page, "MTN Mobile Money");
   await role(page, "textbox", { name: /^Numéro Mobile Money/ }).fill("0197123402");
   await role(page, "button", { name: /^Payer/ }).click();
+  // Attente de l'issue (WA04) : le faux prestataire notifie après `FAKE_PAYMENT_DELAY` secondes
+  await expect(role(page, "heading", { name: "On confirme votre paiement…" })).toBeVisible();
   await expect(role(page, "heading", { name: "Paiement échoué" })).toBeVisible({ timeout: 30_000 });
   // Refus notifié par le prestataire (`DECLINED`) : l'API confirme qu'aucun débit n'a eu lieu
   await expect(text(page, /Aucun montant n'a été débité/)).toBeVisible();
