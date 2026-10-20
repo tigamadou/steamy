@@ -135,3 +135,79 @@ describe("PaymentForm (WA03)", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("30 secondes");
   });
 });
+
+describe("PaymentForm · Mobile Money préféré et double clic (WPD15)", () => {
+  it("préremplit pays, réseau et numéro du Mobile Money préféré ; « Payer » en magenta (C1)", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue({ ok: true, data: {} });
+    render(
+      <PaymentForm
+        amount={18000}
+        countries={COUNTRIES}
+        preferred={{ country: "TG", network: "reseau-t", phone: "+22890000000" }}
+        onSubmit={onSubmit}
+      />,
+    );
+    expect(screen.getByRole("combobox", { name: /^Pays/ })).toHaveValue("TG");
+    expect(await screen.findByRole("radio", { name: "Réseau T" })).toBeChecked();
+    expect(screen.getByRole("textbox", { name: /Numéro Mobile Money/ })).toHaveValue("90 00 00 00");
+    const pay = screen.getByRole("button", { name: /^Payer/ });
+    expect(pay.className).toContain("bg-primary-500");
+    await user.click(pay);
+    expect(onSubmit).toHaveBeenCalledWith({ country: "TG", network: "reseau-t", msisdn: "+22890000000" });
+  });
+
+  it("numéro préféré d'un autre pays que l'indicatif : non prérempli", async () => {
+    render(
+      <PaymentForm
+        amount={18000}
+        countries={COUNTRIES}
+        preferred={{ country: "BJ", network: "reseau-a", phone: "+22890000000" }}
+        onSubmit={vi.fn()}
+      />,
+    );
+    expect(await screen.findByRole("radio", { name: "Réseau A" })).toBeChecked();
+    expect(screen.getByRole("textbox", { name: /Numéro Mobile Money/ })).toHaveValue("");
+  });
+
+  it("réseau préféré qui n'est plus proposé pour le pays : aucun réseau présélectionné, choix exigé", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn().mockResolvedValue({ ok: true, data: {} });
+    render(
+      <PaymentForm
+        amount={18000}
+        countries={COUNTRIES}
+        preferred={{ country: "BJ", network: "reseau-retire", phone: "+2290190123401" }}
+        onSubmit={onSubmit}
+      />,
+    );
+    await screen.findByRole("radio", { name: "Réseau A" });
+    expect(screen.getAllByRole("radio").filter((radio) => (radio as HTMLInputElement).checked)).toHaveLength(0);
+    await user.click(screen.getByRole("button", { name: /^Payer/ }));
+    expect(onSubmit).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("radio", { name: "Réseau B" }));
+    await user.click(screen.getByRole("button", { name: /^Payer/ }));
+    expect(onSubmit).toHaveBeenCalledWith({ country: "BJ", network: "reseau-b", msisdn: "+2290190123401" });
+  });
+
+  it("un double clic sur « Payer » n'initie qu'un paiement", async () => {
+    let finish: (value: unknown) => void = () => {};
+    const onSubmit = vi.fn(() => new Promise((resolve) => (finish = resolve)));
+    render(
+      <PaymentForm
+        amount={18000}
+        countries={COUNTRIES}
+        preferred={{ country: "BJ", network: "reseau-a", phone: "+2290190123401" }}
+        onSubmit={onSubmit as never}
+      />,
+    );
+    await screen.findByRole("radio", { name: "Réseau A" });
+    const form = screen.getByRole("button", { name: /^Payer/ }).closest("form") as HTMLFormElement;
+    // Deux envois avant le rendu du bouton occupé
+    form.requestSubmit();
+    form.requestSubmit();
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    finish({ ok: true, data: {} });
+    await waitFor(() => expect(screen.getByRole("button", { name: /^Payer/ })).toBeEnabled());
+  });
+});

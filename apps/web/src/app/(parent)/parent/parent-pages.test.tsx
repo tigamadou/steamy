@@ -7,6 +7,7 @@ import { AppShellSkeleton } from "@/components/ds/AppShell";
 import { Notifications, NotificationsSkeleton } from "@/features/notifications/Notifications";
 import { ConsentRequestScreen, ConsentRequestSkeleton } from "@/features/parent/consent/ConsentRequestScreen";
 import { ParentHome, ParentHomeSkeleton } from "@/features/parent/home/ParentHome";
+import { PaymentRequestScreen, PaymentRequestSkeleton } from "@/features/parent/payment-request/PaymentRequestScreen";
 import { ChildDetail, ChildDetailSkeleton } from "@/features/parent/children/ChildDetail";
 import { ChildForm } from "@/features/parent/children/ChildForm";
 import { ChildrenList, ChildrenListSkeleton } from "@/features/parent/children/ChildrenList";
@@ -19,6 +20,10 @@ const back = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ back }) }));
 vi.mock("@/features/parent/shell/ParentShell", () => ({ ParentShell: () => null }));
 vi.mock("@/features/parent/home/ParentHome", () => ({ ParentHome: () => null, ParentHomeSkeleton: () => null }));
+vi.mock("@/features/parent/payment-request/PaymentRequestScreen", () => ({
+  PaymentRequestScreen: () => null,
+  PaymentRequestSkeleton: () => null,
+}));
 vi.mock("@/features/parent/children/ChildrenList", () => ({ ChildrenList: () => null, ChildrenListSkeleton: () => null }));
 vi.mock("@/features/parent/children/ChildDetail", () => ({ ChildDetail: () => null, ChildDetailSkeleton: () => null }));
 vi.mock("@/features/parent/children/EditChild", () => ({ EditChild: () => null, EditChildSkeleton: () => null }));
@@ -42,6 +47,8 @@ const { default: ParentLoading } = await import("./loading");
 const { default: ParentError } = await import("./error");
 const { default: ParentNotFound } = await import("./not-found");
 const { default: NotificationsPage } = await import("./notifications/page");
+const { default: PaymentRequestPage } = await import("./demandes/[id]/page");
+const { default: PaymentRequestNotFound } = await import("./demandes/[id]/not-found");
 const { default: ChildrenPage } = await import("./enfants/page");
 const { default: AddChildPage } = await import("./enfants/ajouter/page");
 const { default: ChildPage } = await import("./enfants/[id]/page");
@@ -92,6 +99,22 @@ describe("pages de l'espace parent", () => {
     expect(tree.props.fallback.props.space).toBe("parent");
     expect(tree.props.children.type).toBe(Notifications);
     expect(tree.props.children.props).toMatchObject({ space: "parent", searchParams });
+  });
+});
+
+describe("WPD15", () => {
+  it("demande de paiement sous Suspense, avec son squelette", () => {
+    const params = Promise.resolve({ id: "12" });
+    const tree = PaymentRequestPage({ params } as never) as Boundary;
+    expect(tree.props.fallback.type).toBe(PaymentRequestSkeleton);
+    expect(tree.props.children.type).toBe(PaymentRequestScreen);
+    expect(tree.props.children.props).toMatchObject({ params });
+  });
+
+  it("« Demande introuvable » sans distinguer « interdit »", () => {
+    render(<PaymentRequestNotFound />);
+    expect(screen.getByRole("heading", { level: 2, name: "Demande introuvable" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Voir mes demandes à valider" })).toHaveAttribute("href", "/parent");
   });
 });
 
