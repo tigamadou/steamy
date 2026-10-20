@@ -148,6 +148,14 @@ export const routes = {
     event: (slug: string) => `/parent/evenements/${slug}`,
     eventSignup: (slug: string) => `/parent/evenements/${slug}/inscription`,
     orders: "/parent/commandes",
+    /** WPD07 : filtre de statut (`?statut=`) et page dans l'URL (« Toutes » et la page 1 n'y figurent pas). */
+    orderList: (filter?: string, page = 1) => {
+      const query = new URLSearchParams();
+      if (filter) query.set("statut", filter);
+      if (page > 1) query.set("page", String(page));
+      const search = query.toString();
+      return search ? `/parent/commandes?${search}` : "/parent/commandes";
+    },
     order: (reference: string) => `/parent/commandes/${reference}`,
     /** WK01-WK03 dans l'espace parent : achat direct de kit (C10). */
     shop: "/parent/boutique",
