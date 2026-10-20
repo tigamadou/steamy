@@ -8,11 +8,7 @@ const getCurrentUser = vi.fn();
 const GET = vi.fn();
 const flags = vi.hoisted(() => ({
   unlock: false,
-  events: false,
   orders: false,
-  deliveryAddress: false,
-  parentInfo: false,
-  accountDeletion: false,
 }));
 vi.mock("@/lib/auth/session", () => ({ getCurrentUser: () => getCurrentUser() }));
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
@@ -46,7 +42,7 @@ describe("ProfileHub (WD13)", () => {
   beforeEach(() => {
     getCurrentUser.mockReset().mockResolvedValue(ME);
     GET.mockReset().mockResolvedValue({ data: PROFILE, response: new Response(null, { status: 200 }) });
-    Object.assign(flags, { orders: false, deliveryAddress: false, parentInfo: false, accountDeletion: false });
+    flags.orders = false;
   });
 
   it("affiche le profil lu dans l'API et l'identifiant en lecture seule", async () => {
@@ -70,45 +66,49 @@ describe("ProfileHub (WD13)", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("renvoie vers WD06, WD21, les CGU et l'aide ; écrans non livrés absents, jamais « Bientôt »", async () => {
+  it("renvoie vers WD17, WD18, WD19, WD06, WD21, WD22, les CGU, l'aide et WD15 ; WD14 absent, jamais « Bientôt »", async () => {
     await renderHub();
     const hrefs = screen.getAllByRole("link").map((link) => link.getAttribute("href"));
     expect(hrefs).toEqual([
       "/apprenant/profil/modifier",
       "/apprenant/profil/mot-de-passe",
+      "/apprenant/profil/livraison",
       "/apprenant/notifications/preferences",
       "/apprenant/profil/progression",
+      "/apprenant/profil/parent",
       "/legal/cgu",
       "/apprenant/aide",
+      "/apprenant/profil/suppression",
     ]);
-    expect(screen.queryByRole("region", { name: "Livraison" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("region", { name: "Zone sensible" })).not.toBeInTheDocument();
-    expect(screen.queryByText(/Bientôt/)).not.toBeInTheDocument();
-    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
-      "Mon profil",
-      "Connexion",
-      "Notifications",
-      "Mon compte",
-    ]);
-  });
-
-  it("drapeaux ouverts : livraison, commandes, parent et zone sensible", async () => {
-    Object.assign(flags, { orders: true, deliveryAddress: true, parentInfo: true, accountDeletion: true });
-    await renderHub();
     expect(within(screen.getByRole("region", { name: "Livraison" })).getByRole("link")).toHaveAttribute(
       "href",
       "/apprenant/profil/livraison",
     );
-    const account = screen.getByRole("region", { name: "Mon compte" });
-    expect(within(account).getByRole("link", { name: /Mes commandes/ })).toHaveAttribute(
+    expect(within(screen.getByRole("region", { name: "Mon compte" })).getByRole("link", { name: /Mon parent/ })).toHaveAttribute(
       "href",
-      "/apprenant/profil/commandes",
+      "/apprenant/profil/parent",
     );
-    expect(within(account).getByRole("link", { name: /Mon parent/ })).toHaveAttribute("href", "/apprenant/profil/parent");
     expect(within(screen.getByRole("region", { name: "Zone sensible" })).getByRole("link")).toHaveAttribute(
       "href",
       "/apprenant/profil/suppression",
     );
+    expect(screen.queryByText(/Bientôt/)).not.toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual([
+      "Mon profil",
+      "Connexion",
+      "Livraison",
+      "Notifications",
+      "Mon compte",
+      "Zone sensible",
+    ]);
+  });
+
+  it("drapeau `orders` ouvert : « Mes commandes » (WD14)", async () => {
+    flags.orders = true;
+    await renderHub();
+    expect(
+      within(screen.getByRole("region", { name: "Mon compte" })).getByRole("link", { name: /Mes commandes/ }),
+    ).toHaveAttribute("href", "/apprenant/profil/commandes");
   });
 
   it("valeurs absentes : « Non renseigné »", async () => {

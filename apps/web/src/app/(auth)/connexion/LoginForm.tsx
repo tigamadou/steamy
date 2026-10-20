@@ -9,7 +9,9 @@ import { ErrorSummary } from "@/components/ds/ErrorSummary";
 import { Field } from "@/components/ds/Field";
 import { IdentifierInput } from "@/components/ds/IdentifierInput";
 import { PasswordInput } from "@/components/ds/PasswordInput";
+import { mergeGuestCart } from "@/features/shop/api";
 import { homeForRole } from "@/lib/auth/home-for-role";
+import { routes } from "@/lib/routes";
 import { errorMessage, type ApiFailure } from "@/lib/api-call";
 import { login } from "@/lib/auth/login";
 import { setResumeIdentifier } from "@/lib/auth/resume-handoff";
@@ -58,8 +60,12 @@ export function LoginForm({ next, notice }: { next: string | null; notice?: stri
 
     const result = await login(identifier, password);
     if (!result.ok) return { attempt, failure: result };
+    const { role } = result.data;
+    // Panier invité versé dans le panier du compte (D38) ; l'apprenant retrouve le sien dans son espace
+    if (role === "learner" || role === "parent") await mergeGuestCart();
+    const target = next ?? homeForRole(result.data);
     // Retour arrière impossible vers la connexion une fois connecté
-    router.replace(next ?? homeForRole(result.data));
+    router.replace(role === "learner" && target === routes.cart ? routes.learner.cart : target);
     router.refresh();
     return { attempt };
   }, { attempt: 0 });
