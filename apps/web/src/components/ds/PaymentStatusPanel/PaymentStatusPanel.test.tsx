@@ -126,4 +126,21 @@ describe("PaymentStatusPanel", () => {
     );
     expect(screen.getByText(/Aucun montant n'a été débité/)).toBeInTheDocument();
   });
+
+  it("nouvel essai en cours : « Réessayer le paiement » occupé", () => {
+    render(
+      <PaymentStatusPanel
+        {...props}
+        retrying
+        payment={{ ...PENDING, status: "failed", failureCode: "DECLINED", failureReason: "" }}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Réessayer le paiement" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Réessayer le paiement" })).toHaveAttribute("aria-busy", "true");
+  });
+
+  it("refus notifié par le faux prestataire (DECLINED) : aucun débit, affirmé", () => {
+    render(<PaymentStatusPanel {...props} payment={{ ...PENDING, status: "failed", failureCode: "DECLINED" }} />);
+    expect(screen.getByText("La transaction n'a pas pu aboutir. Aucun montant n'a été débité.")).toBeInTheDocument();
+  });
 });

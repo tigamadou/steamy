@@ -39,6 +39,11 @@ export function formatFullDate(isoDateTime: string): string {
   return FULL_DATE.format(new Date(isoDateTime));
 }
 
+/** Heure au fuseau de la plateforme, « 14:32 » (heure limite d'une réservation de stock). */
+export function formatTime(isoInstant: string): string {
+  return TIME.format(new Date(isoInstant));
+}
+
 /** Créneau « 14:00 – 16:30 ». */
 export function formatTimeRange(startIso: string, endIso: string): string {
   return `${TIME.format(new Date(startIso))} – ${TIME.format(new Date(endIso))}`;
