@@ -12,8 +12,12 @@ describe("parentNav", () => {
       ["help", "book", "Aide"],
       ["settings", "gear", "Paramètres"],
     ]);
-    expect(parentNav.filter((entry) => !entry.hidden).map((entry) => entry.href)).toEqual(["/parent"]);
-    expect(PARENT_PROFILE_HREF).toBe("/parent");
+    expect(parentNav.filter((entry) => !entry.hidden).map((entry) => entry.href)).toEqual([
+      "/parent",
+      "/parent/aide",
+      "/parent/parametres",
+    ]);
+    expect(PARENT_PROFILE_HREF).toBe("/parent/parametres");
   });
 });
 

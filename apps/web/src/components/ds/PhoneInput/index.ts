@@ -3,6 +3,7 @@ export {
   DEFAULT_COUNTRY,
   flagEmoji,
   formatNational,
+  initialCountry,
   isValidNational,
   maskPhone,
   toE164,

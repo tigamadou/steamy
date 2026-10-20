@@ -108,14 +108,16 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation 
   - [ ] Tests unitaires : semaine vide, semaine sans email
   - [ ] Playwright : navigation vers la semaine précédente
   - [ ] Recette : chiffres identiques à ceux de l'API pour le jeu D2
-- [ ] **4.9** Paramètres et aide · `feature/lot4-parametres-aide` (requiert 4.1, 4.7, API-L3a)
-  - [ ] `WPD08` Paramètres : profil, connexion (`NewPasswordFields`, changement de numéro avec `OTPInput`), livraison et paiement (`AddressForm`), notifications, `DangerZone`
-  - [ ] `WPD13` Aide : FAQ en `FaqAccordion` avec recherche locale, « Contacter le support » vers `WL24`
-  - [ ] Branchement API : `accounts/me/` (PATCH), `parent-profile/`, `password/`, `email/`, `phone-change/` + `verify/`, `delivery-address/`, `notifications/preferences/`, `deletion-request/`
-  - [ ] Règles : changement de numéro par OTP sur le nouveau numéro (D24), suppression du compte désactivée tant qu'un enfant est rattaché (`CHILDREN_STILL_LINKED`), FAQ versionnée sans invitation par téléphone ni réseaux en dur (D76)
-  - [ ] Tests unitaires : `DangerZone` désactivée avec enfants ; OTP (`OTP_INVALID`, `OTP_RESEND_TOO_EARLY`)
-  - [ ] Playwright : changement de numéro puis connexion avec le nouveau numéro
-  - [ ] Recette : les préférences de notification sont prises en compte (pas de rapport par email si désactivé)
+- [x] **4.9** Paramètres et aide · `feature/lot4-parametres-aide` (requiert 4.1, 4.7, API-L3a) · PR #126
+  - [x] `WPD08` Paramètres : profil, connexion (`NewPasswordFields`, changement de numéro avec `OTPInput`), livraison et paiement (`AddressForm`), notifications, `DangerZone`
+  - [x] `WPD13` Aide : FAQ en `FaqAccordion` avec recherche locale, « Contacter le support » vers `WL24`
+  - [x] Branchement API : `accounts/me/` (PATCH), `parent-profile/`, `password/`, `email/`, `phone-change/` + `verify/`, `delivery-address/`, `notifications/preferences/`, `deletion-request/`
+  - [x] Règles : changement de numéro par OTP sur le nouveau numéro (D24), suppression du compte désactivée tant qu'un enfant est rattaché (`CHILDREN_STILL_LINKED`), FAQ versionnée sans invitation par téléphone ni réseaux en dur (D76)
+  - [x] Tests unitaires : `DangerZone` désactivée avec enfants ; OTP (`OTP_INVALID`, `OTP_RESEND_TOO_EARLY`)
+  - [x] Playwright : changement de numéro puis connexion avec le nouveau numéro
+  - [x] Recette : les préférences de notification sont prises en compte (pas de rapport par email si désactivé)
+  > Écarts : l'email de contact se modifie avec le profil (`PATCH accounts/me/parent-profile/`, effaçable) plutôt que par `POST accounts/me/email/` (qui exige le mot de passe et ne permet pas de le retirer) ; suppression du compte parent annulable par le support seulement (aucun endpoint d'annulation côté parent) ; la recette « pas de rapport par email si désactivé » est vérifiée par la préférence enregistrée (e2e) et par l'API (`email_enabled`), pas par l'envoi lundi ; FAQ propre au parent (`content/faq/parent.ts`).
+  > Point à soumettre au produit : D54 dit la suppression « annulable », mais seul le support peut annuler celle du compte parent (aucun endpoint côté parent, le compte étant désactivé aussitôt).
 - [ ] **4.10** Consentement d'origine enseignant · `feature/lot4-consentement-enseignant` (requiert 4.3, API-L5 ; livrée avec le lot 5, avant l'étape 5.9)
   - [ ] `WPD05` variante enseignant : nom de l'enseignant, classe, établissement, parcours (D60)
   - [ ] Acceptation avec création de l'identifiant (champs de `WPD04` préremplis), puis l'élève rejoint la classe
