@@ -9,6 +9,8 @@ const router = { replace: vi.fn(), refresh: vi.fn(), push: vi.fn() };
 const setResumeIdentifier = vi.fn();
 vi.mock("@/lib/auth/login", () => ({ login }));
 vi.mock("@/lib/auth/resume-handoff", () => ({ setResumeIdentifier }));
+const mergeGuestCart = vi.fn(async () => 0);
+vi.mock("@/features/shop/api", () => ({ mergeGuestCart }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 vi.mock("@/lib/use-referential", () => ({
   useReferential: () => ({
@@ -58,6 +60,24 @@ describe("LoginForm (W16)", () => {
     render(<LoginForm next="/apprenant/catalogue" />);
     await submit("lea.adjovi", "Steamy2026");
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/apprenant/catalogue"));
+  });
+
+  it("verse le panier invité dans le compte ; l'apprenant revient sur son propre panier", async () => {
+    mergeGuestCart.mockClear();
+    login.mockResolvedValue({ ok: true, data: { role: "learner", profileStep: null } });
+    render(<LoginForm next="/boutique/panier" />);
+    await submit("lea.adjovi", "Steamy2026");
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/apprenant/boutique/panier"));
+    expect(mergeGuestCart).toHaveBeenCalledTimes(1);
+  });
+
+  it("un compte sans panier (enseignant) ne verse rien", async () => {
+    mergeGuestCart.mockClear();
+    login.mockResolvedValue({ ok: true, data: { role: "teacher", profileStep: null } });
+    render(<LoginForm next="/boutique/panier" />);
+    await submit("prof", "Steamy2026");
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/boutique/panier"));
+    expect(mergeGuestCart).not.toHaveBeenCalled();
   });
 
   it.each([

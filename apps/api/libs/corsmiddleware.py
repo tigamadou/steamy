@@ -9,6 +9,8 @@ class CorsMiddleware:
     - Origines de CORS_ALLOWED_ORIGINS (le front) : origine renvoyée explicitement
       et cookies autorisés, nécessaires à l'auth par session depuis le navigateur.
     - Autres origines : `*` sans cookies (appels anonymes ou par token uniquement).
+    - `X-Guest-Token` accepté (suivi et paiement d'une commande invitée, D12) ; `Retry-After` exposé au navigateur
+      pour afficher le délai d'un `THROTTLED` ou d'un `QUIZ_COOLDOWN`.
     """
 
     def __init__(self, get_response):
@@ -31,6 +33,8 @@ class CorsMiddleware:
         response["Vary"] = ", ".join(filter(None, [response.get("Vary"), "Origin"]))
         response["Access-Control-Allow-Methods"] = "DELETE, GET, OPTIONS, PATCH, POST, PUT"
         response["Access-Control-Allow-Headers"] = (
-            "accept, accept-encoding, authorization, content-type, dnt, origin, user-agent, x-csrftoken, x-requested-with, sentry-trace"
+            "accept, accept-encoding, authorization, content-type, dnt, origin, user-agent, x-csrftoken, x-requested-with, "
+            "sentry-trace, x-guest-token"
         )
+        response["Access-Control-Expose-Headers"] = "retry-after"
         return response
