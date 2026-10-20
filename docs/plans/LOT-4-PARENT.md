@@ -13,7 +13,7 @@ paiement `WA03`, états `WA04`/`WA05`/`WA07`, suivi `WK07`).
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : validation de la maquette de `WPD15` (C18), puis 4.1 après `API-L4` · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
+Statut : 🟡 en cours · Prochaine tâche : 4.2, 4.3 et 4.4 (après validation C18 de `WPD15`) · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
 
 ### Lot 4 · Espace parent — 🟡 en cours
 - [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15` · PR #72
@@ -28,17 +28,18 @@ Statut : 🟡 en cours · Prochaine tâche : validation de la maquette de `WPD15
   - [x] Recette : toutes variantes et tous états dessinés, aucun prix, réseau ou délai en dur, vouvoiement
   - [x] Compléter d'après §5.11 : kit requis (parcours), adresse de kit modifiée (frais recalculés), mobile 360 du kit et de l'attente de confirmation, âge sur `WPD05` (D20), état « déjà traitée » de `WPD05`, « Payer » en magenta (C1)
   - [ ] Maquette validée par le produit (C18) avant 4.4
-- [ ] **4.1** Socle parent, accueil et notifications · `feature/lot4-accueil` (requiert API-L4)
-  - [ ] Layout `(parent)` : contrôle du rôle côté serveur, redirection vers `/connexion?next=`, `loading.tsx`, `error.tsx`, `not-found.tsx`
-  - [ ] `ParentNav` (config de l'`AppShell`) et navigation active correcte sur chaque route
-  - [ ] `WPD01` Accueil + « À valider »
-  - [ ] `WPD14` Notifications (onglets, « Tout marquer comme lu »)
-  - [ ] Composants `PendingActionList`, `PendingActionRow`, `ChildCard`, `NotificationList`, `notificationHref(type)`
-  - [ ] Branchement API : `accounts/me/`, `accounts/pending-actions/`, `accounts/children/`, `notifications/` (`?unread=`, `unread-count/`, `{id}/read/`, `read-all/`)
-  - [ ] Règles : 4 types dans « À valider » (consentements, paiements, candidatures, suppressions), stat « À valider » = longueur de la liste, aucune alerte de connexion (D56), utilisateur issu de la session
-  - [ ] Tests unitaires : `PendingActionRow` pour les 4 types, `notificationHref` pour tous les types de §5.11, état vide sans enfant (CTA « Ajouter un enfant »), compteur de la cloche décrémenté après lecture
-  - [ ] Playwright : accès refusé à un apprenant et à un enseignant (redirection) ; parent du jeu D2 : liste « À valider » conforme au seed
-  - [ ] Recette : les 4 types mènent à la bonne route, « Tout marquer comme lu » remet le compteur à 0
+- [x] **4.1** Socle parent, accueil et notifications · `feature/lot4-accueil` (requiert API-L4) · PR #122
+  - [x] Layout `(parent)` : contrôle du rôle côté serveur, redirection vers `/connexion?next=`, `loading.tsx`, `error.tsx`, `not-found.tsx`
+  - [x] `ParentNav` (config de l'`AppShell`) et navigation active correcte sur chaque route
+  - [x] `WPD01` Accueil + « À valider »
+  - [x] `WPD14` Notifications (onglets, « Tout marquer comme lu »)
+  - [x] Composants `PendingActionList`, `PendingActionRow`, `ChildCard`, `NotificationList`, `notificationHref(type)`
+  - [x] Branchement API : `accounts/me/`, `accounts/pending-actions/`, `accounts/children/`, `notifications/` (`?unread=`, `unread-count/`, `{id}/read/`, `read-all/`)
+  - [x] Règles : 4 types dans « À valider » (consentements, paiements, candidatures, suppressions), stat « À valider » = longueur de la liste, aucune alerte de connexion (D56), utilisateur issu de la session
+  - [x] Tests unitaires : `PendingActionRow` pour les 4 types, `notificationHref` pour tous les types de §5.11, état vide sans enfant (CTA « Ajouter un enfant »), compteur de la cloche décrémenté après lecture
+  - [x] Playwright : accès refusé à un apprenant et à un enseignant (redirection) ; parent du jeu D2 : liste « À valider » conforme au seed
+  - [x] Recette : les 4 types mènent à la bonne route, « Tout marquer comme lu » remet le compteur à 0
+  > Écarts : « À valider » sans l'objet de la demande (titre du parcours, montant) ni carte de parcours en cours dans `ChildCard` (l'API ne les renvoie pas : `PendingAction` et `Child.activeCourses`) ; les CTA visent les routes des étapes 4.2 à 4.7 (entrées de nav masquées jusqu'à leur livraison) ; WPD14 réutilise `NotificationList` du lot 3, paramétrée par espace ; préférences de notification dans `WPD08` (4.9).
 - [ ] **4.2** Enfants · `feature/lot4-enfants` (requiert 4.1, API-L4.1 ; commentaires : API-L5)
   - [ ] `WPD02` Mes enfants (`ChildRow` : actif, demande à examiner, suppression programmée ; CTA « Examiner » vers `WPD05`)
   - [ ] `WPD03` Détail enfant (`ChildProfileCard`, `CourseProgressList`, `AttemptList`, `TeacherComments` en lecture seule)
