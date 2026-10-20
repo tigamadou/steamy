@@ -105,7 +105,7 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 d
   - [ ] Tests unitaires : texte D54, motif requis
   - [ ] Playwright : suppression puis annulation (l'enfant peut de nouveau se connecter) ; demande `WD15` validée depuis « À valider »
   - [ ] Recette : pendant les 30 jours, l'enfant ne peut plus se connecter (`ACCOUNT_DEACTIVATED`)
-- [x] **4.8** Rapport hebdomadaire · `feature/lot4-rapport-hebdo` (requiert 4.2, API-L3a) · PR #PR48
+- [x] **4.8** Rapport hebdomadaire · `feature/lot4-rapport-hebdo` (requiert 4.2, API-L3a) · PR #144
   - [x] `WPD11` Rapport hebdomadaire (`?semaine=AAAA-Www`)
   - [x] Composants `WeekNavigator`, `WeeklyStats`, `WeeklyActivityBars` (lot 3, tableau de données en alternative), `CourseProgressList`, `WeeklyEmailNotice`
   - [x] Branchement API : `accounts/children/{id}/weekly-report/?week=`
