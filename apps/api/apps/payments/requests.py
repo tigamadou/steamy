@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
-from apps.accounts.models import ParentChildLink
+from apps.accounts.models import ParentChildLink, User
 from libs.errors import ApiError
 
 from .models import Order, PaymentRequest
@@ -37,21 +37,37 @@ def next_resend_at(request: PaymentRequest):
     return request.last_sent_at + RESEND_DELAY
 
 
+def kit_lines(items) -> list[tuple[str, int]]:
+    """Lignes d'une demande de kits, comparables quel que soit leur ordre."""
+    return sorted((item["kit_slug"], item["quantity"]) for item in items)
+
+
 @transaction.atomic
 def create_request(learner, *, kind: str, amount: int, course=None, items=None):
-    """Crée la demande et prévient le parent. Une demande en attente pour le même parcours est réutilisée."""
+    """
+    Crée la demande et prévient le parent. Une demande en attente pour le même parcours, ou pour les mêmes kits en
+    mêmes quantités (ordre indifférent), est réutilisée.
+    """
     parent = parent_of(learner)
     if (
         parent is None
     ):  # pragma: no cover - un apprenant actif a toujours un parent (consentement, S3)
         raise ApiError("PERMISSION_DENIED")
+    # Verrou de l'apprenant : deux demandes simultanées ne créent pas deux demandes ni deux SMS
+    User.objects.select_for_update().filter(pk=learner.pk).first()
+    now = timezone.now()
+    open_requests = PaymentRequest.objects.filter(
+        requested_by=learner, status=PaymentRequest.Status.PENDING, expires_at__gt=now
+    )
     if course is not None:
-        existing = PaymentRequest.objects.filter(
-            requested_by=learner, course=course, status=PaymentRequest.Status.PENDING
-        ).first()
+        existing = open_requests.filter(course=course).first()
         if existing:
             return existing, False
-    now = timezone.now()
+    elif items:
+        wanted = kit_lines(items)
+        for existing in open_requests.filter(kind=PaymentRequest.Kind.KIT, course__isnull=True):
+            if kit_lines(existing.items) == wanted:
+                return existing, False
     request = PaymentRequest.objects.create(
         requested_by=learner,
         parent=parent,

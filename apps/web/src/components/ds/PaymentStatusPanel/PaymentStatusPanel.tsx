@@ -75,7 +75,7 @@ const SETTLED: ReadonlySet<Payment["status"]> = new Set(["succeeded", "failed"])
  * débit n'a eu lieu : initiation refusée ou impossible, ou refus notifié par le prestataire. Tout autre code (montant
  * incohérent, code inconnu) reçoit un texte neutre : le front n'affirme pas l'absence de débit (WK09).
  */
-const NOT_DEBITED: ReadonlySet<string> = new Set([
+const NOT_DEBITED: ReadonlySet<Schemas["PaymentFailureCodeEnum"]> = new Set<Schemas["PaymentFailureCodeEnum"]>([
   "DECLINED",
   "PROVIDER_REFUSED",
   "PROVIDER_UNAVAILABLE",
@@ -152,7 +152,7 @@ export function PaymentStatusPanel({
         <Mascot pose="sad" size={130} />
         <h2 className="m-0 text-[28px] font-black text-error-700">Paiement échoué</h2>
         <p className="m-0 text-[15px] leading-normal font-semibold text-ink-700">
-          {NOT_DEBITED.has(payment.failureCode) ? texts.notDebited : texts.failedNeutral}
+          {payment.failureCode !== "" && NOT_DEBITED.has(payment.failureCode) ? texts.notDebited : texts.failedNeutral}
         </p>
         {payment.failureReason && (
           <p className="m-0 rounded-[14px] border-2 border-error-100 bg-error-50 px-4 py-3 text-[13px] font-extrabold text-error-700">
