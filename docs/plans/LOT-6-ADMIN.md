@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : réponses du produit aux trois questions ouvertes (voir « Questions produit à trancher ») · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -240,16 +240,64 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot · Prérequ
   > Garde-fou monochrome étendu au rendu (`components/backoffice/monochrome-rendu.test.tsx`) : le HTML de chaque
   > écran et état du back-office, composants du design system compris, ne contient aucune classe primaire ; `Loader`,
   > `Mascot` et les états WX ont une variante encre (le hors-ligne la prend sous `/backoffice`).
-- [ ] **Critères de fin du lot 6**
-  - [ ] WAD01-WAD05 conformes à la spec et à la définition de « terminé », monochrome sans `--primary-*`, accessibles, responsive, sans donnée en dur
+- [ ] **Critères de fin du lot 6** · `feature/lot6-fin-de-lot`
+  - [x] WAD01-WAD05 conformes à la spec et à la définition de « terminé », monochrome sans `--primary-*`, accessibles, responsive, sans donnée en dur
   - [ ] WAD06-WAD14 couverts par l'admin Django (colonnes, filtres, recherches, actions, inlines de §5.14), sans élément de « À ne pas porter », thème monochrome, admin en français
-  - [ ] WAD15 : TOTP obligatoire pour tout membre ; `/api/backoffice/` refuse toute session non vérifiée (`OTP_REQUIRED`)
-  - [ ] Matrice des groupes figée par test ; chaque permission testée en accès autorisé et refusé
-  - [ ] Invariants D70, S3/C3, S9, D71, D74 testés côté admin Django et côté API
-  - [ ] Toute écriture du personnel tracée dans `AuditLog`
-  - [ ] KPI `auto` vérifiés contre des valeurs de référence ; `kpiStatus` conforme à D73/§4.5 ; exports CSV/PDF asynchrones ; rapport soumis verrouillé
-  - [ ] Parcours Playwright verts : garde d'accès (anonyme, parent, groupe insuffisant) et Impact Tracker de bout en bout
-  - [ ] `make openapi` à jour ; CI `ci-ok` verte sur chaque PR vers `development`
+    - [x] WAD06-WAD13 couverts (6.2 à 6.5), thème monochrome, admin en français
+    - [ ] WAD14 : « mode maintenance » et « inscriptions ouvertes » (question produit Q1)
+  - [x] WAD15 : TOTP obligatoire pour tout membre ; `/api/backoffice/` refuse toute session non vérifiée (`OTP_REQUIRED`)
+  - [x] Matrice des groupes figée par test ; chaque permission testée en accès autorisé et refusé
+  - [x] Invariants D70, S3/C3, S9, D71, D74 testés côté admin Django et côté API
+  - [x] Toute écriture du personnel tracée dans `AuditLog`
+  - [x] KPI `auto` vérifiés contre des valeurs de référence ; `kpiStatus` conforme à D73/§4.5 ; exports CSV/PDF asynchrones ; rapport soumis verrouillé
+  - [x] Parcours Playwright verts : garde d'accès (anonyme, parent, groupe insuffisant) et Impact Tracker de bout en bout
+  - [x] `make openapi` à jour ; CI `ci-ok` verte sur chaque PR vers `development`
+  - [ ] Questions produit Q1 à Q3 tranchées (ci-dessous), puis recettes manuelles de 6.2 et 6.3
+  > Vérification des critères (fin de lot) : WAD01-WAD05 livrés par 6.6 à 6.9, garde-fou monochrome au rendu
+  > (`components/backoffice/monochrome-rendu.test.tsx`), contrôles d'accessibilité et vérifications visuelles à 360 et
+  > 1280 px dans chaque PR ; WAD15 et `OTP_REQUIRED` : `core/tests/test_staff_login.py`, `test_staff_permission.py` ;
+  > matrice : `core/tests/test_staff_groups.py`, chaque `ModelAdmin` testé par persona autorisé et refusé ;
+  > invariants : D70 (`accounts/tests/test_backoffice_admin.py`), S3/C3 (`events/tests/test_admin_wad12.py`,
+  > `test_parent_decision.py`), S9 (`payments/tests/test_admin_wad10_wad11.py`, `test_webhook.py`), D71 (rôle en
+  > lecture seule, garde-fous du dernier Super-admin), D74 (`impact/tests/test_reports.py`) ; audit :
+  > `AuditedAdminMixin` imposé par `SteamyAdminSite.register` (`core/tests/test_admin_site.py`) et actions métier
+  > journalisées ; KPI : `impact/tests/test_compute.py` (valeurs de référence), `test_periods_status.py` (D73),
+  > `test_exports.py` ; Playwright : `e2e/backoffice.spec.ts` (anonyme, parent, Support refusé sur l'Impact Tracker),
+  > `impact-tracker.spec.ts`, `impact-rapport.spec.ts` ; contrat : contrôle `openapi.yaml` de la CI. Le lot reste
+  > ouvert sur les trois questions produit.
+
+### Questions produit à trancher
+
+- **Q1 · WAD14, « mode maintenance » et « inscriptions ouvertes »** (spec §5.14 WAD14, PLAN-API API-L6.3). Les deux
+  réglages sont listés dans WAD14, mais aucun comportement d'API n'est spécifié : ils ne sont ni dans
+  `PlatformSettings` ni dans l'admin. Questions : que bloque chacun, pour qui, et avec quel message ?
+  - Maintenance, option A : hors v1. On retire la ligne de WAD14 et la spec est mise à jour.
+  - Maintenance, option B : coupure des personas. Toute l'API des personas répond 503 `MAINTENANCE`, sauf la santé,
+    l'admin et `/api/backoffice/`. Le front affiche une page de maintenance avec un message éditable. Le personnel
+    garde son accès.
+  - Maintenance, option C : lecture seule. Les lectures passent, les écritures des personas répondent 503
+    `MAINTENANCE`. Le front affiche un bandeau.
+  - Inscriptions, option A : hors v1.
+  - Inscriptions, option B : interrupteur global. La création d'un compte apprenant ou parent répond
+    `SIGNUPS_CLOSED` et le front affiche un message. Les invitations d'enseignants et du personnel ne sont pas
+    concernées.
+  - Inscriptions, option C : interrupteur par persona (apprenant, parent), ou par pays (D76).
+- **Q2 · WAD05, comportement de « Valider la saisie »** (6.9). Hypothèse de travail livrée, sans champ serveur : le
+  bouton enregistre, puis signale chaque indicateur manuel encore vide. « Soumettre » ne l'exige pas, mais sa modale
+  annonce les indicateurs manquants. Question : la validation est-elle une étape métier ?
+  - Option A : garder l'hypothèse. Simple aide à la saisie, aucun état serveur.
+  - Option B : étape serveur. Champs `validated_at` et `validated_by` sur `ImpactReport`, journalisés. La soumission
+    exige un rapport validé, et toute nouvelle saisie annule la validation.
+  - Option C : retirer le bouton. La modale de « Soumettre » suffit à signaler les manques.
+- **Q3 · Recettes manuelles de 6.2 et 6.3**. Ces recettes demandent des écritures sur le jeu D2 (relance d'un
+  consentement, invitation d'un enseignant, création et publication d'un parcours). Les tests Playwright ne couvrent
+  que la lecture, pour garder D2 intact. Pytest couvre les écritures. Question : qui fait ces recettes, où, et à quel
+  moment ?
+  - Option A : le produit les déroule sur l'environnement de recette (staging), avec le jeu D2, avant la clôture du lot.
+  - Option B : on accepte la couverture automatique (pytest pour les écritures, Playwright en lecture) comme recette,
+    et le lot se clôt.
+  - Option C : des scénarios Playwright en écriture tournent sur une copie jetable de D2 (base réinitialisée avant le
+    test). La recette devient automatique, pour un coût de CI plus élevé.
 
 ## Périmètre et principes
 
