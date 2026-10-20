@@ -17,6 +17,12 @@ type RoleOptions = NonNullable<Parameters<Page["getByRole"]>[1]>;
 const role = (page: Page, name: Role, options: RoleOptions = {}) => page.getByRole(name, options).filter({ visible: true });
 const text = (page: Page, value: string | RegExp) => page.getByText(value).filter({ visible: true });
 
+/** Réseau Mobile Money : la radio est masquée (`sr-only`) sous sa carte, on clique la carte visible. */
+async function choose(page: Page, network: string) {
+  await text(page, network).click();
+  await expect(page.getByRole("radio", { name: network })).toBeChecked();
+}
+
 test("P4 : checkout invité, échec du paiement puis réussite, suivi de la commande", async ({ page }) => {
   test.setTimeout(180_000);
 
@@ -60,7 +66,7 @@ test("P4 : checkout invité, échec du paiement puis réussite, suivi de la comm
   await expect(role(page, "heading", { name: /Total à payer · 1 article \+ livraison/ })).toBeVisible();
   await expect(text(page, /réservés jusqu'à \d{2}:\d{2}/)).toBeVisible();
   await axe(page);
-  await role(page, "radio", { name: "MTN Mobile Money" }).check();
+  await choose(page, "MTN Mobile Money");
   await role(page, "textbox", { name: /^Numéro Mobile Money/ }).fill("0197123402");
   await role(page, "button", { name: /^Payer/ }).click();
   await expect(role(page, "heading", { name: "Paiement échoué" })).toBeVisible({ timeout: 30_000 });
@@ -71,7 +77,7 @@ test("P4 : checkout invité, échec du paiement puis réussite, suivi de la comm
 
   // « Changer de numéro » puis paiement accepté (…01) → WK07
   await role(page, "button", { name: "Changer de numéro" }).click();
-  await role(page, "radio", { name: "MTN Mobile Money" }).check();
+  await choose(page, "MTN Mobile Money");
   await role(page, "textbox", { name: /^Numéro Mobile Money/ }).fill("0197123401");
   await role(page, "button", { name: /^Payer/ }).click();
   await expect(page).toHaveURL(/\/boutique\/commandes\/[\w-]+$/, { timeout: 30_000 });
