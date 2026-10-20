@@ -333,6 +333,7 @@ SPECTACULAR_SETTINGS = {
         "RoleEnum": "apps.accounts.models.User.Role",
         "ConsentStatusEnum": "apps.accounts.models.ConsentRequest.Status",
         "MembershipStatusEnum": "apps.classrooms.models.ClassroomMembership.Status",
+        "ApplicationStatusEnum": "apps.events.models.EventApplication.Status",
         "UserStatusEnum": "apps.accounts.models.User.Status",
         "DeletionRequestStatusEnum": "apps.accounts.models.DeletionRequest.Status",
         "EnrollmentStatusEnum": "apps.learning.models.Enrollment.Status",
@@ -597,6 +598,10 @@ CELERY_BEAT_SCHEDULE = {
     "expire-payment-requests": {
         "task": "apps.payments.tasks.expire_payment_requests",
         "schedule": crontab(minute=45),
+    },
+    "detect-dropouts": {
+        "task": "apps.classrooms.tasks.detect_dropouts",
+        "schedule": crontab(minute=0, hour=7),
     },
 }
 # optional default task time limits
