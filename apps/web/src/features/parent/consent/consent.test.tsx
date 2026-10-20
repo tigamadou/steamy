@@ -34,6 +34,7 @@ function consent(overrides: Partial<ConsentRequest> = {}): ConsentRequest {
   return {
     id: 9,
     origin: "learner",
+    classroom: null,
     status: "pending",
     firstName: "Kemi",
     lastName: "Adjovi",
