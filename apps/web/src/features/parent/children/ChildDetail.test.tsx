@@ -11,6 +11,9 @@ const { GET, POST } = vi.hoisted(() => ({
   POST: vi.fn(),
 }));
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
+vi.mock("@/features/parent/deletion/CancelDeletionButton", () => ({
+  CancelDeletionButton: ({ childId }: { childId: number }) => <button type="button">Annuler la suppression {childId}</button>,
+}));
 vi.mock("@/lib/api-browser", () => ({ getBrowserApi: async () => ({ POST }) }));
 vi.mock("next/navigation", () => ({
   notFound: () => {
@@ -133,6 +136,14 @@ describe("ChildDetailView (WPD03)", () => {
     expect(await screen.findByText("Le profil de Léa est enregistré.")).toBeInTheDocument();
   });
 
+  it("suppression (WPD09) : compte désactivé, ou demande de l'enfant refusée", async () => {
+    const view = render(<ChildDetailView child={childDetail()} confirmation="supprime" />);
+    expect(await screen.findByText(/Le compte de Léa est désactivé : la suppression reste annulable 30 jours\./)).toBeInTheDocument();
+    view.unmount();
+    render(<ChildDetailView child={childDetail()} confirmation="demande-refusee" />);
+    expect(await screen.findByText("La demande de suppression est refusée : Léa en est informé·e.")).toBeInTheDocument();
+  });
+
   it("suppression programmée : rappel daté au lieu du lien « Supprimer le compte »", () => {
     render(
       <ChildDetailView child={childDetail({ deletion: { id: 4, status: "scheduled", scheduledFor: "2026-11-18T10:00:00Z" } })} />,
@@ -141,6 +152,7 @@ describe("ChildDetailView (WPD03)", () => {
       "Compte désactivé : suppression programmée le 18 novembre 2026.",
     );
     expect(screen.queryByRole("link", { name: "Supprimer le compte" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Annuler la suppression 7" })).toBeInTheDocument();
   });
 
   it("suppression programmée sans date", () => {
@@ -293,6 +305,8 @@ describe("ChildDetail (serveur) et getChild", () => {
 
   it("parseConfirmation ignore les valeurs inconnues ; squelette au vouvoiement", () => {
     expect(parseConfirmation("modifie")).toBe("modifie");
+    expect(parseConfirmation("supprime")).toBe("supprime");
+    expect(parseConfirmation("demande-refusee")).toBe("demande-refusee");
     expect(parseConfirmation(["cree"])).toBeUndefined();
     expect(parseConfirmation("autre")).toBeUndefined();
     render(<ChildDetailSkeleton />);

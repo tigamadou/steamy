@@ -7,6 +7,9 @@ import { child, pendingAction } from "@/test/parent-fixtures";
 
 const GET = vi.fn();
 vi.mock("@/lib/api", () => ({ getServerApi: async () => ({ GET }) }));
+vi.mock("@/features/parent/deletion/CancelDeletionButton", () => ({
+  CancelDeletionButton: ({ childId }: { childId: number }) => <button type="button">Annuler la suppression {childId}</button>,
+}));
 
 const { ChildRow, fullName } = await import("./ChildRow");
 const { ChildrenList, ChildrenListSkeleton, ChildrenListView, CHILDREN_PAGE_SIZE } = await import("./ChildrenList");
@@ -51,7 +54,7 @@ describe("ChildRow (WPD02, 3 statuts)", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("suppression programmée : badge « Supprimé le … » (J+30), sans « Annuler » (livré avec WPD09)", () => {
+  it("suppression programmée : badge « Supprimé le … » (J+30) et « Annuler la suppression »", () => {
     const deleted = child({
       status: "deactivated",
       deletion: { id: 4, status: "scheduled", scheduledFor: "2026-11-18T10:00:00Z" },
@@ -59,7 +62,7 @@ describe("ChildRow (WPD02, 3 statuts)", () => {
     render(<ChildRow item={{ kind: "child", child: deleted }} />);
     const row = screen.getByRole("article", { name: "Léa Adjovi" });
     expect(within(row).getByText(/Supprimé le/)).toHaveTextContent("Supprimé le 18 novembre 2026");
-    expect(within(row).queryByRole("button")).toBeNull();
+    expect(within(row).getByRole("button", { name: "Annuler la suppression 7" })).toBeInTheDocument();
     expect(within(row).getByRole("link", { name: /Voir le profil/ })).toBeInTheDocument();
   });
 

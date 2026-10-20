@@ -47,12 +47,15 @@ vi.mock("@/features/shop/KitDetailView", () => ({ KitDetailView: () => null, Kit
 vi.mock("@/features/shop/CartView", () => ({ CartView: () => null }));
 vi.mock("@/features/shop/DeliveryZonesSlot", () => ({ DeliveryZonesSlot: () => null }));
 vi.mock("@/lib/shop", () => ({ getKit: async (slug: string) => (slug === "bot" ? { name: "Steamy Bot v1" } : null) }));
+vi.mock("@/features/parent/deletion/DeleteChild", () => ({ DeleteChild: () => null, DeleteChildSkeleton: () => null }));
 vi.mock("@/features/notifications/Notifications", () => ({
   Notifications: () => null,
   NotificationsSkeleton: () => null,
 }));
 
 const { default: Layout } = await import("./layout");
+const { default: DeleteChildPage } = await import("./enfants/[id]/supprimer/page");
+const { DeleteChild, DeleteChildSkeleton } = await import("@/features/parent/deletion/DeleteChild");
 const { default: HomePage } = await import("./page");
 const { default: ParentLoading } = await import("./loading");
 const { default: ParentError } = await import("./error");
@@ -259,5 +262,16 @@ describe("états de l'espace parent", () => {
     render(<ParentNotFound />);
     expect(screen.getByRole("heading", { level: 2, name: "Cette page est introuvable" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Retour à l'accueil" })).toHaveAttribute("href", "/parent");
+  });
+});
+
+describe("WPD09 (4.7)", () => {
+  it("suppression du compte d'un enfant sous Suspense, paramètres et demande transmis", () => {
+    const params = Promise.resolve({ id: "7" });
+    const searchParams = Promise.resolve({ demande: "9" });
+    const tree = DeleteChildPage({ params, searchParams } as never) as Boundary;
+    expect(tree.props.fallback.type).toBe(DeleteChildSkeleton);
+    expect(tree.props.children.type).toBe(DeleteChild);
+    expect(tree.props.children.props).toMatchObject({ params, searchParams });
   });
 });
