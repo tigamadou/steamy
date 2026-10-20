@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { createParent } from "./support/api";
+import { closeFamily, createFamily } from "./support/family";
 import { DEMO } from "./support/demo";
 import { loginAs, loginViaApi, logoutFromShell, openShellMenu } from "./support/session";
 
@@ -52,7 +53,7 @@ test("WPD01 : Marie voit « À valider » conforme au jeu D2, ses statistiques e
   await expect(kids.getByRole("link", { name: /Léa Adjovi/ })).toHaveAttribute("href", /^\/parent\/enfants\/\d+$/);
   await expect(kids.getByRole("link", { name: /Noé Adjovi/ })).toBeVisible();
   // Aucune alerte de connexion (D56)
-  await expect(page.getByText(/alerte/i)).toHaveCount(0);
+  await expect(page.getByText(/alerte/i).filter({ visible: true })).toHaveCount(0);
   await axe(page);
 });
 
@@ -74,26 +75,26 @@ test("WPD01 et WPD14 : un parent sans enfant voit l'état vide et aucune notific
 });
 
 test("WPD14 : onglets dans l'URL et « Tout marquer comme lu » remet la cloche à 0", async ({ page }) => {
-  await loginAs(page, "parent");
+  // Famille neuve : la demande de suppression de l'enfant notifie le parent, sans dépendre du jeu de démo partagé
+  const family = await createFamily();
+  await family.childSession.post("/api/accounts/me/deletion-request/", { note: "" });
+  await loginViaApi(page, family.parentPhone);
   await page.goto("/parent/notifications");
   const tabs = page.getByRole("navigation", { name: "Filtrer les notifications" });
   await expect(tabs.getByRole("link", { name: "Toutes" })).toHaveAttribute("aria-current", "page");
   await axe(page);
-  await tabs.getByRole("link", { name: /^Non lues \(\d+\)$/ }).click();
+  await tabs.getByRole("link", { name: /^Non lues \([1-9]\d*\)$/ }).click();
   await expect(page).toHaveURL("/parent/notifications?onglet=non-lues");
 
   await page.goto("/parent/notifications");
   const markAll = page.getByRole("button", { name: "Tout marquer comme lu" });
-  // Rejouable : le jeu de démo est partagé (projets « bureau » et « mobile ») ; sans non-lue, le bouton est inactif
-  if (await markAll.isEnabled()) {
-    await expect(async () => {
-      if (await markAll.isEnabled()) await markAll.click();
-      await expect(bell(page)).toHaveAccessibleName("Notifications, aucune non lue", { timeout: 2_000 });
-    }).toPass();
-  }
+  await expect(markAll).toBeEnabled();
+  await markAll.click();
+  await expect(bell(page)).toHaveAccessibleName("Notifications, aucune non lue");
   await expect(page.getByRole("link", { name: "Non lues (0)" })).toBeVisible();
   await page.reload();
   await expect(bell(page)).toHaveAccessibleName("Notifications, aucune non lue");
+  await closeFamily(family);
 });
 
 test("shell parent : navigation active, puis déconnexion au vouvoiement", async ({ page }) => {

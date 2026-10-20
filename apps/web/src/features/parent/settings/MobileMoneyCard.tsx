@@ -108,7 +108,7 @@ export function MobileMoneyCard({ value, countries }: { value: MobileMoney | nul
         ]}
       >
         <form onSubmit={submit} noValidate aria-label="Mobile Money préféré" className="flex flex-col gap-4">
-          <ErrorSummary errors={summary} focusKey={attempt} />
+          <ErrorSummary title="Corrigez les erreurs suivantes :" errors={summary} focusKey={attempt} />
           <p className="m-0 text-[13px] font-semibold text-ink-600">
             Ce compte est proposé par défaut quand vous payez une demande de votre enfant ou une commande.
           </p>

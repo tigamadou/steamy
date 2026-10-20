@@ -4,12 +4,7 @@ import { getServerApi } from "@/lib/api";
 import { getCurrentUser } from "@/lib/auth/session";
 
 import { LearnerShellFrame } from "./LearnerShellFrame";
-
-/** « Léa A. » : prénom et initiale du nom. */
-export function shortName(firstName: string, lastName: string): string {
-  const initial = lastName.trim().charAt(0);
-  return initial ? `${firstName} ${initial.toUpperCase()}.` : firstName;
-}
+import { shortName } from "./short-name";
 
 /**
  * Shell de l'apprenant, côté serveur (sous `<Suspense>`) : profil courant (`accounts/me/`, lu une fois par requête)

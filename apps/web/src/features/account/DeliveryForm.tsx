@@ -138,7 +138,9 @@ export function DeliveryForm({
         aria-label="Adresse de livraison"
         className="flex flex-col gap-4 rounded-[18px] border-2 border-ink-100 bg-surface p-5"
       >
-        <ErrorSummary errors={errors} focusKey={state.attempt} />
+        <ErrorSummary
+          title={register === "vous" ? "Corrigez les erreurs suivantes :" : undefined}
+          errors={errors} focusKey={state.attempt} />
         <AddressForm
           legend="Adresse de livraison"
           legendHidden

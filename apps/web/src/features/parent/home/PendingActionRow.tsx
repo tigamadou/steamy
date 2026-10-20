@@ -1,7 +1,7 @@
 import type { Schemas } from "@steamy/api-client";
 
 import { Button, type ButtonProps } from "@/components/ds";
-import { notificationTarget } from "@/features/notifications/notification-icon";
+import { parentTarget } from "@/features/notifications/spaces";
 import { formatInstant } from "@/lib/dates";
 import { routes } from "@/lib/routes";
 
@@ -57,9 +57,9 @@ export const PENDING_KINDS: Record<PendingActionType, Kind> = {
   },
 };
 
-/** Écran où traiter la demande : l'`url` de l'API (route du front), sinon la route de son type. */
+/** Écran où traiter la demande : l'`url` de l'API (route du front hors des autres espaces), sinon celle de son type. */
 export function pendingActionHref(action: PendingAction): string {
-  return notificationTarget(action.url) ?? PENDING_KINDS[action.type].fallback(action);
+  return parentTarget(action.url) ?? PENDING_KINDS[action.type].fallback(action);
 }
 
 /** Ligne de « À valider » (WPD01) : enfant, objet et date de la demande, CTA vers l'écran qui la traite. */

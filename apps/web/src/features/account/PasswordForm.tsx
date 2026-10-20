@@ -82,7 +82,9 @@ export function PasswordForm({ register = "tu" }: { register?: Register } = {}) 
         noValidate
         className="flex flex-col gap-4 rounded-[18px] border-2 border-ink-100 bg-surface p-5"
       >
-        <ErrorSummary errors={errors} focusKey={state.attempt} />
+        <ErrorSummary
+          title={register === "vous" ? "Corrigez les erreurs suivantes :" : undefined}
+          errors={errors} focusKey={state.attempt} />
         <Field label="Mot de passe actuel" id="mot-de-passe-actuel" required error={state.current}>
           <PasswordInput name="currentPassword" autoComplete="current-password" />
         </Field>

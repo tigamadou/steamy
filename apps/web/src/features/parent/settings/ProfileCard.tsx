@@ -58,11 +58,19 @@ export function ProfileCard({ identity }: { identity: ParentIdentity }) {
         router.refresh();
         return { attempt, saved: saved + 1, fields: {} };
       }
+      // Nom enregistré, email ou profession refusés : le nom affiché est relu, l'erreur dit ce qui manque
+      if (me.ok) router.refresh();
       const apiFields = Object.fromEntries(
         Object.entries(result.fields).filter(([name]) => name in IDS),
       ) as State["fields"];
       if (Object.keys(apiFields).length > 0) return { attempt, saved, fields: apiFields };
-      return { attempt, saved, fields: {}, error: errorMessage(result, "vous") };
+      const error = errorMessage(result, "vous");
+      return {
+        attempt,
+        saved,
+        fields: {},
+        error: me.ok ? `Votre nom est enregistré, mais pas l'email ni la profession. ${error}` : error,
+      };
     },
     { attempt: 0, saved: 0, fields: {} },
   );
@@ -86,7 +94,7 @@ export function ProfileCard({ identity }: { identity: ParentIdentity }) {
         ]}
       >
         <form onSubmit={submitWith(action)} noValidate aria-label="Mes informations" className="flex flex-col gap-4">
-          <ErrorSummary errors={errors} focusKey={state.attempt} />
+          <ErrorSummary title="Corrigez les erreurs suivantes :" errors={errors} focusKey={state.attempt} />
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Prénom" id={IDS.firstName} required error={state.fields.firstName}>
               <Input name="firstName" defaultValue={identity.firstName} autoComplete="given-name" />

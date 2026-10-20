@@ -58,7 +58,7 @@ export function DeleteChildForm({ child }: { child: { id: number; firstName: str
       className="flex flex-col gap-4.5 rounded-[22px] border-2 border-error-300 bg-surface p-5 sm:p-7"
     >
       <DeletionRule firstName={child.firstName} />
-      <ErrorSummary errors={errors} focusKey={state.attempt} />
+      <ErrorSummary title="Corrigez les erreurs suivantes :" errors={errors} focusKey={state.attempt} />
       <Field label="Motif de la suppression" id="suppression-motif" required error={state.reason}>
         <ReferentialSelect
           name="reason"

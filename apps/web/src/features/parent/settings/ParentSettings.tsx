@@ -65,16 +65,10 @@ export async function ParentSettings() {
         <MobileMoneyCard value={parent.mobileMoney} countries={countries} />
       </Section>
 
-      <section id="notifications" aria-labelledby="notifications-titre" className="flex scroll-mt-20 flex-col gap-2">
-        <h2
-          id="notifications-titre"
-          className="m-0 mb-1 text-[13px] font-black tracking-[0.06em] text-ink-700 uppercase"
-        >
-          Notifications
-        </h2>
+      <Section id="notifications" title="Notifications">
         {/* Une adresse ajoutée ou retirée dans le profil change les interrupteurs disponibles : formulaire remonté */}
         <PreferencesForm key={prefs.emailAddress ?? ""} initial={prefs} space="parent" />
-      </section>
+      </Section>
 
       <Section title="Légal">
         {LEGAL_LINKS.map(([doc, label]) => (

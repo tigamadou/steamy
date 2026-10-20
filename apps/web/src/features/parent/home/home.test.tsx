@@ -60,6 +60,10 @@ describe("pendingActionHref", () => {
     expect(pendingActionHref(pendingAction({ type: "payment_request", id: "4", url: "https://ailleurs.test" }))).toBe(
       "/parent/demandes/4",
     );
+    // Lien vers un autre espace : la route du type, comme pour les notifications
+    expect(pendingActionHref(pendingAction({ type: "payment_request", id: "4", url: "/apprenant/catalogue" }))).toBe(
+      "/parent/demandes/4",
+    );
     expect(pendingActionHref(pendingAction({ type: "event_application", id: "5", url: "" }))).toBe(
       "/parent/evenements?candidature=5",
     );
