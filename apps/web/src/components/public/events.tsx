@@ -2,7 +2,7 @@ import type { Schemas } from "@steamy/api-client";
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 
-import { Badge, Breadcrumb, Button, SkeletonBlock } from "@/components/ds";
+import { Badge, Breadcrumb, Button, SkeletonBlock, type BreadcrumbItem } from "@/components/ds";
 import { datePill, formatFullDate, formatTimeRange } from "@/lib/dates";
 import { formatPrice } from "@/lib/format";
 import { routes } from "@/lib/routes";
@@ -104,10 +104,9 @@ export function EventListSkeleton() {
   );
 }
 
-/** Encart d'action du visiteur : places, prix, « Participer » ou motif quand l'événement n'est plus ouvert. */
-export function EventVisitorAction({ event }: { event: SteamyEvent }) {
+/** Prix et places de l'encart d'action (WL23), lus dans l'API : jauge des places, ou date d'un événement passé. */
+export function EventAvailability({ event }: { event: SteamyEvent }) {
   const state = eventState(event);
-  const back = routes.event(event.slug);
   const taken = event.capacity - event.seatsLeft;
   const percent = event.capacity > 0 ? Math.round((taken / event.capacity) * 100) : 100;
   return (
@@ -143,6 +142,17 @@ export function EventVisitorAction({ event }: { event: SteamyEvent }) {
           </div>
         </div>
       )}
+    </>
+  );
+}
+
+/** Encart d'action du visiteur : places, prix, « Participer » ou motif quand l'événement n'est plus ouvert. */
+export function EventVisitorAction({ event }: { event: SteamyEvent }) {
+  const state = eventState(event);
+  const back = routes.event(event.slug);
+  return (
+    <>
+      <EventAvailability event={event} />
       {state === "open" && (
         <>
           <Button block size="lg" href={routes.login(back)}>
@@ -188,16 +198,37 @@ export function EventVisitorAction({ event }: { event: SteamyEvent }) {
   );
 }
 
+/** Emplacement de la fiche : page publique (h1, fil d'Ariane public) ou shell connecté (h1 porté par le header). */
+export type EventDetailPlacement = {
+  /** Niveau du titre de l'événement : 1 (public) ou 2 (shell, sous le titre du header) ; sections un cran dessous. */
+  headingLevel?: 1 | 2;
+  /** Fil d'Ariane ; par défaut, celui du site public. */
+  breadcrumb?: BreadcrumbItem[];
+  /** Fiche dans un shell : sans marges de page (le shell les fournit). */
+  embedded?: boolean;
+};
+
 /**
  * Fiche d'un événement (WL23), réutilisable dans les espaces connectés : l'encart d'action est fourni par l'appelant
  * (visiteur ici, apprenant au lot 3, parent au lot 4).
  */
-export function EventDetail({ event, action }: { event: Schemas["SteamyEventDetail"]; action: ReactNode }) {
+export function EventDetail({
+  event,
+  action,
+  headingLevel = 1,
+  breadcrumb,
+  embedded = false,
+}: { event: Schemas["SteamyEventDetail"]; action: ReactNode } & EventDetailPlacement) {
+  const Title = headingLevel === 1 ? "h1" : "h2";
+  const SectionTitle = headingLevel === 1 ? "h2" : "h3";
   return (
-    <div className="mx-auto w-full max-w-[1120px] px-4 pt-7 pb-14 sm:px-8">
-      <Breadcrumb className="mb-4" items={[{ label: "Événements", href: routes.events }, { label: event.title }]} />
+    <div className={embedded ? "w-full" : "mx-auto w-full max-w-[1120px] px-4 pt-7 pb-14 sm:px-8"}>
+      <Breadcrumb
+        className="mb-4"
+        items={breadcrumb ?? [{ label: "Événements", href: routes.events }, { label: event.title }]}
+      />
       <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div>
+        <div className="min-w-0">
           <div
             className="relative flex flex-col gap-5.5 overflow-hidden rounded-[24px] bg-(--event) p-6.5 text-white sm:flex-row sm:items-center"
             style={{ "--event": event.color } as CSSProperties}
@@ -210,7 +241,7 @@ export function EventDetail({ event, action }: { event: Schemas["SteamyEventDeta
               <p className="self-start rounded-pill bg-ink-900/30 px-3 py-1 text-xs font-black tracking-[0.04em] uppercase">
                 {event.emoji} Steamy Event
               </p>
-              <h1 className="text-[26px] leading-tight font-black sm:text-[30px]">{event.title}</h1>
+              <Title className="text-[26px] leading-tight font-black sm:text-[30px]">{event.title}</Title>
               <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-extrabold">
                 <li>📅 {formatFullDate(event.startsAt)}</li>
                 <li>🕒 {formatTimeRange(event.startsAt, event.endsAt)}</li>
@@ -220,13 +251,13 @@ export function EventDetail({ event, action }: { event: Schemas["SteamyEventDeta
             </div>
           </div>
           <section className="mt-7">
-            <h2 className="mb-3 text-xl font-black text-ink-900">L&apos;événement</h2>
+            <SectionTitle className="mb-3 text-xl font-black text-ink-900">L&apos;événement</SectionTitle>
             <p className="text-[15px] leading-relaxed font-semibold whitespace-pre-line text-ink-700">
               {event.description}
             </p>
           </section>
           <section className="mt-7">
-            <h2 className="mb-3 text-xl font-black text-ink-900">Infos pratiques</h2>
+            <SectionTitle className="mb-3 text-xl font-black text-ink-900">Infos pratiques</SectionTitle>
             <ul className="grid gap-2.5 sm:grid-cols-2">
               <li className="flex gap-2.5 rounded-[14px] border-2 border-ink-100 bg-ink-50 px-3.5 py-3 text-[13px] font-bold text-ink-700">
                 <span aria-hidden>🗺️</span>
@@ -251,13 +282,13 @@ export function EventDetail({ event, action }: { event: Schemas["SteamyEventDeta
 }
 
 /** Skeleton de la fiche WL23. */
-export function EventDetailSkeleton() {
+export function EventDetailSkeleton({ embedded = false }: { embedded?: boolean }) {
   return (
     <div
       role="status"
       aria-busy="true"
       aria-label="Chargement de l'événement…"
-      className="mx-auto w-full max-w-[1120px] px-4 pt-7 pb-14 sm:px-8"
+      className={embedded ? "w-full" : "mx-auto w-full max-w-[1120px] px-4 pt-7 pb-14 sm:px-8"}
     >
       <SkeletonBlock className="mb-4 h-3.5 w-56" />
       <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_320px]">

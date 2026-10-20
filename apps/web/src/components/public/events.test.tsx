@@ -118,14 +118,33 @@ describe("EventDetail (WL23, réutilisable)", () => {
     expect(screen.queryByText(/👥/)).not.toBeInTheDocument();
   });
 
+  it("dans un shell : titre en h2, sections en h3, fil d'Ariane de l'appelant, sans marges de page", () => {
+    const { container } = render(
+      <EventDetail
+        event={steamyEvent()}
+        action={null}
+        headingLevel={2}
+        embedded
+        breadcrumb={[{ label: "Steamy Events", href: "/apprenant/evenements" }, { label: "Atelier" }]}
+      />,
+    );
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Atelier Électronique débutant" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: "Infos pratiques" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Steamy Events" })).toHaveAttribute("href", "/apprenant/evenements");
+    expect(container.firstElementChild).toHaveClass("w-full");
+    expect(container.firstElementChild).not.toHaveClass("mx-auto");
+  });
+
   it("skeletons verbalisés", () => {
     render(
       <>
         <EventListSkeleton />
         <EventDetailSkeleton />
+        <EventDetailSkeleton embedded />
       </>,
     );
     expect(screen.getByRole("status", { name: "Chargement des événements…" })).toBeInTheDocument();
-    expect(screen.getByRole("status", { name: "Chargement de l'événement…" })).toBeInTheDocument();
+    expect(screen.getAllByRole("status", { name: "Chargement de l'événement…" })).toHaveLength(2);
   });
 });

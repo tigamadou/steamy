@@ -79,6 +79,9 @@ def test_mission_points_are_awarded_once(scale, client, learner, course, enrollm
 
 
 def test_no_points_without_a_scale(client, learner, course, enrollment):
+    settings_ = PlatformSettings.load()
+    settings_.points_scale = {}
+    settings_.save()
     resp = client.post(f"/api/learning/missions/{missions_of(course)[0].id}/complete/")
     assert resp.json()["pointsEarned"] == 0
     assert not PointsEntry.objects.exists() and points(learner) == 0
@@ -168,8 +171,10 @@ def test_rank_is_derived_from_points(scale, value, expected):
 
 
 def test_no_rank_without_thresholds_or_below_the_first(learner):
-    assert gamification.rank_for(500) is None
     settings_ = PlatformSettings.load()
+    settings_.rank_thresholds = []
+    settings_.save()
+    assert gamification.rank_for(500) is None
     settings_.rank_thresholds = [{"rank": "Bricoleur", "points": 100}]
     settings_.save()
     assert gamification.rank_for(10) is None
