@@ -12,6 +12,8 @@ const OPEN_EVENT = { slug: "atelier-electronique", title: "Atelier Électronique
 const FULL_EVENT = { slug: "hackathon-ia", title: "Hackathon IA junior" };
 
 async function axe(page: Page) {
+  // Le `<title>` des métadonnées est diffusé avec la page : l'attendre avant l'analyse (règle `document-title`)
+  await expect(page).toHaveTitle(/\S/);
   const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(violations).toEqual([]);
 }
@@ -61,8 +63,9 @@ test("P6 : WD10 → WL23 → WD11 → WD10 « En attente de ton parent » ; seco
   await page.getByRole("button", { name: "Envoyer ma candidature" }).click();
 
   // Retour à WD10 : candidature « En attente de ton parent », plus de « Participer » sur cet événement
-  await expect(page).toHaveURL("/apprenant/evenements?candidature=envoyee");
   await expect(page.getByText("Ta candidature est envoyée à ton parent.")).toBeVisible();
+  // Le toast retire `?candidature=envoyee` de l'adresse : un rechargement ne le réaffiche pas
+  await expect(page).toHaveURL("/apprenant/evenements");
   const mine = page.getByRole("list", { name: "Tes candidatures" });
   await expect(mine.getByRole("listitem")).toHaveCount(1);
   await expect(mine).toContainText(OPEN_EVENT.title);
@@ -70,6 +73,9 @@ test("P6 : WD10 → WL23 → WD11 → WD10 « En attente de ton parent » ; seco
   const card = eventCard(page, OPEN_EVENT.title);
   await expect(card.getByText("En attente de ton parent")).toBeVisible();
   await expect(card.getByRole("link", { name: /Participer/ })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("list", { name: "Tes candidatures" })).toBeVisible();
+  await expect(page.getByText("Ta candidature est envoyée à ton parent.")).toHaveCount(0);
 
   // Second envoi depuis la page ouverte avant : refusé par l'API (`ALREADY_APPLIED`)
   await second.getByRole("textbox", { name: /Pourquoi veux-tu participer/ }).fill("Encore une fois.");

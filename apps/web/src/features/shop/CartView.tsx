@@ -26,10 +26,19 @@ function articles(count: number): string {
   return `${count} article${count > 1 ? "s" : ""}`;
 }
 
+/** Kits retirés du panier : plus en vente, ou refusés (épuisés) quand le panier invité a rejoint le compte. */
+function droppedMessage(count: number, tu: boolean): string {
+  const your = tu ? "ton" : "votre";
+  return count > 1
+    ? `${count} kits de ${your} panier ne sont plus disponibles : ils ont été retirés.`
+    : `Un kit de ${your} panier n'est plus disponible : il a été retiré.`;
+}
+
 /**
- * WK03 / WK10 · Panier. Invité : `localStorage`, CTA « Commander » → WK04. Apprenant : panier serveur, CTA « Demander à
- * mon parent » (WK08). Un apprenant connecté arrivé sur le panier public est renvoyé vers le sien. Prix et sous-total
- * de l'API ; la livraison est calculée à l'étape suivante.
+ * WK03 / WK10 · Panier. Invité : `localStorage`, CTA « Commander » → WK04, sous-total « estimé » (somme des prix
+ * relus, le total fait foi à WK06). Apprenant : panier serveur, CTA « Demander à mon parent » (WK08). Parent connecté :
+ * pas de tunnel invité, son achat passe par son espace (lot 4). Un apprenant connecté arrivé sur le panier public est
+ * renvoyé vers le sien. Prix et sous-total de l'API ; la livraison est calculée à l'étape suivante.
  */
 export function CartView({ context, zones, onRequestParent }: CartViewProps) {
   const router = useRouter();
@@ -62,11 +71,7 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
     );
   }
 
-  const dropped =
-    state.dropped > 0 &&
-    (tu
-      ? "Un kit de ton panier n'est plus en vente : il a été retiré."
-      : "Un kit de votre panier n'est plus en vente : il a été retiré.");
+  const dropped = state.dropped > 0 && droppedMessage(state.dropped, tu);
 
   if (state.lines.length === 0) {
     return (
@@ -92,6 +97,8 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
   }
 
   const unavailable = state.lines.some((line) => !line.kit.available);
+  // Panier invité : sous-total additionné à partir des prix relus dans l'API (aucun devis anonyme), le total fait foi
+  const estimated = state.shopper === "guest";
 
   const change = async (line: CartLine, quantity: number | null) => {
     const error = quantity === null ? await remove(line) : await setQuantity(line, quantity);
@@ -147,10 +154,17 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
           Récapitulatif
         </h2>
         <dl className="flex flex-col gap-2.5">
-          <WKSummaryRow label={`Sous-total (${articles(state.count)})`} value={formatPrice(state.subtotal)} />
+          <WKSummaryRow
+            label={`${estimated ? "Sous-total estimé" : "Sous-total"} (${articles(state.count)})`}
+            value={formatPrice(state.subtotal)}
+          />
           <WKSummaryRow label="Livraison" value="Calculée à l'étape suivante" />
           <div aria-hidden className="h-px bg-ink-100" />
-          <WKSummaryRow label="Total hors livraison" value={formatPrice(state.subtotal)} strong />
+          <WKSummaryRow
+            label={estimated ? "Total estimé hors livraison" : "Total hors livraison"}
+            value={formatPrice(state.subtotal)}
+            strong
+          />
         </dl>
         {unavailable && (
           <p role="alert" className="text-sm font-bold text-error-700">
@@ -183,6 +197,16 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
               Demander à mon parent
             </Button>
           )
+        ) : state.shopper === "parent" ? (
+          // Le tunnel invité demande nom et téléphone : un parent connecté achète depuis son espace (C10, lot 4)
+          <>
+            <p className="text-sm font-semibold text-ink-700">
+              Vous êtes connecté avec votre compte parent : vos commandes se passent depuis votre espace parent.
+            </p>
+            <Button block size="lg" variant="outline" href={routes.parent.home} iconRight="arrow-right">
+              Aller à mon espace parent
+            </Button>
+          </>
         ) : unavailable ? (
           <Button block size="lg" disabled>
             Commander

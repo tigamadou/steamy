@@ -18,12 +18,12 @@ async function axe(page: Page) {
   expect(violations).toEqual([]);
 }
 
-/** Saisit le code dans WA01 et l'envoie (« Valider le code », puis « Réessayer » après une erreur). */
-async function submitCode(page: Page, code: string, button: "Valider le code" | "Réessayer") {
+/** Saisit le code dans WA01 et l'envoie : une nouvelle saisie efface l'échec précédent, le bouton reste « Valider le code ». */
+async function submitCode(page: Page, code: string) {
   const input = page.getByRole("textbox", { name: /Code Kit/ });
   await input.fill("");
   await input.pressSequentially(code);
-  await page.getByRole("button", { name: button }).click();
+  await page.getByRole("button", { name: "Valider le code" }).click();
 }
 
 test("P2 · WA01 / WA06 : Kit Code inconnu, puis valide en minuscules → WC06a, puis déjà utilisé", async ({ page }) => {
@@ -42,7 +42,7 @@ test("P2 · WA01 / WA06 : Kit Code inconnu, puis valide en minuscules → WC06a,
   await axe(page);
 
   // WA06 : code inconnu
-  await submitCode(page, "STEAMY-ZZZZ-ZZZZ", "Valider le code");
+  await submitCode(page, "STEAMY-ZZZZ-ZZZZ");
   await expect(page.getByRole("heading", { level: 2, name: "Code Kit invalide" }).filter({ visible: true })).toBeVisible();
   await expect(page.getByRole("textbox", { name: /Code Kit/ }).filter({ visible: true })).toHaveAttribute("aria-invalid", "true");
   await expect(page.getByRole("link", { name: "Contacter le support" }).filter({ visible: true })).toBeVisible();
@@ -50,7 +50,10 @@ test("P2 · WA01 / WA06 : Kit Code inconnu, puis valide en minuscules → WC06a,
 
   // Code valide saisi en minuscules sans tirets : mis en forme à la frappe
   const typed = code.replace(/-/g, "").toLowerCase();
-  await submitCode(page, typed, "Réessayer");
+  // Nouvelle saisie : le titre de l'échec disparaît
+  await page.getByRole("textbox", { name: /Code Kit/ }).fill("");
+  await expect(page.getByRole("heading", { level: 2, name: "Code Kit invalide" }).filter({ visible: true })).toHaveCount(0);
+  await submitCode(page, typed);
   await expect(page).toHaveURL(`/apprenant/parcours/${COURSE}`, { timeout: 20_000 });
   await expect(page.getByRole("status").filter({ hasText: "Parcours débloqué" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: COURSE_TITLE }).filter({ visible: true })).toBeVisible();
@@ -63,7 +66,7 @@ test("P2 · WA01 / WA06 : Kit Code inconnu, puis valide en minuscules → WC06a,
   const other = await createLearner({ firstName: "Ama" });
   await loginViaApi(page, other.username, other.password);
   await page.goto(`/apprenant/catalogue/${COURSE}/kit-code`);
-  await submitCode(page, code, "Valider le code");
+  await submitCode(page, code);
   await expect(page.getByRole("heading", { level: 2, name: "Code déjà utilisé" }).filter({ visible: true })).toBeVisible();
   await expect(page.getByText(/qu'une seule fois/).filter({ visible: true })).toBeVisible();
 });

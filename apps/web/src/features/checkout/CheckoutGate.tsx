@@ -25,17 +25,20 @@ function Notice({ children, action }: { children: ReactNode; action: ReactNode }
 
 /**
  * Garde du tunnel invité : le panier doit être lu, non vide et entièrement disponible. Un apprenant connecté est
- * renvoyé vers son panier (il demande à son parent, S3). Rend `children` avec le panier prêt.
+ * renvoyé vers son panier (il demande à son parent, S3) ; un parent connecté vers le panier public, qui le mène à son
+ * espace (le tunnel invité lui redemanderait nom et téléphone). Rend `children` avec le panier prêt.
  */
 export function CheckoutGate({ children }: { children: (cart: ReadyCart) => ReactNode }) {
   const router = useRouter();
   const { state, reload } = useCart("public", "vous");
-  const learner = state.status === "ready" && state.shopper === "learner";
+  const shopper = state.status === "ready" ? state.shopper : null;
+  const away = shopper === "learner" || shopper === "parent";
   useEffect(() => {
-    if (learner) router.replace(routes.learner.cart);
-  }, [learner, router]);
+    if (shopper === "learner") router.replace(routes.learner.cart);
+    else if (shopper === "parent") router.replace(routes.cart);
+  }, [shopper, router]);
 
-  if (state.status === "loading" || learner) {
+  if (state.status === "loading" || away) {
     return (
       <div role="status" aria-busy="true" aria-label="Chargement de votre commande…" className="flex flex-col gap-4">
         <SkeletonBlock className="h-14 rounded-lg" />

@@ -38,8 +38,11 @@ describe("pages Steamy Events de l'apprenant", () => {
     expect(toast).toBe(false);
     expect(home.metadata.title).toBe("Steamy Events");
 
+    // Le paramètre est retiré de l'adresse une fois le toast affiché : un retour arrière ne le réaffiche pas
+    window.history.replaceState(null, "", "/apprenant/evenements?candidature=envoyee&x=1");
     render(await home.default({ searchParams: Promise.resolve({ candidature: "envoyee" }) } as never));
     expect(await screen.findByText("Ta candidature est envoyée à ton parent.")).toBeInTheDocument();
+    expect(window.location.search).toBe("?x=1");
   });
 
   it("WL23 : fiche sous Suspense, squelette sans marges de page, titre de l'événement", async () => {
