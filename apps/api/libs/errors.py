@@ -153,6 +153,10 @@ CATALOG: dict[str, tuple[int, str]] = {
     ),
     "ORDER_EXPIRED": (S.HTTP_410_GONE, "Cette commande a expiré."),
     "ORDER_ALREADY_PAID": (S.HTTP_409_CONFLICT, "Cette commande est déjà payée."),
+    "PAYMENT_IN_PROGRESS": (
+        S.HTTP_409_CONFLICT,
+        "Un paiement est déjà en cours pour cette commande : validez-le sur votre téléphone ou attendez son issue.",
+    ),
     "PAYMENT_FAILED": (S.HTTP_402_PAYMENT_REQUIRED, "Le paiement n'a pas abouti."),
     "PAYMENT_REQUEST_CLOSED": (S.HTTP_409_CONFLICT, "Cette demande de paiement est déjà traitée."),
     # --- Événements, classes, pilotage ------------------------------------------------------
