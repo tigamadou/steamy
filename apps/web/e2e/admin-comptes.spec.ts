@@ -42,6 +42,7 @@ test("6.2 Super-admin consulte l'équipe et ses appareils TOTP (WAD13)", async (
   await expect(results.getByRole("columnheader", { name: "Groupes" })).toBeVisible();
   await expect(page.locator('select[name="action"] option[value="reset_totp"]')).toHaveCount(1);
   await expect(page.locator('select[name="action"] option[value="send_activation"]')).toHaveCount(1);
+  await expect(page.locator('select[name="action"] option[value="revoke_invitation"]')).toHaveCount(1);
 
   // « Inviter un membre » : email, identité et groupes ; le mot de passe se choisit par le lien d'activation
   await page.goto(`${API_URL}/admin/accounts/staffmember/add/`);

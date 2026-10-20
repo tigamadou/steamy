@@ -45,7 +45,7 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot · Prérequ
   > visible une fois l'appareil confirmé (ni secret ni QR code dans l'admin des appareils). `/api/backoffice/overview/`
   > n'existant pas encore (API-L6.4), le refus `OTP_REQUIRED` est testé sur une route factice protégée par
   > `IsStaffVerified`. Ancien catalogue `courses` (dont `Path`) retiré de l'admin ; `messaging` était déjà supprimé.
-- [x] **6.2** Utilisateurs, consentements, équipe · `feature/lot6-comptes-consentements` · PR #133, invitation d'un membre `feature/lot6-invitation-membre` (requiert 6.1, API-L2, API-L4, API-L5)
+- [x] **6.2** Utilisateurs, consentements, équipe · `feature/lot6-comptes-consentements` · PR #133, invitation d'un membre `feature/lot6-invitation-membre` · PR #137 (requiert 6.1, API-L2, API-L4, API-L5)
   - [x] WAD06 Utilisateurs (admin Django) : `UserAdmin` (colonnes, filtres, recherche, `role` en lecture seule après création)
   - [x] WAD06 action « Inviter un enseignant » (email + `School` vers `TeacherInvitation`) et désactiver / réactiver avec motif et audit
   - [x] WAD07 Fiche utilisateur (admin Django) : inlines lecture seule, genre et handicap soumis à *view_sensitive_profile*
@@ -54,7 +54,7 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot · Prérequ
   - [x] WAD08 `PublicProfileReviewAdmin` : approuver / rejeter pseudonyme et avatar (D15)
   - [x] WAD13 Équipe (admin Django) : `StaffMemberAdmin`, « Inviter un membre » (lien d'activation + enrôlement TOTP), « Réinitialiser le TOTP », garde-fou sur le dernier Super-admin
     - [x] `StaffMemberAdmin` (groupes, TOTP, dernière connexion), « Réinitialiser le TOTP », garde-fous du dernier Super-admin et de soi-même (API-L6.2)
-    - [x] « Inviter un membre » par lien d'activation : email, identité et groupes ; le membre choisit son mot de passe par le lien (valable `PASSWORD_RESET_TIMEOUT`, à usage unique), puis enrôle son TOTP avant toute page de l'admin ; action « Renvoyer le lien d'activation », colonne « Activé »
+    - [x] « Inviter un membre » par lien d'activation : email, identité et groupes ; le membre choisit son mot de passe par le lien (`StaffInvitation`, jeton haché, usage unique, valable 72 h : `ACTIVATION_LIFETIME`), puis enrôle son TOTP avant toute page de l'admin ; actions « Renvoyer le lien d'activation » (10 min au moins entre deux envois : `RESEND_COOLDOWN`) et « Révoquer l'invitation », colonne « Activé »
   - [x] Groupes et permissions de ces modèles conformes à la matrice
   - [x] Tests : aucune action ne fait passer une `ConsentRequest` à `accepted` ou `refused` (D70) ; relance soumise aux plafonds
   - [x] Tests : Contenu et Finance sans accès aux consentements ni champs sensibles ; Support sans genre/handicap sans permission
@@ -73,12 +73,17 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot · Prérequ
   > ne serait pas utilisable dans ce parcours ; l'apprenant passe par son parent. La colonne « personnel » de WAD06 n'a
   > pas lieu d'être : le personnel est listé à part (WAD13). Recette manuelle à faire par le produit (le test
   > Playwright couvre la recherche de Léa Adjovi, son parent et les consentements, en lecture).
-  > Invitation d'un membre (WAD13) : le formulaire d'ajout de l'équipe ne demande plus de mot de passe ; le compte
-  > naît avec un mot de passe inutilisable et reçoit par email un lien `admin/activation/<uid>/<jeton>/` (jeton de
-  > `PasswordResetTokenGenerator`, sel propre : périmé avec `PASSWORD_RESET_TIMEOUT` ou dès le mot de passe choisi ;
-  > un renvoi invalide le lien précédent). La page applique les validateurs de mot de passe, puis enchaîne sur
-  > l'enrôlement TOTP de 6.1 : aucune session avant le premier code confirmé. Envoi et activation journalisés
-  > (`staff.invitation_sent`, `staff.activated`).
+  > Invitation d'un membre (WAD13), PR #137 : le formulaire d'ajout de l'équipe ne demande plus de mot de passe ; le
+  > compte naît avec un mot de passe inutilisable et une `StaffInvitation` (jeton `token_urlsafe` haché, `sent_at`,
+  > `expires_at`, `invited_by`, `accepted_at`, `revoked_at`, sur le modèle de `TeacherInvitation`). Lien
+  > `admin/activation/<jeton>/` valable 72 h (`ACTIVATION_LIFETIME`), email envoyé après la transaction. Sur le modèle
+  > de `PasswordResetConfirmView`, la première visite place le jeton en session et redirige vers
+  > `admin/activation/definir/` : le jeton ne reste pas dans l'URL, et le filtre `libs/access_log.py` le masque dans les
+  > journaux d'accès d'uvicorn et de gunicorn. Les deux pages sont plafonnées par IP (`staff-activation`, 10/min ;
+  > 429 et `staff.activation_throttled`) et masquent l'email. Le mot de passe passe les validateurs, puis l'enrôlement
+  > TOTP de 6.1 s'enchaîne : aucune session avant le premier code confirmé. Renvoi espacé de 10 min
+  > (`RESEND_COOLDOWN`), qui remplace le lien précédent ; « Révoquer l'invitation » invalide le lien et désactive le
+  > compte. Journal : `staff.invitation_sent`, `staff.activated`, `staff.invitation_revoked`.
 - [x] **6.3** Contenu des parcours · `feature/lot6-contenu-parcours` · PR #113 (requiert 6.1, API-L1, API-L3a)
   - [x] WAD09 Contenu (admin Django) : `CourseAdmin` (colonnes, filtres, slug prérempli, couverture S3, `trailerVimeoId`)
   - [x] Hiérarchie par inlines chaînés : `Project` dans `Course`, `Level` dans `Project`, `Mission` dans `Level` (fil d'Ariane, ordre éditable)

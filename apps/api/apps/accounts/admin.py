@@ -731,7 +731,7 @@ class StaffMemberAdmin(DjangoUserAdmin):
     )
     readonly_fields = ("is_superuser", "status", "date_joined", "last_login")
     filter_horizontal = ("groups",)
-    actions = ["send_activation", "reset_totp"]
+    actions = ["send_activation", "revoke_invitation", "reset_totp"]
 
     def get_queryset(self, request):
         confirmed = TOTPDevice.objects.filter(user=OuterRef("pk"), confirmed=True)
@@ -765,12 +765,7 @@ class StaffMemberAdmin(DjangoUserAdmin):
         super().save_model(request, obj, form, change)
         if not change:
             staff_auth.send_activation(obj, request)
-            self.message_user(
-                request,
-                f"Lien d'activation envoyé à {obj.email}.",
-                messages.SUCCESS,
-                fail_silently=True,
-            )
+            self.message_user(request, f"Lien d'activation envoyé à {obj.email}.", messages.SUCCESS)
 
     @admin.display(description="Nom")
     def full_name(self, obj):
@@ -787,6 +782,18 @@ class StaffMemberAdmin(DjangoUserAdmin):
     @admin.display(description="Activé", boolean=True)
     def activated(self, obj):
         return obj.has_usable_password()
+
+    @admin.action(
+        description="Révoquer l'invitation (lien invalidé, compte désactivé)", permissions=["add"]
+    )
+    def revoke_invitation(self, request, queryset):
+        for member in queryset:
+            try:
+                staff_auth.revoke_invitation(member, request)
+            except ValueError as error:
+                self.message_user(request, str(error), messages.WARNING)
+            else:
+                self.message_user(request, f"{member} : invitation révoquée.", messages.SUCCESS)
 
     @admin.action(description="Renvoyer le lien d'activation", permissions=["add"])
     def send_activation(self, request, queryset):

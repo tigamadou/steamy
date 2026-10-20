@@ -7,6 +7,7 @@ nullables : l'unicité et la présence de l'identifiant propre à chaque rôle s
 
 import uuid
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.db.models import Q
@@ -600,6 +601,44 @@ class StaffMember(User):
         proxy = True
         verbose_name = _("membre du personnel")
         verbose_name_plural = _("équipe")
+
+
+class StaffInvitation(models.Model):
+    """
+    Invitation d'un membre du personnel (WAD13) : lien `admin/activation/<jeton>/` par email, jeton stocké haché,
+    usage unique, durée `apps.core.staff_auth.ACTIVATION_LIFETIME` ; révocable tant qu'elle n'est pas acceptée.
+    """
+
+    member = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="staff_invitation",
+        verbose_name=_("membre"),
+    )
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    token_hash = models.CharField(max_length=64, blank=True, db_index=True)
+    sent_at = models.DateTimeField(_("envoyée le"), null=True, blank=True)
+    expires_at = models.DateTimeField(_("expire le"), null=True, blank=True)
+    accepted_at = models.DateTimeField(_("acceptée le"), null=True, blank=True)
+    revoked_at = models.DateTimeField(_("révoquée le"), null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("invitation d'un membre")
+        verbose_name_plural = _("invitations des membres")
+
+    def __str__(self):
+        return f"Invitation de {self.member}"
+
+    @property
+    def pending(self) -> bool:
+        return self.accepted_at is None and self.revoked_at is None
 
 
 class PublicProfileReview(TimestampedModel):
