@@ -14,7 +14,7 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 6.2 après API-L5 ; critères de fin du lot · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
 ### Lot 6 · Back-office hybride — 🟡 en cours
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
@@ -45,19 +45,34 @@ Statut : 🟡 en cours · Prochaine tâche : 6.2 après API-L5 ; critères de fi
   > visible une fois l'appareil confirmé (ni secret ni QR code dans l'admin des appareils). `/api/backoffice/overview/`
   > n'existant pas encore (API-L6.4), le refus `OTP_REQUIRED` est testé sur une route factice protégée par
   > `IsStaffVerified`. Ancien catalogue `courses` (dont `Path`) retiré de l'admin ; `messaging` était déjà supprimé.
-- [ ] **6.2** Utilisateurs, consentements, équipe · `feature/lot6-comptes-consentements` (requiert 6.1, API-L2, API-L4, API-L5)
-  - [ ] WAD06 Utilisateurs (admin Django) : `UserAdmin` (colonnes, filtres, recherche, `role` en lecture seule après création)
-  - [ ] WAD06 action « Inviter un enseignant » (email + `School` vers `TeacherInvitation`) et désactiver / réactiver avec motif et audit
-  - [ ] WAD07 Fiche utilisateur (admin Django) : inlines lecture seule, genre et handicap soumis à *view_sensitive_profile*
-  - [ ] WAD07 actions : réinitialiser le mot de passe, « Voir le parent », changement de parent (D22 : lien remplacé à l'acceptation du nouveau parent seulement)
-  - [ ] WAD08 Consentements (admin Django) : `ConsentRequestAdmin` en suivi seul, actions *relancer le parent* (plafonds de W07) et *marquer en litige* (note obligatoire)
-  - [ ] WAD08 `PublicProfileReviewAdmin` : approuver / rejeter pseudonyme et avatar (D15)
+- [x] **6.2** Utilisateurs, consentements, équipe · `feature/lot6-comptes-consentements` · PR #PR62 (requiert 6.1, API-L2, API-L4, API-L5)
+  - [x] WAD06 Utilisateurs (admin Django) : `UserAdmin` (colonnes, filtres, recherche, `role` en lecture seule après création)
+  - [x] WAD06 action « Inviter un enseignant » (email + `School` vers `TeacherInvitation`) et désactiver / réactiver avec motif et audit
+  - [x] WAD07 Fiche utilisateur (admin Django) : inlines lecture seule, genre et handicap soumis à *view_sensitive_profile*
+  - [x] WAD07 actions : réinitialiser le mot de passe, « Voir le parent », changement de parent (D22 : lien remplacé à l'acceptation du nouveau parent seulement)
+  - [x] WAD08 Consentements (admin Django) : `ConsentRequestAdmin` en suivi seul, actions *relancer le parent* (plafonds de W07) et *marquer en litige* (note obligatoire)
+  - [x] WAD08 `PublicProfileReviewAdmin` : approuver / rejeter pseudonyme et avatar (D15)
   - [ ] WAD13 Équipe (admin Django) : `StaffMemberAdmin`, « Inviter un membre » (lien d'activation + enrôlement TOTP), « Réinitialiser le TOTP », garde-fou sur le dernier Super-admin
-  - [ ] Groupes et permissions de ces modèles conformes à la matrice
-  - [ ] Tests : aucune action ne fait passer une `ConsentRequest` à `accepted` ou `refused` (D70) ; relance soumise aux plafonds
-  - [ ] Tests : Contenu et Finance sans accès aux consentements ni champs sensibles ; Support sans genre/handicap sans permission
-  - [ ] Tests : invitation enseignant crée une `TeacherInvitation` et aucun `User` actif ; dernier Super-admin non supprimable ; changement de parent sans acceptation = lien inchangé
+    - [x] `StaffMemberAdmin` (groupes, TOTP, dernière connexion), « Réinitialiser le TOTP », garde-fous du dernier Super-admin et de soi-même (API-L6.2)
+    - [ ] « Inviter un membre » par lien d'activation : création avec mot de passe initial, puis enrôlement TOTP obligatoire à la première connexion (6.1) ; lien d'activation à concevoir
+  - [x] Groupes et permissions de ces modèles conformes à la matrice
+  - [x] Tests : aucune action ne fait passer une `ConsentRequest` à `accepted` ou `refused` (D70) ; relance soumise aux plafonds
+  - [x] Tests : Contenu et Finance sans accès aux consentements ni champs sensibles ; Support sans genre/handicap sans permission
+  - [x] Tests : invitation enseignant crée une `TeacherInvitation` et aucun `User` actif ; dernier Super-admin non supprimable ; changement de parent sans acceptation = lien inchangé
   - [ ] Recette sur le jeu D2 : retrouver Léa Adjovi, voir son parent et ses consentements, relancer une demande, inviter un enseignant rattaché à une école
+  > Notes : l'essentiel de WAD06-WAD08 et WAD13 vient d'API-L6.2 (PR #61) avec ses tests (`accounts/tests/
+  > test_backoffice_admin.py`) : personas sans ajout ni suppression, rôle et identifiants en lecture seule, suspendre /
+  > désactiver / réactiver avec motif, consentements en suivi seul (relance aux plafonds de W07, litige), changement de
+  > parent à l'acceptation du nouveau parent seulement (D22), modération D15, équipe et garde-fous. Cette étape ajoute :
+  > colonnes avatar et ville, filtre pays ; fiche avec localité qualifiée (D75), genre et handicap soumis à
+  > *view_sensitive_profile*, inlines en lecture seule (enfants et commandes d'un parent ; consentements, inscriptions
+  > et classes d'un apprenant, chacun visible selon les droits de lecture de la matrice) ; action « Réinitialiser le mot
+  > de passe » (Support) ; bouton « Inviter un enseignant » vers `TeacherInvitation`, envoyée dès sa création, aucun
+  > compte n'existant avant l'acceptation (S5). Écarts : la réinitialisation envoie au titulaire (parent par SMS,
+  > enseignant par email) le lien de « Mot de passe oublié », où il reçoit son code (D26) : un code émis depuis l'admin
+  > ne serait pas utilisable dans ce parcours ; l'apprenant passe par son parent. La colonne « personnel » de WAD06 n'a
+  > pas lieu d'être : le personnel est listé à part (WAD13). Recette manuelle à faire par le produit (le test
+  > Playwright couvre la recherche de Léa Adjovi, son parent et les consentements, en lecture).
 - [x] **6.3** Contenu des parcours · `feature/lot6-contenu-parcours` · PR #113 (requiert 6.1, API-L1, API-L3a)
   - [x] WAD09 Contenu (admin Django) : `CourseAdmin` (colonnes, filtres, slug prérempli, couverture S3, `trailerVimeoId`)
   - [x] Hiérarchie par inlines chaînés : `Project` dans `Course`, `Level` dans `Project`, `Mission` dans `Level` (fil d'Ariane, ordre éditable)

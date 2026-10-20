@@ -53,6 +53,13 @@ class TeacherInvitationAdmin(admin.ModelAdmin):
     readonly_fields = ("invited_by", "sent_at", "expires_at", "accepted_at")
     actions = ["send"]
 
+    def save_model(self, request, obj, form, change):
+        """Une invitation créée (« Inviter un enseignant », WAD06) part aussitôt ; le compte naît à son acceptation."""
+        super().save_model(request, obj, form, change)
+        if not change:
+            send_invitation(obj, invited_by=request.user)
+            self.message_user(request, f"Invitation envoyée à {obj.email}.", messages.SUCCESS)
+
     @admin.action(description="Envoyer l'invitation par email (nouveau lien, valable 7 jours)")
     def send(self, request, queryset):
         pending = queryset.filter(accepted_at__isnull=True)

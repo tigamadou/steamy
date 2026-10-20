@@ -156,3 +156,43 @@ def _age(profile) -> int | None:
     today = timezone.localdate()
     born = profile.birth_date
     return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+
+
+#: Message envoyé par le Support (WAD07) : lien vers « Mot de passe oublié », où le titulaire reçoit son code (D26)
+RESET_LINK_TEXT = (
+    "Steamy : pour choisir un nouveau mot de passe, ouvrez {url} et saisissez {identifier}. "
+    "Vous recevrez un code de vérification."
+)
+
+
+def send_password_reset_link(user: User, request) -> str:
+    """
+    WAD07 « Réinitialiser le mot de passe » : le parent (SMS) ou l'enseignant (email) reçoit le lien du parcours
+    « Mot de passe oublié » (WL02), où le code lui est envoyé ; le personnel ne voit jamais de code. Un apprenant
+    passe par son parent (D26). Renvoie le canal utilisé ; `ValueError` si le compte n'y a pas droit.
+    """
+    from django.conf import settings
+    from django.core.mail import send_mail
+
+    if user.status != User.Status.ACTIVE:
+        raise ValueError(f"{user} : compte non actif.")
+    url = f"{settings.WEB_URL.rstrip('/')}/mot-de-passe-oublie"
+    if user.role == User.Role.PARENT and user.phone:
+        queue_sms(
+            user.phone,
+            RESET_LINK_TEXT.format(url=url, identifier="votre numéro"),
+            purpose="password_reset",
+        )
+        channel = "sms"
+    elif user.role == User.Role.TEACHER and user.email:
+        send_mail(
+            "Steamy · nouveau mot de passe",
+            RESET_LINK_TEXT.format(url=url, identifier="votre adresse email"),
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+        )
+        channel = "email"
+    else:
+        raise ValueError(f"{user} : un apprenant change de mot de passe par son parent (D26).")
+    audit("user.password_reset_link", request=request, target=user, data={"channel": channel})
+    return channel

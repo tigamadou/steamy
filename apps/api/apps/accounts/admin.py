@@ -14,6 +14,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.contrib.auth.forms import UserChangeForm
+from django.db.models import Q
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import ngettext
@@ -84,12 +85,125 @@ class ParentChangeForm(forms.Form):
 # --- Utilisateurs (WAD06, WAD07) ------------------------------------------------------------------
 
 
+class ReadOnlyInline(admin.TabularInline):
+    """Inline de la fiche utilisateur (WAD07) : lecture seule, sans ajout ni suppression."""
+
+    extra = 0
+    can_delete = False
+    show_change_link = True
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+class ChildrenInline(ReadOnlyInline):
+    model = ParentChildLink
+    fk_name = "parent"
+    fields = ("learner", "relationship", "created_at")
+    readonly_fields = fields
+    verbose_name_plural = "Enfants rattachés"
+
+
+class ConsentInline(ReadOnlyInline):
+    model = ConsentRequest
+    fk_name = "learner"
+    fields = ("origin", "parent_phone", "status", "created_at", "expires_at")
+    readonly_fields = fields
+    verbose_name_plural = "Demandes de consentement"
+
+
+def enrollment_inline():
+    from apps.learning.models import Enrollment
+
+    return type(
+        "EnrollmentInline",
+        (ReadOnlyInline,),
+        {
+            "model": Enrollment,
+            "fk_name": "learner",
+            "fields": ("course", "source", "status", "created_at"),
+            "readonly_fields": ("course", "source", "status", "created_at"),
+            "verbose_name_plural": "Inscriptions",
+        },
+    )
+
+
+def order_inline():
+    from apps.payments.models import Order
+
+    return type(
+        "OrderInline",
+        (ReadOnlyInline,),
+        {
+            "model": Order,
+            "fk_name": "payer",
+            "fields": ("reference", "kind", "total", "status", "created_at"),
+            "readonly_fields": ("reference", "kind", "total", "status", "created_at"),
+            "verbose_name_plural": "Commandes payées",
+        },
+    )
+
+
+def membership_inline():
+    from apps.classrooms.models import ClassroomMembership
+
+    return type(
+        "MembershipInline",
+        (ReadOnlyInline,),
+        {
+            "model": ClassroomMembership,
+            "fk_name": "learner",
+            "fields": ("classroom", "status", "joined_at", "left_at"),
+            "readonly_fields": ("classroom", "status", "joined_at", "left_at"),
+            "verbose_name_plural": "Classes",
+        },
+    )
+
+
+class CountryFilter(admin.SimpleListFilter):
+    """Pays de la localité du profil (apprenant ou parent)."""
+
+    title = "pays"
+    parameter_name = "pays"
+
+    def lookups(self, request, model_admin):
+        from apps.referentials.models import Country
+
+        return [(country.code, country.label) for country in Country.objects.filter(active=True)]
+
+    def queryset(self, request, queryset):
+        if not self.value():
+            return queryset
+        return queryset.filter(
+            Q(learner_profile__locality__country=self.value())
+            | Q(parent_profile__locality__country=self.value())
+        )
+
+
+def profile_of(user):
+    """Profil d'apprenant ou de parent (localité, avatar, champs sensibles) ; `None` pour un enseignant."""
+    for name in ("learner_profile", "parent_profile"):
+        try:
+            return getattr(user, name)
+        except (LearnerProfile.DoesNotExist, ParentProfile.DoesNotExist):
+            continue
+    return None
+
+
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "full_name", "role", "status", "date_joined")
-    list_filter = ("role", "status")
+    list_display = ("__str__", "avatar", "full_name", "role", "city", "date_joined", "status")
+    list_filter = ("role", "status", CountryFilter)
     search_fields = ("username", "phone", "email", "first_name", "last_name")
     ordering = ("-date_joined",)
+    list_select_related = (
+        "learner_profile__locality",
+        "learner_profile__avatar",
+        "parent_profile__locality",
+    )
     fields = (
         "role",
         "status",
@@ -99,6 +213,7 @@ class UserAdmin(admin.ModelAdmin):
         "first_name",
         "last_name",
         "parent",
+        "locality",
         "date_joined",
         "last_login",
     )
@@ -109,10 +224,87 @@ class UserAdmin(admin.ModelAdmin):
         "phone",
         "email",
         "parent",
+        "locality",
         "date_joined",
         "last_login",
     )
-    actions = ["suspend", "deactivate", "reactivate"]
+    actions = ["suspend", "deactivate", "reactivate", "send_password_reset"]
+
+    def get_fields(self, request, obj=None):
+        fields = list(super().get_fields(request, obj))
+        if request.user.has_perm("accounts.view_sensitive_profile"):
+            fields += ["gender", "disability"]
+        return fields
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = list(super().get_readonly_fields(request, obj))
+        if request.user.has_perm("accounts.view_sensitive_profile"):
+            fields += ["gender", "disability"]
+        return fields
+
+    def get_inlines(self, request, obj):
+        # Pas de page d'ajout (S1, S5) : `obj` est toujours un compte existant
+        if obj.role == User.Role.PARENT:
+            return [ChildrenInline, order_inline()]
+        if obj.role == User.Role.LEARNER:
+            return [ConsentInline, enrollment_inline(), membership_inline()]
+        return []
+
+    def changelist_view(self, request, extra_context=None):
+        # « Inviter un enseignant » (S5) : seule voie de création d'un compte enseignant
+        extra_context = {
+            **(extra_context or {}),
+            "teacher_invitation_url": reverse("admin:classrooms_teacherinvitation_add"),
+        }
+        return super().changelist_view(request, extra_context)
+
+    @admin.display(description="Avatar")
+    def avatar(self, obj):
+        profile = profile_of(obj)
+        avatar = getattr(profile, "avatar", None)
+        return avatar.emoji if avatar else "—"
+
+    @admin.display(description="Ville")
+    def city(self, obj):
+        profile = profile_of(obj)
+        return profile.locality.city if profile and profile.locality else "—"
+
+    @admin.display(description="Localité")
+    def locality(self, obj):
+        profile = profile_of(obj)
+        if profile is None or profile.locality is None:
+            return "—"
+        place = profile.locality
+        return f"{place.city}, {place.country_id} · {place.get_area_type_display()}"
+
+    @admin.display(description="Genre")
+    def gender(self, obj):
+        profile = profile_of(obj)
+        return profile.get_gender_display() if profile and profile.gender else "—"
+
+    @admin.display(description="Handicap")
+    def disability(self, obj):
+        profile = profile_of(obj)
+        return str(profile.disability) if profile and profile.disability else "—"
+
+    @admin.action(
+        description="Réinitialiser le mot de passe (lien au titulaire)",
+        permissions=["reset_password"],
+    )
+    def send_password_reset(self, request, queryset):
+        for user in queryset:
+            try:
+                channel = backoffice.send_password_reset_link(user, request)
+            except ValueError as error:
+                self.message_user(request, str(error), messages.ERROR)
+            else:
+                via = "par SMS" if channel == "sms" else "par email"
+                self.message_user(
+                    request, f"{user} : lien de réinitialisation envoyé {via}.", messages.SUCCESS
+                )
+
+    def has_reset_password_permission(self, request):
+        return request.user.has_perm("accounts.reset_password")
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(is_staff=False)
