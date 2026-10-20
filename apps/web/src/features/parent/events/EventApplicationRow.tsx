@@ -55,10 +55,14 @@ export function EventApplicationRow({ application: initial, countries, preferred
     );
     setPending(false);
     if (!result.ok) {
+      // Traitée entre-temps (par l'autre parent, ou dans un autre onglet) : l'écran se relit
+      if (result.code === "APPLICATION_ALREADY_RESOLVED") router.refresh();
       setError(applicationErrorMessage(result));
       return;
     }
     setApplication(result.data);
+    // Les boutons disparaissent : le focus passe à la ligne, qui annonce le nouvel état
+    row.current?.focus();
     if (result.data.status === "pending_payment") setPaying(true);
     else router.refresh();
   }
@@ -66,7 +70,7 @@ export function EventApplicationRow({ application: initial, countries, preferred
   return (
     <article
       ref={row}
-      tabIndex={highlighted ? -1 : undefined}
+      tabIndex={-1}
       aria-labelledby={titleId}
       className={cx(
         "flex flex-col gap-3 rounded-[18px] border-2 bg-surface p-4 outline-none",
@@ -145,6 +149,7 @@ export function EventApplicationRow({ application: initial, countries, preferred
           // La ligne garde sa propre copie de la candidature : elle prend celle de l'API, l'accueil se relit
           setApplication(refused);
           setRefusing(false);
+          row.current?.focus();
           router.refresh();
         }}
       />

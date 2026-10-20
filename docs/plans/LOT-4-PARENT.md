@@ -13,7 +13,7 @@ paiement `WA03`, états `WA04`/`WA05`/`WA07`, suivi `WK07`).
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 de `WPD15`) · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
+Statut : 🟡 en cours · Prochaine tâche : PR de fin de lot (suivis de relecture, critères de fin) après la fusion de 4.6 à 4.8 ; 4.10 avec le lot 5 · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
 
 ### Lot 4 · Espace parent — 🟡 en cours
 - [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15` · PR #72
@@ -96,7 +96,7 @@ Statut : 🟡 en cours · Prochaine tâche : 4.2 et 4.4 (après validation C18 d
   - [x] Playwright : accord à un événement payant (`WD11`, `WPD06`, `WPD15`, paiement, « acceptée » en `WD10`)
   - [x] Playwright : inscription directe par le parent (`WPD12`) à un événement payant
   - [x] Recette : refus notifié à l'enfant ; événement complet non payable
-  > Écarts : `WPD06` réunit « Demandes de mes enfants » (toutes les candidatures, la mise en avant `?candidature=<id>` venant de « À valider ») et « Événements à venir » ; le paiement d'un événement accepté reprend `OrderPayment` de `WPD15` (réessai unique, paiement tardif remboursé C17) sur la commande d'événement créée par l'API (`orderReference`), sans demande de paiement (D53 amendé) ; `WL23` du lot 1 dans le shell parent, avec « Inscrire un enfant » ou le motif (complet, clos, passé) ; un refus met la ligne à jour avec la candidature renvoyée par l'API ; notification de l'enfant vérifiée par l'API dans l'e2e (écran `WD10` du lot 3).
+  > Écarts : `WPD06` réunit « Demandes de mes enfants » (toutes les candidatures, la mise en avant `?candidature=<id>` venant de « À valider ») et « Événements à venir » ; le paiement d'un événement accepté reprend `OrderPayment` de `WPD15` (réessai unique, paiement tardif remboursé C17) sur la commande d'événement créée par l'API (`orderReference`), sans demande de paiement (D53 amendé) ; `WL23` du lot 1 dans le shell parent, avec « Inscrire un enfant » ou le motif (complet, clos, passé) ; un refus met la ligne à jour avec la candidature renvoyée par l'API ; côté enfant, la candidature (`WD11`) et son statut (`WD10`) sont faits ou lus par l'API dans l'e2e, ces écrans relevant du lot 3 (`apprenant-evenements.spec.ts`) ; notification de l'enfant vérifiée par l'API ; « À valider » mène à `WPD06` avec la candidature mise en avant (`?candidature=<id>`), même sans `url` de l'API ; le focus passe à la ligne après un accord ou un refus ; WPD12 annonce qu'un ticket de l'enfant remplace le paiement.
 - [ ] **4.7** Suppressions · `feature/lot4-suppressions` (requiert 4.2)
   - [ ] `WPD09` Supprimer (initiative du parent) avec `DeleteChildForm` (motif* + précisions, texte D54)
   - [ ] Validation d'une demande `WD15` (`?demande=<id>`, motif prérempli, Accepter / Refuser)

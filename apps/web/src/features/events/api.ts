@@ -38,7 +38,10 @@ export async function getEvent(slug: string): Promise<Schemas["SteamyEventDetail
   return dataOf(result);
 }
 
-/** Toutes les candidatures de l'apprenant connecté (quelques-unes au plus), les plus récentes d'abord. */
+/**
+ * Toutes les candidatures de l'utilisateur connecté, les plus récentes d'abord : les siennes pour l'apprenant (WD10),
+ * celles de ses enfants pour le parent (WPD06).
+ */
 export async function getMyApplications(): Promise<Schemas["Application"][]> {
   const api = await getServerApi();
   const applications: Schemas["Application"][] = [];

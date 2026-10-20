@@ -180,6 +180,8 @@ describe("EventApplicationRow (WPD06, D53)", () => {
     expect(POST).toHaveBeenCalledWith("/api/events/applications/{id}/accept/", { params: { path: { id: 4 } } });
     expect(await screen.findByText("Acceptée")).toBeInTheDocument();
     expect(router.refresh).toHaveBeenCalled();
+    // Les boutons ont disparu : le focus est sur la ligne
+    expect(screen.getByRole("article", { name: "Défi robots de Cotonou" })).toHaveFocus();
   });
 
   it("accepter un événement payant : la place est réservée et le paiement s'ouvre (commande d'événement)", async () => {
@@ -214,6 +216,16 @@ describe("EventApplicationRow (WPD06, D53)", () => {
     await user.click(screen.getByRole("button", { name: /^Accepter/ }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Cet événement est complet");
     expect(screen.getByText("À examiner")).toBeInTheDocument();
+    expect(router.refresh).not.toHaveBeenCalled();
+  });
+
+  it("candidature déjà traitée à l'accord : message et écran relu", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValue(failure(409, "APPLICATION_ALREADY_RESOLVED"));
+    setup();
+    await user.click(screen.getByRole("button", { name: /^Accepter/ }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("déjà été traitée");
+    expect(router.refresh).toHaveBeenCalled();
   });
 
   it("refuser ouvre la modale ; candidature refusée avec motif affiché", async () => {
@@ -228,8 +240,9 @@ describe("EventApplicationRow (WPD06, D53)", () => {
     await user.click(screen.getByRole("button", { name: /^Refuser\s*la candidature de Léa$/ }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Refuser la candidature" }));
     await waitFor(() => expect(router.refresh).toHaveBeenCalled());
-    // La ligne affiche aussitôt la candidature refusée renvoyée par l'API
+    // La ligne affiche aussitôt la candidature refusée renvoyée par l'API, et reçoit le focus
     expect(screen.getByText("Refusée")).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "Défi robots de Cotonou" })).toHaveFocus();
     expect(screen.getByText("Motif : Après les examens.")).toBeInTheDocument();
     view.unmount();
     setup({ status: "refused", refusalReason: "Trop loin." });
@@ -260,6 +273,7 @@ describe("RefuseApplicationDialog", () => {
     await user.type(screen.getByRole("textbox", { name: /Motif/ }), " Trop loin. ");
     await user.click(screen.getByRole("button", { name: "Refuser la candidature" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("déjà été traitée");
+    expect(router.refresh).toHaveBeenCalledTimes(1);
     expect(POST).toHaveBeenCalledWith("/api/events/applications/{id}/refuse/", {
       params: { path: { id: 4 } },
       body: { reason: "Trop loin." },
@@ -289,6 +303,26 @@ describe("EventOrderPayment", () => {
     await screen.findByRole("radio", { name: "MTN Mobile Money" });
     await user.click(screen.getByRole("button", { name: /^Payer/ }));
     await waitFor(() => expect(router.refresh).toHaveBeenCalled());
+    // La commande est relue : la fermeture est constatée sans attendre l'écran serveur
+    await waitFor(() =>
+      expect(GET.mock.calls.filter(([path]) => path === "/api/payments/orders/{reference}/")).toHaveLength(2),
+    );
+  });
+
+  it.each([
+    ["paid", "Cette participation est déjà payée : l'inscription est confirmée."],
+    ["cancelled", "Commande annulée : elle n'a pas été payée à temps et le stock a été libéré."],
+    ["refunded", "Commande remboursée : elle vous a été remboursée."],
+  ] as const)("commande %s : état dédié, aucun paiement proposé", async (status, text) => {
+    GET.mockImplementation(async (path: string) =>
+      path === "/api/payments/orders/{reference}/"
+        ? respond(200, order({ kind: "event", total: 5000, status }))
+        : respond(200, NETWORKS),
+    );
+    render(<EventOrderPayment orderReference="CMD-EVT" countries={COUNTRIES} success={<p>ok</p>} />);
+    expect(await screen.findByText(text)).toHaveAttribute("role", "status");
+    expect(screen.queryByRole("button", { name: /^Payer/ })).toBeNull();
+    expect(screen.queryByText(/Place réservée/)).toBeNull();
   });
 });
 
@@ -307,13 +341,13 @@ describe("EventSignupForm (WPD12)", () => {
     );
     expect(screen.getByText(/Participation : 5\s000\sF\sCFA/)).toBeInTheDocument();
     expect(await axe(container)).toHaveNoViolations();
-    await user.click(screen.getByRole("button", { name: "Continuer vers le paiement" }));
+    await user.click(screen.getByRole("button", { name: "Continuer" }));
     expect(await screen.findByRole("link", { name: "Choisissez l'enfant à inscrire." })).toBeInTheDocument();
     expect(POST).not.toHaveBeenCalled();
 
     await user.selectOptions(screen.getByRole("combobox", { name: /^Enfant/ }), "8");
     await user.type(screen.getByRole("textbox", { name: /Motivation/ }), "  Il adore les robots. ");
-    await user.click(screen.getByRole("button", { name: "Continuer vers le paiement" }));
+    await user.click(screen.getByRole("button", { name: "Continuer" }));
     expect(POST).toHaveBeenCalledWith("/api/events/{slug}/applications/", {
       params: { path: { slug: "defi-robots" } },
       body: { childId: 8, motivation: "Il adore les robots.", selfLevel: "" },
@@ -343,7 +377,7 @@ describe("EventSignupForm (WPD12)", () => {
       ["ALREADY_APPLIED", /déjà inscrit/],
     ] as const) {
       POST.mockResolvedValueOnce(failure(409, code));
-      await user.click(screen.getByRole("button", { name: "Continuer vers le paiement" }));
+      await user.click(screen.getByRole("button", { name: "Continuer" }));
       await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(text));
     }
   });
@@ -364,6 +398,18 @@ describe("pages serveur des événements du parent", () => {
     );
     expect(screen.getAllByText("Complet").length).toBeGreaterThan(0);
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("WPD06 : un nouveau statut relu par `router.refresh()` remplace la copie de la ligne", async () => {
+    getUpcomingEvents.mockResolvedValue([]);
+    getMyApplications.mockResolvedValue([application()]);
+    serverGET.mockResolvedValue(respond(200, { mobileMoney: null }));
+    const view = render((await ParentEventsHome({ searchParams: Promise.resolve({}) })) as ReactElement);
+    expect(screen.getByText("À examiner")).toBeInTheDocument();
+    getMyApplications.mockResolvedValue([application({ status: "accepted" })]);
+    view.rerender((await ParentEventsHome({ searchParams: Promise.resolve({}) })) as ReactElement);
+    expect(screen.getByText("Acceptée")).toBeInTheDocument();
+    expect(screen.queryByText("À examiner")).toBeNull();
   });
 
   it("WPD06 : états vides ; session perdue", async () => {

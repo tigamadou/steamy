@@ -60,7 +60,9 @@ describe("pendingActionHref", () => {
     expect(pendingActionHref(pendingAction({ type: "payment_request", id: "4", url: "https://ailleurs.test" }))).toBe(
       "/parent/demandes/4",
     );
-    expect(pendingActionHref(pendingAction({ type: "event_application", url: "" }))).toBe("/parent/evenements");
+    expect(pendingActionHref(pendingAction({ type: "event_application", id: "5", url: "" }))).toBe(
+      "/parent/evenements?candidature=5",
+    );
     expect(pendingActionHref(pendingAction({ type: "deletion_request", id: "9", childId: 8, url: "" }))).toBe(
       "/parent/enfants/8/supprimer?demande=9",
     );

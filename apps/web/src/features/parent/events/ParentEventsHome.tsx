@@ -98,7 +98,8 @@ export async function ParentEventsHome({ searchParams }: { searchParams: Promise
         ) : (
           <ul aria-label="Candidatures de mes enfants" className="m-0 flex list-none flex-col gap-3 p-0">
             {applications.map((application) => (
-              <li key={application.id}>
+              // La ligne garde sa copie de la candidature : un nouveau statut lu par `router.refresh()` la remonte
+              <li key={`${application.id}-${application.status}`}>
                 <EventApplicationRow
                   application={application}
                   countries={countries}

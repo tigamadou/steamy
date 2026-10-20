@@ -23,11 +23,10 @@ async function axe(page: Page) {
   expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
 }
 
-/** Premier réseau du pays (clic sur la carte visible), numéro de test, « Payer ». */
+/** Réseau MTN du Bénin (clic sur la carte visible, la radio est masquée), numéro de test, « Payer ». */
 async function pay(page: Page, national: string) {
-  const radio = page.getByRole("radio").first();
-  await page.locator(`[id="${(await radio.getAttribute("aria-labelledby")) as string}"]`).click();
-  await expect(radio).toBeChecked();
+  await page.getByText("MTN Mobile Money", { exact: true }).click();
+  await expect(page.getByRole("radio", { name: "MTN Mobile Money" })).toBeChecked();
   await page.getByRole("textbox", { name: /Numéro Mobile Money/ }).fill(national);
   await page.getByRole("button", { name: /^Payer \d/ }).click();
 }
@@ -108,7 +107,7 @@ test("WL23 → WPD12 : inscription directe d'un enfant à un événement payant,
   await expect(page).toHaveURL(`/parent/evenements/${PAID_EVENT.slug}/inscription`);
   await page.getByRole("combobox", { name: /^Enfant/ }).selectOption({ label: "Kofi Test" });
   await axe(page);
-  await page.getByRole("button", { name: "Continuer vers le paiement" }).click();
+  await page.getByRole("button", { name: "Continuer", exact: true }).click();
   await expect(page.getByText(/Place réservée jusqu'au/)).toBeVisible();
   await pay(page, "0197000001");
   await expect(page.getByRole("heading", { name: "Paiement réussi !" })).toBeVisible({ timeout: 30_000 });

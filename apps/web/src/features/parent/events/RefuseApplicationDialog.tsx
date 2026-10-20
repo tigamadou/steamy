@@ -1,6 +1,7 @@
 "use client";
 
 import type { Schemas } from "@steamy/api-client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button, Field, Modal, Textarea } from "@/components/ds";
@@ -27,6 +28,7 @@ export function RefuseApplicationDialog({
   eventTitle,
   onRefused,
 }: RefuseApplicationDialogProps) {
+  const router = useRouter();
   const [reason, setReason] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
@@ -42,6 +44,7 @@ export function RefuseApplicationDialog({
     );
     setPending(false);
     if (!result.ok) {
+      if (result.code === "APPLICATION_ALREADY_RESOLVED") router.refresh();
       setError(applicationErrorMessage(result));
       return;
     }

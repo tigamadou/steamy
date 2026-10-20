@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { Button, Loader, type PaymentFormProps, type PhoneCountry } from "@/components/ds";
+import { closedOrderNote } from "@/features/checkout/order-status";
 import { OrderPayment } from "@/features/parent/payment-request/OrderPayment";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { formatInstantTime } from "@/lib/dates";
@@ -21,9 +22,16 @@ export type EventOrderPaymentProps = {
 
 type Loaded = { order: Schemas["Order"] } | { error: string };
 
+/** Commande d'événement qui n'attend plus de paiement : payée, réservation expirée (annulée) ou remboursée (C17). */
+function settledNote(status: Schemas["OrderStatusEnum"]): string {
+  if (status === "paid") return "Cette participation est déjà payée : l'inscription est confirmée.";
+  return closedOrderNote(status === "refunded" ? "refunded" : "cancelled");
+}
+
 /**
  * Paiement de la commande d'un événement payant (WPD06, WPD12) avec le formulaire de WPD15, sans demande de paiement :
- * total et heure limite de la place réservée lus dans la commande ; la candidature n'est acceptée qu'au paiement.
+ * total et heure limite de la place réservée lus dans la commande ; la candidature n'est acceptée qu'au paiement. La
+ * commande est relue à chaque fermeture (expirée, déjà payée) : seule une commande en attente se paie.
  */
 export function EventOrderPayment({ orderReference, countries, preferred, success }: EventOrderPaymentProps) {
   const router = useRouter();
@@ -56,6 +64,13 @@ export function EventOrderPayment({ orderReference, countries, preferred, succes
     );
   }
   const { order } = loaded.value;
+  if (order.status !== "pending") {
+    return (
+      <p role="status" className="m-0 rounded-[14px] bg-ink-50 px-4 py-3 text-[13px] font-bold text-ink-700">
+        {settledNote(order.status)}
+      </p>
+    );
+  }
   return (
     <div className="flex flex-col gap-3">
       <p className="m-0 rounded-[14px] bg-primary-50 px-4 py-3 text-[13px] font-bold text-ink-700">
@@ -68,7 +83,11 @@ export function EventOrderPayment({ orderReference, countries, preferred, succes
         countries={countries}
         preferred={preferred}
         success={{ message: success, action: { label: "Voir les événements", href: routes.parent.events } }}
-        onOrderClosed={() => router.refresh()}
+        onOrderClosed={() => {
+          // La commande a changé côté serveur : elle est relue, l'écran aussi
+          setAttempt((n) => n + 1);
+          router.refresh();
+        }}
       />
     </div>
   );
