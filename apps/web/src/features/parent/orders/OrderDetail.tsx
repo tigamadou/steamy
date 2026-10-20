@@ -39,7 +39,7 @@ export async function OrderDetail({ params }: { params: Promise<{ reference: str
   return (
     <div className="flex flex-col gap-5">
       <Breadcrumb items={[{ label: "Commandes", href: routes.parent.orders }, { label: order.reference }]} />
-      <div className={pending ? "grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]" : "mx-auto w-full max-w-190"}>
+      <div className={pending ? "grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]" : "mx-auto w-full max-w-190"}>
         <div className="flex min-w-0 flex-col gap-5">
           <section
             aria-labelledby="commande-titre"

@@ -13,6 +13,12 @@ const COMPATIBLE_COURSE = "capteurs-electroniques";
 async function axe(page: Page) {
   const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
   expect(violations).toEqual([]);
+  // Aucun défilement horizontal, même à 360 px (une piste de grille trop large décale les clics sur mobile)
+  const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+  }));
+  expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
 }
 
 test("achat direct : boutique, panier, livraison, paiement, WPD07, facture et Kit Code qui débloque le parcours", async ({
