@@ -51,8 +51,10 @@ def _hash(token: str) -> str:
 
 
 def issue_token(challenge_id, code: str) -> str:
+    # Hors de la transaction ci-dessous : un code faux lève après avoir compté l'essai, et une
+    # transaction englobante annulerait ce compte (D24 : 3 essais).
+    challenge = verify_challenge(challenge_id, code, [PURPOSE])
     with transaction.atomic():
-        challenge = verify_challenge(challenge_id, code, [PURPOSE])
         # Un code valide n'existe que pour un compte réel : les défis « à vide » n'envoient aucun code.
         token = secrets.token_urlsafe(32)
         PasswordResetToken.objects.create(

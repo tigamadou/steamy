@@ -190,3 +190,17 @@ def test_parent_profile_get_creates_it_if_missing():
     resp = as_user(parent).get(PROFILE)
     assert resp.status_code == 200
     assert resp.json()["profileStep"] == "parent-location"
+
+
+def test_the_right_code_is_refused_after_three_wrong_ones(parent, sms):
+    client = as_user(parent)
+    challenge = start(client).json()["challengeId"]
+    code = sms.last_code(NEW)
+    wrong = "000000" if code != "000000" else "111111"
+    for _ in range(3):
+        resp = client.post(VERIFY, {"challengeId": challenge, "code": wrong}, format="json")
+        assert resp.json()["code"] == "OTP_INVALID"
+    resp = client.post(VERIFY, {"challengeId": challenge, "code": code}, format="json")
+    assert resp.json()["code"] == "OTP_TOO_MANY_ATTEMPTS"
+    parent.refresh_from_db()
+    assert parent.phone == OLD

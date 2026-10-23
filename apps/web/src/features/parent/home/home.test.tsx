@@ -132,9 +132,14 @@ describe("ParentHomeView", () => {
   });
 
   it("confirmation après l'acceptation d'une demande (WPD05)", async () => {
-    const { container } = render(<ParentHomeView kids={[]} count={0} actions={[]} acceptedFirstName="Kemi" />);
+    const { container } = render(<ParentHomeView kids={[]} count={0} actions={[]} accepted={{ firstName: "Kemi", classroom: null }} />);
     expect(screen.getByRole("status")).toHaveTextContent("Demande acceptée : Kemi peut terminer son inscription.");
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("confirmation après l'acceptation d'une invitation d'enseignant : classe rejointe", () => {
+    render(<ParentHomeView kids={[]} count={0} actions={[]} accepted={{ firstName: "Kemi", classroom: "5e B" }} />);
+    expect(screen.getByRole("status")).toHaveTextContent("Invitation acceptée : Kemi a rejoint la classe « 5e B ».");
   });
 
   it("childrenHeadline : singulier et pluriel", () => {
@@ -170,16 +175,33 @@ describe("ParentHome (WPD01)", () => {
     );
     const tree = (await ParentHome(home({ consentement: "9" }))) as ReactElement<Parameters<typeof ParentHomeView>[0]>;
     expect(GET).toHaveBeenCalledWith("/api/accounts/consent-requests/{id}/", { params: { path: { id: "9" } } });
-    expect(tree.props.acceptedFirstName).toBe("Kemi");
+    expect(tree.props.accepted).toEqual({ firstName: "Kemi", classroom: null });
+
+    routeApi(
+      respond(200, { count: 0, results: [] }),
+      respond(200, []),
+      respond(200, { id: 9, status: "accepted", firstName: "Kemi", origin: "teacher", classroom: { name: "5e B" } }),
+    );
+    const teacher = (await ParentHome(home({ consentement: "9" }))) as ReactElement<Parameters<typeof ParentHomeView>[0]>;
+    expect(teacher.props.accepted).toEqual({ firstName: "Kemi", classroom: "5e B" });
+    routeApi(
+      respond(200, { count: 0, results: [] }),
+      respond(200, []),
+      respond(200, { id: 9, status: "accepted", firstName: "Kemi", origin: "teacher", classroom: null }),
+    );
+    const withoutClass = (await ParentHome(home({ consentement: "9" }))) as ReactElement<
+      Parameters<typeof ParentHomeView>[0]
+    >;
+    expect(withoutClass.props.accepted).toEqual({ firstName: "Kemi", classroom: null });
   });
 
   it("aucune confirmation pour une demande non acceptée, inconnue ou un paramètre invalide", async () => {
     routeApi(respond(200, { count: 0, results: [] }), respond(200, []), respond(200, { status: "refused", firstName: "Kemi" }));
     let tree = (await ParentHome(home({ consentement: "9" }))) as ReactElement<Parameters<typeof ParentHomeView>[0]>;
-    expect(tree.props.acceptedFirstName).toBeUndefined();
+    expect(tree.props.accepted).toBeUndefined();
     routeApi(respond(200, { count: 0, results: [] }), respond(200, []));
     tree = (await ParentHome(home({ consentement: "9" }))) as ReactElement<Parameters<typeof ParentHomeView>[0]>;
-    expect(tree.props.acceptedFirstName).toBeUndefined();
+    expect(tree.props.accepted).toBeUndefined();
     GET.mockClear();
     await ParentHome(home({ consentement: ["9", "10"] }));
     await ParentHome(home({ consentement: "Kemi" }));
