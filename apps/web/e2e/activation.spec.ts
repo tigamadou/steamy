@@ -258,7 +258,7 @@ test.describe("activation enseignante", { tag: "@donnees-uniques" }, () => {
     await page.goto(`/enseignant/eleves/${learnerId}?classe=${robotics.id}`);
     await expect(page.getByRole("heading", { level: 2, name: "Cet élève est introuvable" })).toBeVisible();
     await page.goto(`/enseignant/parcours/${robotics.course.slug}`);
-    await expect(page.getByRole("heading", { level: 2, name: "Ce parcours est introuvable" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: "Ce contenu est introuvable" })).toBeVisible();
     // Aucun nom d'élève de Koffi n'apparaît dans les évaluations de Nadia
     await page.goto("/enseignant/evaluations");
     await expect(page.getByText("Yao Kpadé")).toHaveCount(0);
