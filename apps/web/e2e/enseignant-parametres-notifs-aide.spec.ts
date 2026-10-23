@@ -23,11 +23,11 @@ test("WT08 : profil, connexion, notifications, légal et fermeture du compte", a
 
   const profile = page.getByRole("heading", { level: 2, name: "Profil" });
   await expect(profile).toBeVisible();
-  await expect(page.getByText("Koffi Adékambi")).toBeVisible();
+  await expect(page.getByText("Koffi Adékambi").filter({ visible: true }).first()).toBeVisible();
   // Établissement en lecture seule, pas de « Bio » ni de téléphone de connexion
-  await expect(page.getByText("Établissement")).toBeVisible();
+  await expect(page.getByText("Établissement", { exact: true }).filter({ visible: true }).first()).toBeVisible();
   await expect(page.getByText(/^Bio$|Téléphone/)).toHaveCount(0);
-  await expect(page.getByText("koffi.adekambi@steamy.test")).toBeVisible();
+  await expect(page.getByText("koffi.adekambi@steamy.test").filter({ visible: true }).first()).toBeVisible();
   await axe(page);
 
   // Notifications : un interrupteur enregistré aussitôt, puis remis comme il était

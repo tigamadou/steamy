@@ -97,10 +97,10 @@ test.describe("activation enseignante", { tag: "@donnees-uniques" }, () => {
     await logoutFromShell(page);
     await expect(page).toHaveURL("/connexion");
     await page.getByRole("textbox", { name: /Identifiant ou numéro/ }).fill(INVITED);
-    await page.getByLabel(/^Mot de passe/).fill("NadiaReset2026");
+    await page.getByLabel(/^Mot de passe/).filter({ visible: true }).fill("NadiaReset2026");
     await page.getByRole("button", { name: "Se connecter" }).click();
     await expect(page).toHaveURL("/connexion");
-    await page.getByLabel(/^Mot de passe/).fill("NadiaChange2026");
+    await page.getByLabel(/^Mot de passe/).filter({ visible: true }).fill("NadiaChange2026");
     await page.getByRole("button", { name: "Se connecter" }).click();
     await expect(page).toHaveURL("/enseignant");
   });
