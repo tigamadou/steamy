@@ -35,6 +35,13 @@ describe("Tag", () => {
     expect(link).toHaveAttribute("aria-current", "true");
   });
 
+  it("n'anime que la bordure : texte et fond ne passent par aucun état intermédiaire au changement d'état", () => {
+    render(<Tag href="/parcours">Toutes</Tag>);
+    const link = screen.getByRole("link", { name: "Toutes" });
+    expect(link).toHaveClass("transition-[border-color]");
+    expect(link).not.toHaveClass("transition-colors");
+  });
+
   it("ne présente aucune violation d'accessibilité", async () => {
     const { container } = render(
       <div>
