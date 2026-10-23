@@ -6,18 +6,19 @@ règles communes, la définition de « terminé » et les outils de test sont da
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 5.1 Shell, accueil et navigation · Prérequis : `API-L5` (endpoints `classrooms`, `API-L5.1` à `API-L5.5`, seed D2) ; lots 1, 2 et 3 livrés ; lot 4 pour l'affichage des commentaires côté parent (`WPD03`) ; maquette de `WT13` validée (C18) avant 5.2 ; étape 4.10 du lot 4 livrée pendant ce lot, avant 5.9
+Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Paramètres, notifications, aide (5.2 attend la validation de la maquette de `WT13`) · Prérequis : `API-L5` (endpoints `classrooms`, `API-L5.1` à `API-L5.5`, seed D2) ; lots 1, 2 et 3 livrés ; lot 4 pour l'affichage des commentaires côté parent (`WPD03`) ; maquette de `WT13` validée (C18) avant 5.2 ; étape 4.10 du lot 4 livrée pendant ce lot, avant 5.9
 
-### Lot 5 · Espace enseignant — ⬜ à faire
-- [ ] **5.1** Shell, accueil et navigation · `feature/lot5-shell-accueil` (requiert API-L5)
-  - [ ] Layout `(enseignant)` : contrôle du rôle `teacher` côté serveur, redirection vers `/connexion`
-  - [ ] Config `AppShell` enseignant (7 entrées, icône `help` ajoutée au DS pour Aide, cloche vers `WT12`)
-  - [ ] `WT01` Accueil : `ClassCard`, `ReviewRow`, `DropoutRow`, `StatPill`, `SectionHeader`
-  - [ ] Branchement API : `accounts/me/`, `notifications/unread-count/`, `classrooms/dashboard/`
-  - [ ] États : sans classe (Zeti + « Créer une classe » vers `WT13`), « À revoir » vide, « Décrochage » vide, erreur, hors ligne
-  - [ ] Tests unitaires : nav active selon la route ; registre (aucun « tu », snapshot de textes)
-  - [ ] Tests : redirection d'un apprenant ou d'un parent hors de `/enseignant`
-  - [ ] Recette : compteurs conformes au seed ; « Commenter » ouvre `WT05` sur la tentative ; aucun « À corriger »
+### Lot 5 · Espace enseignant — 🟡 en cours
+- [x] **5.1** Shell, accueil et navigation · `feature/lot5-shell-accueil` (requiert API-L5)
+  - [x] Layout `(enseignant)` : contrôle du rôle `teacher` côté serveur, redirection vers `/connexion`
+  - [x] Config `AppShell` enseignant (7 entrées, icône `help` ajoutée au DS pour Aide, cloche vers la page des notifications) ; seules les entrées dont les écrans sont livrés sont visibles, chaque étape lève la sienne
+  - [x] `WT01` Accueil : `ClassCard`, `ReviewRow`, `DropoutRow`, `StatPill`, `SectionHeader`
+  - [x] Branchement API : `accounts/me/`, `notifications/unread-count/`, `classrooms/dashboard/`
+  - [x] États : sans classe (Zeti + « Créer une classe » vers la création de classe), « À revoir » vide, « Décrochage » vide, erreur, hors ligne
+  - [x] Tests unitaires : nav active selon la route ; registre (aucun « tu », contrôle des textes)
+  - [x] Tests : redirection d'un apprenant ou d'un parent hors de `/enseignant`
+  - [ ] Recette : compteurs conformes au seed ; aucun « À corriger » ; « Commenter » ouvre le profil élève sur la tentative (lien posé, le profil arrive avec l'étape 5.4)
+  > Écarts : l'ancienne page d'attente (`SpaceWaiting`) et son bouton de déconnexion sont supprimés ; les liens de l'accueil vers WT04, WT05, WT06 et WT13 mènent à des écrans livrés par les étapes suivantes.
 - [ ] **5.2** Classes · `feature/lot5-classes` (requiert 5.1, maquette de `WT13` validée)
   - [x] Conception de la maquette `WT13` dans `design/screens-enseignant-a-concevoir-web.jsx` (C18)
   - [ ] `WT03` Mes classes

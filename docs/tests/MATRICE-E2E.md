@@ -121,7 +121,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WPD12` | Faire participer un enfant | 4 | Inscription directe d'un enfant actif à un événement payant, paiement compris → acceptée côté enfant ; événement complet : aucun paiement possible | `apps/web/e2e/parent-evenements.spec.ts` |
 | `WPD13` | Aide & support | 4 | FAQ du parent, recherche locale, « Contacter le support » → WL24 | `apps/web/e2e/parent-parametres-aide.spec.ts` |
 | `WPD14` | Notifications | 4 | Onglets dans l'URL, « Tout marquer comme lu » → cloche à 0, état vide au vouvoiement | `apps/web/e2e/parent-accueil-notifications.spec.ts` |
-| `WT01` | Accueil formateur | 5 |  |  |
+| `WT01` | Accueil formateur | 5 | Koffi (jeu D2) : compteurs, classes et tentatives à revoir identiques à l'API, « Commenter » ciblé sur la tentative, sans « À corriger » ; enseignante sans classe : état vide et « Créer une classe » ; apprenant et parent renvoyés vers leur espace ; shell, déconnexion | `apps/web/e2e/enseignant-accueil.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WT02` | Mes parcours encadrés | 5 |  |  |
 | `WT03` | Mes classes | 5 |  |  |
 | `WT04` | Apprenants d'une classe | 5 |  |  |

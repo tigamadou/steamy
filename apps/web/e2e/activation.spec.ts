@@ -46,6 +46,12 @@ test.describe("activation enseignante", { tag: "@donnees-uniques" }, () => {
     await page.getByRole("button", { name: "Activer mon compte" }).click();
     await expect(page).toHaveURL("/enseignant");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Nadia");
+    // WT01 : l'enseignante invitée n'a encore aucune classe (jeu D2), l'accueil l'invite à en créer une
+    await expect(page.getByRole("heading", { level: 2, name: "Aucune classe pour l'instant" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Créer une classe" })).toHaveAttribute(
+      "href",
+      "/enseignant/classes/nouvelle",
+    );
   });
 
   test("le lien d'activation déjà utilisé est refusé", async ({ browser }) => {
