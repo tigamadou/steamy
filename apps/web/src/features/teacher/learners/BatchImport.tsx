@@ -144,7 +144,8 @@ export function BatchImport({
     setProblems(next);
     if (next.length > 0) return;
 
-    const parsed = file ? null : parseDelimited(list);
+    // La liste collée est déjà lue (aperçu) : pas de seconde lecture
+    const parsed = file ? null : preview;
     if (parsed && parsed.rows.length + parsed.malformed.length === 0) {
       setProblems([{ field: IDS.list, message: "La liste ne contient aucune ligne d'élève." }]);
       return;
