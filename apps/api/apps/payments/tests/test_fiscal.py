@@ -405,3 +405,89 @@ def test_admin_activates_emecef_only_when_the_dgi_rates_match(client):
     with mock.patch("apps.payments.fiscal.guard.get_fiscal_provider", side_effect=AssertionError):
         again = client.post(f"{SETTINGS_URL}1/change/", {**form, "dropout_threshold_days": 9})
     assert again.status_code == 302 and PlatformSettings.load().dropout_threshold_days == 9
+
+
+# --- Vérification manuelle (`emecef_check`, lecture seule) -------------------------------------------------------
+
+
+def test_emecef_reads_the_invoice_and_payment_types(emecef):
+    types = [{"type": "FV", "description": "Facture de vente"}, {"type": "FA"}, "bruit"]
+    with mock.patch("requests.request", return_value=response(types)) as request:
+        assert emecef.invoice_types() == [("FV", "Facture de vente"), ("FA", "")]
+    assert request.call_args.args[:2] == (
+        "GET",
+        "https://dgi.test/sygmef-emcf/api/info/invoiceTypes",
+    )
+    with mock.patch(
+        "requests.request", return_value=response([{"type": "MOBILEMONEY", "description": "MM"}])
+    ):
+        assert emecef.payment_types() == [("MOBILEMONEY", "MM")]
+    with (
+        mock.patch("requests.request", return_value=response({"a": 1})),
+        pytest.raises(FiscalTemporaryError),
+    ):
+        emecef.payment_types()
+
+
+def test_the_fake_provider_lists_its_types():
+    provider = FakeFiscalProvider()
+    assert [code for code, _ in provider.invoice_types()] == ["FV", "FA", "EV", "EA"]
+    assert "MOBILEMONEY" in [code for code, _ in provider.payment_types()]
+
+
+def test_emecef_check_prints_the_read_only_report_without_the_token(emecef, settings):
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    settings.FISCAL_PROVIDER = "emecef"
+    status = {"tokenValid": "true", "ifu": "0000000000001", "nim": "NIM1", "version": "1.0"}
+    groups = {"a": 0, "b": 18, "c": 0, "d": 0, "e": 0, "f": 0, "aibA": 1, "aibB": 5}
+    replies = [
+        response(status),
+        response(groups),
+        response([{"type": "FV", "description": "Facture de vente"}]),
+        response([{"type": "ESPECES", "description": "Espèces"}]),
+    ]
+    out = StringIO()
+    with mock.patch("requests.request", side_effect=replies) as request:
+        call_command("emecef_check", stdout=out)
+    assert [call.args[0] for call in request.call_args_list] == ["GET"] * 4
+    report = out.getvalue()
+    assert "jeton valide : oui" in report and "•••••••••0001" in report and "B : 18" in report
+    assert (
+        "AIB A : 1 · AIB B : 5" in report
+        and "FV : Facture de vente" in report
+        and "ESPECES" in report
+    )
+    assert "jeton-de-test" not in report and "0000000000001" not in report
+
+
+def test_emecef_check_fails_on_an_invalid_token_or_an_api_error(emecef, settings):
+    from io import StringIO
+
+    from django.core.management import call_command
+    from django.core.management.base import CommandError
+
+    settings.FISCAL_PROVIDER = "fake"
+    out = StringIO()
+    call_command("emecef_check", stdout=out)  # faux fournisseur : rapport sans réseau
+    assert "FISCAL_PROVIDER=fake" in out.getvalue()
+
+    settings.FISCAL_PROVIDER = "emecef"
+    with (
+        mock.patch("requests.request", side_effect=requests.ConnectionError),
+        pytest.raises(CommandError, match="injoignable"),
+    ):
+        call_command("emecef_check", stdout=StringIO())
+    invalid = [
+        response({"tokenValid": "false"}),
+        response({"a": 0, "b": 18, "c": 0, "d": 0, "e": 0, "f": 0, "aibA": 1, "aibB": 5}),
+        response([]),
+        response([]),
+    ]
+    with (
+        mock.patch("requests.request", side_effect=invalid),
+        pytest.raises(CommandError, match="pas valide"),
+    ):
+        call_command("emecef_check", stdout=StringIO())

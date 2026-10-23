@@ -38,7 +38,7 @@ class EmecefProvider(FiscalInvoiceProvider):
 
     # --- Appels à l'API ------------------------------------------------------------------------
 
-    def _call(self, method: str, path: str, payload: dict | None = None) -> dict:
+    def _call(self, method: str, path: str, payload: dict | None = None, expect: type = dict):
         try:
             response = requests.request(
                 method,
@@ -63,9 +63,9 @@ class EmecefProvider(FiscalInvoiceProvider):
             data = response.json()
         except ValueError:
             raise FiscalTemporaryError("Réponse illisible d'e-MECeF") from None
-        if not isinstance(data, dict):
+        if not isinstance(data, expect):
             raise FiscalTemporaryError("Réponse illisible d'e-MECeF")
-        if data.get("errorCode"):
+        if expect is dict and data.get("errorCode"):
             raise FiscalError(
                 str(data.get("errorDesc") or data["errorCode"]), code=str(data["errorCode"])
             )
@@ -96,6 +96,20 @@ class EmecefProvider(FiscalInvoiceProvider):
             )
         except (KeyError, TypeError, ValueError):
             raise FiscalTemporaryError("Groupes de taxe illisibles") from None
+
+    def invoice_types(self) -> list[tuple[str, str]]:
+        return self._described(self._call("GET", "/api/info/invoiceTypes", expect=list))
+
+    def payment_types(self) -> list[tuple[str, str]]:
+        return self._described(self._call("GET", "/api/info/paymentTypes", expect=list))
+
+    @staticmethod
+    def _described(items: list) -> list[tuple[str, str]]:
+        return [
+            (str(item.get("type") or ""), str(item.get("description") or ""))
+            for item in items
+            if isinstance(item, dict)
+        ]
 
     def request_invoice(self, request: InvoiceRequest) -> InvoiceTotals:
         body = {

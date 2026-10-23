@@ -22,6 +22,8 @@ from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 
 from .base import (
+    INVOICE_TYPES,
+    PAYMENT_NAMES,
     FiscalError,
     FiscalInvoiceProvider,
     FiscalStatus,
@@ -56,6 +58,12 @@ class FakeFiscalProvider(FiscalInvoiceProvider):
 
     def tax_groups(self) -> TaxGroups:
         return TaxGroups(rates=dict(FAKE_RATES), aib_a=FAKE_AIB["A"], aib_b=FAKE_AIB["B"])
+
+    def invoice_types(self) -> list[tuple[str, str]]:
+        return [(code, f"Type {code} (faux)") for code in INVOICE_TYPES]
+
+    def payment_types(self) -> list[tuple[str, str]]:
+        return [(name, f"{name} (faux)") for name in PAYMENT_NAMES]
 
     def request_invoice(self, request: InvoiceRequest) -> InvoiceTotals:
         if request.reference.endswith("-DOWN"):

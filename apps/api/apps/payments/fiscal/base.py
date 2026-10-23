@@ -126,6 +126,14 @@ class FiscalInvoiceProvider:
     def tax_groups(self) -> TaxGroups:
         raise NotImplementedError
 
+    def invoice_types(self) -> list[tuple[str, str]]:
+        """Types de facture admis : `[(type, description)]` (lecture seule)."""
+        raise NotImplementedError
+
+    def payment_types(self) -> list[tuple[str, str]]:
+        """Moyens de paiement admis : `[(type, description)]` (lecture seule)."""
+        raise NotImplementedError
+
     def request_invoice(self, request: InvoiceRequest) -> InvoiceTotals:
         raise NotImplementedError
 
