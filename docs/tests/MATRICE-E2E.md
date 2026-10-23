@@ -129,7 +129,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WT06` | Ajouter des apprenants (individuel / lot) | 5 | Individuel : erreurs de forme, SMS au parent (faux fournisseur), invitation « En attente du parent » ; lot : liste de 5 lignes (doublon, déjà présent, numéro invalide, ligne mal formée), rapport conforme, filtre, correction, renvoi, ligne « envoyée » | `apps/web/e2e/enseignant-ajout-eleves.spec.ts` |
 | `WT07` | Suivi des évaluations | 5 | Filtres Toutes / Formatives / Sommatives / À revoir et classe dans l'URL (rechargement), nombres identiques à l'API, « Commenter » vers WT05, aucune action de correction ; filtre invalide ramené à « Toutes » | `apps/web/e2e/enseignant-evaluations.spec.ts` |
 | `WT08` | Paramètres | 5 |  |  |
-| `WT09` | Steamy Events | 5 |  |  |
+| `WT09` | Steamy Events | 5 | Événements à venir, candidatures des élèves en lecture seule identiques à l'API, fiche WL23 dans le shell ; proposer à une classe : confirmation « notifiés », seconde proposition à la même classe refusée (message du serveur) | `apps/web/e2e/enseignant-evenements.spec.ts` |
 | `WT10` | Détail parcours encadré | 5 | Arbre Projet → Niveau → Mission avec compteurs de l'API, panneau de suivi, mission en lecture seule sans progression ; parcours non encadré : 404 | `apps/web/e2e/enseignant-parcours.spec.ts` |
 | `WT11` | Aide & support | 5 |  |  |
 | `WT12` | Notifications | 5 |  |  |

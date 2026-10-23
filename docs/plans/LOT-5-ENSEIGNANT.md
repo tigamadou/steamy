@@ -6,7 +6,7 @@ règles communes, la définition de « terminé » et les outils de test sont da
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Paramètres, notifications, aide (5.2 attend la validation de la maquette de `WT13`) · Prérequis : `API-L5` (endpoints `classrooms`, `API-L5.1` à `API-L5.5`, seed D2) ; lots 1, 2 et 3 livrés ; lot 4 pour l'affichage des commentaires côté parent (`WPD03`) ; maquette de `WT13` validée (C18) avant 5.2 ; étape 4.10 du lot 4 livrée pendant ce lot, avant 5.9
+Statut : 🟡 en cours · Prochaine tâche : spécialité de `WT08` (après la PR d'API #151), puis 5.9 (après la fusion de l'étape 4.10) · Prérequis : `API-L5` (endpoints `classrooms`, `API-L5.1` à `API-L5.5`, seed D2) ; lots 1, 2 et 3 livrés ; lot 4 pour l'affichage des commentaires côté parent (`WPD03`) ; maquette de `WT13` validée (C18) avant 5.2 ; étape 4.10 du lot 4 livrée pendant ce lot, avant 5.9
 
 ### Lot 5 · Espace enseignant — 🟡 en cours
 - [x] **5.1** Shell, accueil et navigation · `feature/lot5-shell-accueil` · PR #147 (requiert API-L5)
@@ -51,7 +51,7 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [x] Playwright : commenter une tentative `ko`, elle sort de « À revoir », commentaire visible côté parent (`WPD03`) et apprenant notifié
   - [x] Recette : aucun champ sensible dans l'affichage (le payload `LearnerFollowUp` n'en porte pas)
   > Écarts : le commentaire n'est pas affiché sur l'accueil de l'apprenant (`WD01`) : cette carte n'existe pas dans le lot 3 ; l'apprenant en est notifié (`WD04`, « t'a laissé un commentaire »). « Commenter » sur une ligne de `WT01` vient de l'étape 5.1 (`?tentative=`). La tentative est présentée avec son pourcentage et son statut serveur (l'API ne renvoie pas de score brut). La mention du test de contrat de payload est couverte côté API (sérialiseur dédié).
-- [x] **5.5** Évaluations « À revoir » · `feature/lot5-evaluations` (requiert 5.4)
+- [x] **5.5** Évaluations « À revoir » · `feature/lot5-evaluations` · PR #158 (requiert 5.4)
   - [x] `WT07` : filtres Toutes / Formatives / Sommatives / À revoir dans l'URL, filtre par classe, pagination, « Commenter » vers `WT05`
   - [x] Branchement API : `classrooms/reviews/?status=&type=&classroomId=`
   - [x] Tests unitaires : filtres et `searchParams`, pagination, état vide par filtre
@@ -66,12 +66,13 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [x] Playwright : parcours de Koffi, arbre et mission, 404 d'un parcours hors de ses classes
   - [x] Recette : seuls les parcours des classes de l'enseignant apparaissent (D64)
   > Écarts : l'API ne renvoie ni progression globale par parcours (WT02) ni taux d'échec par mission (WT10). La carte de WT02 affiche classes et élèves ; le panneau de WT10 classe les niveaux et projets par taux de réussite du serveur (« Les plus échoués »). Un ajout d'API serait nécessaire pour la progression globale.
-- [ ] **5.7** Événements · `feature/lot5-evenements` (requiert 5.2)
-  - [ ] `WT09` Événements à venir et `WL23` dans le shell enseignant
-  - [ ] « Proposer à une classe » : modale de choix de classe puis confirmation « Les élèves et leurs parents ont été notifiés »
-  - [ ] « Candidatures de mes élèves » en lecture seule
-  - [ ] Branchement API : `events/`, `events/{slug}/`, `proposals/`, `classrooms/event-applications/`
-  - [ ] Tests unitaires : modale, double proposition à la même classe (message serveur)
+- [x] **5.7** Événements · `feature/lot5-evenements` (requiert 5.2)
+  - [x] `WT09` Événements à venir et `WL23` dans le shell enseignant
+  - [x] « Proposer à une classe » : modale de choix de classe puis confirmation « Les élèves et leurs parents ont été notifiés »
+  - [x] « Candidatures de mes élèves » en lecture seule
+  - [x] Branchement API : `events/`, `events/{slug}/`, `proposals/`, `classrooms/event-applications/`
+  - [x] Tests unitaires : modale, double proposition à la même classe (message serveur)
+  > Écarts : la carte d'événement est partagée avec le parent (`EventTile`). Le test de la proposition réussie est joué une fois, sur « bureau » (une proposition par classe).
 - [ ] **5.8** Paramètres, notifications, aide · `feature/lot5-parametres-notifs-aide` (requiert 5.1)
   - [ ] `WT08` Paramètres : profil (nom, spécialité, établissement en lecture seule), connexion (email, mot de passe D25), notifications (in-app et email), légal
   - [ ] `WT08` zone sensible : « Demander la fermeture du compte » vers `public/contact-messages/` (sujet prérempli)
