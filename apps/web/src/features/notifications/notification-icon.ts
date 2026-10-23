@@ -11,6 +11,10 @@ const BY_NAME: Record<string, string> = {
   bell: "🔔",
   book: "📘",
   gift: "🎁",
+  users: "👥",
+  "user-x": "📭",
+  alert: "⚠️",
+  message: "💬",
 };
 
 const BY_TYPE: Record<string, string> = {
@@ -29,6 +33,12 @@ const BY_TYPE: Record<string, string> = {
   event_application_accepted: "🎟️",
   event_application_refused: "📭",
   teacher_comment: "💬",
+  "classroom.joined": "👥",
+  "classroom.invitation_refused": "📭",
+  "classroom.invitation_expired": "⌛",
+  "classroom.dropout": "⚠️",
+  "classroom.comment": "💬",
+  "event.proposed": "🎟️",
 };
 
 const BY_CATEGORY: Partial<Record<Schemas["CategoryEnum"], string>> = {
@@ -37,6 +47,9 @@ const BY_CATEGORY: Partial<Record<Schemas["CategoryEnum"], string>> = {
   coaching: "💬",
   events: "🎟️",
   payments: "💳",
+  progress: "📈",
+  reviews: "📝",
+  consents: "✅",
   account: "👤",
 };
 

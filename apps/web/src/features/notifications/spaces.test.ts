@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { NOTIFICATION_SPACES, notificationHref } from "./spaces";
+import { NOTIFICATION_SPACES, notificationHref, teacherHref } from "./spaces";
 
 describe("notificationHref (WPD14, types de §5.11)", () => {
   it.each([
@@ -40,5 +40,39 @@ describe("NOTIFICATION_SPACES", () => {
     expect(NOTIFICATION_SPACES.parent.register).toBe("vous");
     expect(NOTIFICATION_SPACES.parent.list("non-lues")).toBe("/parent/notifications?onglet=non-lues");
     expect(NOTIFICATION_SPACES.parent.preferences).toBe("/parent/parametres#notifications");
+  });
+});
+
+describe("teacherHref (WT12, types de §5.12)", () => {
+  it.each([
+    // url de l'API : WT05 (élève et classe), WT04 (classe)
+    ["classroom.dropout", "/enseignant/eleves/22?classe=3", "/enseignant/eleves/22?classe=3"],
+    ["classroom.joined", "/enseignant/classes/3", "/enseignant/classes/3"],
+    ["classroom.invitation_refused", "/enseignant/classes/3", "/enseignant/classes/3"],
+    ["event.proposed", "/enseignant/evenements/robot-cup", "/enseignant/evenements/robot-cup"],
+    ["announcement", "/evenements/robot-cup", "/evenements/robot-cup"],
+    // Sans url utilisable : la cible de son type
+    ["classroom.joined", "", "/enseignant/classes"],
+    ["classroom.invitation_refused", "", "/enseignant/classes"],
+    ["classroom.invitation_expired", "", "/enseignant/classes"],
+    ["classroom.dropout", "", "/enseignant/classes"],
+    ["event.proposed", "https://ailleurs.test", "/enseignant/evenements"],
+  ])("%s (%s) → %s", (type, url, expected) => {
+    expect(teacherHref({ type, url })).toBe(expected);
+  });
+
+  it("type inconnu sans url : aucune cible ; lien vers un autre espace écarté", () => {
+    expect(teacherHref({ type: "nouveau", url: "" })).toBeNull();
+    expect(teacherHref({ type: "nouveau", url: "/parent" })).toBeNull();
+    expect(teacherHref({ type: "nouveau", url: "/apprenant/catalogue" })).toBeNull();
+    expect(teacherHref({ type: "nouveau", url: "/backoffice/impact" })).toBeNull();
+  });
+
+  it("l'enseignant est au vouvoiement, avec ses routes", () => {
+    const teacher = NOTIFICATION_SPACES.teacher;
+    expect(teacher.register).toBe("vous");
+    expect(teacher.list("non-lues")).toBe("/enseignant/notifications?onglet=non-lues");
+    expect(teacher.preferences).toBe("/enseignant/parametres#notifications");
+    expect(teacher.href({ type: "classroom.joined", url: "/enseignant/classes/3" })).toBe("/enseignant/classes/3");
   });
 });
