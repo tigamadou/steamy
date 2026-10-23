@@ -83,7 +83,7 @@ Statut : ✅ terminé (recette produit : couverture automatique acceptée le 202
   - [x] Playwright : changement de mot de passe puis reconnexion
   > Écart : la FAQ est un module TypeScript (comme celles de l'apprenant et du parent), pas du MDX.
 - [x] **5.9** Parcours de bout en bout et durcissement · `feature/lot5-e2e` (requiert 5.1 à 5.8, étape 4.10 du lot 4, lot 2 activation)
-  - [x] Playwright « Invitation complète » : invitation admin (jeu D2), activation `/activation/[token]`, connexion `W16`, création de classe, invitation, acceptation `WPD05`, élève actif en `WT04`, notification « a rejoint la classe »
+  - [x] Playwright « Invitation complète » : invitation admin (jeu D2), activation `/activation#jeton=…`, connexion `W16`, création de classe, invitation, acceptation `WPD05`, élève actif en `WT04`, notification « a rejoint la classe »
   - [x] Playwright « Compte existant (C11) » : rattachement du compte, élève dans `WT04`, parcours `source=classroom`, sans paiement
   - [x] Playwright « Refus » : invitation « Refusée » dans `WT04`, notification `WT12`
   - [x] Playwright « Import avec erreurs » : preuve dans `enseignant-ajout-eleves.spec.ts` (étape 5.3)
@@ -125,7 +125,7 @@ Vocabulaire : la maquette dit « formateur » et « À corriger » ; l'interface
 | Livré par | Réutilisé ici |
 | --- | --- |
 | Lot 1 | Design system (tokens magenta C1, atomes, `Field`, `PhoneInput` E.164, `Tabs`, `CourseCard`), états vides et enveloppes d'état en `WXState` avec `Mascot` (Zeti), `WL23` (`EventRow`, `EventDetail`), `WL24` (formulaire de contact), FAQ statique MDX (D10) en `FaqAccordion`, outillage Vitest + Playwright |
-| Lot 2 | `Modal`, `NewPasswordFields` + `PwReq`, activation enseignant `/activation/[token]` (variante de WL04, `auth/teacher-invitations/`), W16 email + mot de passe, WL02-WL05 avec code email, `safeNext()` et retour par `?next=`, gestion des codes d'erreur (D4) |
+| Lot 2 | `Modal`, `NewPasswordFields` + `PwReq`, activation enseignant `/activation#jeton=…` (variante de WL04, `auth/teacher-invitations/`), W16 email + mot de passe, WL02-WL05 avec code email, `safeNext()` et retour par `?next=`, gestion des codes d'erreur (D4) |
 | Lot 3 | `AppShell` paramétré (nav, cloche, menu), `StatPill`, `SectionHeader`, `QuizAttemptRow`, `MissionItem`, `ProgressBar`, `Section`, `InfoCard`, `SettingsRow`, `Toggle`, `NotifItem`, lecteur de mission (`VimeoPlayer`, `MissionBlocks`), arbre Projet → Niveau → Mission, écran de notifications et préférences de l'apprenant (modèles pour WT12 et WT08) |
 | Lot 4 | Affichage des commentaires côté parent (`WPD03`). L'étape **4.10** (WPD05 d'origine enseignant : création de l'identifiant ou rattachement d'un compte existant, C11) dépend d'`API-L5` : elle est **livrée pendant ce lot**, avant 5.9 |
 | `API-L5` | Tous les endpoints `classrooms` (§7.6) et `API-L5.1` à `API-L5.5` ; `make seed` avec une école, un enseignant invité, deux classes, des élèves actifs, des invitations en attente, refusées et expirées, des tentatives `ko` et un élève inactif depuis plus de 7 jours (D2) |

@@ -91,15 +91,15 @@ def test_resending_invalidates_the_previous_link(school_bj):
     invitation = TeacherInvitation.objects.create(email="nadia@ecole.bj", school=school_bj)
     first = send_invitation(invitation)
     second = send_invitation(invitation)
-    assert APIClient().get(f"{URL}{first}/").json()["code"] == "INVITATION_INVALID"
-    assert APIClient().get(f"{URL}{second}/").status_code == 200
+    assert lookup(first).json()["code"] == "INVITATION_INVALID"
+    assert lookup(second).status_code == 200
 
 
 def test_invitation_without_school_or_first_name(country):
     invitation = TeacherInvitation.objects.create(email="x@ecole.bj")
     token = send_invitation(invitation)
     assert mail.outbox[0].body.startswith("Bonjour,\n\nL'équipe Steamy vous invite")
-    assert APIClient().get(f"{URL}{token}/").json()["schoolName"] is None
+    assert lookup(token).json()["schoolName"] is None
 
 
 # --- Lien d'activation ------------------------------------------------------------------------------
@@ -193,24 +193,11 @@ def test_accept_requires_csrf(settings, school_bj):
     assert accept(token, client=client).status_code == 403
 
 
-# --- Transition : anciennes routes (jeton dans le chemin), dépréciées ----------------------------------------------
-
-
-def test_the_former_routes_still_work_during_the_deployment(school_bj):
-    invitation = TeacherInvitation.objects.create(email="nadia@ecole.bj", school=school_bj)
-    token = send_invitation(invitation)
-    assert APIClient().get(f"{URL}{token}/").json()["schoolName"] == "Lycée de Porto-Novo"
-    resp = APIClient().post(f"{URL}{token}/accept/", {"password": PASSWORD}, format="json")
-    assert resp.status_code == 200 and resp.json()["user"]["role"] == "teacher"
-    assert APIClient().get(f"{URL}{token}/").json()["code"] == "INVITATION_INVALID"
-
-
-def test_tokens_in_former_paths_are_masked_in_access_logs():
-    from libs.access_log import mask_secrets
-
-    line = '"GET /api/auth/teacher-invitations/s3cr3t-T0k/ HTTP/1.1" "POST /api/auth/teacher-invitations/abc/accept/"'
-    assert mask_secrets(line) == (
-        '"GET /api/auth/teacher-invitations/•••/ HTTP/1.1" "POST /api/auth/teacher-invitations/•••/accept/"'
+@pytest.mark.parametrize("path", ["{token}/", "{token}/accept/"])
+def test_the_token_is_never_accepted_in_the_path(school_bj, path):
+    token = send_invitation(
+        TeacherInvitation.objects.create(email="nadia@ecole.bj", school=school_bj)
     )
-    for path in ("/api/auth/teacher-invitations/lookup/", "/api/auth/teacher-invitations/accept/"):
-        assert mask_secrets(path) == path
+    url = f"{URL}{path.format(token=token)}"
+    assert APIClient().get(url).status_code == 404
+    assert APIClient().post(url, {"password": PASSWORD}, format="json").status_code == 404
