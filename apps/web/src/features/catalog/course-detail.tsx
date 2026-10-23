@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { Accordion, Badge, Icon, SkeletonBlock, VimeoPlayer } from "@/components/ds";
 import { offerOf, plural } from "@/components/public/course-detail";
-import { DIFFICULTY_LABELS, formatMinutes, formatPrice, KIT_CODE_LABEL } from "@/lib/format";
+import { DIFFICULTY_LABELS, formatMinutes, formatPriceHt, KIT_CODE_LABEL } from "@/lib/format";
 
 // Fiche parcours de l'apprenant (WC04, WC05) : en-tête, sections, programme. Le h1 est le titre du shell
 // (« Catalogue ») : le titre du parcours est un h2, les sections des h3.
@@ -47,7 +47,7 @@ export function CourseHero({ course }: { course: Course }) {
           ) : offer === "free" ? (
             <Badge tone="success">Gratuit</Badge>
           ) : (
-            <Badge tone="amber">{formatPrice(course.price ?? 0)}</Badge>
+            <Badge tone="amber">{formatPriceHt(course.price ?? 0)}</Badge>
           )}
         </div>
       </div>

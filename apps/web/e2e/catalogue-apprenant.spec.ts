@@ -113,7 +113,7 @@ test("WC05 : parcours à kit sans prix de parcours → WA01 ; parcours payant d�
   await expect(card.getByText("Débloqué avec le Kit Code")).toBeVisible();
   await expect(card.getByText("Kit requis")).toBeVisible();
   await expect(card.getByText("Steamy Bot v1", { exact: true })).toBeVisible();
-  await expect(card.getByText(/35\s000 F CFA · En stock/)).toBeVisible();
+  await expect(card.getByText(/35\s000 F CFA HT · En stock/)).toBeVisible();
   await expect(page.getByText(/25\s000/)).toHaveCount(0);
   await expect(card.getByRole("link", { name: "J'ai un Kit Code" })).toHaveAttribute(
     "href",

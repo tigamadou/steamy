@@ -13,9 +13,9 @@ export function requestTitle(request: Pick<PaymentRequest, "course" | "items">):
   return request.items.map((item) => quantityLabel(item.title, item.quantity)).join(", ");
 }
 
-/** Montant demandé, calculé par le serveur (hors livraison pour un kit, C10). */
-export function requestAmount(request: Pick<PaymentRequest, "amount">): string {
-  return formatPrice(request.amount);
+/** Montant demandé, taxes comprises, calculé par le serveur (hors livraison pour un kit, C10, C25). */
+export function requestAmount(request: Pick<PaymentRequest, "total">): string {
+  return formatPrice(request.total);
 }
 
 /** Statut d'une demande, au tutoiement (WA02, WD14). */

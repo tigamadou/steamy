@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { Badge, Breadcrumb, ShippingTimeline, SkeletonBlock, WKSummaryRow } from "@/components/ds";
+import { Badge, Breadcrumb, ShippingTimeline, SkeletonBlock, TaxRows, WKSummaryRow } from "@/components/ds";
 import { closedOrderNote } from "@/features/checkout/order-status";
 import { shippingSteps } from "@/features/checkout/shipping";
 import { getServerApi } from "@/lib/api";
@@ -84,7 +84,8 @@ export async function OrderDetail({ params }: { params: Promise<{ reference: str
                   value={formatPrice(order.shippingFee)}
                 />
               )}
-              <WKSummaryRow label="Total" value={formatPrice(order.total)} />
+              <TaxRows taxes={order.taxes} />
+              <WKSummaryRow label="Total à payer" value={formatPrice(order.total)} />
             </dl>
             {address && (
               <p className="m-0 text-[13px] font-semibold text-ink-700">

@@ -26,6 +26,8 @@ const cart = (items: Array<{ id: number; kit: typeof KIT; quantity: number }>) =
   items: items.map((item) => ({ ...item, total: item.kit.price * item.quantity })),
   count: items.reduce((n, item) => n + item.quantity, 0),
   subtotal: items.reduce((n, item) => n + item.kit.price * item.quantity, 0),
+  taxes: [],
+  total: items.reduce((n, item) => n + item.kit.price * item.quantity, 0),
 });
 const failure = (code: string) => ({ ok: false, code, message: "", fields: {} });
 
@@ -35,6 +37,31 @@ beforeEach(() => {
   api.mergeGuestCart.mockResolvedValue(0);
 });
 afterEach(() => window.localStorage.clear());
+
+describe("WK03 · taxes du panier (C25)", () => {
+  it("panier serveur : taxes et total de l'API ; panier invité : taxes ajoutées au paiement", async () => {
+    api.getCart.mockResolvedValue({
+      ok: true,
+      data: {
+        ...cart([{ id: 1, kit: KIT, quantity: 2 }]),
+        taxes: [{ code: "vat", rate: "18", base: 70000, amount: 12600 }],
+        total: 82600,
+      },
+    });
+    const { unmount } = render(<CartView context="learner" />);
+    const recap = await screen.findByRole("region", { name: "Récapitulatif" });
+    expect(within(recap).getByText("TVA (18 %)").nextSibling).toHaveTextContent(/^12\s600\sF\sCFA$/);
+    expect(within(recap).getByText("Total hors livraison").nextSibling).toHaveTextContent(/^82\s600\sF\sCFA$/);
+    expect(within(recap).queryByText(/taxes éventuelles/)).not.toBeInTheDocument();
+    unmount();
+
+    api.probeShopper.mockResolvedValue("guest");
+    api.getKitDetail.mockResolvedValue({ ok: true, data: KIT });
+    writeGuestCart([{ kitSlug: KIT.slug, quantity: 1 }]);
+    render(<CartView context="public" />);
+    expect(await screen.findByText(/Les taxes éventuelles sont ajoutées au moment du paiement/)).toBeInTheDocument();
+  });
+});
 
 describe("WK03 · panier de l'apprenant (serveur)", () => {
   it("lignes, sous-total de l'API, livraison à l'étape suivante, sans CTA avant 3.7c", async () => {
@@ -46,7 +73,7 @@ describe("WK03 · panier de l'apprenant (serveur)", () => {
       "/apprenant/boutique/steamy-bot-v1",
     );
     const recap = screen.getByRole("region", { name: "Récapitulatif" });
-    expect(within(recap).getByText("Sous-total (3 articles)")).toBeInTheDocument();
+    expect(within(recap).getByText("Sous-total HT (3 articles)")).toBeInTheDocument();
     expect(within(recap).getAllByText(/92\s000 F CFA/)).toHaveLength(2);
     expect(within(recap).getByText("Calculée à l'étape suivante")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Demander à mon parent/ })).not.toBeInTheDocument();
@@ -90,7 +117,7 @@ describe("WK03 · panier de l'apprenant (serveur)", () => {
     render(<CartView context="learner" />);
     await userEvent.click(await screen.findByRole("button", { name: "Ajouter un exemplaire de Steamy Bot v1" }));
     expect(api.updateCartItem).toHaveBeenCalledWith(1, 3);
-    expect(await screen.findByText("Sous-total (4 articles)")).toBeInTheDocument();
+    expect(await screen.findByText("Sous-total HT (4 articles)")).toBeInTheDocument();
 
     api.updateCartItem.mockResolvedValueOnce(failure("VALIDATION_ERROR"));
     await userEvent.click(screen.getByRole("button", { name: "Ajouter un exemplaire de Steamy Bot v1" }));
@@ -139,7 +166,7 @@ describe("WK03 · panier de l'invité (localStorage)", () => {
     api.getKitDetail.mockImplementation(async (slug: string) => ({ ok: true, data: slug === "pack" ? PACK : KIT }));
     render(<CartView context="public" />);
     // Sous-total additionné à partir des prix relus : estimé, le total fait foi à WK06
-    expect(await screen.findByText("Sous-total estimé (3 articles)")).toBeInTheDocument();
+    expect(await screen.findByText("Sous-total HT estimé (3 articles)")).toBeInTheDocument();
     expect(screen.getByText("Total estimé hors livraison")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Commander" })).toHaveAttribute("href", "/boutique/commande/coordonnees");
     expect(screen.getByRole("link", { name: "Steamy Bot v1" })).toHaveAttribute("href", "/boutique/steamy-bot-v1");
@@ -149,7 +176,7 @@ describe("WK03 · panier de l'invité (localStorage)", () => {
       { kitSlug: "steamy-bot-v1", quantity: 1 },
       { kitSlug: "pack", quantity: 1 },
     ]);
-    expect(screen.getByText("Sous-total estimé (2 articles)")).toBeInTheDocument();
+    expect(screen.getByText("Sous-total HT estimé (2 articles)")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Retirer Pack Électronique" }));
     expect(readGuestCart()).toEqual([{ kitSlug: "steamy-bot-v1", quantity: 1 }]);
     expect(api.updateCartItem).not.toHaveBeenCalled();
@@ -200,7 +227,7 @@ describe("WK03 · panier de l'invité (localStorage)", () => {
     api.probeShopper.mockResolvedValue("guest");
     api.getKitDetail.mockResolvedValue({ ok: true, data: KIT });
     const { container } = render(<CartView context="public" />);
-    await screen.findByText("Sous-total estimé (1 article)");
+    await screen.findByText("Sous-total HT estimé (1 article)");
     expect(await axe(container)).toHaveNoViolations();
   });
 });
@@ -229,7 +256,7 @@ describe("panier public vu par un compte connecté", () => {
     api.getCart.mockResolvedValue({ ok: true, data: cart([{ id: 1, kit: KIT, quantity: 1 }]) });
     const { container } = render(<CartView context="parent" />);
     expect(await screen.findByRole("link", { name: "Commander" })).toHaveAttribute("href", "/parent/boutique/commande");
-    expect(screen.getByText("Sous-total (1 article)")).toBeInTheDocument();
+    expect(screen.getByText("Sous-total HT (1 article)")).toBeInTheDocument();
     expect(api.probeShopper).not.toHaveBeenCalled();
     expect(router.replace).not.toHaveBeenCalled();
     expect(await axe(container)).toHaveNoViolations();

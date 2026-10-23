@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { Badge, Breadcrumb, Button, SkeletonBlock, type BreadcrumbItem } from "@/components/ds";
 import { datePill, formatFullDate, formatTimeRange } from "@/lib/dates";
-import { formatPrice } from "@/lib/format";
+import { formatPriceHt } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
 // Steamy Events (S8) : ligne de calendrier (WL21) et fiche réutilisable (WL23, puis WD10 et WPD06).
@@ -37,7 +37,7 @@ export function PriceBadge({ event }: { event: Pick<SteamyEvent, "isFree" | "pri
   return event.isFree ? (
     <Badge tone="success">Gratuit</Badge>
   ) : (
-    <Badge tone="primary">{formatPrice(event.price ?? 0)}</Badge>
+    <Badge tone="primary">{formatPriceHt(event.price ?? 0)}</Badge>
   );
 }
 
@@ -133,7 +133,7 @@ export function EventAvailability({ event }: { event: SteamyEvent }) {
     <>
       <div className="flex items-baseline justify-between">
         <p className="text-[26px] font-black text-ink-900">
-          {event.isFree ? "Gratuit" : formatPrice(event.price ?? 0)}
+          {event.isFree ? "Gratuit" : formatPriceHt(event.price ?? 0)}
         </p>
         {!event.isFree && <Badge tone="primary">Payant</Badge>}
       </div>

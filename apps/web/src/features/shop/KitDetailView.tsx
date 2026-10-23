@@ -6,7 +6,7 @@ import { Badge, Breadcrumb, Button, Icon, SkeletonBlock, WKGallery } from "@/com
 import { stringList } from "@/components/public/course-detail";
 import { listHref } from "@/lib/catalog-filters";
 import { cx } from "@/lib/cx";
-import { DIFFICULTY_LABELS, formatPrice } from "@/lib/format";
+import { DIFFICULTY_LABELS, formatPriceHt } from "@/lib/format";
 import { getDeliveryZones, getKit } from "@/lib/shop";
 
 import { AddToCartButton } from "./AddToCartButton";
@@ -99,7 +99,7 @@ export async function KitDetailView({ params, context }: { params: Promise<{ slu
           className="flex flex-col gap-4 rounded-[22px] border-2 border-ink-100 bg-surface p-5 lg:sticky lg:top-4"
         >
           <p className={cx("text-[30px] font-black", kit.available ? "text-primary-700" : "text-ink-500")}>
-            {formatPrice(kit.price)}
+            {formatPriceHt(kit.price)}
           </p>
           <div>
             <Badge tone={kit.available ? "success" : "error"}>{kit.available ? "En stock" : "Indisponible"}</Badge>

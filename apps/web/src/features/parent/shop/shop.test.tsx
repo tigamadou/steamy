@@ -41,7 +41,7 @@ const failure = (status: number, code: string) => ({ error: { code, message: "" 
 const KIT = { slug: "steamy-bot", name: "Steamy Bot v1", available: true } as Schemas["Kit"];
 const reload = vi.fn();
 function cart(lines = [{ kit: KIT, quantity: 2, total: 70000, id: 1 }]) {
-  return { state: { status: "ready", shopper: "parent", lines, count: 2, subtotal: 70000, dropped: 0 }, reload };
+  return { state: { status: "ready", shopper: "parent", lines, count: 2, subtotal: 70000, taxes: [], total: 70000, dropped: 0 }, reload };
 }
 const PREFERRED = { country: "BJ", network: "mtn", phone: "+2290190000001" };
 const BASE = {
@@ -76,7 +76,7 @@ describe("ParentKitCheckout (achat direct de kit, C10)", () => {
     const { container } = render(<ParentKitCheckout {...BASE} />);
     expect(useCart).toHaveBeenCalledWith("parent", "vous");
     expect(screen.getByText("Steamy Bot v1 × 2")).toBeInTheDocument();
-    expect(screen.getByText("Sous-total hors livraison").nextSibling).toHaveTextContent(/70\s000/);
+    expect(screen.getByText("Sous-total HT hors livraison").nextSibling).toHaveTextContent(/70\s000/);
     expect(await axe(container)).toHaveNoViolations();
     await user.selectOptions(screen.getByRole("combobox", { name: /Pour quel enfant/ }), "8");
     await waitFor(() => expect(screen.getByRole("combobox", { name: /^Ville ou zone/ })).toHaveValue("2"));

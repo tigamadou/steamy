@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { Badge, Button, KitMiniCard, ProgressBar } from "@/components/ds";
 import { offerOf, plural, stringList } from "@/components/public/course-detail";
-import { formatPrice } from "@/lib/format";
+import { formatPriceHt } from "@/lib/format";
 import { routes } from "@/lib/routes";
 import { createPaymentRequest } from "@/features/unlock/api";
 
@@ -103,7 +103,7 @@ export function EnrollCard({ course, progress, wished, kit, pendingRequestId }: 
           {offer === "paid" && (
             <>
               <div>
-                <p className="text-[30px] leading-none font-black text-ink-900">{formatPrice(course.price ?? 0)}</p>
+                <p className="text-[30px] leading-none font-black text-ink-900">{formatPriceHt(course.price ?? 0)}</p>
                 <p className="mt-1.5 text-xs font-bold text-ink-600">Payé par ton parent · accès à vie</p>
               </div>
               {pendingRequestId ? (
@@ -173,7 +173,7 @@ export function EnrollCard({ course, progress, wished, kit, pendingRequestId }: 
           <p className="text-[11px] font-black tracking-[0.06em] text-ink-600 uppercase">Kit requis</p>
           <KitMiniCard
             name={kit.name}
-            priceLabel={formatPrice(kit.price)}
+            priceLabel={formatPriceHt(kit.price)}
             available={kit.available}
             emoji={kit.emoji || kit.category.icon}
             href={routes.learner.shopKit(kit.slug)}

@@ -2,12 +2,25 @@ import { describe, expect, it } from "vitest";
 
 import { course } from "@/test/api-fixtures";
 
-import { DIFFICULTY_LABELS, formatMinutes, formatPrice, quantityLabel, toCourseCard } from "./format";
+import {
+  DIFFICULTY_LABELS,
+  formatMinutes,
+  formatPrice,
+  formatPriceHt,
+  quantityLabel,
+  TAX_LABELS,
+  toCourseCard,
+} from "./format";
 
 describe("format", () => {
   it("écrit les prix en francs CFA avec des espaces de milliers", () => {
     expect(formatPrice(25000).replace(/\s/g, " ")).toBe("25 000 F CFA");
     expect(formatPrice(0)).toBe("0 F CFA");
+  });
+
+  it("les prix du catalogue sont hors taxes (C25) ; les taxes de l'API ont leur libellé", () => {
+    expect(formatPriceHt(25000).replace(/\s/g, " ")).toBe("25 000 F CFA HT");
+    expect(TAX_LABELS).toEqual({ vat: "TVA", aib: "AIB" });
   });
 
   it("nomme la difficulté, jamais le niveau (S2)", () => {
@@ -24,7 +37,7 @@ describe("format", () => {
     });
     const paid = toCourseCard(course({ isFree: undefined, price: undefined, emoji: "" }));
     expect(paid.isFree).toBe(false);
-    expect(paid.priceLabel).toBe("0 F CFA");
+    expect(paid.priceLabel).toBe("0 F CFA HT");
     expect(paid.emoji).toBe("🤖");
   });
 

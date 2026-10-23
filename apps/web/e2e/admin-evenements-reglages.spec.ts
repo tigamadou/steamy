@@ -32,6 +32,13 @@ test("6.5 Super-admin suit les événements et candidatures, puis ouvre les rég
   await expect(page).toHaveURL(/\/admin\/core\/platformsettings\/\d+\/change\/$/);
   await expect(page.getByLabel(/Seuil de décrochage|décrochage/i)).toBeVisible();
   await expect(page.locator(".field-sms_provider")).toBeVisible();
+  // C25 : TVA et AIB (activation, taux, application à la livraison), éteintes par défaut
+  await expect(page.getByRole("heading", { name: "Factures : TVA et AIB (C25)" })).toBeVisible();
+  for (const field of ["vat_enabled", "vat_rate", "vat_applies_to_shipping", "aib_enabled", "aib_rate", "aib_applies_to_shipping"]) {
+    await expect(page.locator(`.field-${field}`)).toBeVisible();
+  }
+  await expect(page.locator("#id_vat_enabled")).not.toBeChecked();
+  await expect(page.locator("#id_aib_enabled")).not.toBeChecked();
 
   // Réseaux Mobile Money par pays (Celtiis compris, D76)
   await page.goto(`${API_URL}/admin/referentials/paymentnetwork/`);

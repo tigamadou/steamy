@@ -16,7 +16,7 @@ vi.mock("@/lib/api-browser", () => ({ getBrowserApi: async () => client }));
 const api = await import("./api");
 const { clearDroppedLines, peekDroppedLines, readGuestCart, writeGuestCart } = await import("./guest-cart");
 
-const CART = { items: [{ id: 7, kit: KIT, quantity: 2, total: 70000 }], count: 2, subtotal: 70000 };
+const CART = { items: [{ id: 7, kit: KIT, quantity: 2, total: 70000 }], count: 2, subtotal: 70000, taxes: [], total: 70000 };
 const failure = (code: string, status: number) => ({ status, error: { code, message: `${code} !` } });
 
 beforeEach(() => {

@@ -8,6 +8,7 @@ import {
   Field,
   Select,
   SkeletonBlock,
+  TaxRows,
   WKSummaryRow,
   type PaymentFormProps,
   type PhoneCountry,
@@ -126,7 +127,9 @@ export function ParentKitCheckout(props: ParentKitCheckoutProps) {
                 value={formatPrice(line.total)}
               />
             ))}
-            <WKSummaryRow label="Sous-total hors livraison" value={formatPrice(state.subtotal)} />
+            <WKSummaryRow label="Sous-total HT hors livraison" value={formatPrice(state.subtotal)} />
+            <TaxRows taxes={state.taxes} />
+            <WKSummaryRow label="Total hors livraison" value={formatPrice(state.total)} strong />
           </dl>
           {kids.length > 0 && (
             <Field
@@ -198,6 +201,7 @@ export function ParentKitCheckout(props: ParentKitCheckoutProps) {
             label={order.deliveryZone ? `Livraison (${order.deliveryZone.name})` : "Livraison"}
             value={formatPrice(order.shippingFee)}
           />
+          <TaxRows taxes={order.taxes} />
         </dl>
         <p className="m-0 mt-3 text-[13px] font-bold text-ink-700">
           Vos kits sont réservés jusqu&apos;au <time dateTime={order.expiresAt}>{formatInstantTime(order.expiresAt)}</time>{" "}

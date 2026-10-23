@@ -55,6 +55,7 @@ const ORDER = {
   status: "pending",
   subtotal: 70000,
   shippingFee: 1500,
+  taxes: [],
   total: 71500,
   items: [{ id: 1, title: "Bot", quantity: 2, total: 70000 }],
   deliveryZone: { id: 2, name: "Porto-Novo", delayLabel: "2 à 3 jours" },
@@ -200,6 +201,17 @@ describe("WK06 / WK09 · paiement", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Réessayez dans quelques instants");
     await userEvent.click(screen.getByRole("button", { name: "Réessayer" }));
     expect(await screen.findByRole("button", { name: /^Payer/ })).toBeInTheDocument();
+  });
+
+  it("taxes de l'API (C25) : articles HT, livraison, une ligne par taxe", async () => {
+    getOrder.mockResolvedValue({
+      ok: true,
+      data: { ...ORDER, taxes: [{ code: "vat", rate: "18", base: 71500, amount: 12870 }], total: 84370 },
+    });
+    render(<PaymentStep />);
+    expect((await screen.findByText("Articles HT")).nextSibling).toHaveTextContent(/^70\s000\sF\sCFA$/);
+    expect(screen.getByText("TVA (18 %)").nextSibling).toHaveTextContent(/^12\s870\sF\sCFA$/);
+    expect(screen.getByText(/84\s370 F CFA/, { selector: "p" })).toBeInTheDocument();
   });
 
   it("pays en chargement puis en erreur ; un seul article", async () => {

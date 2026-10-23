@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { Button, Mascot, SkeletonBlock, WKCartRow, WKSummaryRow } from "@/components/ds";
-import { formatPrice } from "@/lib/format";
+import { Button, Mascot, SkeletonBlock, TaxRows, WKCartRow, WKSummaryRow } from "@/components/ds";
+import { formatPrice, formatPriceHt } from "@/lib/format";
 import { routes } from "@/lib/routes";
 import { useUndoableAction } from "@/lib/use-undoable-action";
 
@@ -131,8 +131,8 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
                 href={kitHref(line.kit.slug)}
                 emoji={line.kit.emoji || line.kit.category.icon}
                 color={line.kit.category.color}
-                priceLabel={formatPrice(line.kit.price)}
-                totalLabel={formatPrice(line.total)}
+                priceLabel={formatPriceHt(line.kit.price)}
+                totalLabel={formatPriceHt(line.total)}
                 quantity={line.quantity}
                 unavailable={!line.kit.available}
                 busy={pending === line.kit.slug}
@@ -156,17 +156,21 @@ export function CartView({ context, zones, onRequestParent }: CartViewProps) {
         </h2>
         <dl className="flex flex-col gap-2.5">
           <WKSummaryRow
-            label={`${estimated ? "Sous-total estimé" : "Sous-total"} (${articles(state.count)})`}
+            label={`${estimated ? "Sous-total HT estimé" : "Sous-total HT"} (${articles(state.count)})`}
             value={formatPrice(state.subtotal)}
           />
+          <TaxRows taxes={state.taxes} />
           <WKSummaryRow label="Livraison" value="Calculée à l'étape suivante" />
           <div aria-hidden className="h-px bg-ink-100" />
           <WKSummaryRow
             label={estimated ? "Total estimé hors livraison" : "Total hors livraison"}
-            value={formatPrice(state.subtotal)}
+            value={formatPrice(state.total)}
             strong
           />
         </dl>
+        {estimated && (
+          <p className="text-[13px] font-bold text-ink-600">Les taxes éventuelles sont ajoutées au moment du paiement.</p>
+        )}
         {unavailable && (
           <p role="alert" className="text-sm font-bold text-error-700">
             {tu

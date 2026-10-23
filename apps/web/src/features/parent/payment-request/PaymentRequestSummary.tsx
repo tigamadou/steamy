@@ -4,12 +4,12 @@ import type { ReactNode } from "react";
 import { Avatar, Badge } from "@/components/ds";
 import type { PaymentRequest } from "@/features/unlock/types";
 import { formatInstant } from "@/lib/dates";
-import { formatPrice, quantityLabel } from "@/lib/format";
+import { formatPrice, formatPriceHt, quantityLabel, TAX_LABELS } from "@/lib/format";
 
 import { STATE_BADGES, type ScreenState } from "./messages";
 
 type Child = Pick<Schemas["ChildDetail"], "firstName" | "lastName" | "age" | "schoolGrade" | "avatar">;
-type Order = Pick<Schemas["Order"], "items" | "shippingFee" | "total" | "deliveryZone">;
+type Order = Pick<Schemas["Order"], "items" | "shippingFee" | "taxes" | "total" | "deliveryZone">;
 
 export type PaymentRequestSummaryProps = {
   request: PaymentRequest;
@@ -125,21 +125,35 @@ export function PaymentRequestSummary({ request, child, state, requiredKit, orde
                 value={formatPrice(order.shippingFee)}
               />
             )}
+            {order.taxes.map((tax) => (
+              <Line key={tax.code} label={`${TAX_LABELS[tax.code]} (${tax.rate} %)`} value={formatPrice(tax.amount)} />
+            ))}
           </>
-        ) : request.kind === "kit" ? (
-          request.items.map((item) => (
-            <Line
-              key={item.kitSlug}
-              label={quantityLabel(item.title, item.quantity)}
-              value={item.quantity > 1 ? `${formatPrice(item.unitPrice)} l'unité` : formatPrice(item.unitPrice)}
-            />
-          ))
-        ) : null}
+        ) : (
+          <>
+            {request.kind === "kit" &&
+              request.items.map((item) => (
+                <Line
+                  key={item.kitSlug}
+                  label={quantityLabel(item.title, item.quantity)}
+                  value={
+                    item.quantity > 1
+                      ? `${formatPriceHt(item.unitPrice)} l'unité`
+                      : formatPriceHt(item.unitPrice)
+                  }
+                />
+              ))}
+            {request.taxes.length > 0 && <Line label="Sous-total HT" value={formatPrice(request.amount)} />}
+            {request.taxes.map((tax) => (
+              <Line key={tax.code} label={`${TAX_LABELS[tax.code]} (${tax.rate} %)`} value={formatPrice(tax.amount)} />
+            ))}
+          </>
+        )}
         <div className="mt-1 flex items-baseline justify-between gap-4">
           <dt className="text-[15px] font-black text-ink-900">
             {amountLabel(request.kind, state, !!order)}
           </dt>
-          <dd className="m-0 text-[22px] font-black text-primary-700">{formatPrice(order?.total ?? request.amount)}</dd>
+          <dd className="m-0 text-[22px] font-black text-primary-700">{formatPrice(order?.total ?? request.total)}</dd>
         </div>
       </dl>
 
