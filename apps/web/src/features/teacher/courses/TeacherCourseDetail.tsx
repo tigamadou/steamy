@@ -8,7 +8,7 @@ import { CourseInsights } from "./CourseInsights";
 import { MissionCompletionItem } from "./MissionCompletionItem";
 import { supervisionLabel } from "./SupervisedCourseCard";
 
-/** WT10 · contenu (numéros dans l'ordre de l'API) : en-tête, arbre Projet → Niveau → Mission en lecture seule, panneau de suivi. */
+/** WT10 · contenu (numéros d'après l'ordre de l'API, comme la mission) : en-tête, arbre Projet → Niveau → Mission en lecture seule, panneau de suivi. */
 export function TeacherCourseDetailView({ course }: { course: SupervisedCourseDetail }) {
   const { slug } = course;
   return (
@@ -41,12 +41,12 @@ export function TeacherCourseDetailView({ course }: { course: SupervisedCourseDe
           {course.projects.map((project, projectIndex) => (
             <section key={project.id} aria-labelledby={`projet-${project.id}`} className="flex flex-col gap-3">
               <h3 id={`projet-${project.id}`} className="m-0 text-base font-black text-ink-900">
-                Projet {projectIndex + 1} · {project.title}
+                Projet {(project.order ?? projectIndex) + 1} · {project.title}
               </h3>
               {project.levels.map((level, levelIndex) => (
                 <section key={level.id} aria-labelledby={`niveau-${level.id}`} className="flex flex-col gap-2">
                   <h4 id={`niveau-${level.id}`} className="m-0 text-sm font-extrabold text-ink-800">
-                    Niveau {levelIndex + 1} · {level.title}
+                    Niveau {(level.order ?? levelIndex) + 1} · {level.title}
                     {level.durationMin !== undefined && (
                       <span className="font-semibold text-ink-600"> · {formatMinutes(level.durationMin)}</span>
                     )}
@@ -55,7 +55,7 @@ export function TeacherCourseDetailView({ course }: { course: SupervisedCourseDe
                     {level.missions.map((mission, missionIndex) => (
                       <li key={mission.id}>
                         <MissionCompletionItem
-                          step={`Mission ${missionIndex + 1}`}
+                          step={`Mission ${(mission.order ?? missionIndex) + 1}`}
                           title={mission.title}
                           durationMin={mission.durationMin ?? 0}
                           icon={mission.icon}

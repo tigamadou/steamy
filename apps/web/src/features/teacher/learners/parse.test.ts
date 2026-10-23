@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { TEMPLATE_CSV, decodeCsv, detectSeparator, parseDelimited } from "./parse";
+import { TEMPLATE_CSV, decodeCsv, detectSeparator, parseDelimited, splitLine } from "./parse";
 
 describe("detectSeparator", () => {
   it.each([
@@ -51,6 +51,18 @@ describe("parseDelimited", () => {
 
   it("texte vide : rien", () => {
     expect(parseDelimited("  \n ")).toEqual({ rows: [], malformed: [] });
+  });
+});
+
+describe("splitLine", () => {
+  it("garde un séparateur entre guillemets et les guillemets doublés", () => {
+    expect(splitLine('"Dupont, Jean",Kpadé,0197000001,mère', ",")).toEqual(["Dupont, Jean", "Kpadé", "0197000001", "mère"]);
+    expect(splitLine('"Jean ""JJ"""; Kpadé', ";")).toEqual(['Jean "JJ"', "Kpadé"]);
+    expect(splitLine("a;b;", ";")).toEqual(["a", "b", ""]);
+  });
+
+  it("une liste dont un nom contient le séparateur reste à quatre colonnes", () => {
+    expect(parseDelimited('"Dupont, Jean",Kpadé,0197000001,mère').rows).toHaveLength(1);
   });
 });
 
