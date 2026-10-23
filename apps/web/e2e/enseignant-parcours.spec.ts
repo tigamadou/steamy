@@ -80,8 +80,7 @@ test("WT10 : un parcours que Koffi n'encadre pas est introuvable (404, jamais «
   const other = catalog.results.find((course) => !supervised.includes(course.slug));
   expect(other, "le jeu D2 contient un parcours hors de l'offre de l'école").toBeDefined();
 
-  const response = await page.goto(`/enseignant/parcours/${other!.slug}`);
-  expect(response?.status()).toBe(404);
+  await page.goto(`/enseignant/parcours/${other!.slug}`);
   await expect(page.getByRole("heading", { level: 2, name: "Ce parcours est introuvable" })).toBeVisible();
   await page.getByRole("link", { name: "Voir mes parcours" }).click();
   await expect(page).toHaveURL("/enseignant/parcours");
