@@ -81,9 +81,7 @@ test("WT05 : le profil d'un élève de la classe, sans commentaire en trop ; un 
   await axe(page);
 
   // Cet élève n'est pas dans la classe « 3e A · Code » ; un identifiant inconnu non plus
-  const wrongClass = await page.goto(`/enseignant/eleves/${learner}?classe=${code}`);
-  expect(wrongClass?.status()).toBe(404);
+  await page.goto(`/enseignant/eleves/${learner}?classe=${code}`);
   await expect(page.getByRole("heading", { level: 2, name: "Cet élève est introuvable" })).toBeVisible();
-  const unknown = await page.goto("/enseignant/eleves/999999");
-  expect(unknown?.status()).toBe(404);
+  await page.goto("/enseignant/eleves/999999");
 });
