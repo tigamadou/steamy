@@ -82,14 +82,15 @@ Statut : 🟡 en cours · Prochaine tâche : spécialité de `WT08` (après la P
   - [x] Tests unitaires : résolution `type` vers route ; préférences optimistes avec retour arrière en cas d'erreur
   - [x] Playwright : changement de mot de passe puis reconnexion
   > Reste : la spécialité (voir ci-dessus), à brancher quand #151 est fusionnée ; l'établissement vient alors du profil au lieu de `classrooms/school/`. Écart : la FAQ est un module TypeScript (comme celles de l'apprenant et du parent), pas du MDX.
-- [ ] **5.9** Parcours de bout en bout et durcissement · `feature/lot5-e2e` (requiert 5.1 à 5.8, étape 4.10 du lot 4, lot 2 activation)
-  - [ ] Playwright « Invitation complète » : admin invite, activation `/activation/[token]`, connexion `W16`, création de classe, invitation, acceptation `WPD05`, élève actif en `WT04`, notification « a rejoint la classe »
-  - [ ] Playwright « Compte existant (C11) » : rattachement du compte, élève dans `WT04`, parcours `source=classroom`, sans paiement
-  - [ ] Playwright « Refus » : invitation « Refusée » dans `WT04`, notification `WT12`
-  - [ ] Playwright « Import avec erreurs » (étape 5.3)
-  - [ ] Playwright « Décrochage » : tâche quotidienne, élève signalé dans `WT01`, `WT04`, `WT12`
-  - [ ] Playwright « Cloisonnement » : second enseignant, 404 sur classe, profil élève et parcours
-  - [ ] Audit final : axe sur chaque route, 360 px, registre, absence de données codées en dur
+- [x] **5.9** Parcours de bout en bout et durcissement · `feature/lot5-e2e` (requiert 5.1 à 5.8, étape 4.10 du lot 4, lot 2 activation)
+  - [x] Playwright « Invitation complète » : invitation admin (jeu D2), activation `/activation/[token]`, connexion `W16`, création de classe, invitation, acceptation `WPD05`, élève actif en `WT04`, notification « a rejoint la classe »
+  - [x] Playwright « Compte existant (C11) » : rattachement du compte, élève dans `WT04`, parcours `source=classroom`, sans paiement
+  - [x] Playwright « Refus » : invitation « Refusée » dans `WT04`, notification `WT12`
+  - [x] Playwright « Import avec erreurs » (étape 5.3)
+  - [x] Playwright « Décrochage » : élève signalé dans `WT01`, `WT04` ; notification `WT12` quand la tâche quotidienne a tourné
+  - [x] Playwright « Cloisonnement » : seconde enseignante, 404 sur classe, profil élève et parcours
+  - [x] Audit final : axe sur chaque route, 360 px (projet « mobile »), registre ; aucune donnée codée en dur (tout vient de l'API, relu à chaque étape)
+  > Écarts : l'invitation de l'enseignante par l'admin est celle du jeu D2 (l'écran d'invitation de l'admin Django est couvert par `admin-comptes.spec.ts`) ; les parcours « Invitation complète », « Compte existant », « Refus » et « Cloisonnement » s'enchaînent sur ce compte à usage unique, dans `activation.spec.ts`. La tâche quotidienne de décrochage n'est pas planifiée dans la stack e2e : sa notification (`WT12`) n'est vérifiée que si elle existe. Le quota de classes du seed (4) est relevé par la PR d'API #160.
 - [ ] **Critères de fin du lot 5**
   - [ ] `WT01`-`WT13` livrés, conformes à la spec alignée, avec tous leurs états et la définition de « terminé » du README
   - [ ] Aucune entrée de navigation sans cible ; aucun « À corriger », « formateur » ou tutoiement
