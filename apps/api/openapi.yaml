@@ -1622,6 +1622,83 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/accounts/me/teacher-profile/:
+    get:
+      operationId: accounts_me_teacher_profile_retrieve
+      description: 'WT08 : spécialité et établissement (lecture seule) de l''enseignant
+        connecté.'
+      tags:
+      - accounts
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherProfile'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    patch:
+      operationId: accounts_me_teacher_profile_partial_update
+      description: 'WT08 : modifie la spécialité.'
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTeacherProfileUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherProfile'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/accounts/pending-actions/:
     get:
       operationId: accounts_pending_actions_list
@@ -12414,6 +12491,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CategoryPreferenceRequest'
+    PatchedTeacherProfileUpdateRequest:
+      type: object
+      description: Seule la spécialité se modifie ; le reste du corps est ignoré.
+      properties:
+        specialty:
+          type: string
+          title: Spécialité
+          maxLength: 120
     PatchedValuesInputRequest:
       type: object
       properties:
@@ -14206,6 +14291,38 @@ components:
       required:
       - password
       - token
+    TeacherProfile:
+      type: object
+      properties:
+        specialty:
+          type: string
+          readOnly: true
+          title: Spécialité
+        school:
+          allOf:
+          - $ref: '#/components/schemas/TeacherSchool'
+          readOnly: true
+          nullable: true
+      required:
+      - school
+      - specialty
+    TeacherSchool:
+      type: object
+      description: Établissement de l'enseignant, en lecture seule (C6).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        city:
+          type: string
+          readOnly: true
+      required:
+      - city
+      - id
+      - name
     Ticket:
       type: object
       description: Ticket Steamy Events offert à la certification (D33), utilisable

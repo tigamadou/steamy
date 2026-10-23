@@ -787,6 +787,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`/parent/evenements`), catégorie Steamy Events. `event-applications` : candidatures des élèves actifs des classes
   > actives de l'enseignant (statut, événement, élève, classe), sans motivation ni paiement. Migration
   > `events/0005_propositions` (après `0004_application_refuse_permission`).
+- [x] **API-L5.6** Profil enseignant (WT08) · `feature/api-l5-profil-enseignant`
+  - [x] `GET`/`PATCH accounts/me/teacher-profile/` (enseignant seulement) : `{ specialty, school: { id, name, city } | null }`, seule `specialty` (≤ 120 caractères) se modifie, `bio`, `phone` et `verified_at` jamais exposés (S5)
+  - [x] Tests : lecture, modification, longueur max, refus apprenant et parent, champs en lecture seule ignorés, sans école ; `make openapi` committé
 - [x] **Critères de fin d'API-L5**
   - [x] Un enseignant ne peut pas créer de contenu (S5)
   - [x] Seed enrichi, `make openapi` committé
