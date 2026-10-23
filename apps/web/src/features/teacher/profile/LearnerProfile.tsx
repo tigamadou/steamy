@@ -42,7 +42,7 @@ export function LearnerProfileView({
           { label: name },
         ]}
       />
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_21.25rem]">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_21.25rem]">
         <div className="flex min-w-0 flex-col gap-5">
           <section aria-labelledby="progression-eleve" className="flex flex-col gap-3 rounded-[18px] border-[1.5px] border-ink-100 bg-surface p-4.5">
             <h2 id="progression-eleve" className="m-0 text-lg font-black tracking-[-0.01em] text-ink-900">
@@ -178,7 +178,7 @@ export function LearnerProfileSkeleton() {
   return (
     <div role="status" aria-busy="true" aria-label="Chargement du profil…" className="flex flex-col gap-5">
       <SkeletonBlock className="h-5 w-64 rounded-sm" />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_21.25rem]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_21.25rem]">
         <div className="flex flex-col gap-3">
           <SkeletonBlock className="h-28 rounded-[18px]" />
           <SkeletonBlock className="h-18 rounded-[14px]" />

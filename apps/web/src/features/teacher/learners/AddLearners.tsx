@@ -59,7 +59,7 @@ export async function AddLearners({ searchParams }: { searchParams: Promise<Sear
       {classrooms.length === 0 ? (
         <NoClassroomForLearners />
       ) : (
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
+        <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
           <section
             aria-label="Ajouter des élèves"
             className="flex min-w-0 flex-col gap-4 rounded-[22px] border-2 border-ink-100 bg-surface p-5 sm:p-6"
@@ -93,7 +93,7 @@ export async function AddLearners({ searchParams }: { searchParams: Promise<Sear
 /** Squelette de WT06 : onglets, formulaire et quota. */
 export function AddLearnersSkeleton() {
   return (
-    <div role="status" aria-busy="true" aria-label="Chargement du formulaire…" className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
+    <div role="status" aria-busy="true" aria-label="Chargement du formulaire…" className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
       <SkeletonBlock className="h-120 rounded-[22px]" />
       <SkeletonBlock className="h-56 rounded-[20px]" />
     </div>

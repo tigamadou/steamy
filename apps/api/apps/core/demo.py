@@ -208,7 +208,7 @@ def seed_classrooms(accounts: dict[str, User]) -> None:
             "country": Country.objects.get(code="BJ"),
             "city": "Cotonou",
             "learner_quota": 120,
-            "classroom_quota": 4,
+            "classroom_quota": 12,
         },
     )
     TeacherProfile.objects.filter(user=accounts["koffi"]).update(school=school)

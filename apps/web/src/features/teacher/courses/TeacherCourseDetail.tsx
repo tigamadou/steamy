@@ -33,7 +33,7 @@ export function TeacherCourseDetailView({ course }: { course: SupervisedCourseDe
           {course.description && <p className="m-0 mt-2 text-sm font-semibold text-ink-700">{course.description}</p>}
         </div>
       </header>
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <section aria-labelledby="contenu-parcours" className="flex min-w-0 flex-col gap-5">
           <h2 id="contenu-parcours" className="m-0 text-lg font-black tracking-[-0.01em] text-ink-900">
             Contenu du parcours
@@ -90,7 +90,7 @@ export function TeacherCourseDetailSkeleton() {
     <div role="status" aria-busy="true" aria-label="Chargement du parcours…" className="flex flex-col gap-5">
       <SkeletonBlock className="h-5 w-48 rounded-sm" />
       <SkeletonBlock className="h-28 rounded-[22px]" />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="flex flex-col gap-2">
           <SkeletonBlock className="h-18 rounded-lg" />
           <SkeletonBlock className="h-18 rounded-lg" />

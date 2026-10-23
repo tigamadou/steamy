@@ -104,7 +104,7 @@ export function IndividualForm({
         </p>
       )}
       <ErrorSummary title="Corrigez les erreurs suivantes :" errors={errors} focusKey={state.attempt} />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Prénom" id={IDS.firstName} required error={state.fields.firstName}>
           <Input name="firstName" autoComplete="off" maxLength={150} />
         </Field>
