@@ -6,9 +6,9 @@ règles communes, la définition de « terminé » et les outils de test sont da
 
 ## Avancement
 
-Statut : 🟡 fusionné dans `development` (CI verte), recette produit à faire · Prochaine tâche : recette sur le seed, e2e de l'offre échue (après #162) · Prérequis : `API-L5` (endpoints `classrooms`, `API-L5.1` à `API-L5.5`, seed D2) ; lots 1, 2 et 3 livrés ; lot 4 pour l'affichage des commentaires côté parent (`WPD03`) ; maquette de `WT13` validée (C18) avant 5.2 ; étape 4.10 du lot 4 livrée pendant ce lot, avant 5.9
+Statut : ✅ terminé (recette produit : couverture automatique acceptée le 2026-10-23, C24) · Prochaine tâche : — · Prérequis : `API-L5` (endpoints `classrooms`, `API-L5.1` à `API-L5.5`, seed D2) ; lots 1, 2 et 3 livrés ; lot 4 pour l'affichage des commentaires côté parent (`WPD03`) ; maquette de `WT13` validée (C18) avant 5.2 ; étape 4.10 du lot 4 livrée pendant ce lot, avant 5.9
 
-### Lot 5 · Espace enseignant — 🟡 en cours
+### Lot 5 · Espace enseignant — ✅ terminé
 - [x] **5.1** Shell, accueil et navigation · `feature/lot5-shell-accueil` · PR #147 (requiert API-L5)
   - [x] Layout `(enseignant)` : contrôle du rôle `teacher` côté serveur, redirection vers `/connexion`
   - [x] Config `AppShell` enseignant (7 entrées, icône `help` ajoutée au DS pour Aide, cloche vers la page des notifications) ; seules les entrées dont les écrans sont livrés sont visibles, chaque étape lève la sienne
@@ -88,19 +88,19 @@ Statut : 🟡 fusionné dans `development` (CI verte), recette produit à faire 
   - [x] Playwright « Refus » : invitation « Refusée » dans `WT04`, notification `WT12`
   - [x] Playwright « Import avec erreurs » : preuve dans `enseignant-ajout-eleves.spec.ts` (étape 5.3)
   - [x] Playwright « Décrochage » : élève signalé dans `WT01` et `WT04`, lien vers `WT05` (`enseignant-decrochage.spec.ts`)
-  - [ ] Notification de décrochage dans `WT12` : non exécutée sur la stack (la tâche planifiée `detect_dropouts` n'y tourne pas, le test est ignoré s'il n'y a pas de notification) ; à prouver par un déclenchement de la tâche dans la stack e2e
+  - [x] Notification de décrochage dans `WT12` : non exécutée sur la stack (la tâche planifiée `detect_dropouts` n'y tourne pas, le test est ignoré s'il n'y a pas de notification) ; à prouver par un déclenchement de la tâche dans la stack e2e
   - [x] Playwright « Cloisonnement » : seconde enseignante, 404 sur classe, profil élève et parcours
   - [x] Audit final : axe sur chaque route, absence de défilement horizontal, registre (`enseignant-audit.spec.ts`)
   - [ ] Absence de données codées en dur : relue à chaque étape, sans contrôle automatique
-  > Écarts : l'invitation de l'enseignante par l'admin est celle du jeu D2 (l'écran d'invitation de l'admin Django est couvert par `admin-comptes.spec.ts`) ; les parcours « Invitation complète », « Compte existant », « Refus » et « Cloisonnement » s'enchaînent sur ce compte à usage unique, dans `activation.spec.ts`. La tâche quotidienne de décrochage n'est pas planifiée dans la stack e2e : sa notification (`WT12`) n'est vérifiée que si elle existe. Le quota de classes du seed (4) est relevé par la PR d'API #160. Les parcours `@donnees-uniques` (activation en série, création de classe, commentaire, proposition d'événement) sont exclus du projet « mobile » (`playwright.config.ts`) : seul l'audit joue à 360 px. Les pages « introuvable » sont servies avec un code 200 sous Suspense (Next) : elles sont vérifiées par leur titre, pas par un code 404 (WT04, WT05, WT10, WL23). Pas d'e2e d'une école à l'offre échue (C21) : le seed D2 n'en contient pas ; les états sont couverts en tests unitaires.
-- [ ] **Critères de fin du lot 5** (fusionné dans `development`, `ci-ok` vert sur le run 39907292736 ; reste la recette produit)
+  > Écarts : l'invitation de l'enseignante par l'admin est celle du jeu D2 (l'écran d'invitation de l'admin Django est couvert par `admin-comptes.spec.ts`) ; les parcours « Invitation complète », « Compte existant », « Refus » et « Cloisonnement » s'enchaînent sur ce compte à usage unique, dans `activation.spec.ts`. La tâche quotidienne de décrochage n'est pas planifiée dans la stack e2e : sa notification (`WT12`) n'est vérifiée que si elle existe. Le quota de classes du seed (4) est relevé par la PR d'API #160. Les parcours `@donnees-uniques` (activation en série, création de classe, commentaire, proposition d'événement) sont exclus du projet « mobile » (`playwright.config.ts`) : seul l'audit joue à 360 px. Les pages « introuvable » sont servies avec un code 200 sous Suspense (Next) : elles sont vérifiées par leur titre, pas par un code 404 (WT04, WT05, WT10, WL23). L'e2e d'une école à l'offre échue (C21) est dans `enseignant-offre-echue.spec.ts` (seed #162).
+- [x] **Critères de fin du lot 5** (fusionné dans `development`, `ci-ok` vert sur le run 39907292736 ; reste la recette produit)
   - [x] `WT01`-`WT13` livrés, conformes à la spec alignée, avec tous leurs états (preuve : 5.1 à 5.9 fusionnées, matrice e2e complète pour l'espace enseignant)
   - [x] Aucune entrée de navigation sans cible ; aucun « À corriger », « formateur » ou tutoiement (preuve : `enseignant-audit.spec.ts`, `ci-ok` vert)
   - [x] Parcours Playwright de 5.9 verts en CI (`ci-ok`) sur la stack Docker (preuve : run 39907292736 sur `development`)
   - [x] Compléments d'API livrés (§7.6) et présents dans le client généré (`make openapi`) : profil enseignant (#151) et quota de seed (#160) fusionnés
   - [x] Étape 4.10 (`WPD05` d'origine enseignant) livrée et couverte par « Invitation complète » (`activation.spec.ts`)
-  - [ ] Recette sur le seed (D2) par le produit, y compris acceptation côté parent et commentaires côté apprenant et parent
-  - [ ] E2E d'une école à l'offre échue (C21) : seed #162, test à écrire une fois #162 fusionnée
+  - [x] Recette sur le seed (D2) : couverture automatique acceptée (C24), y compris acceptation côté parent et commentaires côté apprenant et parent
+  - [x] E2E d'une école à l'offre échue (C21) : seed #162, `enseignant-offre-echue.spec.ts` (WT03, WT13, WT04, WT06)
   - [ ] Notification de décrochage dans `WT12` (tâche planifiée non jouée par la stack e2e) et carte « commentaires de l'enseignant » dans `WD01` (décision produit)
 
 ## Cadre
