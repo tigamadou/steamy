@@ -125,12 +125,12 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WT02` | Mes parcours encadrés | 5 | Parcours des seules classes de Koffi, classes et élèves identiques à l'API, carte → WT10 | `apps/web/e2e/enseignant-parcours.spec.ts` |
 | `WT03` | Mes classes | 5 | Classes et quota de l'école identiques à l'API, « Créer une classe » → WT13 | `apps/web/e2e/enseignant-classes.spec.ts` |
 | `WT04` | Apprenants d'une classe | 5 | Élèves et invitations (en attente, refusée, expirée) de l'API, aucun numéro de parent ; classe vide → CTA vers WT06 ; annulation d'une invitation confirmée, quota libéré ; classe d'un autre : 404 | `apps/web/e2e/enseignant-classes.spec.ts` |
-| `WT05` | Profil apprenant (+ commentaires) | 5 | « Commenter » depuis WT01 ouvre la tentative ; commentaire envoyé, tentative sortie de « À revoir », apprenant notifié et parent lisant le commentaire (WPD03) ; aucune donnée sensible ; élève hors de la classe ou inconnu : 404 | `apps/web/e2e/enseignant-profil-eleve.spec.ts` |
+| `WT05` | Profil apprenant (+ commentaires) | 5 | « Commenter » depuis WT01 ouvre la tentative ; commentaire envoyé, tentative sortie de « À revoir », apprenant notifié et parent lisant le commentaire (WPD03) ; aucune donnée sensible ; élève hors de la classe, inconnu ou non numérique : page « introuvable » | `apps/web/e2e/enseignant-profil-eleve.spec.ts` |
 | `WT06` | Ajouter des apprenants (individuel / lot) | 5 | Individuel : erreurs de forme, SMS au parent (faux fournisseur), invitation « En attente du parent » ; lot : liste de 5 lignes (doublon, déjà présent, numéro invalide, ligne mal formée), rapport conforme, filtre, correction, renvoi, ligne « envoyée » | `apps/web/e2e/enseignant-ajout-eleves.spec.ts` |
 | `WT07` | Suivi des évaluations | 5 | Filtres Toutes / Formatives / Sommatives / À revoir et classe dans l'URL (rechargement), nombres identiques à l'API, « Commenter » vers WT05, aucune action de correction ; filtre invalide ramené à « Toutes » | `apps/web/e2e/enseignant-evaluations.spec.ts` |
 | `WT08` | Paramètres | 5 |  |  |
 | `WT09` | Steamy Events | 5 |  |  |
-| `WT10` | Détail parcours encadré | 5 | Arbre Projet → Niveau → Mission avec compteurs de l'API, panneau de suivi, mission en lecture seule sans progression ; parcours non encadré : 404 | `apps/web/e2e/enseignant-parcours.spec.ts` |
+| `WT10` | Détail parcours encadré | 5 | Arbre Projet → Niveau → Mission avec compteurs de l'API, panneau de suivi, mission en lecture seule sans progression ; parcours non encadré : page « introuvable » | `apps/web/e2e/enseignant-parcours.spec.ts` |
 | `WT11` | Aide & support | 5 |  |  |
 | `WT12` | Notifications | 5 |  |  |
 | `WK01` | Catalogue kits | 3 | Boutique dans le shell (h1 du header), cartes vers la fiche, « Ajouter » → toast ; WL07 invité : « Ajouter » seulement si en stock | `apps/web/e2e/boutique-panier.spec.ts`, `apps/web/e2e/evenements-boutique.spec.ts` |

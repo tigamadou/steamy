@@ -119,7 +119,9 @@ export function LearnerProfileView({
             <h2 id="commenter" className="m-0 text-base font-black text-ink-900">
               Commenter
             </h2>
+            {/* Une autre `?tentative=` remonte le formulaire : la tentative choisie suit l'URL */}
             <CommentForm
+              key={selectedAttempt ?? "aucune"}
               learnerId={learner.id}
               classroomId={classroom.id}
               attempts={attempts}
