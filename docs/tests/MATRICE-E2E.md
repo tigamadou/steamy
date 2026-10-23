@@ -130,7 +130,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WT07` | Suivi des évaluations | 5 |  |  |
 | `WT08` | Paramètres | 5 |  |  |
 | `WT09` | Steamy Events | 5 |  |  |
-| `WT10` | Détail parcours encadré | 5 | Arbre Projet → Niveau → Mission avec compteurs de l'API, panneau de suivi, mission en lecture seule sans progression ; parcours non encadré : 404 | `apps/web/e2e/enseignant-parcours.spec.ts` |
+| `WT10` | Détail parcours encadré | 5 | Arbre Projet → Niveau → Mission avec compteurs de l'API, panneau de suivi, mission en lecture seule sans progression ; parcours non encadré : page « introuvable » | `apps/web/e2e/enseignant-parcours.spec.ts` |
 | `WT11` | Aide & support | 5 |  |  |
 | `WT12` | Notifications | 5 |  |  |
 | `WK01` | Catalogue kits | 3 | Boutique dans le shell (h1 du header), cartes vers la fiche, « Ajouter » → toast ; WL07 invité : « Ajouter » seulement si en stock | `apps/web/e2e/boutique-panier.spec.ts`, `apps/web/e2e/evenements-boutique.spec.ts` |
