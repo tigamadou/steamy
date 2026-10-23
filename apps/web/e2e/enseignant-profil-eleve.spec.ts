@@ -84,4 +84,7 @@ test("WT05 : le profil d'un élève de la classe, sans commentaire en trop ; un 
   await page.goto(`/enseignant/eleves/${learner}?classe=${code}`);
   await expect(page.getByRole("heading", { level: 2, name: "Cet élève est introuvable" })).toBeVisible();
   await page.goto("/enseignant/eleves/999999");
+  await expect(page.getByRole("heading", { level: 2, name: "Cet élève est introuvable" })).toBeVisible();
+  await page.goto("/enseignant/eleves/abc");
+  await expect(page.getByRole("heading", { level: 2, name: "Cet élève est introuvable" })).toBeVisible();
 });
