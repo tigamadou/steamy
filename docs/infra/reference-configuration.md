@@ -34,6 +34,12 @@ En staging et en prod, le chart les injecte dans api, worker, beat et migrate.
 | `FAKE_PAYMENT_DELAY` | non | `3` | — | Secondes avant le webhook du faux prestataire |
 | `INVOICE_PROVISIONAL` | non | `true` | — | Vrai : le PDF est un « Reçu de paiement » non fiscal. **Ne passer à `false` qu'après la décision comptable** (ADR 0005, P1 facture normalisée MECeF) |
 | `INVOICE_SELLER` | non | `{"name": "Steamy"}` | — | JSON des mentions du vendeur (`name`, `address`, `tax_id` IFU, `registration` RCCM, `phone`, `email`) ; seuls les champs renseignés sont imprimés |
+| `FISCAL_PROVIDER` | non | `fake` (local, CI) / `emecef` (déployé) | — | Fournisseur de facture normalisée ([ADR 0006](../adr/0006-facture-normalisee-emecef.md)). `fake` **refuse de fonctionner** en staging et en prod. Rien n'est appelé tant que `PlatformSettings.emecef_enabled` est faux (reçu provisoire) |
+| `EMECEF_API_URL` | oui si `emecef` | — | — | URL de l'API e-MCF de la DGI (ex. `https://…/sygmef-emcf`) |
+| `EMECEF_TOKEN` | oui si `emecef` | — | secret du même nom | Jeton d'API (JWT) lié à l'IFU de Steamy, obtenu auprès de la DGI. **Jamais dans le dépôt ni en CI** |
+| `EMECEF_IFU` | oui si `emecef` | — | — | IFU de Steamy, envoyé dans chaque demande de facture |
+
+**Vérifier l'accès e-MECeF** (hors CI, lecture seule, aucune facture créée) : renseigner `EMECEF_API_URL`, `EMECEF_IFU` et `EMECEF_TOKEN` dans `apps/api/.env` (ignoré par git ; modèle : [`.env.example`](../../apps/api/.env.example)) avec `FISCAL_PROVIDER=emecef`, puis `python manage.py emecef_check` : affiche `tokenValid`, le NIM, les taux des groupes A à F et de l'AIB, les types de facture et de paiement. Ne jamais coller le jeton dans un message, un ticket ou un fichier versionné.
 | `INVOICE_MENTIONS` | non | `[]` | — | Mentions légales supplémentaires (liste JSON) |
 | `SMS_PROVIDER` | non | `fake` | `twilio` (values `sms.provider`) | Fournisseur SMS ([ADR 0002](../adr/0002-fournisseur-sms.md)). `fake` envoie chaque SMS comme e-mail à `<e164>@sms.test` (Mailpit) et **refuse de fonctionner** en staging et en prod. Défaut : `fake` en local et CI, `twilio` en déployé |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | oui si `twilio` | — | secrets du même nom | Identifiants de l'API Twilio. **Jamais dans le dépôt**. En staging : identifiants de test Twilio (aucun SMS réel, numéros magiques) ou sous-compte plafonné |

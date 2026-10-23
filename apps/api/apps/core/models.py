@@ -108,6 +108,23 @@ class PlatformSettings(models.Model):
     )
     vat_applies_to_shipping = models.BooleanField(_("TVA sur la livraison"), default=True)
     aib_applies_to_shipping = models.BooleanField(_("AIB sur la livraison"), default=True)
+    # Facture normalisée e-MECeF (ADR 0006, C26) : éteinte par défaut, le document reste un reçu provisoire. Les groupes
+    # de taxe A à F sont saisis d'après la DGI, sans défaut ; IFU, URL et jeton sont des variables d'environnement.
+    emecef_enabled = models.BooleanField(_("facture normalisée e-MECeF activée"), default=False)
+    emecef_taxed_group = models.CharField(
+        _("groupe de taxe des articles taxés"),
+        max_length=1,
+        choices=[(group, group) for group in "ABCDEF"],
+        blank=True,
+        help_text=_("Groupe e-MECeF appliqué aux lignes quand la TVA est activée"),
+    )
+    emecef_exempt_group = models.CharField(
+        _("groupe de taxe des articles exonérés"),
+        max_length=1,
+        choices=[(group, group) for group in "ABCDEF"],
+        blank=True,
+        help_text=_("Groupe e-MECeF appliqué aux lignes quand la TVA n'est pas activée"),
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -128,7 +145,7 @@ class PlatformSettings(models.Model):
 
     def clean(self):
         """Barème : `{événement: points ≥ 0}` ; paliers : `[{rank, points}]` aux points strictement croissants ;
-        TVA ou AIB activé : taux > 0."""
+        TVA ou AIB activé : taux > 0 ; e-MECeF activé : groupes de taxe renseignés."""
         errors = {}
         for tax in ("vat", "aib"):
             if getattr(self, f"{tax}_enabled") and not getattr(self, f"{tax}_rate"):
@@ -140,6 +157,10 @@ class PlatformSettings(models.Model):
             errors["points_scale"] = (
                 "Un objet {événement: points}, points entiers positifs ou nuls."
             )
+        if self.emecef_enabled:
+            for field in ("emecef_taxed_group", "emecef_exempt_group"):
+                if not getattr(self, field):
+                    errors[field] = "Un groupe de taxe est requis pour activer e-MECeF."
         thresholds = self.rank_thresholds
         valid = isinstance(thresholds, list) and all(
             isinstance(t, dict)

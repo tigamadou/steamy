@@ -1,3 +1,6 @@
+import copy
+
+from django import forms
 from django.apps import apps
 from django.conf import settings
 from django.contrib import admin, messages
@@ -34,6 +37,39 @@ def unregister_frozen(site, labels) -> None:
 unregister_frozen(admin.site, FROZEN_MODELS)
 
 
+#: Réglages dont le changement, e-MECeF activé, est revérifié auprès de la DGI (les autres se changent même si elle est
+#: injoignable)
+TAX_FIELDS = {
+    "emecef_enabled",
+    "emecef_taxed_group",
+    "emecef_exempt_group",
+    "vat_enabled",
+    "vat_rate",
+    "aib_enabled",
+    "aib_rate",
+}
+
+
+class PlatformSettingsForm(forms.ModelForm):
+    """Activer e-MECeF vérifie le jeton et que nos taux égalent ceux de la DGI (ADR 0006) : sinon, refus."""
+
+    class Meta:
+        model = PlatformSettings
+        fields = [field.name for field in PlatformSettings._meta.fields if field.editable]
+
+    def clean(self):
+        from apps.payments.fiscal.guard import activation_errors
+
+        data = super().clean()
+        if data.get("emecef_enabled") and not self.errors and TAX_FIELDS & set(self.changed_data):
+            candidate = copy.copy(self.instance)
+            for field, value in data.items():
+                setattr(candidate, field, value)
+            for field, message in activation_errors(candidate).items():
+                self.add_error(field, message)
+        return data
+
+
 @admin.register(PlatformSettings)
 class PlatformSettingsAdmin(admin.ModelAdmin):
     """
@@ -41,6 +77,7 @@ class PlatformSettingsAdmin(admin.ModelAdmin):
     par le modèle. Les réglages sont relus à chaque usage (`PlatformSettings.load()`) : aucun cache à invalider.
     """
 
+    form = PlatformSettingsForm
     fieldsets = (
         (
             "OTP (D24)",
@@ -72,6 +109,10 @@ class PlatformSettingsAdmin(admin.ModelAdmin):
                     "aib_applies_to_shipping",
                 )
             },
+        ),
+        (
+            "Facture normalisée e-MECeF (C26)",
+            {"fields": ("emecef_enabled", "emecef_taxed_group", "emecef_exempt_group")},
         ),
         ("Messagerie (S10)", {"fields": ("sms_provider",)}),
     )
