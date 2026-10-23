@@ -20,3 +20,10 @@ describe.each([
     expect(tree.props.children.props).toEqual({ role, children: "contenu" });
   });
 });
+
+describe("espace enseignant : métadonnées", () => {
+  it("n'est jamais indexé, y compris ses pages « introuvable » (balise posée par le layout)", async () => {
+    const { metadata } = await import("./(enseignant)/layout");
+    expect(metadata.robots).toEqual({ index: false, follow: false });
+  });
+});
