@@ -2,17 +2,20 @@
 
 import type { Schemas } from "@steamy/api-client";
 import { useRouter } from "next/navigation";
-import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 
 import { Button, ErrorSummary, Field, Textarea } from "@/components/ds";
+import { throttledLabel, useThrottle } from "@/components/ds/RetryCountdown";
 import { apiCall, errorMessage, type ApiResult } from "@/lib/api-call";
 import { routes } from "@/lib/routes";
 
 import { ClassroomField } from "./ClassroomField";
-import { ImportReport, correctedLines, type ErrorLine, type SentLine } from "./ImportReport";
+import { ImportReport, correctedLines, reportSummary, type ErrorLine, type SentLine } from "./ImportReport";
 import {
   COLUMNS,
   COLUMN_LABELS,
+  MAX_FILE_BYTES,
+  MAX_IMPORT_ROWS,
   PREVIEW_ROWS,
   TEMPLATE_CSV,
   decodeCsv,
@@ -58,9 +61,12 @@ function toSent(created: ImportResult["created"]): SentLine[] {
 export function BatchImport({
   classrooms,
   defaultClassroom,
+  offerExpired = false,
 }: {
   classrooms: Pick<Schemas["Classroom"], "id" | "name">[];
   defaultClassroom?: string;
+  /** Offre échue : l'ajout d'élèves est bloqué (C21), le serveur répond `SCHOOL_OFFER_EXPIRED`. */
+  offerExpired?: boolean;
 }) {
   const router = useRouter();
   const inFlight = useRef(false);
@@ -74,13 +80,37 @@ export function BatchImport({
   const [report, setReport] = useState<Report | null>(null);
   const [errorsOnly, setErrorsOnly] = useState(false);
   const [failure, setFailure] = useState<string>();
+  // Dernière classe choisie : gardée après « Nouvel import »
+  const [chosenClassroom, setChosenClassroom] = useState(defaultClassroom ?? "");
+  // Annonce du résultat : une région `aria-live` montée avant le résultat, pour qu'il soit lu
+  const [announcement, setAnnouncement] = useState("");
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const [focusKey, setFocusKey] = useState(0);
+  const { wait, track } = useThrottle();
+
+  // Le résultat remplace le formulaire : le focus passe au titre du rapport (après l'envoi comme après un renvoi)
+  useEffect(() => {
+    if (focusKey > 0) headingRef.current?.focus();
+  }, [focusKey]);
 
   const previewSource = file ? fileText : list;
-  const preview = previewSource ? parseDelimited(previewSource) : null;
+  // Une seule lecture de la liste, même à chaque frappe ; l'aperçu n'en montre que les premières lignes
+  const preview = useMemo(() => (previewSource ? parseDelimited(previewSource) : null), [previewSource]);
   const previewRows: ImportRow[] = preview?.rows.slice(0, PREVIEW_ROWS) ?? [];
+  const totalLines = preview ? preview.rows.length + preview.malformed.length : 0;
 
   async function onFile(event: ChangeEvent<HTMLInputElement>) {
     const chosen = event.target.files?.[0] ?? null;
+    // Un fichier trop gros est refusé avant d'être lu : le serveur ne l'accepterait pas non plus
+    if (chosen && chosen.size > MAX_FILE_BYTES) {
+      event.target.value = "";
+      setFile(null);
+      setFileText(null);
+      setProblems([{ field: IDS.file, message: "Ce fichier dépasse 1 Mo : découpez-le en plusieurs imports." }]);
+      setAttempt((n) => n + 1);
+      return;
+    }
+    setProblems([]);
     setFile(chosen);
     setFileText(chosen && /\.csv$/i.test(chosen.name) ? decodeCsv(await chosen.arrayBuffer()) : null);
   }
@@ -147,15 +177,21 @@ export function BatchImport({
           );
     if (!result) return;
     if (!result.ok) {
+      track(result);
       setProblems([{ message: errorMessage(result, "vous") }]);
+      setAttempt((n) => n + 1);
       return;
     }
     setProblems([]);
+    setChosenClassroom(classroomId);
     setReport({
       classroomId,
       sent: toSent(result.data.created),
       errors: [...localErrors, ...toErrorLines(result.data.errors)].sort((a, b) => a.line - b.line),
     });
+    const lines = [...localErrors, ...toErrorLines(result.data.errors)];
+    setAnnouncement(reportSummary(result.data.created.length, lines.length));
+    setFocusKey((n) => n + 1);
     // Les places utilisées ont changé : le quota affiché est relu
     router.refresh();
   }
@@ -171,18 +207,22 @@ export function BatchImport({
     );
     if (!result) return;
     if (!result.ok) {
+      track(result);
       setFailure(errorMessage(result, "vous"));
       return;
     }
     setFailure(undefined);
     const resent = new Set(lines.map((line) => line.line));
-    setReport({
+    const next = {
       classroomId: report.classroomId,
       sent: [...report.sent, ...toSent(result.data.created)],
       errors: [...report.errors.filter((line) => !resent.has(line.line)), ...toErrorLines(result.data.errors)].sort(
         (a, b) => a.line - b.line,
       ),
-    });
+    };
+    setReport(next);
+    setAnnouncement(reportSummary(next.sent.length, next.errors.length));
+    setFocusKey((n) => n + 1);
     router.refresh();
   }
 
@@ -197,10 +237,19 @@ export function BatchImport({
     );
   }
 
+  const live = (
+    <p role="status" className="sr-only">
+      {announcement}
+    </p>
+  );
+
   if (report) {
     return (
       <div className="flex flex-col gap-5">
+        {live}
         <ImportReport
+          headingRef={headingRef}
+          wait={wait}
           sent={report.sent}
           errors={report.errors}
           errorsOnly={errorsOnly}
@@ -231,6 +280,12 @@ export function BatchImport({
 
   return (
     <form onSubmit={(event) => void submit(event)} noValidate aria-label="Importer des élèves" className="flex flex-col gap-4">
+      {live}
+      {offerExpired && (
+        <p className="m-0 rounded-[14px] border-2 border-error-100 bg-error-50 px-3.5 py-3 text-[13px] font-extrabold text-error-700">
+          ⛔ L&apos;offre de votre établissement est échue : l&apos;ajout d&apos;élèves est bloqué.
+        </p>
+      )}
       <ErrorSummary title="Corrigez les erreurs suivantes :" errors={problems} focusKey={attempt} />
       <p className="m-0 text-sm font-semibold text-ink-700">
         Colonnes attendues : {COLUMNS.map((column) => COLUMN_LABELS[column]).join(", ")}. Un fichier CSV ou Excel de 200
@@ -243,7 +298,7 @@ export function BatchImport({
           Télécharger le modèle CSV
         </a>
       </p>
-      <ClassroomField id={IDS.classroom} classrooms={classrooms} defaultValue={defaultClassroom} />
+      <ClassroomField id={IDS.classroom} classrooms={classrooms} defaultValue={chosenClassroom || defaultClassroom} />
       <Field label="Fichier CSV ou Excel" id={IDS.file} hint="Si vous choisissez un fichier, la liste collée est ignorée.">
         <input
           type="file"
@@ -270,6 +325,12 @@ export function BatchImport({
       {file && fileText === null && (
         <p className="m-0 text-[13px] font-bold text-ink-600">
           Aperçu indisponible pour un fichier Excel : le rapport détaille chaque ligne après l&apos;envoi.
+        </p>
+      )}
+      {totalLines > MAX_IMPORT_ROWS && (
+        <p className="m-0 text-[13px] font-bold text-amber-700">
+          Cette liste compte {totalLines} lignes : un import en accepte {MAX_IMPORT_ROWS} au plus. Le serveur refusera
+          l&apos;envoi tel quel : découpez-le en plusieurs imports.
         </p>
       )}
       {preview && (
@@ -317,8 +378,8 @@ export function BatchImport({
         </div>
       )}
       <div className="flex justify-end">
-        <Button type="submit" loading={pending} icon="arrow-right">
-          Importer et envoyer les demandes
+        <Button type="submit" loading={pending} disabled={offerExpired || wait > 0} icon="arrow-right">
+          {throttledLabel(wait, "Importer et envoyer les demandes")}
         </Button>
       </div>
     </form>

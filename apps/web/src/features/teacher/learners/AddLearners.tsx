@@ -73,9 +73,14 @@ export async function AddLearners({ searchParams }: { searchParams: Promise<Sear
               ]}
             />
             {batch ? (
-              <BatchImport classrooms={classrooms} defaultClassroom={defaultClassroom} />
+              <BatchImport classrooms={classrooms} defaultClassroom={defaultClassroom} offerExpired={school.offerExpired} />
             ) : (
-              <IndividualForm classrooms={classrooms} countries={countries} defaultClassroom={defaultClassroom} />
+              <IndividualForm
+                classrooms={classrooms}
+                countries={countries}
+                defaultClassroom={defaultClassroom}
+                offerExpired={school.offerExpired}
+              />
             )}
           </section>
           <QuotaNotice school={school} />
