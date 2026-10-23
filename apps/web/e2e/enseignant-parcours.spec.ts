@@ -72,7 +72,7 @@ test("WT10 : arbre du parcours avec compteurs, panneau de suivi, mission en lect
   await axe(page);
 });
 
-test("WT10 : un parcours que Koffi n'encadre pas est introuvable (404, jamais « interdit »)", async ({ page }) => {
+test("WT10 : un parcours que Koffi n'encadre pas est introuvable (page « introuvable », jamais « interdit »)", async ({ page }) => {
   await loginAs(page, "teacher");
   await page.goto("/enseignant/parcours");
   const supervised = (await readApi<Page_<Course>>(page, "/api/classrooms/courses/")).results.map((c) => c.slug);
@@ -81,7 +81,9 @@ test("WT10 : un parcours que Koffi n'encadre pas est introuvable (404, jamais «
   expect(other, "le jeu D2 contient un parcours hors de l'offre de l'école").toBeDefined();
 
   await page.goto(`/enseignant/parcours/${other!.slug}`);
-  await expect(page.getByRole("heading", { level: 2, name: "Ce parcours est introuvable" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Ce contenu est introuvable" })).toBeVisible();
+  // Page « introuvable » : non indexée (le code HTTP est 200 sous Suspense)
+  await expect(page.locator('meta[name="robots"][content*="noindex"]')).toHaveCount(1);
   await page.getByRole("link", { name: "Voir mes parcours" }).click();
   await expect(page).toHaveURL("/enseignant/parcours");
 });

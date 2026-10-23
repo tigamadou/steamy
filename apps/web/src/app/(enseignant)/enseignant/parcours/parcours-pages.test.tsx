@@ -51,7 +51,7 @@ describe("pages des parcours encadrés", () => {
 
   it("parcours introuvable : h2, sans distinguer « interdit », retour à WT02", () => {
     render(<CourseNotFound />);
-    expect(screen.getByRole("heading", { level: 2, name: "Ce parcours est introuvable" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Ce contenu est introuvable" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Voir mes parcours" })).toHaveAttribute("href", "/enseignant/parcours");
   });
 });
