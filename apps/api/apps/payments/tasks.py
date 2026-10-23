@@ -139,6 +139,14 @@ def issue_fiscal_invoice(self, invoice_id: int) -> str:
 
 
 @shared_task
+def check_emecef_status() -> int:
+    """Chaque jour : jeton, e-MCF actif, IFU, accessibilité ; alerte la Finance (ADR 0006). Renvoie le nombre d'alertes."""
+    from .fiscal.monitor import check_status
+
+    return len(check_status())
+
+
+@shared_task
 def retry_pending_invoices() -> int:
     """Toutes les 10 min : relance les factures restées `pending` plus de 10 minutes (worker arrêté)."""
     from datetime import timedelta

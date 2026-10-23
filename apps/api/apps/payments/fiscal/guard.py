@@ -40,6 +40,10 @@ def activation_errors(config, provider: FiscalInvoiceProvider | None = None) -> 
             return {
                 "emecef_enabled": f"L'e-MCF n'est pas actif (statut : {status.emcf_status or 'inconnu'})."
             }
+        if settings.FISCAL_PROVIDER == "emecef" and status.ifu != settings.EMECEF_IFU:
+            return {
+                "emecef_enabled": "L'IFU du jeton ne correspond pas à EMECEF_IFU : mauvais jeton pour cet environnement."
+            }
         groups = provider.tax_groups()
     except FiscalError as error:
         return {"emecef_enabled": f"e-MECeF est injoignable ou refuse la demande : {error}"}
@@ -51,6 +55,11 @@ def activation_errors(config, provider: FiscalInvoiceProvider | None = None) -> 
     if groups.rates[exempt] != 0:
         errors["emecef_exempt_group"] = (
             f"Le groupe {exempt} est à {groups.rates[exempt]} % chez la DGI : il devrait être exonéré."
+        )
+    export = config.emecef_export_group
+    if export and groups.rates[export] != 0:
+        errors["emecef_export_group"] = (
+            f"Le groupe {export} est à {groups.rates[export]} % chez la DGI : une vente à l'exportation est à taux nul."
         )
     if config.aib_enabled and settings.EMECEF_AIB_IN_TOTAL is None:
         errors["aib_enabled"] = (

@@ -281,7 +281,7 @@ class PaymentAdmin(admin.ModelAdmin):
 class InvoiceAdmin(admin.ModelAdmin):
     """Factures en lecture seule (Finance) ; un PDF en échec se relance par l'action « Régénérer » (ADR 0005 §8)."""
 
-    list_display = ("number", "order", "pdf_status", "fiscal_status", "issued_at")
+    list_display = ("number", "order", "pdf_status", "fiscal_status", "fiscal_type", "issued_at")
     list_filter = ("pdf_status", "fiscal_status")
     search_fields = ("number", "order__reference", "fiscal_uid")
     readonly_fields = (
@@ -293,6 +293,7 @@ class InvoiceAdmin(admin.ModelAdmin):
         "snapshot",
         "issued_at",
         "fiscal_status",
+        "fiscal_type",
         "fiscal_uid",
         "fiscal",
         "fiscal_error",
@@ -363,6 +364,13 @@ class InvoiceAdmin(admin.ModelAdmin):
         self.message_user(request, f"{len(ids)} émission(s) relancée(s).")
 
 
+#: Les avoirs sont hors périmètre de la v1 (ADR 0006) : les remboursements se traitent à la main
+REFUND_INVOICE_NOTE = (
+    "La facture normalisée d'origine n'est pas annulable par l'application : si nécessaire, l'avoir est à émettre "
+    "manuellement auprès de la DGI."
+)
+
+
 class RefundForm(forms.ModelForm):
     """Demande de remboursement (Finance) : sur un paiement réussi, dans la limite du montant encore remboursable."""
 
@@ -375,6 +383,7 @@ class RefundForm(forms.ModelForm):
         if (
             "payment" in self.fields
         ):  # absent de la fiche en lecture seule (remboursement déjà demandé)
+            self.fields["reason"].help_text = REFUND_INVOICE_NOTE
             # Paiements réussis encore remboursables (pas déjà entièrement remboursés)
             self.fields["payment"].queryset = (
                 Payment.objects.filter(status=Payment.Status.SUCCEEDED)
@@ -408,7 +417,15 @@ class ProcessRefundForm(forms.Form):
 
 @admin.register(Refund)
 class RefundAdmin(admin.ModelAdmin):
-    list_display = ("id", "order", "payment", "amount", "reason", "processed", "created_at")
+    list_display = (
+        "id",
+        "order",
+        "payment",
+        "amount",
+        "reason",
+        "processed",
+        "created_at",
+    )
     list_filter = ("processed",)
     search_fields = ("payment__order__reference",)
     list_select_related = ("payment__order",)

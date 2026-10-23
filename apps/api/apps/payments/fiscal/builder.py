@@ -54,7 +54,12 @@ def _line(title: str, quantity: int, amount: int, group: str) -> FiscalItem:
 
 
 def build_request(
-    order, buyer: dict, config, aib: str | None, aib_in_total: bool
+    order,
+    buyer: dict,
+    config,
+    aib: str | None,
+    aib_in_total: bool,
+    invoice_type: str = "FV",
 ) -> tuple[InvoiceRequest, Expected]:
     goods = [(item.title, item.quantity, item.total) for item in order.items.all()]
     shipping = order.shipping_fee
@@ -70,8 +75,11 @@ def build_request(
     ]
     shares = allocate(taxed_amounts, vat["amount"] if vat else 0)
     items = []
+    export = invoice_type == "EV"
     for (title, quantity, total), taxed, share in zip(lines, taxed_flags, shares, strict=True):
-        if taxed:
+        if export:  # vente à l'exportation : tout est au groupe d'export, au montant payé
+            items.append(_line(title, quantity, total + share, config.emecef_export_group))
+        elif taxed:
             items.append(_line(title, quantity, total + share, config.emecef_taxed_group))
         else:
             items.append(_line(title, quantity, total, config.emecef_exempt_group))
@@ -79,15 +87,15 @@ def build_request(
     aib_amount = aib_tax["amount"] if aib_tax else 0
     expected = Expected(
         taxed_group=config.emecef_taxed_group,
-        taxed_total=(vat["base"] + vat["amount"]) if vat else 0,
-        vat_base=vat["base"] if vat else 0,
-        vat=vat["amount"] if vat else 0,
+        taxed_total=(vat["base"] + vat["amount"]) if vat and not export else 0,
+        vat_base=vat["base"] if vat and not export else 0,
+        vat=vat["amount"] if vat and not export else 0,
         aib=aib_amount,
         lines_total=lines_total,
         total=lines_total + (aib_amount if aib_in_total else 0),
     )
     request = InvoiceRequest(
-        type="FV",
+        type=invoice_type,
         items=items,
         client=FiscalClient(name=buyer.get("name", ""), contact=buyer.get("phone", "")),
         payments=[FiscalPayment("MOBILEMONEY", expected.total)],

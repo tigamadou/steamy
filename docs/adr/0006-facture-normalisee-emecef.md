@@ -1,7 +1,7 @@
 # ADR 0006 · Facture normalisée e-MECeF (DGI du Bénin)
 
-- **Statut** : **proposée**, conforme à la spécification officielle de la DGI ; reste à valider par la comptabilité :
-  groupes de taxe (E1), exportation (E4) et, par une sonde sur le serveur de test, l'AIB dans `total` (E3)
+- **Statut** : **proposée**, conforme à la spécification officielle de la DGI et aux décisions de l'utilisateur du
+  2026-10-23 ; reste : l'AIB dans `total` (E3, par la sonde sur le serveur de test)
 - **Date** : 23 octobre 2026 (mise en conformité avec le PDF de la DGI le même jour)
 - **Étape** : `API-L3b.2c` ([PLAN-API](../plans/PLAN-API.md)), après `API-L3b.2b` (reçu provisoire) et C25 (TVA et AIB
   paramétrables)
@@ -34,7 +34,7 @@ provisoire actuel (`INVOICE_PROVISIONAL`) reste le comportement par défaut.
 | `GET /invoice/{uid}` | Détail d'une demande en attente |
 
 Une demande non finalisée est **en attente 2 minutes**, puis **expire** ; **10 demandes en attente au plus** par e-MCF
-(erreur 1). Il n'y a **aucune clé d'idempotence** : `reference` ne sert qu'aux avoirs. Erreurs (annexe) : 1 trop de
+(erreur 1). Il n'y a **aucune clé d'idempotence** : `reference` ne sert qu'aux avoirs (hors v1). Erreurs (annexe) : 1 trop de
 demandes en attente, 3 type invalide, 4 référence d'origine manquante, 5 référence sans 24 caractères, 6 AIB invalide,
 7 paiement invalide, 8 aucun article, 9 groupe invalide, 10 référence d'origine non vérifiable pour l'instant
 (réessayer), 11 facture d'origine introuvable, 12 avoir supérieur à la facture d'origine, 20 facture inconnue ou déjà
@@ -55,8 +55,14 @@ L'API « integrator » (demande d'agrément, jetons) sert aux **démarches** du 
 
 ### 1. Taxes ↔ groupes ↔ `aib`
 
-- `PlatformSettings.emecef_taxed_group` (groupe des lignes quand la TVA est activée) et `emecef_exempt_group` (quand
-  elle ne l'est pas) : saisis d'après la comptabilité, **sans défaut inventé**.
+- **Libellés officiels des groupes de la DGI** : A = EXO « Exonéré » ; B = TAX « Taxable » ; C = EXP « Exportation de
+  produits taxables » ; D = MP « TVA régime d'exception » ; E = TPS « Régime fiscal TPS » ; F = RES « Réservé »
+  (affichés ainsi dans l'admin). L'API ne renvoie que leurs **taux**.
+- Réglages `PlatformSettings` (défauts, tous modifiables) : `emecef_taxed_group` = **B** (lignes quand la TVA est
+  activée, taux lu dans `/info/taxGroups` et égal à `vat_rate`) ; `emecef_exempt_group` = **E** (lignes quand la TVA
+  n'est pas activée : Steamy relève du **régime TPS**, confirmé par l'utilisateur le 2026-10-23) ; `emecef_export_group`
+  = **C** (factures EV). D et F ne sont jamais utilisés par défaut. Le groupe exonéré doit avoir un taux **nul** chez la
+  DGI (rien à ajouter au prix), sinon l'activation est refusée.
 - **Garde-fou** (à l'activation et avant chaque émission) : `GET /info/taxGroups` donne pour le groupe taxé un taux
   **égal à `vat_rate`**, un taux **nul** pour le groupe exonéré ; `aib_rate` doit valoir **1 ou 5** (groupes AIB A et B,
   seules valeurs de la spécification ; contrôle statique du modèle, en français) **et** égaler `aibA` ou `aibB`, ce qui
@@ -98,8 +104,13 @@ montant de paiement envoyé est notre total payé.
 - `client` : nom du payeur (parent connecté ou invité), `contact` = téléphone, **sans IFU** (vente à un particulier ;
   IFU facultatif sur le profil hors v1). `operator.name` = « Steamy » (obligatoire), `id` omis.
 - `payment` : `MOBILEMONEY`, montant = total payé (jamais l'`ESPECES` par défaut).
-- Type `FV` pour tous les payeurs. Les payeurs hors Bénin (D76) relèvent peut-être de `EV` : **question comptable
-  ouverte (E4)**, `FV` en attendant.
+- **Type** : `FV` pour un payeur du Bénin, **`EV` (exportation) pour un payeur hors du Bénin** (décision du
+  2026-10-23). Le pays est celui du **réseau Mobile Money** du paiement (`Payment.country`), à défaut celui du numéro de
+  téléphone du payeur (D76) ; pays inconnu : `FV`, signalé au journal d'audit (`invoice.fiscal_country_unknown`). Le type
+  est **figé** sur la facture (`Invoice.fiscal_type`). Une facture `EV` met toutes ses lignes dans le groupe
+  `emecef_export_group` (défaut **C**, taux nul exigé chez la DGI), **au montant payé** : l'exportation est à taux nul, et si de la TVA a été facturée à ce payeur, elle reste
+  dans le prix (question comptable E4b : exempter de TVA à la commande les payeurs hors Bénin est une évolution du moteur
+  de taxes, à décider).
 
 ### 5. Flux, délais et reprise
 
@@ -112,22 +123,36 @@ montant de paiement envoyé est notre total payé.
 - `Invoice` gagne `fiscal_status` (`none`, `requested`, `confirmed`, `failed`), `fiscal_uid` et `fiscal` (éléments de
   sécurité). Le numéro interne `FAC-AAAA-NNNNNN` est conservé ; le numéro fiscal est le Code MECeF/DGI. Le PDF imprime
   le QR, le Code MECeF/DGI, le NIM, les compteurs et la date, et n'est un document fiscal que si `confirmed`.
-- **Jeton** : un par e-MCF, jamais journalisé ni affiché. Tâche quotidienne : alerte Finance quand `tokenValid` est
-  dans moins de 14 jours, et à l'expiration (plus d'émission). Seul un e-MCF « Actif » émet.
+- **Jeton** : un par e-MCF, jamais journalisé ni affiché. Tâche quotidienne `check_emecef_status` : alerte Finance
+  (courriel et journal d'audit) quand `tokenValid` est dans moins de 14 jours, à l'expiration, si l'e-MCF n'est plus
+  « Actif », si l'IFU du jeton ne correspond pas à `EMECEF_IFU` ou si l'API est injoignable ; sans jeton valide, plus
+  d'émission (les factures restent « demandées » et sont relancées).
 
-### 6. Avoirs
+### 6. Avoirs : hors périmètre de la v1
 
-Un remboursement traité émet un **avoir** `FA` : `reference` = Code MECeF/DGI de la facture d'origine **sans tirets
-(24 caractères)**, montant au plus égal à celui de la facture d'origine (erreur 12), lignes reprenant les groupes de la
-facture d'origine. Erreurs possibles : 4, 5, 10 (réessai), 11, 12. Une facture confirmée n'est jamais modifiée.
+Décision du 2026-10-23 : **les factures d'avoir (`FA`, `EA`) sont retirées de l'application**. Les remboursements
+(`Refund`) sont traités **manuellement par la Finance, hors application** ; un remboursement continue d'inclure la part
+de taxes de la commande. La facture normalisée d'origine **n'est pas annulable par l'application** : si nécessaire,
+l'avoir est à émettre manuellement auprès de la DGI (rappel affiché sur le formulaire de remboursement de l'admin). Le
+code d'émission ne connaît que `FV` et `EV`. Le contrat, lui, reste documenté pour une reprise ultérieure : type `FA`
+(`EA` à l'exportation), `reference` = Code MECeF/DGI de la facture d'origine **sans tirets (24 caractères)**, montant au
+plus égal à celui de la facture d'origine (erreur 12), lignes aux groupes de la facture d'origine, erreurs 4, 5, 10
+(réessai), 11 et 12. Une reprise demandera : un modèle d'avoir, l'enregistrement des lignes envoyées, le cycle
+demande/confirmation de la facture, et la question de l'`aib` d'un avoir.
 
 ### 7. Réglages, secrets et fournisseur
 
 - `FISCAL_PROVIDER` : `fake` (local, CI, e2e ; **refuse de fonctionner** en staging et en prod) ou `emecef`. Le faux
   fournisseur calcule comme l'e-MCF (extraction de la TVA du TTC, mêmes champs de réponse).
-- `EMECEF_ENVIRONMENT` : `test` (par défaut, aussi en staging) ou `production` ; **production n'est accepté que par
-  l'environnement de production de Steamy**. `EMECEF_TOKEN` (secret) et `EMECEF_IFU` (13 caractères) viennent de
-  l'environnement, jamais du dépôt ni de la CI.
+- **Deux jeux de secrets, un par environnement** (décision du 2026-10-23) : local, dev, vérifications manuelles et
+  préproduction utilisent le **jeton de test** et le serveur de test ; la production utilise le **jeton de production** et
+  le serveur de production. `EMECEF_ENVIRONMENT` : `test` (par défaut) ou `production` ; **production n'est accepté que
+  par l'environnement de production de Steamy** (`DJANGO_ENV=production`). `EMECEF_TOKEN` (secret) et `EMECEF_IFU`
+  (13 caractères) viennent de l'environnement (`apps/api/.env` local ignoré par git pour le test, secret de déploiement
+  pour la production), jamais du dépôt ni de la CI. **Garde-fou** : l'IFU renvoyé par `/info/status` doit égaler
+  `EMECEF_IFU`, sinon pas d'activation ni d'émission (mauvais jeton pour cet environnement).
+- `PlatformSettings` : `emecef_enabled` (faux par défaut), `emecef_taxed_group` (B), `emecef_exempt_group` (E),
+  `emecef_export_group` (C) ; AIB restreint à 1 % ou 5 % quand e-MECeF est activé ; pas de taux selon l'IFU du client.
 - `PlatformSettings.emecef_enabled` : **faux par défaut** (reçu provisoire).
 - Aucun appel réseau réel en test ni en CI : transport simulé avec les réponses exactes de la documentation.
 - Sonde manuelle `emecef_probe` (hors CI), **uniquement sur le serveur de test** et avec `--yes-test` : émet une facture
@@ -137,11 +162,11 @@ facture d'origine. Erreurs possibles : 4, 5, 10 (réessai), 11, 12. Une facture 
 
 | # | Point | État |
 | --- | --- | --- |
-| E1 | Sens des groupes A à F | **Ouvert** : seuls les taux sont lus (`/info/taxGroups`) ; réglages sans défaut, garde-fou par le taux |
+| E1 | Sens des groupes A à F | **Résolu** : libellés officiels de la DGI ; TVA activée = B, sans TVA = **E (régime TPS)**, export = C ; réglables, garde-fou par le taux lu dans `/info/taxGroups` |
 | E2 | Prix TTC ou HT, arrondi | **Résolu** : `price` TTC, TVA extraite sur le total du groupe ; méthode de répartition ci-dessus |
 | E3 | AIB `A` / `B` et `total` | **Précisé** : A = 1 %, B = 5 % uniquement ; `total` avec ou sans AIB à vérifier par la sonde de test |
-| E4 | Payeurs hors Bénin : `FV` ou `EV` | **Ouvert** (comptabilité) : `FV` en attendant |
-| E5 | Doublon, expiration, référence d'avoir | **Résolu** : pas de clé d'idempotence, expiration à 2 min, 10 demandes en attente au plus, `reference` = Code MECeF/DGI sans tirets (24) |
+| E4 | Payeurs hors Bénin : `FV` ou `EV` | **Résolu** : `EV` (pays du réseau Mobile Money, sinon du téléphone ; inconnu : `FV`) ; groupe d'export C ; la TVA facturée à ces payeurs reste dans le prix (**aucun changement du moteur de taxes**, à reprendre plus tard) ; **avoirs hors v1** : remboursements manuels |
+| E5 | Doublon, expiration, référence d'avoir (avoirs hors v1) | **Résolu** : pas de clé d'idempotence, expiration à 2 min, 10 demandes en attente au plus, `reference` = Code MECeF/DGI sans tirets (24) |
 | E6 | Client sans IFU | **Résolu** : `client` et son IFU sont facultatifs |
 | E7 | Facture déjà émise en reçu provisoire | **Ouvert** : aucune régularisation automatique ; décision comptable |
 | E8 | Agrément du logiciel et jeton | **Précisé** : l'utilisateur possède l'IFU et le jeton ; démarches manuelles hors code |
@@ -159,6 +184,6 @@ facture d'origine. Erreurs possibles : 4, 5, 10 (réessai), 11, 12. Une facture 
 ## Suites
 
 1. **Fait** : socle (interface, faux fournisseur, client conforme, réglages, `emecef_check`).
-2. Émission asynchrone, éléments de sécurité sur `Invoice`, PDF avec QR (PR B).
-3. Avoirs sur remboursement, surveillance du jeton et du statut (PR C).
-4. Sonde `emecef_probe` sur le serveur de test (PR D), lancée par l'utilisateur avec son jeton.
+2. **Fait** : émission asynchrone, éléments de sécurité sur `Invoice`, PDF avec QR (PR B).
+3. **Fait** : type `EV`, garde-fou IFU, surveillance quotidienne du jeton (PR C). **Avoirs retirés de la v1** : remboursements traités à la main (à reprendre plus tard).
+4. **Fait** : sonde `emecef_probe` sur le serveur de test (PR D), lancée par l'utilisateur avec son jeton de test ; mode d'emploi dans `docs/infra/reference-configuration.md`.

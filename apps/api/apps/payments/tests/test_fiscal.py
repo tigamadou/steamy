@@ -23,7 +23,6 @@ from apps.payments.fiscal import (
     FiscalPayment,
     FiscalTemporaryError,
     InvoiceRequest,
-    SecurityElements,
     TaxGroups,
     get_fiscal_provider,
 )
@@ -179,8 +178,6 @@ def test_status_and_security_elements_helpers():
     )
     assert not later.token_valid and not later.active
     assert FiscalStatus(token_valid_until=None, emcf_status="Actif").active
-    elements = SecurityElements("d", "qr", "X537-E4DB-AJUU-HHXN-FWIS-FEKJ", "1/1 FV", "NIM")
-    assert elements.reference == "X537E4DBAJUUHHXNFWISFEKJ" and len(elements.reference) == 24
 
 
 # --- Faux fournisseur ----------------------------------------------------------------------------------------------
@@ -197,11 +194,7 @@ def test_fake_computes_like_the_dgi_example_and_confirms_with_security_elements(
     assert totals.group_totals["A"] == 1350 and totals.group_totals["B"] == 3600
     assert (totals.excl_tax["B"], totals.vat["B"], totals.vat["D"]) == (3051, 549, 0)
     elements = provider.confirm(totals.uid)
-    assert (
-        len(elements.code) == 29
-        and len(elements.reference) == 24
-        and elements.qr_code.startswith("F;")
-    )
+    assert len(elements.code) == 29 and elements.qr_code.startswith("F;")
     assert elements.nim and elements.counters == "1/1 FV"
     with pytest.raises(FiscalError) as again:
         provider.confirm(totals.uid)
@@ -338,7 +331,6 @@ def test_emecef_requests_an_invoice_with_the_dgi_example(emecef):
         "client": {"name": "Marie Houngbo", "contact": "+2290197000001"},
         "aib": "A",
     }
-    assert "reference" not in body
     assert totals.uid == DGI_INVOICE["uid"] and totals.total == 4950 and totals.aib == 0
     assert totals.group_totals == {"A": 1350, "B": 3600, "C": 0, "D": 0, "E": 0, "F": 0}
     assert totals.excl_tax == {"B": 3051, "D": 0} and totals.vat == {"B": 549, "D": 0}
@@ -354,7 +346,7 @@ def test_emecef_omits_the_optional_request_fields(emecef):
     with mock.patch("requests.request", return_value=response(DGI_INVOICE)) as request:
         emecef.request_invoice(plain)
     body = request.call_args.kwargs["json"]
-    assert "aib" not in body and "client" not in body and "reference" not in body
+    assert "aib" not in body and "client" not in body
     assert body["items"][0] == {
         "name": "Lait",
         "price": 1200,
@@ -363,29 +355,6 @@ def test_emecef_omits_the_optional_request_fields(emecef):
         "code": "92891",
         "taxSpecific": 230,
     }
-
-
-def test_a_credit_note_carries_the_24_character_reference_of_the_original_invoice(emecef):
-    original = SecurityElements(
-        "d", "qr", "X537-E4DB-AJUU-HHXN-FWIS-FEKJ", "64/64 FV", "IN01000005"
-    )
-    credit = InvoiceRequest(
-        type="FA",
-        items=[FiscalItem("", "Jus d'orange", 1800, Decimal(1), "B")],
-        client=FiscalClient(name="Marie"),
-        payments=[FiscalPayment("MOBILEMONEY", 1800)],
-        reference=original.reference,
-    )
-    with mock.patch("requests.request", return_value=response(DGI_INVOICE)) as request:
-        emecef.request_invoice(credit)
-    assert request.call_args.kwargs["json"]["reference"] == "X537E4DBAJUUHHXNFWISFEKJ"
-    for bad, code in (("", "5"), ("X537-E4DB", "5"), ("X537-E4DB-AJUU-HHXN-FWIS-FEKJ", "5")):
-        with mock.patch("requests.request") as request, pytest.raises(FiscalError) as error:
-            emecef.request_invoice(InvoiceRequest(**{**credit.__dict__, "reference": bad}))
-        assert error.value.code == code and not request.called
-    with mock.patch("requests.request") as request, pytest.raises(FiscalError) as error:
-        emecef.request_invoice(InvoiceRequest(**{**credit.__dict__, "type": "FV"}))
-    assert error.value.code == "4" and not request.called
 
 
 def test_emecef_confirms_and_cancels_with_put(emecef):
@@ -398,10 +367,7 @@ def test_emecef_confirms_and_cancels_with_put(emecef):
         "64/64 FV",
         "IN01000005",
     )
-    assert (
-        elements.date_time == "23/11/2020 13:17:08"
-        and elements.reference == "X537E4DBAJUUHHXNFWISFEKJ"
-    )
+    assert elements.date_time == "23/11/2020 13:17:08"
     cancelled = {
         "dateTime": "23/11/2020 13:17:09",
         "qrCode": "",
@@ -568,12 +534,16 @@ def test_activation_is_refused_without_environment_with_a_bad_token_or_an_inacti
 
 def test_emecef_is_off_by_default_and_needs_its_groups():
     config = PlatformSettings.load()
-    assert (config.emecef_enabled, config.emecef_taxed_group, config.emecef_exempt_group) == (
-        False,
-        "",
-        "",
-    )
+    # Libellés officiels de la DGI : B taxable, E régime TPS (Steamy sans TVA), C exportation
+    assert (
+        config.emecef_enabled,
+        config.emecef_taxed_group,
+        config.emecef_exempt_group,
+        config.emecef_export_group,
+    ) == (False, "B", "E", "C")
+    config.full_clean()
     config.emecef_enabled = True
+    config.emecef_taxed_group = config.emecef_exempt_group = ""
     with pytest.raises(ValidationError) as error:
         config.full_clean()
     assert set(error.value.message_dict) == {"emecef_taxed_group", "emecef_exempt_group"}
@@ -623,6 +593,7 @@ def test_admin_activates_emecef_only_when_the_dgi_rates_match(client):
         emecef_enabled="on",
         emecef_taxed_group="B",
         emecef_exempt_group="A",
+        emecef_export_group="C",
         vat_enabled="on",
         vat_applies_to_shipping="on",
         aib_applies_to_shipping="on",
@@ -717,3 +688,22 @@ def test_emecef_check_with_the_fake_provider_and_failures(emecef, settings):
         pytest.raises(CommandError, match="pas actif"),
     ):
         call_command("emecef_check", stdout=StringIO())
+
+
+def test_the_migration_fills_empty_groups_and_keeps_the_staff_choice():
+    from importlib import import_module
+
+    from django.apps import apps as registry
+
+    migration = import_module("apps.core.migrations.0009_groupes_dgi")
+    config = PlatformSettings.load()
+    config.emecef_taxed_group, config.emecef_exempt_group, config.emecef_export_group = "", "A", ""
+    config.save()
+    migration.fill_groups(registry, None)
+    config.refresh_from_db()
+    assert (config.emecef_taxed_group, config.emecef_exempt_group, config.emecef_export_group) == (
+        "B",
+        "A",
+        "C",
+    )
+    migration.fill_groups(registry, None)  # idempotent : rien à remplir

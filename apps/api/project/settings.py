@@ -609,6 +609,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.payments.tasks.retry_pending_invoices",
         "schedule": crontab(minute="*/10"),
     },
+    # Facture normalisée e-MECeF : jeton, e-MCF actif, IFU (ADR 0006)
+    "check-emecef-status": {
+        "task": "apps.payments.tasks.check_emecef_status",
+        "schedule": crontab(minute=0, hour=6),
+    },
     "expire-payment-requests": {
         "task": "apps.payments.tasks.expire_payment_requests",
         "schedule": crontab(minute=45),

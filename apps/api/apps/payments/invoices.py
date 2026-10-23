@@ -18,10 +18,32 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
+from apps.accounts.fields import phone_country
+from apps.core.audit import audit
 from apps.core.models import DocumentSequence, PlatformSettings
 
 from .models import Invoice, Order, Payment
 from .taxes import snapshot_lines
+
+BENIN = "BJ"
+
+
+def payer_country(order: Order, payment: Payment) -> str:
+    """Pays du payeur : celui du réseau Mobile Money utilisé, à défaut celui de son numéro de téléphone (D76)."""
+    if payment.country:
+        return payment.country
+    phone = order.payer.phone if order.payer is not None else order.guest_phone
+    country = phone_country(phone) if phone else None
+    return country.code if country else ""
+
+
+def fiscal_type_of(order: Order, payment: Payment) -> str:
+    """`EV` (vente à l'exportation) pour un payeur hors du Bénin, `FV` sinon ; pays inconnu : `FV`, signalé (ADR 0006)."""
+    country = payer_country(order, payment)
+    if not country:
+        audit("invoice.fiscal_country_unknown", target=order, data={"payment": payment.pk})
+        return "FV"
+    return "FV" if country == BENIN else "EV"
 
 
 def buyer_of(order: Order) -> dict:
@@ -43,10 +65,12 @@ def issue_invoice(order: Order, payment: Payment) -> Invoice:
         return existing
     issued_at = timezone.now()
     number = DocumentSequence.next("invoice", issued_at.year)
+    fiscal_type = fiscal_type_of(order, payment)
     invoice = Invoice.objects.create(
         order=order,
         number=f"FAC-{issued_at.year}-{number:06d}",
         issued_at=issued_at,
+        fiscal_type=fiscal_type,
         snapshot={
             "provisional": settings.INVOICE_PROVISIONAL,
             "seller": {k: v for k, v in settings.INVOICE_SELLER.items() if v},

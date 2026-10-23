@@ -10,7 +10,6 @@ Client de l'API e-MCF 1.0 de la DGI du Bénin (ADR 0006) : spécification offici
 - Aucun appel n'est fait tant que `PlatformSettings.emecef_enabled` est faux, et jamais en CI (transport simulé).
 """
 
-import re
 from datetime import datetime
 
 import requests
@@ -36,8 +35,6 @@ API_URLS = {
     "production": "https://sygmef.impots.bj/emcf/api",
 }
 TIMEOUT_SECONDS = 20
-CREDIT_TYPES = ("FA", "EA")
-REFERENCE_LENGTH = 24
 
 
 def parse_datetime(value) -> datetime | None:
@@ -156,13 +153,6 @@ class EmecefProvider(FiscalInvoiceProvider):
     # --- Facturation -----------------------------------------------------------------------------
 
     def request_invoice(self, request: InvoiceRequest) -> InvoiceTotals:
-        if request.type in CREDIT_TYPES and not re.fullmatch(r"[A-Za-z0-9]{24}", request.reference):
-            raise FiscalError(
-                "La référence d'un avoir est le Code MECeF/DGI de la facture d'origine, sans tirets (24 caractères).",
-                code="5",
-            )
-        if request.type not in CREDIT_TYPES and request.reference:
-            raise FiscalError("Seuls les avoirs portent une référence.", code="4")
         body = {
             "ifu": self.ifu,
             "type": request.type,
@@ -186,8 +176,6 @@ class EmecefProvider(FiscalInvoiceProvider):
             body["client"] = client
         if request.aib:
             body["aib"] = request.aib
-        if request.reference:
-            body["reference"] = request.reference
         data = self._call("POST", "/invoice", body)
         return self._totals(data)
 

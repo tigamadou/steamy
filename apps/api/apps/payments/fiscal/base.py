@@ -72,8 +72,8 @@ class FiscalPayment:
 @dataclass(frozen=True)
 class InvoiceRequest:
     """
-    Demande de facture construite par le serveur à partir d'une commande. Il n'y a pas de clé d'idempotence : `reference`
-    sert **uniquement** aux avoirs (`FA`, `EA`), avec les 24 caractères du Code MECeF/DGI de la facture d'origine.
+    Demande de facture construite par le serveur à partir d'une commande : `FV` (vente) ou `EV` (exportation) ; les avoirs
+    (`FA`, `EA`) sont hors périmètre de la v1 (ADR 0006). Il n'y a pas de clé d'idempotence côté DGI.
     """
 
     type: str
@@ -85,8 +85,6 @@ class InvoiceRequest:
     #: Nom de l'opérateur : obligatoire pour la DGI (par exemple « Steamy »)
     operator_name: str = "Steamy"
     operator_id: str = ""
-    #: Code MECeF/DGI de la facture d'origine, sans tirets (24 caractères) : avoirs seulement
-    reference: str = ""
 
 
 @dataclass(frozen=True)
@@ -109,7 +107,7 @@ class InvoiceTotals:
 class SecurityElements:
     """
     Éléments de sécurité à imprimer sur la facture, renvoyés à la confirmation. À l'annulation, `qr_code` et `code`
-    sont vides. `code` = Code MECeF/DGI sur 29 caractères avec tirets ; sans tirets (24), c'est la référence d'un avoir.
+    sont vides. `code` = Code MECeF/DGI sur 29 caractères avec tirets.
     """
 
     date_time: str
@@ -117,11 +115,6 @@ class SecurityElements:
     code: str
     counters: str
     nim: str
-
-    @property
-    def reference(self) -> str:
-        """Code MECeF/DGI sans tirets : la `reference` d'un avoir sur cette facture."""
-        return self.code.replace("-", "")
 
 
 @dataclass(frozen=True)

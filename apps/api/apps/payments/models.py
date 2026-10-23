@@ -357,6 +357,8 @@ class Invoice(models.Model):
     #: Éléments de sécurité à imprimer : `{date_time, qr_code, code, counters, nim}`
     fiscal = models.JSONField(_("éléments de sécurité"), default=dict, blank=True)
     fiscal_error = models.TextField(_("erreur e-MECeF"), blank=True)
+    #: `FV` (vente) ou `EV` (vente à l'exportation, payeur hors du Bénin) : figé à l'émission de la facture
+    fiscal_type = models.CharField(_("type de facture"), max_length=2, default="FV")
 
     class Meta:
         ordering = ["-issued_at", "-id"]
