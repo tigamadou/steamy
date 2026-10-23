@@ -165,7 +165,7 @@ export function TeacherHomeSkeleton() {
         <SkeletonBlock className="h-16 rounded-lg" />
         <SkeletonBlock className="h-16 rounded-lg" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <SkeletonBlock className="h-32 rounded-[18px]" />
         <SkeletonBlock className="h-32 rounded-[18px]" />
         <SkeletonBlock className="hidden h-32 rounded-[18px] lg:block" />
