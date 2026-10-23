@@ -39,7 +39,8 @@ const WPDAC_TEXTAREA = {
 };
 
 // ─── Objets de demande (jeu D2 : Léa Adjovi, 13 ans, 4ᵉ ; parent Marie Adjovi) ───
-// Montants calculés par le serveur ; libellés FCFA (D2).
+// Montants calculés par le serveur ; libellés FCFA (D2). Prix du catalogue HT ; TVA et AIB s'ajoutent si le personnel les
+// active (C25) : taux d'exemple ici (18 % et 1 %), les vrais taux sont ceux des réglages de la plateforme.
 const WPDAC_REQUESTS = {
   course: {
     kindLabel: "Parcours",
@@ -47,8 +48,9 @@ const WPDAC_REQUESTS = {
     title: "Capteurs électroniques",
     color: "var(--cat-electronique)",
     emoji: "⚡",
-    lines: [["Parcours complet · accès à vie", "18 000 FCFA"]],
-    total: "18 000 FCFA",
+    lines: [["Parcours complet · accès à vie (HT)", "18 000 FCFA"]],
+    taxes: [["TVA (18 %)", "3 240 FCFA"], ["AIB (1 %)", "180 FCFA"]],
+    total: "21 420 FCFA",
     requiredKit: "Kit Capteurs Steamy · non inclus (Kit Code à saisir par Léa)",
     note: "Le parcours est débloqué pour Léa dès la confirmation du paiement.",
   },
@@ -59,10 +61,11 @@ const WPDAC_REQUESTS = {
     color: "var(--cat-robotique)",
     emoji: "🤖",
     lines: [
-      ["Steamy Bot v1 × 1", "35 000 FCFA"],
+      ["Steamy Bot v1 × 1 (HT)", "35 000 FCFA"],
       ["Livraison · zone Cotonou", "1 500 FCFA"],
     ],
-    total: "36 500 FCFA",
+    taxes: [["TVA (18 %)", "6 570 FCFA"], ["AIB (1 %)", "365 FCFA"]],
+    total: "43 435 FCFA",
     note: "Le kit est réservé pendant 30 min dès que vous lancez le paiement. Le Kit Code imprimé sur la notice débloque le parcours « Construis ton robot Bluetooth ».",
   },
   event: {
@@ -71,8 +74,9 @@ const WPDAC_REQUESTS = {
     title: "Atelier Électronique débutant",
     color: "var(--cat-electronique)",
     emoji: "💡",
-    lines: [["Inscription · samedi 28 juin 2026", "5 000 FCFA"]],
-    total: "5 000 FCFA",
+    lines: [["Inscription · samedi 28 juin 2026 (HT)", "5 000 FCFA"]],
+    taxes: [["TVA (18 %)", "900 FCFA"], ["AIB (1 %)", "50 FCFA"]],
+    total: "5 950 FCFA",
     note: "L'inscription de Léa est confirmée dès le paiement, dans la limite des places.",
   },
 };
@@ -192,7 +196,8 @@ function WPDACObject({ kind = "course", compact, editAddress }) {
     ? {
         ...base,
         lines: [base.lines[0], ["Livraison · zone Abomey-Calavi", "2 000 FCFA"]],
-        total: "37 000 FCFA",
+        taxes: [["TVA (18 %)", "6 660 FCFA"], ["AIB (1 %)", "370 FCFA"]],
+        total: "44 030 FCFA",
       }
     : base;
   return (
@@ -252,6 +257,12 @@ function WPDACObject({ kind = "course", compact, editAddress }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: 10, borderTop: "2px dashed var(--ink-100)" }}>
         {r.lines.map(([k, v], i) => (
           <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 700, color: "var(--ink-600)" }}>
+            <span>{k}</span>
+            <span>{v}</span>
+          </div>
+        ))}
+        {r.taxes.map(([k, v], i) => (
+          <div key={`t${i}`} style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 700, color: "var(--ink-600)" }}>
             <span>{k}</span>
             <span>{v}</span>
           </div>
@@ -356,7 +367,7 @@ function WPDACStatusPanel({ status, mobile }) {
         <Loader />
         <div style={{ fontSize: 20, fontWeight: 900 }}>Validez le paiement sur votre téléphone</div>
         <div style={{ fontSize: 14, fontWeight: 600, color: "var(--ink-600)", lineHeight: 1.5 }}>
-          Une demande de 18 000 FCFA a été envoyée au <b>+229 01 97 45 22 18</b> (MTN). Confirmez-la avec votre code
+          Une demande de 21 420 FCFA a été envoyée au <b>+229 01 97 45 22 18</b> (MTN). Confirmez-la avec votre code
           secret Mobile Money. Nous vérifions le statut automatiquement : vous pouvez garder cette page ouverte.
         </div>
         <WPDACNote icon="⏱️" tone="ink">
@@ -376,7 +387,7 @@ function WPDACStatusPanel({ status, mobile }) {
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 6, padding: 14, borderRadius: 14, background: "var(--success-50)", textAlign: "left" }}>
           {[
             ["Référence", "#CM-2052"],
-            ["Montant", "18 000 FCFA"],
+            ["Montant", "21 420 FCFA"],
             ["Réseau", "MTN · 01 97 •• •• 18"],
             ["Date", "14 oct. 2026 · 18:42"],
           ].map(([k, v]) => (
@@ -478,7 +489,7 @@ function WPDACStatusPanel({ status, mobile }) {
         demande ; Léa en sera informée et pourra la renvoyer quand le kit sera de retour.
       </div>
       <Button block size="lg" disabled>
-        Payer 36 500 FCFA
+        Payer 43 435 FCFA
       </Button>
       <Button block variant="danger">
         Refuser la demande
@@ -515,7 +526,7 @@ function WPD15_PaymentRequest({ kind = "course", status = "pending", modal, edit
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 420px", gap: 22, alignItems: "flex-start" }}>
           <WPDACSummary kind={kind} badge={<WPDACStatusBadge status={status} />} editAddress={editAddress} />
           {status === "pending" ? (
-            <WPDACPaymentForm kind={kind} total={editAddress ? "37 000 FCFA" : undefined} />
+            <WPDACPaymentForm kind={kind} total={editAddress ? "44 030 FCFA" : undefined} />
           ) : (
             <WPDACStatusPanel status={status} />
           )}
@@ -533,7 +544,7 @@ function WPDACRefuseModal() {
       <div className="modal" style={{ maxWidth: 460, textAlign: "left", display: "flex", flexDirection: "column", gap: 14 }}>
         <div style={{ fontSize: 22, fontWeight: 900 }}>Refuser la demande de Léa ?</div>
         <div style={{ fontSize: 14, fontWeight: 600, color: "var(--ink-600)", lineHeight: 1.5 }}>
-          Parcours <b>Capteurs électroniques</b> · 18 000 FCFA. Léa sera prévenue de votre refus.
+          Parcours <b>Capteurs électroniques</b> · 21 420 FCFA (taxes comprises). Léa sera prévenue de votre refus.
         </div>
         <Field label="Motif (facultatif)" hint="Il sera transmis à Léa.">
           <textarea style={WPDAC_TEXTAREA} defaultValue="On en reparle après les examens." />
