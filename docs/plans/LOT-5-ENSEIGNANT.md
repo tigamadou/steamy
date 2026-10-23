@@ -53,7 +53,7 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [ ] Branchement API : `classrooms/reviews/?status=&type=&classroomId=`
   - [ ] Tests unitaires : filtres et `searchParams`, pagination, état vide par filtre
   - [ ] Recette : aucune action de correction ou de modification de note (D65)
-- [x] **5.6** Parcours encadrés · `feature/lot5-parcours` (requiert 5.1)
+- [x] **5.6** Parcours encadrés · `feature/lot5-parcours` · PR #149 (requiert 5.1)
   - [x] `WT02` Mes parcours encadrés (carte de parcours encadré : classes, élèves)
   - [x] `WT10` Détail parcours encadré (`MissionCompletionItem`, panneau droit : progression par classe, taux de réussite, niveaux et projets les plus échoués)
   - [x] Mission en lecture seule (lecteur du lot 3 sans progression, sans quiz, sans suivi du visionnage)
