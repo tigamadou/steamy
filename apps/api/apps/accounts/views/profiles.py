@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.fields import PhoneField, phone_country
-from apps.accounts.models import Gender, LearnerProfile, ParentProfile
+from apps.accounts.models import Gender, LearnerProfile, ParentProfile, TeacherProfile
 from apps.accounts.profile import ProfileStep, profile_step
 from apps.accounts.signup import MAX_AGE, MIN_AGE
 from apps.referentials.models import (
@@ -36,7 +36,7 @@ from apps.referentials.serializers import (
     SchoolGradeSerializer,
 )
 from libs.errors import message_for
-from libs.permissions import IsLearner, IsParent
+from libs.permissions import IsLearner, IsParent, IsTeacher
 
 #: Objectifs au moins (W13).
 MIN_LEARNER_GOALS = 2
@@ -286,3 +286,57 @@ class ParentProfileView(APIView):
         with transaction.atomic():
             serializer.save()
         return Response(ParentProfileSerializer(profile).data)
+
+
+# --- Enseignant (WT08) --------------------------------------------------------------------------
+
+
+class TeacherSchoolSerializer(serializers.Serializer):
+    """Établissement de l'enseignant, en lecture seule (C6)."""
+
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    city = serializers.CharField(read_only=True)
+
+
+class TeacherProfileSerializer(serializers.ModelSerializer):
+    # Ni `bio`, ni `phone`, ni `verified_at` : aucun profil public d'auteur (S5)
+    school = TeacherSchoolSerializer(read_only=True, allow_null=True)
+
+    class Meta:
+        model = TeacherProfile
+        fields = ("specialty", "school")
+        read_only_fields = fields
+
+
+class TeacherProfileUpdateSerializer(serializers.ModelSerializer):
+    """Seule la spécialité se modifie ; le reste du corps est ignoré."""
+
+    class Meta:
+        model = TeacherProfile
+        fields = ("specialty",)
+        extra_kwargs = {"specialty": {"required": False, "allow_blank": True}}
+
+
+class TeacherProfileView(APIView):
+    permission_classes = [IsTeacher]
+
+    @extend_schema(responses=TeacherProfileSerializer)
+    def get(self, request):
+        """WT08 : spécialité et établissement (lecture seule) de l'enseignant connecté."""
+        profile, _ = TeacherProfile.objects.select_related("school").get_or_create(
+            user=request.user
+        )
+        return Response(TeacherProfileSerializer(profile).data)
+
+    @extend_schema(request=TeacherProfileUpdateSerializer, responses=TeacherProfileSerializer)
+    def patch(self, request):
+        """WT08 : modifie la spécialité."""
+        profile, _ = TeacherProfile.objects.select_related("school").get_or_create(
+            user=request.user
+        )
+        serializer = TeacherProfileUpdateSerializer(profile, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            serializer.save()
+        return Response(TeacherProfileSerializer(profile).data)

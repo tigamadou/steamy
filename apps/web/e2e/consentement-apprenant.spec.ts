@@ -59,8 +59,7 @@ test("W18 : le refus est affiché avec son motif, l'identifiant est libéré, le
   await axe(page);
   expect(await isUsernameAvailable(username)).toBe(true);
 
-  // Nouvelle inscription vers le même parent : délai de 30 jours (C9). Dans un autre navigateur : la session de
-  // celui-ci garde le refus affiché (W18), voir le rapport du lot sur `POST auth/learner-signup/`.
+  // Nouvelle inscription vers le même parent : délai de 30 jours (C9).
   const again = await (await browser.newContext()).newPage();
   await startLearnerSignup(again);
   await again.getByRole("textbox", { name: /^Numéro de téléphone du parent/ }).fill(phone.slice(4));
@@ -103,4 +102,23 @@ test("W16 : un compte en attente bascule vers la reprise, identifiant prérempli
   await other.getByRole("button", { name: "Reprendre mon inscription" }).click();
   await expect(other).toHaveURL("/inscription/reprendre");
   await expect(other.getByRole("textbox", { name: /^Identifiant/ })).toHaveValue(username);
+});
+
+test("W18 n'est plus réaffiché : une nouvelle inscription dans le même navigateur après un refus mène à W07", async ({
+  page,
+}) => {
+  await startLearnerSignup(page);
+  const refusedPhone = uniquePhone();
+  const link = await sendConsentRequest(page, refusedPhone);
+  await decideConsent(link, refusedPhone, { accept: false, note: "Pas maintenant." });
+  await page.reload();
+  await expect(page).toHaveURL("/inscription/apprenant/refus");
+
+  // Même navigateur, même session : nouvelle inscription vers un autre parent
+  await startLearnerSignup(page);
+  await sendConsentRequest(page, uniquePhone());
+  await expect(page).toHaveURL("/inscription/apprenant/attente");
+  await page.reload();
+  await expect(page).toHaveURL("/inscription/apprenant/attente");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("On attend l'accord de ton parent…");
 });
