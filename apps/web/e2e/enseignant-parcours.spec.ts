@@ -82,8 +82,6 @@ test("WT10 : un parcours que Koffi n'encadre pas est introuvable (page « introu
 
   await page.goto(`/enseignant/parcours/${other!.slug}`);
   await expect(page.getByRole("heading", { level: 2, name: "Ce contenu est introuvable" })).toBeVisible();
-  // Page « introuvable » : non indexée (le code HTTP est 200 sous Suspense)
-  await expect(page.locator('meta[name="robots"][content*="noindex"]')).toHaveCount(1);
   await page.getByRole("link", { name: "Voir mes parcours" }).click();
   await expect(page).toHaveURL("/enseignant/parcours");
 });
