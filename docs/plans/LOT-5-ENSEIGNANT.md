@@ -6,85 +6,98 @@ règles communes, la définition de « terminé » et les outils de test sont da
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 5.1 Shell, accueil et navigation · Prérequis : `API-L5` (endpoints `classrooms`, `API-L5.1` à `API-L5.5`, seed D2) ; lots 1, 2 et 3 livrés ; lot 4 pour l'affichage des commentaires côté parent (`WPD03`) ; maquette de `WT13` validée (C18) avant 5.2 ; étape 4.10 du lot 4 livrée pendant ce lot, avant 5.9
+Statut : 🟡 en cours · Prochaine tâche : fusion de la pile de PR (5.1 à 5.9 en PR : #147, #149, #152, #155 à #159, #161), CI `ci-ok` verte sur la pile fusionnée, recette produit · Prérequis : `API-L5` (endpoints `classrooms`, `API-L5.1` à `API-L5.5`, seed D2) ; lots 1, 2 et 3 livrés ; lot 4 pour l'affichage des commentaires côté parent (`WPD03`) ; maquette de `WT13` validée (C18) avant 5.2 ; étape 4.10 du lot 4 livrée pendant ce lot, avant 5.9
 
-### Lot 5 · Espace enseignant — ⬜ à faire
-- [ ] **5.1** Shell, accueil et navigation · `feature/lot5-shell-accueil` (requiert API-L5)
-  - [ ] Layout `(enseignant)` : contrôle du rôle `teacher` côté serveur, redirection vers `/connexion`
-  - [ ] Config `AppShell` enseignant (7 entrées, icône `help` ajoutée au DS pour Aide, cloche vers `WT12`)
-  - [ ] `WT01` Accueil : `ClassCard`, `ReviewRow`, `DropoutRow`, `StatPill`, `SectionHeader`
-  - [ ] Branchement API : `accounts/me/`, `notifications/unread-count/`, `classrooms/dashboard/`
-  - [ ] États : sans classe (Zeti + « Créer une classe » vers `WT13`), « À revoir » vide, « Décrochage » vide, erreur, hors ligne
-  - [ ] Tests unitaires : nav active selon la route ; registre (aucun « tu », snapshot de textes)
-  - [ ] Tests : redirection d'un apprenant ou d'un parent hors de `/enseignant`
-  - [ ] Recette : compteurs conformes au seed ; « Commenter » ouvre `WT05` sur la tentative ; aucun « À corriger »
-- [ ] **5.2** Classes · `feature/lot5-classes` (requiert 5.1, maquette de `WT13` validée)
-  - [x] Conception de la maquette `WT13` dans `design/screens-enseignant-a-concevoir-web.jsx` (C18)
-  - [ ] `WT03` Mes classes
-  - [ ] `WT13` Créer / modifier une classe (`ClassroomForm` : nom*, parcours* limité à l'offre, niveau scolaire facultatif, établissement en lecture seule) d'après la maquette validée
-  - [ ] `WT04` Élèves d'une classe (`MemberRow`, `InvitationRow` en attente / refusée / expirée)
-  - [ ] `QuotaNotice` et bouton « Créer » désactivé si quota atteint, erreur serveur `CLASSROOM_QUOTA_EXCEEDED` quand même affichée
-  - [ ] `ConfirmDialog` « Retirer de la classe » (libère le quota)
-  - [ ] Parcours désactivé en édition dès qu'il y a un membre
-  - [ ] Branchement API : `classrooms/`, `classrooms/school/`, `PATCH classrooms/{id}/`, `members/`, retrait
-  - [ ] Tests unitaires : formulaire (validation, erreurs serveur sur les champs), lignes d'invitation par statut
-  - [ ] Playwright : création, `WT04` vide, CTA vers `WT06`
-  - [ ] Recette : création redirige vers `WT04` ; retrait confirmé fait disparaître l'élève et libère le quota
-- [ ] **5.3** Ajout d'élèves et import · `feature/lot5-ajout-eleves` (requiert 5.2)
-  - [ ] `WT06` onglet Individuel : prénom*, nom*, téléphone du parent* (`PhoneInput`), lien de parenté*, classe* (`?classe=`), encart consentement SMS (D60)
-  - [ ] `WT06` onglet Import par lot : CSV / Excel (200 lignes max) ou liste collée, modèle CSV téléchargeable, aperçu des 5 premières lignes, classe*
-  - [ ] État « Résultat d'import » : `ImportReport` par ligne, filtre « Erreurs seulement », édition en place, « Renvoyer les lignes corrigées »
-  - [ ] Quota restant affiché avant l'envoi ; le front ne valide que la forme
-  - [ ] Branchement API : `invitations/`, `invitations/import/`, `classrooms/school/`
-  - [ ] Tests unitaires : parsing de la liste collée (`;`, `,`, tabulation), rendu de chaque code d'erreur, édition et renvoi
-  - [ ] Playwright : import de 6 lignes (doublon, numéro invalide, ligne malformée, déjà présent, dépassement de quota), rapport conforme, correction, renvoi, ligne « envoyée »
-  - [ ] Recette : invitations « En attente du parent » dans `WT04` ; SMS émis par le faux fournisseur (S10)
-- [ ] **5.4** Profil élève et commentaires · `feature/lot5-profil-eleve` (requiert 5.2)
-  - [ ] `WT05` : progression, tentatives (`QuizAttemptRow`, statut serveur D31), avatar, classe, badges, moyenne
-  - [ ] Commentaire : `textarea`, « Envoyer le commentaire », rattachement à une tentative (`?tentative=`), historique, mention « Visible par l'élève et son parent » (D63)
-  - [ ] Branchement API : `classrooms/learners/{id}/?classroomId=`, `comments/`
-  - [ ] Règles : aucune donnée sensible, pas d'âge ni de « Message au parent », 404 hors des classes de l'enseignant
-  - [ ] Tests unitaires : envoi, longueur max, état d'erreur
-  - [ ] Playwright : commenter une tentative `ko`, elle sort de « À revoir », commentaire visible côté apprenant (`WD01`) et parent (`WPD03`)
-  - [ ] Recette : aucun champ sensible dans le payload (test de contrat)
-- [ ] **5.5** Évaluations « À revoir » · `feature/lot5-evaluations` (requiert 5.4)
-  - [ ] `WT07` : filtres Toutes / Formatives / Sommatives / À revoir dans l'URL, filtre par classe, pagination, « Commenter » vers `WT05`
-  - [ ] Branchement API : `classrooms/reviews/?status=&type=&classroomId=`
-  - [ ] Tests unitaires : filtres et `searchParams`, pagination, état vide par filtre
-  - [ ] Recette : aucune action de correction ou de modification de note (D65)
-- [ ] **5.6** Parcours encadrés · `feature/lot5-parcours` (requiert 5.1)
-  - [ ] `WT02` Mes parcours encadrés (`CourseCard` encadré)
-  - [ ] `WT10` Détail parcours encadré (`MissionCompletionItem`, panneau droit : progression par classe, taux de réussite, missions les plus échouées)
-  - [ ] Mission en lecture seule (lecteur du lot 3 sans progression ni quiz)
-  - [ ] Branchement API : `classrooms/courses/`, `courses/{slug}/`, `missions/{id}/`
-  - [ ] Tests unitaires : arbre avec compteurs ; parcours non encadré = 404
-  - [ ] Recette : seuls les parcours des classes de l'enseignant apparaissent (D64)
-- [ ] **5.7** Événements · `feature/lot5-evenements` (requiert 5.2)
-  - [ ] `WT09` Événements à venir et `WL23` dans le shell enseignant
-  - [ ] « Proposer à une classe » : modale de choix de classe puis confirmation « Les élèves et leurs parents ont été notifiés »
-  - [ ] « Candidatures de mes élèves » en lecture seule
-  - [ ] Branchement API : `events/`, `events/{slug}/`, `proposals/`, `classrooms/event-applications/`
-  - [ ] Tests unitaires : modale, double proposition à la même classe (message serveur)
-- [ ] **5.8** Paramètres, notifications, aide · `feature/lot5-parametres-notifs-aide` (requiert 5.1)
-  - [ ] `WT08` Paramètres : profil (nom, spécialité, établissement en lecture seule), connexion (email, mot de passe D25), notifications (in-app et email), légal
-  - [ ] `WT08` zone sensible : « Demander la fermeture du compte » vers `public/contact-messages/` (sujet prérempli)
-  - [ ] `WT12` Notifications : onglets, « Tout marquer comme lu », liens par type (`WT05`, `WT04`, `WT09`)
-  - [ ] `WT11` Aide : FAQ statique MDX (4 sujets du plan) + formulaire `WL24`
-  - [ ] Tests unitaires : résolution `type` vers route ; préférences optimistes avec retour arrière en cas d'erreur
-  - [ ] Playwright : changement de mot de passe puis reconnexion
-- [ ] **5.9** Parcours de bout en bout et durcissement · `feature/lot5-e2e` (requiert 5.1 à 5.8, étape 4.10 du lot 4, lot 2 activation)
-  - [ ] Playwright « Invitation complète » : admin invite, activation `/activation/[token]`, connexion `W16`, création de classe, invitation, acceptation `WPD05`, élève actif en `WT04`, notification « a rejoint la classe »
-  - [ ] Playwright « Compte existant (C11) » : rattachement du compte, élève dans `WT04`, parcours `source=classroom`, sans paiement
-  - [ ] Playwright « Refus » : invitation « Refusée » dans `WT04`, notification `WT12`
-  - [ ] Playwright « Import avec erreurs » (étape 5.3)
-  - [ ] Playwright « Décrochage » : tâche quotidienne, élève signalé dans `WT01`, `WT04`, `WT12`
-  - [ ] Playwright « Cloisonnement » : second enseignant, 404 sur classe, profil élève et parcours
-  - [ ] Audit final : axe sur chaque route, 360 px, registre, absence de données codées en dur
+### Lot 5 · Espace enseignant — 🟡 en cours
+- [x] **5.1** Shell, accueil et navigation · `feature/lot5-shell-accueil` · PR #147 (requiert API-L5)
+  - [x] Layout `(enseignant)` : contrôle du rôle `teacher` côté serveur, redirection vers `/connexion`
+  - [x] Config `AppShell` enseignant (7 entrées, icône `help` ajoutée au DS pour Aide, cloche vers la page des notifications) ; seules les entrées dont les écrans sont livrés sont visibles, chaque étape lève la sienne
+  - [x] `WT01` Accueil : `ClassCard`, `ReviewRow`, `DropoutRow`, `StatPill`, `SectionHeader`
+  - [x] Branchement API : `accounts/me/`, `notifications/unread-count/`, `classrooms/dashboard/`
+  - [x] États : sans classe (Zeti + « Créer une classe » vers la création de classe), « À revoir » vide, « Décrochage » vide, erreur, hors ligne
+  - [x] Tests unitaires : nav active selon la route ; registre (aucun « tu », contrôle des textes)
+  - [x] Tests : redirection d'un apprenant ou d'un parent hors de `/enseignant`
+  - [x] Recette : compteurs conformes au seed ; aucun « À corriger » ; « Commenter » ouvre le profil élève sur la tentative (preuve : `enseignant-accueil.spec.ts` et `enseignant-profil-eleve.spec.ts`, une fois la pile fusionnée)
+  > Écarts : l'ancienne page d'attente (`SpaceWaiting`) et son bouton de déconnexion sont supprimés. Pris seule, l'étape 5.1 laisse les liens de l'accueil vers WT04, WT05, WT06 et WT13 sans cible : elle n'est utilisable qu'avec la pile 5.2 à 5.4 fusionnée.
+- [x] **5.2** Classes · `feature/lot5-classes` · PR #155 (requiert 5.1, maquette de `WT13` validée)
+  - [x] Conception de la maquette `WT13` dans `design/screens-enseignant-a-concevoir-web.jsx` (C18) ; **validée par le produit le 2026-10-23, sans retouche**
+  - [x] `WT03` Mes classes
+  - [x] `WT13` Créer / modifier une classe (`ClassroomForm` : nom*, parcours* limité à l'offre, niveau scolaire facultatif, établissement en lecture seule) d'après la maquette validée
+  - [x] `WT04` Élèves d'une classe (`MemberRow`, `InvitationRow` en attente / refusée / expirée)
+  - [x] `QuotaNotice` et bouton « Créer » désactivé si quota atteint, erreur serveur `CLASSROOM_QUOTA_EXCEEDED` quand même affichée
+  - [x] `ConfirmDialog` « Retirer de la classe » (libère le quota)
+  - [x] Parcours désactivé en édition dès qu'il y a un membre
+  - [x] Branchement API : `classrooms/`, `classrooms/school/`, `PATCH classrooms/{id}/`, `members/`, retrait
+  - [x] Tests unitaires : formulaire (validation, erreurs serveur sur les champs), lignes d'invitation par statut
+  - [x] Playwright : création, `WT04` vide, CTA vers `WT06`
+  - [x] Recette : création redirige vers `WT04` ; retrait confirmé fait disparaître l'élève et libère le quota
+  > Écarts : « Annuler l'invitation » (même endpoint que le retrait) est proposé sur les invitations. Le quota de classes du jeu D2 est de 4 pour 2 classes créées : le test de création (une seule fois, sur « bureau ») en consomme une ; l'étape 5.9 en créera une autre, la marge est étroite (à relever dans le seed si besoin).
+- [x] **5.3** Ajout d'élèves et import · `feature/lot5-ajout-eleves` · PR #156 (requiert 5.2)
+  - [x] `WT06` onglet Individuel : prénom*, nom*, téléphone du parent* (`PhoneInput`), lien de parenté*, classe* (`?classe=`), encart consentement SMS (D60)
+  - [x] `WT06` onglet Import par lot : CSV / Excel (200 lignes max) ou liste collée, modèle CSV téléchargeable, aperçu des 5 premières lignes (CSV et liste collée), classe*
+  - [x] État « Résultat d'import » : `ImportReport` par ligne, filtre « Erreurs seulement », édition en place, « Renvoyer les lignes corrigées »
+  - [x] Quota restant affiché avant l'envoi ; le front ne valide que la forme
+  - [x] Branchement API : `invitations/`, `invitations/import/`, `classrooms/school/`
+  - [x] Tests unitaires : parsing de la liste collée (`;`, `,`, tabulation), rendu de chaque code d'erreur, édition et renvoi
+  - [x] Playwright : import de lignes (doublon, numéro invalide, ligne malformée, déjà présent), rapport conforme, correction, renvoi, ligne « envoyée »
+  - [x] Recette : invitations « En attente du parent » dans `WT04` ; SMS émis par le faux fournisseur (S10)
+  > Écarts : pas d'aperçu pour un fichier Excel (le serveur seul sait le lire) ; le rapport le détaille après l'envoi. Le dépassement de quota d'élèves n'est pas rejoué en Playwright (le quota du seed est de 120) : rendu et renvoi couverts par les tests unitaires. Une ligne mal formée d'une liste collée (colonnes en trop ou en moins, champ vide) est signalée par le front sans être envoyée. Un fichier de plus de 1 Mo est refusé avant lecture ; au-delà de 200 lignes le front avertit sans bloquer (le serveur juge). Les imports de fichier ne sont testés qu'en unitaire (Playwright joue la liste collée) ; le dépassement de quota d'élèves n'est pas rejoué en e2e. L'attente imposée par `THROTTLED` bloque les envois avec un compte à rebours.
+- [x] **5.4** Profil élève et commentaires · `feature/lot5-profil-eleve` (requiert 5.2)
+  - [x] `WT05` : progression, tentatives (statut serveur D31), avatar, classe, badges, moyenne
+  - [x] Commentaire : `textarea`, « Envoyer le commentaire », rattachement à une tentative (`?tentative=`), historique, mention « Visible par l'élève et son parent » (D63)
+  - [x] Branchement API : `classrooms/learners/{id}/?classroomId=`, `comments/`
+  - [x] Règles : aucune donnée sensible, pas d'âge ni de « Message au parent », 404 hors des classes de l'enseignant
+  - [x] Tests unitaires : envoi, longueur max, état d'erreur
+  - [x] Playwright : commenter une tentative `ko`, elle sort de « À revoir », commentaire visible côté parent (`WPD03`) et apprenant notifié
+  - [x] Recette : aucun champ sensible dans l'affichage (le payload `LearnerFollowUp` n'en porte pas)
+  > Écarts : le commentaire n'est pas affiché sur l'accueil de l'apprenant (`WD01`) : cette carte n'existe pas dans le lot 3 ; l'apprenant en est notifié (`WD04`, « t'a laissé un commentaire »). « Commenter » sur une ligne de `WT01` vient de l'étape 5.1 (`?tentative=`). La tentative est présentée avec son pourcentage et son statut serveur (l'API ne renvoie pas de score brut). La mention du test de contrat de payload est couverte côté API (sérialiseur dédié).
+- [x] **5.5** Évaluations « À revoir » · `feature/lot5-evaluations` (requiert 5.4)
+  - [x] `WT07` : filtres Toutes / Formatives / Sommatives / À revoir dans l'URL, filtre par classe, pagination, « Commenter » vers `WT05`
+  - [x] Branchement API : `classrooms/reviews/?status=&type=&classroomId=`
+  - [x] Tests unitaires : filtres et `searchParams`, pagination, état vide par filtre
+  - [x] Recette : aucune action de correction ou de modification de note (D65)
+  > Écarts : « Sommatives » et « Formatives » filtrent par type de quiz, tous statuts confondus ; « À revoir » = tentatives échouées non commentées. Une tentative déjà commentée est signalée « Commentée » au lieu de « Commenter ».
+- [x] **5.6** Parcours encadrés · `feature/lot5-parcours` · PR #149 (requiert 5.1)
+  - [x] `WT02` Mes parcours encadrés (carte de parcours encadré : classes, élèves)
+  - [x] `WT10` Détail parcours encadré (`MissionCompletionItem`, panneau droit : progression par classe, taux de réussite, niveaux et projets les plus échoués)
+  - [x] Mission en lecture seule (lecteur du lot 3 sans progression, sans quiz, sans suivi du visionnage)
+  - [x] Branchement API : `classrooms/courses/`, `courses/{slug}/`, `missions/{id}/`
+  - [x] Tests unitaires : arbre avec compteurs ; parcours non encadré = 404
+  - [x] Playwright : parcours de Koffi, arbre et mission, 404 d'un parcours hors de ses classes
+  - [x] Recette : seuls les parcours des classes de l'enseignant apparaissent (D64)
+  > Écarts : l'API ne renvoie ni progression globale par parcours (WT02) ni taux d'échec par mission (WT10). La carte de WT02 affiche classes et élèves ; le panneau de WT10 classe les niveaux et projets par taux de réussite du serveur (« Les plus échoués »). Un ajout d'API serait nécessaire pour la progression globale.
+- [x] **5.7** Événements · `feature/lot5-evenements` (requiert 5.2)
+  - [x] `WT09` Événements à venir et `WL23` dans le shell enseignant
+  - [x] « Proposer à une classe » : modale de choix de classe puis confirmation « Les élèves et leurs parents ont été notifiés »
+  - [x] « Candidatures de mes élèves » en lecture seule
+  - [x] Branchement API : `events/`, `events/{slug}/`, `proposals/`, `classrooms/event-applications/`
+  - [x] Tests unitaires : modale, double proposition à la même classe (message serveur)
+  > Écarts : la carte d'événement est partagée avec le parent (`EventTile`). « Proposer à une classe » est désactivé (avec le motif) quand l'événement est complet, clos ou passé. Les candidatures sont lues sur une page de 50, sans « voir plus » : au-delà, les plus anciennes ne sont pas listées. Le test de la proposition réussie est joué une fois, sur « bureau » (une proposition par classe).
+- [x] **5.8** Paramètres, notifications, aide · `feature/lot5-parametres-notifs-aide` · PR #152 (requiert 5.1)
+  - [x] `WT08` Paramètres : profil (nom, établissement en lecture seule), connexion (email, mot de passe D25), notifications (in-app et email), légal
+  - [x] `WT08` spécialité du profil (`GET` · `PATCH accounts/me/teacher-profile/`, API #151) ; l'établissement vient du profil
+  - [x] `WT08` zone sensible : « Demander la fermeture du compte » vers `public/contact-messages/` (sujet « Autre », message prérempli)
+  - [x] `WT12` Notifications : onglets, « Tout marquer comme lu », liens par type (profil élève, classe, événements)
+  - [x] `WT11` Aide : FAQ statique des 4 sujets + formulaire `WL24` dans le shell
+  - [x] Tests unitaires : résolution `type` vers route ; préférences optimistes avec retour arrière en cas d'erreur
+  - [x] Playwright : changement de mot de passe puis reconnexion
+  > Écart : la FAQ est un module TypeScript (comme celles de l'apprenant et du parent), pas du MDX.
+- [x] **5.9** Parcours de bout en bout et durcissement · `feature/lot5-e2e` (requiert 5.1 à 5.8, étape 4.10 du lot 4, lot 2 activation)
+  - [x] Playwright « Invitation complète » : invitation admin (jeu D2), activation `/activation/[token]`, connexion `W16`, création de classe, invitation, acceptation `WPD05`, élève actif en `WT04`, notification « a rejoint la classe »
+  - [x] Playwright « Compte existant (C11) » : rattachement du compte, élève dans `WT04`, parcours `source=classroom`, sans paiement
+  - [x] Playwright « Refus » : invitation « Refusée » dans `WT04`, notification `WT12`
+  - [x] Playwright « Import avec erreurs » : preuve dans `enseignant-ajout-eleves.spec.ts` (étape 5.3)
+  - [x] Playwright « Décrochage » : élève signalé dans `WT01` et `WT04`, lien vers `WT05` (`enseignant-decrochage.spec.ts`)
+  - [ ] Notification de décrochage dans `WT12` : non exécutée sur la stack (la tâche planifiée `detect_dropouts` n'y tourne pas, le test est ignoré s'il n'y a pas de notification) ; à prouver par un déclenchement de la tâche dans la stack e2e
+  - [x] Playwright « Cloisonnement » : seconde enseignante, 404 sur classe, profil élève et parcours
+  - [x] Audit final : axe sur chaque route, absence de défilement horizontal, registre (`enseignant-audit.spec.ts`)
+  - [ ] Absence de données codées en dur : relue à chaque étape, sans contrôle automatique
+  > Écarts : l'invitation de l'enseignante par l'admin est celle du jeu D2 (l'écran d'invitation de l'admin Django est couvert par `admin-comptes.spec.ts`) ; les parcours « Invitation complète », « Compte existant », « Refus » et « Cloisonnement » s'enchaînent sur ce compte à usage unique, dans `activation.spec.ts`. La tâche quotidienne de décrochage n'est pas planifiée dans la stack e2e : sa notification (`WT12`) n'est vérifiée que si elle existe. Le quota de classes du seed (4) est relevé par la PR d'API #160. Les parcours `@donnees-uniques` (activation en série, création de classe, commentaire, proposition d'événement) sont exclus du projet « mobile » (`playwright.config.ts`) : seul l'audit joue à 360 px. Les pages « introuvable » sont servies avec un code 200 sous Suspense (Next) : elles sont vérifiées par leur titre, pas par un code 404 (WT04, WT05, WT10, WL23). Pas d'e2e d'une école à l'offre échue (C21) : le seed D2 n'en contient pas ; les états sont couverts en tests unitaires.
 - [ ] **Critères de fin du lot 5**
   - [ ] `WT01`-`WT13` livrés, conformes à la spec alignée, avec tous leurs états et la définition de « terminé » du README
   - [ ] Aucune entrée de navigation sans cible ; aucun « À corriger », « formateur » ou tutoiement
-  - [ ] Parcours Playwright de 5.9 verts en CI (`ci-ok`) sur la stack Docker
-  - [ ] Compléments d'API livrés (§7.6) et présents dans le client généré (`make openapi`)
+  - [ ] Parcours Playwright de 5.9 verts en CI (`ci-ok`) sur la stack Docker (preuve attendue : `ci-ok` vert sur `development` après fusion de la pile)
+  - [ ] Compléments d'API livrés (§7.6) et présents dans le client généré (`make openapi`) : profil enseignant #151 fusionné ; quota de seed #160 à fusionner
   - [ ] Étape 4.10 (`WPD05` d'origine enseignant) livrée et couverte par « Invitation complète »
   - [ ] Recette sur le seed (D2) par le produit, y compris acceptation côté parent et commentaires côté apprenant et parent
 

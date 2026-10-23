@@ -132,3 +132,29 @@ describe("PreferencesForm du parent (section de WPD08)", () => {
     expect(screen.getByText(/Vérifiez votre connexion/)).toBeInTheDocument();
   });
 });
+
+describe("PreferencesForm de l'enseignant (section de WT08)", () => {
+  const TEACHER = {
+    emailAddress: "koffi.adekambi@steamy.test",
+    categories: [
+      { category: "progress" as const, label: "Progression", inApp: true, email: true },
+      { category: "reviews" as const, label: "Tentatives à revoir", inApp: true, email: false },
+      { category: "events" as const, label: "Steamy Events", inApp: true, email: false },
+    ],
+  };
+
+  it("sans onglets, titres en h3, trois catégories décrites au vouvoiement", async () => {
+    const { container } = render(<PreferencesForm initial={TEACHER} space="teacher" />);
+    expect(screen.queryByRole("link", { name: "Paramètres" })).toBeNull();
+    expect(screen.getByRole("heading", { level: 3, name: "Canaux" })).toBeInTheDocument();
+    expect(screen.getByText(/Élèves qui rejoignent une classe/)).toBeInTheDocument();
+    expect(screen.getByText("Tentatives échouées de vos élèves, à commenter.")).toBeInTheDocument();
+    expect(screen.getByText("Annonces Steamy Events.")).toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("sans adresse email : texte propre à l'enseignant", () => {
+    render(<PreferencesForm initial={{ ...TEACHER, emailAddress: null }} space="teacher" />);
+    expect(screen.getByText(/renseignée sur votre compte/)).toBeInTheDocument();
+  });
+});

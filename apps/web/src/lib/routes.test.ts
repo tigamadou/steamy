@@ -104,3 +104,30 @@ describe("sectionOf", () => {
     expect(sectionOf("/parcoursx")).toBeNull();
   });
 });
+
+describe("routes.teacher", () => {
+  it("construit les URL de l'espace enseignant (LOT-5, arborescence des routes)", () => {
+    const t = routes.teacher;
+    expect(t.home).toBe("/enseignant");
+    expect(t.course("robot-bluetooth")).toBe("/enseignant/parcours/robot-bluetooth");
+    expect(t.mission("robot-bluetooth", 4)).toBe("/enseignant/parcours/robot-bluetooth/missions/4");
+    expect(t.classroom(3)).toBe("/enseignant/classes/3");
+    expect(t.classroom(3, "creee")).toBe("/enseignant/classes/3?confirmation=creee");
+    expect(t.classroom(3, "invitation")).toBe("/enseignant/classes/3?confirmation=invitation");
+    expect(t.editClassroom(3)).toBe("/enseignant/classes/3/modifier");
+    expect(t.addLearners()).toBe("/enseignant/eleves/ajouter");
+    expect(t.addLearners({ classroomId: 3 })).toBe("/enseignant/eleves/ajouter?classe=3");
+    expect(t.addLearners({ classroomId: 3, batch: true })).toBe("/enseignant/eleves/ajouter?classe=3&onglet=lot");
+    expect(t.learner(21)).toBe("/enseignant/eleves/21");
+    expect(t.learner(21, { classroomId: 3, attemptId: 90 })).toBe("/enseignant/eleves/21?classe=3&tentative=90");
+    expect(t.reviews()).toBe("/enseignant/evaluations");
+    expect(t.reviews({ filter: "a-revoir", classroomId: 3, page: 2 })).toBe(
+      "/enseignant/evaluations?filtre=a-revoir&classe=3&page=2",
+    );
+    expect(t.reviews({ page: 1 })).toBe("/enseignant/evaluations");
+    expect(t.reviews({ filter: "toutes", classroomId: 3 })).toBe("/enseignant/evaluations?classe=3");
+    expect(t.event("robot-cup")).toBe("/enseignant/evenements/robot-cup");
+    expect(t.notificationList()).toBe("/enseignant/notifications");
+    expect(t.notificationList("non-lues", 2)).toBe("/enseignant/notifications?onglet=non-lues&page=2");
+  });
+});

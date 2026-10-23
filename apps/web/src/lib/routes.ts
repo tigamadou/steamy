@@ -183,6 +183,58 @@ export const routes = {
     settings: "/parent/parametres",
     help: "/parent/aide",
   },
+  // Espace enseignant (lot 5, LOT-5 « Arborescence des routes »)
+  teacher: {
+    home: "/enseignant",
+    /** WT02 · parcours encadrés. */
+    courses: "/enseignant/parcours",
+    course: (slug: string) => `/enseignant/parcours/${slug}`,
+    /** Mission d'un parcours encadré, en lecture seule (WT10). */
+    mission: (slug: string, id: number | string) => `/enseignant/parcours/${slug}/missions/${id}`,
+    /** WT03 · mes classes. */
+    classes: "/enseignant/classes",
+    /** WT13 · création d'une classe. */
+    newClassroom: "/enseignant/classes/nouvelle",
+    /** WT04 · élèves d'une classe. */
+    /** `confirmation` : rappel après la création ou la modification de la classe (WT13), ou l'envoi d'une demande (WT06). */
+    classroom: (id: number | string, confirmation?: "creee" | "modifiee" | "invitation") =>
+      confirmation ? `/enseignant/classes/${id}?confirmation=${confirmation}` : `/enseignant/classes/${id}`,
+    /** WT13 · même formulaire en édition. */
+    editClassroom: (id: number | string) => `/enseignant/classes/${id}/modifier`,
+    /** WT06 · `classe` présélectionne la classe, `lot` ouvre l'onglet « Import par lot ». */
+    addLearners: (options: { classroomId?: number | string; batch?: boolean } = {}) => {
+      const query = new URLSearchParams();
+      if (options.classroomId !== undefined) query.set("classe", String(options.classroomId));
+      if (options.batch) query.set("onglet", "lot");
+      const search = query.toString();
+      return search ? `/enseignant/eleves/ajouter?${search}` : "/enseignant/eleves/ajouter";
+    },
+    /** WT05 · profil d'un élève dans une classe, éventuellement sur une tentative. */
+    learner: (id: number | string, options: { classroomId?: number | string; attemptId?: number | string } = {}) => {
+      const query = new URLSearchParams();
+      if (options.classroomId !== undefined) query.set("classe", String(options.classroomId));
+      if (options.attemptId !== undefined) query.set("tentative", String(options.attemptId));
+      const search = query.toString();
+      return search ? `/enseignant/eleves/${id}?${search}` : `/enseignant/eleves/${id}`;
+    },
+    /** WT07 · filtre (`?filtre=`), classe (`?classe=`) et page dans l'URL (« Toutes » et la page 1 n'y figurent pas). */
+    reviews: (options: { filter?: string; classroomId?: number | string; page?: number } = {}) => {
+      const query = new URLSearchParams();
+      if (options.filter && options.filter !== "toutes") query.set("filtre", options.filter);
+      if (options.classroomId !== undefined) query.set("classe", String(options.classroomId));
+      if (options.page && options.page > 1) query.set("page", String(options.page));
+      const search = query.toString();
+      return search ? `/enseignant/evaluations?${search}` : "/enseignant/evaluations";
+    },
+    events: "/enseignant/evenements",
+    /** WL23 dans le shell enseignant. */
+    event: (slug: string) => `/enseignant/evenements/${slug}`,
+    notifications: "/enseignant/notifications",
+    /** WT12 : onglet « Non lues » et page de la liste dans l'URL (la page 1 et « Toutes » n'y figurent pas). */
+    notificationList: notificationList("/enseignant/notifications"),
+    settings: "/enseignant/parametres",
+    help: "/enseignant/aide",
+  },
   // Back-office Next.js (lot 6, WAD01-WAD05)
   backoffice: {
     home: "/backoffice",

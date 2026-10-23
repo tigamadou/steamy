@@ -1,14 +1,12 @@
 import type { Schemas } from "@steamy/api-client";
-import Link from "next/link";
-import type { CSSProperties } from "react";
 
 import { Badge, Button, Mascot, SectionHeader, SkeletonBlock } from "@/components/ds";
-import { eventPlace, eventState, PriceBadge } from "@/components/public/events";
+import { eventState } from "@/components/public/events";
 import { getMyApplications, getUpcomingEvents } from "@/features/events/api";
+import { EventTile } from "@/features/events/EventTile";
 import { CLOSED_REASONS, closedReason } from "@/features/events/status";
 import { getServerApi } from "@/lib/api";
 import { readOrNull } from "@/lib/api-read";
-import { formatFullDate } from "@/lib/dates";
 import { getCountries } from "@/lib/referentials";
 import { routes } from "@/lib/routes";
 
@@ -26,38 +24,19 @@ export function highlightedApplication(searchParams: SearchParams): number | nul
 function ParentEventCard({ event }: { event: Schemas["SteamyEvent"] }) {
   const reason = closedReason(eventState(event));
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-[18px] border-[1.5px] border-ink-100 bg-surface">
-      <span
-        aria-hidden
-        className="flex h-24 items-center justify-center bg-(--event) text-[44px]"
-        style={{ "--event": event.color } as CSSProperties}
-      >
-        {event.emoji || "🎟️"}
-      </span>
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <h3 className="m-0 text-[15px] font-black">
-          <Link
-            href={routes.parent.event(event.slug)}
-            className="rounded-sm text-ink-900 hover:text-primary-700 hover:underline focus-visible:outline-3 focus-visible:outline-primary-500"
-          >
-            {event.title}
-          </Link>
-        </h3>
-        <p className="m-0 text-[13px] font-bold text-ink-600">
-          📅 {formatFullDate(event.startsAt)} · 📍 {eventPlace(event)}
-        </p>
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1.5">
-          <PriceBadge event={event} />
-          {reason ? (
-            <Badge tone="neutral">{CLOSED_REASONS[reason].cta}</Badge>
-          ) : (
-            <Button size="sm" href={routes.parent.eventSignup(event.slug)}>
-              Inscrire un enfant<span className="sr-only"> à {event.title}</span>
-            </Button>
-          )}
-        </div>
-      </div>
-    </article>
+    <EventTile
+      event={event}
+      href={routes.parent.event(event.slug)}
+      action={
+        reason ? (
+          <Badge tone="neutral">{CLOSED_REASONS[reason].cta}</Badge>
+        ) : (
+          <Button size="sm" href={routes.parent.eventSignup(event.slug)}>
+            Inscrire un enfant<span className="sr-only"> à {event.title}</span>
+          </Button>
+        )
+      }
+    />
   );
 }
 

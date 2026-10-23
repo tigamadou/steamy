@@ -1,6 +1,15 @@
-import { SpaceWaiting } from "@/components/auth/SpaceWaiting";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 
-// Page d'attente de l'espace, remplacée par son accueil dans le lot qui le livre.
-export default function EnseignantHome() {
-  return <SpaceWaiting role="teacher" />;
+import { TeacherHome, TeacherHomeSkeleton } from "@/features/teacher/home/TeacherHome";
+
+export const metadata: Metadata = { title: "Accueil" };
+
+/** WT01 · accueil de l'enseignant : classes, « À revoir » et « Décrochage ». */
+export default function TeacherHomePage() {
+  return (
+    <Suspense fallback={<TeacherHomeSkeleton />}>
+      <TeacherHome />
+    </Suspense>
+  );
 }
