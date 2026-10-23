@@ -73,10 +73,8 @@ test("WL02 répond de même pour un numéro inconnu ; WL03 refuse un code faux",
   await expect(page).toHaveURL("/mot-de-passe-oublie");
 });
 
-// D24 : 3 essais, le 4ᵉ refusé. En attente d'un correctif de l'API : `issue_token` (password_reset.py) appelle
-// `verify_challenge` dans une transaction englobante, que l'erreur annule avec l'incrément du compteur d'essais.
-// Le plafond est vérifié sur WP02 (inscription parent) et l'état de l'écran par les tests Vitest d'`OtpForm`.
-test.fixme("WL03 bloque la saisie après les essais permis (OTP_TOO_MANY_ATTEMPTS)", async ({ page }) => {
+// D24 : 3 essais, le 4ᵉ refusé (le compteur tient depuis API-L2, PR #148).
+test("WL03 bloque la saisie après les essais permis (OTP_TOO_MANY_ATTEMPTS)", async ({ page }) => {
   await requestCode(page, uniquePhone());
   const otp = page.getByLabel("Code à 6 chiffres reçu par SMS");
   for (let attempt = 1; attempt <= 4; attempt += 1) {

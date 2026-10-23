@@ -226,3 +226,31 @@ def test_password_policy_and_suspended_account(sms):
 def test_mask_email():
     assert mask_email("") == "••"
     assert mask_email("a@b.c") == "a•••@b.c"
+
+
+# --- D24 : le plafond d'essais tient jusqu'au bout de la transaction -----------------------------
+
+
+def wrong_code(code):
+    return "000000" if code != "000000" else "111111"
+
+
+def test_wl03_blocks_the_right_code_after_three_wrong_ones(sms):
+    parent = ParentFactory(phone=PHONE)
+    challenge_id = ask(PHONE).json()["challengeId"]
+    code = sms.last_code(PHONE)
+    for _ in range(3):
+        assert verify(challenge_id, wrong_code(code)).json()["code"] == "OTP_INVALID"
+    resp = verify(challenge_id, code)
+    assert resp.json()["code"] == "OTP_TOO_MANY_ATTEMPTS"
+    assert OtpChallenge.objects.get(pk=challenge_id).attempts == 3
+    assert not PasswordResetToken.objects.filter(user=parent).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_wl03_attempt_counter_is_committed(sms):
+    ParentFactory(phone=PHONE)
+    challenge_id = ask(PHONE).json()["challengeId"]
+    code = sms.last_code(PHONE)
+    assert verify(challenge_id, wrong_code(code)).json()["code"] == "OTP_INVALID"
+    assert OtpChallenge.objects.get(pk=challenge_id).attempts == 1
