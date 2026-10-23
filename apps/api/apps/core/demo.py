@@ -30,7 +30,7 @@ from apps.classrooms.demo import (
     seed_proposals,
 )
 from apps.classrooms.invitations import send_invitation
-from apps.classrooms.models import School, TeacherInvitation
+from apps.classrooms.models import Classroom, School, TeacherInvitation
 from apps.core.groups import CONTENT, FINANCE, SUPER_ADMIN, SUPPORT
 from apps.events.models import SteamyEvent
 from apps.impact import services as impact
@@ -57,6 +57,9 @@ DEMO_TOTP_KEY = "3132333435363738393031323334353637383930"
 LEA_USERNAME = "lea.adjovi"
 MARIE_PHONE = "+2290190000001"
 KOFFI_EMAIL = "koffi.adekambi@steamy.test"
+#: Enseignante d'une école dont l'offre est échue (C21) : création de classe et ajout d'élèves bloqués.
+EXPIRED_TEACHER_EMAIL = "esther.offre-echue@steamy.test"
+EXPIRED_SCHOOL_NAME = "Collège de l'Offre échue"
 SCHOOL_NAME = "Collège Steamy de Cotonou"
 #: Invitation enseignant en attente (P6 du lot 2 : lien lu dans Mailpit).
 INVITED_TEACHER_EMAIL = "nadia.houngbo@steamy.test"
@@ -815,6 +818,40 @@ def seed_e2e() -> None:
     settings_.save()
 
 
+def seed_expired_offer() -> User:
+    """
+    École à l'offre échue et son enseignante (C21, WT03/WT04/WT06) : une classe existe et reste suivie, mais le serveur
+    refuse toute création de classe et tout ajout d'élève (`SCHOOL_OFFER_EXPIRED`). Idempotent.
+    """
+    teacher = _user(
+        {"email": EXPIRED_TEACHER_EMAIL},
+        role=User.Role.TEACHER,
+        first_name="Esther",
+        last_name="Gnonlonfoun",
+        status=User.Status.ACTIVE,
+    )
+    school, _ = School.objects.update_or_create(
+        name=EXPIRED_SCHOOL_NAME,
+        defaults={
+            "country": Country.objects.get(code="BJ"),
+            "city": "Porto-Novo",
+            "offer": "Offre Classe Robotique 2025",
+            "valid_until": datetime.date(2025, 12, 31),
+            "learner_quota": 30,
+            "classroom_quota": 3,
+        },
+    )
+    TeacherProfile.objects.update_or_create(user=teacher, defaults={"school": school})
+    school.courses.set(catalog.Course.objects.filter(slug__in=["decouverte-robotique"]))
+    course = catalog.Course.objects.get(slug="decouverte-robotique")
+    Classroom.objects.update_or_create(
+        teacher=teacher,
+        name="6e A · Robotique",
+        defaults={"school": school, "course": course, "color": "#C2185B", "archived_at": None},
+    )
+    return teacher
+
+
 def seed_all() -> dict[str, User]:
     accounts = seed_accounts()
     seed_backoffice(accounts)
@@ -831,4 +868,5 @@ def seed_all() -> dict[str, User]:
     seed_members(classrooms, accounts["koffi"], accounts["lea"], DEMO_PASSWORD)
     seed_proposals(classrooms[0], accounts["koffi"])
     seed_follow_up(classrooms, accounts["koffi"])
+    accounts["echue"] = seed_expired_offer()
     return accounts
