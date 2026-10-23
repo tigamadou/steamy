@@ -52,6 +52,11 @@ def activation_errors(config, provider: FiscalInvoiceProvider | None = None) -> 
         errors["emecef_exempt_group"] = (
             f"Le groupe {exempt} est à {groups.rates[exempt]} % chez la DGI : il devrait être exonéré."
         )
+    if config.aib_enabled and settings.EMECEF_AIB_IN_TOTAL is None:
+        errors["aib_enabled"] = (
+            "Le total de l'e-MCF inclut-il l'AIB ? Lancez `emecef_probe` sur le serveur de test, puis renseignez "
+            "EMECEF_AIB_IN_TOTAL."
+        )
     if config.aib_enabled and aib_letter(config, groups) is None:
         errors["aib_rate"] = (
             f"Le taux d'AIB doit être {groups.aib_a} % (A) ou {groups.aib_b} % (B) chez la DGI."

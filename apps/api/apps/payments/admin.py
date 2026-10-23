@@ -281,12 +281,24 @@ class PaymentAdmin(admin.ModelAdmin):
 class InvoiceAdmin(admin.ModelAdmin):
     """Factures en lecture seule (Finance) ; un PDF en échec se relance par l'action « Régénérer » (ADR 0005 §8)."""
 
-    list_display = ("number", "order", "pdf_status", "issued_at")
-    list_filter = ("pdf_status",)
-    search_fields = ("number", "order__reference")
-    readonly_fields = ("order", "number", "uuid", "pdf_status", "download", "snapshot", "issued_at")
+    list_display = ("number", "order", "pdf_status", "fiscal_status", "issued_at")
+    list_filter = ("pdf_status", "fiscal_status")
+    search_fields = ("number", "order__reference", "fiscal_uid")
+    readonly_fields = (
+        "order",
+        "number",
+        "uuid",
+        "pdf_status",
+        "download",
+        "snapshot",
+        "issued_at",
+        "fiscal_status",
+        "fiscal_uid",
+        "fiscal",
+        "fiscal_error",
+    )
     exclude = ("pdf",)
-    actions = ["regenerate"]
+    actions = ["regenerate", "retry_fiscal"]
 
     def has_add_permission(self, request):
         return False
@@ -338,6 +350,17 @@ class InvoiceAdmin(admin.ModelAdmin):
         for invoice_id in ids:
             transaction.on_commit(lambda pk=invoice_id: generate_invoice_pdf.delay(pk))
         self.message_user(request, f"{len(ids)} PDF relancé(s).")
+
+    @admin.action(description="Relancer la facture normalisée e-MECeF (échec)")
+    def retry_fiscal(self, request, queryset):
+        from .tasks import issue_fiscal_invoice
+
+        failed = queryset.filter(fiscal_status=Invoice.FiscalStatus.FAILED)
+        ids = list(failed.values_list("id", flat=True))
+        failed.update(fiscal_status=Invoice.FiscalStatus.NONE, fiscal_uid="", fiscal_error="")
+        for invoice_id in ids:
+            transaction.on_commit(lambda pk=invoice_id: issue_fiscal_invoice.delay(pk))
+        self.message_user(request, f"{len(ids)} émission(s) relancée(s).")
 
 
 class RefundForm(forms.ModelForm):

@@ -57,6 +57,21 @@ def expire_payment_requests() -> int:
 INVOICE_MAX_RETRIES = 5
 
 
+def invoice_context(invoice) -> dict:
+    """Contexte du PDF : contenu figé, plus les éléments de sécurité e-MECeF une fois la facture normalisée confirmée."""
+    from .fiscal.qr import qr_svg
+    from .models import Invoice
+
+    context = {**invoice.snapshot, "number": invoice.number}
+    if invoice.fiscal_status == Invoice.FiscalStatus.CONFIRMED:
+        context.update(
+            provisional=False,
+            fiscal=invoice.fiscal,
+            fiscal_qr=qr_svg(invoice.fiscal["qr_code"]),
+        )
+    return context
+
+
 def build_invoice_pdf(invoice_id: int) -> bool:
     """
     Génère le PDF depuis le contenu figé, sous une clé déterministe (même UUID) : relancer ne crée pas de second
@@ -74,7 +89,7 @@ def build_invoice_pdf(invoice_id: int) -> bool:
         pdf = invoice.pdf
         if invoice.pdf_status == Invoice.PdfStatus.READY and pdf and pdf.storage.exists(pdf.name):
             return False
-        content = render_pdf("pdf/invoice.html", {**invoice.snapshot, "number": invoice.number})
+        content = render_pdf("pdf/invoice.html", invoice_context(invoice))
         pdf.save(invoice_path(invoice, None), ContentFile(content), save=False)
         invoice.pdf_status = Invoice.PdfStatus.READY
         invoice.save(update_fields=["pdf", "pdf_status"])
@@ -95,6 +110,32 @@ def generate_invoice_pdf(self, invoice_id: int) -> bool:
             Invoice.objects.filter(pk=invoice_id).update(pdf_status=Invoice.PdfStatus.FAILED)
             raise
         raise self.retry(exc=exc, countdown=30 * 2**self.request.retries) from exc
+
+
+@shared_task(bind=True, acks_late=True, max_retries=INVOICE_MAX_RETRIES)
+def issue_fiscal_invoice(self, invoice_id: int) -> str:
+    """
+    Facture normalisée e-MECeF d'une facture payée (ADR 0006) ; réessais à attente exponentielle sur erreur passagère
+    (ou l'attente demandée par l'émission), puis `failed` (visible de la Finance, relançable depuis l'admin).
+    """
+    from .fiscal.base import FiscalTemporaryError
+    from .fiscal.issuance import FiscalDeferred, issue_fiscal
+    from .models import Invoice
+
+    try:
+        return issue_fiscal(invoice_id)
+    except Invoice.DoesNotExist:
+        return ""
+    except FiscalTemporaryError as exc:
+        if self.request.retries >= self.max_retries:
+            Invoice.objects.filter(pk=invoice_id).update(
+                fiscal_status=Invoice.FiscalStatus.FAILED, fiscal_error=str(exc)[:500]
+            )
+            raise
+        countdown = (
+            exc.countdown if isinstance(exc, FiscalDeferred) else 30 * 2**self.request.retries
+        )
+        raise self.retry(exc=exc, countdown=countdown) from exc
 
 
 @shared_task

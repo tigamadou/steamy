@@ -485,7 +485,8 @@ def test_aib_letter_follows_the_dgi_rates():
     assert aib_letter(configure(aib_enabled=True, aib_rate=Decimal("3")), groups) is None
 
 
-def test_activation_is_possible_when_rates_match_the_dgi():
+def test_activation_is_possible_when_rates_match_the_dgi(settings):
+    settings.EMECEF_AIB_IN_TOTAL = False
     config = configure(
         emecef_enabled=True,
         emecef_taxed_group="B",
@@ -499,7 +500,8 @@ def test_activation_is_possible_when_rates_match_the_dgi():
     assert activation_errors(configure(emecef_enabled=True, emecef_exempt_group="A")) == {}
 
 
-def test_activation_is_refused_when_rates_diverge():
+def test_activation_is_refused_when_rates_diverge(settings):
+    settings.EMECEF_AIB_IN_TOTAL = True
     errors = activation_errors(
         configure(
             emecef_enabled=True,
@@ -513,6 +515,16 @@ def test_activation_is_refused_when_rates_diverge():
     )
     assert set(errors) == {"emecef_taxed_group", "emecef_exempt_group", "aib_rate"}
     assert "18 %" in errors["emecef_taxed_group"] and "exonéré" in errors["emecef_exempt_group"]
+
+
+def test_activation_with_the_aib_waits_for_the_probe_to_say_if_total_includes_it(settings):
+    settings.EMECEF_AIB_IN_TOTAL = None
+    config = configure(
+        emecef_enabled=True, emecef_exempt_group="A", aib_enabled=True, aib_rate=Decimal("5")
+    )
+    assert set(activation_errors(config)) == {"aib_enabled"}
+    settings.EMECEF_AIB_IN_TOTAL = False
+    assert activation_errors(config) == {}
 
 
 def test_activation_is_refused_without_environment_with_a_bad_token_or_an_inactive_emcf(settings):

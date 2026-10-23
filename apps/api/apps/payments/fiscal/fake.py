@@ -3,7 +3,7 @@ Faux fournisseur de facture normalisée : le seul autorisé hors staging et prod
 
 Il calcule comme l'e-MCF documenté par la DGI : le `price` d'une ligne d'un groupe taxable est **TTC** et la TVA en est
 extraite (`HT = arrondi(total du groupe × 100 / (100 + taux))`, `TVA = total du groupe − HT`) ; `total` est la somme des
-lignes, l'AIB (calculé sur le HT) est rapporté à part. Les groupes et taux sont **artificiels** (aucune valeur légale),
+lignes, l'AIB (calculé sur le HT) est rapporté à part, et ajouté à `total` si `EMECEF_AIB_IN_TOTAL`. Les groupes et taux sont **artificiels** (aucune valeur légale),
 d'après l'exemple de la documentation : A = 0, B = 18, C = 0, D = 18, E = 0, F = 0 ; AIB A = 1 %, B = 5 %. Les demandes
 vivent dans le cache (Redis en local).
 
@@ -106,6 +106,7 @@ class FakeFiscalProvider(FiscalInvoiceProvider):
         total = sum(group_totals.values())
         base_ht = total - sum(vat.values())
         aib = to_franc(Decimal(base_ht) * FAKE_AIB[request.aib] / 100) if request.aib else 0
+        total += aib if settings.EMECEF_AIB_IN_TOTAL else 0
         uid = str(uuid.uuid4())
         cache.set(_key(uid), {"state": "requested", "type": request.type}, TTL)
         return InvoiceTotals(

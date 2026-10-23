@@ -18,7 +18,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
-from apps.core.models import DocumentSequence
+from apps.core.models import DocumentSequence, PlatformSettings
 
 from .models import Invoice, Order, Payment
 from .taxes import snapshot_lines
@@ -75,12 +75,17 @@ def issue_invoice(order: Order, payment: Payment) -> Invoice:
             "issued_on": f"{issued_at:%d/%m/%Y}",
         },
     )
-    from .tasks import generate_invoice_pdf
+    from .tasks import generate_invoice_pdf, issue_fiscal_invoice
 
     transaction.on_commit(lambda: generate_invoice_pdf.delay(invoice.pk))
+    if (
+        PlatformSettings.load().emecef_enabled
+    ):  # facture normalisée e-MECeF (ADR 0006), le reçu partant déjà
+        transaction.on_commit(lambda: issue_fiscal_invoice.delay(invoice.pk))
     return invoice
 
 
 def filename(invoice: Invoice) -> str:
-    kind = "recu" if invoice.snapshot.get("provisional") else "facture"
+    confirmed = invoice.fiscal_status == Invoice.FiscalStatus.CONFIRMED
+    kind = "recu" if invoice.snapshot.get("provisional") and not confirmed else "facture"
     return f"{kind}-{invoice.number}.pdf"
