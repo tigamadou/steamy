@@ -99,7 +99,7 @@ export function ClassroomForm({ school, classroom }: { school: School; classroom
   const lockedCourse = school.courses.find((course) => course.slug === classroom?.course.slug) ?? classroom?.course;
 
   return (
-    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
+    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
       <form
         onSubmit={submitWith(action)}
         noValidate

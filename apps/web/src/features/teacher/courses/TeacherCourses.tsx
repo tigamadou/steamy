@@ -23,7 +23,7 @@ export function NoSupervisedCourse() {
 export function TeacherCoursesView({ courses }: { courses: SupervisedCourse[] }) {
   if (courses.length === 0) return <NoSupervisedCourse />;
   return (
-    <ul aria-label="Mes parcours encadrés" className="m-0 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+    <ul aria-label="Mes parcours encadrés" className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
       {courses.map((course) => (
         <li key={course.slug} className="flex flex-col">
           <SupervisedCourseCard course={course} />
@@ -46,7 +46,7 @@ export function TeacherCoursesSkeleton() {
       role="status"
       aria-busy="true"
       aria-label="Chargement de vos parcours…"
-      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
     >
       <SkeletonBlock className="h-52 rounded-[22px]" />
       <SkeletonBlock className="h-52 rounded-[22px]" />

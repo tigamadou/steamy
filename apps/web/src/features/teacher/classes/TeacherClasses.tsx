@@ -33,7 +33,7 @@ export function NoClassroomYet({ blocked }: { blocked: boolean }) {
 export function TeacherClassesView({ classrooms, school }: { classrooms: Classroom[]; school: School }) {
   const blocked = creationBlocked(school);
   return (
-    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
+    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
       <section aria-labelledby="mes-classes-liste" className="flex min-w-0 flex-col gap-4">
         <div className="flex items-center justify-between gap-4">
           <h2 id="mes-classes-liste" className="m-0 text-lg font-black tracking-[-0.01em] text-ink-900">
@@ -60,7 +60,7 @@ export function TeacherClassesView({ classrooms, school }: { classrooms: Classro
         {classrooms.length === 0 ? (
           <NoClassroomYet blocked={blocked} />
         ) : (
-          <ul aria-label="Mes classes" className="m-0 grid list-none gap-4 p-0 sm:grid-cols-2">
+          <ul aria-label="Mes classes" className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2">
             {classrooms.map((classroom) => (
               <li key={classroom.id}>
                 <ClassCard classroom={classroom} />
@@ -83,8 +83,8 @@ export async function TeacherClasses() {
 /** Squelette de WT03 : cartes et quota. */
 export function TeacherClassesSkeleton() {
   return (
-    <div role="status" aria-busy="true" aria-label="Chargement de vos classes…" className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <div role="status" aria-busy="true" aria-label="Chargement de vos classes…" className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <SkeletonBlock className="h-32 rounded-[18px]" />
         <SkeletonBlock className="h-32 rounded-[18px]" />
       </div>
