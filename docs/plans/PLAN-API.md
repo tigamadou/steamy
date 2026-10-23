@@ -530,7 +530,8 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
     base, amount}]` sur la commande, `taxes` et `total` (hors livraison, aperçu) sur le panier et les demandes de
     paiement ; OpenAPI et types régénérés. Lectures de `order.total` revues : paiements, remboursements, notifications
     (montant payé), admin ; la facture sera ventilée en C25.3
-  - [ ] **C25.3 · facture** : ventilation HT / TVA / AIB / total lue sur la commande, jamais recalculée
+  - [x] **C25.3 · facture** : le snapshot garde `taxes` (lues sur `Order.taxes`, jamais recalculées) ; PDF : sous-total
+    HT, livraison, une ligne par taxe (taux et base), « Total à payer » ; factures déjà émises inchangées
   - [ ] **C25.4 · front** (PR séparée, après l'API) : « HT » sur les prix du catalogue, « Total à payer » au paiement
   - [ ] **Taux d'AIB à confirmer** par la comptabilité : défauts éteints et à 0, aucune valeur légale supposée
   - [ ] **Suite `API-L3b.2c`** : facture normalisée e-MECeF, interface `FiscalInvoiceProvider` et faux fournisseur,

@@ -61,7 +61,7 @@ def test_invoice_is_issued_at_payment_and_downloadable_by_the_payer(paid_order):
         f"{invoice.uuid}.pdf"
     )
     snapshot = invoice.snapshot
-    assert snapshot["provisional"] is True and "vat" not in snapshot
+    assert snapshot["provisional"] is True and snapshot["taxes"] == []
     assert snapshot["seller"] == {"name": "Steamy"}
     assert snapshot["buyer"]["phone"] == paid_order.payer.phone
     assert snapshot["lines"][0]["total"] == 15000 and snapshot["total"] == 15000
@@ -216,3 +216,43 @@ def test_admin_regenerates_the_pdf(client, paid_order, django_capture_on_commit_
         )
     invoice.refresh_from_db()
     assert invoice.pdf_status == Invoice.PdfStatus.READY
+
+
+def test_invoice_breaks_down_the_taxes_frozen_on_the_order(django_capture_on_commit_callbacks):
+    from decimal import Decimal
+
+    from django.template.loader import render_to_string
+
+    from apps.core.models import PlatformSettings
+
+    config = PlatformSettings.load()
+    config.vat_enabled, config.vat_rate = True, Decimal("18")
+    config.aib_enabled, config.aib_rate = True, Decimal("5")
+    config.save()
+    order = OrderFactory(
+        subtotal=10000,
+        vat_amount=1800,
+        aib_amount=500,
+        total=12300,
+        taxes={
+            "vat": {"rate": "18", "base": 10000, "amount": 1800},
+            "aib": {"rate": "5", "base": 10000, "amount": 500},
+        },
+    )
+    pay(order, django_capture_on_commit_callbacks)
+    invoice = Invoice.objects.get(order=order)
+    snapshot = invoice.snapshot
+    assert snapshot["total"] == 12300
+    assert [(t["code"], t["amount"]) for t in snapshot["taxes"]] == [("vat", 1800), ("aib", 500)]
+
+    # Un réglage modifié ensuite ne change rien à la facture émise
+    config.vat_rate = Decimal("5")
+    config.save()
+    Invoice.objects.filter(pk=invoice.pk).update(pdf_status=Invoice.PdfStatus.PENDING)
+    assert tasks.build_invoice_pdf(invoice.pk) is True
+    invoice.refresh_from_db()
+    assert invoice.snapshot == snapshot
+
+    html = render_to_string("pdf/invoice.html", {**snapshot, "number": invoice.number})
+    assert "Sous-total HT" in html and "TVA (18 % de 10000 FCFA)" in html
+    assert "AIB (5 % de 10000 FCFA)" in html and "Total à payer" in html
