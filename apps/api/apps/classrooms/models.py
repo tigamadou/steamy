@@ -46,7 +46,7 @@ class School(models.Model):
 class TeacherInvitation(models.Model):
     """
     Seule voie de création d'un compte enseignant (S5). Créée dans l'admin, envoyée par l'action « Envoyer » :
-    lien `/activation/<jeton>` par email, jeton stocké haché, valable 7 jours, usage unique.
+    lien `/activation#jeton=…` par email, jeton stocké haché, valable 7 jours, usage unique.
     """
 
     email = models.EmailField(_("email"))

@@ -78,7 +78,7 @@ Event « Défi robots à Cotonou » est déjà proposé à la 4ᵉ B.
 
 `seed_demo` crée une invitation pour **Nadia Houngbo** (`nadia.houngbo@steamy.test`, même école) et l'envoie :
 l'email « Activez votre compte enseignant Steamy » arrive dans Mailpit (http://localhost:8025) avec le lien
-`/activation/<jeton>`, valable 7 jours. Chaque `make seed` envoie un nouveau lien (l'ancien ne vaut plus) et remet
+`/activation#jeton=…`, valable 7 jours. Chaque `make seed` envoie un nouveau lien (l'ancien ne vaut plus) et remet
 l'invitation en attente, même si elle a été activée.
 
 ## SMS en local

@@ -751,46 +751,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/auth/teacher-invitations/{token}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @deprecated
-         * @description Lien `/activation/<jeton>` : invitation valable, sinon `INVITATION_INVALID`.
-         */
-        get: operations["auth_teacher_invitations_legacy_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/teacher-invitations/{token}/accept/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @deprecated
-         * @description Ancienne route (jeton dans le chemin) : préférer `teacher-invitations/accept/`.
-         */
-        post: operations["auth_teacher_invitations_legacy_accept"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/auth/teacher-invitations/accept/": {
         parameters: {
             query?: never;
@@ -5605,9 +5565,6 @@ export interface components {
          * @enum {string}
          */
         TaxLineCodeEnum: "vat" | "aib";
-        TeacherActivationRequest: {
-            password: string;
-        };
         /** @description Tentative vue par l'enseignant (WT05, WT07) : statut serveur (D31), jamais les réponses ni le corrigé. */
         TeacherAttempt: {
             id: number;
@@ -8533,100 +8490,6 @@ export interface operations {
                 };
             };
             403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    auth_teacher_invitations_legacy_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                token: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TeacherInvitation"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    auth_teacher_invitations_legacy_accept: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                token: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TeacherActivationRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LoginResponse"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -529,7 +529,7 @@ Catalogue des codes métier (extensible, chaque code a son message français) :
 | `POST auth/password-reset/` `{ identifier }` → `{ challengeId }` | WL02 | à aligner (`forgot-password-step-1`, lien email) |
 | `POST auth/password-reset/verify/` `{ challengeId, code }` → `{ resetToken }` | WL03 | à créer |
 | `POST auth/password-reset/confirm/` `{ resetToken, password }` | WL04, WL05 | à aligner (`forgot-password-step-2`) |
-| `GET auth/teacher-invitations/{token}/` · `POST …/accept/` `{ password }` | activation enseignant (§8.18) | à créer |
+| `POST auth/teacher-invitations/lookup/` `{ token }` · `POST …/accept/` `{ token, password }` | activation enseignant (§8.18) ; jeton dans le corps, jamais dans le chemin | existe |
 
 ### 7.3 `accounts`
 

@@ -24,9 +24,11 @@ type AsLink = CommonProps & {
 export type TagProps = AsButton | AsLink;
 
 // Filtre de catégorie (design/ds-atoms.jsx). Toujours un vrai bouton (`aria-pressed`) ou un vrai lien.
+// Seule la bordure s'anime (survol) : le passage actif/inactif change texte et fond d'un coup, sans état intermédiaire
+// de faible contraste (flou pour axe en e2e, WC02).
 export function Tag({ active, color, className, children, ...props }: TagProps) {
   const classes = cx(
-    "inline-flex cursor-pointer items-center gap-1.5 rounded-pill border-2 px-3.5 py-2 text-[13px] font-extrabold leading-none transition-colors",
+    "inline-flex cursor-pointer items-center gap-1.5 rounded-pill border-2 px-3.5 py-2 text-[13px] font-extrabold leading-none transition-[border-color]",
     "focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary-500",
     active ? "border-ink-900 bg-ink-900 text-white" : "border-ink-200 bg-surface text-ink-700 hover:border-ink-300",
     className,
