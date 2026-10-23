@@ -12,17 +12,23 @@ import { submitWith } from "@/lib/form";
 export type TeacherIdentity = {
   firstName: string;
   lastName: string;
+  /** Spécialité (facultative), modifiable. */
+  specialty: string;
   /** Nom de l'établissement de rattachement, en lecture seule (C6). */
   school: string | null;
 };
 
-type FieldName = "firstName" | "lastName";
+type FieldName = "firstName" | "lastName" | "specialty";
 type State = { attempt: number; fields: Partial<Record<FieldName, string>>; error?: string; saved: number };
 
-const IDS: Record<FieldName, string> = { firstName: "profil-prenom", lastName: "profil-nom" };
+const IDS: Record<FieldName, string> = {
+  firstName: "profil-prenom",
+  lastName: "profil-nom",
+  specialty: "profil-specialite",
+};
 
 /**
- * Profil de WT08 : nom modifiable (`PATCH accounts/me/`) ; l'établissement est celui de l'invitation, il ne se change
+ * Profil de WT08 : nom (`PATCH accounts/me/`) et spécialité (`PATCH accounts/me/teacher-profile/`) modifiables ; l'établissement est celui de l'invitation, il ne se change
  * pas ici. Aucune « Bio » : un enseignant n'a pas de profil public (S5).
  */
 export function TeacherProfileCard({ identity }: { identity: TeacherIdentity }) {
@@ -34,17 +40,23 @@ export function TeacherProfileCard({ identity }: { identity: TeacherIdentity }) 
       const saved = previous.saved;
       const firstName = String(form.get("firstName") ?? "").trim();
       const lastName = String(form.get("lastName") ?? "").trim();
+      const specialty = String(form.get("specialty") ?? "").trim();
       const fields: State["fields"] = {};
       if (!firstName) fields.firstName = "Indiquez votre prénom.";
       if (!lastName) fields.lastName = "Indiquez votre nom.";
       if (fields.firstName || fields.lastName) return { attempt, saved, fields };
 
-      const result = await apiCall((api) => api.PATCH("/api/accounts/me/", { body: { firstName, lastName } }));
+      const me = await apiCall((api) => api.PATCH("/api/accounts/me/", { body: { firstName, lastName } }));
+      const result = me.ok
+        ? await apiCall((api) => api.PATCH("/api/accounts/me/teacher-profile/", { body: { specialty } }))
+        : me;
       if (result.ok) {
         setEditing(false);
         router.refresh();
         return { attempt, saved: saved + 1, fields: {} };
       }
+      // Nom enregistré, spécialité refusée : le nom affiché est relu
+      if (me.ok) router.refresh();
       const apiFields = Object.fromEntries(
         Object.entries(result.fields).filter(([name]) => name in IDS),
       ) as State["fields"];
@@ -67,6 +79,7 @@ export function TeacherProfileCard({ identity }: { identity: TeacherIdentity }) 
         onEdit={() => setEditing(true)}
         rows={[
           { label: "Nom", value: `${identity.firstName} ${identity.lastName}`.trim() },
+          { label: "Spécialité", value: identity.specialty },
           { label: "Établissement", value: identity.school },
         ]}
       >
@@ -80,6 +93,9 @@ export function TeacherProfileCard({ identity }: { identity: TeacherIdentity }) 
               <Input name="lastName" defaultValue={identity.lastName} autoComplete="family-name" />
             </Field>
           </div>
+          <Field label="Spécialité" id={IDS.specialty} hint="Facultatif." error={state.fields.specialty}>
+            <Input name="specialty" defaultValue={identity.specialty} maxLength={120} autoComplete="organization-title" />
+          </Field>
           <p className="m-0 text-[13px] font-semibold text-ink-600">
             Votre établissement ({identity.school ?? "non renseigné"}) est celui de votre invitation : il ne se modifie pas
             ici.

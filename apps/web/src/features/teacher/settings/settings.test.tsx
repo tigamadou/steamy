@@ -29,7 +29,7 @@ const failure = (status: number, code: string, fields?: Record<string, string>) 
     },
   });
 
-const IDENTITY = { firstName: "Koffi", lastName: "Adékambi", school: "Collège Les Palmiers" };
+const IDENTITY = { firstName: "Koffi", lastName: "Adékambi", specialty: "Robotique", school: "Collège Les Palmiers" };
 
 beforeEach(() => {
   POST.mockReset();
@@ -44,11 +44,12 @@ describe("TeacherProfileCard (WT08, profil)", () => {
     const { container } = render(<TeacherProfileCard identity={IDENTITY} />);
     expect(screen.getByText("Koffi Adékambi")).toBeInTheDocument();
     expect(screen.getByText("Collège Les Palmiers")).toBeInTheDocument();
+    expect(screen.getByText("Robotique")).toBeInTheDocument();
     expect(screen.queryByText(/Bio|Téléphone/)).toBeNull();
     expect(await axe(container)).toHaveNoViolations();
   });
 
-  it("modifie le nom : PATCH accounts/me/, relecture, confirmation", async () => {
+  it("modifie le nom et la spécialité : PATCH accounts/me/ puis accounts/me/teacher-profile/, relecture, confirmation", async () => {
     const user = userEvent.setup();
     PATCH.mockResolvedValue(respond(200));
     render(<TeacherProfileCard identity={IDENTITY} />);
@@ -56,13 +57,27 @@ describe("TeacherProfileCard (WT08, profil)", () => {
     expect(screen.getByText(/est celui de votre invitation/)).toBeInTheDocument();
     await user.clear(screen.getByLabelText(/Prénom/));
     await user.type(screen.getByLabelText(/Prénom/), "Kofi");
+    await user.clear(screen.getByLabelText(/Spécialité/));
+    await user.type(screen.getByLabelText(/Spécialité/), "Électronique");
     await user.click(screen.getByRole("button", { name: "Enregistrer" }));
     await waitFor(() =>
       expect(PATCH).toHaveBeenCalledWith("/api/accounts/me/", { body: { firstName: "Kofi", lastName: "Adékambi" } }),
     );
+    expect(PATCH).toHaveBeenCalledWith("/api/accounts/me/teacher-profile/", { body: { specialty: "Électronique" } });
     expect(router.refresh).toHaveBeenCalled();
     expect(await screen.findByText("Vos informations sont enregistrées.")).toBeInTheDocument();
     expect(screen.queryByRole("form", { name: "Mes informations" })).toBeNull();
+  });
+
+  it("spécialité refusée après l'enregistrement du nom : le nom est relu, l'erreur est au champ", async () => {
+    const user = userEvent.setup();
+    PATCH.mockResolvedValueOnce(respond(200));
+    PATCH.mockResolvedValueOnce(failure(400, "VALIDATION_ERROR", { specialty: "Spécialité trop longue." }));
+    render(<TeacherProfileCard identity={IDENTITY} />);
+    await user.click(screen.getByRole("button", { name: /Modifier/ }));
+    await user.click(screen.getByRole("button", { name: "Enregistrer" }));
+    expect((await screen.findAllByText("Spécialité trop longue.")).length).toBeGreaterThan(0);
+    expect(router.refresh).toHaveBeenCalledTimes(1);
   });
 
   it("champs vides : erreurs sous les champs, aucun appel", async () => {
@@ -246,7 +261,7 @@ describe("TeacherSettings (WT08)", () => {
   it("lit l'utilisateur, l'établissement et les préférences ; sections de §5.12", async () => {
     getCurrentUser.mockResolvedValue({ firstName: "Koffi", lastName: "Adékambi", email: "koffi@steamy.test" });
     GET.mockImplementation(async (path: string) =>
-      path.includes("school") ? { data: { name: "Collège Les Palmiers" }, response: new Response(null, { status: 200 }) } : { data: PREFS, response: new Response(null, { status: 200 }) },
+      path.includes("teacher-profile") ? { data: { specialty: "Robotique", school: { id: 1, name: "Collège Les Palmiers", city: "Cotonou" } }, response: new Response(null, { status: 200 }) } : { data: PREFS, response: new Response(null, { status: 200 }) },
     );
     const { container } = render(await TeacherSettings());
     for (const title of ["Profil", "Connexion", "Notifications", "Légal", "Zone sensible"]) {
@@ -273,7 +288,7 @@ describe("TeacherSettings (WT08)", () => {
   it("sans email, la demande de fermeture part avec une coordonnée vide", async () => {
     getCurrentUser.mockResolvedValue({ firstName: "Koffi", lastName: "Adékambi", email: null });
     GET.mockImplementation(async (path: string) =>
-      path.includes("school") ? { data: { name: "École" }, response: new Response(null, { status: 200 }) } : { data: PREFS, response: new Response(null, { status: 200 }) },
+      path.includes("teacher-profile") ? { data: { specialty: "", school: null }, response: new Response(null, { status: 200 }) } : { data: PREFS, response: new Response(null, { status: 200 }) },
     );
     render(await TeacherSettings());
     expect(screen.getByRole("button", { name: "Demander la fermeture du compte" })).toBeInTheDocument();
