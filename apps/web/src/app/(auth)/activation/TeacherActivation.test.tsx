@@ -3,14 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const POST = vi.fn();
-const redirect = vi.fn();
 vi.mock("@/lib/api-browser", () => ({ getBrowserApi: async () => ({ POST }) }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), refresh: vi.fn() }), redirect }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), refresh: vi.fn() }) }));
 
 const { TeacherActivation } = await import("./TeacherActivation");
 const { ACTIVATION_TOKEN_KEY, forgetActivationToken, takeActivationToken } = await import("./activation-token");
 const { default: ActivationPage, metadata } = await import("./page");
-const { default: FormerActivationLink } = await import("./[token]/page");
 
 const respond = (status: number, body: object = {}) => ({ ...body, response: new Response(null, { status }) });
 const invitation = { firstName: "Awa", schoolName: "CEG Akpakpa", emailMasked: "a•••@ecole.bj" };
@@ -104,10 +102,5 @@ describe("Écran d'activation (C6, jeton dans le fragment)", () => {
   it("sert la page /activation avec son titre", () => {
     expect(metadata.title).toBe("Activation du compte");
     expect(ActivationPage().type).toBe(TeacherActivation);
-  });
-
-  it("redirige l'ancien lien vers le fragment", async () => {
-    await FormerActivationLink({ params: Promise.resolve({ token: "ancien_jeton" }) } as PageProps<"/activation/[token]">);
-    expect(redirect).toHaveBeenCalledWith("/activation#jeton=ancien_jeton");
   });
 });

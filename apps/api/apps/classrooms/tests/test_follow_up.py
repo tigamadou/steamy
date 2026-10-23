@@ -239,6 +239,30 @@ def test_comment_length_is_bounded(world):
     )
 
 
+def test_a_comment_is_seen_as_such_by_every_teacher_of_the_learner(world):
+    """C27 : `commented` ne dépend pas de l'auteur du commentaire."""
+    from apps.classrooms.follow_up import attempts_of
+
+    w = world
+    ko = attempt(w["enrollment"], w["level_quiz"], "ko", 30)
+    colleague = teacher_of(w["school"], first_name="Nadia", last_name="Houngbo")
+    other_class = ClassroomFactory(
+        school=w["school"], teacher=colleague, course=w["course"], name="4e C"
+    )
+    MembershipFactory(classroom=other_class, learner=w["awa"])
+    assert attempts_of(w["teacher"]).get(pk=ko.pk).commented is False
+    assert attempts_of(colleague).get(pk=ko.pk).commented is False
+
+    TeacherComment.objects.create(
+        teacher=w["teacher"], learner=w["awa"], classroom=w["classroom"], attempt=ko, body="Revois."
+    )
+
+    assert attempts_of(w["teacher"]).get(pk=ko.pk).commented is True
+    assert attempts_of(colleague).get(pk=ko.pk).commented is True
+    body = client_for(colleague).get(f"{URL}learners/{w['awa'].pk}/").json()
+    assert [a["commented"] for a in body["attempts"]] == [True]
+
+
 def test_learner_and_parent_read_the_comments(world):
     w = world
     ko = attempt(w["enrollment"], w["level_quiz"], "ko", 30)

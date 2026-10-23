@@ -271,22 +271,21 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
 - [x] **API-L2.7** Activation enseignant · `feature/api-l2-7-activation-enseignant`
   - [x] App `classrooms` amorcée : `School` minimale, `TeacherInvitation`
   - [x] Invitation créée depuis l'admin Django (action « Envoyer »)
-  - [x] `GET auth/teacher-invitations/{token}/`, `POST …/accept/` (C6)
+  - [x] `GET auth/teacher-invitations/{token}/`, `POST …/accept/` (C6), remplacés ensuite par `lookup/` et `accept/` (jeton dans le corps)
   - [x] Tests : jeton expiré ou réutilisé refusé
   - [x] Plafonds d'inscription séparés : création (`signup`) et étapes suivantes (`signup-step`), testé par le parcours d'une famille depuis une même IP
-  - [ ] Jeton hors des URL et des journaux (suite de la relecture de LOT-6 #137)
+  - [x] Jeton hors des URL et des journaux (suite de la relecture de LOT-6 #137)
     - [x] API · `feature/api-activation-enseignant-post` : `POST auth/teacher-invitations/lookup/` et `POST …/accept/`, jeton dans le corps ; anciennes routes `{token}/` et `{token}/accept/` gardées, dépréciées, masquées dans les journaux d'accès (`libs/access_log.py`)
     - [x] Front · `feature/lot2-activation-enseignant-fragment` : lien `/activation#jeton=…` lu côté client puis retiré (`replaceState`), `Referrer-Policy: no-referrer`, ancien lien `/activation/<jeton>` redirigé ; email au nouveau format
-    - [ ] Retrait des routes `legacy` de l'API (`{token}/`, `{token}/accept/`) et de la redirection `/activation/[token]` du front, 7 jours après le déploiement en production du front (liens déjà envoyés expirés) ; masquage correspondant de `libs/access_log.py` à retirer avec
+    - [x] Retrait des routes `legacy` de l'API (`{token}/`, `{token}/accept/`), de la redirection `/activation/[token]` du front et du masquage correspondant de `libs/access_log.py` · `chore/retrait-routes-activation-enseignant` : retirées sans attendre les 7 jours, rien n'étant déployé (phase de développement, 2026-10-23) ; le front et `activation.spec.ts` n'utilisent que `lookup/` et `accept/`, un jeton dans le chemin donne 404 (testé)
   > Notes (jeton hors URL) : un jeton dans le chemin finit dans les journaux d'accès (API, Next, proxy) et dans
   > l'en-tête Referer. L'API lit désormais le jeton dans le corps d'un POST, `lookup/` pour l'en-tête de l'écran et
   > `accept/` pour l'activation, avec les mêmes plafonds (`invitation`) et le même contrôle CSRF. Les anciennes
-  > routes restent le temps du déploiement : le front en service les appelle encore. Elles sont marquées
-  > `deprecated` dans le contrat (`operationId` en `legacy`) et leur jeton est masqué dans les journaux d'accès.
+  > routes ont été retirées le 2026-10-23 (aucun déploiement, aucun lien déjà envoyé à honorer).
   > Front : l'email porte désormais `/activation#jeton=…` ; la page lit le fragment, le retire de l'adresse
   > (`replaceState`) et le garde dans l'onglet (`sessionStorage`) pour un rechargement, relit l'invitation par
   > `lookup/`, puis active par `accept/`. `Referrer-Policy: no-referrer` reste posé sur `/activation`. L'ancien lien
-  > `/activation/<jeton>` redirige vers le fragment le temps que les liens déjà envoyés expirent.
+  > `/activation/<jeton>` ne redirige plus : la route du front est retirée.
 - [x] **API-L2.8** Correctifs OTP, refus rejoué, identifiant concurrent · `feature/api-l2-correctifs` · PR #148
   - [x] `issue_token` (WL03) : `verify_challenge` sorti de la transaction englobante, l'incrément d'`attempts` n'est plus annulé, `OTP_TOO_MANY_ATTEMPTS` atteint au 4ᵉ essai (D24) ; autres appelants relus (`parent_signup` WP02, `phone_change`) : aucun `atomic` englobant
   - [x] `POST auth/learner-signup/` et `…/resume/` retirent `learner_signup_consent` de la session (W18 ne revient plus après un refus)
@@ -1096,7 +1095,7 @@ Bénin.
 | `API-L2.4` Décision du parent | `POST accounts/consent-requests/preview/` (jeton → numéro masqué pour préremplir WP01, public, throttlé, aucune donnée de l'enfant), `POST accounts/consent-requests/claim/` (jeton du SMS, parent connecté, numéro concordant sinon `CONSENT_PHONE_MISMATCH`), `GET accounts/consent-requests/` (demandes adressées au numéro vérifié : WP04), `GET …/{id}/` (D20 : prénom, nom, identifiant, âge, lien), `…/accept/`, `…/refuse/` (motif obligatoire) ; création de `ParentChildLink` ; refus : demande gardée 30 j (C9), cooldown par numéro (`CONSENT_COOLDOWN`), compte purgé et identifiant libéré (D22) | L |
 | `API-L2.5` Profils | `profileStep` de `accounts/me/` (W11-W14, WP07-WP09 : redirection après connexion) ; `PATCH accounts/me/`, `…/learner-profile/` (W11-W14 : date de naissance cohérente avec l'âge déclaré, `BIRTHDATE_AGE_MISMATCH` ; objectifs ≥ 2 ; genre et handicap facultatifs, D6), `…/parent-profile/` (WP07-WP09) | M |
 | `API-L2.6` Mot de passe oublié | `POST auth/password-reset/` (parent : OTP SMS ; enseignant : code par email, C6 ; apprenant : refus explicite, D26), `…/verify/` → `resetToken`, `…/confirm/` ; réponse identique que le compte existe ou non | M |
-| `API-L2.7` Activation enseignant | App `classrooms` amorcée : `School` minimale, `TeacherInvitation` ; invitation créée depuis l'admin Django (action « Envoyer ») ; `GET auth/teacher-invitations/{token}/`, `POST …/accept/` (C6) | S |
+| `API-L2.7` Activation enseignant | App `classrooms` amorcée : `School` minimale, `TeacherInvitation` ; invitation créée depuis l'admin Django (action « Envoyer ») ; `POST auth/teacher-invitations/lookup/`, `POST …/accept/` (C6, jeton dans le corps) | S |
 
 **Tâches Celery** : `send_sms`, `expire_consent_requests` (7 j), `purge_refused_requests` (30 j), `purge_signup_sessions`
 (compte `pending` expiré supprimé, identifiant libéré), `send_email` (existant).

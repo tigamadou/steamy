@@ -2,8 +2,7 @@
 Domaine `auth` : activation d'un compte enseignant depuis le lien de l'invitation (C6, S5).
 
 Le jeton voyage dans le corps des requêtes (`lookup/`, `accept/`), jamais dans le chemin : il reste hors des journaux
-d'accès. Les anciennes routes `<jeton>/` et `<jeton>/accept/` restent le temps du déploiement (front précédent),
-dépréciées et masquées dans les journaux (`libs/access_log.py`).
+d'accès.
 """
 
 from django.contrib.auth import login
@@ -72,7 +71,7 @@ class TeacherInvitationLookupView(InvitationView):
         return Response(TeacherInvitationSerializer(invitation).data)
 
 
-class TeacherInvitationTokenAcceptView(InvitationView):
+class TeacherInvitationAcceptView(InvitationView):
     @extend_schema(
         request=TeacherInvitationAcceptSerializer, responses=LoginResponseSerializer, auth=[]
     )
@@ -83,31 +82,3 @@ class TeacherInvitationTokenAcceptView(InvitationView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         return activate(request, data["token"], data["password"])
-
-
-class TeacherInvitationView(InvitationView):
-    @extend_schema(
-        responses=TeacherInvitationSerializer,
-        auth=[],
-        deprecated=True,
-        operation_id="auth_teacher_invitations_legacy_retrieve",
-    )
-    def get(self, request, token):
-        """Lien `/activation/<jeton>` : invitation valable, sinon `INVITATION_INVALID`."""
-        return Response(TeacherInvitationSerializer(open_invitation(token)).data)
-
-
-class TeacherInvitationAcceptView(InvitationView):
-    @extend_schema(
-        request=TeacherActivationSerializer,
-        responses=LoginResponseSerializer,
-        auth=[],
-        deprecated=True,
-        operation_id="auth_teacher_invitations_legacy_accept",
-    )
-    def post(self, request, token):
-        """Ancienne route (jeton dans le chemin) : préférer `teacher-invitations/accept/`."""
-        enforce_csrf(request)
-        serializer = TeacherActivationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        return activate(request, token, serializer.validated_data["password"])
