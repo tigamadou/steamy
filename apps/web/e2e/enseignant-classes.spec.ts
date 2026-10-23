@@ -35,8 +35,8 @@ test("WT13 : erreur serveur « nom déjà pris » affichée au champ, sans crée
   await page.goto("/enseignant/classes/nouvelle");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Créer une classe");
   await page.getByLabel(/Nom de la classe/).fill("4e B · Robotique");
-  // Radios natives masquées : on clique la carte (le libellé) visible
-  await page.getByRole("radio").first().locator("xpath=ancestor::label").click();
+  // Radios natives masquées : on clique le libellé visible du premier parcours
+  await page.getByText(/· \d+ h$/).first().click();
   await page.getByRole("button", { name: "Créer la classe" }).click();
   await expect(page.getByText("Une classe porte déjà ce nom dans votre établissement.").filter({ visible: true }).first()).toBeVisible();
   await expect(page).toHaveURL("/enseignant/classes/nouvelle");
@@ -52,8 +52,8 @@ test.describe("création d'une classe", { tag: "@donnees-uniques" }, () => {
     await page.goto("/enseignant/classes/nouvelle");
     const name = `Classe e2e ${uniqueSuffix()}`;
     await page.getByLabel(/Nom de la classe/).fill(name);
-    const course = page.getByRole("radio").first();
-    await course.locator("xpath=ancestor::label").click();
+    // Radios natives masquées : on clique le libellé visible du premier parcours
+    await page.getByText(/· \d+ h$/).first().click();
     await page.getByRole("combobox", { name: /Niveau scolaire/ }).selectOption({ index: 1 });
     await page.getByRole("button", { name: "Créer la classe" }).click();
 

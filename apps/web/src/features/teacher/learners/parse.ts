@@ -24,6 +24,12 @@ export const TEMPLATE_CSV = `${COLUMNS.map((column) => COLUMN_LABELS[column]).jo
 /** Nombre de lignes montrées dans l'aperçu avant l'envoi. */
 export const PREVIEW_ROWS = 5;
 
+/** Taille maximale d'un fichier d'import, comme le serveur (1 Mo) : refusé avant d'être lu. */
+export const MAX_FILE_BYTES = 1024 * 1024;
+
+/** Lignes au plus par import (C19) : au-delà, le serveur refuse (`IMPORT_TOO_LARGE`) ; le front ne fait qu'avertir. */
+export const MAX_IMPORT_ROWS = 200;
+
 function fold(value: string): string {
   return value
     .normalize("NFD")
@@ -41,8 +47,29 @@ export function detectSeparator(text: string): "\t" | ";" | "," {
   return semicolons > 0 && semicolons >= commas ? ";" : ",";
 }
 
-function cleanCell(cell: string): string {
-  return cell.trim().replace(/^"(.*)"$/, "$1").trim();
+/** Découpe une ligne sur le séparateur, en gardant un séparateur placé entre guillemets (`"Dupont, Jean"`). */
+export function splitLine(line: string, separator: string): string[] {
+  const cells: string[] = [];
+  let current = "";
+  let quoted = false;
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index];
+    if (char === '"') {
+      if (quoted && line[index + 1] === '"') {
+        current += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (char === separator && !quoted) {
+      cells.push(current.trim());
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  cells.push(current.trim());
+  return cells;
 }
 
 export type ParsedList = {
@@ -63,7 +90,7 @@ export function parseDelimited(text: string): ParsedList {
   let seenFirst = false;
   text.split(/\r?\n/).forEach((raw, index) => {
     if (!raw.trim()) return;
-    const cells = raw.split(separator).map(cleanCell);
+    const cells = splitLine(raw, separator);
     const first = !seenFirst;
     seenFirst = true;
     if (first && ["prenom", "firstname", "first name"].includes(fold(cells[0] ?? ""))) return;

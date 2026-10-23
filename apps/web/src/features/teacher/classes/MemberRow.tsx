@@ -91,7 +91,7 @@ export function InvitationRow({ member, classroomId }: { member: Member; classro
       </div>
       <Badge tone={tone}>{invitationLabel(member)}</Badge>
       <div className="self-end sm:self-auto">
-        <RemoveMemberButton classroomId={classroomId} memberId={member.id} name={name} invitation />
+        <RemoveMemberButton classroomId={classroomId} memberId={member.id} name={name} invitation closed={!pending} />
       </div>
     </div>
   );

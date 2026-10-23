@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useRef } from "react";
 
 import { Button, ErrorSummary, Field, Input, PhoneInput, ReferentialSelect, type PhoneCountry } from "@/components/ds";
+import { throttledLabel, useThrottle } from "@/components/ds/RetryCountdown";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { submitWith } from "@/lib/form";
 import { routes } from "@/lib/routes";
@@ -33,14 +34,18 @@ export function IndividualForm({
   classrooms,
   countries,
   defaultClassroom,
+  offerExpired = false,
 }: {
   classrooms: Pick<Schemas["Classroom"], "id" | "name">[];
   countries: PhoneCountry[];
   defaultClassroom?: string;
+  /** Offre échue : l'ajout d'élèves est bloqué (C21), le serveur répond `SCHOOL_OFFER_EXPIRED`. */
+  offerExpired?: boolean;
 }) {
   const router = useRouter();
   const relationships = useReferential("relationships");
   const inFlight = useRef(false);
+  const { wait, track } = useThrottle();
   const [state, action, pending] = useActionState(
     async (previous: State, form: FormData): Promise<State> => {
       const attempt = previous.attempt + 1;
@@ -65,11 +70,13 @@ export function IndividualForm({
           body: { firstName, lastName, parentPhone, relationship },
         }),
       );
-      inFlight.current = false;
       if (result.ok) {
+        // Le verrou reste posé jusqu'à la navigation : un nouveau clic ne renvoie pas la demande
         router.push(routes.teacher.classroom(classroomId, "invitation"));
         return { attempt, fields: {} };
       }
+      inFlight.current = false;
+      track(result);
       if (result.code === "PHONE_INVALID") {
         return { attempt, fields: { parentPhone: "Ce numéro n'est pas valide : vérifiez-le." } };
       }
@@ -91,6 +98,11 @@ export function IndividualForm({
 
   return (
     <form onSubmit={submitWith(action)} noValidate aria-label="Ajouter un élève" className="flex flex-col gap-4">
+      {offerExpired && (
+        <p className="m-0 rounded-[14px] border-2 border-error-100 bg-error-50 px-3.5 py-3 text-[13px] font-extrabold text-error-700">
+          ⛔ L&apos;offre de votre établissement est échue : l&apos;ajout d&apos;élèves est bloqué.
+        </p>
+      )}
       <ErrorSummary title="Corrigez les erreurs suivantes :" errors={errors} focusKey={state.attempt} />
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Prénom" id={IDS.firstName} required error={state.fields.firstName}>
@@ -123,8 +135,8 @@ export function IndividualForm({
         Le parent reçoit une demande de consentement par SMS. L&apos;élève rejoint la classe après son accord.
       </p>
       <div className="flex justify-end">
-        <Button type="submit" loading={pending} icon="arrow-right">
-          Envoyer la demande
+        <Button type="submit" loading={pending} disabled={offerExpired || wait > 0} icon="arrow-right">
+          {throttledLabel(wait, "Envoyer la demande")}
         </Button>
       </div>
     </form>

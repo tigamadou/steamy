@@ -234,6 +234,16 @@ describe("WT05 · profil de l'élève", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
+  it("une autre tentative dans l'URL change la tentative du commentaire (le texte déjà saisi repart avec le formulaire)", () => {
+    const view = followUp();
+    const { rerender } = render(<LearnerProfileView followUp={view} selectedAttempt={90} />);
+    expect(screen.getByRole("combobox", { name: /À propos de la tentative/ })).toHaveValue("90");
+    rerender(<LearnerProfileView followUp={view} selectedAttempt={91} />);
+    expect(screen.getByRole("combobox", { name: /À propos de la tentative/ })).toHaveValue("91");
+    rerender(<LearnerProfileView followUp={view} />);
+    expect(screen.getByRole("combobox", { name: /À propos de la tentative/ })).toHaveValue("");
+  });
+
   it("états vides : aucune tentative, aucun badge, aucun commentaire ; élève en décrochage", () => {
     render(
       <LearnerProfileView
