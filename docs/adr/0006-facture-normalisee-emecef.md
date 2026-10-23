@@ -186,4 +186,4 @@ demande/confirmation de la facture, et la question de l'`aib` d'un avoir.
 1. **Fait** : socle (interface, faux fournisseur, client conforme, réglages, `emecef_check`).
 2. **Fait** : émission asynchrone, éléments de sécurité sur `Invoice`, PDF avec QR (PR B).
 3. **Fait** : type `EV`, garde-fou IFU, surveillance quotidienne du jeton (PR C). **Avoirs retirés de la v1** : remboursements traités à la main (à reprendre plus tard).
-4. Sonde `emecef_probe` sur le serveur de test (PR D), lancée par l'utilisateur avec son jeton.
+4. **Fait** : sonde `emecef_probe` sur le serveur de test (PR D), lancée par l'utilisateur avec son jeton de test ; mode d'emploi dans `docs/infra/reference-configuration.md`.
