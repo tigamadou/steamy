@@ -9,7 +9,7 @@ règles communes, la définition de « terminé » et les outils de test sont da
 Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Paramètres, notifications, aide (5.2 attend la validation de la maquette de `WT13`) · Prérequis : `API-L5` (endpoints `classrooms`, `API-L5.1` à `API-L5.5`, seed D2) ; lots 1, 2 et 3 livrés ; lot 4 pour l'affichage des commentaires côté parent (`WPD03`) ; maquette de `WT13` validée (C18) avant 5.2 ; étape 4.10 du lot 4 livrée pendant ce lot, avant 5.9
 
 ### Lot 5 · Espace enseignant — 🟡 en cours
-- [x] **5.1** Shell, accueil et navigation · `feature/lot5-shell-accueil` (requiert API-L5)
+- [x] **5.1** Shell, accueil et navigation · `feature/lot5-shell-accueil` · PR #147 (requiert API-L5)
   - [x] Layout `(enseignant)` : contrôle du rôle `teacher` côté serveur, redirection vers `/connexion`
   - [x] Config `AppShell` enseignant (7 entrées, icône `help` ajoutée au DS pour Aide, cloche vers la page des notifications) ; seules les entrées dont les écrans sont livrés sont visibles, chaque étape lève la sienne
   - [x] `WT01` Accueil : `ClassCard`, `ReviewRow`, `DropoutRow`, `StatPill`, `SectionHeader`
