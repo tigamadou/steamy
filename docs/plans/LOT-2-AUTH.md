@@ -136,7 +136,7 @@ Statut : ✅ terminé (recette produit : couverture automatique acceptée le 202
 - [x] **Critères de fin du lot 2** (revérifiés sur `development` après les correctifs API-L2 de la PR #148)
   - [x] Les 34 écrans respectent la définition de « terminé » du README et SPEC-ECRANS §2, sans élément « Ne pas porter »
     - Vérifié : matrice e2e à jour (`python3 scripts/e2e_matrix.py --check`), les 34 écrans ont un test e2e (axe, 360 px, registre) ; W18 n'est plus réaffiché dans le même navigateur : `consentement-apprenant.spec.ts` (« W18 n'est plus réaffiché… »), correctif API #148.
-    - Recette produit : couverture automatique acceptée le 2026-10-23 (C24). Pour le lot 6, l'équipe a accepté la couverture automatique (pytest et Playwright) comme recette. Question ouverte pour le lot 2 : la recette écran par écran se fait-elle, ou l'équipe accepte-t-elle la couverture automatique ? Case non cochée tant que l'équipe n'a pas répondu.
+    - Recette produit : couverture automatique acceptée le 2026-10-23 (C24). Même règle que pour le lot 6 (pytest et Playwright).
   - [x] Parcours P1 à P7 verts en CI sur la stack Docker avec le faux fournisseur SMS ; tests Vitest des composants verts
     - Jobs `e2e` (projets bureau et mobile) et `web` (Vitest) verts sur la PR de clôture ; P1 `parcours-p1-inscription-accord.spec.ts`, P2 `parcours-p2-refus.spec.ts`, P3 `parcours-p3-reprise.spec.ts`, P4 `parcours-p4-parent-existant.spec.ts`, P5 `mot-de-passe-oublie.spec.ts` (le plafond d'essais de WL03 n'est plus en `test.fixme`) et `activation.spec.ts`, P6 `activation.spec.ts`, P7 `parcours-p7-accessibilite.spec.ts`.
   - [x] Aucune Server Action ni appel hors client généré pour l'authentification ; CSRF effectif sur toutes les écritures
