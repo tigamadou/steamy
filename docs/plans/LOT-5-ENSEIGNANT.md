@@ -53,13 +53,15 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [ ] Branchement API : `classrooms/reviews/?status=&type=&classroomId=`
   - [ ] Tests unitaires : filtres et `searchParams`, pagination, état vide par filtre
   - [ ] Recette : aucune action de correction ou de modification de note (D65)
-- [ ] **5.6** Parcours encadrés · `feature/lot5-parcours` (requiert 5.1)
-  - [ ] `WT02` Mes parcours encadrés (`CourseCard` encadré)
-  - [ ] `WT10` Détail parcours encadré (`MissionCompletionItem`, panneau droit : progression par classe, taux de réussite, missions les plus échouées)
-  - [ ] Mission en lecture seule (lecteur du lot 3 sans progression ni quiz)
-  - [ ] Branchement API : `classrooms/courses/`, `courses/{slug}/`, `missions/{id}/`
-  - [ ] Tests unitaires : arbre avec compteurs ; parcours non encadré = 404
-  - [ ] Recette : seuls les parcours des classes de l'enseignant apparaissent (D64)
+- [x] **5.6** Parcours encadrés · `feature/lot5-parcours` (requiert 5.1)
+  - [x] `WT02` Mes parcours encadrés (carte de parcours encadré : classes, élèves)
+  - [x] `WT10` Détail parcours encadré (`MissionCompletionItem`, panneau droit : progression par classe, taux de réussite, niveaux et projets les plus échoués)
+  - [x] Mission en lecture seule (lecteur du lot 3 sans progression, sans quiz, sans suivi du visionnage)
+  - [x] Branchement API : `classrooms/courses/`, `courses/{slug}/`, `missions/{id}/`
+  - [x] Tests unitaires : arbre avec compteurs ; parcours non encadré = 404
+  - [x] Playwright : parcours de Koffi, arbre et mission, 404 d'un parcours hors de ses classes
+  - [x] Recette : seuls les parcours des classes de l'enseignant apparaissent (D64)
+  > Écarts : l'API ne renvoie ni progression globale par parcours (WT02) ni taux d'échec par mission (WT10). La carte de WT02 affiche classes et élèves ; le panneau de WT10 classe les niveaux et projets par taux de réussite du serveur (« Les plus échoués »). Un ajout d'API serait nécessaire pour la progression globale.
 - [ ] **5.7** Événements · `feature/lot5-evenements` (requiert 5.2)
   - [ ] `WT09` Événements à venir et `WL23` dans le shell enseignant
   - [ ] « Proposer à une classe » : modale de choix de classe puis confirmation « Les élèves et leurs parents ont été notifiés »

@@ -9,7 +9,7 @@ const t = routes.teacher;
  */
 export const teacherNav: NavEntry[] = [
   { id: "home", icon: "home", label: "Accueil", href: t.home },
-  { id: "courses", icon: "book", label: "Mes parcours", href: t.courses, hidden: true },
+  { id: "courses", icon: "book", label: "Mes parcours", href: t.courses },
   { id: "classes", icon: "user", label: "Mes classes", href: t.classes, hidden: true },
   { id: "reviews", icon: "star", label: "Évaluations", href: t.reviews(), hidden: true },
   { id: "events", icon: "trophy", label: "Événements", href: t.events, hidden: true },

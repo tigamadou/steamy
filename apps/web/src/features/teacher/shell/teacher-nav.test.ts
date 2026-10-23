@@ -13,7 +13,7 @@ describe("teacherNav", () => {
       ["help", "help", "Aide"],
       ["settings", "gear", "Paramètres"],
     ]);
-    expect(teacherNav.filter((entry) => !entry.hidden).map((entry) => entry.href)).toEqual(["/enseignant"]);
+    expect(teacherNav.filter((entry) => !entry.hidden).map((entry) => entry.href)).toEqual(["/enseignant", "/enseignant/parcours"]);
     expect(teacherNav.map((entry) => entry.href)).toEqual([
       "/enseignant",
       "/enseignant/parcours",
