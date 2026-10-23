@@ -4,7 +4,7 @@ import type { Schemas } from "@steamy/api-client";
 import { useRouter } from "next/navigation";
 import { useActionState, useRef } from "react";
 
-import { Button, ChoiceGroup, ErrorSummary, Field, Input, ReferentialSelect } from "@/components/ds";
+import { Button, ChoiceGroup, ErrorSummary, Field, Icon, Input, ReferentialSelect } from "@/components/ds";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { submitWith } from "@/lib/form";
 import { routes } from "@/lib/routes";
@@ -131,7 +131,7 @@ export function ClassroomForm({ school, classroom }: { school: School; classroom
             <p className="m-0 flex items-center gap-3 rounded-2xl border-2 border-ink-200 bg-ink-50 p-3 text-sm font-black text-ink-900">
               <span aria-hidden>{lockedCourse.emoji}</span>
               {lockedCourse.title}
-              <span aria-hidden className="ml-auto">🔒</span>
+              <Icon name="lock" size={16} className="ml-auto text-ink-600" />
             </p>
             <p className="m-0 text-[13px] font-bold text-ink-600">
               {classroom.memberCount} élève{classroom.memberCount > 1 ? "s sont inscrits" : " est inscrit"} : le parcours

@@ -67,6 +67,17 @@ test("WT07 : filtre par classe dans l'URL, filtre d'URL invalide ramené à « T
   await page.getByRole("navigation", { name: "Filtrer les évaluations" }).getByRole("link", { name: "À revoir" }).click();
   await expect(page).toHaveURL(`/enseignant/evaluations?filtre=a-revoir&classe=${robotics.id}`);
 
+  // Une classe qui n'est pas la mienne : même liste que « Toutes les classes »
+  await page.goto("/enseignant/evaluations?classe=999999");
+  const all = await readApi<Reviews>(page, "/api/classrooms/reviews/?pageSize=20");
+  await expect(page.getByRole("combobox", { name: "Classe" })).toHaveValue("");
+  await expect(page.getByRole("status").filter({ hasText: /évaluation/ })).toContainText(String(all.count));
+
+  // Page au-delà de la dernière : retour à la première page
+  await page.goto("/enseignant/evaluations?page=99");
+  await expect(page).toHaveURL("/enseignant/evaluations");
+  await expect(page.getByRole("navigation", { name: "Pagination des évaluations" })).toHaveCount(0);
+
   await page.goto("/enseignant/evaluations?filtre=a-corriger&page=-3");
   await expect(
     page.getByRole("navigation", { name: "Filtrer les évaluations" }).getByRole("link", { name: "Toutes" }),

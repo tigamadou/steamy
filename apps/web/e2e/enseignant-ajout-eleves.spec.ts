@@ -81,6 +81,8 @@ test("WT06 import par lot : rapport conforme, correction des lignes, renvoi, lig
   await page.getByRole("button", { name: "Importer et envoyer les demandes" }).click();
 
   await expect(page.getByRole("heading", { level: 2, name: "Résultat d'import" })).toBeVisible();
+  // Le résultat remplace le formulaire : le focus passe au titre du rapport
+  await expect(page.getByRole("heading", { level: 2, name: "Résultat d'import" })).toBeFocused();
   await expect(page.getByRole("status").filter({ hasText: "envoyée" })).toContainText("1 demande envoyée · 4 lignes à vérifier");
   const lines = page.getByRole("list", { name: "Lignes de l'import" });
   await expect(lines.getByRole("listitem", { name: "Ligne 3" })).toContainText("Doublon dans la liste");
@@ -101,6 +103,7 @@ test("WT06 import par lot : rapport conforme, correction des lignes, renvoi, lig
   await page.getByLabel(/Lien de parenté de la ligne 6/).fill("mère");
   await page.getByRole("button", { name: "Renvoyer les lignes corrigées" }).click();
   await expect(page.getByRole("status").filter({ hasText: "envoyée" })).toContainText("3 demandes envoyées · 2 lignes à vérifier");
+  await expect(page.getByRole("heading", { level: 2, name: "Résultat d'import" })).toBeFocused();
   await expect(lines.getByRole("listitem", { name: "Ligne 5" })).toHaveCount(0);
   await expect(lines.getByText("Envoyée")).toHaveCount(3);
 

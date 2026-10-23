@@ -21,11 +21,14 @@ export function RemoveMemberButton({
   memberId,
   name,
   invitation,
+  closed = false,
 }: {
   classroomId: number;
   memberId: number;
   name: string;
   invitation: boolean;
+  /** Invitation refusée ou expirée : elle ne retient plus de place dans le quota. */
+  closed?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -37,7 +40,7 @@ export function RemoveMemberButton({
     },
     [],
   );
-  const label = invitation ? "Annuler l'invitation" : "Retirer de la classe";
+  const label = closed ? "Retirer l'invitation" : invitation ? "Annuler l'invitation" : "Retirer de la classe";
   return (
     <>
       <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
@@ -47,7 +50,7 @@ export function RemoveMemberButton({
       <ConfirmDialog
         open={open}
         onClose={() => setOpen(false)}
-        title={invitation ? "Annuler cette invitation ?" : "Retirer cet élève de la classe ?"}
+        title={closed ? "Retirer cette invitation ?" : invitation ? "Annuler cette invitation ?" : "Retirer cet élève de la classe ?"}
         confirmLabel={label}
         onConfirm={() =>
           apiCall((api) =>
@@ -62,9 +65,11 @@ export function RemoveMemberButton({
         }}
       >
         <p className="m-0">
-          {invitation
-            ? `L'invitation de ${name} est annulée et sa place est libérée dans le quota de l'établissement.`
-            : `${name} ne fait plus partie de la classe et sa place est libérée dans le quota de l'établissement.`}
+          {closed
+            ? `L'invitation de ${name} est retirée de la liste.`
+            : invitation
+              ? `L'invitation de ${name} est annulée et sa place est libérée dans le quota de l'établissement.`
+              : `${name} ne fait plus partie de la classe et sa place est libérée dans le quota de l'établissement.`}
         </p>
       </ConfirmDialog>
     </>

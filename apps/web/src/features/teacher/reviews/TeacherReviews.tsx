@@ -19,32 +19,31 @@ type SearchParams = Record<string, string | string[] | undefined>;
 export async function TeacherReviews({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const requested = parseReviewParams(await searchParams);
   const api = await getServerApi();
-  const [classrooms, list] = await Promise.all([
-    getClassrooms(),
-    api.GET("/api/classrooms/reviews/", {
-      params: {
-        query: {
-          ...FILTER_QUERY[requested.filter],
-          classroomId: requested.classroomId ? Number(requested.classroomId) : undefined,
-          page: requested.page,
-          pageSize: REVIEWS_PAGE_SIZE,
-        },
-      },
-    }),
-  ]);
-  // Page au-delà de la dernière (URL saisie à la main) : retour à la première
-  if (list.response.status === 404 && requested.page > 1) {
-    redirect(routes.teacher.reviews({ filter: requested.filter, classroomId: requested.classroomId }));
-  }
-  const data = readOrNull(list);
-  if (!data || !classrooms) return null;
-  // Une classe qui n'est pas la mienne n'est pas proposée : le filtre de l'URL retombe sur toutes les classes
+  // Mes classes d'abord : la classe de l'URL n'est transmise à l'API que si c'est l'une d'elles (sinon « toutes »)
+  const classrooms = await getClassrooms();
+  if (!classrooms) return null;
   const params: ReviewParams = {
     ...requested,
     classroomId: classrooms.some((classroom) => String(classroom.id) === requested.classroomId)
       ? requested.classroomId
       : undefined,
   };
+  const list = await api.GET("/api/classrooms/reviews/", {
+    params: {
+      query: {
+        ...FILTER_QUERY[params.filter],
+        classroomId: params.classroomId ? Number(params.classroomId) : undefined,
+        page: params.page,
+        pageSize: REVIEWS_PAGE_SIZE,
+      },
+    },
+  });
+  // Page au-delà de la dernière (URL saisie à la main) : retour à la première
+  if (list.response.status === 404 && params.page > 1) {
+    redirect(routes.teacher.reviews({ filter: params.filter, classroomId: params.classroomId }));
+  }
+  const data = readOrNull(list);
+  if (!data) return null;
   const base = (filter: ReviewParams["filter"]) => routes.teacher.reviews({ filter, classroomId: params.classroomId });
   return (
     <div className="flex flex-col gap-5">

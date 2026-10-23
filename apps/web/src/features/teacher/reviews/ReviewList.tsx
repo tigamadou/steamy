@@ -2,6 +2,7 @@
 
 import type { Schemas } from "@steamy/api-client";
 import Link from "next/link";
+import type { RefObject } from "react";
 
 import { Icon } from "@/components/ds";
 import { ReviewRow } from "@/features/teacher/home/ReviewRow";
@@ -35,17 +36,21 @@ export function ReviewList({
   hasNext: boolean;
 }) {
   const { filter, classroomId, page } = params;
-  const list = useFocusOnChange<HTMLUListElement>("evaluations", `${filter}-${classroomId ?? ""}-${page}`);
+  const list = useFocusOnChange<HTMLElement>("evaluations", `${filter}-${classroomId ?? ""}-${page}`);
   const href = (target: number) => routes.teacher.reviews({ filter, classroomId, page: target });
   return (
     <div className="flex flex-col gap-4">
       {reviews.length === 0 ? (
-        <p className="m-0 rounded-[14px] border border-dashed border-ink-200 bg-surface px-4.5 py-5 text-sm font-semibold text-ink-600">
+        <p
+          ref={list as RefObject<HTMLParagraphElement | null>}
+          tabIndex={-1}
+          className="m-0 rounded-[14px] border border-dashed border-ink-200 bg-surface px-4.5 py-5 text-sm font-semibold text-ink-600 outline-none"
+        >
           {EMPTY_TEXTS[filter]}
         </p>
       ) : (
         <ul
-          ref={list}
+          ref={list as RefObject<HTMLUListElement | null>}
           tabIndex={-1}
           aria-label={`Évaluations : ${FILTER_LABELS[filter]}`}
           className="m-0 flex list-none flex-col gap-2 p-0 outline-none"

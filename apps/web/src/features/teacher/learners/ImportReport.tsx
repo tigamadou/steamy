@@ -1,8 +1,9 @@
 "use client";
 
-import { useId } from "react";
+import { useId, type Ref } from "react";
 
 import { Badge, Button, Checkbox, Input } from "@/components/ds";
+import { throttledLabel } from "@/components/ds/RetryCountdown";
 
 import { COLUMN_LABELS, COLUMNS, EDITABLE_CODES, ERROR_LABELS, type ImportErrorCode, type RowData } from "./parse";
 
@@ -22,7 +23,14 @@ export function correctedLines(lines: readonly ErrorLine[]): ErrorLine[] {
   return lines.filter((line) => EDITABLE_CODES.includes(line.code) && isEdited(line));
 }
 
+/** « 2 demandes envoyées · 5 lignes à vérifier » : annoncé dans la région `aria-live` de l'import. */
+export function reportSummary(sent: number, errors: number): string {
+  return `${sent} demande${sent > 1 ? "s" : ""} envoyée${sent > 1 ? "s" : ""} · ${errors} ligne${errors > 1 ? "s" : ""} à vérifier`;
+}
+
 type Props = {
+  /** Titre du rapport, qui reçoit le focus quand le résultat apparaît. */
+  headingRef?: Ref<HTMLHeadingElement>;
   sent: readonly SentLine[];
   errors: readonly ErrorLine[];
   errorsOnly: boolean;
@@ -30,6 +38,8 @@ type Props = {
   onEdit: (line: number, column: (typeof COLUMNS)[number], value: string) => void;
   onResend: () => void;
   resending: boolean;
+  /** Secondes d'attente imposées par le serveur (`THROTTLED`) avant un nouvel envoi. */
+  wait?: number;
   /** Message d'échec du dernier renvoi (réseau, plafond, fichier trop long…), conservé pour un nouvel essai. */
   failure?: string;
 };
@@ -39,19 +49,21 @@ type Props = {
  * en place des lignes dont l'erreur se corrige, puis « Renvoyer les lignes corrigées ». Les statuts sont ceux du
  * serveur ; le front ne les recalcule pas.
  */
-export function ImportReport({ sent, errors, errorsOnly, onErrorsOnly, onEdit, onResend, resending, failure }: Props) {
+export function ImportReport({ headingRef, sent, errors, errorsOnly, onErrorsOnly, onEdit, onResend, resending, wait = 0, failure }: Props) {
   const baseId = useId();
   const corrected = correctedLines(errors);
   return (
     <section aria-labelledby="resultat-import" className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="resultat-import" className="m-0 text-lg font-black tracking-[-0.01em] text-ink-900">
+        <h2
+          id="resultat-import"
+          ref={headingRef}
+          tabIndex={-1}
+          className="m-0 text-lg font-black tracking-[-0.01em] text-ink-900 outline-none"
+        >
           Résultat d&apos;import
         </h2>
-        <p role="status" className="m-0 text-sm font-extrabold text-ink-700">
-          {sent.length} demande{sent.length > 1 ? "s" : ""} envoyée{sent.length > 1 ? "s" : ""} · {errors.length} ligne
-          {errors.length > 1 ? "s" : ""} à vérifier
-        </p>
+        <p className="m-0 text-sm font-extrabold text-ink-700">{reportSummary(sent.length, errors.length)}</p>
       </div>
       <Checkbox
         label="Erreurs seulement"
@@ -78,7 +90,7 @@ export function ImportReport({ sent, errors, errorsOnly, onErrorsOnly, onEdit, o
                 <span className="text-xs font-semibold text-ink-600">{line.message}</span>
               </div>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                {COLUMNS.map((column) => {
+                {COLUMNS.filter((column) => editable || column !== "parentPhone").map((column) => {
                   const id = `${baseId}-${line.line}-${column}`;
                   return (
                     <div key={column} className="flex flex-col gap-1">
@@ -119,8 +131,8 @@ export function ImportReport({ sent, errors, errorsOnly, onErrorsOnly, onEdit, o
           <p className="m-0 text-xs font-semibold text-ink-600">
             Corrigez les valeurs des lignes en erreur, puis renvoyez-les : seules les lignes corrigées repartent.
           </p>
-          <Button onClick={onResend} loading={resending} disabled={corrected.length === 0}>
-            Renvoyer les lignes corrigées
+          <Button onClick={onResend} loading={resending} disabled={corrected.length === 0 || wait > 0}>
+            {throttledLabel(wait, "Renvoyer les lignes corrigées")}
           </Button>
         </div>
       )}

@@ -29,7 +29,7 @@ const COUNTRIES = [
 
 const { IndividualForm } = await import("./IndividualForm");
 const { BatchImport } = await import("./BatchImport");
-const { ImportReport, correctedLines, isEdited } = await import("./ImportReport");
+const { ImportReport, correctedLines, isEdited, reportSummary } = await import("./ImportReport");
 const { AddLearners, AddLearnersSkeleton, NoClassroomForLearners, defaultClassroomOf } = await import("./AddLearners");
 
 const CLASSROOMS = [
@@ -419,6 +419,174 @@ describe("WT06 · onglet Import par lot", () => {
   });
 });
 
+describe("WT06 · import : focus, annonce, bornes, attente du serveur", () => {
+  const renderBatch = (props: object = {}) =>
+    render(<BatchImport classrooms={CLASSROOMS} defaultClassroom="3" {...props} />);
+  async function paste(user: ReturnType<typeof userEvent.setup>, text: string) {
+    await user.click(screen.getByRole("textbox", { name: /Ou collez une liste/ }));
+    await user.paste(text);
+  }
+  const ok = (created: unknown[] = [], errors: unknown[] = []) => ({
+    data: { created, errors },
+    response: new Response(null, { status: 200 }),
+  });
+
+  it("le résultat est annoncé dans une région montée avant lui, et le focus passe au titre du rapport", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValue(ok([member({ id: 70, firstName: "Yao", lastName: "Kpadé" })]));
+    renderBatch();
+    expect(screen.getByRole("status")).toHaveTextContent("");
+    await paste(user, "Yao;Kpadé;0197000001;mère");
+    await user.click(screen.getByRole("button", { name: "Importer et envoyer les demandes" }));
+    const heading = await screen.findByRole("heading", { level: 2, name: "Résultat d'import" });
+    await waitFor(() => expect(heading).toHaveFocus());
+    expect(screen.getByRole("status")).toHaveTextContent("1 demande envoyée · 0 ligne à vérifier");
+  });
+
+  it("après « Renvoyer les lignes corrigées », le focus revient au titre et le résultat est réannoncé", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValueOnce(ok([], [rowError(1, "PHONE_INVALID", { firstName: "A", lastName: "B", parentPhone: "1", relationship: "mère" })]));
+    renderBatch();
+    await paste(user, "A;B;1;mère");
+    await user.click(screen.getByRole("button", { name: "Importer et envoyer les demandes" }));
+    const phone = await screen.findByLabelText(/Téléphone du parent de la ligne 1/);
+    await user.clear(phone);
+    await user.type(phone, "0197000001");
+    POST.mockResolvedValueOnce(ok([member({ id: 71, firstName: "A", lastName: "B" })]));
+    await user.click(screen.getByRole("button", { name: "Renvoyer les lignes corrigées" }));
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("1 demande envoyée · 0 ligne à vérifier"));
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Résultat d'import" })).toHaveFocus());
+  });
+
+  it("fichier de plus de 1 Mo : refusé avant d'être lu, au vouvoiement", async () => {
+    const user = userEvent.setup();
+    renderBatch();
+    const big = new File([new Uint8Array(1024 * 1024 + 1)], "gros.csv", { type: "text/csv" });
+    await user.upload(screen.getByLabelText(/Fichier CSV ou Excel/), big);
+    expect((await screen.findAllByText("Ce fichier dépasse 1 Mo : découpez-le en plusieurs imports.")).length).toBeGreaterThan(0);
+    expect(screen.getByRole("textbox", { name: /Ou collez une liste/ })).toBeEnabled();
+    expect(screen.queryByText(/Aperçu/)).toBeNull();
+  });
+
+  it("plus de 200 lignes : simple avertissement, l'envoi reste possible (le serveur juge)", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValue(ok());
+    renderBatch();
+    const rows = Array.from({ length: 201 }, (_, index) => `E${index};Test;0197000001;mère`).join("\n");
+    await paste(user, rows);
+    expect(screen.getByText(/Cette liste compte 201 lignes : un import en accepte 200 au plus/)).toBeInTheDocument();
+    expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(6);
+    await user.click(screen.getByRole("button", { name: "Importer et envoyer les demandes" }));
+    await waitFor(() => expect(POST).toHaveBeenCalledTimes(1));
+  });
+
+  it("THROTTLED : l'envoi est bloqué pendant le délai du serveur avec un compte à rebours", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValue({
+      error: { code: "THROTTLED", message: "Trop de demandes." },
+      response: new Response(null, { status: 429, headers: { "Retry-After": "30" } }),
+    });
+    renderBatch();
+    await paste(user, "A;B;0197000001;mère");
+    await user.click(screen.getByRole("button", { name: "Importer et envoyer les demandes" }));
+    expect(await screen.findByRole("button", { name: /Réessayer dans 0:30/ })).toBeDisabled();
+    expect((await screen.findAllByText(/Trop de tentatives/)).length).toBeGreaterThan(0);
+  });
+
+  it("THROTTLED au renvoi : le renvoi est bloqué pendant le délai", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValueOnce(ok([], [rowError(1, "PHONE_INVALID", { firstName: "A", lastName: "B", parentPhone: "1", relationship: "mère" })]));
+    renderBatch();
+    await paste(user, "A;B;1;mère");
+    await user.click(screen.getByRole("button", { name: "Importer et envoyer les demandes" }));
+    const phone = await screen.findByLabelText(/Téléphone du parent de la ligne 1/);
+    await user.clear(phone);
+    await user.type(phone, "2");
+    POST.mockResolvedValueOnce({
+      error: { code: "THROTTLED", message: "" },
+      response: new Response(null, { status: 429, headers: { "Retry-After": "12" } }),
+    });
+    await user.click(screen.getByRole("button", { name: "Renvoyer les lignes corrigées" }));
+    expect(await screen.findByRole("button", { name: /Réessayer dans 0:12/ })).toBeDisabled();
+  });
+
+  it.each([
+    ["IMPORT_TOO_LARGE", "Le fichier dépasse 200 lignes."],
+    ["SCHOOL_OFFER_EXPIRED", "L'offre de l'établissement est échue."],
+  ])("%s sur l'onglet lot : le message du serveur reste affiché", async (code, message) => {
+    const user = userEvent.setup();
+    POST.mockResolvedValue(failure(400, code, message));
+    renderBatch();
+    await paste(user, "A;B;0197000001;mère");
+    await user.click(screen.getByRole("button", { name: "Importer et envoyer les demandes" }));
+    expect((await screen.findAllByText(message)).length).toBeGreaterThan(0);
+  });
+
+  it("offre échue : message en tête et envoi désactivé", () => {
+    renderBatch({ offerExpired: true });
+    expect(screen.getByText(/L'offre de votre établissement est échue : l'ajout d'élèves est bloqué/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Importer et envoyer les demandes" })).toBeDisabled();
+  });
+
+  it("la classe choisie est gardée après « Nouvel import »", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValue(ok());
+    renderBatch();
+    await user.selectOptions(screen.getByRole("combobox", { name: /Classe/ }), "4");
+    await paste(user, "A;B;0197000001;mère");
+    await user.click(screen.getByRole("button", { name: "Importer et envoyer les demandes" }));
+    await screen.findByRole("button", { name: "Nouvel import" });
+    await user.click(screen.getByRole("button", { name: "Nouvel import" }));
+    expect(screen.getByRole("combobox", { name: /Classe/ })).toHaveValue("4");
+  });
+});
+
+describe("WT06 · individuel : offre échue et attente du serveur", () => {
+  async function fillAll(user: ReturnType<typeof userEvent.setup>) {
+    await user.type(screen.getByLabelText(/^Prénom/), "Yao");
+    await user.type(screen.getByLabelText(/^Nom/), "Kpadé");
+    await user.type(screen.getByRole("textbox", { name: /Téléphone du parent/ }), "0197000001");
+    await user.selectOptions(screen.getByRole("combobox", { name: /Lien de parenté/ }), "mere");
+  }
+
+  it("offre échue : message en tête et envoi désactivé", () => {
+    render(<IndividualForm classrooms={CLASSROOMS} countries={COUNTRIES} defaultClassroom="3" offerExpired />);
+    expect(screen.getByText(/L'offre de votre établissement est échue/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Envoyer la demande" })).toBeDisabled();
+  });
+
+  it("SCHOOL_OFFER_EXPIRED et THROTTLED : message du serveur, puis envoi bloqué pendant le délai", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValueOnce(failure(403, "SCHOOL_OFFER_EXPIRED", "L'offre est échue."));
+    render(<IndividualForm classrooms={CLASSROOMS} countries={COUNTRIES} defaultClassroom="3" />);
+    await fillAll(user);
+    await user.click(screen.getByRole("button", { name: "Envoyer la demande" }));
+    expect((await screen.findAllByText("L'offre est échue.")).length).toBeGreaterThan(0);
+    POST.mockResolvedValueOnce({
+      error: { code: "THROTTLED", message: "" },
+      response: new Response(null, { status: 429, headers: { "Retry-After": "20" } }),
+    });
+    await user.click(screen.getByRole("button", { name: "Envoyer la demande" }));
+    expect(await screen.findByRole("button", { name: /Réessayer dans 0:20/ })).toBeDisabled();
+  });
+
+  it("après un succès, le verrou reste posé jusqu'à la navigation : pas de seconde demande", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValue({ data: member(), response: new Response(null, { status: 201 }) });
+    render(<IndividualForm classrooms={CLASSROOMS} countries={COUNTRIES} defaultClassroom="3" />);
+    await fillAll(user);
+    const form = screen.getByRole("form", { name: "Ajouter un élève" });
+    await act(async () => {
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    });
+    await waitFor(() => expect(router.push).toHaveBeenCalled());
+    await act(async () => {
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    });
+    expect(POST).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("ImportReport", () => {
   const line = { line: 2, code: "PHONE_INVALID" as const, message: "m", original: { firstName: "A", lastName: "B", parentPhone: "1", relationship: "r" }, data: { firstName: "A", lastName: "B", parentPhone: "1", relationship: "r" } };
 
@@ -433,7 +601,20 @@ describe("ImportReport", () => {
     render(
       <ImportReport sent={[{ id: 1, name: "A B" }]} errors={[line]} errorsOnly={false} onErrorsOnly={vi.fn()} onEdit={vi.fn()} onResend={vi.fn()} resending={false} />,
     );
-    expect(screen.getByRole("status")).toHaveTextContent("1 demande envoyée · 1 ligne à vérifier");
+    expect(screen.getByText("1 demande envoyée · 1 ligne à vérifier")).toBeInTheDocument();
+    expect(reportSummary(0, 0)).toBe("0 demande envoyée · 0 ligne à vérifier");
+    expect(reportSummary(2, 5)).toBe("2 demandes envoyées · 5 lignes à vérifier");
+  });
+
+  it("une erreur qui ne se corrige pas n'affiche pas le numéro du parent ; avec attente imposée, le renvoi est bloqué", () => {
+    const fixed = { ...line, code: "ALREADY_IN_CLASSROOM" as const };
+    const edited = { ...line, data: { ...line.data, parentPhone: "2" } };
+    render(
+      <ImportReport sent={[]} errors={[fixed, { ...edited, line: 3 }]} errorsOnly onErrorsOnly={vi.fn()} onEdit={vi.fn()} onResend={vi.fn()} resending={false} wait={42} />,
+    );
+    expect(screen.queryByLabelText(/Téléphone du parent de la ligne 2/)).toBeNull();
+    expect(screen.getByLabelText(/Téléphone du parent de la ligne 3/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Réessayer dans 0:42/ })).toBeDisabled();
   });
 });
 
