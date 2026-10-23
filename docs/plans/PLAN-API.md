@@ -277,7 +277,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Jeton hors des URL et des journaux (suite de la relecture de LOT-6 #137)
     - [x] API · `feature/api-activation-enseignant-post` : `POST auth/teacher-invitations/lookup/` et `POST …/accept/`, jeton dans le corps ; anciennes routes `{token}/` et `{token}/accept/` gardées, dépréciées, masquées dans les journaux d'accès (`libs/access_log.py`)
     - [x] Front · `feature/lot2-activation-enseignant-fragment` : lien `/activation#jeton=…` lu côté client puis retiré (`replaceState`), `Referrer-Policy: no-referrer`, ancien lien `/activation/<jeton>` redirigé ; email au nouveau format
-    - [x] Retrait des routes `legacy` de l'API (`{token}/`, `{token}/accept/`), de la redirection `/activation/[token]` du front et du masquage correspondant de `libs/access_log.py` · `chore/retrait-routes-activation-enseignant` : retirées sans attendre les 7 jours, rien n'étant déployé (phase de développement, 2026-10-23) ; le front et `activation.spec.ts` n'utilisent que `lookup/` et `accept/`, un jeton dans le chemin donne 404 (testé)
+    - [x] Retrait des routes `legacy` de l'API (`{token}/`, `{token}/accept/`), de la redirection `/activation/[token]` du front et du masquage correspondant de `libs/access_log.py` · `chore/retrait-routes-activation-enseignant` : retirées sans attendre les 7 jours, rien n'étant déployé (phase de développement, 2026-10-23) ; le front et `auth/activation.spec.ts` n'utilisent que `lookup/` et `accept/`, un jeton dans le chemin donne 404 (testé)
   > Notes (jeton hors URL) : un jeton dans le chemin finit dans les journaux d'accès (API, Next, proxy) et dans
   > l'en-tête Referer. L'API lit désormais le jeton dans le corps d'un POST, `lookup/` pour l'en-tête de l'écran et
   > `accept/` pour l'activation, avec les mêmes plafonds (`invitation`) et le même contrôle CSRF. Les anciennes
@@ -291,7 +291,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] `POST auth/learner-signup/` et `…/resume/` retirent `learner_signup_consent` de la session (W18 ne revient plus après un refus)
   - [x] `create_learner_signup` : `IntegrityError` sur l'identifiant → `USERNAME_TAKEN` ; invitation de classe et `children` le faisaient déjà ; l'activation (`…/password/`) ne crée pas d'identifiant
   - [x] Tests : 3 codes faux puis le bon refusé (WL03, WP02, changement de numéro), compteur validé en `transaction=True`, clé de session vidée, collision d'identifiant
-  - [ ] Front, hors de cette PR : lever le `test.fixme` de « WL03 bloque la saisie après les essais permis » (`apps/web/e2e/mot-de-passe-oublie.spec.ts`), l'API tient maintenant le plafond
+  - [ ] Front, hors de cette PR : lever le `test.fixme` de « WL03 bloque la saisie après les essais permis » (`apps/web/e2e/auth/mot-de-passe-oublie.spec.ts`), l'API tient maintenant le plafond
 - [x] **Tâches Celery d'API-L2**
   - [x] `send_sms`, `expire_consent_requests` (7 j), `purge_refused_requests` (30 j), `purge_signup_sessions`
   - [x] Planifiées dans `CELERY_BEAT_SCHEDULE`, exécutables à la main (`manage.py <tâche>`)

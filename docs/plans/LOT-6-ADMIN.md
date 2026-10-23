@@ -59,7 +59,7 @@ Statut : ✅ terminé · Prochaine tâche : aucune (questions produit tranchées
   - [x] Tests : aucune action ne fait passer une `ConsentRequest` à `accepted` ou `refused` (D70) ; relance soumise aux plafonds
   - [x] Tests : Contenu et Finance sans accès aux consentements ni champs sensibles ; Support sans genre/handicap sans permission
   - [x] Tests : invitation enseignant crée une `TeacherInvitation` et aucun `User` actif ; dernier Super-admin non supprimable ; changement de parent sans acceptation = lien inchangé
-  - [x] Recette sur le jeu D2 : retrouver Léa Adjovi, voir son parent et ses consentements, relancer une demande, inviter un enseignant rattaché à une école (Q3 : couverture automatique, `e2e/admin-comptes.spec.ts` en lecture ; `accounts/tests/test_backoffice_admin.py::test_resend_follows_the_caps`, `test_admin_wad06_wad07.py::test_inviting_a_teacher_creates_an_invitation_and_no_account` pour les écritures)
+  - [x] Recette sur le jeu D2 : retrouver Léa Adjovi, voir son parent et ses consentements, relancer une demande, inviter un enseignant rattaché à une école (Q3 : couverture automatique, `e2e/admin/admin-comptes.spec.ts` en lecture ; `accounts/tests/test_backoffice_admin.py::test_resend_follows_the_caps`, `test_admin_wad06_wad07.py::test_inviting_a_teacher_creates_an_invitation_and_no_account` pour les écritures)
   > Notes : l'essentiel de WAD06-WAD08 et WAD13 vient d'API-L6.2 (PR #61) avec ses tests (`accounts/tests/
   > test_backoffice_admin.py`) : personas sans ajout ni suppression, rôle et identifiants en lecture seule, suspendre /
   > désactiver / réactiver avec motif, consentements en suivi seul (relance aux plafonds de W07, litige), changement de
@@ -93,7 +93,7 @@ Statut : ✅ terminé · Prochaine tâche : aucune (questions produit tranchées
   - [x] `CategoryAdmin` et `BadgeAdmin`
   - [x] Tests : groupe Contenu seul en écriture ; publication refusée sur arbre incomplet ; quiz sur les deux ou aucun = erreur
   - [x] Tests : `isCorrect` absent des réponses de l'API (S8) ; changement de prix sans effet sur les `OrderItem` existants
-  - [x] Recette : créer un parcours complet (2 projets, niveaux, missions Vimeo, quiz), le publier, le voir dans `WL22` et `WC` (Q3 : couverture automatique, `e2e/admin-contenu.spec.ts` en lecture ; `catalog/tests/test_admin_wad09.py::test_a_complete_course_is_published_and_audited` et suivants pour les écritures)
+  - [x] Recette : créer un parcours complet (2 projets, niveaux, missions Vimeo, quiz), le publier, le voir dans `WL22` et `WC` (Q3 : couverture automatique, `e2e/admin/admin-contenu.spec.ts` en lecture ; `catalog/tests/test_admin_wad09.py::test_a_complete_course_is_published_and_audited` et suivants pour les écritures)
   > Notes : une grande partie de WAD09 existait (API-L1, API-L3a : inlines triables, quiz, `SingleCorrectChoiceFormSet`,
   > `CategoryAdmin`, `BadgeAdmin`). Ajouts : colonnes accès (gratuit / payant + prix), kit requis et inscrits
   > (annotation), filtre « kit » ; statut en lecture seule, modifié seulement par « Publier » (`catalog/publication.py` :
@@ -173,7 +173,7 @@ Statut : ✅ terminé · Prochaine tâche : aucune (questions produit tranchées
   > et WAD02 (6.8). Le lien « Modération » vise `admin/accounts/consentrequest/`, enregistré à l'étape 6.2. Les
   > valeurs de `SourceTag` (`auto`, `manual`, `unavailable`) sont à aligner sur le contrat d'`API-L6.4`.
   > Le refus de `/backoffice/impact` est vérifié en e2e avec le compte Support (aussi hors Finance et Super-admin) :
-  > Contenu reçoit des codes faux dans `admin-connexion.spec.ts`, ce qui déclenche la limitation de django-otp.
+  > Contenu reçoit des codes faux dans `admin/admin-connexion.spec.ts`, ce qui déclenche la limitation de django-otp.
 - [x] **6.7** WAD01 Vue d'ensemble · `feature/lot6-vue-ensemble` · PR #93 (requiert 6.6, API-L6.4)
   - [x] WAD01 (Next.js) `/backoffice` : hero, 4 `StatCard`, carte échéance (`DeadlineTracker`), liste « À traiter »
   - [x] Branchement API : `GET backoffice/overview/` (entrées « À traiter » filtrées par groupe, `adminPath` fourni par le serveur)
@@ -222,8 +222,8 @@ Statut : ✅ terminé · Prochaine tâche : aucune (questions produit tranchées
     - [x] Soumission idempotente et `REPORT_LOCKED` (`apps/impact/tests/test_reports.py`, API-L6.4)
     - [x] Export d'autrui refusé, CSV identique à WAD04 (`apps/impact/tests/test_exports.py`, PR #110)
   - [x] Playwright (parcours critique) : Finance via WAD15 (TOTP de développement), brouillon WAD05, validation, export CSV WAD04, soumission, champs en lecture seule ; Support sur la même URL = accès refusé
-    - [x] Tout le parcours sauf l'export CSV (`e2e/impact-rapport.spec.ts`, refus de Support dans `e2e/backoffice.spec.ts`)
-    - [x] Export CSV téléchargé et vérifié (en-tête, lignes) dans `e2e/impact-rapport.spec.ts` (PR #111)
+    - [x] Tout le parcours sauf l'export CSV (`e2e/admin/impact-rapport.spec.ts`, refus de Support dans `e2e/admin/backoffice.spec.ts`)
+    - [x] Export CSV téléchargé et vérifié (en-tête, lignes) dans `e2e/admin/impact-rapport.spec.ts` (PR #111)
   - [x] Confirmation produit du comportement de « Valider la saisie » : aide à la saisie, sans état serveur (Q2, 2026-10-23)
   > Notes : exports (PR #111) : « Exporter CSV / PDF » demande l'export, interroge son état toutes les 2 s (2 min au
   > plus), puis annonce le lien de téléchargement (redirection de l'API vers une URL présignée) ; pas de notification au
@@ -262,10 +262,10 @@ Statut : ✅ terminé · Prochaine tâche : aucune (questions produit tranchées
   > lecture seule, garde-fous du dernier Super-admin), D74 (`impact/tests/test_reports.py`) ; audit :
   > `AuditedAdminMixin` imposé par `SteamyAdminSite.register` (`core/tests/test_admin_site.py`) et actions métier
   > journalisées ; KPI : `impact/tests/test_compute.py` (valeurs de référence), `test_periods_status.py` (D73),
-  > `test_exports.py` ; Playwright : `e2e/backoffice.spec.ts` (anonyme, parent, Support refusé sur l'Impact Tracker),
-  > `impact-tracker.spec.ts`, `impact-rapport.spec.ts` ; contrat : contrôle `openapi.yaml` de la CI. Clôture
+  > `test_exports.py` ; Playwright : `e2e/admin/backoffice.spec.ts` (anonyme, parent, Support refusé sur l'Impact Tracker),
+  > `admin/impact-tracker.spec.ts`, `admin/impact-rapport.spec.ts` ; contrat : contrôle `openapi.yaml` de la CI. Clôture
   > (2026-10-23) : WAD14 couvert par 6.5 (`core/tests/test_platform.py`, `test_reglages.py`,
-  > `e2e/admin-evenements-reglages.spec.ts`), les deux réglages restants étant hors v1 (Q1, `ARBITRAGES.md` C22) ;
+  > `e2e/admin/admin-evenements-reglages.spec.ts`), les deux réglages restants étant hors v1 (Q1, `ARBITRAGES.md` C22) ;
   > « Valider la saisie » conservé en aide à la saisie (Q2, spec WAD05) ; recettes de 6.2 et 6.3 acquises par pytest
   > (écritures) et Playwright (lecture) (Q3).
 

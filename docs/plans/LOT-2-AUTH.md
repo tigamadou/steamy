@@ -35,7 +35,7 @@ Statut : ✅ terminé (recette produit : couverture automatique acceptée le 202
   - [x] `proxy.ts` (contrôle optimiste du cookie de session) et layouts `(apprenant)`, `(parent)`, `(enseignant)` avec `RoleGate` et page d'attente minimale
   - [x] Correction du repli CSRF vers `GET /api/auth/csrf/` si non répercutée au lot 1 : déjà faite par API-1.2 (PR #17), contrôlée
   - [x] Helpers Playwright : lecture du faux fournisseur SMS et de Mailpit, données via `make seed`
-  - [x] Validation des cookies de session `web` ↔ `api` sur la stack Docker avec un vrai `POST auth/login/` : domaine parent `steamy.test` en e2e (`COOKIE_DOMAIN` lu hors production), parcours `e2e/espaces.spec.ts`
+  - [x] Validation des cookies de session `web` ↔ `api` sur la stack Docker avec un vrai `POST auth/login/` : domaine parent `steamy.test` en e2e (`COOKIE_DOMAIN` lu hors production), parcours `e2e/auth/espaces.spec.ts`
   - [x] Tests Vitest : composants (clavier, collage OTP, bornes du stepper, E.164 par pays, `PwReq` en phase avec D25), `safeNext`, `homeForRole`, `identifier` (table C7)
   - [x] Recette : composants conformes à la maquette, clavier seul, contrastes AA, aucun référentiel en dur
 
@@ -129,16 +129,16 @@ Statut : ✅ terminé (recette produit : couverture automatique acceptée le 202
   - [x] P2 Refus
   - [x] P3 Reprise
   - [x] P4 Parent existant
-  - [x] P5 Mot de passe oublié (parent par SMS, enseignant par email) : `mot-de-passe-oublie.spec.ts` et `activation.spec.ts` (étape 2.2)
-  - [x] P6 Activation enseignant : `activation.spec.ts` (étape 2.2, projet « bureau », invitation du jeu de démo à usage unique)
+  - [x] P5 Mot de passe oublié (parent par SMS, enseignant par email) : `auth/mot-de-passe-oublie.spec.ts` et `auth/activation.spec.ts` (étape 2.2)
+  - [x] P6 Activation enseignant : `auth/activation.spec.ts` (étape 2.2, projet « bureau », invitation du jeu de démo à usage unique)
   - [x] P7 Accessibilité (axe sur chaque écran, P1 au clavier seul, viewport 360 px)
 
 - [x] **Critères de fin du lot 2** (revérifiés sur `development` après les correctifs API-L2 de la PR #148)
   - [x] Les 34 écrans respectent la définition de « terminé » du README et SPEC-ECRANS §2, sans élément « Ne pas porter »
-    - Vérifié : matrice e2e à jour (`python3 scripts/e2e_matrix.py --check`), les 34 écrans ont un test e2e (axe, 360 px, registre) ; W18 n'est plus réaffiché dans le même navigateur : `consentement-apprenant.spec.ts` (« W18 n'est plus réaffiché… »), correctif API #148.
+    - Vérifié : matrice e2e à jour (`python3 scripts/e2e_matrix.py --check`), les 34 écrans ont un test e2e (axe, 360 px, registre) ; W18 n'est plus réaffiché dans le même navigateur : `auth/consentement-apprenant.spec.ts` (« W18 n'est plus réaffiché… »), correctif API #148.
     - Recette produit : couverture automatique acceptée le 2026-10-23 (C24). Même règle que pour le lot 6 (pytest et Playwright).
   - [x] Parcours P1 à P7 verts en CI sur la stack Docker avec le faux fournisseur SMS ; tests Vitest des composants verts
-    - Jobs `e2e` (projets bureau et mobile) et `web` (Vitest) verts sur la PR de clôture ; P1 `parcours-p1-inscription-accord.spec.ts`, P2 `parcours-p2-refus.spec.ts`, P3 `parcours-p3-reprise.spec.ts`, P4 `parcours-p4-parent-existant.spec.ts`, P5 `mot-de-passe-oublie.spec.ts` (le plafond d'essais de WL03 n'est plus en `test.fixme`) et `activation.spec.ts`, P6 `activation.spec.ts`, P7 `parcours-p7-accessibilite.spec.ts`.
+    - Jobs `e2e` (projets bureau et mobile) et `web` (Vitest) verts sur la PR de clôture ; P1 `parcours/parcours-p1-inscription-accord.spec.ts`, P2 `parcours/parcours-p2-refus.spec.ts`, P3 `parcours/parcours-p3-reprise.spec.ts`, P4 `parcours/parcours-p4-parent-existant.spec.ts`, P5 `auth/mot-de-passe-oublie.spec.ts` (le plafond d'essais de WL03 n'est plus en `test.fixme`) et `auth/activation.spec.ts`, P6 `auth/activation.spec.ts`, P7 `parcours/parcours-p7-accessibilite.spec.ts`.
   - [x] Aucune Server Action ni appel hors client généré pour l'authentification ; CSRF effectif sur toutes les écritures
   - [x] Aucune donnée personnelle, code ou jeton d'API dans les URL, `localStorage` ou journaux du front
   - [x] Les trois rôles redirigés vers leur espace, personnel refusé sur W16, `next` sûr
@@ -146,7 +146,7 @@ Statut : ✅ terminé (recette produit : couverture automatique acceptée le 202
   > Reprise :
   > - Les défauts d'API signalés sont corrigés (PR #148) : plafond d'essais OTP de WL03, refus rejoué dans le même navigateur, identifiant pris en concurrence (`USERNAME_TAKEN`).
   > - Il ne reste que la décision sur la recette produit (question ci-dessus), sans trancher ici.
-  > - Activation enseignant : le jeton passe dans le fragment de l'URL (`/activation#jeton=…`), l'ancien lien `/activation/[token]` a été retiré le 2026-10-23, avec les routes `{token}/` de l'API (front PR #141, API #140) ; couvert par `activation.spec.ts` et la ligne WL04 de la matrice.
+  > - Activation enseignant : le jeton passe dans le fragment de l'URL (`/activation#jeton=…`), l'ancien lien `/activation/[token]` a été retiré le 2026-10-23, avec les routes `{token}/` de l'API (front PR #141, API #140) ; couvert par `auth/activation.spec.ts` et la ligne WL04 de la matrice.
 
 ---
 

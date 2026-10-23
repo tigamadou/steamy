@@ -17,7 +17,7 @@ Statut : ✅ terminé (recette produit : couverture automatique acceptée le 202
   - [x] États : sans classe (Zeti + « Créer une classe » vers la création de classe), « À revoir » vide, « Décrochage » vide, erreur, hors ligne
   - [x] Tests unitaires : nav active selon la route ; registre (aucun « tu », contrôle des textes)
   - [x] Tests : redirection d'un apprenant ou d'un parent hors de `/enseignant`
-  - [x] Recette : compteurs conformes au seed ; aucun « À corriger » ; « Commenter » ouvre le profil élève sur la tentative (preuve : `enseignant-accueil.spec.ts` et `enseignant-profil-eleve.spec.ts`, une fois la pile fusionnée)
+  - [x] Recette : compteurs conformes au seed ; aucun « À corriger » ; « Commenter » ouvre le profil élève sur la tentative (preuve : `enseignant/enseignant-accueil.spec.ts` et `enseignant/enseignant-profil-eleve.spec.ts`, une fois la pile fusionnée)
   > Écarts : l'ancienne page d'attente (`SpaceWaiting`) et son bouton de déconnexion sont supprimés. Pris seule, l'étape 5.1 laisse les liens de l'accueil vers WT04, WT05, WT06 et WT13 sans cible : elle n'est utilisable qu'avec la pile 5.2 à 5.4 fusionnée.
 - [x] **5.2** Classes · `feature/lot5-classes` · PR #155 (requiert 5.1, maquette de `WT13` validée)
   - [x] Conception de la maquette `WT13` dans `design/screens-enseignant-a-concevoir-web.jsx` (C18) ; **validée par le produit le 2026-10-23, sans retouche**
@@ -86,21 +86,21 @@ Statut : ✅ terminé (recette produit : couverture automatique acceptée le 202
   - [x] Playwright « Invitation complète » : invitation admin (jeu D2), activation `/activation#jeton=…`, connexion `W16`, création de classe, invitation, acceptation `WPD05`, élève actif en `WT04`, notification « a rejoint la classe »
   - [x] Playwright « Compte existant (C11) » : rattachement du compte, élève dans `WT04`, parcours `source=classroom`, sans paiement
   - [x] Playwright « Refus » : invitation « Refusée » dans `WT04`, notification `WT12`
-  - [x] Playwright « Import avec erreurs » : preuve dans `enseignant-ajout-eleves.spec.ts` (étape 5.3)
-  - [x] Playwright « Décrochage » : élève signalé dans `WT01` et `WT04`, lien vers `WT05` (`enseignant-decrochage.spec.ts`)
+  - [x] Playwright « Import avec erreurs » : preuve dans `enseignant/enseignant-ajout-eleves.spec.ts` (étape 5.3)
+  - [x] Playwright « Décrochage » : élève signalé dans `WT01` et `WT04`, lien vers `WT05` (`enseignant/enseignant-decrochage.spec.ts`)
   - [x] Notification de décrochage dans `WT12` : non exécutée sur la stack (la tâche planifiée `detect_dropouts` n'y tourne pas, le test est ignoré s'il n'y a pas de notification) ; à prouver par un déclenchement de la tâche dans la stack e2e
   - [x] Playwright « Cloisonnement » : seconde enseignante, 404 sur classe, profil élève et parcours
-  - [x] Audit final : axe sur chaque route, absence de défilement horizontal, registre (`enseignant-audit.spec.ts`)
+  - [x] Audit final : axe sur chaque route, absence de défilement horizontal, registre (`enseignant/enseignant-audit.spec.ts`)
   - [ ] Absence de données codées en dur : relue à chaque étape, sans contrôle automatique
-  > Écarts : l'invitation de l'enseignante par l'admin est celle du jeu D2 (l'écran d'invitation de l'admin Django est couvert par `admin-comptes.spec.ts`) ; les parcours « Invitation complète », « Compte existant », « Refus » et « Cloisonnement » s'enchaînent sur ce compte à usage unique, dans `activation.spec.ts`. La tâche quotidienne de décrochage n'est pas planifiée dans la stack e2e : sa notification (`WT12`) n'est vérifiée que si elle existe. Le quota de classes du seed (4) est relevé par la PR d'API #160. Les parcours `@donnees-uniques` (activation en série, création de classe, commentaire, proposition d'événement) sont exclus du projet « mobile » (`playwright.config.ts`) : seul l'audit joue à 360 px. Les pages « introuvable » sont servies avec un code 200 sous Suspense (Next) : elles sont vérifiées par leur titre, pas par un code 404 (WT04, WT05, WT10, WL23). L'e2e d'une école à l'offre échue (C21) est dans `enseignant-offre-echue.spec.ts` (seed #162).
+  > Écarts : l'invitation de l'enseignante par l'admin est celle du jeu D2 (l'écran d'invitation de l'admin Django est couvert par `admin/admin-comptes.spec.ts`) ; les parcours « Invitation complète », « Compte existant », « Refus » et « Cloisonnement » s'enchaînent sur ce compte à usage unique, dans `auth/activation.spec.ts`. La tâche quotidienne de décrochage n'est pas planifiée dans la stack e2e : sa notification (`WT12`) n'est vérifiée que si elle existe. Le quota de classes du seed (4) est relevé par la PR d'API #160. Les parcours `@donnees-uniques` (activation en série, création de classe, commentaire, proposition d'événement) sont exclus du projet « mobile » (`playwright.config.ts`) : seul l'audit joue à 360 px. Les pages « introuvable » sont servies avec un code 200 sous Suspense (Next) : elles sont vérifiées par leur titre, pas par un code 404 (WT04, WT05, WT10, WL23). L'e2e d'une école à l'offre échue (C21) est dans `enseignant/enseignant-offre-echue.spec.ts` (seed #162).
 - [x] **Critères de fin du lot 5** (fusionné dans `development`, `ci-ok` vert sur le run 39907292736 ; reste la recette produit)
   - [x] `WT01`-`WT13` livrés, conformes à la spec alignée, avec tous leurs états (preuve : 5.1 à 5.9 fusionnées, matrice e2e complète pour l'espace enseignant)
-  - [x] Aucune entrée de navigation sans cible ; aucun « À corriger », « formateur » ou tutoiement (preuve : `enseignant-audit.spec.ts`, `ci-ok` vert)
+  - [x] Aucune entrée de navigation sans cible ; aucun « À corriger », « formateur » ou tutoiement (preuve : `enseignant/enseignant-audit.spec.ts`, `ci-ok` vert)
   - [x] Parcours Playwright de 5.9 verts en CI (`ci-ok`) sur la stack Docker (preuve : run 39907292736 sur `development`)
   - [x] Compléments d'API livrés (§7.6) et présents dans le client généré (`make openapi`) : profil enseignant (#151) et quota de seed (#160) fusionnés
-  - [x] Étape 4.10 (`WPD05` d'origine enseignant) livrée et couverte par « Invitation complète » (`activation.spec.ts`)
+  - [x] Étape 4.10 (`WPD05` d'origine enseignant) livrée et couverte par « Invitation complète » (`auth/activation.spec.ts`)
   - [x] Recette sur le seed (D2) : couverture automatique acceptée (C24), y compris acceptation côté parent et commentaires côté apprenant et parent
-  - [x] E2E d'une école à l'offre échue (C21) : seed #162, `enseignant-offre-echue.spec.ts` (WT03, WT13, WT04, WT06)
+  - [x] E2E d'une école à l'offre échue (C21) : seed #162, `enseignant/enseignant-offre-echue.spec.ts` (WT03, WT13, WT04, WT06)
   - [ ] Notification de décrochage dans `WT12` (tâche planifiée non jouée par la stack e2e) et carte « commentaires de l'enseignant » dans `WD01` (décision produit)
 
 ## Cadre

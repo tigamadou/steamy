@@ -81,7 +81,7 @@ Statut : ✅ terminé · Prochaine tâche : — (pastilles de thème de la FAQ d
   - [x] `WL16` `/categories` (`CategoryCard`)
   - [x] Appels `catalog/categories/` et `catalog/courses/?category=&page=` via `'use cache'` (`lib/catalog.ts`, `cacheLife("minutes")`, `cacheTag("catalog")`), sous `<Suspense>` + `connection()` + `AppStateBoundary`
   - [x] Tests Vitest : `CategoryCard`, sérialisation filtre ↔ URL
-  - [x] Parcours Playwright « découverte » (accueil → ancre → catalogue → filtre → catégories → catalogue filtré) (`e2e/decouverte.spec.ts`)
+  - [x] Parcours Playwright « découverte » (accueil → ancre → catalogue → filtre → catégories → catalogue filtré) (`e2e/public/decouverte.spec.ts`)
   - [x] Recette : aucun chiffre ni catégorie en dur ; les 6 catégories du jeu D2 apparaissent
 
 - [x] **1.3** Fiche parcours publique `WL22` (requiert API-L1 et 1.2) · `feature/lot1-fiche-parcours` · PR #48
@@ -91,13 +91,13 @@ Statut : ✅ terminé · Prochaine tâche : — (pastilles de thème de la FAQ d
   - [x] Appel `catalog/courses/{slug}/` sans contenu de mission
   - [x] Test API (API-L1.2, `catalog/tests/test_api.py`) et test Playwright : absence de `vimeoId` / corps de mission dans le HTML
   - [x] Test Vitest : plan en accordéon (`details`/`summary` focusables) ; Entrée et Espace vérifiés par Playwright
-  - [x] Parcours Playwright : WL06 → WL22 → CTA → URL d'inscription avec retour (`e2e/fiche-parcours.spec.ts`)
+  - [x] Parcours Playwright : WL06 → WL22 → CTA → URL d'inscription avec retour (`e2e/public/fiche-parcours.spec.ts`)
 - [x] **1.4** Événements et boutique (requiert API-L1 et 1.2) · `feature/lot1-evenements-boutique` · PR #49
   - [x] `WL21` `/evenements` (`EventRow`, prix, complet, état vide « Aucun événement à venir »)
   - [x] `WL23` `/evenements/[slug]` (`EventDetail` réutilisable avec un encart d'action fourni par l'appelant, CTA visiteur ou motif : complet, candidatures closes, passé ; JSON-LD `Event`, slugs au sitemap, 404 propre)
   - [x] `WL07` `/boutique` (grille `WKKitCard` en mode vitrine, filtres par catégorie dans l'URL, pagination, état vide)
   - [x] Appels `events/`, `events/{slug}/`, `shop/kits/` (`lib/events.ts`, `lib/shop.ts`, `'use cache'`, tags `events` et `shop`)
-  - [x] Parcours Playwright « événements » (WL21 → WL23 → CTA visiteur ; événement complet → CTA désactivé ; passé) et boutique (`e2e/evenements-boutique.spec.ts`)
+  - [x] Parcours Playwright « événements » (WL21 → WL23 → CTA visiteur ; événement complet → CTA désactivé ; passé) et boutique (`e2e/public/evenements-boutique.spec.ts`)
 - [x] **1.5** Pages éditoriales (WL20 requiert API-L1 pour `public/leads/`, le reste sans API) · `feature/lot1-editorial` · PR #36 ; newsletter `feature/lot1-newsletter` · PR #58
   - [x] `WL09` `/legal/[doc]` (`Tabs`, `#consentement-parental`, corrections S3, D6, D15, D23, D40)
   - [x] `WL10` `/a-propos`
@@ -107,15 +107,15 @@ Statut : ✅ terminé · Prochaine tâche : — (pastilles de thème de la FAQ d
   - [x] Encart newsletter de WL20 (`POST public/leads/`, cases « 18 ans ou plus » et consentement non cochées, vouvoiement, origine `guides`)
   - [x] Contenus `src/content/{legal,blog,guides,faq}` et `site.ts` (`@next/mdx`, `mdx-components.tsx`)
   - [x] Tests Vitest : formulaire newsletter (consentement obligatoire, `VALIDATION_ERROR`, `THROTTLED`)
-  - [x] Parcours Playwright : footer → CGU#consentement-parental, onglets légaux par URL, blog → article, téléchargement d'un guide (`e2e/editorial.spec.ts`)
-  - [x] Parcours Playwright : newsletter acceptée (`e2e/editorial.spec.ts`)
+  - [x] Parcours Playwright : footer → CGU#consentement-parental, onglets légaux par URL, blog → article, téléchargement d'un guide (`e2e/public/editorial.spec.ts`)
+  - [x] Parcours Playwright : newsletter acceptée (`e2e/public/editorial.spec.ts`)
   - [x] Recette : aucune mention « moins de 16 ans » ni « numéro » de l'apprenant (test Vitest `src/content/content.test.ts`, exécuté en CI)
 - [x] **1.6** Formulaires B2B et aide (requiert API-1, API-L1 et 1.2) · `feature/lot1-formulaires` · PR #50
   - [x] `WL11` `/ecoles` (3 offres de `content/site.ts`, CTA « Choisir » vers `/ecoles?offre=<offre>#devis`, formulaire au vouvoiement, confirmation en place)
   - [x] `WL24` `/aide` (FAQ `content/faq/` avec recherche, formulaire de contact, `?sujet=`, ancres `#faq` et `#contact`, message conservé en cas de coupure)
   - [x] Appels `public/quote-requests/`, `public/contact-messages/` (`lib/public-forms.ts`, champ piège), `referentials/countries/` (lu côté serveur en cache, passé à `PhoneInput`)
   - [x] Tests Vitest : validation, mapping des `fields` (`lib/api-errors.ts`), `THROTTLED` avec le délai `Retry-After`
-  - [x] Parcours Playwright « devis » (offre présélectionnée → envoi → confirmation ; email dans Mailpit, `worker` ajouté à `make e2e`) (`e2e/formulaires.spec.ts`)
+  - [x] Parcours Playwright « devis » (offre présélectionnée → envoi → confirmation ; email dans Mailpit, `worker` ajouté à `make e2e`) (`e2e/public/formulaires.spec.ts`)
   - [x] Parcours Playwright « contact » (`/aide?sujet=candidature`)
   - [x] Liste blanche du test de liens réduite aux routes du lot 2
 
@@ -123,7 +123,7 @@ Statut : ✅ terminé · Prochaine tâche : — (pastilles de thème de la FAQ d
 - [x] **Neutralisation** des écrans reportés et fusionnés (WL08, WL12-WL15, WL19) · à livrer avec 1.0c et 1.5
   - [x] Onglet WL13 retiré de `PublicNav`, WL15 et WL19 retirés du mega-menu « Ressources », WL08 retiré (« Steamy Events » → WL21) (1.0c)
   - [x] Aucun lien vers WL12 ni WL14 (shell en 1.0c, articles et pages éditoriales en 1.5)
-  - [x] Test Playwright : aucun `href` vers `/defis`, `/communaute`, `/tutoriels`, `/classements`, `/ateliers` (`e2e/socle-public.spec.ts`)
+  - [x] Test Playwright : aucun `href` vers `/defis`, `/communaute`, `/tutoriels`, `/classements`, `/ateliers` (`e2e/public/socle-public.spec.ts`)
 
 - [x] **Critères de fin du lot 1**
   - [x] Étapes 1.0a-1.6 fusionnées dans `development`, CI verte (`ci-ok` incluant `e2e`, exécution du push de #58, `7e1ddda`)
