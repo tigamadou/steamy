@@ -406,6 +406,13 @@ INVOICE_SELLER = json.loads(os.getenv("INVOICE_SELLER", '{"name": "Steamy"}'))
 # TVA et AIB (activation, taux) : réglages de la plateforme (`PlatformSettings`, C25), pas des variables d'environnement
 # Mentions légales supplémentaires (liste JSON de lignes)
 INVOICE_MENTIONS = json.loads(os.getenv("INVOICE_MENTIONS", "[]"))
+# Facture normalisée e-MECeF (ADR 0006, C26) : faux fournisseur en local, CI et e2e ; l'API de la DGI en staging et en
+# production, seulement si `PlatformSettings.emecef_enabled`. IFU, URL et jeton viennent de l'environnement (secrets),
+# jamais du dépôt.
+FISCAL_PROVIDER = os.getenv("FISCAL_PROVIDER", "emecef" if DEPLOYED else "fake")
+EMECEF_API_URL = os.getenv("EMECEF_API_URL", "")
+EMECEF_TOKEN = os.getenv("EMECEF_TOKEN", "")
+EMECEF_IFU = os.getenv("EMECEF_IFU", "")
 # Identifiants FedaPay des devises, quand une notification ne donne que `currency_id`
 FEDAPAY_CURRENCY_IDS = json.loads(os.getenv("FEDAPAY_CURRENCY_IDS", '{"1": "XOF"}'))
 
