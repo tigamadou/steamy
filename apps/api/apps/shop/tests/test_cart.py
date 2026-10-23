@@ -28,7 +28,13 @@ def shopper(request):
 
 
 def test_empty_cart(shopper):
-    assert client_for(shopper).get(CART).json() == {"items": [], "count": 0, "subtotal": 0}
+    assert client_for(shopper).get(CART).json() == {
+        "items": [],
+        "count": 0,
+        "subtotal": 0,
+        "taxes": [],
+        "total": 0,
+    }
 
 
 def test_add_update_and_remove_kits(shopper):

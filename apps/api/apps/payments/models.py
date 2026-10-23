@@ -141,7 +141,13 @@ class Order(models.Model):
     )
     subtotal = models.PositiveIntegerField(_("sous-total (FCFA)"))
     shipping_fee = models.PositiveIntegerField(_("frais de livraison (FCFA)"), default=0)
-    total = models.PositiveIntegerField(_("total (FCFA)"))
+    vat_amount = models.PositiveIntegerField(_("TVA (FCFA)"), default=0)
+    aib_amount = models.PositiveIntegerField(_("AIB (FCFA)"), default=0)
+    #: Taux, bases et montants des taxes figés à la création (C25), jamais recalculés ; `{"vat": …|null, "aib": …|null}`
+    taxes = models.JSONField(_("taxes figées"), default=dict, blank=True)
+    total = models.PositiveIntegerField(
+        _("total à payer (FCFA)"), help_text="Sous-total HT + livraison + TVA + AIB"
+    )
     currency = models.CharField(_("devise"), max_length=3, default="XOF", editable=False)
     delivery_zone = models.ForeignKey(
         "shop.DeliveryZone",
@@ -173,8 +179,13 @@ class Order(models.Model):
         verbose_name_plural = _("commandes")
         constraints = [
             models.CheckConstraint(
-                condition=Q(total=models.F("subtotal") + models.F("shipping_fee")),
-                name="order_total_is_subtotal_plus_shipping",
+                condition=Q(
+                    total=models.F("subtotal")
+                    + models.F("shipping_fee")
+                    + models.F("vat_amount")
+                    + models.F("aib_amount")
+                ),
+                name="order_total_is_subtotal_shipping_and_taxes",
             ),
             models.CheckConstraint(
                 condition=Q(payer__isnull=True) | ~Q(payer=models.F("beneficiary")),
