@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 import { extractCode, extractLink, waitForMessage } from "./support/mailpit";
+import { loginViaApi, logoutFromShell } from "./support/session";
 
 // Activation enseignant (C6) puis mot de passe oublié par email (LOT-2-AUTH, étape 2.2, P6).
 // L'invitation du jeu de démo est à usage unique : parcours en série, sur le seul projet « bureau » (étiquette
@@ -79,6 +80,27 @@ test.describe("activation enseignante", { tag: "@donnees-uniques" }, () => {
     await page.goto("/connexion");
     await page.getByRole("textbox", { name: /Identifiant ou numéro/ }).fill(INVITED);
     await page.getByLabel(/^Mot de passe/).fill("NadiaReset2026");
+    await page.getByRole("button", { name: "Se connecter" }).click();
+    await expect(page).toHaveURL("/enseignant");
+  });
+
+  test("l'enseignante change son mot de passe (WT08), se déconnecte puis se reconnecte avec le nouveau", async ({ page }) => {
+    await loginViaApi(page, INVITED, "NadiaReset2026");
+    await page.goto("/enseignant/parametres");
+    await page.getByRole("button", { name: "Changer de mot de passe" }).click();
+    await page.getByLabel("Mot de passe actuel").fill("NadiaReset2026");
+    await page.getByLabel(/^Nouveau mot de passe/).fill("NadiaChange2026");
+    await page.getByLabel(/^Confirmez votre nouveau mot de passe/).fill("NadiaChange2026");
+    await page.getByRole("button", { name: "Mettre à jour le mot de passe" }).click();
+    await expect(page.getByText("Votre mot de passe est mis à jour.")).toBeVisible();
+
+    await logoutFromShell(page);
+    await expect(page).toHaveURL("/connexion");
+    await page.getByRole("textbox", { name: /Identifiant ou numéro/ }).fill(INVITED);
+    await page.getByLabel(/^Mot de passe/).fill("NadiaReset2026");
+    await page.getByRole("button", { name: "Se connecter" }).click();
+    await expect(page).toHaveURL("/connexion");
+    await page.getByLabel(/^Mot de passe/).fill("NadiaChange2026");
     await page.getByRole("button", { name: "Se connecter" }).click();
     await expect(page).toHaveURL("/enseignant");
   });

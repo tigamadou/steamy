@@ -6,11 +6,11 @@ import { useActionState, useState } from "react";
 import { OtpForm, type OtpChallenge } from "@/components/auth/OtpForm";
 import { Button, ErrorSummary, Field, PasswordInput, PhoneInput, type PhoneCountry } from "@/components/ds";
 import { PasswordForm } from "@/features/account/PasswordForm";
+import { EditableCard } from "@/features/account/EditableCard";
 import { SavedToast } from "@/features/account/SavedToast";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { submitWith } from "@/lib/form";
 
-import { EditableCard } from "./EditableCard";
 
 type Mode = "phone" | "password" | null;
 type PhoneState = {

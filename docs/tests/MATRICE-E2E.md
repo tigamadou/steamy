@@ -128,11 +128,11 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WT05` | Profil apprenant (+ commentaires) | 5 |  |  |
 | `WT06` | Ajouter des apprenants (individuel / lot) | 5 |  |  |
 | `WT07` | Suivi des évaluations | 5 |  |  |
-| `WT08` | Paramètres | 5 |  |  |
+| `WT08` | Paramètres | 5 | Profil (établissement en lecture seule, sans Bio ni téléphone), interrupteur de notification enregistré puis remis, légal, demande de fermeture du compte reçue par le support ; changement de mot de passe puis reconnexion | `apps/web/e2e/enseignant-parametres-notifs-aide.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WT09` | Steamy Events | 5 |  |  |
 | `WT10` | Détail parcours encadré | 5 |  |  |
-| `WT11` | Aide & support | 5 |  |  |
-| `WT12` | Notifications | 5 |  |  |
+| `WT11` | Aide & support | 5 | FAQ des quatre sujets, recherche locale, formulaire de contact dans le shell reçu par l'équipe | `apps/web/e2e/enseignant-parametres-notifs-aide.spec.ts` |
+| `WT12` | Notifications | 5 | Onglets dans l'URL, « Tout marquer comme lu » → cloche à 0, état vide au vouvoiement | `apps/web/e2e/enseignant-parametres-notifs-aide.spec.ts` |
 | `WK01` | Catalogue kits | 3 | Boutique dans le shell (h1 du header), cartes vers la fiche, « Ajouter » → toast ; WL07 invité : « Ajouter » seulement si en stock | `apps/web/e2e/boutique-panier.spec.ts`, `apps/web/e2e/evenements-boutique.spec.ts` |
 | `WK02` | Détail kit | 3 | Fiche dans le shell, parcours compatibles → WC05, délais par zone lus dans l'API, « Acheter maintenant » → WK03 | `apps/web/e2e/boutique-panier.spec.ts` |
 | `WK03` | Panier | 3 | P5 (partie panier) : panier serveur, quantité, retrait, survit à une reconnexion ; panier invité fusionné à la connexion (W16 `?next=`) ; « Commander » invité → WK04 ; panier public → panier de l'apprenant ; « Demander à mon parent » → WK08 (P5) | `apps/web/e2e/boutique-panier.spec.ts`, `apps/web/e2e/boutique-demande-parent.spec.ts` |

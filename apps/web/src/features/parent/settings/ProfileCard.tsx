@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 
 import { Button, ErrorSummary, Field, Input } from "@/components/ds";
+import { EditableCard } from "@/features/account/EditableCard";
 import { SavedToast } from "@/features/account/SavedToast";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { submitWith } from "@/lib/form";
 
-import { EditableCard } from "./EditableCard";
 
 export type ParentIdentity = {
   firstName: string;
