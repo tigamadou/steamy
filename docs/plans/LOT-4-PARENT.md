@@ -13,10 +13,10 @@ paiement `WA03`, états `WA04`/`WA05`/`WA07`, suivi `WK07`).
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : validation C18 de la maquette de `WPD15` par le produit (seul point ouvert du lot) · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
+Statut : ✅ terminé (maquette de `WPD15` validée par le produit le 2026-10-23, C18) · Prochaine tâche : — · Prérequis : `API-L4` (tout le lot), `API-L3b` (4.4 à 4.6), `API-L3a` (4.2, 4.8, 4.9), `API-L5` (4.10 et bloc commentaires de `WPD03`) ; lots 1, 2 et 3 livrés ; maquette de `WPD15` validée (C18, étape 4.0) avant 4.4
 
-### Lot 4 · Espace parent — 🟡 en cours
-- [ ] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15` · PR #72
+### Lot 4 · Espace parent — ✅ terminé
+- [x] **4.0** Conception de `WPD15` et des états manquants · `feature/lot4-conception-wpd15` · PR #72
   - [x] Créer `design/screens-parent-a-concevoir-web.jsx` (même design system) et l'ajouter à `App.html`
   - [x] Concevoir `WPD15` en 3 variantes d'objet : parcours, kit (adresse + zone + frais), événement
   - [x] Concevoir les 8 états de `WPD15` : en attente, attente de confirmation, payée, échec, refusée, expirée, annulée par l'enfant, kit en rupture
@@ -27,7 +27,7 @@ Statut : 🟡 en cours · Prochaine tâche : validation C18 de la maquette de `W
   - [x] Respecter les contraintes : `WA03` (C1 magenta), carte enfant de `WPD05`, montants serveur, mention « Paiement sécurisé · aucune carte bancaire », mobile 360 px d'abord
   - [x] Recette : toutes variantes et tous états dessinés, aucun prix, réseau ou délai en dur, vouvoiement
   - [x] Compléter d'après §5.11 : kit requis (parcours), adresse de kit modifiée (frais recalculés), mobile 360 du kit et de l'attente de confirmation, âge sur `WPD05` (D20), état « déjà traitée » de `WPD05`, « Payer » en magenta (C1)
-  - [ ] Maquette validée par le produit (C18) avant 4.4
+  - [x] Maquette validée par le produit (C18, 2026-10-23), mise à jour avec les lignes de taxes (C25)
 - [x] **4.1** Socle parent, accueil et notifications · `feature/lot4-accueil` (requiert API-L4) · PR #122
   - [x] Layout `(parent)` : contrôle du rôle côté serveur, redirection vers `/connexion?next=`, `loading.tsx`, `error.tsx`, `not-found.tsx`
   - [x] `ParentNav` (config de l'`AppShell`) et navigation active correcte sur chaque route
@@ -75,7 +75,7 @@ Statut : 🟡 en cours · Prochaine tâche : validation C18 de la maquette de `W
   - [x] Playwright : l'enfant demande un parcours, le parent paie, l'enfant accède (`WC05`, `WA02`, SMS, `W16`, `WPD15`, webhook simulé, `WD23`, `WC06a`)
   - [x] Playwright : variantes échec puis réessai, demande de kit avec adresse visible en `WPD07`, refus (`WA02` « refusée »)
   - [x] Recette : un autre parent obtient « Demande introuvable » ; aucun numéro complet dans les journaux front ; échec avec la raison du prestataire et « Réessayer »
-  > Écarts : maquette de WPD15 non encore validée par le produit (C18) ; l'événement payant passe par la commande d'événement de 4.6 (D53 amendé), pas par une demande ; parcours de l'enfant (WC05, WA02, WD23, WC06a) vérifié par l'API dans l'e2e, ses écrans relevant du lot 3 (#119) ; commande de kit visible en `WPD07` vérifiée par l'API (WPD07 livré en 4.5) ; API ajoutée : motif du refus et commande en attente reprise (#129), énumération des statuts (#127) ; `PaymentForm` (#119) : Mobile Money préféré prérempli, bouton « Payer » en magenta (C1), double envoi bloqué.
+  > Écarts : maquette de WPD15 validée le 2026-10-23 (C18) ; l'événement payant passe par la commande d'événement de 4.6 (D53 amendé), pas par une demande ; parcours de l'enfant (WC05, WA02, WD23, WC06a) vérifié par l'API dans l'e2e, ses écrans relevant du lot 3 (#119) ; commande de kit visible en `WPD07` vérifiée par l'API (WPD07 livré en 4.5) ; API ajoutée : motif du refus et commande en attente reprise (#129), énumération des statuts (#127) ; `PaymentForm` (#119) : Mobile Money préféré prérempli, bouton « Payer » en magenta (C1), double envoi bloqué.
 - [x] **4.5** Commandes, factures et Kit Codes · `feature/lot4-commandes` (requiert 4.4, API-L3b) · PR #136
   - [x] `WPD07` Commandes (`OrderRow`, `OrderStatusFilter`, `?statut=`)
   - [x] Suivi `/parent/commandes/[reference]` (type `WK07`, `ShippingTimeline`, `KitCodeList`)
@@ -133,9 +133,9 @@ Statut : 🟡 en cours · Prochaine tâche : validation C18 de la maquette de `W
   - [x] Branchement API : `consent-requests/{id}/accept/` avec `{ username, password }` ou `{ learnerId }` (API-L5.2)
   - [x] Playwright : invitation de l'enseignant (WT06), SMS, le parent accepte, l'élève apparaît dans la classe (WT04) ; invitation et classe passent par l'API de l'enseignant, ces écrans relevant du lot 5
   > Écarts : sans enfant déjà rattaché, pas de choix : création du compte ; identifiant proposé d'après le prénom et le nom (`suggestUsername`), modifiable, disponibilité vérifiée comme en `WPD04` (règles partagées dans `children/username.ts`) ; l'acceptation revient sur `WPD01` (« Invitation acceptée : {Prénom} a rejoint la classe… ») ; demande close : textes propres à l'invitation (classe rejointe, nouvelle invitation possible, invitation retirée). Atterrissage du lien SMS (lot 2) : un seul `claim` en vol par jeton, l'effet rejoué de React affichait « Lien incomplet » en développement.
-- [ ] **Critères de fin du lot 4** · PR de fin de lot #145
-  - [ ] `WPD01`-`WPD15` livrés selon la définition de « terminé » du README, au vouvoiement, en 360 px et sur bureau (variante enseignant de `WPD05` livrée avec le lot 5)
-    > Tous livrés (4.1 à 4.9), e2e sur les projets « bureau » et « mobile » (360 px) avec contrôle du défilement horizontal ; reste la validation C18 de la maquette de `WPD15` (4.0), en attente du produit.
+- [x] **Critères de fin du lot 4** · PR de fin de lot #145
+  - [x] `WPD01`-`WPD15` livrés selon la définition de « terminé » du README, au vouvoiement, en 360 px et sur bureau (variante enseignant de `WPD05` livrée avec le lot 5)
+    > Tous livrés (4.1 à 4.9), e2e sur les projets « bureau » et « mobile » (360 px) avec contrôle du défilement horizontal ; maquette de `WPD15` validée par le produit le 2026-10-23 (C18).
   - [x] Parcours Playwright verts sur la stack Docker avec `make seed` : enfant demande un parcours, parent paie, enfant accède (`parent-demande-paiement.spec.ts`)
   - [x] Parcours Playwright verts : refus de consentement (`parent-consentement.spec.ts`)
   - [x] Parcours Playwright verts : accord à un événement payant, plus achat direct de kit et création d'enfant (`parent-evenements.spec.ts`, `parent-commandes.spec.ts`, `parent-enfants.spec.ts`)
@@ -382,4 +382,4 @@ ajoutées au README ; noms des composants alignés sur LOT-3.
 | --- | --- |
 | Choix du prestataire de paiement après comparaison (S9, ADR-Paiement) | Branchement réel (le faux prestataire suffit au lot) |
 | Réservation du stock d'un kit dès « Continuer vers le paiement » (WPD15, achat direct), gardée en attendant la décision de l'utilisateur | Rien : comportement actuel conservé |
-| Validation C18 de la maquette de `WPD15` (4.0) par le produit | Critère « `WPD01`-`WPD15` livrés » du lot |
+| ~~Validation C18 de la maquette de `WPD15` (4.0)~~ : validée le 2026-10-23 | — |
