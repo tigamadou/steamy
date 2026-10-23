@@ -125,6 +125,7 @@ describe("routes.teacher", () => {
       "/enseignant/evaluations?filtre=a-revoir&classe=3&page=2",
     );
     expect(t.reviews({ page: 1 })).toBe("/enseignant/evaluations");
+    expect(t.reviews({ filter: "toutes", classroomId: 3 })).toBe("/enseignant/evaluations?classe=3");
     expect(t.event("robot-cup")).toBe("/enseignant/evenements/robot-cup");
     expect(t.notificationList()).toBe("/enseignant/notifications");
     expect(t.notificationList("non-lues", 2)).toBe("/enseignant/notifications?onglet=non-lues&page=2");

@@ -42,7 +42,7 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [x] Playwright : import de lignes (doublon, numéro invalide, ligne malformée, déjà présent), rapport conforme, correction, renvoi, ligne « envoyée »
   - [x] Recette : invitations « En attente du parent » dans `WT04` ; SMS émis par le faux fournisseur (S10)
   > Écarts : pas d'aperçu pour un fichier Excel (le serveur seul sait le lire) ; le rapport le détaille après l'envoi. Le dépassement de quota d'élèves n'est pas rejoué en Playwright (le quota du seed est de 120) : rendu et renvoi couverts par les tests unitaires. Une ligne mal formée d'une liste collée (colonnes en trop ou en moins, champ vide) est signalée par le front sans être envoyée.
-- [x] **5.4** Profil élève et commentaires · `feature/lot5-profil-eleve` (requiert 5.2)
+- [x] **5.4** Profil élève et commentaires · `feature/lot5-profil-eleve` · PR #157 (requiert 5.2)
   - [x] `WT05` : progression, tentatives (statut serveur D31), avatar, classe, badges, moyenne
   - [x] Commentaire : `textarea`, « Envoyer le commentaire », rattachement à une tentative (`?tentative=`), historique, mention « Visible par l'élève et son parent » (D63)
   - [x] Branchement API : `classrooms/learners/{id}/?classroomId=`, `comments/`
@@ -51,11 +51,12 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [x] Playwright : commenter une tentative `ko`, elle sort de « À revoir », commentaire visible côté parent (`WPD03`) et apprenant notifié
   - [x] Recette : aucun champ sensible dans l'affichage (le payload `LearnerFollowUp` n'en porte pas)
   > Écarts : le commentaire n'est pas affiché sur l'accueil de l'apprenant (`WD01`) : cette carte n'existe pas dans le lot 3 ; l'apprenant en est notifié (`WD04`, « t'a laissé un commentaire »). « Commenter » sur une ligne de `WT01` vient de l'étape 5.1 (`?tentative=`). La tentative est présentée avec son pourcentage et son statut serveur (l'API ne renvoie pas de score brut). La mention du test de contrat de payload est couverte côté API (sérialiseur dédié).
-- [ ] **5.5** Évaluations « À revoir » · `feature/lot5-evaluations` (requiert 5.4)
-  - [ ] `WT07` : filtres Toutes / Formatives / Sommatives / À revoir dans l'URL, filtre par classe, pagination, « Commenter » vers `WT05`
-  - [ ] Branchement API : `classrooms/reviews/?status=&type=&classroomId=`
-  - [ ] Tests unitaires : filtres et `searchParams`, pagination, état vide par filtre
-  - [ ] Recette : aucune action de correction ou de modification de note (D65)
+- [x] **5.5** Évaluations « À revoir » · `feature/lot5-evaluations` (requiert 5.4)
+  - [x] `WT07` : filtres Toutes / Formatives / Sommatives / À revoir dans l'URL, filtre par classe, pagination, « Commenter » vers `WT05`
+  - [x] Branchement API : `classrooms/reviews/?status=&type=&classroomId=`
+  - [x] Tests unitaires : filtres et `searchParams`, pagination, état vide par filtre
+  - [x] Recette : aucune action de correction ou de modification de note (D65)
+  > Écarts : « Sommatives » et « Formatives » filtrent par type de quiz, tous statuts confondus ; « À revoir » = tentatives échouées non commentées. Une tentative déjà commentée est signalée « Commentée » au lieu de « Commenter ».
 - [x] **5.6** Parcours encadrés · `feature/lot5-parcours` · PR #149 (requiert 5.1)
   - [x] `WT02` Mes parcours encadrés (carte de parcours encadré : classes, élèves)
   - [x] `WT10` Détail parcours encadré (`MissionCompletionItem`, panneau droit : progression par classe, taux de réussite, niveaux et projets les plus échoués)

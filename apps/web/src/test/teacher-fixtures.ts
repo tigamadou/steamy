@@ -39,7 +39,7 @@ export function memberLearner(overrides: Partial<Schemas["MemberLearner"]> = {})
 export function review(overrides: Partial<Schemas["Review"]> = {}): Schemas["Review"] {
   return {
     id: 90,
-    quiz: { id: 5, kind: "level", title: "Quiz du niveau 2", projectTitle: "Robot suiveur", levelTitle: "Niveau 2" },
+    quiz: { id: 5, kind: "formative", title: "Quiz du niveau 2", projectTitle: "Robot suiveur", levelTitle: "Niveau 2" },
     percentage: 33,
     status: "ko",
     passed: false,
@@ -203,7 +203,7 @@ export function invitation(overrides: Partial<Schemas["Member"]> = {}): Schemas[
 export function attempt(overrides: Partial<Schemas["TeacherAttempt"]> = {}): Schemas["TeacherAttempt"] {
   return {
     id: 90,
-    quiz: { id: 5, kind: "level", title: "Quiz du niveau 2", projectTitle: "Robot suiveur", levelTitle: "Niveau 2" },
+    quiz: { id: 5, kind: "formative", title: "Quiz du niveau 2", projectTitle: "Robot suiveur", levelTitle: "Niveau 2" },
     percentage: 33,
     status: "ko",
     passed: false,
