@@ -96,7 +96,6 @@ FROZEN = {
     "payments.orderitem": {SA: ("v",), SU: ("v",), FI: ("v",)},
     "payments.payment": {SA: ("v",), SU: ("v",), FI: ("v",)},
     "payments.refund": {SA: ("v",), FI: ("vac", "process_refund")},
-    "payments.creditnote": {SA: ("v",), FI: ("v", "issue_creditnote")},
     "referentials.avatar": {SA: ("vac",), SU: ("v",)},
     "referentials.country": {SA: ("vac",), SU: ("v",)},
     "referentials.disability": {SA: ("vac",), SU: ("v",)},

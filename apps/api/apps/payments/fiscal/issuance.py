@@ -141,16 +141,7 @@ def _issue(invoice, config) -> str:
         "nim": elements.nim,
     }
     invoice.pdf_status = Invoice.PdfStatus.PENDING
-    invoice.save(
-        update_fields=[
-            "fiscal_status",
-            "fiscal_error",
-            "fiscal",
-            "pdf_status",
-            "fiscal_total",
-            "fiscal_lines",
-        ]
-    )
+    invoice.save(update_fields=["fiscal_status", "fiscal_error", "fiscal", "pdf_status"])
     audit(
         "invoice.fiscal_confirmed",
         target=invoice,
