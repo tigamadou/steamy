@@ -66,7 +66,7 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [ ] « Candidatures de mes élèves » en lecture seule
   - [ ] Branchement API : `events/`, `events/{slug}/`, `proposals/`, `classrooms/event-applications/`
   - [ ] Tests unitaires : modale, double proposition à la même classe (message serveur)
-- [ ] **5.8** Paramètres, notifications, aide · `feature/lot5-parametres-notifs-aide` · PR #152 (requiert 5.1)
+- [x] **5.8** Paramètres, notifications, aide · `feature/lot5-parametres-notifs-aide` · PR #152 (requiert 5.1)
   - [x] `WT08` Paramètres : profil (nom, établissement en lecture seule), connexion (email, mot de passe D25), notifications (in-app et email), légal
   - [x] `WT08` spécialité du profil (`GET` · `PATCH accounts/me/teacher-profile/`, API #151) ; l'établissement vient du profil
   - [x] `WT08` zone sensible : « Demander la fermeture du compte » vers `public/contact-messages/` (sujet « Autre », message prérempli)

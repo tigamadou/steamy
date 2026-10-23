@@ -1,8 +1,10 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-import { waitForMessage } from "./support/mailpit";
-import { loginAs } from "./support/session";
+import { uniqueSuffix } from "./support/api";
+import { closeFamily, createFamily } from "./support/family";
+import { extractLink, waitForMessage, waitForSms } from "./support/mailpit";
+import { loginAs, readApi, writeApi } from "./support/session";
 
 // LOT-5 étape 5.8 · paramètres (WT08), notifications (WT12) et aide (WT11) de l'enseignant. Le changement de mot de
 // passe puis la reconnexion se jouent sur un compte à usage unique : activation.spec.ts.
@@ -57,24 +59,48 @@ test("WT08 : profil, connexion, notifications, légal et fermeture du compte", a
 });
 
 test("WT12 : onglets dans l'URL, « Tout marquer comme lu » remet la cloche à zéro", async ({ page }) => {
-  await loginAs(page, "teacher");
-  await page.goto("/enseignant/notifications");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Notifications");
-  await axe(page);
-  const tabs = page.getByRole("navigation", { name: "Filtrer les notifications" });
-  if (await tabs.isVisible()) {
+  // Une notification non lue, créée pour Koffi : un parent refuse l'invitation de son enfant (jeu de données neuf)
+  const family = await createFamily();
+  try {
+    await loginAs(page, "teacher");
+    await page.goto("/enseignant");
+    const classes = await readApi<{ results: { id: number; name: string }[] }>(page, "/api/classrooms/");
+    const robotics = classes.results.find((classroom) => classroom.name === "4e B · Robotique")!;
+    const [relationship] = await readApi<{ code: string }[]>(page, "/api/referentials/relationships/");
+    const since = new Date();
+    const firstName = `Notif${uniqueSuffix()}`;
+    await writeApi(page, `/api/classrooms/${robotics.id}/invitations/`, {
+      firstName,
+      lastName: "Refus",
+      parentPhone: family.parentPhone,
+      relationship: relationship.code,
+    });
+    const link = extractLink(await waitForSms(family.parentPhone, { since }), "/consentement/");
+    const request = (await family.parentSession.post("/api/accounts/consent-requests/claim/", {
+      token: link.pathname.split("/").pop(),
+    })) as { id: number };
+    const [reason] = (await family.parentSession.get("/api/referentials/refusal-reasons/")) as { code: string }[];
+    await family.parentSession.post(`/api/accounts/consent-requests/${request.id}/refuse/`, {
+      reason: reason.code,
+      note: "",
+    });
+
+    await page.goto("/enseignant/notifications");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Notifications");
+    await axe(page);
+    const tabs = page.getByRole("navigation", { name: "Filtrer les notifications" });
     await expect(tabs.getByRole("link", { name: "Toutes" })).toHaveAttribute("aria-current", "page");
-    await tabs.getByRole("link", { name: /^Non lues/ }).click();
+    await expect(page.getByText(new RegExp(`Invitation refusée : ${firstName}`)).first()).toBeVisible();
+
+    await tabs.getByRole("link", { name: /^Non lues \([1-9]\d*\)$/ }).click();
     await expect(page).toHaveURL("/enseignant/notifications?onglet=non-lues");
-    const markAll = page.getByRole("button", { name: "Tout marquer comme lu" });
-    if (await markAll.isEnabled()) {
-      await markAll.click();
-      await expect(bell(page)).toHaveAccessibleName("Notifications, aucune non lue");
-      await page.reload();
-      await expect(bell(page)).toHaveAccessibleName("Notifications, aucune non lue");
-    }
-  } else {
-    await expect(page.getByText(/Vous n'avez aucune notification/)).toBeVisible();
+    await expect(bell(page)).not.toHaveAccessibleName("Notifications, aucune non lue");
+    await page.getByRole("button", { name: "Tout marquer comme lu" }).click();
+    await expect(bell(page)).toHaveAccessibleName("Notifications, aucune non lue");
+    await page.reload();
+    await expect(bell(page)).toHaveAccessibleName("Notifications, aucune non lue");
+  } finally {
+    await closeFamily(family);
   }
 });
 

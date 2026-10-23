@@ -166,12 +166,13 @@ describe("TeacherConnectionCard (WT08, connexion)", () => {
     expect(router.refresh).not.toHaveBeenCalled();
   });
 
-  it("annuler le changement d'adresse", async () => {
+  it("annuler le changement d'adresse : le focus revient au bouton d'édition", async () => {
     const user = userEvent.setup();
     render(<TeacherConnectionCard email="koffi@steamy.test" />);
     await user.click(screen.getByRole("button", { name: /Changer d'adresse/ }));
     await user.click(screen.getByRole("button", { name: "Annuler" }));
     expect(screen.getByText("koffi@steamy.test")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Changer d'adresse/ })).toHaveFocus();
   });
 
   it("mot de passe : formulaire D25 au vouvoiement, puis « Fermer »", async () => {
@@ -182,6 +183,7 @@ describe("TeacherConnectionCard (WT08, connexion)", () => {
     expect(screen.queryByRole("button", { name: "Changer de mot de passe" })).toBeNull();
     await user.click(screen.getByRole("button", { name: "Fermer" }));
     expect(screen.getByRole("button", { name: "Changer de mot de passe" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Changer d'adresse/ })).toHaveFocus();
   });
 });
 
