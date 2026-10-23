@@ -46,17 +46,28 @@ test.describe("commenter une tentative échouée", { tag: "@donnees-uniques" }, 
     const after = await readApi<Dashboard>(page, "/api/classrooms/dashboard/");
     expect(after.toReview.map((review) => review.id)).not.toContain(target.id);
 
-    // L'apprenant est notifié (WD04) ; le parent lit le commentaire sur le profil de son enfant (WPD03)
-    await page.context().clearCookies();
-    await loginViaApi(page, target.learner.firstName === "Yao" ? "yao.kpade" : "lea.adjovi", DEMO_PASSWORD);
-    await page.goto("/apprenant/notifications");
-    await expect(page.getByText(/laissé un commentaire/).first()).toBeVisible();
+    // L'apprenant est notifié (WD04) ; le parent lit le commentaire de l'enseignant sur son enfant (WPD03). Les profils
+    // du jeu D2 n'étant pas tous complets (le parent de Yao n'a pas fini son inscription), la lecture passe par l'API.
+    const accounts: Record<string, { learner: string; parent: string }> = {
+      Yao: { learner: "yao.kpade", parent: "+2290190000002" },
+      "Sèna": { learner: "sena.kpade", parent: "+2290190000002" },
+      "Léa": { learner: "lea.adjovi", parent: "+2290190000001" },
+    };
+    const account = accounts[target.learner.firstName];
+    expect(account, `compte de démonstration de ${name}`).toBeDefined();
 
     await page.context().clearCookies();
-    await loginViaApi(page, "+2290190000002");
-    await page.goto("/parent/enfants");
-    await page.getByRole("link", { name: new RegExp(name) }).first().click();
-    await expect(page.getByText(comment)).toBeVisible();
+    await loginViaApi(page, account.learner, DEMO_PASSWORD);
+    const notifications = await readApi<{ results: { type: string; message: string }[] }>(page, "/api/notifications/?pageSize=50");
+    expect(notifications.results.some((item) => item.type === "classroom.comment" && item.message.includes(comment))).toBe(true);
+
+    await page.context().clearCookies();
+    await loginViaApi(page, account.parent);
+    const comments = await readApi<{ results: { body: string }[] }>(
+      page,
+      `/api/classrooms/comments/?learnerId=${target.learner.id}`,
+    );
+    expect(comments.results.map((item) => item.body)).toContain(comment);
   });
 });
 
