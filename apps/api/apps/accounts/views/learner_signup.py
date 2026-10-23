@@ -239,6 +239,8 @@ class LearnerSignupView(PublicView):
         learner, code = service.create_learner_signup(
             data["first_name"], data["last_name"], data["username"], data["age"]
         )
+        # Le refus d'une inscription précédente ne doit pas réafficher W18
+        request.session.pop(service.CONSENT_SESSION_KEY, None)
         request.session[service.SESSION_KEY] = learner.pk
         signup = learner.signup_session
         return Response(
@@ -271,6 +273,7 @@ class LearnerSignupResumeView(PublicView):
         signup = service.resume_signup(
             serializer.validated_data["username"], serializer.validated_data["resume_code"]
         )
+        request.session.pop(service.CONSENT_SESSION_KEY, None)
         request.session[service.SESSION_KEY] = signup.learner_id
         return Response(LearnerSignupStateSerializer.build(signup))
 

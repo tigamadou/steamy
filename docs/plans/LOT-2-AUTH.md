@@ -23,7 +23,7 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot (CI des PR #51-#57, correctifs API) · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
+Statut : 🟡 en cours · Prochaine tâche : décision sur la recette produit des 34 écrans (écran par écran ou couverture automatique) · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
 ### Socle — ✅ terminé
 - [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
@@ -133,19 +133,20 @@ Statut : 🟡 en cours · Prochaine tâche : critères de fin du lot (CI des PR 
   - [x] P6 Activation enseignant : `activation.spec.ts` (étape 2.2, projet « bureau », invitation du jeu de démo à usage unique)
   - [x] P7 Accessibilité (axe sur chaque écran, P1 au clavier seul, viewport 360 px)
 
-- [ ] **Critères de fin du lot 2**
+- [ ] **Critères de fin du lot 2** (revérifiés sur `development` après les correctifs API-L2 de la PR #148)
   - [ ] Les 34 écrans respectent la définition de « terminé » du README et SPEC-ECRANS §2, sans élément « Ne pas porter »
-  - [ ] Parcours P1 à P7 verts en CI sur la stack Docker avec le faux fournisseur SMS ; tests Vitest des composants verts
+    - Vérifié : matrice e2e à jour (`python3 scripts/e2e_matrix.py --check`), les 34 écrans ont un test e2e (axe, 360 px, registre) ; W18 n'est plus réaffiché dans le même navigateur : `consentement-apprenant.spec.ts` (« W18 n'est plus réaffiché… »), correctif API #148.
+    - Reste : la recette produit écran par écran. Pour le lot 6, l'équipe a accepté la couverture automatique (pytest et Playwright) comme recette. Question ouverte pour le lot 2 : la recette écran par écran se fait-elle, ou l'équipe accepte-t-elle la couverture automatique ? Case non cochée tant que l'équipe n'a pas répondu.
+  - [x] Parcours P1 à P7 verts en CI sur la stack Docker avec le faux fournisseur SMS ; tests Vitest des composants verts
+    - Jobs `e2e` (projets bureau et mobile) et `web` (Vitest) verts sur la PR de clôture ; P1 `parcours-p1-inscription-accord.spec.ts`, P2 `parcours-p2-refus.spec.ts`, P3 `parcours-p3-reprise.spec.ts`, P4 `parcours-p4-parent-existant.spec.ts`, P5 `mot-de-passe-oublie.spec.ts` (le plafond d'essais de WL03 n'est plus en `test.fixme`) et `activation.spec.ts`, P6 `activation.spec.ts`, P7 `parcours-p7-accessibilite.spec.ts`.
   - [x] Aucune Server Action ni appel hors client généré pour l'authentification ; CSRF effectif sur toutes les écritures
   - [x] Aucune donnée personnelle, code ou jeton d'API dans les URL, `localStorage` ou journaux du front
   - [x] Les trois rôles redirigés vers leur espace, personnel refusé sur W16, `next` sûr
   - [x] Composants DS du lot documentés et réutilisables par les lots 3, 4 et 5
   > Reprise :
-  > - Les deux critères restants attendent la CI verte des PR #51 à #57 (P1 à P7 sur la stack Docker) et la recette produit.
-  > - Deux défauts de l'API sont à corriger côté API-L2 :
-  >   - `issue_token` annule le compteur d'essais de WL03 : test `test.fixme` dans `mot-de-passe-oublie.spec.ts` ;
-  >   - `POST auth/learner-signup/` garde en session le refus précédent, ce qui laisse W18 affiché dans le même navigateur.
-  > - Défaut mineur de l'API : un identifiant pris en concurrence donne une 500 (`IntegrityError`) au lieu de `USERNAME_TAKEN`.
+  > - Les défauts d'API signalés sont corrigés (PR #148) : plafond d'essais OTP de WL03, refus rejoué dans le même navigateur, identifiant pris en concurrence (`USERNAME_TAKEN`).
+  > - Il ne reste que la décision sur la recette produit (question ci-dessus), sans trancher ici.
+  > - Activation enseignant : le jeton passe dans le fragment de l'URL (`/activation#jeton=…`), l'ancien lien `/activation/[token]` redirige vers le fragment (front PR #141, API #140) ; couvert par `activation.spec.ts` et la ligne WL04 de la matrice.
 
 ---
 
