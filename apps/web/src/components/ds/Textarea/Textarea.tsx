@@ -1,13 +1,14 @@
 "use client";
 
-import type { TextareaHTMLAttributes } from "react";
+import type { ComponentProps } from "react";
 
 import { cx } from "@/lib/cx";
 
 import { controlBoxClasses, useFieldControl } from "../Field";
 import { controlTextClasses } from "../Field/control";
 
-export type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
+// `ComponentProps` porte aussi `ref` (React 19) : le formulaire peut rendre le focus au champ.
+export type TextareaProps = ComponentProps<"textarea"> & {
   invalid?: boolean;
 };
 

@@ -220,7 +220,7 @@ export const routes = {
     /** WT07 · filtre (`?filtre=`), classe (`?classe=`) et page dans l'URL (« Toutes » et la page 1 n'y figurent pas). */
     reviews: (options: { filter?: string; classroomId?: number | string; page?: number } = {}) => {
       const query = new URLSearchParams();
-      if (options.filter) query.set("filtre", options.filter);
+      if (options.filter && options.filter !== "toutes") query.set("filtre", options.filter);
       if (options.classroomId !== undefined) query.set("classe", String(options.classroomId));
       if (options.page && options.page > 1) query.set("page", String(options.page));
       const search = query.toString();
