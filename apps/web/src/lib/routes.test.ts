@@ -113,6 +113,7 @@ describe("routes.teacher", () => {
     expect(t.mission("robot-bluetooth", 4)).toBe("/enseignant/parcours/robot-bluetooth/missions/4");
     expect(t.classroom(3)).toBe("/enseignant/classes/3");
     expect(t.classroom(3, "creee")).toBe("/enseignant/classes/3?confirmation=creee");
+    expect(t.classroom(3, "invitation")).toBe("/enseignant/classes/3?confirmation=invitation");
     expect(t.editClassroom(3)).toBe("/enseignant/classes/3/modifier");
     expect(t.addLearners()).toBe("/enseignant/eleves/ajouter");
     expect(t.addLearners({ classroomId: 3 })).toBe("/enseignant/eleves/ajouter?classe=3");

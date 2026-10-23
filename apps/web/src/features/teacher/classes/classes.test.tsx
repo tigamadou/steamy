@@ -464,7 +464,7 @@ describe("WT04 · élèves d'une classe", () => {
     const props = { params: Promise.resolve({ id: "3" }), searchParams: Promise.resolve({ confirmation: "creee" }) };
     render(await ClassroomMembers(props));
     expect(screen.getByText("La classe est créée.")).toBeInTheDocument();
-    const other = render(await ClassroomMembers({ ...props, searchParams: Promise.resolve({ confirmation: "x" }) }));
+    const other = render(await ClassroomMembers({ ...props, searchParams: Promise.resolve({ confirmation: "constructor" }) }));
     expect(other.container.textContent).not.toContain("La classe est créée.");
     GET.mockResolvedValue(respond(404));
     await expect(ClassroomMembers(props)).rejects.toThrow("NEXT_NOT_FOUND");

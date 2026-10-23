@@ -8,7 +8,11 @@ import { MEMBERS_HEADING_ID } from "./RemoveMemberButton";
 
 const t = routes.teacher;
 
-const CONFIRMATIONS = { creee: "La classe est créée.", modifiee: "La classe est enregistrée." } as const;
+const CONFIRMATIONS = {
+  creee: "La classe est créée.",
+  modifiee: "La classe est enregistrée.",
+  invitation: "La demande est envoyée au parent. L'élève rejoindra la classe après son accord.",
+} as const;
 
 /** WT04 vide : « Ajoutez vos premiers élèves » → WT06 sur cette classe. */
 export function EmptyClassroom({ classroom, blocked }: { classroom: Classroom; blocked: boolean }) {
@@ -125,7 +129,7 @@ export function ClassroomMembersView({
 }
 
 function confirmationOf(value: string | string[] | undefined): keyof typeof CONFIRMATIONS | undefined {
-  return value === "creee" || value === "modifiee" ? value : undefined;
+  return typeof value === "string" && Object.hasOwn(CONFIRMATIONS, value) ? (value as keyof typeof CONFIRMATIONS) : undefined;
 }
 
 /** WT04 · élèves d'une classe, lus côté serveur ; une classe d'un autre enseignant est introuvable (404). */

@@ -19,7 +19,7 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [x] Tests : redirection d'un apprenant ou d'un parent hors de `/enseignant`
   - [ ] Recette : compteurs conformes au seed ; aucun « À corriger » ; « Commenter » ouvre le profil élève sur la tentative (lien posé, le profil arrive avec l'étape 5.4)
   > Écarts : l'ancienne page d'attente (`SpaceWaiting`) et son bouton de déconnexion sont supprimés ; les liens de l'accueil vers WT04, WT05, WT06 et WT13 mènent à des écrans livrés par les étapes suivantes.
-- [x] **5.2** Classes · `feature/lot5-classes` (requiert 5.1, maquette de `WT13` validée)
+- [x] **5.2** Classes · `feature/lot5-classes` · PR #155 (requiert 5.1, maquette de `WT13` validée)
   - [x] Conception de la maquette `WT13` dans `design/screens-enseignant-a-concevoir-web.jsx` (C18) ; **validée par le produit le 2026-10-23, sans retouche**
   - [x] `WT03` Mes classes
   - [x] `WT13` Créer / modifier une classe (`ClassroomForm` : nom*, parcours* limité à l'offre, niveau scolaire facultatif, établissement en lecture seule) d'après la maquette validée
@@ -32,15 +32,16 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [x] Playwright : création, `WT04` vide, CTA vers `WT06`
   - [x] Recette : création redirige vers `WT04` ; retrait confirmé fait disparaître l'élève et libère le quota
   > Écarts : « Annuler l'invitation » (même endpoint que le retrait) est proposé sur les invitations. Le quota de classes du jeu D2 est de 4 pour 2 classes créées : le test de création (une seule fois, sur « bureau ») en consomme une ; l'étape 5.9 en créera une autre, la marge est étroite (à relever dans le seed si besoin).
-- [ ] **5.3** Ajout d'élèves et import · `feature/lot5-ajout-eleves` (requiert 5.2)
-  - [ ] `WT06` onglet Individuel : prénom*, nom*, téléphone du parent* (`PhoneInput`), lien de parenté*, classe* (`?classe=`), encart consentement SMS (D60)
-  - [ ] `WT06` onglet Import par lot : CSV / Excel (200 lignes max) ou liste collée, modèle CSV téléchargeable, aperçu des 5 premières lignes, classe*
-  - [ ] État « Résultat d'import » : `ImportReport` par ligne, filtre « Erreurs seulement », édition en place, « Renvoyer les lignes corrigées »
-  - [ ] Quota restant affiché avant l'envoi ; le front ne valide que la forme
-  - [ ] Branchement API : `invitations/`, `invitations/import/`, `classrooms/school/`
-  - [ ] Tests unitaires : parsing de la liste collée (`;`, `,`, tabulation), rendu de chaque code d'erreur, édition et renvoi
-  - [ ] Playwright : import de 6 lignes (doublon, numéro invalide, ligne malformée, déjà présent, dépassement de quota), rapport conforme, correction, renvoi, ligne « envoyée »
-  - [ ] Recette : invitations « En attente du parent » dans `WT04` ; SMS émis par le faux fournisseur (S10)
+- [x] **5.3** Ajout d'élèves et import · `feature/lot5-ajout-eleves` (requiert 5.2)
+  - [x] `WT06` onglet Individuel : prénom*, nom*, téléphone du parent* (`PhoneInput`), lien de parenté*, classe* (`?classe=`), encart consentement SMS (D60)
+  - [x] `WT06` onglet Import par lot : CSV / Excel (200 lignes max) ou liste collée, modèle CSV téléchargeable, aperçu des 5 premières lignes (CSV et liste collée), classe*
+  - [x] État « Résultat d'import » : `ImportReport` par ligne, filtre « Erreurs seulement », édition en place, « Renvoyer les lignes corrigées »
+  - [x] Quota restant affiché avant l'envoi ; le front ne valide que la forme
+  - [x] Branchement API : `invitations/`, `invitations/import/`, `classrooms/school/`
+  - [x] Tests unitaires : parsing de la liste collée (`;`, `,`, tabulation), rendu de chaque code d'erreur, édition et renvoi
+  - [x] Playwright : import de lignes (doublon, numéro invalide, ligne malformée, déjà présent), rapport conforme, correction, renvoi, ligne « envoyée »
+  - [x] Recette : invitations « En attente du parent » dans `WT04` ; SMS émis par le faux fournisseur (S10)
+  > Écarts : pas d'aperçu pour un fichier Excel (le serveur seul sait le lire) ; le rapport le détaille après l'envoi. Le dépassement de quota d'élèves n'est pas rejoué en Playwright (le quota du seed est de 120) : rendu et renvoi couverts par les tests unitaires. Une ligne mal formée d'une liste collée (colonnes en trop ou en moins, champ vide) est signalée par le front sans être envoyée.
 - [ ] **5.4** Profil élève et commentaires · `feature/lot5-profil-eleve` (requiert 5.2)
   - [ ] `WT05` : progression, tentatives (`QuizAttemptRow`, statut serveur D31), avatar, classe, badges, moyenne
   - [ ] Commentaire : `textarea`, « Envoyer le commentaire », rattachement à une tentative (`?tentative=`), historique, mention « Visible par l'élève et son parent » (D63)

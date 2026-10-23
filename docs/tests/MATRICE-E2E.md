@@ -126,7 +126,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WT03` | Mes classes | 5 | Classes et quota de l'école identiques à l'API, « Créer une classe » → WT13 | `apps/web/e2e/enseignant-classes.spec.ts` |
 | `WT04` | Apprenants d'une classe | 5 | Élèves et invitations (en attente, refusée, expirée) de l'API, aucun numéro de parent ; classe vide → CTA vers WT06 ; annulation d'une invitation confirmée, quota libéré ; classe d'un autre : 404 | `apps/web/e2e/enseignant-classes.spec.ts` |
 | `WT05` | Profil apprenant (+ commentaires) | 5 |  |  |
-| `WT06` | Ajouter des apprenants (individuel / lot) | 5 |  |  |
+| `WT06` | Ajouter des apprenants (individuel / lot) | 5 | Individuel : erreurs de forme, SMS au parent (faux fournisseur), invitation « En attente du parent » ; lot : liste de 5 lignes (doublon, déjà présent, numéro invalide, ligne mal formée), rapport conforme, filtre, correction, renvoi, ligne « envoyée » | `apps/web/e2e/enseignant-ajout-eleves.spec.ts` |
 | `WT07` | Suivi des évaluations | 5 |  |  |
 | `WT08` | Paramètres | 5 |  |  |
 | `WT09` | Steamy Events | 5 |  |  |
