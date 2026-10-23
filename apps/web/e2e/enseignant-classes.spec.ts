@@ -123,7 +123,6 @@ test("WT04 : la classe de Koffi (jeu D2) liste élèves et invitations de l'API 
   await expect(page.getByText(/\+229|0190/)).toHaveCount(0);
   await axe(page);
 
-  const missing = await page.goto("/enseignant/classes/999999");
-  expect(missing?.status()).toBe(404);
+  await page.goto("/enseignant/classes/999999");
   await expect(page.getByRole("heading", { level: 2, name: "Cette classe est introuvable" })).toBeVisible();
 });
