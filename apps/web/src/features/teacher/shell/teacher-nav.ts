@@ -12,9 +12,9 @@ export const teacherNav: NavEntry[] = [
   { id: "courses", icon: "book", label: "Mes parcours", href: t.courses },
   { id: "classes", icon: "user", label: "Mes classes", href: t.classes },
   { id: "reviews", icon: "star", label: "Évaluations", href: t.reviews() },
-  { id: "events", icon: "trophy", label: "Événements", href: t.events, hidden: true },
-  { id: "help", icon: "help", label: "Aide", href: t.help, hidden: true },
-  { id: "settings", icon: "gear", label: "Paramètres", href: t.settings, hidden: true },
+  { id: "events", icon: "trophy", label: "Événements", href: t.events },
+  { id: "help", icon: "help", label: "Aide", href: t.help },
+  { id: "settings", icon: "gear", label: "Paramètres", href: t.settings },
 ];
 
 /** Lien du profil dans le header : les paramètres (WT08). */

@@ -228,3 +228,17 @@ export function followUp(overrides: Partial<Schemas["LearnerFollowUp"]> = {}): S
     ...overrides,
   } as Schemas["LearnerFollowUp"];
 }
+
+export function eventApplication(
+  overrides: Partial<Schemas["ClassroomEventApplication"]> = {},
+): Schemas["ClassroomEventApplication"] {
+  return {
+    id: 8,
+    status: "pending_parent",
+    event: { slug: "defi-robots", title: "Défi robots de Cotonou", emoji: "🤖", color: "#7c3aed", startsAt: "2026-12-05T09:00:00Z", city: "Cotonou", online: false, price: 5000 },
+    learner: memberLearner(),
+    classroom: { id: 3, name: "4ᵉ B · Robotique" },
+    createdAt: "2026-10-21T10:00:00Z",
+    ...overrides,
+  } as Schemas["ClassroomEventApplication"];
+}

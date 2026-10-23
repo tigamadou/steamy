@@ -144,7 +144,7 @@ describe("TeacherHomeView (WT01)", () => {
     );
     render(<NoClassroom />);
     const text = [filled, empty, document.body].map((node) => node.textContent ?? "").join(" ");
-    expect(text).not.toMatch(/\b(tu|ton|ta|tes|toi|te)\b/i);
+    expect(text).not.toMatch(/(?<!\p{L})(tu|ton|ta|tes|toi|te)(?!\p{L})/iu);
     expect(text).not.toMatch(/formateur|à corriger/i);
     expect(text).toMatch(/Suivez la progression de vos classes/);
   });

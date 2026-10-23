@@ -13,11 +13,11 @@ import {
   ReferentialSelect,
   type PhoneCountry,
 } from "@/components/ds";
+import { EditableCard } from "@/features/account/EditableCard";
 import { SavedToast } from "@/features/account/SavedToast";
 import { apiCall, errorMessage } from "@/lib/api-call";
 import { useReferential } from "@/lib/use-referential";
 
-import { EditableCard } from "./EditableCard";
 
 type MobileMoney = Schemas["MobileMoney"];
 type Errors = { network?: string; phone?: string; form?: string };
