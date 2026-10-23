@@ -21,7 +21,7 @@ const ZONES = [
   { id: 2, country: "BJ", name: "Porto-Novo", fee: 1500, delayLabel: "2 à 3 jours" },
 ];
 const GUEST = { firstName: "Awa", lastName: "Test", phone: "+2290190000002", phoneCountry: "BJ", phoneNational: "0190000002" };
-const CART = { status: "ready", shopper: "guest", lines: [{ kit: KIT, quantity: 2, total: 70000 }], count: 2, subtotal: 70000, dropped: 0 } as const;
+const CART = { status: "ready", shopper: "guest", lines: [{ kit: KIT, quantity: 2, total: 70000 }], count: 2, subtotal: 70000, taxes: [], total: 70000, dropped: 0 } as const;
 const failure = (code: string, fields: Record<string, string> = {}) => ({ ok: false, code, message: "", fields });
 
 async function fill() {
@@ -49,7 +49,7 @@ describe("WK05 · livraison", () => {
     render(<DeliveryForm cart={CART as never} />);
     await fill();
     expect(getZones).toHaveBeenCalledWith("BJ");
-    expect(screen.getByText(/Livraison Porto-Novo : 1\s500 F CFA · délai annoncé 2 à 3 jours/)).toBeInTheDocument();
+    expect(screen.getByText(/Livraison Porto-Novo : 1\s500 F CFA HT · délai annoncé 2 à 3 jours/)).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /Téléphone du destinataire/ })).toHaveValue("0190000002");
     await userEvent.click(screen.getByRole("button", { name: "Continuer vers le paiement" }));
     expect(createKitOrder).toHaveBeenCalledWith({

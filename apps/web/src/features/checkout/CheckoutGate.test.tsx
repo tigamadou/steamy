@@ -16,7 +16,7 @@ const { CheckoutFrame } = await import("./CheckoutFrame");
 const { DeliveryStep, GuestStep } = await import("./steps");
 
 const ready = (lines = [{ kit: KIT, quantity: 2, total: 70000 }], shopper = "guest") => ({
-  state: { status: "ready", shopper, lines, count: 2, subtotal: 70000, dropped: 0 },
+  state: { status: "ready", shopper, lines, count: 2, subtotal: 70000, taxes: [], total: 70000, dropped: 0 },
   reload: vi.fn(),
 });
 

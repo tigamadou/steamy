@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { Accordion, Badge, Breadcrumb, Button, Icon, SkeletonBlock } from "@/components/ds";
 import { catalogHref } from "@/lib/catalog-filters";
-import { DIFFICULTY_LABELS, formatPrice, KIT_CODE_LABEL } from "@/lib/format";
+import { DIFFICULTY_LABELS, formatPriceHt, KIT_CODE_LABEL } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
 import { WLJoinBanner } from "./sections";
@@ -76,7 +76,7 @@ export function CourseHero({ course }: { course: Course }) {
           ) : offer === "free" ? (
             <Badge tone="success">Gratuit</Badge>
           ) : (
-            <Badge tone="amber">{formatPrice(course.price ?? 0)}</Badge>
+            <Badge tone="amber">{formatPriceHt(course.price ?? 0)}</Badge>
           )}
         </div>
       </div>
@@ -180,7 +180,7 @@ export function EnrollCard({ course }: { course: Course }) {
       {offer === "paid" && (
         <>
           <div>
-            <p className="text-[30px] font-black text-ink-900">{formatPrice(course.price ?? 0)}</p>
+            <p className="text-[30px] font-black text-ink-900">{formatPriceHt(course.price ?? 0)}</p>
             <p className="text-[13px] font-bold text-ink-600">📱 Payé par ton parent en Mobile Money · accès à vie</p>
           </div>
           <Button block size="lg" icon="user" href={routes.signup(back)}>

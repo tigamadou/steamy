@@ -72,4 +72,5 @@ export * from "./WKCartRow";
 export * from "./WKGallery";
 export * from "./WKKitCard";
 export * from "./WKQtyStepper";
+export * from "./TaxRows";
 export * from "./WKSummaryRow";

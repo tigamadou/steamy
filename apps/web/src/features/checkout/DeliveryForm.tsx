@@ -7,7 +7,7 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { AddressForm, Button, ErrorSummary, Field, PhoneInput } from "@/components/ds";
 import { errorMessage } from "@/lib/api-call";
-import { formatPrice } from "@/lib/format";
+import { formatPriceHt } from "@/lib/format";
 import { routes } from "@/lib/routes";
 import { throttledLabel, useThrottle } from "@/components/ds/RetryCountdown";
 import { useReferential } from "@/lib/use-referential";
@@ -197,7 +197,7 @@ export function DeliveryForm({ cart }: { cart: ReadyCart }) {
       <div aria-live="polite">
         {zone && (
           <p className="rounded-[14px] bg-primary-50 p-3.5 text-sm font-bold text-primary-800">
-            Livraison {zone.name} : {formatPrice(zone.fee)} · délai annoncé {zone.delayLabel}
+            Livraison {zone.name} : {formatPriceHt(zone.fee)} · délai annoncé {zone.delayLabel}
           </p>
         )}
       </div>

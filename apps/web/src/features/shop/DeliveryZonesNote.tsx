@@ -2,7 +2,7 @@ import type { Schemas } from "@steamy/api-client";
 
 import { Icon } from "@/components/ds";
 import type { Register } from "@/lib/api-call";
-import { formatPrice } from "@/lib/format";
+import { formatPriceHt } from "@/lib/format";
 
 /**
  * Délais et frais de livraison par zone (WK02, WK10), lus dans le référentiel des zones (D38) : aucun délai n'est
@@ -20,7 +20,7 @@ export function DeliveryZonesNote({ zones, register }: { zones: Schemas["Deliver
           <div key={zone.id} className="flex flex-wrap justify-between gap-x-3">
             <dt>{zone.name}</dt>
             <dd className="font-bold text-ink-900">
-              {zone.delayLabel} · {formatPrice(zone.fee)}
+              {zone.delayLabel} · {formatPriceHt(zone.fee)}
             </dd>
           </div>
         ))}

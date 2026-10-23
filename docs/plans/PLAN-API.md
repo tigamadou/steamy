@@ -532,7 +532,12 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
     (montant payé), admin ; la facture sera ventilée en C25.3
   - [x] **C25.3 · facture** : le snapshot garde `taxes` (lues sur `Order.taxes`, jamais recalculées) ; PDF : sous-total
     HT, livraison, une ligne par taxe (taux et base), « Total à payer » ; factures déjà émises inchangées
-  - [ ] **C25.4 · front** (PR séparée, après l'API) : « HT » sur les prix du catalogue, « Total à payer » au paiement
+  - [x] **C25.4 · front** (PR séparée, `feature/web-taxes-ht-total`) : « HT » sur les prix du catalogue, des kits, des
+    événements et de la livraison (`formatPriceHt`) ; composant `TaxRows` : lignes de taxes lues dans l'API (panier,
+    commande, paiement, suivi, mes commandes, demande de paiement WPD15), « Sous-total HT » et « Total à payer »,
+    aucun montant recalculé côté client (l'invité, dont le panier reste dans le navigateur, voit le HT et la mention
+    des taxes ajoutées au paiement). Réglage des taxes : l'admin Django WAD14 suffit (Super-admin, journal d'audit),
+    pas d'écran front dédié
   - [ ] **Taux d'AIB à confirmer** par la comptabilité : défauts éteints et à 0, aucune valeur légale supposée
   - [ ] **Suite `API-L3b.2c`** : facture normalisée e-MECeF, interface `FiscalInvoiceProvider` et faux fournisseur,
     après obtention du contrat d'API DGI et des identifiants (ADR 0005, P1 tranché, reste l'accès)

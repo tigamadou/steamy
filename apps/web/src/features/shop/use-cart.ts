@@ -23,8 +23,12 @@ export type CartContents = {
   lines: CartLine[];
   /** Nombre d'articles (somme des quantités). */
   count: number;
-  /** Somme des lignes hors livraison : celle de l'API pour un panier serveur, celle des prix relus pour l'invité. */
+  /** Somme des lignes HT hors livraison : celle de l'API pour un panier serveur, celle des prix relus pour l'invité. */
   subtotal: number;
+  /** Taxes ajoutées au HT (livraison exclue), lues dans l'API ; vides pour l'invité, dont le panier reste dans le navigateur. */
+  taxes: Schemas["TaxLine"][];
+  /** HT + taxes hors livraison : celui de l'API pour un panier serveur, le sous-total HT pour l'invité. */
+  total: number;
   /**
    * Kits retirés du panier : retirés de la vente depuis l'ajout (invité), ou refusés à la fusion du panier invité
    * dans le panier serveur après la connexion (kit épuisé ou retiré).
@@ -51,15 +55,20 @@ function fromServer(cart: Schemas["Cart"], dropped = 0): CartContents {
     lines: cart.items.map((item) => ({ kit: item.kit, quantity: item.quantity, total: item.total, id: item.id })),
     count: cart.count,
     subtotal: cart.subtotal,
+    taxes: cart.taxes,
+    total: cart.total,
     dropped,
   };
 }
 
 function summed(lines: CartLine[], dropped: number): CartContents {
+  const subtotal = lines.reduce((sum, line) => sum + line.total, 0);
   return {
     lines,
     count: lines.reduce((sum, line) => sum + line.quantity, 0),
-    subtotal: lines.reduce((sum, line) => sum + line.total, 0),
+    subtotal,
+    taxes: [],
+    total: subtotal,
     dropped,
   };
 }

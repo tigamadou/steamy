@@ -4,7 +4,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import type { KitCardData } from "@/components/ds";
 
 import { getPublicApi } from "./api-public";
-import { DIFFICULTY_LABELS, formatPrice } from "./format";
+import { DIFFICULTY_LABELS, formatPriceHt } from "./format";
 import { PublicApiError, unwrap } from "./public-api-error";
 
 // Kits en vitrine (API-L1.5), en cache étiqueté `shop`. À appeler sous `<Suspense>`, après `connection()`.
@@ -56,7 +56,7 @@ export function toKitCard(kit: Schemas["Kit"]): KitCardData {
   return {
     name: kit.name,
     difficulty: DIFFICULTY_LABELS[kit.difficulty],
-    priceLabel: formatPrice(kit.price),
+    priceLabel: formatPriceHt(kit.price),
     availability: kit.available ? "in_stock" : "out_of_stock",
     color: kit.category.color,
     emoji: kit.emoji || kit.category.icon,

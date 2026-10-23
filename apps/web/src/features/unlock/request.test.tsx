@@ -200,6 +200,7 @@ describe("PaymentRequestView · WK08 (kind=kit)", () => {
     kind: "kit" as const,
     course: null,
     amount: 92000,
+    total: 92000,
     items: [
       { kitSlug: "steamy-bot-v1", title: "Steamy Bot v1", unitPrice: 35000, quantity: 2 },
       { kitSlug: "pack-electronique", title: "Pack Électronique", unitPrice: 22000, quantity: 1 },

@@ -3,7 +3,7 @@
 import type { Schemas } from "@steamy/api-client";
 import { useEffect, useState } from "react";
 
-import { Button, Mascot, ShippingTimeline, SkeletonBlock, WKSummaryRow } from "@/components/ds";
+import { Button, Mascot, ShippingTimeline, SkeletonBlock, TaxRows, WKSummaryRow } from "@/components/ds";
 import { errorMessage, type ApiFailure } from "@/lib/api-call";
 import { cx } from "@/lib/cx";
 import { formatPrice } from "@/lib/format";
@@ -155,12 +155,13 @@ export function OrderTracking({ reference }: { reference: string }) {
           ))}
         </ul>
         <dl className="flex flex-col gap-2 border-t border-ink-100 pt-3">
-          <WKSummaryRow label="Sous-total" value={formatPrice(order.subtotal)} />
+          <WKSummaryRow label="Sous-total HT" value={formatPrice(order.subtotal)} />
           <WKSummaryRow
             label={order.deliveryZone ? `Livraison (${order.deliveryZone.name})` : "Livraison"}
             value={formatPrice(order.shippingFee)}
           />
-          <WKSummaryRow label="Total" value={formatPrice(order.total)} strong />
+          <TaxRows taxes={order.taxes} />
+          <WKSummaryRow label="Total à payer" value={formatPrice(order.total)} strong />
         </dl>
       </section>
 
