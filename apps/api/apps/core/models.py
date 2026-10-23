@@ -2,9 +2,12 @@
 Réglages de la plateforme et journal d'audit (SPEC-TECHNIQUE §3.7).
 
 `PlatformSettings` est un singleton (une seule ligne, `pk = 1`) édité dans l'admin Django (WAD14) ; ses valeurs
-par défaut viennent des arbitrages (D24, D32, D66, C8). Barème de points et paliers de rang : barème standard (C8,
-arbitré le 2026-10-19), modifiable par le personnel.
+par défaut viennent des arbitrages (D24, D32, D66, C8, C25). Barème de points et paliers de rang : barème standard (C8,
+arbitré le 2026-10-19), modifiable par le personnel. TVA et AIB des factures : deux interrupteurs indépendants et
+leurs taux (C25, arbitré le 2026-10-23), éteints par défaut tant que la comptabilité n'a pas donné les taux.
 """
+
+from decimal import Decimal
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -81,6 +84,30 @@ class PlatformSettings(models.Model):
         blank=True,
         help_text='Liste ordonnée, ex. [{"rank": "Explorateur", "points": 0}, …]',
     )
+    # Taxes (C25, ADR 0005) : les prix du catalogue sont HT ; la TVA et l'AIB, si activées, s'ajoutent au montant payé
+    # (`apps.payments.taxes`). Aucun taux légal n'est supposé : taux à 0 et interrupteurs éteints jusqu'à la réponse de
+    # la comptabilité. Les frais de livraison sont taxés par défaut, réglable pour chaque taxe.
+    vat_enabled = models.BooleanField(_("TVA activée"), default=False)
+    vat_rate = models.DecimalField(
+        _("taux de TVA (%)"),
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("0"),
+        validators=bounds(0, 100),
+    )
+    aib_enabled = models.BooleanField(_("AIB activé"), default=False)
+    aib_rate = models.DecimalField(
+        _("taux d'AIB (%)"),
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("0"),
+        validators=bounds(0, 100),
+        help_text=_(
+            "Acompte sur impôt sur les bénéfices, calculé sur le montant HT (jamais sur la TVA)"
+        ),
+    )
+    vat_applies_to_shipping = models.BooleanField(_("TVA sur la livraison"), default=True)
+    aib_applies_to_shipping = models.BooleanField(_("AIB sur la livraison"), default=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -100,8 +127,12 @@ class PlatformSettings(models.Model):
         super().save(*args, **kwargs)
 
     def clean(self):
-        """Barème : `{événement: points ≥ 0}` ; paliers : `[{rank, points}]` aux points strictement croissants."""
+        """Barème : `{événement: points ≥ 0}` ; paliers : `[{rank, points}]` aux points strictement croissants ;
+        TVA ou AIB activé : taux > 0."""
         errors = {}
+        for tax in ("vat", "aib"):
+            if getattr(self, f"{tax}_enabled") and not getattr(self, f"{tax}_rate"):
+                errors[f"{tax}_rate"] = "Un taux supérieur à 0 est requis pour activer cette taxe."
         scale = self.points_scale
         if not isinstance(scale, dict) or not all(
             isinstance(v, int) and not isinstance(v, bool) and v >= 0 for v in scale.values()

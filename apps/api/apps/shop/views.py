@@ -14,6 +14,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.models import PlatformSettings
+from apps.payments.taxes import compute_taxes
 from libs.authentication import enforce_csrf
 from libs.errors import ApiError
 
@@ -114,11 +116,15 @@ class IsShopper(permissions.IsAuthenticated):
 def cart_body(user) -> dict:
     cart, _ = Cart.objects.get_or_create(user=user)
     items = list(cart.items.select_related("kit__category"))
+    subtotal = sum(item.kit.price * item.quantity for item in items)
+    quote = compute_taxes(subtotal, 0, PlatformSettings.load())
     return CartSerializer(
         {
             "items": items,
             "count": sum(item.quantity for item in items),
-            "subtotal": sum(item.kit.price * item.quantity for item in items),
+            "subtotal": subtotal,
+            "taxes": quote.lines(),
+            "total": quote.total,
         }
     ).data
 

@@ -1,8 +1,8 @@
 # ADR 0005 · Génération des PDF (certificats, factures) et stockage privé
 
 - **Statut** : **acceptée** pour le moteur, l'asynchrone, le stockage privé et l'accès (ils appliquent des décisions
-  déjà prises) ; **proposée** pour les points P1 à P7 de la section « Points à trancher », dont certains
-  **bloquent `API-L3b.2`** (obligations fiscales)
+  déjà prises) ; **P1 et P2 tranchés le 2026-10-23** (C25, voir « Décision du 23 octobre 2026 ») ; **proposée** pour
+  les autres points de la section « Points à trancher »
 - **Date** : 15 octobre 2026
 - **Étapes** : avant `API-L3a.4` (certificats) ; le même module sert `API-L3b.2` (factures)
   ([PLAN-API](../plans/PLAN-API.md#api-l3a--pédagogie))
@@ -153,6 +153,30 @@ paiement) avec un faux fournisseur en local et en CI, l'API du dispositif ne ser
 le PDF Steamy affiche alors les éléments renvoyés (numéro, signature, QR). Cette variante n'est **pas** dessinée
 ici, faute de réponse.
 
+## Décision du 23 octobre 2026 (P1 et P2, C25)
+
+- **P1** : Steamy émet des **factures normalisées** (e-MECeF / DGI). Le PDF de Steamy sera donc le support des
+  éléments renvoyés par le dispositif (numéro, signature, code QR). **Reste à obtenir** : le contrat d'API de la DGI
+  et les identifiants (IFU, jetons e-MECeF). L'appel réel n'est **pas** implémenté ; l'interface
+  `FiscalInvoiceProvider` (faux fournisseur en local et en CI) est la suite, dans une nouvelle ADR (voir « Suites »).
+  D'ici là, `INVOICE_PROVISIONAL=true` : le document reste un « Reçu de paiement » non fiscal.
+- **P2** : pas de prix TTC. Les tarifs du catalogue, des kits et des événements sont des prix **HT** (le prix serveur
+  en XOF entier, valeur inchangée en base). Dans `PlatformSettings`, l'admin (Super-admin) règle le **taux de TVA**, le
+  **taux d'AIB** et deux interrupteurs **indépendants** (TVA seule, AIB seul, les deux, aucun), plus, pour chaque
+  taxe, un interrupteur « s'applique à la livraison » (`vat_applies_to_shipping`, `aib_applies_to_shipping`,
+  **vrai par défaut**). Défauts : taxes éteintes, taux à 0 : aucune valeur légale n'est inventée (le taux d'AIB
+  applicable n'a pas été confirmé par une source officielle) ; activer une taxe exige un taux > 0. Les réglages Django
+  `INVOICE_VAT_RATE` et `INVOICE_PRICES_INCLUDE_VAT` sont **supprimés**.
+- **Les taxes s'ajoutent au montant payé** (décision du même jour) : `total à payer = HT + livraison + TVA + AIB`.
+  C'est ce total qui est débité, attendu par le webhook et porté par la facture.
+- **Calcul** (`apps/payments/taxes.py`, `compute_taxes`, fonction pure) : base de la TVA = lignes HT (+ livraison si
+  `vat_applies_to_shipping`) ; base de l'AIB = lignes HT (+ livraison si `aib_applies_to_shipping`), **jamais la
+  TVA** ; arrondi **une seule fois par taxe, sur le total de la commande**, au franc, la demi-unité vers le haut
+  (pas d'arrondi ligne par ligne).
+- **Figé** : les taux, bases et montants sont enregistrés sur la commande à sa création et ne sont **jamais
+  recalculés** (idempotence, webhooks, remboursements, factures) ; la facture ventile ce qui est figé sur la commande.
+- **Étapes** : (1) réglages et moteur de calcul ; (2) commande, paiement, webhook et API ; (3) facture ; (4) front.
+
 ## Conséquences
 
 - (+) Aucune dépendance nouvelle pour le moteur, un seul module pour deux documents, des gabarits en HTML.
@@ -160,8 +184,8 @@ ici, faute de réponse.
 - (+) Idempotence : réessais, filet de sécurité et régénération sont sûrs.
 - (−) Il faut ouvrir un point d'accès public à RustFS pour signer des URL utilisables ; sans cela, le téléchargement
   ne fonctionne qu'en local.
-- (−) Le format légal de la facture est **inconnu** : `API-L3b.2` ne doit pas être livrée en production avant la
-  réponse du comptable.
+- (−) Le format légal exact reste à valider (contrat DGI, taux d'AIB, traitement de l'AIB dans le prix) :
+  `API-L3b.2b` ne doit pas être livrée en production comme facture normalisée avant cela.
 - (−) WeasyPrint 66 est antérieur à un correctif de sécurité ; atténué par un récupérateur de ressources restreint et
   des gabarits sans entrée utilisateur brute, à lever par la montée de version.
 - (−) La tension entre conservation des factures (D40) et anonymisation des comptes se règle par le snapshot, mais sa
@@ -171,8 +195,8 @@ ici, faute de réponse.
 
 | # | Point | Proposition | Bloque |
 | --- | --- | --- | --- |
-| P1 | **Facture normalisée (MECeF / e-MECeF)** : Steamy y est-elle tenue ? Le PDF Steamy est-il la facture ou un simple reçu ? | Consulter le comptable et la DGI **avant** `API-L3b.2` ; décider entre « facture Steamy conforme » et « facture normalisée récupérée via l'API de la DGI » | `API-L3b.2` |
-| P2 | TVA : prix TTC ou HT, taux, exonération de l'enseignement, arrondi | Réponse du comptable ; le prix serveur en XOF entier reste la référence | `API-L3b.2` |
+| P1 | ✅ *tranché le 2026-10-23 : facture normalisée ; reste le contrat d'API DGI et les identifiants.* **Facture normalisée (MECeF / e-MECeF)** : Steamy y est-elle tenue ? Le PDF Steamy est-il la facture ou un simple reçu ? | Consulter le comptable et la DGI **avant** `API-L3b.2` ; décider entre « facture Steamy conforme » et « facture normalisée récupérée via l'API de la DGI » | `API-L3b.2` |
+| P2 | ✅ *tranché le 2026-10-23 : prix HT, taxes (TVA, AIB) ajoutées au montant payé, taux et activations réglables par l'admin, livraison taxée par réglage ; reste le taux d'AIB à confirmer.* TVA : prix TTC ou HT, taux, exonération de l'enseignement, arrondi | Réponse du comptable ; le prix serveur en XOF entier reste la référence | `API-L3b.2` |
 | P3 | Formats de numéro (`CERT-AAAA-NNNNNN`, `FAC-AAAA-NNNNNN`), remise à zéro annuelle | Adopter ces formats, sauf contrainte fiscale (P1) | — |
 | P4 | État `failed` sur `Certificate` et `Invoice` (la spec ne connaît que `pending`, `ready`) | L'ajouter, avec champ `pdfStatus` sur `Invoice` | `API-L3a.4` |
 | P5 | Point d'accès public à RustFS (sous-domaine `media.`) pour signer les URL présignées | Le prévoir dans `docs/infra` avant la recette de `API-L3a.4` ; signature faite avec ce point d'accès, stockage interne inchangé | recette `L3a.4` |
@@ -185,6 +209,8 @@ ici, faute de réponse.
   learning/certificates/` et `…/download/`, tests d'accès et d'idempotence.
 - `API-L3b.2` : gabarit de facture et tâche, **après** réponse à P1 et P2 ; accès payeur seulement.
 - Infrastructure : exposer RustFS (P5) ; ajouter les polices Nunito au dépôt.
+- Facture normalisée : obtenir le contrat d'API e-MECeF et les identifiants, puis `FiscalInvoiceProvider` + faux
+  fournisseur (nouvelle ADR, nouvelle étape `API-L3b.2c`).
 - Une ADR acceptée n'est pas réécrite : si P1 impose un dispositif fiscal, une nouvelle ADR décrit
   `FiscalInvoiceProvider` et remplace la partie « Facture » de celle-ci.
 

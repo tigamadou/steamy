@@ -4,7 +4,11 @@ n'envoie que des identifiants et des quantités ; les serializers d'entrée n'on
 de commande garde un instantané du prix (`OrderItem`).
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+
+from apps.core.models import PlatformSettings
+
+from .taxes import TaxQuote, compute_taxes
 
 
 @dataclass(frozen=True)
@@ -24,16 +28,20 @@ class Line:
 
 @dataclass(frozen=True)
 class Quote:
-    lines: list[Line] = field(default_factory=list)
-    shipping_fee: int = 0
+    lines: list[Line]
+    shipping_fee: int
+    #: Taxes (C25) calculées par `quote()` d'après les réglages du moment, puis figées sur la commande
+    taxes: TaxQuote
 
     @property
     def subtotal(self) -> int:
+        """Somme des lignes HT, hors livraison."""
         return sum(line.total for line in self.lines)
 
     @property
     def total(self) -> int:
-        return self.subtotal + self.shipping_fee
+        """Total à payer : HT + livraison + taxes."""
+        return self.taxes.total
 
 
 def course_line(course) -> Line:
@@ -52,5 +60,8 @@ def event_line(application) -> Line:
 
 
 def quote(lines: list[Line], delivery_zone=None) -> Quote:
-    """Devis d'une commande : lignes, frais de la zone de livraison (D38) et total."""
-    return Quote(lines=lines, shipping_fee=delivery_zone.fee if delivery_zone else 0)
+    """Devis d'une commande : lignes HT, frais de la zone de livraison (D38), taxes (C25) et total à payer."""
+    shipping_fee = delivery_zone.fee if delivery_zone else 0
+    goods = sum(line.total for line in lines)
+    taxes = compute_taxes(goods, shipping_fee, PlatformSettings.load())
+    return Quote(lines=lines, shipping_fee=shipping_fee, taxes=taxes)

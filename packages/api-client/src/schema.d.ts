@@ -2725,8 +2725,12 @@ export interface components {
             items: components["schemas"]["CartItem"][];
             /** @description Nombre d'articles (somme des quantités) */
             count: number;
-            /** @description Somme des lignes, hors livraison (FCFA) */
+            /** @description Somme des lignes HT, hors livraison (FCFA) */
             subtotal: number;
+            /** @description Taxes qui s'ajouteront au HT (livraison exclue), d'après les réglages du moment */
+            taxes: components["schemas"]["TaxLine"][];
+            /** @description HT + taxes, hors livraison (FCFA) */
+            total: number;
         };
         CartItem: {
             readonly id: number;
@@ -4209,7 +4213,12 @@ export interface components {
             readonly subtotal: number;
             /** Frais de livraison (FCFA) */
             readonly shippingFee: number;
-            /** Total (FCFA) */
+            /** @description Taxes ajoutées au HT, figées à la création de la commande (vide si aucune) */
+            readonly taxes: components["schemas"]["TaxLine"][];
+            /**
+             * Total à payer (FCFA)
+             * @description Sous-total HT + livraison + TVA + AIB
+             */
             readonly total: number;
             /** Devise */
             readonly currency: string;
@@ -4276,7 +4285,12 @@ export interface components {
             readonly subtotal: number;
             /** Frais de livraison (FCFA) */
             readonly shippingFee: number;
-            /** Total (FCFA) */
+            /** @description Taxes ajoutées au HT, figées à la création de la commande (vide si aucune) */
+            readonly taxes: components["schemas"]["TaxLine"][];
+            /**
+             * Total à payer (FCFA)
+             * @description Sous-total HT + livraison + TVA + AIB
+             */
             readonly total: number;
             /** Devise */
             readonly currency: string;
@@ -4910,6 +4924,10 @@ export interface components {
              * @description Hors frais de livraison
              */
             readonly amount: number;
+            /** @description Taxes qui s'ajouteront au montant HT (livraison exclue), d'après les réglages du moment ; la commande les fige à sa création */
+            readonly taxes: components["schemas"]["TaxLine"][];
+            /** @description Montant HT + taxes, hors livraison (FCFA) ; le total à payer définitif est celui de la commande */
+            readonly total: number;
             readonly learner: components["schemas"]["Beneficiary"];
             readonly parentFirstName: string;
             /**
@@ -5566,6 +5584,27 @@ export interface components {
             readonly summativePassRate: number | null;
             readonly projects: components["schemas"]["ProjectNode"][];
         };
+        TaxLine: {
+            /**
+             * @description `vat` : TVA ; `aib` : AIB
+             *
+             *     * `vat` - vat
+             *     * `aib` - aib
+             */
+            code: components["schemas"]["TaxLineCodeEnum"];
+            /** @description Taux en %, ex. `18` ou `1.5` */
+            rate: string;
+            /** @description Montant HT sur lequel la taxe est calculée (FCFA) */
+            base: number;
+            /** @description Montant de la taxe, ajouté au total à payer (FCFA) */
+            amount: number;
+        };
+        /**
+         * @description * `vat` - vat
+         *     * `aib` - aib
+         * @enum {string}
+         */
+        TaxLineCodeEnum: "vat" | "aib";
         TeacherActivationRequest: {
             password: string;
         };

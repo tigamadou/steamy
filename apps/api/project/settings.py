@@ -403,9 +403,7 @@ FEDAPAY_MODES = json.loads(
 INVOICE_PROVISIONAL = os.getenv("INVOICE_PROVISIONAL", "true").lower() == "true"
 # Vendeur imprimé (seuls les champs renseignés) : {"name", "address", "tax_id" (IFU), "registration" (RCCM), …}
 INVOICE_SELLER = json.loads(os.getenv("INVOICE_SELLER", '{"name": "Steamy"}'))
-# Taux de TVA en % (vide : aucune ventilation) et prix catalogue TTC ou HT
-INVOICE_VAT_RATE = float(os.getenv("INVOICE_VAT_RATE")) if os.getenv("INVOICE_VAT_RATE") else None
-INVOICE_PRICES_INCLUDE_VAT = os.getenv("INVOICE_PRICES_INCLUDE_VAT", "true").lower() == "true"
+# TVA et AIB (activation, taux) : réglages de la plateforme (`PlatformSettings`, C25), pas des variables d'environnement
 # Mentions légales supplémentaires (liste JSON de lignes)
 INVOICE_MENTIONS = json.loads(os.getenv("INVOICE_MENTIONS", "[]"))
 # Identifiants FedaPay des devises, quand une notification ne donne que `currency_id`

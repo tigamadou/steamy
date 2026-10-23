@@ -4,6 +4,7 @@ notification (D7), réseaux Mobile Money activables par pays (D76). Chaque accè
 """
 
 from datetime import timedelta
+from decimal import Decimal
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -37,6 +38,8 @@ def settings_form(**overrides):
         "otp_daily_limit_per_ip": 20,
         "summative_retry_cooldown_seconds": 600,
         "dropout_threshold_days": 7,
+        "vat_rate": "0",
+        "aib_rate": "0",
         "points_scale": '{"mission": 10}',
         "rank_thresholds": '[{"rank": "Explorateur", "points": 0}]',
     }
@@ -119,6 +122,47 @@ def test_valid_points_scale_and_rank_thresholds_pass():
         {"rank": "Inventeur", "points": 500},
     ]
     config.full_clean()
+
+
+def test_tax_switches_and_rates_default_to_off_and_are_edited_by_the_super_admin(client):
+    config = PlatformSettings.load()
+    assert (config.vat_enabled, config.vat_rate, config.aib_enabled, config.aib_rate) == (
+        False,
+        0,
+        False,
+        0,
+    )
+    assert config.vat_applies_to_shipping and config.aib_applies_to_shipping
+    verified_client(client, SUPER_ADMIN)
+    page = client.get(f"{SETTINGS}1/change/").content.decode()
+    assert "Factures : TVA et AIB (C25)" in page
+    response = client.post(
+        f"{SETTINGS}1/change/",
+        settings_form(aib_enabled="on", aib_rate="1.50", vat_rate="18"),
+    )
+    assert response.status_code == 302
+    config.refresh_from_db()
+    assert (config.vat_enabled, config.aib_enabled) == (False, True)
+    assert (config.vat_rate, config.aib_rate) == (18, Decimal("1.5"))
+    assert not config.vat_applies_to_shipping and not config.aib_applies_to_shipping
+
+
+@pytest.mark.parametrize(
+    ("fields", "invalid"),
+    [
+        ({"vat_enabled": True}, "vat_rate"),
+        ({"aib_enabled": True}, "aib_rate"),
+        ({"vat_rate": Decimal("100.01")}, "vat_rate"),
+        ({"aib_rate": Decimal("-1")}, "aib_rate"),
+    ],
+)
+def test_taxes_are_validated(fields, invalid):
+    config = PlatformSettings.load()
+    for name, value in fields.items():
+        setattr(config, name, value)
+    with pytest.raises(ValidationError) as error:
+        config.full_clean()
+    assert set(error.value.message_dict) == {invalid}
 
 
 # --- Annonces (D7) ----------------------------------------------------------------------------------------
