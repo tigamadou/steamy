@@ -99,6 +99,12 @@ describe("ReviewList", () => {
     expect(screen.queryByRole("list")).toBeNull();
   });
 
+  it("liste vide : le focus passe au message quand le filtre change", () => {
+    const { rerender } = render(<ReviewList reviews={[]} params={{ filter: "toutes", page: 1 }} hasNext={false} />);
+    rerender(<ReviewList reviews={[]} params={{ filter: "a-revoir", page: 1 }} hasNext={false} />);
+    expect(screen.getByText(EMPTY_TEXTS["a-revoir"])).toHaveFocus();
+  });
+
   it("changer de page ou de filtre remet le focus à la liste", () => {
     const { rerender } = render(<ReviewList reviews={[review()]} params={{ filter: "toutes", page: 1 }} hasNext />);
     rerender(<ReviewList reviews={[review()]} params={{ filter: "toutes", page: 2 }} hasNext />);
@@ -147,6 +153,10 @@ describe("WT07 · évaluations", () => {
     render(await TeacherReviews({ searchParams: Promise.resolve({ classe: "999" }) }));
     expect(screen.getByRole("combobox", { name: /Classe/ })).toHaveValue("");
     expect(screen.getByRole("status")).toHaveTextContent("1 évaluation");
+    // La classe étrangère n'est pas transmise à l'API : même liste que « Toutes les classes »
+    expect(GET).toHaveBeenCalledWith("/api/classrooms/reviews/", {
+      params: { query: { classroomId: undefined, page: 1, pageSize: REVIEWS_PAGE_SIZE } },
+    });
     expect(screen.getByRole("link", { name: "Formatives" })).toHaveAttribute("href", "/enseignant/evaluations?filtre=formatives");
   });
 
