@@ -126,12 +126,13 @@ Statut : 🟡 en cours · Prochaine tâche : validation C18 de la maquette de `W
   - [x] Recette : les préférences de notification sont prises en compte (pas de rapport par email si désactivé)
   > Écarts : l'email de contact se modifie avec le profil (`PATCH accounts/me/parent-profile/`, effaçable) plutôt que par `POST accounts/me/email/` (qui exige le mot de passe et ne permet pas de le retirer) ; suppression du compte parent annulable par le support seulement (aucun endpoint d'annulation côté parent) ; la recette « pas de rapport par email si désactivé » est vérifiée par la préférence enregistrée (e2e) et par l'API (`email_enabled`), pas par l'envoi lundi ; FAQ propre au parent (`content/faq/parent.ts`).
   > Point à soumettre au produit : D54 dit la suppression « annulable », mais seul le support peut annuler celle du compte parent (aucun endpoint côté parent, le compte étant désactivé aussitôt).
-- [ ] **4.10** Consentement d'origine enseignant · `feature/lot4-consentement-enseignant` (requiert 4.3, API-L5 ; livrée avec le lot 5, avant l'étape 5.9)
-  - [ ] `WPD05` variante enseignant : nom de l'enseignant, classe, établissement, parcours (D60)
-  - [ ] Acceptation avec création de l'identifiant (champs de `WPD04` préremplis), puis l'élève rejoint la classe
-  - [ ] Choix « Rattacher {Prénom} à la classe » sans nouvel identifiant si l'enfant a déjà un compte (C11)
-  - [ ] Branchement API : `consent-requests/{id}/accept/` avec `{ username, password }` ou `{ learnerId }` (API-L5.2)
-  - [ ] Playwright (lot 5 disponible) : invitation `WT06`, SMS, le parent accepte, l'élève apparaît dans `WT04`
+- [x] **4.10** Consentement d'origine enseignant · `feature/lot4-consentement-enseignant` (requiert 4.3, API-L5 ; livrée avec le lot 5, avant l'étape 5.9) · PR #PR410
+  - [x] `WPD05` variante enseignant : nom de l'enseignant, classe, établissement, parcours (D60)
+  - [x] Acceptation avec création de l'identifiant (champs de `WPD04` préremplis), puis l'élève rejoint la classe
+  - [x] Choix « Rattacher {Prénom} à la classe » sans nouvel identifiant si l'enfant a déjà un compte (C11)
+  - [x] Branchement API : `consent-requests/{id}/accept/` avec `{ username, password }` ou `{ learnerId }` (API-L5.2)
+  - [x] Playwright : invitation de l'enseignant (WT06), SMS, le parent accepte, l'élève apparaît dans la classe (WT04) ; invitation et classe passent par l'API de l'enseignant, ces écrans relevant du lot 5
+  > Écarts : sans enfant déjà rattaché, pas de choix : création du compte ; identifiant proposé d'après le prénom et le nom (`suggestUsername`), modifiable, disponibilité vérifiée comme en `WPD04` (règles partagées dans `children/username.ts`) ; l'acceptation revient sur `WPD01` (« Invitation acceptée : {Prénom} a rejoint la classe… ») ; demande close : textes propres à l'invitation (classe rejointe, nouvelle invitation possible, invitation retirée). Atterrissage du lien SMS (lot 2) : un seul `claim` en vol par jeton, l'effet rejoué de React affichait « Lien incomplet » en développement.
 - [ ] **Critères de fin du lot 4** · PR de fin de lot #145
   - [ ] `WPD01`-`WPD15` livrés selon la définition de « terminé » du README, au vouvoiement, en 360 px et sur bureau (variante enseignant de `WPD05` livrée avec le lot 5)
     > Tous livrés (4.1 à 4.9), e2e sur les projets « bureau » et « mobile » (360 px) avec contrôle du défilement horizontal ; reste la validation C18 de la maquette de `WPD15` (4.0), en attente du produit.

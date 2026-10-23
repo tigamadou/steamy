@@ -11,6 +11,7 @@ import { routes } from "@/lib/routes";
 
 import { ConsentDecision } from "./ConsentDecision";
 import { ConsentOrigin } from "./ConsentOrigin";
+import { TeacherConsentDecision, type ExistingChild } from "./TeacherConsentDecision";
 
 export type ConsentRequest = Schemas["ConsentRequest"];
 
@@ -22,14 +23,17 @@ export const CLOSED_STATUS: Record<string, { label: string; tone: BadgeTone }> =
   cancelled: { label: "Annulée", tone: "neutral" },
 };
 
-/** Encart d'une demande close (WPD05 en lecture seule, maquette de l'étape 4.0). */
+/** Encart d'une demande close (WPD05 en lecture seule, maquette de l'étape 4.0), selon son origine. */
 function closedNote(request: ConsentRequest): { icon: string; text: string } {
   const resolved = request.resolvedAt ? ` le ${formatInstant(request.resolvedAt)}` : "";
+  const classroom = request.origin === "teacher" ? request.classroom : null;
   switch (request.status) {
     case "accepted":
       return {
         icon: "✅",
-        text: `Vous avez accepté cette demande${resolved} : ${request.firstName} peut terminer son inscription.`,
+        text: classroom
+          ? `Vous avez accepté cette invitation${resolved} : ${request.firstName} a rejoint la classe « ${classroom.name} ».`
+          : `Vous avez accepté cette demande${resolved} : ${request.firstName} peut terminer son inscription.`,
       };
     case "refused":
       return {
@@ -41,19 +45,27 @@ function closedNote(request: ConsentRequest): { icon: string; text: string } {
     case "expired":
       return {
         icon: "⌛",
-        text: `Cette demande a expiré le ${formatInstant(request.expiresAt)}, sans réponse pendant 7 jours. Votre enfant peut vous en envoyer une nouvelle.`,
+        text: `Cette demande a expiré le ${formatInstant(request.expiresAt)}, sans réponse pendant 7 jours. ${
+          classroom ? "L'enseignant peut vous inviter de nouveau." : "Votre enfant peut vous en envoyer une nouvelle."
+        }`,
       };
     default:
       return {
         icon: "🚫",
-        text: "Cette demande a été annulée : votre enfant en a envoyé une plus récente ou a abandonné son inscription.",
+        text: classroom
+          ? "Cette invitation a été retirée par l'enseignant."
+          : "Cette demande a été annulée : votre enfant en a envoyé une plus récente ou a abandonné son inscription.",
       };
   }
 }
 
-/** WPD05 · contenu : carte de l'enfant (D20), origine, encart du responsable légal et décision, ou lecture seule. */
-export function ConsentRequestView({ request }: { request: ConsentRequest }) {
+/**
+ * WPD05 · contenu : carte de l'enfant (D20), origine, encart du responsable légal et décision, ou lecture seule. Une
+ * invitation d'enseignant (4.10) demande l'identifiant de l'enfant, ou le rattachement de l'un de `kids` (C11).
+ */
+export function ConsentRequestView({ request, kids = [] }: { request: ConsentRequest; kids?: ExistingChild[] }) {
   const pending = request.status === "pending";
+  const classroom = request.origin === "teacher" ? request.classroom : null;
   const note = pending ? null : closedNote(request);
   return (
     <div className="mx-auto flex w-full max-w-160 flex-col gap-4">
@@ -85,7 +97,17 @@ export function ConsentRequestView({ request }: { request: ConsentRequest }) {
               En acceptant, vous confirmez être le responsable légal de {request.firstName}. Si vous refusez, la demande
               est close : une nouvelle demande sera possible dans 30 jours.
             </p>
-            <ConsentDecision id={request.id} firstName={request.firstName} />
+            {classroom ? (
+              <TeacherConsentDecision
+                id={request.id}
+                firstName={request.firstName}
+                lastName={request.lastName}
+                classroomName={classroom.name}
+                kids={kids}
+              />
+            ) : (
+              <ConsentDecision id={request.id} firstName={request.firstName} />
+            )}
           </>
         ) : (
           <Button href={routes.parent.home} variant="outline" block>
@@ -97,7 +119,13 @@ export function ConsentRequestView({ request }: { request: ConsentRequest }) {
   );
 }
 
-/** WPD05 · demande adressée au numéro du parent, lue côté serveur ; celle d'un autre numéro est « introuvable ». */
+/** Enfants lus pour le rattachement à une classe (C11) : une famille en compte rarement plus. */
+const KIDS_PAGE_SIZE = 50;
+
+/**
+ * WPD05 · demande adressée au numéro du parent, lue côté serveur ; celle d'un autre numéro est « introuvable ». Pour
+ * une invitation d'enseignant en attente, les enfants actifs du parent sont lus aussi (rattachement, C11).
+ */
 export async function ConsentRequestScreen({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   // Identifiant illisible : « Demande introuvable », sans appeler l'API
@@ -107,7 +135,15 @@ export async function ConsentRequestScreen({ params }: { params: Promise<{ id: s
   if (result.response.status === 404) notFound();
   const request = readOrNull(result);
   if (!request) return null;
-  return <ConsentRequestView request={request} />;
+  if (request.origin !== "teacher" || request.status !== "pending") return <ConsentRequestView request={request} />;
+  const children = readOrNull(
+    await api.GET("/api/accounts/children/", { params: { query: { pageSize: KIDS_PAGE_SIZE } } }),
+  );
+  if (!children) return null;
+  const kids = (children.results ?? [])
+    .filter((child) => child.status === "active")
+    .map(({ id: childId, firstName, lastName }) => ({ id: childId, firstName, lastName }));
+  return <ConsentRequestView request={request} kids={kids} />;
 }
 
 /** Squelette de WPD05 : fil d'Ariane, carte de l'enfant, origine et actions. */

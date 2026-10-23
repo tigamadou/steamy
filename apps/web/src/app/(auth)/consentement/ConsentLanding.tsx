@@ -33,6 +33,27 @@ const CLOSED: Partial<Record<ErrorCode, { title: string; text: string }>> = {
   },
 };
 
+/**
+ * Un seul `claim` en vol par jeton, partagé par les rejeux de l'effet (React le rejoue en développement) : un second
+ * appel trouverait le jeton déjà consommé et afficherait « Lien incomplet » à la place de la demande.
+ */
+const claims = new Map<string, ReturnType<typeof claim>>();
+
+function claim(token: string) {
+  return apiCall((api) => api.POST("/api/accounts/consent-requests/claim/", { body: { token } }));
+}
+
+function claimOnce(token: string): ReturnType<typeof claim> {
+  let request = claims.get(token);
+  if (!request) {
+    request = claim(token);
+    claims.set(token, request);
+    // Les rejeux de l'effet arrivent avant la réponse ; ensuite, un nouvel atterrissage (après la connexion) rappelle l'API
+    void request.finally(() => claims.delete(token));
+  }
+  return request;
+}
+
 const LINK_INVALID = {
   title: "Lien incomplet ou déjà utilisé",
   text: "Ouvrez le dernier lien reçu par SMS. Si le problème persiste, contactez l'équipe Steamy.",
@@ -55,7 +76,7 @@ export function ConsentLanding() {
       return;
     }
     let current = true;
-    void apiCall((api) => api.POST("/api/accounts/consent-requests/claim/", { body: { token } })).then((result) => {
+    void claimOnce(token).then((result) => {
       if (!current) return;
       if (result.ok) {
         clearFlow("consentToken");
