@@ -21,6 +21,7 @@ import { routes } from "@/lib/routes";
 import { useReferential } from "@/lib/use-referential";
 
 import type { ChildDetail } from "./api";
+import { isUsernameAvailable as isAvailable, USERNAME_RULE, USERNAME_TAKEN } from "./username";
 
 /** Champs du formulaire (noms de l'API) et identifiant de leur contrôle (liens du récapitulatif d'erreurs). */
 const FIELD_IDS = {
@@ -40,23 +41,13 @@ type FieldName = keyof typeof FIELD_IDS;
 type Errors = Partial<Record<FieldName, string>>;
 type State = { attempt: number; fields: Errors; error?: string };
 
-export const USERNAME_RULE =
-  "L'identifiant : 3 à 30 caractères (lettres, chiffres, « . », « _ » ou « - ») avec au moins une lettre, sans « @ ».";
-export const USERNAME_TAKEN = "Cet identifiant est déjà associé à un compte Steamy. Choisissez-en un autre.";
+export { USERNAME_RULE, USERNAME_TAKEN };
 
 /** Genre facultatif (D6) : la réponse peut être retirée. */
 const GENDER_OPTIONS = [...GENDERS, { value: "", emoji: "🤫", label: "Ne pas dire" }];
 
 function referentialStatus(status: "idle" | "loading" | "error" | "ready") {
   return status === "idle" ? "loading" : status;
-}
-
-/** Disponibilité de l'identifiant : `false` s'il est pris, `null` si l'API ne répond pas (le serveur retranchera). */
-async function isAvailable(username: string): Promise<boolean | null> {
-  const result = await apiCall((api) =>
-    api.GET("/api/auth/username-availability/", { params: { query: { username } } }),
-  );
-  return result.ok ? result.data.available : null;
 }
 
 /** Erreurs de l'API : sous leur champ (`fields`), le reste en tête du formulaire. */

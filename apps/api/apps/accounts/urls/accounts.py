@@ -7,7 +7,7 @@ from apps.accounts.views.deletion import DeletionRequestViewSet, MyDeletionReque
 from apps.accounts.views.me import EmailChangeView, MeView, PasswordChangeView
 from apps.accounts.views.pending_actions import PendingActionsView
 from apps.accounts.views.phone_change import PhoneChangeVerifyView, PhoneChangeView
-from apps.accounts.views.profiles import LearnerProfileView, ParentProfileView
+from apps.accounts.views.profiles import LearnerProfileView, ParentProfileView, TeacherProfileView
 
 router = SimpleRouter()
 router.register(r"consent-requests", ConsentRequestViewSet, basename="consent-request")
@@ -26,6 +26,7 @@ urlpatterns = [
     ),
     path("me/learner-profile/", LearnerProfileView.as_view(), name="accounts-me-learner-profile"),
     path("me/parent-profile/", ParentProfileView.as_view(), name="accounts-me-parent-profile"),
+    path("me/teacher-profile/", TeacherProfileView.as_view(), name="accounts-me-teacher-profile"),
     path("me/parent/", MyParentView.as_view(), name="accounts-me-parent"),
     path(
         "me/deletion-request/",

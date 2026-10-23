@@ -15,7 +15,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models.functions import Lower
 from django.utils import timezone
 
@@ -71,19 +71,22 @@ def username_available(username: str) -> bool:
 def create_learner_signup(first_name, last_name, username, age) -> tuple[User, str]:
     """Crée le compte en attente et renvoie le code de reprise en clair (une seule fois)."""
     code = new_resume_code()
-    with transaction.atomic():
-        learner = User.objects.create_learner(
-            username,
-            first_name=first_name,
-            last_name=last_name,
-            status=User.Status.PENDING,
-        )
-        LearnerProfile.objects.create(user=learner, declared_age=age)
-        SignupSession.objects.create(
-            learner=learner,
-            resume_code_hash=make_password(code),
-            expires_at=timezone.now() + SIGNUP_LIFETIME,
-        )
+    try:
+        with transaction.atomic():
+            learner = User.objects.create_learner(
+                username,
+                first_name=first_name,
+                last_name=last_name,
+                status=User.Status.PENDING,
+            )
+            LearnerProfile.objects.create(user=learner, declared_age=age)
+            SignupSession.objects.create(
+                learner=learner,
+                resume_code_hash=make_password(code),
+                expires_at=timezone.now() + SIGNUP_LIFETIME,
+            )
+    except IntegrityError:  # identifiant pris entre la vérification et l'écriture
+        raise ApiError("USERNAME_TAKEN", fields={"username": "USERNAME_TAKEN"}) from None
     return learner, code
 
 

@@ -167,3 +167,14 @@ def test_signup_requires_csrf(settings):
     settings.CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
     client = APIClient(enforce_csrf_checks=True, HTTP_ORIGIN="http://localhost:3000")
     assert signup(client).status_code == 403
+
+
+def test_wp02_blocks_the_right_code_after_three_wrong_ones(sms):
+    client = APIClient()
+    challenge_id = signup(client).json()["challengeId"]
+    code = sms.last_code(PHONE)
+    wrong = "000000" if code != "000000" else "111111"
+    for _ in range(3):
+        assert verify(client, challenge_id, wrong).json()["code"] == "OTP_INVALID"
+    assert verify(client, challenge_id, code).json()["code"] == "OTP_TOO_MANY_ATTEMPTS"
+    assert OtpChallenge.objects.get(pk=challenge_id).attempts == 3

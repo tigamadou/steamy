@@ -539,7 +539,7 @@ Catalogue des codes métier (extensible, chaque code a son message français) :
 | `PATCH accounts/me/` | WD17, WPD08, WT08 | à créer |
 | `GET` · `PATCH accounts/me/learner-profile/` | W11-W14, WD13 (lecture), WD17 | à créer |
 | `PATCH accounts/me/parent-profile/` | WP07-WP09, WPD08 | à créer |
-| `PATCH accounts/me/teacher-profile/` | WT08 | à créer |
+| `GET` · `PATCH accounts/me/teacher-profile/` `{ specialty, school: { id, name, city } \| null }` (seule `specialty` se modifie) | WT08 | existe |
 | `POST accounts/me/password/` `{ currentPassword, newPassword }` | WD18, WPD08, WT08 | à aligner (`user/change-password`) |
 | `POST accounts/me/email/` | WPD08, WT08 | à aligner (`user/change-email`) |
 | `POST accounts/me/phone-change/` · `POST …/verify/` | WPD08 | à créer |
