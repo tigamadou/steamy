@@ -196,7 +196,9 @@ export const routes = {
     /** WT13 · création d'une classe. */
     newClassroom: "/enseignant/classes/nouvelle",
     /** WT04 · élèves d'une classe. */
-    classroom: (id: number | string) => `/enseignant/classes/${id}`,
+    /** `confirmation` : rappel après la création ou la modification de la classe (WT13). */
+    classroom: (id: number | string, confirmation?: "creee" | "modifiee") =>
+      confirmation ? `/enseignant/classes/${id}?confirmation=${confirmation}` : `/enseignant/classes/${id}`,
     /** WT13 · même formulaire en édition. */
     editClassroom: (id: number | string) => `/enseignant/classes/${id}/modifier`,
     /** WT06 · `classe` présélectionne la classe, `lot` ouvre l'onglet « Import par lot ». */

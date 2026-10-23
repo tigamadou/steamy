@@ -19,18 +19,19 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [x] Tests : redirection d'un apprenant ou d'un parent hors de `/enseignant`
   - [ ] Recette : compteurs conformes au seed ; aucun « À corriger » ; « Commenter » ouvre le profil élève sur la tentative (lien posé, le profil arrive avec l'étape 5.4)
   > Écarts : l'ancienne page d'attente (`SpaceWaiting`) et son bouton de déconnexion sont supprimés ; les liens de l'accueil vers WT04, WT05, WT06 et WT13 mènent à des écrans livrés par les étapes suivantes.
-- [ ] **5.2** Classes · `feature/lot5-classes` (requiert 5.1, maquette de `WT13` validée)
-  - [x] Conception de la maquette `WT13` dans `design/screens-enseignant-a-concevoir-web.jsx` (C18)
-  - [ ] `WT03` Mes classes
-  - [ ] `WT13` Créer / modifier une classe (`ClassroomForm` : nom*, parcours* limité à l'offre, niveau scolaire facultatif, établissement en lecture seule) d'après la maquette validée
-  - [ ] `WT04` Élèves d'une classe (`MemberRow`, `InvitationRow` en attente / refusée / expirée)
-  - [ ] `QuotaNotice` et bouton « Créer » désactivé si quota atteint, erreur serveur `CLASSROOM_QUOTA_EXCEEDED` quand même affichée
-  - [ ] `ConfirmDialog` « Retirer de la classe » (libère le quota)
-  - [ ] Parcours désactivé en édition dès qu'il y a un membre
-  - [ ] Branchement API : `classrooms/`, `classrooms/school/`, `PATCH classrooms/{id}/`, `members/`, retrait
-  - [ ] Tests unitaires : formulaire (validation, erreurs serveur sur les champs), lignes d'invitation par statut
-  - [ ] Playwright : création, `WT04` vide, CTA vers `WT06`
-  - [ ] Recette : création redirige vers `WT04` ; retrait confirmé fait disparaître l'élève et libère le quota
+- [x] **5.2** Classes · `feature/lot5-classes` (requiert 5.1, maquette de `WT13` validée)
+  - [x] Conception de la maquette `WT13` dans `design/screens-enseignant-a-concevoir-web.jsx` (C18) ; **validée par le produit le 2026-10-23, sans retouche**
+  - [x] `WT03` Mes classes
+  - [x] `WT13` Créer / modifier une classe (`ClassroomForm` : nom*, parcours* limité à l'offre, niveau scolaire facultatif, établissement en lecture seule) d'après la maquette validée
+  - [x] `WT04` Élèves d'une classe (`MemberRow`, `InvitationRow` en attente / refusée / expirée)
+  - [x] `QuotaNotice` et bouton « Créer » désactivé si quota atteint, erreur serveur `CLASSROOM_QUOTA_EXCEEDED` quand même affichée
+  - [x] `ConfirmDialog` « Retirer de la classe » (libère le quota)
+  - [x] Parcours désactivé en édition dès qu'il y a un membre
+  - [x] Branchement API : `classrooms/`, `classrooms/school/`, `PATCH classrooms/{id}/`, `members/`, retrait
+  - [x] Tests unitaires : formulaire (validation, erreurs serveur sur les champs), lignes d'invitation par statut
+  - [x] Playwright : création, `WT04` vide, CTA vers `WT06`
+  - [x] Recette : création redirige vers `WT04` ; retrait confirmé fait disparaître l'élève et libère le quota
+  > Écarts : « Annuler l'invitation » (même endpoint que le retrait) est proposé sur les invitations. Le quota de classes du jeu D2 est de 4 pour 2 classes créées : le test de création (une seule fois, sur « bureau ») en consomme une ; l'étape 5.9 en créera une autre, la marge est étroite (à relever dans le seed si besoin).
 - [ ] **5.3** Ajout d'élèves et import · `feature/lot5-ajout-eleves` (requiert 5.2)
   - [ ] `WT06` onglet Individuel : prénom*, nom*, téléphone du parent* (`PhoneInput`), lien de parenté*, classe* (`?classe=`), encart consentement SMS (D60)
   - [ ] `WT06` onglet Import par lot : CSV / Excel (200 lignes max) ou liste collée, modèle CSV téléchargeable, aperçu des 5 premières lignes, classe*

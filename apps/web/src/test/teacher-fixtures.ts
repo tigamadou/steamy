@@ -73,3 +73,59 @@ export function dashboard(overrides: Partial<Schemas["TeacherDashboard"]> = {}):
     ...overrides,
   };
 }
+
+export function school(overrides: Partial<Schemas["School"]> = {}): Schemas["School"] {
+  return {
+    name: "Collège Steamy de Cotonou",
+    city: "Cotonou",
+    country: "BJ",
+    offer: "Offre Classe Robotique 2026",
+    validUntil: "2026-12-31",
+    offerExpired: false,
+    learnerQuota: 120,
+    learnersUsed: 54,
+    learnersLeft: 66,
+    classroomQuota: 5,
+    classroomsUsed: 3,
+    classroomsLeft: 2,
+    courses: [
+      classroom().course,
+      { ...classroom().course, slug: "scratch", title: "Initiation à Scratch", emoji: "💻" },
+    ],
+    ...overrides,
+  } as Schemas["School"];
+}
+
+export function member(overrides: Partial<Schemas["Member"]> = {}): Schemas["Member"] {
+  return {
+    id: 51,
+    status: "active",
+    firstName: "Yao",
+    lastName: "Kpadé",
+    learner: memberLearner(),
+    invitationStatus: null,
+    invitationExpiresAt: null,
+    progressPct: 40,
+    lastActivityAt: "2026-10-10T10:00:00Z",
+    isDropout: false,
+    joinedAt: "2026-09-02T10:00:00Z",
+    createdAt: "2026-09-01T10:00:00Z",
+    ...overrides,
+  } as Schemas["Member"];
+}
+
+export function invitation(overrides: Partial<Schemas["Member"]> = {}): Schemas["Member"] {
+  return member({
+    id: 52,
+    status: "invited",
+    firstName: "Kémi",
+    lastName: "Ahouandjinou",
+    learner: null,
+    invitationStatus: "pending",
+    invitationExpiresAt: "2026-10-30T10:00:00Z",
+    progressPct: null,
+    lastActivityAt: null,
+    joinedAt: null,
+    ...overrides,
+  });
+}
