@@ -475,6 +475,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/accounts/me/teacher-profile/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WT08 : spécialité et établissement (lecture seule) de l'enseignant connecté. */
+        get: operations["accounts_me_teacher_profile_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description WT08 : modifie la spécialité. */
+        patch: operations["accounts_me_teacher_profile_partial_update"];
+        trace?: never;
+    };
     "/api/accounts/pending-actions/": {
         parameters: {
             query?: never;
@@ -4818,6 +4836,11 @@ export interface components {
         PatchedPreferencesUpdateRequest: {
             categories?: components["schemas"]["CategoryPreferenceRequest"][];
         };
+        /** @description Seule la spécialité se modifie ; le reste du corps est ignoré. */
+        PatchedTeacherProfileUpdateRequest: {
+            /** Spécialité */
+            specialty?: string;
+        };
         PatchedValuesInputRequest: {
             values?: components["schemas"]["ValueEntryRequest"][];
         };
@@ -5593,6 +5616,17 @@ export interface components {
         TeacherInvitationAcceptRequest: {
             token: string;
             password: string;
+        };
+        TeacherProfile: {
+            /** Spécialité */
+            readonly specialty: string;
+            readonly school: components["schemas"]["TeacherSchool"] | null;
+        };
+        /** @description Établissement de l'enseignant, en lecture seule (C6). */
+        TeacherSchool: {
+            readonly id: number;
+            readonly name: string;
+            readonly city: string;
         };
         /** @description Ticket Steamy Events offert à la certification (D33), utilisable une fois (C12). */
         Ticket: {
@@ -7641,6 +7675,104 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_teacher_profile_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherProfile"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    accounts_me_teacher_profile_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedTeacherProfileUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherProfile"];
                 };
             };
             400: {

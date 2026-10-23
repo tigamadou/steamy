@@ -477,3 +477,52 @@ def test_purge_signup_sessions_frees_the_username(sms):
     assert User.objects.filter(username="ama.m").exists()
     assert User.objects.filter(pk=active.pk).exists()
     assert ParentFactory()  # aucune autre donnée touchée
+
+
+# --- Refus rejoué dans le même navigateur ----------------------------------------------------------
+
+
+def refused_session(sms):
+    client, _ = started()
+    assert ask_parent(client).status_code == 201
+    assert client.session.get(service.CONSENT_SESSION_KEY)
+    ConsentRequest.objects.update(status=ConsentRequest.Status.REFUSED, learner=None)
+    User.objects.filter(username="kofi.m").delete()
+    assert client.get(SIGNUP_URL).json()["step"] == "refused"
+    return client
+
+
+def test_a_new_signup_in_the_same_browser_forgets_the_previous_refusal(sms):
+    client = refused_session(sms)
+    assert signup(client, username="kofi.n").status_code == 201
+    assert service.CONSENT_SESSION_KEY not in client.session
+    assert client.get(SIGNUP_URL).json()["step"] == "parent"
+
+
+def test_resuming_in_the_same_browser_forgets_the_previous_refusal(sms):
+    other, body = started(username="awa.k", firstName="Awa")
+    client = refused_session(sms)
+    resp = client.post(
+        RESUME_URL, {"username": "awa.k", "resumeCode": body["resumeCode"]}, format="json"
+    )
+    assert resp.status_code == 200, resp.json()
+    assert service.CONSENT_SESSION_KEY not in client.session
+    assert client.get(SIGNUP_URL).json()["step"] == "parent"
+
+
+# --- Identifiant pris en concurrence ---------------------------------------------------------------
+
+
+def test_username_taken_between_check_and_write():
+    LearnerFactory(username="kofi.m")
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(service, "username_available", lambda _username: True)
+        patch.setattr(
+            "apps.accounts.views.learner_signup.LearnerSignupSerializer.validate_username",
+            lambda self, value: value,
+        )
+        resp = signup(APIClient())
+    assert resp.status_code == 409
+    assert resp.json()["code"] == "USERNAME_TAKEN"
+    assert resp.json()["fields"]["username"][0]["code"] == "USERNAME_TAKEN"
+    assert not SignupSession.objects.exists()

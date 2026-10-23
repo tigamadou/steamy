@@ -6,10 +6,15 @@ import pytest
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from apps.accounts.models import LearnerProfile, User
-from apps.accounts.tests.factories import LearnerFactory, ParentFactory, TeacherFactory
+from apps.accounts.models import LearnerProfile, TeacherProfile, User
+from apps.accounts.tests.factories import (
+    LearnerFactory,
+    ParentFactory,
+    TeacherFactory,
+)
 from apps.accounts.views.profiles import age_on
-from apps.referentials.models import Locality
+from apps.classrooms.models import School
+from apps.referentials.models import Country, Locality
 
 pytestmark = pytest.mark.django_db
 
@@ -217,3 +222,92 @@ def test_patch_me_changes_only_the_names(learner):
 
 def test_patch_me_requires_authentication():
     assert APIClient().patch(ME, {"firstName": "X"}, format="json").status_code == 401
+
+
+# --- Enseignant (WT08) ----------------------------------------------------------------------------
+
+TEACHER_URL = f"{ME}teacher-profile/"
+
+
+@pytest.fixture
+def school():
+    return School.objects.create(
+        name="Lycée de Porto-Novo", country=Country.objects.get(code="BJ"), city="Porto-Novo"
+    )
+
+
+@pytest.mark.parametrize("method", ["get", "patch"])
+def test_teacher_profile_is_for_teachers_only(method, learner):
+    assert getattr(APIClient(), method)(TEACHER_URL).status_code == 401
+    for user in (learner, ParentFactory()):
+        assert getattr(client_for(user), method)(TEACHER_URL).status_code == 403
+
+
+def test_teacher_profile_is_read_with_its_school(school):
+    teacher = TeacherFactory(teacher_profile__specialty="Robotique", teacher_profile__school=school)
+    body = client_for(teacher).get(TEACHER_URL).json()
+    assert body == {
+        "specialty": "Robotique",
+        "school": {"id": school.pk, "name": "Lycée de Porto-Novo", "city": "Porto-Novo"},
+    }
+
+
+def test_teacher_without_school_has_null_school():
+    body = client_for(TeacherFactory()).get(TEACHER_URL).json()
+    assert body == {"specialty": "", "school": None}
+
+
+def test_teacher_profile_is_created_when_missing():
+    teacher = TeacherFactory(teacher_profile=None)
+    assert client_for(teacher).get(TEACHER_URL).json() == {"specialty": "", "school": None}
+    assert TeacherProfile.objects.filter(user=teacher).exists()
+
+
+def test_teacher_updates_specialty(school):
+    teacher = TeacherFactory(teacher_profile__school=school)
+    client = client_for(teacher)
+    response = patch(client, TEACHER_URL, {"specialty": "Électronique"})
+    assert response.status_code == 200
+    assert response.json()["specialty"] == "Électronique"
+    assert response.json()["school"]["id"] == school.pk
+    teacher.teacher_profile.refresh_from_db()
+    assert teacher.teacher_profile.specialty == "Électronique"
+    # Facultative : on peut l'effacer, et un corps vide ne change rien
+    assert patch(client, TEACHER_URL, {"specialty": ""}).json()["specialty"] == ""
+    assert patch(client, TEACHER_URL, {}).status_code == 200
+
+
+def test_specialty_is_limited_to_120_characters():
+    teacher = TeacherFactory(teacher_profile__specialty="Robotique")
+    client = client_for(teacher)
+    assert patch(client, TEACHER_URL, {"specialty": "a" * 120}).status_code == 200
+    response = patch(client, TEACHER_URL, {"specialty": "a" * 121})
+    assert response.status_code == 400
+    assert "specialty" in response.json()["fields"]
+
+
+def test_read_only_fields_are_ignored(school):
+    teacher = TeacherFactory(teacher_profile__phone="+22997000000", teacher_profile__bio="Ma bio")
+    other = School.objects.create(name="Autre", country=school.country, city="Cotonou")
+    response = patch(
+        client_for(teacher),
+        TEACHER_URL,
+        {
+            "specialty": "Maths",
+            "school": other.pk,
+            "phone": "+22997111111",
+            "bio": "Nouvelle bio",
+            "verifiedAt": "2026-01-01T00:00:00Z",
+        },
+    )
+    assert response.status_code == 200
+    assert set(response.json()) == {"specialty", "school"}  # ni bio, ni phone, ni verifiedAt (S5)
+    assert response.json()["school"] is None
+    profile = TeacherProfile.objects.get(user=teacher)
+    assert (profile.specialty, profile.school, profile.phone, profile.bio, profile.verified_at) == (
+        "Maths",
+        None,
+        "+22997000000",
+        "Ma bio",
+        None,
+    )
