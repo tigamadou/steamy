@@ -341,7 +341,13 @@ export function BatchImport({
             {Math.min(PREVIEW_ROWS, preview.rows.length) > 1 ? "s" : ""} ligne
             {Math.min(PREVIEW_ROWS, preview.rows.length) > 1 ? "s" : ""} sur {preview.rows.length + preview.malformed.length}
           </p>
-          <div className="overflow-x-auto rounded-lg border border-ink-100">
+          {/* Zone défilante : focusable au clavier (axe, `scrollable-region-focusable`) */}
+          <div
+            role="region"
+            aria-label="Aperçu de l'import"
+            tabIndex={0}
+            className="overflow-x-auto rounded-lg border border-ink-100 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+          >
             <table className="w-full text-left text-[13px]">
               <thead className="bg-ink-50 text-xs font-extrabold text-ink-700">
                 <tr>
