@@ -329,6 +329,12 @@ class Invoice(models.Model):
         READY = "ready", _("Prêt")
         FAILED = "failed", _("Échec")
 
+    class FiscalStatus(models.TextChoices):
+        NONE = "none", _("Reçu provisoire")
+        REQUESTED = "requested", _("Demandée à la DGI")
+        CONFIRMED = "confirmed", _("Facture normalisée")
+        FAILED = "failed", _("Échec e-MECeF")
+
     order = models.OneToOneField(Order, models.PROTECT, related_name="invoice")
     number = models.CharField(_("numéro"), max_length=20, unique=True)
     uuid = models.UUIDField(
@@ -342,6 +348,15 @@ class Invoice(models.Model):
     )
     snapshot = models.JSONField(_("contenu figé"), default=dict)
     issued_at = models.DateTimeField(_("émise le"), default=timezone.now)
+    #: Facture normalisée e-MECeF (ADR 0006) : `none` (reçu provisoire), `requested` (demande envoyée, `fiscal_uid`
+    #: connu), `confirmed` (éléments de sécurité reçus : document fiscal), `failed` (visible de la Finance)
+    fiscal_status = models.CharField(
+        _("facture normalisée"), max_length=9, choices=FiscalStatus, default=FiscalStatus.NONE
+    )
+    fiscal_uid = models.CharField(_("uid e-MECeF"), max_length=36, blank=True)
+    #: Éléments de sécurité à imprimer : `{date_time, qr_code, code, counters, nim}`
+    fiscal = models.JSONField(_("éléments de sécurité"), default=dict, blank=True)
+    fiscal_error = models.TextField(_("erreur e-MECeF"), blank=True)
 
     class Meta:
         ordering = ["-issued_at", "-id"]
