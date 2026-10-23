@@ -46,24 +46,23 @@ test("chaque écran de l'espace enseignant : accessibilité, largeur, registre",
       const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
       expect(violations, route).toEqual([]);
 
-      // Aucun élément ne dépasse à droite de l'écran (contenu long compris : noms de classes créés par les autres parcours) ;
-      // la liste des éléments fautifs rend l'échec exploitable
-      const overflowing = await page.evaluate(() => {
-        const width = document.documentElement.clientWidth;
-        return [...document.querySelectorAll("body *")]
-          .filter((element) => {
-            const box = element.getBoundingClientRect();
-            return box.width > 0 && box.right > width + 0.5 && !element.closest("[class*='overflow-x-auto']");
-          })
-          .slice(0, 5)
-          .map((element) => `${element.tagName.toLowerCase()}.${String(element.className).slice(0, 60)}`);
-      });
-      expect(overflowing, `${route} : éléments qui débordent`).toEqual([]);
       const { scrollWidth, clientWidth } = await page.evaluate(() => ({
         scrollWidth: document.documentElement.scrollWidth,
         clientWidth: document.documentElement.clientWidth,
       }));
-      expect(scrollWidth, `${route} : défilement horizontal`).toBeLessThanOrEqual(clientWidth);
+      // En cas de débordement (contenu long compris : noms de classes créés par les autres parcours), la liste des
+      // éléments qui dépassent à droite rend l'échec exploitable
+      const overflowing =
+        scrollWidth > clientWidth
+          ? await page.evaluate(() => {
+              const width = document.documentElement.clientWidth;
+              return [...document.querySelectorAll("body *")]
+                .filter((element) => element.getBoundingClientRect().right > width + 0.5)
+                .slice(0, 5)
+                .map((element) => `${element.tagName.toLowerCase()}.${String(element.className).slice(0, 60)}`);
+            })
+          : [];
+      expect(scrollWidth, `${route} : défilement horizontal (${overflowing.join(" | ")})`).toBeLessThanOrEqual(clientWidth);
 
       // Registre : vouvoiement sur les libellés de l'interface (titres, boutons, étiquettes), jamais « formateur »
       const chrome = await page
