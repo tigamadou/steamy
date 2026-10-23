@@ -49,12 +49,23 @@ const TEXTS: Record<NotificationSpaceId, Texts> = {
     withoutEmail:
       "Aucune adresse email n'est renseignée dans votre profil : vos notifications restent dans l'application.",
   },
+  teacher: {
+    descriptions: {
+      progress: "Élèves qui rejoignent une classe, invitations refusées ou expirées, risque de décrochage.",
+      reviews: "Tentatives échouées de vos élèves, à commenter.",
+      events: "Annonces Steamy Events.",
+    },
+    app: "Toujours actif : toutes vos notifications s'affichent dans votre espace.",
+    withEmail: "Les catégories ci-dessous peuvent aussi vous être envoyées à cette adresse.",
+    withoutEmail:
+      "Aucune adresse email n'est renseignée sur votre compte : vos notifications restent dans l'application.",
+  },
 };
 
 const HEADING = "m-0 mb-2.5 text-[13px] font-black tracking-[0.06em] text-ink-700 uppercase";
 
 /**
- * WD06 (apprenant) et section « Notifications » de WPD08 (parent, sans onglets) · préférences de notification : l'application est un canal toujours actif ; l'email se règle par catégorie,
+ * WD06 (apprenant) et section « Notifications » de WPD08 (parent) et WT08 (enseignant), sans onglets · préférences de notification : l'application est un canal toujours actif ; l'email se règle par catégorie,
  * seulement si une adresse est renseignée (D30, C12 : ni SMS ni push). Chaque interrupteur est enregistré aussitôt
  * (`PATCH notifications/preferences/`, un à la fois), et revient en arrière si l'enregistrement échoue.
  */
@@ -67,8 +78,8 @@ export function PreferencesForm({
 }) {
   const texts = TEXTS[space];
   const { register } = NOTIFICATION_SPACES[space];
-  // Dans WPD08, les préférences sont une section de la page (h2) : leurs titres passent en h3
-  const Heading = space === "parent" ? "h3" : "h2";
+  // Dans WPD08 et WT08, les préférences sont une section de la page (h2) : leurs titres passent en h3
+  const Heading = space === "learner" ? "h2" : "h3";
   const [preferences, setPreferences] = useState(initial);
   const [status, setStatus] = useState<{ error: boolean; text: string } | null>(null);
   // Un enregistrement à la fois : les interrupteurs attendent la réponse du précédent (pas de PATCH concurrents)

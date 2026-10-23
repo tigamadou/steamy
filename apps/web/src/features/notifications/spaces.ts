@@ -7,8 +7,8 @@ import { notificationTarget } from "./notification-icon";
 
 type Notification = Pick<Schemas["Notification"], "type" | "url">;
 
-/** Espace qui affiche les notifications : WD04 (apprenant, tutoiement) ou WPD14 (parent, vouvoiement). */
-export type NotificationSpaceId = "learner" | "parent";
+/** Espace qui affiche les notifications : WD04 (apprenant, tutoiement), WPD14 (parent) ou WT12 (enseignant, vouvoiement). */
+export type NotificationSpaceId = "learner" | "parent" | "teacher";
 
 export type NotificationSpace = {
   register: Register;
@@ -26,9 +26,13 @@ export type NotificationSpace = {
 };
 
 const p = routes.parent;
+const t = routes.teacher;
 
-/** Préfixes des autres espaces : un lien vers l'un d'eux n'a pas de sens pour le parent. */
-const OTHER_SPACES = ["/apprenant", "/enseignant", "/backoffice"];
+/** Chemin de ce site tiré d'une `url` de l'API, sauf s'il appartient à l'un des `forbidden` espaces ; `null` sinon. */
+function targetOutside(url: string, forbidden: string[]): string | null {
+  const target = notificationTarget(url);
+  return target && !forbidden.some((prefix) => target === prefix || target.startsWith(`${prefix}/`)) ? target : null;
+}
 
 /**
  * Cible d'une notification du parent quand l'API n'en donne pas d'utilisable (§5.11, WPD14) : sans identifiant, la
@@ -60,8 +64,28 @@ export function notificationHref({ type, url }: Notification): string | null {
 
 /** Chemin de ce site tiré d'une `url` de l'API, hors des autres espaces que celui du parent ; `null` sinon. */
 export function parentTarget(url: string): string | null {
-  const target = notificationTarget(url);
-  return target && !OTHER_SPACES.some((prefix) => target === prefix || target.startsWith(`${prefix}/`)) ? target : null;
+  return targetOutside(url, ["/apprenant", "/enseignant", "/backoffice"]);
+}
+
+/**
+ * Cible d'une notification de l'enseignant quand l'API n'en donne pas d'utilisable (§5.12, WT12) : sans identifiant, la
+ * liste où retrouver la classe ou l'événement. Les types sont ceux de `classrooms` et `events` (`classroom.joined`…).
+ */
+const TEACHER_TARGETS: Record<string, string> = {
+  "classroom.joined": t.classes,
+  "classroom.invitation_refused": t.classes,
+  "classroom.invitation_expired": t.classes,
+  "classroom.dropout": t.classes,
+  "event.proposed": t.events,
+};
+
+/**
+ * Cible d'une notification de l'enseignant : l'`url` de l'API quand c'est un chemin de ce site hors des autres
+ * espaces (`/enseignant/eleves/<id>?classe=<id>` : WT05, `/enseignant/classes/<id>` : WT04, une annonce publique…),
+ * sinon la cible de son type, sinon aucune.
+ */
+export function teacherHref({ type, url }: Notification): string | null {
+  return targetOutside(url, ["/apprenant", "/parent", "/backoffice"]) ?? TEACHER_TARGETS[type] ?? null;
 }
 
 export const NOTIFICATION_SPACES: Record<NotificationSpaceId, NotificationSpace> = {
@@ -85,6 +109,18 @@ export const NOTIFICATION_SPACES: Record<NotificationSpaceId, NotificationSpace>
     text: {
       loading: "Chargement de vos notifications…",
       empty: "Vous n'avez aucune notification. Nous vous prévenons dès qu'une demande attend votre accord.",
+      allRead: "Toutes vos notifications sont lues.",
+      nothingUnread: "Vous avez tout lu, rien de neuf.",
+    },
+  },
+  teacher: {
+    register: "vous",
+    list: t.notificationList,
+    preferences: `${t.settings}#notifications`,
+    href: teacherHref,
+    text: {
+      loading: "Chargement de vos notifications…",
+      empty: "Vous n'avez aucune notification. Nous vous prévenons dès qu'un élève rejoint une classe ou décroche.",
       allRead: "Toutes vos notifications sont lues.",
       nothingUnread: "Vous avez tout lu, rien de neuf.",
     },
