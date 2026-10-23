@@ -84,8 +84,9 @@ class PlatformSettings(models.Model):
         blank=True,
         help_text='Liste ordonnée, ex. [{"rank": "Explorateur", "points": 0}, …]',
     )
-    # Factures (C25, ADR 0005) : prix TTC ; la TVA et l'AIB sont ventilées sur la facture seulement si activées.
-    # Aucun taux légal n'est supposé ici : taux à 0 et interrupteurs éteints jusqu'à la réponse de la comptabilité.
+    # Taxes (C25, ADR 0005) : les prix du catalogue sont HT ; la TVA et l'AIB, si activées, s'ajoutent au montant payé
+    # (`apps.payments.taxes`). Aucun taux légal n'est supposé : taux à 0 et interrupteurs éteints jusqu'à la réponse de
+    # la comptabilité. Les frais de livraison sont taxés par défaut, réglable pour chaque taxe.
     vat_enabled = models.BooleanField(_("TVA activée"), default=False)
     vat_rate = models.DecimalField(
         _("taux de TVA (%)"),
@@ -101,8 +102,12 @@ class PlatformSettings(models.Model):
         decimal_places=2,
         default=Decimal("0"),
         validators=bounds(0, 100),
-        help_text=_("Acompte sur impôt sur les bénéfices, calculé sur le montant hors TVA"),
+        help_text=_(
+            "Acompte sur impôt sur les bénéfices, calculé sur le montant HT (jamais sur la TVA)"
+        ),
     )
+    vat_applies_to_shipping = models.BooleanField(_("TVA sur la livraison"), default=True)
+    aib_applies_to_shipping = models.BooleanField(_("AIB sur la livraison"), default=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

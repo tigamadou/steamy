@@ -160,20 +160,22 @@ ici, faute de réponse.
   et les identifiants (IFU, jetons e-MECeF). L'appel réel n'est **pas** implémenté ; l'interface
   `FiscalInvoiceProvider` (faux fournisseur en local et en CI) est la suite, dans une nouvelle ADR (voir « Suites »).
   D'ici là, `INVOICE_PROVISIONAL=true` : le document reste un « Reçu de paiement » non fiscal.
-- **P2** : les prix sont **TTC, sans TVA**. Ce qui s'applique est l'**AIB**. Dans `PlatformSettings`, l'admin
-  (Super-admin) règle le **taux de TVA**, le **taux d'AIB** et deux interrupteurs **indépendants** (TVA seule, AIB seul,
-  les deux, aucun). Défauts : tout éteint, taux à 0 : aucune valeur légale n'est inventée (le taux d'AIB applicable
-  n'a pas été confirmé par une source officielle) ; activer une taxe exige un taux > 0. Les réglages Django
+- **P2** : pas de prix TTC. Les tarifs du catalogue, des kits et des événements sont des prix **HT** (le prix serveur
+  en XOF entier, valeur inchangée en base). Dans `PlatformSettings`, l'admin (Super-admin) règle le **taux de TVA**, le
+  **taux d'AIB** et deux interrupteurs **indépendants** (TVA seule, AIB seul, les deux, aucun), plus, pour chaque
+  taxe, un interrupteur « s'applique à la livraison » (`vat_applies_to_shipping`, `aib_applies_to_shipping`,
+  **vrai par défaut**). Défauts : taxes éteintes, taux à 0 : aucune valeur légale n'est inventée (le taux d'AIB
+  applicable n'a pas été confirmé par une source officielle) ; activer une taxe exige un taux > 0. Les réglages Django
   `INVOICE_VAT_RATE` et `INVOICE_PRICES_INCLUDE_VAT` sont **supprimés**.
-- **Calcul** (`apps/payments/invoices.py`, `tax_breakdown`) : le prix TTC en XOF entier reste la référence ; avec la
-  TVA : `HT = arrondi(TTC × 100 / (100 + taux))`, `TVA = TTC − HT` ; l'AIB est calculé sur la base **hors TVA**
-  (le total TTC si la TVA est éteinte) : `AIB = arrondi(base × taux / 100)`. Arrondi **au franc, la demi-unité vers le
-  haut**. Le snapshot de la facture garde ces montants et les taux **au moment de l'émission** : ni une régénération du
-  PDF ni un changement de réglage ne modifie une facture émise.
-- **Question ouverte (C25)** : l'AIB s'ajoute-t-il au montant payé par le client, ou est-il seulement affiché sur la
-  facture ? **Provisoirement : affiché seulement**, le montant débité (`Order.total`) ne change pas ; la facture le
-  précise. Une décision « ajouté » touche le prix serveur, le paiement et le remboursement : elle demande sa propre
-  étape.
+- **Les taxes s'ajoutent au montant payé** (décision du même jour) : `total à payer = HT + livraison + TVA + AIB`.
+  C'est ce total qui est débité, attendu par le webhook et porté par la facture.
+- **Calcul** (`apps/payments/taxes.py`, `compute_taxes`, fonction pure) : base de la TVA = lignes HT (+ livraison si
+  `vat_applies_to_shipping`) ; base de l'AIB = lignes HT (+ livraison si `aib_applies_to_shipping`), **jamais la
+  TVA** ; arrondi **une seule fois par taxe, sur le total de la commande**, au franc, la demi-unité vers le haut
+  (pas d'arrondi ligne par ligne).
+- **Figé** : les taux, bases et montants sont enregistrés sur la commande à sa création et ne sont **jamais
+  recalculés** (idempotence, webhooks, remboursements, factures) ; la facture ventile ce qui est figé sur la commande.
+- **Étapes** : (1) réglages et moteur de calcul ; (2) commande, paiement, webhook et API ; (3) facture ; (4) front.
 
 ## Conséquences
 
@@ -194,7 +196,7 @@ ici, faute de réponse.
 | # | Point | Proposition | Bloque |
 | --- | --- | --- | --- |
 | P1 | ✅ *tranché le 2026-10-23 : facture normalisée ; reste le contrat d'API DGI et les identifiants.* **Facture normalisée (MECeF / e-MECeF)** : Steamy y est-elle tenue ? Le PDF Steamy est-il la facture ou un simple reçu ? | Consulter le comptable et la DGI **avant** `API-L3b.2` ; décider entre « facture Steamy conforme » et « facture normalisée récupérée via l'API de la DGI » | `API-L3b.2` |
-| P2 | ✅ *tranché le 2026-10-23 : prix TTC sans TVA, AIB ; taux et activations réglables par l'admin ; reste : l'AIB s'ajoute-t-il au montant payé ?* TVA : prix TTC ou HT, taux, exonération de l'enseignement, arrondi | Réponse du comptable ; le prix serveur en XOF entier reste la référence | `API-L3b.2` |
+| P2 | ✅ *tranché le 2026-10-23 : prix HT, taxes (TVA, AIB) ajoutées au montant payé, taux et activations réglables par l'admin, livraison taxée par réglage ; reste le taux d'AIB à confirmer.* TVA : prix TTC ou HT, taux, exonération de l'enseignement, arrondi | Réponse du comptable ; le prix serveur en XOF entier reste la référence | `API-L3b.2` |
 | P3 | Formats de numéro (`CERT-AAAA-NNNNNN`, `FAC-AAAA-NNNNNN`), remise à zéro annuelle | Adopter ces formats, sauf contrainte fiscale (P1) | — |
 | P4 | État `failed` sur `Certificate` et `Invoice` (la spec ne connaît que `pending`, `ready`) | L'ajouter, avec champ `pdfStatus` sur `Invoice` | `API-L3a.4` |
 | P5 | Point d'accès public à RustFS (sous-domaine `media.`) pour signer les URL présignées | Le prévoir dans `docs/infra` avant la recette de `API-L3a.4` ; signature faite avec ce point d'accès, stockage interne inchangé | recette `L3a.4` |

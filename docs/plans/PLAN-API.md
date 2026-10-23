@@ -517,13 +517,17 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Tâche `generate_invoice_pdf` lancée par l'exécution post-paiement ; `GET payments/orders/{reference}/invoice/` (payeur seulement, invité par jeton, P7)
   - [x] Mentions et TVA **paramétrables** (réglages), sans valeur légale inventée, en attendant P1 (MECeF) et P2 (TVA) de l'ADR 0005
   - [x] Tests : facture refusée à l'apprenant bénéficiaire, numérotation sans trou
-  - [x] **Complément C25 (2026-10-23)** · `claude/api-factures-aib-tva` : TVA et AIB paramétrables dans
-    `PlatformSettings` (`vat_enabled`, `vat_rate`, `aib_enabled`, `aib_rate`, migration `core.0006`, édités dans
-    l'admin Django WAD14 par le Super-admin, journal d'audit existant) ; facture TTC ventilée selon les interrupteurs
-    (`tax_breakdown`, arrondi au franc demi-haut, taux figés dans le snapshot) ; `INVOICE_VAT_RATE` et
-    `INVOICE_PRICES_INCLUDE_VAT` supprimés. Pas d'écran front : WAD14 est l'admin Django, pas de PR front
-  - [ ] **Décision en attente (C25)** : l'AIB s'ajoute-t-il au montant payé par le client ? Provisoirement affiché
-    seulement sur la facture, `Order.total` inchangé
+  - [x] **C25.1 · réglages et moteur de calcul** · PR #166 : `PlatformSettings` (`vat_enabled`, `vat_rate`,
+    `vat_applies_to_shipping`, `aib_enabled`, `aib_rate`, `aib_applies_to_shipping`, migration `core.0006`, édités
+    dans l'admin Django WAD14 par le Super-admin, journal d'audit existant) ; `apps/payments/taxes.py`
+    (`compute_taxes`, pure, arrondi unique au franc demi-haut sur le total) ; `INVOICE_VAT_RATE` et
+    `INVOICE_PRICES_INCLUDE_VAT` supprimés. Pas d'écran front : WAD14 est l'admin Django
+  - [ ] **C25.2 · commande, paiement, webhook, API** : taxes figées sur `Order` à la création (total = HT + livraison
+    + TVA + AIB, contrainte DB, commandes existantes à taxes 0) ; webhook, checkout et remboursements sur le montant
+    figé ; API panier/commande/WPD15/événements : sous-total HT, lignes de taxes, total ; tests du montant débité
+    (TVA seule, AIB seule, les deux, aucune)
+  - [ ] **C25.3 · facture** : ventilation HT / TVA / AIB / total lue sur la commande, jamais recalculée
+  - [ ] **C25.4 · front** (PR séparée, après l'API) : « HT » sur les prix du catalogue, « Total à payer » au paiement
   - [ ] **Taux d'AIB à confirmer** par la comptabilité : défauts éteints et à 0, aucune valeur légale supposée
   - [ ] **Suite `API-L3b.2c`** : facture normalisée e-MECeF, interface `FiscalInvoiceProvider` et faux fournisseur,
     après obtention du contrat d'API DGI et des identifiants (ADR 0005, P1 tranché, reste l'accès)
@@ -889,7 +893,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Paiement (S9), avant API-L3b : voir API-L3b.0a
 - [ ] **Points ouverts** (« Reste à décider »)
   - [x] Valeurs du barème de points et des paliers de rang (C8), avant L3a.3 : barème standard, arbitré le 2026-10-19
-  - [ ] Format des factures validé par la comptabilité (P1 et P2 tranchés le 2026-10-23, C25 ; reste le contrat DGI, le taux d'AIB et sa place dans le prix), avant la mise en production de L3b.2b
+  - [ ] Format des factures validé par la comptabilité (P1 et P2 tranchés le 2026-10-23, C25 ; reste le contrat DGI et le taux d'AIB), avant la mise en production de L3b.2b
   - [ ] Texte de finalité des données sensibles (D6) validé juridiquement, avant L2.5
 
 ---
@@ -1305,5 +1309,5 @@ validateurs de mot de passe D25) sont tranchés et intégrés aux étapes ci-des
 | Fournisseur SMS | ADR après comparaison (S10) | Branchement réel L2 |
 | Prestataire de paiement | Tranché : FedaPay (ADR 0003) ; contrat, KYC et frais négociés à obtenir | Branchement réel L3b |
 | Valeurs du barème de points et des paliers de rang (C8) | Tranché le 2026-10-19 : barème standard, défaut de `PlatformSettings` | L3a.3 |
-| Format des factures (obligations fiscales locales) | P1 et P2 tranchés le 2026-10-23 (C25) : facture normalisée, prix TTC sans TVA, AIB ; reste le contrat d'API DGI, le taux d'AIB et l'AIB ajouté ou non au prix | L3b.2c |
+| Format des factures (obligations fiscales locales) | P1 et P2 tranchés le 2026-10-23 (C25) : facture normalisée, prix HT, taxes ajoutées (C25) ; reste le contrat d'API DGI et le taux d'AIB | L3b.2c |
 | Texte de finalité des données sensibles (D6) | Validation juridique | L2.5 (texte front) |

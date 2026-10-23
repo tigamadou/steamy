@@ -132,6 +132,7 @@ def test_tax_switches_and_rates_default_to_off_and_are_edited_by_the_super_admin
         False,
         0,
     )
+    assert config.vat_applies_to_shipping and config.aib_applies_to_shipping
     verified_client(client, SUPER_ADMIN)
     page = client.get(f"{SETTINGS}1/change/").content.decode()
     assert "Factures : TVA et AIB (C25)" in page
@@ -143,6 +144,7 @@ def test_tax_switches_and_rates_default_to_off_and_are_edited_by_the_super_admin
     config.refresh_from_db()
     assert (config.vat_enabled, config.aib_enabled) == (False, True)
     assert (config.vat_rate, config.aib_rate) == (18, Decimal("1.5"))
+    assert not config.vat_applies_to_shipping and not config.aib_applies_to_shipping
 
 
 @pytest.mark.parametrize(

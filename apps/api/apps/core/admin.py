@@ -62,7 +62,16 @@ class PlatformSettingsAdmin(admin.ModelAdmin):
         ("Gamification (C8)", {"fields": ("points_scale", "rank_thresholds")}),
         (
             "Factures : TVA et AIB (C25)",
-            {"fields": ("vat_enabled", "vat_rate", "aib_enabled", "aib_rate")},
+            {
+                "fields": (
+                    "vat_enabled",
+                    "vat_rate",
+                    "vat_applies_to_shipping",
+                    "aib_enabled",
+                    "aib_rate",
+                    "aib_applies_to_shipping",
+                )
+            },
         ),
         ("Messagerie (S10)", {"fields": ("sms_provider",)}),
     )

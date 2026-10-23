@@ -1,7 +1,6 @@
 """Factures (API-L3b.2b, ADR 0005, C12) : émises au paiement, numérotées sans trou, PDF privé, payeur seulement."""
 
 from datetime import timedelta
-from decimal import Decimal
 
 import pytest
 from celery.exceptions import Retry
@@ -10,9 +9,8 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.accounts.tests.factories import ParentFactory, TeacherFactory
-from apps.core.models import PlatformSettings
 from apps.payments import tasks
-from apps.payments.invoices import filename, issue_invoice, rate_label, tax_breakdown, to_franc
+from apps.payments.invoices import filename, issue_invoice
 from apps.payments.models import Invoice, Order
 from apps.payments.providers import PaymentEvent, PaymentStatus
 from apps.payments.utils import handle_payment_event
@@ -63,7 +61,7 @@ def test_invoice_is_issued_at_payment_and_downloadable_by_the_payer(paid_order):
         f"{invoice.uuid}.pdf"
     )
     snapshot = invoice.snapshot
-    assert snapshot["provisional"] is True and snapshot["vat"] is None and snapshot["aib"] is None
+    assert snapshot["provisional"] is True and "vat" not in snapshot
     assert snapshot["seller"] == {"name": "Steamy"}
     assert snapshot["buyer"]["phone"] == paid_order.payer.phone
     assert snapshot["lines"][0]["total"] == 15000 and snapshot["total"] == 15000
@@ -130,60 +128,9 @@ def test_numbers_follow_without_gap_and_issue_is_idempotent(
     assert filename(invoice) == f"facture-{invoice.number}.pdf" and str(invoice) == invoice.number
 
 
-def configure(**fields):
-    config = PlatformSettings.load()
-    for name, value in fields.items():
-        setattr(config, name, value)
-    config.full_clean()
-    config.save()
-    return config
-
-
-def test_no_tax_by_default():
-    assert tax_breakdown(15000) == {"vat": None, "aib": None}
-
-
-def test_vat_alone_splits_a_tax_inclusive_price():
-    configure(vat_enabled=True, vat_rate=Decimal("18"))
-    assert tax_breakdown(11800) == {
-        "vat": {"rate": "18", "excluding_vat": 10000, "vat": 1800, "including_vat": 11800},
-        "aib": None,
-    }
-
-
-def test_aib_alone_is_computed_on_the_total():
-    configure(aib_enabled=True, aib_rate=Decimal("1.5"))
-    assert tax_breakdown(15000) == {
-        "vat": None,
-        "aib": {"rate": "1.5", "base": 15000, "amount": 225},
-    }
-
-
-def test_both_taxes_put_the_aib_on_the_amount_excluding_vat():
-    configure(vat_enabled=True, vat_rate=Decimal("18"), aib_enabled=True, aib_rate=Decimal("5"))
-    assert tax_breakdown(11800) == {
-        "vat": {"rate": "18", "excluding_vat": 10000, "vat": 1800, "including_vat": 11800},
-        "aib": {"rate": "5", "base": 10000, "amount": 500},
-    }
-
-
-def test_rounding_is_to_the_franc_half_up_and_vat_plus_net_equals_total():
-    assert (
-        to_franc(Decimal("2.5")) == 3
-        and to_franc(Decimal("3.5")) == 4
-        and to_franc(Decimal("2.4")) == 2
-    )
-    assert rate_label(Decimal("18.00")) == "18" and rate_label(Decimal("0.50")) == "0.5"
-    configure(vat_enabled=True, vat_rate=Decimal("18"))
-    for total in (1, 99, 10001, 12345):
-        vat = tax_breakdown(total)["vat"]
-        assert vat["excluding_vat"] + vat["vat"] == total
-
-
-def test_taxes_and_seller_are_printed_and_frozen_at_issue(
+def test_seller_and_mentions_are_printed_when_configured(
     django_capture_on_commit_callbacks, settings
 ):
-    configure(vat_enabled=True, vat_rate=Decimal("18"), aib_enabled=True, aib_rate=Decimal("1"))
     settings.INVOICE_SELLER = {
         "name": "Steamy SARL",
         "address": "Cotonou",
@@ -193,23 +140,13 @@ def test_taxes_and_seller_are_printed_and_frozen_at_issue(
     settings.INVOICE_MENTIONS = ["Mention de test"]
     order = OrderFactory()
     pay(order, django_capture_on_commit_callbacks)
-    invoice = Invoice.objects.get(order=order)
-    snapshot = invoice.snapshot
+    snapshot = Invoice.objects.get(order=order).snapshot
     assert snapshot["seller"] == {
         "name": "Steamy SARL",
         "address": "Cotonou",
         "registration": "RB/1",
     }
-    assert snapshot["vat"]["vat"] == 15000 - snapshot["vat"]["excluding_vat"]
-    assert snapshot["aib"] == {"rate": "1", "base": snapshot["vat"]["excluding_vat"], "amount": 127}
     assert snapshot["mentions"] == ["Mention de test"]
-
-    # Changer les taux ensuite ne touche jamais une facture déjà émise, ni son PDF régénéré
-    configure(vat_rate=Decimal("5"), aib_enabled=False)
-    Invoice.objects.filter(pk=invoice.pk).update(pdf_status=Invoice.PdfStatus.PENDING)
-    assert tasks.build_invoice_pdf(invoice.pk) is True
-    invoice.refresh_from_db()
-    assert invoice.snapshot == snapshot and invoice.pdf_status == Invoice.PdfStatus.READY
 
 
 def test_pdf_is_not_rebuilt_when_ready(paid_order):
