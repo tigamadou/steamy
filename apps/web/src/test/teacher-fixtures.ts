@@ -199,3 +199,32 @@ export function invitation(overrides: Partial<Schemas["Member"]> = {}): Schemas[
     ...overrides,
   });
 }
+
+export function attempt(overrides: Partial<Schemas["TeacherAttempt"]> = {}): Schemas["TeacherAttempt"] {
+  return {
+    id: 90,
+    quiz: { id: 5, kind: "level", title: "Quiz du niveau 2", projectTitle: "Robot suiveur", levelTitle: "Niveau 2" },
+    percentage: 33,
+    status: "ko",
+    passed: false,
+    createdAt: "2026-10-20T10:00:00Z",
+    commented: false,
+    ...overrides,
+  } as Schemas["TeacherAttempt"];
+}
+
+export function followUp(overrides: Partial<Schemas["LearnerFollowUp"]> = {}): Schemas["LearnerFollowUp"] {
+  return {
+    learner: memberLearner(),
+    classroom: classroom(),
+    joinedAt: "2026-09-02T10:00:00Z",
+    progressPct: 40,
+    lastActivityAt: "2026-10-10T10:00:00Z",
+    isDropout: false,
+    averagePercentage: 55,
+    badges: [{ id: 1, kind: "level", label: "Électricien", icon: "⚡", description: "", awardedAt: "2026-10-01T10:00:00Z" }],
+    attempts: [attempt(), attempt({ id: 91, status: "ok", percentage: 90, passed: true, commented: true, quiz: { id: 6, kind: "summative", title: "Évaluation du projet", projectTitle: "Robot suiveur", levelTitle: null } })],
+    comments: [{ id: 5, body: "Bon début !\nContinuez.", attemptId: 91, createdAt: "2026-10-21T10:00:00Z" }],
+    ...overrides,
+  } as Schemas["LearnerFollowUp"];
+}
