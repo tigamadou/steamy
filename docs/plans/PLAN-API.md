@@ -287,6 +287,12 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`replaceState`) et le garde dans l'onglet (`sessionStorage`) pour un rechargement, relit l'invitation par
   > `lookup/`, puis active par `accept/`. `Referrer-Policy: no-referrer` reste posé sur `/activation`. L'ancien lien
   > `/activation/<jeton>` redirige vers le fragment le temps que les liens déjà envoyés expirent.
+- [x] **API-L2.8** Correctifs OTP, refus rejoué, identifiant concurrent · `feature/api-l2-correctifs` · PR #148
+  - [x] `issue_token` (WL03) : `verify_challenge` sorti de la transaction englobante, l'incrément d'`attempts` n'est plus annulé, `OTP_TOO_MANY_ATTEMPTS` atteint au 4ᵉ essai (D24) ; autres appelants relus (`parent_signup` WP02, `phone_change`) : aucun `atomic` englobant
+  - [x] `POST auth/learner-signup/` et `…/resume/` retirent `learner_signup_consent` de la session (W18 ne revient plus après un refus)
+  - [x] `create_learner_signup` : `IntegrityError` sur l'identifiant → `USERNAME_TAKEN` ; invitation de classe et `children` le faisaient déjà ; l'activation (`…/password/`) ne crée pas d'identifiant
+  - [x] Tests : 3 codes faux puis le bon refusé (WL03, WP02, changement de numéro), compteur validé en `transaction=True`, clé de session vidée, collision d'identifiant
+  - [ ] Front, hors de cette PR : lever le `test.fixme` de « WL03 bloque la saisie après les essais permis » (`apps/web/e2e/mot-de-passe-oublie.spec.ts`), l'API tient maintenant le plafond
 - [x] **Tâches Celery d'API-L2**
   - [x] `send_sms`, `expire_consent_requests` (7 j), `purge_refused_requests` (30 j), `purge_signup_sessions`
   - [x] Planifiées dans `CELERY_BEAT_SCHEDULE`, exécutables à la main (`manage.py <tâche>`)
@@ -787,6 +793,9 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`/parent/evenements`), catégorie Steamy Events. `event-applications` : candidatures des élèves actifs des classes
   > actives de l'enseignant (statut, événement, élève, classe), sans motivation ni paiement. Migration
   > `events/0005_propositions` (après `0004_application_refuse_permission`).
+- [x] **API-L5.6** Profil enseignant (WT08) · `feature/api-l5-profil-enseignant`
+  - [x] `GET`/`PATCH accounts/me/teacher-profile/` (enseignant seulement) : `{ specialty, school: { id, name, city } | null }`, seule `specialty` (≤ 120 caractères) se modifie, `bio`, `phone` et `verified_at` jamais exposés (S5)
+  - [x] Tests : lecture, modification, longueur max, refus apprenant et parent, champs en lecture seule ignorés, sans école ; `make openapi` committé
 - [x] **Critères de fin d'API-L5**
   - [x] Un enseignant ne peut pas créer de contenu (S5)
   - [x] Seed enrichi, `make openapi` committé
@@ -821,7 +830,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `Announcement` dans `core`, diffusée une fois par la tâche `broadcast_announcement` aux personas actifs du public
   > visé (notification `announcement`, D7), puis figée. Aucun cache serveur à invalider (`PlatformSettings.load()`
   > relit la base ; les référentiels n'ont qu'un cache HTTP d'une heure). « Mode maintenance » et « inscriptions
-  > ouvertes » (WAD14) restent hors de cette étape : comportement d'API non spécifié, à trancher avant LOT-6 6.5.
+  > ouvertes » (WAD14) : hors v1, arbitré le 2026-10-23 (`ARBITRAGES.md` C22).
 - [x] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact-kpi` · PR #65 (1/3), puis `feature/api-l6-4-impact-rapports` · PR #67 (2/3), puis `feature/api-l6-4-impact-exports` · PR #110 (3/3)
   - [x] App `impact` : `KpiDefinition` (30 KPI par migration), `KpiValue`, `ImpactReport`, `ReportExport` ; statut D73
     - [x] `KpiDefinition` (30 KPI en 8 groupes, migration `0002_kpi_definitions`), `KpiValue`, `ImpactReport` ; `kpiStatus` D73 (PR #65)

@@ -199,7 +199,7 @@ describe("ConsentOrigin", () => {
     expect(screen.getByText("Vous avez ajouté Kemi le 15 octobre 2026.")).toBeInTheDocument();
   });
 
-  it("origine enseignant : rien tant que l'étape 4.10 n'est pas livrée", () => {
+  it("origine enseignant sans classe servie par l'API : rien", () => {
     const { container } = render(<ConsentOrigin request={consent({ origin: "teacher" })} />);
     expect(container).toBeEmptyDOMElement();
   });

@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import { StrictMode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { axe } from "@/test/axe";
@@ -34,6 +35,19 @@ describe("ConsentLanding (atterrissage du lien SMS)", () => {
       "/aide?sujet=question#contact",
     );
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("effet rejoué (StrictMode) : un seul `claim`, la demande s'ouvre au lieu de « Lien incomplet »", async () => {
+    // Le second appel trouverait le jeton consommé par le premier
+    POST.mockResolvedValueOnce(respond(200, { data: { id: 42 } })).mockResolvedValue(failure(404, "NOT_FOUND"));
+    render(
+      <StrictMode>
+        <ConsentLanding />
+      </StrictMode>,
+    );
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/inscription/parent/demande/42"));
+    expect(POST).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("heading", { name: "Lien incomplet ou déjà utilisé" })).toBeNull();
   });
 
   it("rattache la demande d'un parent connecté et l'ouvre", async () => {
