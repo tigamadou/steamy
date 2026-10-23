@@ -3,12 +3,14 @@ Facture normalisée e-MECeF (ADR 0006, C26) : interface, faux fournisseur, clien
 réseau réel), garde-fou des taux et activation depuis l'admin.
 """
 
+from datetime import timedelta
 from decimal import Decimal
 from unittest import mock
 
 import pytest
 import requests
 from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.utils import timezone
 
 from apps.core.groups import SUPER_ADMIN
 from apps.core.models import PlatformSettings
@@ -21,10 +23,11 @@ from apps.payments.fiscal import (
     FiscalPayment,
     FiscalTemporaryError,
     InvoiceRequest,
+    SecurityElements,
     TaxGroups,
     get_fiscal_provider,
 )
-from apps.payments.fiscal.base import FiscalInvoiceProvider
+from apps.payments.fiscal.base import FiscalInvoiceProvider, FiscalStatus
 from apps.payments.fiscal.emecef import EmecefProvider
 from apps.payments.fiscal.fake import FakeFiscalProvider
 from apps.payments.fiscal.guard import activation_errors, aib_letter
@@ -44,28 +47,88 @@ def no_network(monkeypatch):
     monkeypatch.setattr(requests.Session, "send", refuse)
 
 
+TEST_URL = "https://developper.impots.bj/sygmef-emcf/api"
+
+
 @pytest.fixture
 def emecef(settings):
-    settings.EMECEF_API_URL = "https://dgi.test/sygmef-emcf/"
+    settings.EMECEF_ENVIRONMENT = "test"
     settings.EMECEF_TOKEN = "jeton-de-test"
-    settings.EMECEF_IFU = "0000000000001"
+    settings.EMECEF_IFU = "9999900000001"
     return EmecefProvider()
 
 
-def invoice_request(reference="CMD-1", aib=None):
+def invoice_request(client_name="Marie Houngbo", aib=None, **fields):
+    """L'exemple de la documentation de la DGI : 2 × 1 800 (groupe B) et 3 × 450 (groupe A), 4 950 au total."""
     return InvoiceRequest(
         type="FV",
-        reference=reference,
         items=[
-            FiscalItem("C1", "Parcours robotique", 10000, Decimal(2), "B"),
-            FiscalItem("L", "Livraison", 2000, Decimal(1), "A", tax_specific=0),
+            FiscalItem("", "Jus d'orange", 1800, Decimal(2), "B"),
+            FiscalItem("", "Lait 1/1 EX", 450, Decimal(3), "A"),
         ],
-        client=FiscalClient(name="Marie Houngbo", contact="+2290197000001"),
-        payments=[FiscalPayment("MOBILEMONEY", 22000)],
+        client=FiscalClient(name=client_name, contact="+2290197000001"),
+        payments=[FiscalPayment("MOBILEMONEY", 4950)],
         aib=aib,
-        operator_id="steamy",
         operator_name="Steamy",
+        **fields,
     )
+
+
+#: Réponses exactes de la documentation de la DGI (« Spécification de l'API pour l'e-MCF v1.0 »)
+DGI_INVOICE = {
+    "uid": "ac33f8fe-9735-4ed6-a9c3-df58a908ccd3",
+    "ta": 0,
+    "tb": 18,
+    "tc": 0,
+    "td": 18,
+    "taa": 1350,
+    "tab": 3600,
+    "tac": 0,
+    "tad": 0,
+    "tae": 0,
+    "taf": 0,
+    "hab": 3051,
+    "had": 0,
+    "vab": 549,
+    "vad": 0,
+    "total": 4950,
+    "aib": 0,
+    "ts": 0,
+}
+DGI_SECURITY = {
+    "dateTime": "23/11/2020 13:17:08",
+    "qrCode": "F;IN01000005;X537E4DBAJUUHHXNFWISFEKJ;9999900000001;20201123131708",
+    "codeMECeFDGI": "X537-E4DB-AJUU-HHXN-FWIS-FEKJ",
+    "counters": "64/64 FV",
+    "nim": "IN01000005",
+}
+DGI_INFO_STATUS = {
+    "status": True,
+    "version": "1.0",
+    "ifu": "9999900000001",
+    "nim": "XX01000070",
+    "tokenValid": "2999-01-31T00:00:00+01:00",
+    "serverDateTime": "2021-01-05T21:26:18.9775221+01:00",
+    "emcfList": [
+        {"nim": "XX01000070", "status": "Actif", "shopName": "TEST #70", "address2": None},
+        {"nim": "XX01000071", "status": "Désactivé", "shopName": "TEST #70"},
+    ],
+}
+DGI_TAX_GROUPS = {"a": 0, "b": 18, "c": 0, "d": 18, "e": 0, "f": 0, "aibA": 1, "aibB": 5}
+DGI_PENDING = {
+    "status": True,
+    "version": "1.0",
+    "ifu": "99999000000001",
+    "tokenValid": "2020-11-28T00:00:00+01:00",
+    "serverDateTime": "2020-11-21T17:25:14.7179651+01:00",
+    "pendingRequestsCount": 2,
+    "pendingRequestsList": [
+        {"date": "2020-11-20T21:45:56.523+01:00", "uid": "437261A6-41BD-4D7B-B61B-E60C2D8089AA"},
+        {"date": "2020-11-20T21:46:49.207+01:00", "uid": "313AE8C2-1EAC-4DE9-AF40-7A0240599114"},
+        {"date": "sans date", "uid": "C562ADCF-BCF5-4592-A95F-5A5617C66FD8"},
+        {"date": "2020-11-20T21:48:17.78+01:00"},
+    ],
+}
 
 
 def response(payload, status=200):
@@ -94,7 +157,10 @@ def test_the_interface_is_abstract():
     provider = FiscalInvoiceProvider()
     for call in (
         provider.status,
+        provider.pending_requests,
         provider.tax_groups,
+        provider.invoice_types,
+        provider.payment_types,
         lambda: provider.request_invoice(invoice_request()),
         lambda: provider.confirm("x"),
         lambda: provider.cancel("x"),
@@ -103,142 +169,255 @@ def test_the_interface_is_abstract():
             call()
 
 
+def test_status_and_security_elements_helpers():
+    now = timezone.now()
+    assert FiscalStatus(token_valid_until=now + timedelta(days=1)).token_valid
+    assert not FiscalStatus(token_valid_until=now - timedelta(days=1)).token_valid
+    assert not FiscalStatus(token_valid_until=None).token_valid
+    later = FiscalStatus(
+        token_valid_until=now + timedelta(days=1), server_time=now + timedelta(days=2)
+    )
+    assert not later.token_valid and not later.active
+    assert FiscalStatus(token_valid_until=None, emcf_status="Actif").active
+    elements = SecurityElements("d", "qr", "X537-E4DB-AJUU-HHXN-FWIS-FEKJ", "1/1 FV", "NIM")
+    assert elements.reference == "X537E4DBAJUUHHXNFWISFEKJ" and len(elements.reference) == 24
+
+
 # --- Faux fournisseur ----------------------------------------------------------------------------------------------
 
 
-def test_fake_flow_request_then_confirm_with_security_elements():
+def test_fake_computes_like_the_dgi_example_and_confirms_with_security_elements():
     provider = FakeFiscalProvider()
-    assert provider.status().token_valid and provider.tax_groups().rates["B"] == 18
-    totals = provider.request_invoice(invoice_request(aib="B"))
-    assert totals.total == 22000 + 1100 and totals.aib == 1100
+    status = provider.status()
+    assert status.token_valid and status.active and provider.pending_requests() == []
+    assert provider.tax_groups().rates["B"] == 18
+    totals = provider.request_invoice(invoice_request())
+    # Exemple de la DGI : le prix TTC du groupe B contient la TVA extraite (3 600 → 3 051 HT + 549)
+    assert (totals.total, totals.aib) == (4950, 0)
+    assert totals.group_totals["A"] == 1350 and totals.group_totals["B"] == 3600
+    assert (totals.excl_tax["B"], totals.vat["B"], totals.vat["D"]) == (3051, 549, 0)
     elements = provider.confirm(totals.uid)
     assert (
-        elements.code.startswith("FAKE-") and elements.qr_code.endswith(totals.uid) and elements.nim
+        len(elements.code) == 29
+        and len(elements.reference) == 24
+        and elements.qr_code.startswith("F;")
     )
-    assert provider.request_invoice(invoice_request()).aib == 0
+    assert elements.nim and elements.counters == "1/1 FV"
+    with pytest.raises(FiscalError) as again:
+        provider.confirm(totals.uid)
+    assert again.value.code == "20"
 
 
-def test_fake_cancel_and_unknown_uid():
+def test_fake_aib_is_computed_on_the_excl_tax_base():
+    totals = FakeFiscalProvider().request_invoice(invoice_request(aib="B"))
+    assert totals.aib == round((1350 + 3051) * 5 / 100) and totals.total == 4950
+
+
+def test_fake_cancel_returns_no_code_and_unknown_uid_is_refused():
     provider = FakeFiscalProvider()
-    uid = provider.request_invoice(invoice_request()).uid
-    assert provider.cancel(uid).qr_code.startswith("X;")
+    cancelled = provider.cancel(provider.request_invoice(invoice_request()).uid)
+    assert cancelled.code == "" and cancelled.qr_code == "" and cancelled.date_time
     with pytest.raises(FiscalError) as error:
-        provider.confirm("inconnu")
-    assert error.value.code == "FAKE_UNKNOWN"
+        provider.cancel("inconnu")
+    assert error.value.code == "20"
 
 
-def test_fake_is_driven_by_the_order_reference():
+def test_fake_is_driven_by_the_client_name():
     provider = FakeFiscalProvider()
     with pytest.raises(FiscalError) as refused:
-        provider.request_invoice(invoice_request("CMD-1-REFUSED"))
-    assert refused.value.code == "FAKE_REFUSED" and not isinstance(
-        refused.value, FiscalTemporaryError
-    )
+        provider.request_invoice(invoice_request("Marie [REFUSED]"))
+    assert refused.value.code == "99" and not isinstance(refused.value, FiscalTemporaryError)
     with pytest.raises(FiscalTemporaryError):
-        provider.request_invoice(invoice_request("CMD-1-DOWN"))
+        provider.request_invoice(invoice_request("Marie [DOWN]"))
+    assert [code for code, _ in provider.invoice_types()] == ["FV", "FA", "EV", "EA"]
+    assert "MOBILEMONEY" in [code for code, _ in provider.payment_types()]
 
 
-# --- Client e-MCF (transport simulé) -------------------------------------------------------------------------------
+# --- Client e-MCF (transport simulé, réponses de la documentation de la DGI) ---------------------------------------
 
 
-def test_emecef_requires_its_environment(settings):
-    settings.EMECEF_API_URL = settings.EMECEF_TOKEN = settings.EMECEF_IFU = ""
-    with pytest.raises(ImproperlyConfigured):
+def test_emecef_requires_a_known_environment_and_its_secrets(settings):
+    settings.EMECEF_TOKEN, settings.EMECEF_IFU = "", ""
+    with pytest.raises(ImproperlyConfigured, match="obligatoires"):
+        EmecefProvider()
+    settings.EMECEF_TOKEN, settings.EMECEF_IFU = "jeton", "9999900000001"
+    settings.EMECEF_ENVIRONMENT = "recette"
+    with pytest.raises(ImproperlyConfigured, match="inconnu"):
         EmecefProvider()
 
 
-def test_emecef_status_and_tax_groups(emecef):
-    payload = {
-        "status": True,
-        "ifu": "0000000000001",
-        "nim": "NIM1",
-        "version": "1.0",
-        "tokenValid": "true",
-        "pendingRequestsList": [{"uid": "u-1", "date": "x"}, {"date": "sans uid"}, "bruit"],
-    }
-    with mock.patch("requests.request", return_value=response(payload)) as request:
+def test_the_production_server_is_reserved_to_the_production_environment(settings):
+    settings.EMECEF_TOKEN, settings.EMECEF_IFU = "jeton", "9999900000001"
+    settings.EMECEF_ENVIRONMENT = "production"
+    settings.ENV = "staging"
+    with pytest.raises(ImproperlyConfigured, match="production"):
+        EmecefProvider()
+    settings.ENV = settings.PRODUCTION
+    assert EmecefProvider().api_url == "https://sygmef.impots.bj/emcf/api"
+
+
+def test_emecef_status_reads_the_token_validity_date_and_the_emcf_status(emecef):
+    with mock.patch("requests.request", return_value=response(DGI_INFO_STATUS)) as request:
         status = emecef.status()
-    assert request.call_args.args == ("GET", "https://dgi.test/sygmef-emcf/api/info/status")
-    assert request.call_args.kwargs["headers"] == {"Authorization": "Bearer jeton-de-test"}
-    assert (status.token_valid, status.ifu, status.nim, status.pending) == (
-        True,
-        "0000000000001",
-        "NIM1",
-        ["u-1"],
+    assert request.call_args.args == ("GET", f"{TEST_URL}/info/status")
+    assert request.call_args.kwargs["headers"]["Authorization"] == "Bearer jeton-de-test"
+    assert (status.ifu, status.nim, status.version, status.emcf_status) == (
+        "9999900000001",
+        "XX01000070",
+        "1.0",
+        "Actif",
     )
-    with mock.patch("requests.request", return_value=response({"tokenValid": "false"})):
-        assert emecef.status().token_valid is False
-    groups = {"a": 0, "b": 18, "c": 0, "d": 0, "e": 3, "f": 0, "aibA": 1, "aibB": 5}
-    with mock.patch("requests.request", return_value=response(groups)):
-        assert emecef.tax_groups() == TaxGroups(
-            rates={"A": 0, "B": 18, "C": 0, "D": 0, "E": 3, "F": 0}, aib_a=1, aib_b=5
-        )
+    assert status.token_valid_until.year == 2999 and status.token_valid and status.active
+    expired = {
+        **DGI_INFO_STATUS,
+        "tokenValid": "2020-11-28T00:00:00+01:00",
+        "emcfList": [],
+        "nim": "autre",
+    }
+    with mock.patch("requests.request", return_value=response(expired)):
+        status = emecef.status()
+    assert not status.token_valid and not status.active
+    with mock.patch("requests.request", return_value=response({"tokenValid": "n'importe quoi"})):
+        assert emecef.status().token_valid_until is None
+
+
+def test_emecef_pending_requests_come_from_the_invoice_api(emecef):
+    with mock.patch("requests.request", return_value=response(DGI_PENDING)) as request:
+        pending = emecef.pending_requests()
+    assert request.call_args.args == ("GET", f"{TEST_URL}/invoice")
+    assert [item.uid for item in pending] == [
+        "437261A6-41BD-4D7B-B61B-E60C2D8089AA",
+        "313AE8C2-1EAC-4DE9-AF40-7A0240599114",
+        "C562ADCF-BCF5-4592-A95F-5A5617C66FD8",
+    ]
+    assert pending[0].date.year == 2020 and pending[2].date is None
+
+
+def test_emecef_reads_the_tax_groups_and_the_types(emecef):
+    with mock.patch("requests.request", return_value=response(DGI_TAX_GROUPS)) as request:
+        groups = emecef.tax_groups()
+    assert request.call_args.args[1] == f"{TEST_URL}/info/taxGroups"
+    assert groups == TaxGroups(
+        rates={"A": 0, "B": 18, "C": 0, "D": 18, "E": 0, "F": 0}, aib_a=1, aib_b=5
+    )
     with (
         mock.patch("requests.request", return_value=response({"a": 0})),
         pytest.raises(FiscalTemporaryError),
     ):
         emecef.tax_groups()
+    types = [{"type": "FV", "description": "Facture de vente"}, {"type": "FA"}, "bruit"]
+    with mock.patch("requests.request", return_value=response(types)) as request:
+        assert emecef.invoice_types() == [("FV", "Facture de vente"), ("FA", "")]
+    assert request.call_args.args[1] == f"{TEST_URL}/info/invoiceTypes"
+    with mock.patch(
+        "requests.request",
+        return_value=response([{"type": "MOBILEMONEY", "description": "MOBILE MONEY"}]),
+    ):
+        assert emecef.payment_types() == [("MOBILEMONEY", "MOBILE MONEY")]
+    with (
+        mock.patch("requests.request", return_value=response({"a": 1})),
+        pytest.raises(FiscalTemporaryError),
+    ):
+        emecef.payment_types()
 
 
-def test_emecef_requests_then_confirms_an_invoice(emecef):
-    created = {"uid": "u-1", "total": 23100, "aib": 1100, "ta": 0, "errorCode": None}
-    with mock.patch("requests.request", return_value=response(created)) as request:
-        totals = emecef.request_invoice(invoice_request(aib="B"))
-    assert (totals.uid, totals.total, totals.aib) == ("u-1", 23100, 1100)
-    assert request.call_args.args == ("POST", "https://dgi.test/sygmef-emcf/api/invoice")
+def test_emecef_requests_an_invoice_with_the_dgi_example(emecef):
+    with mock.patch("requests.request", return_value=response(DGI_INVOICE)) as request:
+        totals = emecef.request_invoice(invoice_request(aib="A"))
+    assert request.call_args.args == ("POST", f"{TEST_URL}/invoice")
     body = request.call_args.kwargs["json"]
-    assert body["ifu"] == "0000000000001" and body["type"] == "FV" and body["reference"] == "CMD-1"
-    assert body["aib"] == "B" and body["operator"] == {"id": "steamy", "name": "Steamy"}
-    assert body["items"][0] == {
-        "code": "C1",
-        "name": "Parcours robotique",
-        "price": 10000,
-        "quantity": 2.0,
-        "taxGroup": "B",
+    assert body == {
+        "ifu": "9999900000001",
+        "type": "FV",
+        "items": [
+            {"name": "Jus d'orange", "price": 1800, "quantity": 2.0, "taxGroup": "B"},
+            {"name": "Lait 1/1 EX", "price": 450, "quantity": 3.0, "taxGroup": "A"},
+        ],
+        "operator": {"id": "", "name": "Steamy"},
+        "payment": [{"name": "MOBILEMONEY", "amount": 4950}],
+        "client": {"name": "Marie Houngbo", "contact": "+2290197000001"},
+        "aib": "A",
     }
-    assert body["items"][1]["taxSpecific"] == 0
-    assert body["client"] == {"name": "Marie Houngbo", "contact": "+2290197000001"}
-    assert body["payment"] == [{"name": "MOBILEMONEY", "amount": 22000}]
-
-    security = {
-        "dateTime": "23/10/2026 15:00:00",
-        "qrCode": "F;NIM1;u-1",
-        "codeMECeFDGI": "AAAA-BBBB",
-        "counters": "5/5 FV",
-        "nim": "NIM1",
-    }
-    with mock.patch("requests.request", return_value=response(security)) as request:
-        elements = emecef.confirm("u-1")
-    assert request.call_args.args == ("PUT", "https://dgi.test/sygmef-emcf/api/invoice/u-1/confirm")
-    assert (elements.code, elements.qr_code, elements.counters, elements.nim) == (
-        "AAAA-BBBB",
-        "F;NIM1;u-1",
-        "5/5 FV",
-        "NIM1",
-    )
-    with mock.patch("requests.request", return_value=response(security)) as request:
-        emecef.cancel("u-1")
-    assert request.call_args.args[1].endswith("/api/invoice/u-1/cancel")
+    assert "reference" not in body
+    assert totals.uid == DGI_INVOICE["uid"] and totals.total == 4950 and totals.aib == 0
+    assert totals.group_totals == {"A": 1350, "B": 3600, "C": 0, "D": 0, "E": 0, "F": 0}
+    assert totals.excl_tax == {"B": 3051, "D": 0} and totals.vat == {"B": 549, "D": 0}
 
 
 def test_emecef_omits_the_optional_request_fields(emecef):
     plain = InvoiceRequest(
         type="FV",
-        reference="CMD-2",
-        items=[FiscalItem("C1", "Parcours", 100, Decimal(1), "A")],
-        client=FiscalClient(name="Awa", ifu="123"),
+        items=[FiscalItem("92891", "Lait", 1200, Decimal("12.250"), "A", tax_specific=230)],
+        client=FiscalClient(name=""),
         payments=[],
     )
-    with mock.patch(
-        "requests.request", return_value=response({"uid": "u", "total": 100})
-    ) as request:
+    with mock.patch("requests.request", return_value=response(DGI_INVOICE)) as request:
         emecef.request_invoice(plain)
     body = request.call_args.kwargs["json"]
-    assert (
-        "aib" not in body
-        and "taxSpecific" not in body["items"][0]
-        and body["client"] == {"name": "Awa", "ifu": "123"}
+    assert "aib" not in body and "client" not in body and "reference" not in body
+    assert body["items"][0] == {
+        "name": "Lait",
+        "price": 1200,
+        "quantity": 12.25,
+        "taxGroup": "A",
+        "code": "92891",
+        "taxSpecific": 230,
+    }
+
+
+def test_a_credit_note_carries_the_24_character_reference_of_the_original_invoice(emecef):
+    original = SecurityElements(
+        "d", "qr", "X537-E4DB-AJUU-HHXN-FWIS-FEKJ", "64/64 FV", "IN01000005"
     )
+    credit = InvoiceRequest(
+        type="FA",
+        items=[FiscalItem("", "Jus d'orange", 1800, Decimal(1), "B")],
+        client=FiscalClient(name="Marie"),
+        payments=[FiscalPayment("MOBILEMONEY", 1800)],
+        reference=original.reference,
+    )
+    with mock.patch("requests.request", return_value=response(DGI_INVOICE)) as request:
+        emecef.request_invoice(credit)
+    assert request.call_args.kwargs["json"]["reference"] == "X537E4DBAJUUHHXNFWISFEKJ"
+    for bad, code in (("", "5"), ("X537-E4DB", "5"), ("X537-E4DB-AJUU-HHXN-FWIS-FEKJ", "5")):
+        with mock.patch("requests.request") as request, pytest.raises(FiscalError) as error:
+            emecef.request_invoice(InvoiceRequest(**{**credit.__dict__, "reference": bad}))
+        assert error.value.code == code and not request.called
+    with mock.patch("requests.request") as request, pytest.raises(FiscalError) as error:
+        emecef.request_invoice(InvoiceRequest(**{**credit.__dict__, "type": "FV"}))
+    assert error.value.code == "4" and not request.called
+
+
+def test_emecef_confirms_and_cancels_with_put(emecef):
+    uid = DGI_INVOICE["uid"]
+    with mock.patch("requests.request", return_value=response(DGI_SECURITY)) as request:
+        elements = emecef.confirm(uid)
+    assert request.call_args.args == ("PUT", f"{TEST_URL}/invoice/{uid}/confirm")
+    assert (elements.code, elements.counters, elements.nim) == (
+        "X537-E4DB-AJUU-HHXN-FWIS-FEKJ",
+        "64/64 FV",
+        "IN01000005",
+    )
+    assert (
+        elements.date_time == "23/11/2020 13:17:08"
+        and elements.reference == "X537E4DBAJUUHHXNFWISFEKJ"
+    )
+    cancelled = {
+        "dateTime": "23/11/2020 13:17:09",
+        "qrCode": "",
+        "codeMECeFDGI": "",
+        "counters": "64/65 FV",
+        "nim": "IN01000005",
+    }
+    with mock.patch("requests.request", return_value=response(cancelled)) as request:
+        result = emecef.cancel(uid)
+    assert request.call_args.args == ("PUT", f"{TEST_URL}/invoice/{uid}/cancel")
+    assert result.code == "" and result.qr_code == "" and result.counters == "64/65 FV"
+    with (
+        mock.patch("requests.request", return_value=response({"dateTime": "x"})),
+        pytest.raises(FiscalTemporaryError),
+    ):
+        emecef.confirm(uid)
 
 
 @pytest.mark.parametrize(
@@ -248,31 +427,44 @@ def test_emecef_omits_the_optional_request_fields(emecef):
         (response({}, status=503), FiscalTemporaryError, ""),
         (response({}, status=429), FiscalTemporaryError, ""),
         (response({}, status=401), FiscalError, "TOKEN_REFUSED"),
-        (response({}, status=403), FiscalError, "TOKEN_REFUSED"),
         (response({}, status=400), FiscalError, "HTTP_ERROR"),
-        (response({"errorCode": "E12", "errorDesc": "IFU inconnu"}), FiscalError, "E12"),
-        (response({"errorCode": "E13"}), FiscalError, "E13"),
+        (
+            response(
+                {
+                    "errorCode": "1",
+                    "errorDesc": "Le nombre maximum de factures en attente est dépassé",
+                }
+            ),
+            FiscalTemporaryError,
+            "1",
+        ),
+        (
+            response({"errorCode": "10", "errorDesc": "Réessayez plus tard"}),
+            FiscalTemporaryError,
+            "10",
+        ),
+        (
+            response({"errorCode": "12", "errorDesc": "Montant supérieur à la facture d'origine"}),
+            FiscalError,
+            "12",
+        ),
+        (response({"errorCode": "99"}), FiscalError, "99"),
         (response(["pas un objet"]), FiscalTemporaryError, ""),
         (response({"uid": "u"}), FiscalTemporaryError, ""),
     ],
 )
-def test_emecef_failures_are_classified(emecef, error, kind, code):
+def test_emecef_failures_are_classified_by_the_annex_of_the_dgi(emecef, error, kind, code):
     effect = {"side_effect": error} if isinstance(error, Exception) else {"return_value": error}
     with mock.patch("requests.request", **effect), pytest.raises(FiscalError) as raised:
         emecef.request_invoice(invoice_request())
     assert type(raised.value) is kind and raised.value.code == code
 
 
-def test_emecef_unreadable_json_and_missing_security_elements(emecef):
+def test_emecef_unreadable_json_is_a_temporary_failure(emecef):
     broken = response({})
     broken.json.side_effect = ValueError
     with mock.patch("requests.request", return_value=broken), pytest.raises(FiscalTemporaryError):
         emecef.status()
-    with (
-        mock.patch("requests.request", return_value=response({"dateTime": "x"})),
-        pytest.raises(FiscalTemporaryError),
-    ):
-        emecef.confirm("u-1")
 
 
 # --- Garde-fou ----------------------------------------------------------------------------------------------------
@@ -323,17 +515,34 @@ def test_activation_is_refused_when_rates_diverge():
     assert "18 %" in errors["emecef_taxed_group"] and "exonéré" in errors["emecef_exempt_group"]
 
 
-def test_activation_is_refused_without_environment_or_with_a_bad_token(settings):
+def test_activation_is_refused_without_environment_with_a_bad_token_or_an_inactive_emcf(settings):
     config = configure(emecef_enabled=True, emecef_exempt_group="A")
     settings.FISCAL_PROVIDER = "emecef"
+    settings.EMECEF_TOKEN = ""
     assert "EMECEF_TOKEN" in activation_errors(config)["emecef_enabled"]
     settings.FISCAL_PROVIDER = "fake"
 
-    class Invalid(FakeFiscalProvider):
+    class Expired(FakeFiscalProvider):
         def status(self):
-            return super().status().__class__(token_valid=False)
+            return FiscalStatus(
+                token_valid_until=timezone.now() - timedelta(days=1), emcf_status="Actif"
+            )
 
-    assert "jeton" in activation_errors(config, Invalid())["emecef_enabled"]
+    assert "expiré" in activation_errors(config, Expired())["emecef_enabled"]
+
+    class Inactive(FakeFiscalProvider):
+        def status(self):
+            return FiscalStatus(
+                token_valid_until=timezone.now() + timedelta(days=9), emcf_status="Désactivé"
+            )
+
+    assert "Désactivé" in activation_errors(config, Inactive())["emecef_enabled"]
+
+    class Unknown(FakeFiscalProvider):
+        def status(self):
+            return FiscalStatus(token_valid_until=timezone.now() + timedelta(days=9))
+
+    assert "inconnu" in activation_errors(config, Unknown())["emecef_enabled"]
 
     class Down(FakeFiscalProvider):
         def tax_groups(self):
@@ -356,6 +565,25 @@ def test_emecef_is_off_by_default_and_needs_its_groups():
     with pytest.raises(ValidationError) as error:
         config.full_clean()
     assert set(error.value.message_dict) == {"emecef_taxed_group", "emecef_exempt_group"}
+
+
+@pytest.mark.parametrize("rate", ["3", "0.5", "10"])
+def test_with_emecef_the_aib_is_one_or_five_percent(rate):
+    config = configure(
+        emecef_enabled=True,
+        emecef_taxed_group="B",
+        emecef_exempt_group="A",
+        aib_enabled=True,
+        aib_rate=Decimal(rate),
+    )
+    with pytest.raises(ValidationError) as error:
+        config.full_clean()
+    assert (
+        set(error.value.message_dict) == {"aib_rate"}
+        and "1 %" in error.value.message_dict["aib_rate"][0]
+    )
+    config.aib_rate = Decimal("5")
+    config.full_clean()
 
 
 def settings_form(**overrides):
@@ -410,60 +638,35 @@ def test_admin_activates_emecef_only_when_the_dgi_rates_match(client):
 # --- Vérification manuelle (`emecef_check`, lecture seule) -------------------------------------------------------
 
 
-def test_emecef_reads_the_invoice_and_payment_types(emecef):
-    types = [{"type": "FV", "description": "Facture de vente"}, {"type": "FA"}, "bruit"]
-    with mock.patch("requests.request", return_value=response(types)) as request:
-        assert emecef.invoice_types() == [("FV", "Facture de vente"), ("FA", "")]
-    assert request.call_args.args[:2] == (
-        "GET",
-        "https://dgi.test/sygmef-emcf/api/info/invoiceTypes",
-    )
-    with mock.patch(
-        "requests.request", return_value=response([{"type": "MOBILEMONEY", "description": "MM"}])
-    ):
-        assert emecef.payment_types() == [("MOBILEMONEY", "MM")]
-    with (
-        mock.patch("requests.request", return_value=response({"a": 1})),
-        pytest.raises(FiscalTemporaryError),
-    ):
-        emecef.payment_types()
-
-
-def test_the_fake_provider_lists_its_types():
-    provider = FakeFiscalProvider()
-    assert [code for code, _ in provider.invoice_types()] == ["FV", "FA", "EV", "EA"]
-    assert "MOBILEMONEY" in [code for code, _ in provider.payment_types()]
-
-
 def test_emecef_check_prints_the_read_only_report_without_the_token(emecef, settings):
     from io import StringIO
 
     from django.core.management import call_command
 
     settings.FISCAL_PROVIDER = "emecef"
-    status = {"tokenValid": "true", "ifu": "0000000000001", "nim": "NIM1", "version": "1.0"}
-    groups = {"a": 0, "b": 18, "c": 0, "d": 0, "e": 0, "f": 0, "aibA": 1, "aibB": 5}
     replies = [
-        response(status),
-        response(groups),
+        response(DGI_INFO_STATUS),
+        response(DGI_PENDING),
+        response(DGI_TAX_GROUPS),
         response([{"type": "FV", "description": "Facture de vente"}]),
-        response([{"type": "ESPECES", "description": "Espèces"}]),
+        response([{"type": "ESPECES", "description": "ESPECES"}]),
     ]
     out = StringIO()
     with mock.patch("requests.request", side_effect=replies) as request:
         call_command("emecef_check", stdout=out)
-    assert [call.args[0] for call in request.call_args_list] == ["GET"] * 4
+    assert [call.args[0] for call in request.call_args_list] == ["GET"] * 5
     report = out.getvalue()
-    assert "jeton valide : oui" in report and "•••••••••0001" in report and "B : 18" in report
+    assert "Serveur : test" in report and "jeton valide : oui (jusqu'au 31/01/2999)" in report
+    assert "•••••••••0001" in report and "e-MCF : Actif · demandes en attente : 3" in report
     assert (
-        "AIB A : 1 · AIB B : 5" in report
+        "D : 18" in report
+        and "AIB A : 1 · AIB B : 5" in report
         and "FV : Facture de vente" in report
-        and "ESPECES" in report
     )
-    assert "jeton-de-test" not in report and "0000000000001" not in report
+    assert "jeton-de-test" not in report and "9999900000001" not in report
 
 
-def test_emecef_check_fails_on_an_invalid_token_or_an_api_error(emecef, settings):
+def test_emecef_check_with_the_fake_provider_and_failures(emecef, settings):
     from io import StringIO
 
     from django.core.management import call_command
@@ -471,8 +674,8 @@ def test_emecef_check_fails_on_an_invalid_token_or_an_api_error(emecef, settings
 
     settings.FISCAL_PROVIDER = "fake"
     out = StringIO()
-    call_command("emecef_check", stdout=out)  # faux fournisseur : rapport sans réseau
-    assert "FISCAL_PROVIDER=fake" in out.getvalue()
+    call_command("emecef_check", stdout=out)
+    assert "FISCAL_PROVIDER=fake" in out.getvalue() and "Serveur : fake" in out.getvalue()
 
     settings.FISCAL_PROVIDER = "emecef"
     with (
@@ -480,14 +683,25 @@ def test_emecef_check_fails_on_an_invalid_token_or_an_api_error(emecef, settings
         pytest.raises(CommandError, match="injoignable"),
     ):
         call_command("emecef_check", stdout=StringIO())
-    invalid = [
-        response({"tokenValid": "false"}),
-        response({"a": 0, "b": 18, "c": 0, "d": 0, "e": 0, "f": 0, "aibA": 1, "aibB": 5}),
-        response([]),
-        response([]),
-    ]
+
+    def replies(status):
+        return [
+            response(status),
+            response(DGI_PENDING),
+            response(DGI_TAX_GROUPS),
+            response([]),
+            response([]),
+        ]
+
+    expired = {**DGI_INFO_STATUS, "tokenValid": "2020-11-28T00:00:00+01:00"}
     with (
-        mock.patch("requests.request", side_effect=invalid),
-        pytest.raises(CommandError, match="pas valide"),
+        mock.patch("requests.request", side_effect=replies(expired)),
+        pytest.raises(CommandError, match="expiré"),
+    ):
+        call_command("emecef_check", stdout=StringIO())
+    inactive = {**DGI_INFO_STATUS, "emcfList": [{"nim": "XX01000070", "status": "Désactivé"}]}
+    with (
+        mock.patch("requests.request", side_effect=replies(inactive)),
+        pytest.raises(CommandError, match="pas actif"),
     ):
         call_command("emecef_check", stdout=StringIO())

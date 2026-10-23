@@ -410,7 +410,8 @@ INVOICE_MENTIONS = json.loads(os.getenv("INVOICE_MENTIONS", "[]"))
 # production, seulement si `PlatformSettings.emecef_enabled`. IFU, URL et jeton viennent de l'environnement (secrets),
 # jamais du dépôt.
 FISCAL_PROVIDER = os.getenv("FISCAL_PROVIDER", "emecef" if DEPLOYED else "fake")
-EMECEF_API_URL = os.getenv("EMECEF_API_URL", "")
+# `test` (serveur de test de la DGI, par défaut, aussi en staging) ou `production` (réservé à la production de Steamy)
+EMECEF_ENVIRONMENT = os.getenv("EMECEF_ENVIRONMENT", "test")
 EMECEF_TOKEN = os.getenv("EMECEF_TOKEN", "")
 EMECEF_IFU = os.getenv("EMECEF_IFU", "")
 # Identifiants FedaPay des devises, quand une notification ne donne que `currency_id`

@@ -1,9 +1,9 @@
 """
 Garde-fou de la facture normalisée (ADR 0006) : nos taux ne divergent jamais de ceux de la DGI.
 
-À l'activation (et avant chaque émission), `GET /api/info/taxGroups` doit renvoyer, pour le groupe choisi, un taux égal
-à `vat_rate`, un taux nul pour le groupe exonéré, et `aib_rate` doit égaler `aibA` ou `aibB` (ce qui donne `aib = A` ou
-`B`). Le jeton doit être valide. Sinon : pas d'activation, pas d'émission.
+À l'activation (et avant chaque émission), `GET /info/taxGroups` doit renvoyer, pour le groupe choisi, un taux égal à
+`vat_rate`, un taux nul pour le groupe exonéré, et `aib_rate` doit égaler `aibA` (1 %) ou `aibB` (5 %), ce qui donne
+`aib = A` ou `B`. L'e-MCF doit être « Actif » et son jeton valide. Sinon : pas d'activation, pas d'émission.
 """
 
 from decimal import Decimal
@@ -27,16 +27,19 @@ def aib_letter(config, groups: TaxGroups) -> str | None:
 def activation_errors(config, provider: FiscalInvoiceProvider | None = None) -> dict[str, str]:
     """Erreurs empêchant d'activer e-MECeF avec ces réglages, par champ ; vide si l'activation est possible."""
     errors: dict[str, str] = {}
-    if settings.FISCAL_PROVIDER == "emecef" and not (
-        settings.EMECEF_API_URL and settings.EMECEF_TOKEN and settings.EMECEF_IFU
-    ):
+    if settings.FISCAL_PROVIDER == "emecef" and not (settings.EMECEF_TOKEN and settings.EMECEF_IFU):
         return {
-            "emecef_enabled": "EMECEF_API_URL, EMECEF_TOKEN et EMECEF_IFU doivent être définis dans l'environnement."
+            "emecef_enabled": "EMECEF_TOKEN et EMECEF_IFU doivent être définis dans l'environnement."
         }
     try:
         provider = provider or get_fiscal_provider()
-        if not provider.status().token_valid:
-            return {"emecef_enabled": "Le jeton e-MECeF n'est pas valide."}
+        status = provider.status()
+        if not status.token_valid:
+            return {"emecef_enabled": "Le jeton e-MECeF est expiré ou invalide."}
+        if not status.active:
+            return {
+                "emecef_enabled": f"L'e-MCF n'est pas actif (statut : {status.emcf_status or 'inconnu'})."
+            }
         groups = provider.tax_groups()
     except FiscalError as error:
         return {"emecef_enabled": f"e-MECeF est injoignable ou refuse la demande : {error}"}

@@ -1,144 +1,164 @@
 # ADR 0006 · Facture normalisée e-MECeF (DGI du Bénin)
 
-- **Statut** : **proposée** : la cartographie ci-dessous est à valider avant tout code d'émission
-- **Date** : 23 octobre 2026
+- **Statut** : **proposée**, conforme à la spécification officielle de la DGI ; reste à valider par la comptabilité :
+  groupes de taxe (E1), exportation (E4) et, par une sonde sur le serveur de test, l'AIB dans `total` (E3)
+- **Date** : 23 octobre 2026 (mise en conformité avec le PDF de la DGI le même jour)
 - **Étape** : `API-L3b.2c` ([PLAN-API](../plans/PLAN-API.md)), après `API-L3b.2b` (reçu provisoire) et C25 (TVA et AIB
   paramétrables)
 - **Décisions appliquées** : P1 de l'[ADR 0005](0005-pdf-et-stockage-prive.md) (facture normalisée, tranché le
   2026-10-23), C25 ([ARBITRAGES](../alignement/ARBITRAGES.md)), C12 (facture au payeur), D40 (conservation)
 - **Remplace** : la partie « Facture » de l'ADR 0005 pour le contenu fiscal ; le moteur PDF, le stockage privé et
   l'accès restent ceux de l'ADR 0005
-- **Contrat** : [`docs/references/emecef/`](../references/emecef/README.md), spécifications OpenAPI publiques de la DGI
+- **Contrat** : [`docs/references/emecef/`](../references/emecef/README.md) : « Spécification de l'API pour l'e-MCF
+  v1.0 » (DGI, PDF) et les deux spécifications OpenAPI publiques
 
 ## Contexte
 
-Steamy émet des factures normalisées. Le contrat de l'API e-MECeF est connu ; **restent à obtenir de la DGI** : l'IFU
-de Steamy et son agrément, le jeton d'API, la signification des groupes de taxe et les règles d'arrondi (non décrits
-dans le swagger). Rien ne part vers la DGI tant que l'interrupteur d'activation est éteint : le reçu provisoire
-actuel (`INVOICE_PROVISIONAL`) reste le comportement par défaut.
+Steamy émet des factures normalisées avec l'**e-MCF** (module de contrôle dématérialisé de la DGI) : le logiciel de
+facturation envoie les données de la facture et reçoit les **éléments de sécurité** (Code MECeF/DGI, QR…) nécessaires
+pour produire la facture normalisée. Rien ne part vers la DGI tant que l'interrupteur d'activation est éteint : le reçu
+provisoire actuel (`INVOICE_PROVISIONAL`) reste le comportement par défaut.
 
-### Ce que dit le contrat (API e-MCF 1.0, `/sygmef-emcf`)
+### Le contrat (spécification v1.0 de la DGI)
 
-| Appel | Rôle |
+| Élément | Règle |
 | --- | --- |
-| `GET /api/info/status` | État du dispositif : `status`, `ifu`, `nim`, **`tokenValid`**, demandes en attente (`pendingRequestsList`), AIB en attente de paiement |
-| `GET /api/info/taxGroups` | **Taux en %** des groupes `a` à `f` et de l'AIB (`aibA`, `aibB`) |
-| `GET /api/info/invoiceTypes`, `paymentTypes` | Types de facture et moyens de paiement admis |
-| `POST /api/invoice` | **Demande** de facture : `ifu`, `aib` (`A` ou `B`), `type` (`FV` vente, `FA` avoir, `EV` vente export, `EA` avoir export), `items[code, name, price (entier), quantity, taxGroup A à F, taxSpecific, originalPrice, priceModification]`, `client[ifu, name, contact, address]`, `operator[id, name]`, `payment[name, amount]`, `reference`. Répond `uid` et les **totaux calculés par la DGI** (`ta…td`, `taa…taf`, `hab`, `had`, `vab`, `vad`, `aib`, `ts`, `total`), ou `errorCode` / `errorDesc` |
-| `PUT /api/invoice/{uid}/confirm` | **Confirmation** : renvoie les **éléments de sécurité** à imprimer (`dateTime`, `qrCode`, `codeMECeFDGI`, `counters`, `nim`) |
-| `PUT /api/invoice/{uid}/cancel` | Annulation d'une demande |
-| `GET /api/invoice`, `GET /api/invoice/{uid}` | Demandes en attente ; détail d'une demande |
+| Serveurs | **Test** `https://developper.impots.bj/sygmef-emcf/api` ; **production** `https://sygmef.impots.bj/emcf/api`. Facturation : `{base}/invoice` ; information : `{base}/info` |
+| Authentification | `Authorization: Bearer <jeton JWT>` ; un jeton **par e-MCF** (un par point de vente), créé par la DGI, à garder secret ; sans jeton valide : HTTP 401 |
+| `GET /info/status` | `tokenValid` est la **date de validité** du jeton (pas un booléen), `serverDateTime`, `nim`, `emcfList[nim, status]` : l'e-MCF doit être **« Actif »** (`Enregistré` : pas activé par la DGI ; `Désactivé` : ne peut plus enregistrer) |
+| `GET /info/taxGroups` | Taux en % des groupes `a` à `f` et de l'AIB (`aibA`, `aibB`). Exemple de la documentation : A = 0, B = 18, C = 0, D = 18, E = 0, F = 0 ; AIB A = 1, AIB B = 5 |
+| `GET /info/invoiceTypes`, `paymentTypes` | Types de facture (`FV` vente, `EV` vente à l'exportation, `FA` avoir, `EA` avoir à l'exportation) et de paiement (`ESPECES`, `VIREMENT`, `CARTEBANCAIRE`, `MOBILEMONEY`, `CHEQUES`, `CREDIT`, `AUTRE`) |
+| `GET /invoice` | Statut de l'API de facturation : `pendingRequestsCount` et `pendingRequestsList[date, uid]` |
+| `POST /invoice` | **Demande** : `ifu` (13 car.), `aib` (`A` = 1 %, `B` = 5 %), `type`, `items[code?, name, price, quantity, taxGroup, taxSpecific?, originalPrice?, priceModification?]`, `client?[ifu?, name?, contact?, address?]`, `operator[id?, name]`, `payment?[name, amount]` (ESPECES par défaut si absent), `reference` (**avoirs seulement**). Répond `uid` et les totaux **calculés par l'e-MCF** (`ta…td` taux, `taa…taf` total par groupe, `hab`/`had` HT et `vab`/`vad` TVA des groupes B et D, `aib`, `ts`, `total` = somme des lignes), ou `errorCode` / `errorDesc` |
+| `PUT /invoice/{uid}/confirm` ou `/cancel` | Finalisation : `dateTime` (`dd/MM/yyyy HH:mm:ss`), `qrCode`, `codeMECeFDGI` (29 car. avec tirets), `counters`, `nim`. À l'annulation, ni code ni QR. (Le texte du PDF dit POST, son exemple et l'OpenAPI disent PUT : **PUT**) |
+| `GET /invoice/{uid}` | Détail d'une demande en attente |
 
-Authentification : en-tête `Authorization: Bearer <JWT>` (clé API liée à l'IFU). L'API « integrator » (demande
-d'agrément `submitDemand`, jetons `requestToken` / `confirmToken` / `getToken`) sert aux **démarches** du contribuable :
-elles se font à la main, **aucun appel depuis le code**.
+Une demande non finalisée est **en attente 2 minutes**, puis **expire** ; **10 demandes en attente au plus** par e-MCF
+(erreur 1). Il n'y a **aucune clé d'idempotence** : `reference` ne sert qu'aux avoirs. Erreurs (annexe) : 1 trop de
+demandes en attente, 3 type invalide, 4 référence d'origine manquante, 5 référence sans 24 caractères, 6 AIB invalide,
+7 paiement invalide, 8 aucun article, 9 groupe invalide, 10 référence d'origine non vérifiable pour l'instant
+(réessayer), 11 facture d'origine introuvable, 12 avoir supérieur à la facture d'origine, 20 facture inconnue ou déjà
+finalisée, 99 erreur de traitement.
 
-### Ce que le contrat ne dit pas (à obtenir de la DGI)
+L'API « integrator » (demande d'agrément, jetons) sert aux **démarches** du contribuable : elles se font à la main,
+**aucun appel depuis le code**.
 
-1. La **signification des groupes A à F** (exonéré, taxable, exportation…) et celle des champs `hab`, `had`, `vab`,
-   `vad`, `ts` de la réponse. Une recherche publique n'a confirmé que le groupe C (exportation, 0 %) ; aucun taux
-   n'est supposé ici.
-2. Si les **prix des articles sont TTC** (les taxes sont alors extraites du prix) ou HT, et la **règle d'arrondi**
-   (par article ou sur le total).
-3. Le comportement d'un `POST /api/invoice` **rejoué avec la même `reference`** (doublon refusé ? même `uid` ?), la
-   durée de vie d'une demande non confirmée, la façon de référencer la facture d'origine dans un **avoir** (`FA`).
-4. Si l'**AIB** s'applique à toute la facture (un seul champ `aib`) ou peut exclure une ligne.
+### Ce que le document ne dit toujours pas
 
-## Cartographie proposée
+1. Le **sens métier** des groupes A à F (lequel est « taxable », lequel « exonéré ») : seuls leurs taux sont lus par
+   l'API. Une recherche publique n'a confirmé que C = exportation à 0 %.
+2. Si `total` **inclut l'AIB** (les exemples ont un AIB à 0) et sur quelle base l'AIB est calculé.
+3. La règle d'arrondi de l'e-MCF : l'exemple (2 × 1 800 en groupe B → `tab` 3 600, `hab` 3 051, `vab` 549) montre
+   `HT = arrondi(total du groupe × 100 / (100 + taux))` et `TVA = total du groupe − HT`, **sur le total du groupe**.
 
-### 1. TVA et AIB paramétrables ↔ groupes de taxe et `aib`
+## Décisions et cartographie
 
-- `PlatformSettings` gagne `emecef_taxed_group` (groupe A à F appliqué aux articles **quand la TVA est activée**) et
-  `emecef_exempt_group` (groupe appliqué quand elle ne l'est pas). Valeurs saisies par l'admin d'après la comptabilité,
-  **sans défaut inventé**.
-- **Garde-fou** : à l'activation et avant chaque émission, `GET /api/info/taxGroups` doit renvoyer, pour le groupe
-  choisi, un taux **égal à `vat_rate`** ; de même, `aib_rate` doit être égal à `aibA` ou `aibB`, ce qui détermine
-  `aib = A` ou `B`. Sinon : pas d'émission, alerte Finance, la facture reste un reçu en attente. Nos taux ne peuvent
-  donc jamais diverger de ceux de la DGI.
-- **Livraison** : une ligne « Livraison » ; groupe taxé si `vat_applies_to_shipping`, exonéré sinon. L'AIB étant un
-  champ unique de la facture, `aib_applies_to_shipping = false` n'est probablement pas représentable : à confirmer
-  (point 4 ci-dessus) ; à défaut, l'activation d'e-MECeF exige `aib_applies_to_shipping = vrai`.
+### 1. Taxes ↔ groupes ↔ `aib`
 
-### 2. Prix envoyés et écart d'arrondi
+- `PlatformSettings.emecef_taxed_group` (groupe des lignes quand la TVA est activée) et `emecef_exempt_group` (quand
+  elle ne l'est pas) : saisis d'après la comptabilité, **sans défaut inventé**.
+- **Garde-fou** (à l'activation et avant chaque émission) : `GET /info/taxGroups` donne pour le groupe taxé un taux
+  **égal à `vat_rate`**, un taux **nul** pour le groupe exonéré ; `aib_rate` doit valoir **1 ou 5** (groupes AIB A et B,
+  seules valeurs de la spécification ; contrôle statique du modèle, en français) **et** égaler `aibA` ou `aibB`, ce qui
+  donne `aib = A` ou `B` ; le jeton doit être valide (date future, comparée à l'heure du serveur de la DGI) ; l'e-MCF
+  doit être « Actif ». Sinon : pas d'activation, pas d'émission, alerte Finance.
+- **Livraison** : ligne « Livraison », au groupe taxé si `vat_applies_to_shipping`, sinon au groupe exonéré. L'AIB étant
+  un champ unique de la facture, activer e-MECeF avec `aib_applies_to_shipping = faux` n'est pas représentable : la
+  facture est refusée par le contrôle de cohérence (point 2) tant que la sonde n'a pas dit comment l'e-MCF calcule l'AIB.
 
-Nos prix sont HT, les taxes s'ajoutent (C25) ; le montant payé est figé sur la commande et **n'est jamais modifié**
-par la facture. Si la DGI attend des prix TTC, chaque ligne est envoyée avec `HT + part de taxe`. Le `total` renvoyé
-par la DGI est comparé à `Order.total` :
+### 2. Prix envoyés : TTC par ligne, somme exacte
 
-- égal : la facture est confirmée ;
-- différent : **pas de confirmation**, alerte Finance (action admin « Relancer » après correction), jamais de montant
-  débité ajusté. Une fois la méthode d'arrondi de la DGI connue, **notre moteur** (`taxes.py`, arrondi unique sur le
-  total) est aligné sur elle **avant** toute commande réelle, et un test de non-régression compare les deux.
+Le `price` d'un article d'un groupe taxable est **TTC** : l'e-MCF en extrait la TVA. Nos prix sont HT et les taxes
+s'ajoutent (C25), avec la TVA calculée **une fois sur le total** de la commande. Pour que l'e-MCF retrouve **exactement**
+nos montants figés :
 
-### 3. Client de la facture
+1. `T_taxé` = base HT taxée + TVA figée de la commande. Montrons que l'extraction redonne notre base : avec
+   `V = arrondi(base × r / 100)`, l'écart `|V − base × r / 100|` est au plus 0,5 ; `(base + V) × 100 / (100 + r)` vaut donc
+   `base + écart / (1 + r / 100)`, à moins de 0,5 de `base` : l'arrondi de l'e-MCF donne `hab = base` et
+   `vab = V`, **pour tout taux**.
+2. Répartition de la TVA par ligne : méthode du plus fort reste, proportionnelle au HT de chaque ligne taxée (la somme
+   des parts vaut `V` exactement). Prix TTC de la ligne `t = HT + part`.
+3. Prix unitaire entier : si `t` est divisible par la quantité, `price = t / quantité` ; sinon la ligne est envoyée en
+   **quantité 1** au prix `t`, avec le libellé « titre × quantité ». Les lignes exonérées sont envoyées au prix HT.
+4. La somme des lignes vaut `HT + livraison + TVA`, notre total hors AIB.
 
-Payeur de la commande (parent connecté ou invité) : `name`, `contact` = téléphone, `address` vide, **sans `ifu`** (vente
-à un particulier). Un IFU facultatif sur le profil parent est hors v1. Type `FV` pour les payeurs du Bénin ; les
-payeurs d'un autre pays (D76) relèvent peut-être de `EV` (exportation, groupe C) : **à trancher par la comptabilité**.
+**Comparaison avant confirmation** : `hab`, `vab` (groupes taxés) et `aib` de la réponse doivent égaler nos montants
+figés, et `total` notre total hors AIB (ou avec AIB, selon la sonde, point 3). Sinon : **pas de confirmation**, la
+demande est annulée, alerte Finance. Le montant payé n'est **jamais** modifié.
 
-### 4. Flux, états et reprise
+### 3. AIB : à vérifier sur le serveur de test
 
-- **Après** le paiement (pas dans la transaction du webhook) : tâche Celery `issue_fiscal_invoice(invoice_id)` :
-  `POST /api/invoice` → enregistre `uid` aussitôt → compare les totaux → `PUT …/confirm` → enregistre les éléments de
-  sécurité → régénère le PDF.
-- `Invoice` gagne `fiscal_status` (`none`, `requested`, `confirmed`, `failed`), `fiscal_uid` et `fiscal` (JSON des
-  éléments de sécurité : QR, code MECeF/DGI, NIM, compteurs, date), figés (le snapshot reste l'instantané du contenu).
-  Le numéro interne `FAC-AAAA-NNNNNN` est conservé ; le numéro fiscal est le `codeMECeFDGI`. Le PDF imprime le QR
-  (image générée depuis `qrCode`), le code, le NIM, les compteurs et la date, et n'est un document fiscal que si
-  `fiscal_status = confirmed` (sinon : « Reçu de paiement » provisoire, comme aujourd'hui).
-- **Idempotence** : `reference` = référence de la commande ; le `uid` est enregistré avant toute confirmation ; une
-  reprise réutilise le `uid` connu, ou, s'il manque (réponse perdue), cherche dans `GET /api/info/status`
-  (`pendingRequestsList`) avant de redemander. Comportement du doublon : à confirmer (point 3 ci-dessus).
-- **Échecs** : erreur réseau ou 5xx : réessais à attente exponentielle (5 au maximum) ; erreur métier (`errorCode`) :
-  `failed`, **sans réessai automatique**, visible de la Finance avec `errorDesc`. Actions admin : « Relancer », « Annuler
-  la demande » (`PUT …/cancel`, seulement avant confirmation).
-- **Jeton** : tâche quotidienne sur `GET /api/info/status` ; `tokenValid` faux : alerte Finance et émissions suspendues
-  (les factures restent `requested`, relancées au retour du jeton).
+Le champ `aib` de la demande vaut `A` (1 %) ou `B` (5 %) ; la réponse donne le montant. Le document ne dit pas si
+`total` l'inclut. Le réglage d'environnement `EMECEF_AIB_IN_TOTAL` (`true` ou `false`, **absent par défaut**) dit ce que
+la sonde `emecef_probe` a constaté ; tant qu'il est absent, l'activation d'e-MECeF avec l'AIB activé est refusée. Le
+montant de paiement envoyé est notre total payé.
 
-### 5. Avoir sur remboursement
+### 4. Client, opérateur, type
 
-Un remboursement traité (`Refund.processed`) émet un **avoir** (`FA`, ou `EA` en cas d'exportation) du montant remboursé,
-lié à la facture d'origine : `Invoice.kind` (`sale`, `credit`) et `credit_for`. Après confirmation, une facture n'est
-jamais modifiée ni annulée : la correction passe par l'avoir. Remboursement partiel (place d'événement) : une ligne
-d'avoir avec la part de taxes déjà calculée pour le remboursement. La façon de référencer la facture d'origine est un
-point de la DGI (point 3 ci-dessus).
+- `client` : nom du payeur (parent connecté ou invité), `contact` = téléphone, **sans IFU** (vente à un particulier ;
+  IFU facultatif sur le profil hors v1). `operator.name` = « Steamy » (obligatoire), `id` omis.
+- `payment` : `MOBILEMONEY`, montant = total payé (jamais l'`ESPECES` par défaut).
+- Type `FV` pour tous les payeurs. Les payeurs hors Bénin (D76) relèvent peut-être de `EV` : **question comptable
+  ouverte (E4)**, `FV` en attendant.
 
-### 6. Réglages, secrets et fournisseur
+### 5. Flux, délais et reprise
 
-- Variable `FISCAL_PROVIDER` : `fake` (local, CI, e2e ; **refuse de fonctionner** en staging et en prod) ou `emecef`,
-  comme `PAYMENT_PROVIDER` et `SMS_PROVIDER`. Interface `FiscalInvoiceProvider` : `status`, `tax_groups`,
-  `request_invoice`, `confirm`, `cancel`. Le faux fournisseur calcule les totaux avec les mêmes taux et produit des
-  éléments de sécurité factices.
-- Variables d'environnement (jamais dans le dépôt) : `EMECEF_API_URL`, `EMECEF_TOKEN` (secret), `EMECEF_IFU`.
-- `PlatformSettings` : `emecef_enabled` (**faux par défaut** : reçu provisoire), `emecef_taxed_group`,
-  `emecef_exempt_group`. L'activation est refusée si l'IFU ou le jeton manquent, si `tokenValid` est faux ou si le
-  garde-fou des taux échoue.
-- Aucun appel réseau réel en test : le client réel est testé avec un transport simulé ; les sockets sont bloqués en CI.
+- **Après** le paiement (pas dans la transaction du webhook) : tâche Celery. **POST puis confirm dans la minute** (la
+  demande expire à 2 minutes) ; le `uid` est enregistré dès la réponse.
+- Réessais **seulement** sur erreur réseau, 5xx/429 et erreurs 1 et 10, avec attente exponentielle ; toute autre
+  `errorCode` : `failed`, visible de la Finance avec `errorDesc`, **sans réessai automatique**.
+- **Avant de reposter** après une réponse perdue : `GET /invoice` (`pendingRequestsList`) ; une demande en attente de
+  Steamy est annulée plutôt que de risquer un doublon (pas de clé d'idempotence), puis la demande est refaite.
+- `Invoice` gagne `fiscal_status` (`none`, `requested`, `confirmed`, `failed`), `fiscal_uid` et `fiscal` (éléments de
+  sécurité). Le numéro interne `FAC-AAAA-NNNNNN` est conservé ; le numéro fiscal est le Code MECeF/DGI. Le PDF imprime
+  le QR, le Code MECeF/DGI, le NIM, les compteurs et la date, et n'est un document fiscal que si `confirmed`.
+- **Jeton** : un par e-MCF, jamais journalisé ni affiché. Tâche quotidienne : alerte Finance quand `tokenValid` est
+  dans moins de 14 jours, et à l'expiration (plus d'émission). Seul un e-MCF « Actif » émet.
 
-## Points à valider (avant le code d'émission)
+### 6. Avoirs
 
-| # | Point | Proposition |
+Un remboursement traité émet un **avoir** `FA` : `reference` = Code MECeF/DGI de la facture d'origine **sans tirets
+(24 caractères)**, montant au plus égal à celui de la facture d'origine (erreur 12), lignes reprenant les groupes de la
+facture d'origine. Erreurs possibles : 4, 5, 10 (réessai), 11, 12. Une facture confirmée n'est jamais modifiée.
+
+### 7. Réglages, secrets et fournisseur
+
+- `FISCAL_PROVIDER` : `fake` (local, CI, e2e ; **refuse de fonctionner** en staging et en prod) ou `emecef`. Le faux
+  fournisseur calcule comme l'e-MCF (extraction de la TVA du TTC, mêmes champs de réponse).
+- `EMECEF_ENVIRONMENT` : `test` (par défaut, aussi en staging) ou `production` ; **production n'est accepté que par
+  l'environnement de production de Steamy**. `EMECEF_TOKEN` (secret) et `EMECEF_IFU` (13 caractères) viennent de
+  l'environnement, jamais du dépôt ni de la CI.
+- `PlatformSettings.emecef_enabled` : **faux par défaut** (reçu provisoire).
+- Aucun appel réseau réel en test ni en CI : transport simulé avec les réponses exactes de la documentation.
+- Sonde manuelle `emecef_probe` (hors CI), **uniquement sur le serveur de test** et avec `--yes-test` : émet une facture
+  d'une ligne, compare les totaux, puis l'**annule** ; elle sert à confirmer l'AIB dans `total`, les groupes et l'arrondi.
+
+## Points résolus et ouverts
+
+| # | Point | État |
 | --- | --- | --- |
-| E1 | Groupes de taxe A à F : lesquels pour « taxable » et « exonéré » ? | Réglages `emecef_taxed_group` / `emecef_exempt_group` saisis d'après la DGI, garde-fou par `/taxGroups` |
-| E2 | Prix TTC ou HT dans `items[].price`, arrondi par article ou sur le total | Obtenir la règle ; aligner `taxes.py` avant toute commande réelle ; écart de total = pas de confirmation |
-| E3 | AIB `A` ou `B` : quels taux et quel redevable (le taux d'AIB de C25 reste à confirmer) | `aib_rate` doit égaler `aibA` ou `aibB` |
-| E4 | Payeurs hors Bénin : `FV` ou `EV` ? | Comptabilité |
-| E5 | Doublon de `reference`, expiration d'une demande, référence de l'avoir | Réponse DGI ; sinon recherche par `pendingRequestsList` |
-| E6 | Client sans IFU pour un particulier ; adresse facultative | Oui, `ifu` omis |
-| E7 | Facture déjà émise en reçu provisoire avant l'activation | Aucune régularisation automatique ; décision comptable |
-| E8 | Agrément du logiciel (`approvalReference`, `posModel`…) et obtention du jeton | Démarche manuelle de Steamy auprès de la DGI, hors code |
+| E1 | Sens des groupes A à F | **Ouvert** : seuls les taux sont lus (`/info/taxGroups`) ; réglages sans défaut, garde-fou par le taux |
+| E2 | Prix TTC ou HT, arrondi | **Résolu** : `price` TTC, TVA extraite sur le total du groupe ; méthode de répartition ci-dessus |
+| E3 | AIB `A` / `B` et `total` | **Précisé** : A = 1 %, B = 5 % uniquement ; `total` avec ou sans AIB à vérifier par la sonde de test |
+| E4 | Payeurs hors Bénin : `FV` ou `EV` | **Ouvert** (comptabilité) : `FV` en attendant |
+| E5 | Doublon, expiration, référence d'avoir | **Résolu** : pas de clé d'idempotence, expiration à 2 min, 10 demandes en attente au plus, `reference` = Code MECeF/DGI sans tirets (24) |
+| E6 | Client sans IFU | **Résolu** : `client` et son IFU sont facultatifs |
+| E7 | Facture déjà émise en reçu provisoire | **Ouvert** : aucune régularisation automatique ; décision comptable |
+| E8 | Agrément du logiciel et jeton | **Précisé** : l'utilisateur possède l'IFU et le jeton ; démarches manuelles hors code |
 
 ## Conséquences
 
-- (+) Le contrat est figé dans le dépôt ; le faux fournisseur permet de tout tester sans la DGI.
-- (+) Montant payé jamais modifié : l'écart fiscal bloque la facture, pas l'encaissement.
-- (−) Tant que E1 à E3 sont ouverts, l'activation reste impossible en production.
-- (−) Une émission asynchrone laisse un court délai entre le paiement et la facture normalisée (le reçu provisoire
-  est disponible entre-temps).
+- (+) Contrat officiel versé dans le dépôt ; faux fournisseur identique à l'e-MCF documenté ; montants payés jamais
+  modifiés, l'écart fiscal bloque la facture, pas l'encaissement.
+- (+) Les montants de l'e-MCF retombent exactement sur ceux de la commande, quel que soit le taux (démonstration au
+  point 2), sans changer la règle d'arrondi de C25.
+- (−) Tant que E1, E3 et E4 sont ouverts, l'activation en production reste soumise à la comptabilité et à la sonde.
+- (−) Une émission asynchrone laisse un court délai entre le paiement et la facture normalisée (le reçu provisoire est
+  disponible entre-temps).
 
 ## Suites
 
-1. Validation de la cartographie (E1 à E8) avec l'utilisateur et la comptabilité.
-2. PR API : interface `FiscalInvoiceProvider`, faux fournisseur, client e-MCF (transport simulé), réglages et variables.
-3. PR API : émission asynchrone, états et éléments de sécurité sur `Invoice`, PDF avec QR, actions admin.
-4. PR API : avoirs sur remboursement ; surveillance du jeton.
+1. **Fait** : socle (interface, faux fournisseur, client conforme, réglages, `emecef_check`).
+2. Émission asynchrone, éléments de sécurité sur `Invoice`, PDF avec QR (PR B).
+3. Avoirs sur remboursement, surveillance du jeton et du statut (PR C).
+4. Sonde `emecef_probe` sur le serveur de test (PR D), lancée par l'utilisateur avec son jeton.
