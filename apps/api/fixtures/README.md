@@ -17,6 +17,7 @@ Mot de passe de tous les comptes : **`Steamy2026`**.
 | Apprenant | W16 | `noe.adjovi` | Noé Adjovi, 11 ans, créé par Marie ; profil à compléter (W11-W14) |
 | Parent | W16 | `+229 01 90 00 00 01` (ou `0190000001`) | Marie Adjovi ; email de contact `marie.adjovi@steamy.test` |
 | Enseignant | W16 | `koffi.adekambi@steamy.test` | M. Koffi Adékambi |
+| Enseignante, offre de l'école échue (C21) | W16 | `esther.offre-echue@steamy.test` | Mme Esther Gnonlonfoun |
 | Parent | W16 | `+229 01 90 00 00 02` (ou `0190000002`) | Bernard Kpadé, parent de Yao et Sèna |
 | Apprenants | W16 | `yao.kpade`, `sena.kpade` | Élèves de M. Adékambi |
 | Personnel · Super-admin | admin Django (`/admin/`, WAD15) | `superadmin@steamy.test` | Groupe Super-admin (pas `is_superuser`, réservé au compte de secours) |

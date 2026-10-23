@@ -6,7 +6,7 @@ from rest_framework.test import APIClient
 
 from apps.accounts.demo import NOE_USERNAME
 from apps.accounts.models import ConsentRequest, DeletionRequest, User
-from apps.core.demo import DEMO_PASSWORD, MARIE_PHONE
+from apps.core.demo import DEMO_PASSWORD, EXPIRED_TEACHER_EMAIL, MARIE_PHONE
 
 pytestmark = pytest.mark.django_db
 
@@ -44,3 +44,25 @@ def test_reseeding_restores_the_pending_deletion_without_duplicates():
         DeletionRequest.Status.PENDING_PARENT
     ]
     assert User.objects.filter(username=NOE_USERNAME).count() == 1
+
+
+def test_the_demo_has_a_school_with_an_expired_offer_that_blocks_new_classes():
+    """C21 : l'enseignante de l'école à l'offre échue suit sa classe, mais ne peut plus en créer."""
+    call_command("seed_demo")
+    client = APIClient()
+    login = client.post(
+        "/api/auth/login/",
+        {"identifier": EXPIRED_TEACHER_EMAIL, "password": DEMO_PASSWORD},
+        format="json",
+    )
+    assert login.status_code == 200
+    school = client.get("/api/classrooms/school/").json()
+    assert school["offerExpired"] is True
+    assert client.get("/api/classrooms/").json()["count"] == 1
+    created = client.post(
+        "/api/classrooms/",
+        {"name": "6e B", "courseSlug": school["courses"][0]["slug"]},
+        format="json",
+    )
+    assert created.status_code == 403
+    assert created.json()["code"] == "SCHOOL_OFFER_EXPIRED"
