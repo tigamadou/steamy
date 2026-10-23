@@ -540,11 +540,10 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
     pas d'écran front dédié
   - [ ] **Taux d'AIB à confirmer** par la comptabilité : défauts éteints et à 0, aucune valeur légale supposée
   - [ ] **Suite `API-L3b.2c`** : facture normalisée e-MECeF ([ADR 0006](../adr/0006-facture-normalisee-emecef.md)).
-    Contrat DGI versé dans `docs/references/emecef/` ; cartographie proposée (groupes de taxe, `aib`, avoirs, flux,
+    Contrat DGI versé dans `docs/references/emecef/` ; cartographie proposée (groupes de taxe, `aib`, flux,
     réglages), **à valider** (E1 à E8) ; ensuite : (1) interface `FiscalInvoiceProvider`, faux fournisseur, client
     e-MCF, réglages (**fait**, #172 : `apps/payments/fiscal/`, `FISCAL_PROVIDER`, `EMECEF_ENVIRONMENT`, `EMECEF_IFU`, `EMECEF_TOKEN`,
-    `PlatformSettings.emecef_enabled` / groupes, garde-fou des taux à l'activation) ; (2) émission asynchrone, éléments de sécurité sur `Invoice`, PDF avec QR ; (3) avoirs sur
-    remboursement, surveillance du jeton ; IFU, agrément et jeton restent à obtenir de la DGI
+    `PlatformSettings.emecef_enabled` / groupes, garde-fou des taux à l'activation) ; (2) émission asynchrone, éléments de sécurité sur `Invoice`, PDF avec QR ; (3) surveillance du jeton et EV (**fait**) ; **avoirs hors v1** (remboursements manuels, ADR 0006 §6) ; IFU, agrément et jeton restent à obtenir de la DGI
   - [ ] **Écart** : format légal non validé (P1 : contrat DGI à obtenir ; P2 : taux à confirmer). Tant que la comptabilité n'a pas répondu, le document reste un
     « Reçu de paiement » non fiscal (`INVOICE_PROVISIONAL=true`) ; ne pas passer à `false` en production avant la
     décision, ni livrer une facture normalisée sans l'interface `FiscalInvoiceProvider` prévue par l'ADR 0005

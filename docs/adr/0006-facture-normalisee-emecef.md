@@ -1,7 +1,7 @@
 # ADR 0006 · Facture normalisée e-MECeF (DGI du Bénin)
 
 - **Statut** : **proposée**, conforme à la spécification officielle de la DGI et aux décisions de l'utilisateur du
-  2026-10-23 ; reste : l'AIB dans `total` (E3, par la sonde sur le serveur de test) et la TVA des payeurs hors Bénin (E4b)
+  2026-10-23 ; reste : l'AIB dans `total` (E3, par la sonde sur le serveur de test)
 - **Date** : 23 octobre 2026 (mise en conformité avec le PDF de la DGI le même jour)
 - **Étape** : `API-L3b.2c` ([PLAN-API](../plans/PLAN-API.md)), après `API-L3b.2b` (reçu provisoire) et C25 (TVA et AIB
   paramétrables)
@@ -34,7 +34,7 @@ provisoire actuel (`INVOICE_PROVISIONAL`) reste le comportement par défaut.
 | `GET /invoice/{uid}` | Détail d'une demande en attente |
 
 Une demande non finalisée est **en attente 2 minutes**, puis **expire** ; **10 demandes en attente au plus** par e-MCF
-(erreur 1). Il n'y a **aucune clé d'idempotence** : `reference` ne sert qu'aux avoirs. Erreurs (annexe) : 1 trop de
+(erreur 1). Il n'y a **aucune clé d'idempotence** : `reference` ne sert qu'aux avoirs (hors v1). Erreurs (annexe) : 1 trop de
 demandes en attente, 3 type invalide, 4 référence d'origine manquante, 5 référence sans 24 caractères, 6 AIB invalide,
 7 paiement invalide, 8 aucun article, 9 groupe invalide, 10 référence d'origine non vérifiable pour l'instant
 (réessayer), 11 facture d'origine introuvable, 12 avoir supérieur à la facture d'origine, 20 facture inconnue ou déjà
@@ -128,19 +128,17 @@ montant de paiement envoyé est notre total payé.
   « Actif », si l'IFU du jeton ne correspond pas à `EMECEF_IFU` ou si l'API est injoignable ; sans jeton valide, plus
   d'émission (les factures restent « demandées » et sont relancées).
 
-### 6. Avoirs : manuels, par la Finance
+### 6. Avoirs : hors périmètre de la v1
 
-Décision du 2026-10-23 : **pas d'émission automatique sur remboursement**. La Finance dispose, sur une facture
-normalisée **confirmée**, de l'action d'admin « Émettre un avoir » (permission `issue_creditnote`, Finance seule) :
-montant ≤ **reste à créditer** (total confirmé moins les avoirs non échoués ; erreur 12 de la DGI sinon), motif, et
-remboursement régularisé (facultatif). L'avoir (`CreditNote`, numéro `AV-AAAA-NNNNNN` sans trou) est demandé à la DGI
-comme une facture : type `FA` (`EA` si la facture est `EV`), `reference` = Code MECeF/DGI de la facture d'origine **sans
-tirets (24 caractères)**, lignes reprenant les **groupes** de la facture d'origine (le montant est réparti entre eux au
-prorata, plus fort reste), même cycle (POST puis confirm, `uid` enregistré, reprise, comparaison du total, `failed`
-visible et relançable depuis l'admin, journal d'audit). Pour que la Finance n'en oublie pas, la liste des remboursements
-a une colonne « Avoir » et un filtre « Sans avoir (facture normalisée) ». Une facture confirmée n'est jamais modifiée.
-Erreurs possibles : 4, 5, 10 (réessai), 11, 12. **Ouvert** : l'avoir ne porte pas de champ `aib` (comportement à
-confirmer par la sonde si l'AIB est activé).
+Décision du 2026-10-23 : **les factures d'avoir (`FA`, `EA`) sont retirées de l'application**. Les remboursements
+(`Refund`) sont traités **manuellement par la Finance, hors application** ; un remboursement continue d'inclure la part
+de taxes de la commande. La facture normalisée d'origine **n'est pas annulable par l'application** : si nécessaire,
+l'avoir est à émettre manuellement auprès de la DGI (rappel affiché sur le formulaire de remboursement de l'admin). Le
+code d'émission ne connaît que `FV` et `EV`. Le contrat, lui, reste documenté pour une reprise ultérieure : type `FA`
+(`EA` à l'exportation), `reference` = Code MECeF/DGI de la facture d'origine **sans tirets (24 caractères)**, montant au
+plus égal à celui de la facture d'origine (erreur 12), lignes aux groupes de la facture d'origine, erreurs 4, 5, 10
+(réessai), 11 et 12. Une reprise demandera : un modèle d'avoir, l'enregistrement des lignes envoyées, le cycle
+demande/confirmation de la facture, et la question de l'`aib` d'un avoir.
 
 ### 7. Réglages, secrets et fournisseur
 
@@ -167,8 +165,8 @@ confirmer par la sonde si l'AIB est activé).
 | E1 | Sens des groupes A à F | **Résolu** : libellés officiels de la DGI ; TVA activée = B, sans TVA = **E (régime TPS)**, export = C ; réglables, garde-fou par le taux lu dans `/info/taxGroups` |
 | E2 | Prix TTC ou HT, arrondi | **Résolu** : `price` TTC, TVA extraite sur le total du groupe ; méthode de répartition ci-dessus |
 | E3 | AIB `A` / `B` et `total` | **Précisé** : A = 1 %, B = 5 % uniquement ; `total` avec ou sans AIB à vérifier par la sonde de test |
-| E4 | Payeurs hors Bénin : `FV` ou `EV` | **Résolu** : `EV` (pays du réseau Mobile Money, sinon du téléphone ; inconnu : `FV`) ; groupe d'export à régler ; TVA facturée à un payeur hors Bénin : à décider (E4b) |
-| E5 | Doublon, expiration, référence d'avoir | **Résolu** : pas de clé d'idempotence, expiration à 2 min, 10 demandes en attente au plus, `reference` = Code MECeF/DGI sans tirets (24) |
+| E4 | Payeurs hors Bénin : `FV` ou `EV` | **Résolu** : `EV` (pays du réseau Mobile Money, sinon du téléphone ; inconnu : `FV`) ; groupe d'export C ; la TVA facturée à ces payeurs reste dans le prix (**aucun changement du moteur de taxes**, à reprendre plus tard) ; **avoirs hors v1** : remboursements manuels |
+| E5 | Doublon, expiration, référence d'avoir (avoirs hors v1) | **Résolu** : pas de clé d'idempotence, expiration à 2 min, 10 demandes en attente au plus, `reference` = Code MECeF/DGI sans tirets (24) |
 | E6 | Client sans IFU | **Résolu** : `client` et son IFU sont facultatifs |
 | E7 | Facture déjà émise en reçu provisoire | **Ouvert** : aucune régularisation automatique ; décision comptable |
 | E8 | Agrément du logiciel et jeton | **Précisé** : l'utilisateur possède l'IFU et le jeton ; démarches manuelles hors code |
@@ -187,5 +185,5 @@ confirmer par la sonde si l'AIB est activé).
 
 1. **Fait** : socle (interface, faux fournisseur, client conforme, réglages, `emecef_check`).
 2. **Fait** : émission asynchrone, éléments de sécurité sur `Invoice`, PDF avec QR (PR B).
-3. **Fait** : type `EV`, garde-fou IFU, avoirs manuels par la Finance, surveillance quotidienne du jeton (PR C).
+3. **Fait** : type `EV`, garde-fou IFU, surveillance quotidienne du jeton (PR C). **Avoirs retirés de la v1** : remboursements traités à la main (à reprendre plus tard).
 4. Sonde `emecef_probe` sur le serveur de test (PR D), lancée par l'utilisateur avec son jeton.

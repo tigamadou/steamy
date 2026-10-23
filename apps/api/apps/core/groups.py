@@ -118,8 +118,6 @@ PERMISSIONS: dict[str, dict[str, tuple[str, ...]]] = {
     "payments.payment": {SUPER_ADMIN: ("v",), SUPPORT: ("v",), FINANCE: ("v",)},
     "payments.invoice": {SUPER_ADMIN: ("v",), SUPPORT: ("v",), FINANCE: ("v",)},
     "payments.refund": {SUPER_ADMIN: ("v",), FINANCE: ("vac", "process_refund")},
-    # Avoirs normalisés (ADR 0006) : émis à la main par la Finance
-    "payments.creditnote": {SUPER_ADMIN: ("v",), FINANCE: ("v", "issue_creditnote")},
     # Steamy Events (WAD12)
     "events.steamyevent": {
         SUPER_ADMIN: ("vacd",),

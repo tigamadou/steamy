@@ -90,7 +90,7 @@ def test_without_vat_lines_are_sent_at_their_excl_tax_price_in_the_exempt_group(
         ("Livraison", 2000, Decimal(1), "A"),
     ]
     assert (expected.lines_total, expected.total, expected.vat_base) == (32000, 32000, 0)
-    assert request.payments[0].amount == 32000 and request.type == "FV" and request.reference == ""
+    assert request.payments[0].amount == 32000 and request.type == "FV"
     assert request.client.name == "Marie Houngbo" and request.operator_name == "Steamy"
     assert discrepancies(expected, FakeFiscalProvider().request_invoice(request)) == []
 

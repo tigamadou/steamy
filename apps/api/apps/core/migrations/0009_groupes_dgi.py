@@ -21,7 +21,7 @@ def fill_groups(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0008_avoirs_export'),
+        ('core', '0008_groupe_export'),
     ]
 
     operations = [
