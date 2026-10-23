@@ -18,14 +18,14 @@ export function ClassroomFilter({
 }) {
   const router = useRouter();
   return (
-    <label className="flex items-center gap-2.5 text-sm font-bold text-ink-700">
+    <label className="flex w-full min-w-0 items-center gap-2.5 text-sm font-bold text-ink-700 sm:w-auto">
       Classe
       <Select
         value={params.classroomId ?? ""}
         onChange={(event) =>
           router.push(routes.teacher.reviews({ filter: params.filter, classroomId: event.target.value || undefined }))
         }
-        className="h-11 min-w-48"
+        className="h-11 min-w-0 flex-1 sm:min-w-48 sm:flex-none"
       >
         <option value="">Toutes les classes</option>
         {classrooms.map((classroom) => (
