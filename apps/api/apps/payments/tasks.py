@@ -138,6 +138,38 @@ def issue_fiscal_invoice(self, invoice_id: int) -> str:
         raise self.retry(exc=exc, countdown=countdown) from exc
 
 
+@shared_task(bind=True, acks_late=True, max_retries=INVOICE_MAX_RETRIES)
+def issue_credit_note(self, credit_id: int) -> str:
+    """Avoir normalisé demandé par la Finance (ADR 0006) ; mêmes réessais que la facture, puis `failed` relançable."""
+    from .fiscal.base import FiscalTemporaryError
+    from .fiscal.credit import issue_credit
+    from .fiscal.issuance import FiscalDeferred
+    from .models import CreditNote
+
+    try:
+        return issue_credit(credit_id)
+    except CreditNote.DoesNotExist:
+        return ""
+    except FiscalTemporaryError as exc:
+        if self.request.retries >= self.max_retries:
+            CreditNote.objects.filter(pk=credit_id).update(
+                fiscal_status=CreditNote.FiscalStatus.FAILED, fiscal_error=str(exc)[:500]
+            )
+            raise
+        countdown = (
+            exc.countdown if isinstance(exc, FiscalDeferred) else 30 * 2**self.request.retries
+        )
+        raise self.retry(exc=exc, countdown=countdown) from exc
+
+
+@shared_task
+def check_emecef_status() -> int:
+    """Chaque jour : jeton, e-MCF actif, IFU, accessibilité ; alerte la Finance (ADR 0006). Renvoie le nombre d'alertes."""
+    from .fiscal.monitor import check_status
+
+    return len(check_status())
+
+
 @shared_task
 def retry_pending_invoices() -> int:
     """Toutes les 10 min : relance les factures restées `pending` plus de 10 minutes (worker arrêté)."""

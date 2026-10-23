@@ -43,6 +43,7 @@ TAX_FIELDS = {
     "emecef_enabled",
     "emecef_taxed_group",
     "emecef_exempt_group",
+    "emecef_export_group",
     "vat_enabled",
     "vat_rate",
     "aib_enabled",
@@ -112,7 +113,14 @@ class PlatformSettingsAdmin(admin.ModelAdmin):
         ),
         (
             "Facture normalisée e-MECeF (C26)",
-            {"fields": ("emecef_enabled", "emecef_taxed_group", "emecef_exempt_group")},
+            {
+                "fields": (
+                    "emecef_enabled",
+                    "emecef_taxed_group",
+                    "emecef_exempt_group",
+                    "emecef_export_group",
+                )
+            },
         ),
         ("Messagerie (S10)", {"fields": ("sms_provider",)}),
     )

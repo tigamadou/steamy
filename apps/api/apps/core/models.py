@@ -127,6 +127,16 @@ class PlatformSettings(models.Model):
         blank=True,
         help_text=_("Groupe e-MECeF appliqué aux lignes quand la TVA n'est pas activée"),
     )
+    emecef_export_group = models.CharField(
+        _("groupe de taxe des ventes à l'exportation"),
+        max_length=1,
+        choices=[(group, group) for group in "ABCDEF"],
+        blank=True,
+        help_text=_(
+            "Groupe e-MECeF des factures EV, émises aux payeurs hors du Bénin (taux nul chez la DGI) ; "
+            "sans valeur par défaut"
+        ),
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

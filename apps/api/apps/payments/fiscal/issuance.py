@@ -75,12 +75,17 @@ def _issue(invoice, config) -> str:
     errors = activation_errors(config, provider)
     if errors:  # jeton expiré, e-MCF inactif, taux qui divergent… : émissions suspendues, relancées plus tard
         raise FiscalTemporaryError(" ".join(errors.values()))
+    if invoice.fiscal_type == "EV" and not config.emecef_export_group:
+        return _fail(
+            invoice, "Groupe de taxe d'exportation non réglé (facture EV).", "EXPORT_GROUP"
+        )
     request, expected = build_request(
         invoice.order,
         invoice.snapshot["buyer"],
         config,
         aib_letter(config, provider.tax_groups()),
         bool(settings.EMECEF_AIB_IN_TOTAL),
+        invoice.fiscal_type,
     )
     if invoice.fiscal_status == Invoice.FiscalStatus.REQUESTED and invoice.fiscal_uid:
         uid = invoice.fiscal_uid  # reprise : la demande a déjà été envoyée, il reste à la confirmer
@@ -118,6 +123,16 @@ def _issue(invoice, config) -> str:
         return _fail(invoice, str(error), error.code)
     invoice.fiscal_status = Invoice.FiscalStatus.CONFIRMED
     invoice.fiscal_error = ""
+    invoice.fiscal_total = expected.total
+    invoice.fiscal_lines = [
+        {
+            "name": item.name,
+            "price": item.price,
+            "quantity": str(item.quantity),
+            "group": item.tax_group,
+        }
+        for item in request.items
+    ]
     invoice.fiscal = {
         "date_time": elements.date_time,
         "qr_code": elements.qr_code,
@@ -126,7 +141,16 @@ def _issue(invoice, config) -> str:
         "nim": elements.nim,
     }
     invoice.pdf_status = Invoice.PdfStatus.PENDING
-    invoice.save(update_fields=["fiscal_status", "fiscal_error", "fiscal", "pdf_status"])
+    invoice.save(
+        update_fields=[
+            "fiscal_status",
+            "fiscal_error",
+            "fiscal",
+            "pdf_status",
+            "fiscal_total",
+            "fiscal_lines",
+        ]
+    )
     audit(
         "invoice.fiscal_confirmed",
         target=invoice,

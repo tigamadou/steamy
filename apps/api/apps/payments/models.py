@@ -357,11 +357,57 @@ class Invoice(models.Model):
     #: Éléments de sécurité à imprimer : `{date_time, qr_code, code, counters, nim}`
     fiscal = models.JSONField(_("éléments de sécurité"), default=dict, blank=True)
     fiscal_error = models.TextField(_("erreur e-MECeF"), blank=True)
+    #: `FV` (vente) ou `EV` (vente à l'exportation, payeur hors du Bénin) : figé à l'émission de la facture
+    fiscal_type = models.CharField(_("type de facture"), max_length=2, default="FV")
+    #: Lignes envoyées à l'e-MCF `[{name, price, quantity, group}]` et total confirmé : base des avoirs
+    fiscal_lines = models.JSONField(_("lignes e-MECeF"), default=list, blank=True)
+    fiscal_total = models.PositiveIntegerField(_("total e-MECeF (FCFA)"), default=0)
 
     class Meta:
         ordering = ["-issued_at", "-id"]
         verbose_name = _("facture")
         verbose_name_plural = _("factures")
+
+    def __str__(self):
+        return self.number
+
+
+class CreditNote(models.Model):
+    """
+    Avoir (`FA`, ou `EA` à l'exportation) émis **à la main par la Finance** sur une facture normalisée confirmée
+    (ADR 0006) : montant au plus égal au reste à créditer, `reference` = Code MECeF/DGI de la facture d'origine sans
+    tirets. Même cycle que la facture : demande, confirmation, `failed` visible et relançable.
+    """
+
+    FiscalStatus = Invoice.FiscalStatus
+
+    invoice = models.ForeignKey(Invoice, models.PROTECT, related_name="credit_notes")
+    #: Remboursement que cet avoir régularise (facultatif)
+    refund = models.OneToOneField(
+        "Refund", models.PROTECT, null=True, blank=True, related_name="credit_note"
+    )
+    number = models.CharField(_("numéro"), max_length=20, unique=True)
+    amount = models.PositiveIntegerField(_("montant (FCFA)"))
+    reason = models.TextField(_("motif"), blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    issued_at = models.DateTimeField(_("émis le"), default=timezone.now)
+    fiscal_status = models.CharField(
+        _("avoir normalisé"),
+        max_length=9,
+        choices=Invoice.FiscalStatus,
+        default=Invoice.FiscalStatus.NONE,
+    )
+    fiscal_uid = models.CharField(_("uid e-MECeF"), max_length=36, blank=True)
+    fiscal = models.JSONField(_("éléments de sécurité"), default=dict, blank=True)
+    fiscal_error = models.TextField(_("erreur e-MECeF"), blank=True)
+
+    class Meta:
+        ordering = ["-issued_at", "-id"]
+        verbose_name = _("avoir")
+        verbose_name_plural = _("avoirs")
+        permissions = [("issue_creditnote", "Peut émettre un avoir")]
 
     def __str__(self):
         return self.number

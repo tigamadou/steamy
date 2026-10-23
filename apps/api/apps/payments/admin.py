@@ -19,7 +19,8 @@ from apps.core.admin_actions import form_action
 from apps.core.groups import FINANCE
 
 from . import backoffice
-from .models import Invoice, KitCode, Order, OrderItem, Payment, PaymentRequest, Refund
+from .fiscal.credit import CreditNoteRefused, create_credit_note, creditable
+from .models import CreditNote, Invoice, KitCode, Order, OrderItem, Payment, PaymentRequest, Refund
 
 
 def run(modeladmin, request, objects, action, done: str) -> None:
@@ -281,7 +282,7 @@ class PaymentAdmin(admin.ModelAdmin):
 class InvoiceAdmin(admin.ModelAdmin):
     """Factures en lecture seule (Finance) ; un PDF en échec se relance par l'action « Régénérer » (ADR 0005 §8)."""
 
-    list_display = ("number", "order", "pdf_status", "fiscal_status", "issued_at")
+    list_display = ("number", "order", "pdf_status", "fiscal_status", "fiscal_type", "issued_at")
     list_filter = ("pdf_status", "fiscal_status")
     search_fields = ("number", "order__reference", "fiscal_uid")
     readonly_fields = (
@@ -293,12 +294,16 @@ class InvoiceAdmin(admin.ModelAdmin):
         "snapshot",
         "issued_at",
         "fiscal_status",
+        "fiscal_type",
         "fiscal_uid",
         "fiscal",
         "fiscal_error",
+        "fiscal_total",
+        "fiscal_lines",
+        "credit_summary",
     )
     exclude = ("pdf",)
-    actions = ["regenerate", "retry_fiscal"]
+    actions = ["regenerate", "retry_fiscal", "issue_credit_note"]
 
     def has_add_permission(self, request):
         return False
@@ -351,6 +356,64 @@ class InvoiceAdmin(admin.ModelAdmin):
             transaction.on_commit(lambda pk=invoice_id: generate_invoice_pdf.delay(pk))
         self.message_user(request, f"{len(ids)} PDF relancé(s).")
 
+    @admin.display(description="Avoirs")
+    def credit_summary(self, obj):
+        notes = list(obj.credit_notes.all())
+        if not notes:
+            return "Aucun avoir"
+        return format_html_join(
+            ", ",
+            "{} ({} FCFA, {})",
+            ((note.number, note.amount, note.get_fiscal_status_display()) for note in notes),
+        )
+
+    def has_issue_creditnote_permission(self, request):
+        return request.user.has_perm("payments.issue_creditnote")
+
+    @admin.action(
+        description="Émettre un avoir (facture normalisée)", permissions=["issue_creditnote"]
+    )
+    def issue_credit_note(self, request, queryset):
+        """Avoir manuel de la Finance (ADR 0006) : une facture confirmée à la fois, montant ≤ reste à créditer."""
+        if queryset.count() != 1:
+            self.message_user(request, "Sélectionnez une seule facture.", messages.ERROR)
+            return None
+        invoice = queryset.get()
+        if invoice.fiscal_status != Invoice.FiscalStatus.CONFIRMED:
+            self.message_user(
+                request,
+                f"{invoice.number} n'est pas une facture normalisée confirmée.",
+                messages.ERROR,
+            )
+            return None
+
+        class Form(CreditNoteForm):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, invoice=invoice, **kwargs)
+
+        def apply(data):
+            try:
+                credit = create_credit_note(
+                    invoice, data["amount"], data["reason"], request.user, data.get("refund")
+                )
+            except CreditNoteRefused as error:
+                self.message_user(request, str(error), messages.ERROR)
+            else:
+                self.message_user(
+                    request, f"Avoir {credit.number} demandé à la DGI.", messages.SUCCESS
+                )
+
+        return form_action(
+            self,
+            request,
+            queryset,
+            Form,
+            title="Émettre un avoir",
+            intro=f"Reste à créditer sur {invoice.number} : {creditable(invoice)} FCFA.",
+            submit_label="Émettre l'avoir",
+            apply=apply,
+        )
+
     @admin.action(description="Relancer la facture normalisée e-MECeF (échec)")
     def retry_fiscal(self, request, queryset):
         from .tasks import issue_fiscal_invoice
@@ -361,6 +424,22 @@ class InvoiceAdmin(admin.ModelAdmin):
         for invoice_id in ids:
             transaction.on_commit(lambda pk=invoice_id: issue_fiscal_invoice.delay(pk))
         self.message_user(request, f"{len(ids)} émission(s) relancée(s).")
+
+
+class CreditNoteForm(forms.Form):
+    amount = forms.IntegerField(label="Montant de l'avoir (FCFA)", min_value=1)
+    reason = forms.CharField(label="Motif", widget=forms.Textarea(attrs={"rows": 3}))
+    refund = forms.ModelChoiceField(
+        label="Remboursement régularisé (facultatif)",
+        queryset=Refund.objects.none(),
+        required=False,
+    )
+
+    def __init__(self, *args, invoice, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["refund"].queryset = Refund.objects.filter(
+            payment__order=invoice.order, processed=True, credit_note__isnull=True
+        )
 
 
 class RefundForm(forms.ModelForm):
@@ -406,10 +485,40 @@ class ProcessRefundForm(forms.Form):
     )
 
 
+class WithoutCreditNoteFilter(admin.SimpleListFilter):
+    """Remboursements traités sur une facture normalisée confirmée, encore sans avoir : à ne pas oublier."""
+
+    title = "avoir"
+    parameter_name = "credit_note"
+
+    def lookups(self, request, model_admin):
+        return [("missing", "Sans avoir (facture normalisée)"), ("issued", "Avec avoir")]
+
+    def queryset(self, request, queryset):
+        if self.value() == "missing":
+            return queryset.filter(
+                processed=True,
+                credit_note__isnull=True,
+                payment__order__invoice__fiscal_status=Invoice.FiscalStatus.CONFIRMED,
+            )
+        if self.value() == "issued":
+            return queryset.filter(credit_note__isnull=False)
+        return queryset
+
+
 @admin.register(Refund)
 class RefundAdmin(admin.ModelAdmin):
-    list_display = ("id", "order", "payment", "amount", "reason", "processed", "created_at")
-    list_filter = ("processed",)
+    list_display = (
+        "id",
+        "order",
+        "payment",
+        "amount",
+        "reason",
+        "processed",
+        "credit",
+        "created_at",
+    )
+    list_filter = ("processed", WithoutCreditNoteFilter)
     search_fields = ("payment__order__reference",)
     list_select_related = ("payment__order",)
     form = RefundForm
@@ -424,6 +533,11 @@ class RefundAdmin(admin.ModelAdmin):
     @admin.display(description="Commande", ordering="payment__order__reference")
     def order(self, obj):
         return obj.payment.order.reference
+
+    @admin.display(description="Avoir")
+    def credit(self, obj):
+        credit = getattr(obj, "credit_note", None)
+        return credit.number if credit else "—"
 
     def save_model(self, request, obj, form, change):
         try:
@@ -528,3 +642,60 @@ class PaymentRequestAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+@admin.register(CreditNote)
+class CreditNoteAdmin(admin.ModelAdmin):
+    """Avoirs normalisés en lecture seule (Finance) ; un échec se relance par l'action (ADR 0006)."""
+
+    list_display = (
+        "number",
+        "invoice",
+        "amount",
+        "fiscal_status",
+        "refund",
+        "created_by",
+        "issued_at",
+    )
+    list_filter = ("fiscal_status",)
+    search_fields = ("number", "invoice__number", "fiscal_uid")
+    list_select_related = ("invoice", "refund", "created_by")
+    readonly_fields = (
+        "invoice",
+        "refund",
+        "number",
+        "amount",
+        "reason",
+        "created_by",
+        "issued_at",
+        "fiscal_status",
+        "fiscal_uid",
+        "fiscal",
+        "fiscal_error",
+    )
+    actions = ["retry_fiscal"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_retry_creditnote_permission(self, request):
+        return request.user.has_perm("payments.issue_creditnote")
+
+    @admin.action(
+        description="Relancer l'avoir normalisé (échec)", permissions=["retry_creditnote"]
+    )
+    def retry_fiscal(self, request, queryset):
+        from .tasks import issue_credit_note
+
+        failed = queryset.filter(fiscal_status=CreditNote.FiscalStatus.FAILED)
+        ids = list(failed.values_list("id", flat=True))
+        failed.update(fiscal_status=CreditNote.FiscalStatus.NONE, fiscal_uid="", fiscal_error="")
+        for credit_id in ids:
+            transaction.on_commit(lambda pk=credit_id: issue_credit_note.delay(pk))
+        self.message_user(request, f"{len(ids)} avoir(s) relancé(s).")

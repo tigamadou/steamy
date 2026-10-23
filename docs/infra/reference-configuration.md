@@ -39,6 +39,18 @@ En staging et en prod, le chart les injecte dans api, worker, beat et migrate.
 | `EMECEF_TOKEN` | oui si `emecef` | — | secret du même nom | Jeton d'API (JWT, un par e-MCF) lié à l'IFU de Steamy, obtenu auprès de la DGI ; jamais journalisé. **Jamais dans le dépôt ni en CI** |
 | `EMECEF_IFU` | oui si `emecef` | — | — | IFU de Steamy (13 caractères), envoyé dans chaque demande de facture |
 
+**Deux environnements, deux jeux de secrets** ([ADR 0006](../adr/0006-facture-normalisee-emecef.md)) :
+
+| | Local, dev, vérification manuelle, préproduction | Production |
+| --- | --- | --- |
+| `EMECEF_ENVIRONMENT` | `test` | `production` (refusé si `DJANGO_ENV` n'est pas `production`) |
+| `EMECEF_TOKEN` | jeton de **test** : `apps/api/.env` (ignoré par git) ou secret de l'environnement | jeton de **production** : secret de déploiement |
+| `EMECEF_IFU` | IFU du jeton de test | IFU du jeton de production |
+
+L'IFU renvoyé par la DGI doit égaler `EMECEF_IFU` : sinon l'activation et l'émission sont refusées. Une surveillance
+quotidienne (`check_emecef_status`) alerte la Finance quand le jeton expire dans moins de 14 jours, à l'expiration, si
+l'e-MCF n'est plus « Actif » ou si l'API est injoignable.
+
 **Vérifier l'accès e-MECeF** (hors CI, lecture seule, aucune facture créée) : renseigner `EMECEF_ENVIRONMENT=test`, `EMECEF_IFU` et `EMECEF_TOKEN` dans `apps/api/.env` (ignoré par git ; modèle : [`.env.example`](../../apps/api/.env.example)) avec `FISCAL_PROVIDER=emecef`, puis `python manage.py emecef_check` : affiche le serveur utilisé, la date de validité du jeton, le statut de l'e-MCF, les demandes en attente, les taux des groupes A à F et de l'AIB, les types de facture et de paiement. Ne jamais coller le jeton dans un message, un ticket ou un fichier versionné.
 | `INVOICE_MENTIONS` | non | `[]` | — | Mentions légales supplémentaires (liste JSON) |
 | `SMS_PROVIDER` | non | `fake` | `twilio` (values `sms.provider`) | Fournisseur SMS ([ADR 0002](../adr/0002-fournisseur-sms.md)). `fake` envoie chaque SMS comme e-mail à `<e164>@sms.test` (Mailpit) et **refuse de fonctionner** en staging et en prod. Défaut : `fake` en local et CI, `twilio` en déployé |
