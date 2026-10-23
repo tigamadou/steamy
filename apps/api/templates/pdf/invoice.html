@@ -60,7 +60,11 @@
   {% else %}
   <tr class="grand"><td>Total payé</td><td class="num">{{ total }} FCFA</td></tr>
   {% endif %}
+  {% if aib %}
+  <tr><td>AIB ({{ aib.rate }} % de {{ aib.base }} FCFA)</td><td class="num">{{ aib.amount }} FCFA</td></tr>
+  {% endif %}
 </table>
+{% if aib %}<p class="mentions">L'AIB est indiqué à titre d'information ; il n'est pas ajouté au total payé.</p>{% endif %}
 <p>Payé le {{ payment.paid_on }} par Mobile Money{% if payment.network %} ({{ payment.network }}){% endif %}{% if payment.transaction %} · transaction {{ payment.transaction }}{% endif %}.</p>
 {% if provisional %}
 <div class="notice">Document non fiscal : reçu de paiement émis par Steamy. La facture normalisée n'est pas émise par ce document.</div>

@@ -34,7 +34,6 @@ En staging et en prod, le chart les injecte dans api, worker, beat et migrate.
 | `FAKE_PAYMENT_DELAY` | non | `3` | — | Secondes avant le webhook du faux prestataire |
 | `INVOICE_PROVISIONAL` | non | `true` | — | Vrai : le PDF est un « Reçu de paiement » non fiscal. **Ne passer à `false` qu'après la décision comptable** (ADR 0005, P1 facture normalisée MECeF) |
 | `INVOICE_SELLER` | non | `{"name": "Steamy"}` | — | JSON des mentions du vendeur (`name`, `address`, `tax_id` IFU, `registration` RCCM, `phone`, `email`) ; seuls les champs renseignés sont imprimés |
-| `INVOICE_VAT_RATE` / `INVOICE_PRICES_INCLUDE_VAT` | non | vide / `true` | — | Taux de TVA en % (vide : aucune ventilation) et prix catalogue TTC ; à fixer par la comptabilité (P2) |
 | `INVOICE_MENTIONS` | non | `[]` | — | Mentions légales supplémentaires (liste JSON) |
 | `SMS_PROVIDER` | non | `fake` | `twilio` (values `sms.provider`) | Fournisseur SMS ([ADR 0002](../adr/0002-fournisseur-sms.md)). `fake` envoie chaque SMS comme e-mail à `<e164>@sms.test` (Mailpit) et **refuse de fonctionner** en staging et en prod. Défaut : `fake` en local et CI, `twilio` en déployé |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` | oui si `twilio` | — | secrets du même nom | Identifiants de l'API Twilio. **Jamais dans le dépôt**. En staging : identifiants de test Twilio (aucun SMS réel, numéros magiques) ou sous-compte plafonné |

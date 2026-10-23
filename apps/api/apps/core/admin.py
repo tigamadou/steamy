@@ -60,6 +60,10 @@ class PlatformSettingsAdmin(admin.ModelAdmin):
             {"fields": ("summative_retry_cooldown_seconds", "dropout_threshold_days")},
         ),
         ("Gamification (C8)", {"fields": ("points_scale", "rank_thresholds")}),
+        (
+            "Factures : TVA et AIB (C25)",
+            {"fields": ("vat_enabled", "vat_rate", "aib_enabled", "aib_rate")},
+        ),
         ("Messagerie (S10)", {"fields": ("sms_provider",)}),
     )
     readonly_fields = ("sms_provider",)

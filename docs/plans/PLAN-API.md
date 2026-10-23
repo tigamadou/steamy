@@ -517,7 +517,17 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Tâche `generate_invoice_pdf` lancée par l'exécution post-paiement ; `GET payments/orders/{reference}/invoice/` (payeur seulement, invité par jeton, P7)
   - [x] Mentions et TVA **paramétrables** (réglages), sans valeur légale inventée, en attendant P1 (MECeF) et P2 (TVA) de l'ADR 0005
   - [x] Tests : facture refusée à l'apprenant bénéficiaire, numérotation sans trou
-  - [ ] **Écart** : format légal non validé (P1, P2). Tant que la comptabilité n'a pas répondu, le document reste un
+  - [x] **Complément C25 (2026-10-23)** · `claude/api-factures-aib-tva` : TVA et AIB paramétrables dans
+    `PlatformSettings` (`vat_enabled`, `vat_rate`, `aib_enabled`, `aib_rate`, migration `core.0006`, édités dans
+    l'admin Django WAD14 par le Super-admin, journal d'audit existant) ; facture TTC ventilée selon les interrupteurs
+    (`tax_breakdown`, arrondi au franc demi-haut, taux figés dans le snapshot) ; `INVOICE_VAT_RATE` et
+    `INVOICE_PRICES_INCLUDE_VAT` supprimés. Pas d'écran front : WAD14 est l'admin Django, pas de PR front
+  - [ ] **Décision en attente (C25)** : l'AIB s'ajoute-t-il au montant payé par le client ? Provisoirement affiché
+    seulement sur la facture, `Order.total` inchangé
+  - [ ] **Taux d'AIB à confirmer** par la comptabilité : défauts éteints et à 0, aucune valeur légale supposée
+  - [ ] **Suite `API-L3b.2c`** : facture normalisée e-MECeF, interface `FiscalInvoiceProvider` et faux fournisseur,
+    après obtention du contrat d'API DGI et des identifiants (ADR 0005, P1 tranché, reste l'accès)
+  - [ ] **Écart** : format légal non validé (P1 : contrat DGI à obtenir ; P2 : taux à confirmer). Tant que la comptabilité n'a pas répondu, le document reste un
     « Reçu de paiement » non fiscal (`INVOICE_PROVISIONAL=true`) ; ne pas passer à `false` en production avant la
     décision, ni livrer une facture normalisée sans l'interface `FiscalInvoiceProvider` prévue par l'ADR 0005
   > Séparée de L3b.2 (tâche découverte) : elle dépendait de `core/pdf.py`, du stockage privé et de
@@ -526,8 +536,8 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > fichier `invoices/<année>/<uuid>.pdf` dans le stockage privé, `snapshot` figé (vendeur, acheteur, lignes,
   > sous-total, livraison, total, TVA, réseau et transaction, dates). Réglages : `INVOICE_PROVISIONAL` (vrai : titre
   > « Reçu de paiement » et mention « document non fiscal »), `INVOICE_SELLER` (JSON ; seuls les champs renseignés
-  > sont imprimés, `{"name": "Steamy"}` par défaut), `INVOICE_VAT_RATE` (vide : aucune ventilation),
-  > `INVOICE_PRICES_INCLUDE_VAT`, `INVOICE_MENTIONS`. Téléchargement : parent payeur ou invité (jeton) ; apprenant,
+  > sont imprimés, `{"name": "Steamy"}` par défaut), `INVOICE_MENTIONS` ; TVA et AIB : réglages de la plateforme
+  > (complément C25). Téléchargement : parent payeur ou invité (jeton) ; apprenant,
   > autre parent, enseignant → 404 ; PDF pas prêt → 409 `PDF_NOT_READY` ; 302 vers l'URL présignée de 5 min, ou le
   > fichier sans stockage objet (CI). La commande du payeur expose `invoice{number, pdfStatus}`. Filet
   > `retry_pending_invoices` (10 min) et action d'admin « Régénérer le PDF ». Avoir sur remboursement : P1.
@@ -879,7 +889,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [x] Paiement (S9), avant API-L3b : voir API-L3b.0a
 - [ ] **Points ouverts** (« Reste à décider »)
   - [x] Valeurs du barème de points et des paliers de rang (C8), avant L3a.3 : barème standard, arbitré le 2026-10-19
-  - [ ] Format des factures validé par la comptabilité, avant L3b.2
+  - [ ] Format des factures validé par la comptabilité (P1 et P2 tranchés le 2026-10-23, C25 ; reste le contrat DGI, le taux d'AIB et sa place dans le prix), avant la mise en production de L3b.2b
   - [ ] Texte de finalité des données sensibles (D6) validé juridiquement, avant L2.5
 
 ---
@@ -1295,5 +1305,5 @@ validateurs de mot de passe D25) sont tranchés et intégrés aux étapes ci-des
 | Fournisseur SMS | ADR après comparaison (S10) | Branchement réel L2 |
 | Prestataire de paiement | Tranché : FedaPay (ADR 0003) ; contrat, KYC et frais négociés à obtenir | Branchement réel L3b |
 | Valeurs du barème de points et des paliers de rang (C8) | Tranché le 2026-10-19 : barème standard, défaut de `PlatformSettings` | L3a.3 |
-| Format des factures (obligations fiscales locales) | Validation par la comptabilité | L3b.2 |
+| Format des factures (obligations fiscales locales) | P1 et P2 tranchés le 2026-10-23 (C25) : facture normalisée, prix TTC sans TVA, AIB ; reste le contrat d'API DGI, le taux d'AIB et l'AIB ajouté ou non au prix | L3b.2c |
 | Texte de finalité des données sensibles (D6) | Validation juridique | L2.5 (texte front) |
