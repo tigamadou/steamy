@@ -184,7 +184,9 @@ describe("TeacherConsentDecision (WPD05, C11)", () => {
     await user.click(screen.getByRole("button", { name: "Accepter l'invitation" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Acceptation impossible :");
     await user.click(screen.getByRole("button", { name: "Refuser" }));
-    expect(screen.getByRole("dialog", { name: "Refuser la demande de Kemi ?" })).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Refuser la demande de Kemi ?" });
+    await user.click(within(dialog).getByRole("button", { name: "Annuler" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
   it("identifiant proposé : sans accents ni caractères refusés, tronqué à 30", () => {
@@ -201,6 +203,8 @@ describe("ConsentRequestView et ConsentRequestScreen · invitation d'un enseigna
     expect(screen.getByText("Invitation de Koffi Adékambi")).toBeInTheDocument();
     expect(screen.getByRole("form", { name: "Accepter l'invitation" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Accepter la demande" })).toBeNull();
+    expect(screen.getByText(/l'invitation est close et l'enseignant en est informé/)).toBeInTheDocument();
+    expect(screen.queryByText(/possible dans 30 jours/)).toBeNull();
   });
 
   it.each([

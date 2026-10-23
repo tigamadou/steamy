@@ -94,8 +94,10 @@ export function ConsentRequestView({ request, kids = [] }: { request: ConsentReq
           <>
             <p className="m-0 flex items-start gap-3 rounded-lg border-2 border-primary-100 bg-primary-50 p-4 text-sm font-bold text-ink-700">
               <span aria-hidden>🔒</span>
-              En acceptant, vous confirmez être le responsable légal de {request.firstName}. Si vous refusez, la demande
-              est close : une nouvelle demande sera possible dans 30 jours.
+              En acceptant, vous confirmez être le responsable légal de {request.firstName}.{" "}
+              {classroom
+                ? "Si vous refusez, l'invitation est close et l'enseignant en est informé."
+                : "Si vous refusez, la demande est close : une nouvelle demande sera possible dans 30 jours."}
             </p>
             {classroom ? (
               <TeacherConsentDecision
