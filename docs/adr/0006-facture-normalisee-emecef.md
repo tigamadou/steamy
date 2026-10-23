@@ -188,4 +188,4 @@ confirmer par la sonde si l'AIB est activé).
 1. **Fait** : socle (interface, faux fournisseur, client conforme, réglages, `emecef_check`).
 2. **Fait** : émission asynchrone, éléments de sécurité sur `Invoice`, PDF avec QR (PR B).
 3. **Fait** : type `EV`, garde-fou IFU, avoirs manuels par la Finance, surveillance quotidienne du jeton (PR C).
-4. Sonde `emecef_probe` sur le serveur de test (PR D), lancée par l'utilisateur avec son jeton.
+4. **Fait** : sonde `emecef_probe` sur le serveur de test (PR D), lancée par l'utilisateur avec son jeton de test ; mode d'emploi dans `docs/infra/reference-configuration.md`.
