@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { DEMO } from "./support/demo";
-import { loginAs, logoutFromShell, openShellMenu } from "./support/session";
+import { loginAs, logoutFromShell, openShellMenu, readApi } from "./support/session";
 
 // LOT-5 étape 5.1 · shell de l'espace enseignant et accueil (WT01).
 
@@ -11,20 +11,13 @@ async function axe(page: Page) {
   expect(violations).toEqual([]);
 }
 
-/** Tableau de bord lu par le navigateur dans l'API, avec la session de l'enseignant. */
-async function readDashboard(page: Page) {
-  return page.evaluate(async () => {
-    const { apiUrl } = (await (await fetch("/runtime-config")).json()) as { apiUrl: string };
-    const response = await fetch(`${apiUrl}/api/classrooms/dashboard/`, { credentials: "include" });
-    return (await response.json()) as {
-      classroomCount: number;
-      learnerCount: number;
-      toReviewCount: number;
-      classrooms: { id: number; name: string }[];
-      toReview: { id: number; learner: { id: number }; classroom: { id: number } }[];
-    };
-  });
-}
+type Dashboard = {
+  classroomCount: number;
+  learnerCount: number;
+  toReviewCount: number;
+  classrooms: { id: number; name: string }[];
+  toReview: { id: number; learner: { id: number; firstName: string; lastName: string }; classroom: { id: number } }[];
+};
 
 test("l'espace enseignant refuse un apprenant et un parent, renvoyés vers leur espace", async ({ page }) => {
   await loginAs(page, "learner");
@@ -40,7 +33,7 @@ test("WT01 : Koffi voit ses compteurs, ses classes et ses tentatives à revoir c
   await loginAs(page, "teacher");
   await page.goto("/enseignant");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(`Bonjour ${DEMO.teacher.firstName} 👋`);
-  const dashboard = await readDashboard(page);
+  const dashboard = await readApi<Dashboard>(page, "/api/classrooms/dashboard/");
 
   const stats = page.getByRole("region", { name: "Vos statistiques" });
   await expect(stats.getByRole("definition")).toHaveText([
@@ -58,14 +51,18 @@ test("WT01 : Koffi voit ses compteurs, ses classes et ses tentatives à revoir c
   await expect(classes.getByRole("link", { name: /3e A · Code/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "Ajouter des élèves" })).toHaveAttribute("href", "/enseignant/eleves/ajouter");
 
-  // « À revoir » : la tentative `ko` de Yao ; « Commenter » cible la tentative (WT05)
+  // « À revoir » : les tentatives échouées lues dans l'API (le parcours de WT05 en consomme une) ; « Commenter » cible
+  // la tentative (WT05)
   const review = page.getByRole("list", { name: "Tentatives à revoir" });
   const first = dashboard.toReview[0];
-  await expect(review.getByRole("listitem")).toHaveCount(dashboard.toReview.length);
-  await expect(review.getByRole("link", { name: /^Commenter la tentative de Yao Kpadé/ }).first()).toHaveAttribute(
-    "href",
-    `/enseignant/eleves/${first.learner.id}?classe=${first.classroom.id}&tentative=${first.id}`,
-  );
+  if (first) {
+    await expect(review.getByRole("listitem")).toHaveCount(dashboard.toReview.length);
+    await expect(
+      review.getByRole("link", { name: new RegExp(`^Commenter la tentative de ${first.learner.firstName} ${first.learner.lastName}`) }).first(),
+    ).toHaveAttribute("href", `/enseignant/eleves/${first.learner.id}?classe=${first.classroom.id}&tentative=${first.id}`);
+  } else {
+    await expect(page.getByText("Aucune tentative à revoir pour le moment.")).toBeVisible();
+  }
 
   // « Décrochage » : section présente, sans libellé « À corriger » ni « formateur »
   await expect(page.getByRole("heading", { level: 2, name: "Décrochage" })).toBeVisible();
