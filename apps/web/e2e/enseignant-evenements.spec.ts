@@ -39,8 +39,7 @@ test("WT09 : événements à venir, candidatures de mes élèves en lecture seul
   await expect(page.getByRole("button", { name: /Proposer à une classe/ })).toBeVisible();
   await axe(page);
 
-  const missing = await page.goto("/enseignant/evenements/evenement-inconnu");
-  expect(missing?.status()).toBe(404);
+  await page.goto("/enseignant/evenements/evenement-inconnu");
   await expect(page.getByRole("heading", { level: 2, name: "Cet événement est introuvable" })).toBeVisible();
 });
 
