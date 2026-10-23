@@ -23,7 +23,7 @@ variante « origine enseignant » de WP05 (lot 5, D60, C11), WPD05 (lot 4, qui r
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : décision sur la recette produit des 34 écrans (écran par écran ou couverture automatique) · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
+Statut : ✅ terminé (recette produit : couverture automatique acceptée le 2026-10-23, C24) · Prochaine tâche : — · Prérequis : API-1 (2.0 et 2.1 partiel) ; API-L2 (2.1 complet, 2.2 à 2.8) ; pré-requis du lot 1 (étapes 1.0a-1.0c) livrés
 
 ### Socle — ✅ terminé
 - [x] **2.0** Socle de l'authentification (requiert API-1) · `feature/lot2-socle` · PR #31
