@@ -568,12 +568,16 @@ def test_activation_is_refused_without_environment_with_a_bad_token_or_an_inacti
 
 def test_emecef_is_off_by_default_and_needs_its_groups():
     config = PlatformSettings.load()
-    assert (config.emecef_enabled, config.emecef_taxed_group, config.emecef_exempt_group) == (
-        False,
-        "",
-        "",
-    )
+    # Libellés officiels de la DGI : B taxable, E régime TPS (Steamy sans TVA), C exportation
+    assert (
+        config.emecef_enabled,
+        config.emecef_taxed_group,
+        config.emecef_exempt_group,
+        config.emecef_export_group,
+    ) == (False, "B", "E", "C")
+    config.full_clean()
     config.emecef_enabled = True
+    config.emecef_taxed_group = config.emecef_exempt_group = ""
     with pytest.raises(ValidationError) as error:
         config.full_clean()
     assert set(error.value.message_dict) == {"emecef_taxed_group", "emecef_exempt_group"}
@@ -623,6 +627,7 @@ def test_admin_activates_emecef_only_when_the_dgi_rates_match(client):
         emecef_enabled="on",
         emecef_taxed_group="B",
         emecef_exempt_group="A",
+        emecef_export_group="C",
         vat_enabled="on",
         vat_applies_to_shipping="on",
         aib_applies_to_shipping="on",
@@ -717,3 +722,22 @@ def test_emecef_check_with_the_fake_provider_and_failures(emecef, settings):
         pytest.raises(CommandError, match="pas actif"),
     ):
         call_command("emecef_check", stdout=StringIO())
+
+
+def test_the_migration_fills_empty_groups_and_keeps_the_staff_choice():
+    from importlib import import_module
+
+    from django.apps import apps as registry
+
+    migration = import_module("apps.core.migrations.0009_groupes_dgi")
+    config = PlatformSettings.load()
+    config.emecef_taxed_group, config.emecef_exempt_group, config.emecef_export_group = "", "A", ""
+    config.save()
+    migration.fill_groups(registry, None)
+    config.refresh_from_db()
+    assert (config.emecef_taxed_group, config.emecef_exempt_group, config.emecef_export_group) == (
+        "B",
+        "A",
+        "C",
+    )
+    migration.fill_groups(registry, None)  # idempotent : rien à remplir

@@ -103,7 +103,7 @@ def test_a_foreign_payer_gets_an_export_invoice_in_the_export_group(
 
 
 def test_an_export_invoice_needs_its_group():
-    config = configure(**VAT)
+    config = configure(**VAT, emecef_export_group="")
     order = taxed_order(config)
     order.status = "paid"
     order.save()

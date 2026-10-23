@@ -1,8 +1,7 @@
 # ADR 0006 · Facture normalisée e-MECeF (DGI du Bénin)
 
 - **Statut** : **proposée**, conforme à la spécification officielle de la DGI et aux décisions de l'utilisateur du
-  2026-10-23 ; reste : groupes de taxe (E1), groupe d'exportation et, par la sonde sur le serveur de test, l'AIB dans
-  `total` (E3)
+  2026-10-23 ; reste : l'AIB dans `total` (E3, par la sonde sur le serveur de test) et la TVA des payeurs hors Bénin (E4b)
 - **Date** : 23 octobre 2026 (mise en conformité avec le PDF de la DGI le même jour)
 - **Étape** : `API-L3b.2c` ([PLAN-API](../plans/PLAN-API.md)), après `API-L3b.2b` (reçu provisoire) et C25 (TVA et AIB
   paramétrables)
@@ -56,8 +55,14 @@ L'API « integrator » (demande d'agrément, jetons) sert aux **démarches** du 
 
 ### 1. Taxes ↔ groupes ↔ `aib`
 
-- `PlatformSettings.emecef_taxed_group` (groupe des lignes quand la TVA est activée) et `emecef_exempt_group` (quand
-  elle ne l'est pas) : saisis d'après la comptabilité, **sans défaut inventé**.
+- **Libellés officiels des groupes de la DGI** : A = EXO « Exonéré » ; B = TAX « Taxable » ; C = EXP « Exportation de
+  produits taxables » ; D = MP « TVA régime d'exception » ; E = TPS « Régime fiscal TPS » ; F = RES « Réservé »
+  (affichés ainsi dans l'admin). L'API ne renvoie que leurs **taux**.
+- Réglages `PlatformSettings` (défauts, tous modifiables) : `emecef_taxed_group` = **B** (lignes quand la TVA est
+  activée, taux lu dans `/info/taxGroups` et égal à `vat_rate`) ; `emecef_exempt_group` = **E** (lignes quand la TVA
+  n'est pas activée : Steamy relève du **régime TPS**, confirmé par l'utilisateur le 2026-10-23) ; `emecef_export_group`
+  = **C** (factures EV). D et F ne sont jamais utilisés par défaut. Le groupe exonéré doit avoir un taux **nul** chez la
+  DGI (rien à ajouter au prix), sinon l'activation est refusée.
 - **Garde-fou** (à l'activation et avant chaque émission) : `GET /info/taxGroups` donne pour le groupe taxé un taux
   **égal à `vat_rate`**, un taux **nul** pour le groupe exonéré ; `aib_rate` doit valoir **1 ou 5** (groupes AIB A et B,
   seules valeurs de la spécification ; contrôle statique du modèle, en français) **et** égaler `aibA` ou `aibB`, ce qui
@@ -103,8 +108,7 @@ montant de paiement envoyé est notre total payé.
   2026-10-23). Le pays est celui du **réseau Mobile Money** du paiement (`Payment.country`), à défaut celui du numéro de
   téléphone du payeur (D76) ; pays inconnu : `FV`, signalé au journal d'audit (`invoice.fiscal_country_unknown`). Le type
   est **figé** sur la facture (`Invoice.fiscal_type`). Une facture `EV` met toutes ses lignes dans le groupe
-  `emecef_export_group` (réglage **sans valeur par défaut**, à confirmer par la sonde et `/info/taxGroups` ; son taux doit
-  être nul), **au montant payé** : l'exportation est à taux nul, et si de la TVA a été facturée à ce payeur, elle reste
+  `emecef_export_group` (défaut **C**, taux nul exigé chez la DGI), **au montant payé** : l'exportation est à taux nul, et si de la TVA a été facturée à ce payeur, elle reste
   dans le prix (question comptable E4b : exempter de TVA à la commande les payeurs hors Bénin est une évolution du moteur
   de taxes, à décider).
 
@@ -149,8 +153,8 @@ confirmer par la sonde si l'AIB est activé).
   (13 caractères) viennent de l'environnement (`apps/api/.env` local ignoré par git pour le test, secret de déploiement
   pour la production), jamais du dépôt ni de la CI. **Garde-fou** : l'IFU renvoyé par `/info/status` doit égaler
   `EMECEF_IFU`, sinon pas d'activation ni d'émission (mauvais jeton pour cet environnement).
-- `PlatformSettings` : `emecef_enabled` (faux par défaut), `emecef_taxed_group`, `emecef_exempt_group`,
-  `emecef_export_group` ; AIB restreint à 1 % ou 5 % quand e-MECeF est activé ; pas de taux selon l'IFU du client.
+- `PlatformSettings` : `emecef_enabled` (faux par défaut), `emecef_taxed_group` (B), `emecef_exempt_group` (E),
+  `emecef_export_group` (C) ; AIB restreint à 1 % ou 5 % quand e-MECeF est activé ; pas de taux selon l'IFU du client.
 - `PlatformSettings.emecef_enabled` : **faux par défaut** (reçu provisoire).
 - Aucun appel réseau réel en test ni en CI : transport simulé avec les réponses exactes de la documentation.
 - Sonde manuelle `emecef_probe` (hors CI), **uniquement sur le serveur de test** et avec `--yes-test` : émet une facture
@@ -160,7 +164,7 @@ confirmer par la sonde si l'AIB est activé).
 
 | # | Point | État |
 | --- | --- | --- |
-| E1 | Sens des groupes A à F | **Ouvert** : seuls les taux sont lus (`/info/taxGroups`) ; réglages sans défaut, garde-fou par le taux |
+| E1 | Sens des groupes A à F | **Résolu** : libellés officiels de la DGI ; TVA activée = B, sans TVA = **E (régime TPS)**, export = C ; réglables, garde-fou par le taux lu dans `/info/taxGroups` |
 | E2 | Prix TTC ou HT, arrondi | **Résolu** : `price` TTC, TVA extraite sur le total du groupe ; méthode de répartition ci-dessus |
 | E3 | AIB `A` / `B` et `total` | **Précisé** : A = 1 %, B = 5 % uniquement ; `total` avec ou sans AIB à vérifier par la sonde de test |
 | E4 | Payeurs hors Bénin : `FV` ou `EV` | **Résolu** : `EV` (pays du réseau Mobile Money, sinon du téléphone ; inconnu : `FV`) ; groupe d'export à régler ; TVA facturée à un payeur hors Bénin : à décider (E4b) |

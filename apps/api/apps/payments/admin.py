@@ -520,7 +520,7 @@ class RefundAdmin(admin.ModelAdmin):
     )
     list_filter = ("processed", WithoutCreditNoteFilter)
     search_fields = ("payment__order__reference",)
-    list_select_related = ("payment__order",)
+    list_select_related = ("payment__order", "credit_note")
     form = RefundForm
     actions = ["process"]
 

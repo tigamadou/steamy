@@ -22,6 +22,15 @@ def bounds(low: int, high: int) -> list:
     return [MinValueValidator(low), MaxValueValidator(high)]
 
 
+#: Groupes de taxation de la DGI (libellés officiels) : seuls leurs taux sont lus par l'API (`/info/taxGroups`)
+EMECEF_GROUPS = [
+    ("A", "A · EXO · Exonéré"),
+    ("B", "B · TAX · Taxable"),
+    ("C", "C · EXP · Exportation de produits taxables"),
+    ("D", "D · MP · TVA régime d'exception"),
+    ("E", "E · TPS · Régime fiscal TPS"),
+    ("F", "F · RES · Réservé"),
+]
 #: Taux d'AIB admis par e-MECeF (spécification de la DGI : groupe A = 1 %, groupe B = 5 %, pas d'autre valeur)
 EMECEF_AIB_RATES = (Decimal("1"), Decimal("5"))
 #: Barème standard (C8) : points par événement, accordés une seule fois.
@@ -116,25 +125,27 @@ class PlatformSettings(models.Model):
     emecef_taxed_group = models.CharField(
         _("groupe de taxe des articles taxés"),
         max_length=1,
-        choices=[(group, group) for group in "ABCDEF"],
+        choices=EMECEF_GROUPS,
+        default="B",
         blank=True,
         help_text=_("Groupe e-MECeF appliqué aux lignes quand la TVA est activée"),
     )
     emecef_exempt_group = models.CharField(
         _("groupe de taxe des articles exonérés"),
         max_length=1,
-        choices=[(group, group) for group in "ABCDEF"],
+        choices=EMECEF_GROUPS,
+        default="E",
         blank=True,
         help_text=_("Groupe e-MECeF appliqué aux lignes quand la TVA n'est pas activée"),
     )
     emecef_export_group = models.CharField(
         _("groupe de taxe des ventes à l'exportation"),
         max_length=1,
-        choices=[(group, group) for group in "ABCDEF"],
+        choices=EMECEF_GROUPS,
+        default="C",
         blank=True,
         help_text=_(
-            "Groupe e-MECeF des factures EV, émises aux payeurs hors du Bénin (taux nul chez la DGI) ; "
-            "sans valeur par défaut"
+            "Groupe e-MECeF des factures EV, émises aux payeurs hors du Bénin (taux nul chez la DGI)"
         ),
     )
     updated_at = models.DateTimeField(auto_now=True)
