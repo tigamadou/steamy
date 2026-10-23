@@ -448,13 +448,24 @@ describe("WT04 · élèves d'une classe", () => {
     expect(screen.getByText("La classe est enregistrée.")).toBeInTheDocument();
   });
 
-  it("offre échue : l'ajout est bloqué, le suivi reste ouvert", () => {
+  it("offre échue : l'ajout est bloqué et expliqué, le suivi reste ouvert", () => {
     const { unmount } = render(<ClassroomMembersView classroom={cl} members={[member()]} blocked />);
     expect(screen.queryByRole("link", { name: "Ajouter des élèves" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Ajouter des élèves" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Ajouter des élèves" })).toHaveAccessibleDescription(
+      /offre de votre établissement est échue/,
+    );
     expect(screen.getByRole("list", { name: "Élèves de la classe" })).toBeInTheDocument();
     unmount();
     render(<EmptyClassroom classroom={cl} blocked />);
     expect(screen.getByRole("button", { name: "Ajouter des élèves" })).toBeDisabled();
+  });
+
+  it("classe vidée par un retrait : le titre de l'état vide reçoit le focus de repli", () => {
+    const { rerender } = render(<ClassroomMembersView classroom={cl} members={[member()]} blocked={false} />);
+    rerender(<ClassroomMembersView classroom={cl} members={[]} blocked={false} />);
+    expect(screen.getByRole("heading", { level: 3, name: "Ajoutez vos premiers élèves" })).toHaveAttribute("tabindex", "-1");
+    expect(screen.getByRole("heading", { level: 3, name: "Ajoutez vos premiers élèves" })).toHaveAttribute("id", "eleves-classe");
   });
 
   it("serveur : classe, élèves, école et confirmation lus ; valeur inconnue ignorée ; sans session rien", async () => {
@@ -490,7 +501,7 @@ describe("Retirer de la classe", () => {
         {row}
       </>,
     );
-    await user.click(screen.getByRole("button", { name: /Retirer de la classe|Annuler l'invitation/ }));
+    await user.click(screen.getByRole("button", { name: /Retirer de la classe|Annuler l'invitation|Retirer l'invitation/ }));
     return { user, dialog: screen.getByRole("dialog"), view };
   }
 
@@ -513,6 +524,15 @@ describe("Retirer de la classe", () => {
       </h3>,
     );
     expect(document.getElementById("eleves-classe")).toHaveFocus();
+  });
+
+  it("invitation refusée ou expirée : retirée de la liste, sans place libérée", async () => {
+    POST.mockResolvedValue({ response: new Response(null, { status: 200 }) });
+    const { user, dialog } = await open(<InvitationRow member={invitation({ invitationStatus: "refused" })} classroomId={3} />);
+    expect(dialog).toHaveTextContent("L'invitation de Kémi Ahouandjinou est retirée de la liste.");
+    expect(dialog).not.toHaveTextContent(/place est libérée/);
+    await user.click(within(dialog).getByRole("button", { name: "Retirer l'invitation" }));
+    await waitFor(() => expect(router.refresh).toHaveBeenCalled());
   });
 
   it("invitation en attente : texte et libellé propres", async () => {

@@ -167,6 +167,17 @@ describe("WT10 · détail d'un parcours encadré", () => {
     expect(screen.getByRole("heading", { level: 4, name: "Niveau 1 · Les moteurs" })).toBeInTheDocument();
   });
 
+  it("numéros : l'ordre de l'API, à défaut la position dans la liste", () => {
+    const course = supervisedCourseDetail();
+    delete course.projects[0].order;
+    delete course.projects[0].levels[0].order;
+    delete course.projects[0].levels[0].missions[1].order;
+    render(<TeacherCourseDetailView course={course} />);
+    expect(screen.getByRole("heading", { level: 3, name: "Projet 1 · Robot suiveur" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 4, name: /^Niveau 1 · Les moteurs/ })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /Mission 2/ })).toHaveLength(1);
+  });
+
   it("mission sans durée", () => {
     const course = supervisedCourseDetail();
     delete course.projects[0].levels[0].missions[0].durationMin;

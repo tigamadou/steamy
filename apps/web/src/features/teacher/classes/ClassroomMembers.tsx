@@ -6,6 +6,11 @@ import { getClassroom, getMembers, getSchool, type Classroom, type Member } from
 import { InvitationRow, MemberRow } from "./MemberRow";
 import { MEMBERS_HEADING_ID } from "./RemoveMemberButton";
 
+/** Explication de l'ajout bloqué par une offre échue (C21) ; le suivi de la classe reste ouvert. */
+const OFFER_EXPIRED_ID = "offre-echue";
+const OFFER_EXPIRED_TEXT =
+  "L'offre de votre établissement est échue : l'ajout d'élèves est bloqué. Le suivi de la classe reste ouvert.";
+
 const t = routes.teacher;
 
 const CONFIRMATIONS = {
@@ -19,13 +24,15 @@ export function EmptyClassroom({ classroom, blocked }: { classroom: Classroom; b
   return (
     <div className="flex flex-col items-center gap-3 rounded-[18px] border-2 border-dashed border-primary-300 bg-primary-50 px-5 py-8 text-center">
       <Mascot pose="wave" size={120} />
-      <h3 className="m-0 text-lg font-black text-ink-900">Ajoutez vos premiers élèves</h3>
+      <h3 id={MEMBERS_HEADING_ID} tabIndex={-1} className="m-0 text-lg font-black text-ink-900 outline-none">
+        Ajoutez vos premiers élèves
+      </h3>
       <p className="m-0 max-w-120 text-sm font-semibold text-ink-700">
         Un par un ou par import d&apos;un fichier. Chaque parent reçoit une demande de consentement par SMS ; l&apos;élève
         rejoint la classe après son accord.
       </p>
       {blocked ? (
-        <Button disabled icon="plus">
+        <Button disabled icon="plus" aria-describedby={OFFER_EXPIRED_ID}>
           Ajouter des élèves
         </Button>
       ) : (
@@ -75,13 +82,22 @@ export function ClassroomMembersView({
           <Button href={t.editClassroom(classroom.id)} variant="outline">
             Modifier
           </Button>
-          {!blocked && (
+          {blocked ? (
+            <Button disabled icon="plus" aria-describedby={OFFER_EXPIRED_ID}>
+              Ajouter des élèves
+            </Button>
+          ) : (
             <Button href={t.addLearners({ classroomId: classroom.id })} icon="plus">
               Ajouter des élèves
             </Button>
           )}
         </div>
       </header>
+      {blocked && (
+        <p id={OFFER_EXPIRED_ID} className="m-0 text-[13px] font-bold text-error-700">
+          {OFFER_EXPIRED_TEXT}
+        </p>
+      )}
       {active.length + invitations.length === 0 ? (
         <EmptyClassroom classroom={classroom} blocked={blocked} />
       ) : (
