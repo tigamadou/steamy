@@ -50,7 +50,7 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [x] Tests unitaires : envoi, longueur max, état d'erreur
   - [x] Playwright : commenter une tentative `ko`, elle sort de « À revoir », commentaire visible côté parent (`WPD03`) et apprenant notifié
   - [x] Recette : aucun champ sensible dans l'affichage (le payload `LearnerFollowUp` n'en porte pas)
-  > Écarts : le commentaire n'est pas affiché sur l'accueil de l'apprenant (`WD01`) : cette carte n'existe pas dans le lot 3 ; l'apprenant en est notifié (`WD04`, « t'a laissé un commentaire »). « Commenter » sur une ligne de `WT01` vient de l'étape 5.1 (`?tentative=`). La tentative est présentée avec son pourcentage et son statut serveur (l'API ne renvoie pas de score brut). La mention du test de contrat de payload est couverte côté API (sérialiseur dédié).
+  > Écarts : `AttemptRow` remplace `QuizAttemptRow` (pourcentage de l'API, sans score brut, avec le lien « Commenter »). Le commentaire n'est pas affiché sur l'accueil de l'apprenant (`WD01`) : cette carte n'existe pas dans le lot 3 ; l'apprenant en est notifié (`WD04`, « t'a laissé un commentaire »). « Commenter » sur une ligne de `WT01` vient de l'étape 5.1 (`?tentative=`). La tentative est présentée avec son pourcentage et son statut serveur (l'API ne renvoie pas de score brut). La mention du test de contrat de payload est couverte côté API (sérialiseur dédié).
 - [ ] **5.5** Évaluations « À revoir » · `feature/lot5-evaluations` (requiert 5.4)
   - [ ] `WT07` : filtres Toutes / Formatives / Sommatives / À revoir dans l'URL, filtre par classe, pagination, « Commenter » vers `WT05`
   - [ ] Branchement API : `classrooms/reviews/?status=&type=&classroomId=`
