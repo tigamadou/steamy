@@ -827,7 +827,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > `Announcement` dans `core`, diffusée une fois par la tâche `broadcast_announcement` aux personas actifs du public
   > visé (notification `announcement`, D7), puis figée. Aucun cache serveur à invalider (`PlatformSettings.load()`
   > relit la base ; les référentiels n'ont qu'un cache HTTP d'une heure). « Mode maintenance » et « inscriptions
-  > ouvertes » (WAD14) restent hors de cette étape : comportement d'API non spécifié, à trancher avant LOT-6 6.5.
+  > ouvertes » (WAD14) : hors v1, arbitré le 2026-10-23 (`ARBITRAGES.md` C22).
 - [x] **API-L6.4** Impact Tracker · `feature/api-l6-4-impact-kpi` · PR #65 (1/3), puis `feature/api-l6-4-impact-rapports` · PR #67 (2/3), puis `feature/api-l6-4-impact-exports` · PR #110 (3/3)
   - [x] App `impact` : `KpiDefinition` (30 KPI par migration), `KpiValue`, `ImpactReport`, `ReportExport` ; statut D73
     - [x] `KpiDefinition` (30 KPI en 8 groupes, migration `0002_kpi_definitions`), `KpiValue`, `ImpactReport` ; `kpiStatus` D73 (PR #65)
