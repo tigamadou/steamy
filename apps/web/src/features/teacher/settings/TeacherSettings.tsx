@@ -22,21 +22,26 @@ const LEGAL_LINKS: Array<[LegalDoc, string]> = [
  */
 export async function TeacherSettings() {
   const api = await getServerApi();
-  const [me, school, preferences] = await Promise.all([
+  const [me, profile, preferences] = await Promise.all([
     getCurrentUser(),
-    api.GET("/api/classrooms/school/"),
+    api.GET("/api/accounts/me/teacher-profile/"),
     api.GET("/api/notifications/preferences/"),
   ]);
-  const establishment = readOrNull(school);
+  const teacher = readOrNull(profile);
   const prefs = readOrNull(preferences);
-  if (!me || !establishment || !prefs) return null;
+  if (!me || !teacher || !prefs) return null;
   const name = `${me.firstName} ${me.lastName}`.trim();
 
   return (
     <div className="mx-auto flex w-full max-w-190 flex-col gap-7">
       <Section title="Profil">
         <TeacherProfileCard
-          identity={{ firstName: me.firstName, lastName: me.lastName, school: establishment.name }}
+          identity={{
+            firstName: me.firstName,
+            lastName: me.lastName,
+            specialty: teacher.specialty,
+            school: teacher.school?.name ?? null,
+          }}
         />
       </Section>
 

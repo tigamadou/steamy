@@ -68,13 +68,13 @@ Statut : 🟡 en cours · Prochaine tâche : 5.6 Parcours encadrés et 5.8 Param
   - [ ] Tests unitaires : modale, double proposition à la même classe (message serveur)
 - [ ] **5.8** Paramètres, notifications, aide · `feature/lot5-parametres-notifs-aide` · PR #152 (requiert 5.1)
   - [x] `WT08` Paramètres : profil (nom, établissement en lecture seule), connexion (email, mot de passe D25), notifications (in-app et email), légal
-  - [ ] `WT08` spécialité du profil (après la PR d'API `feature/api-l5-profil-enseignant`, #151 : `GET` · `PATCH accounts/me/teacher-profile/`)
+  - [x] `WT08` spécialité du profil (`GET` · `PATCH accounts/me/teacher-profile/`, API #151) ; l'établissement vient du profil
   - [x] `WT08` zone sensible : « Demander la fermeture du compte » vers `public/contact-messages/` (sujet « Autre », message prérempli)
   - [x] `WT12` Notifications : onglets, « Tout marquer comme lu », liens par type (profil élève, classe, événements)
   - [x] `WT11` Aide : FAQ statique des 4 sujets + formulaire `WL24` dans le shell
   - [x] Tests unitaires : résolution `type` vers route ; préférences optimistes avec retour arrière en cas d'erreur
   - [x] Playwright : changement de mot de passe puis reconnexion
-  > Reste : la spécialité (voir ci-dessus), à brancher quand #151 est fusionnée ; l'établissement vient alors du profil au lieu de `classrooms/school/`. Écart : la FAQ est un module TypeScript (comme celles de l'apprenant et du parent), pas du MDX.
+  > Écart : la FAQ est un module TypeScript (comme celles de l'apprenant et du parent), pas du MDX.
 - [ ] **5.9** Parcours de bout en bout et durcissement · `feature/lot5-e2e` (requiert 5.1 à 5.8, étape 4.10 du lot 4, lot 2 activation)
   - [ ] Playwright « Invitation complète » : admin invite, activation `/activation/[token]`, connexion `W16`, création de classe, invitation, acceptation `WPD05`, élève actif en `WT04`, notification « a rejoint la classe »
   - [ ] Playwright « Compte existant (C11) » : rattachement du compte, élève dans `WT04`, parcours `source=classroom`, sans paiement
