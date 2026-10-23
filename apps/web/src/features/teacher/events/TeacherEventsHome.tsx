@@ -74,7 +74,7 @@ export function TeacherEventsView({
         {events.length === 0 ? (
           <Empty title="Aucun événement à venir" body="Les prochains Steamy Events seront annoncés ici." />
         ) : (
-          <ul className="m-0 grid list-none gap-4 p-0 sm:grid-cols-2 xl:grid-cols-3">
+          <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 xl:grid-cols-3">
             {events.map((event) => {
               const reason = closedReason(eventState(event));
               return (
@@ -136,7 +136,7 @@ export function TeacherEventsHomeSkeleton() {
   return (
     <div role="status" aria-busy="true" aria-label="Chargement des événements…" className="flex flex-col gap-6">
       <SkeletonBlock className="h-5 w-48" />
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {[0, 1, 2].map((key) => (
           <SkeletonBlock key={key} className="h-48 rounded-[18px]" />
         ))}
