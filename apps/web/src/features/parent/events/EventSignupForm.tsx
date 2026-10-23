@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 
 import { Button, ErrorSummary, Field, Select, Textarea, type PaymentFormProps, type PhoneCountry } from "@/components/ds";
 import { apiCall } from "@/lib/api-call";
-import { formatPrice } from "@/lib/format";
+import { formatPriceHt } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
 import { EventOrderPayment } from "./EventOrderPayment";
@@ -121,7 +121,7 @@ export function EventSignupForm({ event, kids, countries, preferred }: EventSign
       </Field>
       <p className="m-0 rounded-[14px] bg-ink-50 px-4 py-3 text-[13px] font-bold text-ink-700">
         {paid
-          ? `Participation : ${formatPrice(event.price ?? 0)}. La place est réservée dès que vous continuez, puis confirmée au paiement ; si votre enfant a un ticket Steamy Events, il est utilisé et il n'y a rien à payer.`
+          ? `Participation : ${formatPriceHt(event.price ?? 0)}. La place est réservée dès que vous continuez, puis confirmée au paiement ; si votre enfant a un ticket Steamy Events, il est utilisé et il n'y a rien à payer.`
           : "Participation gratuite. Votre accord de parent est acquis : l'inscription est confirmée dans la limite des places."}
       </p>
       <Button type="submit" block size="lg" loading={pending}>

@@ -10,6 +10,7 @@ import {
   PaymentForm,
   PaymentStatusPanel,
   SkeletonBlock,
+  TaxRows,
   WKSummaryRow,
   type PaymentFormValues,
 } from "@/components/ds";
@@ -163,11 +164,12 @@ export function PaymentStep() {
         </h2>
         <p className="mt-1 text-[32px] font-black text-primary-700">{formatPrice(order.total)}</p>
         <dl className="mt-3 flex flex-col gap-1.5">
-          <WKSummaryRow label="Articles" value={formatPrice(order.subtotal)} />
+          <WKSummaryRow label="Articles HT" value={formatPrice(order.subtotal)} />
           <WKSummaryRow
             label={order.deliveryZone ? `Livraison (${order.deliveryZone.name})` : "Livraison"}
             value={formatPrice(order.shippingFee)}
           />
+          <TaxRows taxes={order.taxes} />
         </dl>
         <p className="mt-3 text-[13px] font-bold text-ink-700">
           Vos kits sont réservés jusqu&apos;à {formatTime(order.expiresAt)} : payez avant cette heure.

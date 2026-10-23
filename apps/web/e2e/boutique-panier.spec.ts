@@ -56,7 +56,10 @@ test("P5 panier : WK10 → WK01 → WK02 → WK03, quantité, le panier serveur 
   await expect(visible(page, "link", "Steamy Bot v1")).toBeVisible();
   await expect(visible(page, "link", "Pack Électronique")).toBeVisible();
   await visible(page, "button", "Ajouter un exemplaire de Pack Électronique").click();
-  await expect(page.getByText("Sous-total (3 articles)").filter({ visible: true })).toBeVisible();
+  await expect(page.getByText("Sous-total HT (3 articles)").filter({ visible: true })).toBeVisible();
+  // C25 : prix du catalogue hors taxes, total hors livraison lu dans l'API (taxes éteintes par défaut : aucune ligne)
+  await expect(page.getByText(/F CFA HT/).filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByText("Total hors livraison").filter({ visible: true })).toBeVisible();
   await expect(page.getByText("Calculée à l'étape suivante").filter({ visible: true })).toBeVisible();
   await axe(page);
 
@@ -65,12 +68,12 @@ test("P5 panier : WK10 → WK01 → WK02 → WK03, quantité, le panier serveur 
   await expect(page).toHaveURL(/\/connexion/);
   await loginViaApi(page, username, PASSWORD);
   await page.goto("/apprenant/boutique/panier");
-  await expect(page.getByText("Sous-total (3 articles)").filter({ visible: true })).toBeVisible();
+  await expect(page.getByText("Sous-total HT (3 articles)").filter({ visible: true })).toBeVisible();
 
   // Retrait d'une ligne
   await visible(page, "button", "Retirer Steamy Bot v1").click();
   await expect(page.getByRole("status").filter({ hasText: "« Steamy Bot v1 » retiré du panier." })).toBeVisible();
-  await expect(page.getByText("Sous-total (2 articles)").filter({ visible: true })).toBeVisible();
+  await expect(page.getByText("Sous-total HT (2 articles)").filter({ visible: true })).toBeVisible();
 });
 
 test("P5 fusion : le panier invité rejoint celui de l'apprenant à la connexion (W16 ?next=)", async ({ page }) => {
@@ -98,7 +101,7 @@ test("P5 fusion : le panier invité rejoint celui de l'apprenant à la connexion
   await page.getByRole("button", { name: "Se connecter" }).click();
   await expect(page).toHaveURL("/apprenant/boutique/panier");
   await expect(visible(page, "link", "Steamy Bot v1")).toBeVisible();
-  await expect(page.getByText("Sous-total (1 article)").filter({ visible: true })).toBeVisible();
+  await expect(page.getByText("Sous-total HT (1 article)").filter({ visible: true })).toBeVisible();
   expect(await page.evaluate(() => window.localStorage.getItem("steamy:panier"))).toBeNull();
 
   // Le panier public renvoie l'apprenant connecté vers le sien

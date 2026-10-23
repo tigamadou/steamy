@@ -137,7 +137,7 @@ describe("EnrollCard · WC05", () => {
     expect(screen.getByText("Débloqué avec le Kit Code")).toBeInTheDocument();
     expect(screen.queryByText(/25\s000/)).not.toBeInTheDocument();
     expect(screen.getByText("Kit requis")).toBeInTheDocument();
-    expect(screen.getByText(/35\s000 F CFA · En stock/)).toBeInTheDocument();
+    expect(screen.getByText(/35\s000 F CFA HT · En stock/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "J'ai un Kit Code" })).toHaveAttribute(
       "href",
       "/apprenant/catalogue/robot-bluetooth/kit-code",

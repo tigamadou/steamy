@@ -50,7 +50,7 @@ describe("EventRow (WL21)", () => {
 
   it("payant sans prix renseigné : 0 F CFA", () => {
     render(<EventRow event={steamyEvent({ isFree: false, price: undefined })} />);
-    expect(screen.getByText("0 F CFA")).toBeInTheDocument();
+    expect(screen.getByText("0 F CFA HT")).toBeInTheDocument();
   });
 });
 

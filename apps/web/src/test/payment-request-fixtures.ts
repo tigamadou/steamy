@@ -44,6 +44,7 @@ export const KIT_REQUEST = paymentRequest({
     { kitSlug: "capteurs", title: "Pack capteurs", unitPrice: 5000, quantity: 2 },
   ],
   amount: 45000,
+  total: 45000,
 });
 
 export function order(overrides: Partial<Schemas["Order"]> = {}): Schemas["Order"] {

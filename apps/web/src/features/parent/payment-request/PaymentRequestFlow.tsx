@@ -19,7 +19,7 @@ import { PaymentRequestSummary } from "./PaymentRequestSummary";
 
 type Order = Pick<
   Schemas["Order"],
-  "reference" | "items" | "shippingFee" | "total" | "deliveryZone" | "deliveryAddress" | "expiresAt"
+  "reference" | "items" | "shippingFee" | "taxes" | "total" | "deliveryZone" | "deliveryAddress" | "expiresAt"
 >;
 type Child = Parameters<typeof PaymentRequestSummary>[0]["child"];
 
@@ -176,7 +176,7 @@ export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
   } else {
     panel = (
       <OrderPayment
-        amount={order?.total ?? request.amount}
+        amount={order?.total ?? request.total}
         reference={reference}
         countries={countries}
         preferred={preferred}
@@ -214,7 +214,7 @@ export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
         onClose={() => setDeclining(false)}
         requestId={request.id}
         childFirstName={child.firstName}
-        summary={`${request.kind === "kit" ? "Kit" : "Parcours"} ${title} · ${formatPrice(order?.total ?? request.amount)}`}
+        summary={`${request.kind === "kit" ? "Kit" : "Parcours"} ${title} · ${formatPrice(order?.total ?? request.total)}`}
         onDeclined={() => {
           setDeclining(false);
           router.refresh();

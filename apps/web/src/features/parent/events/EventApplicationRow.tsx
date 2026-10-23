@@ -9,7 +9,7 @@ import { Badge, Button, type PaymentFormProps, type PhoneCountry } from "@/compo
 import { apiCall } from "@/lib/api-call";
 import { cx } from "@/lib/cx";
 import { formatFullDate } from "@/lib/dates";
-import { formatPrice } from "@/lib/format";
+import { formatPriceHt } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
 import { EventOrderPayment } from "./EventOrderPayment";
@@ -92,7 +92,7 @@ export function EventApplicationRow({ application: initial, countries, preferred
           </h3>
           <p className="m-0 text-[13px] font-bold text-ink-600">
             {learner.firstName} · 📅 {formatFullDate(event.startsAt)} ·{" "}
-            {event.price ? formatPrice(event.price) : "Gratuit"}
+            {event.price ? formatPriceHt(event.price) : "Gratuit"}
             {application.ticketUsed && " · 🎟️ Ticket Steamy Events"}
           </p>
           {application.motivation && (

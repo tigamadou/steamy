@@ -11,6 +11,14 @@ export function formatPrice(amount: number): string {
   return `${FCFA.format(amount)} F CFA`;
 }
 
+/** Prix du catalogue, d'un kit, d'un événement ou d'une livraison : hors taxes (C25), `25000` → « 25 000 F CFA HT ». */
+export function formatPriceHt(amount: number): string {
+  return `${formatPrice(amount)} HT`;
+}
+
+/** Libellé d'une taxe ajoutée au HT, par le code de l'API (C25). */
+export const TAX_LABELS: Record<Schemas["TaxLine"]["code"], string> = { vat: "TVA", aib: "AIB" };
+
 /** Ligne de commande ou de panier : « Steamy Bot v1 × 2 », le titre seul pour une unité. */
 export function quantityLabel(title: string, quantity: number): string {
   return quantity > 1 ? `${title} × ${quantity}` : title;
@@ -43,7 +51,7 @@ export function toCourseCard(course: Schemas["CourseList"], href = routes.course
     title: course.title,
     difficulty: DIFFICULTY_LABELS[course.difficulty],
     isFree: !course.requiredKit && (course.isFree ?? false),
-    priceLabel: course.requiredKit ? KIT_CODE_LABEL : formatPrice(course.price ?? 0),
+    priceLabel: course.requiredKit ? KIT_CODE_LABEL : formatPriceHt(course.price ?? 0),
     color: course.category.color,
     emoji: course.emoji || course.category.icon,
   };

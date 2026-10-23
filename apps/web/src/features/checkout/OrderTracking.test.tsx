@@ -12,6 +12,11 @@ vi.mock("./api", () => ({ getOrder, getInvoice }));
 const { OrderTracking } = await import("./OrderTracking");
 const { readOrderToken, saveOrderToken } = await import("./checkout-storage");
 
+const TAXES: Schemas["Order"]["taxes"] = [
+  { code: "vat", rate: "18", base: 70000, amount: 12600 },
+  { code: "aib", rate: "5", base: 70000, amount: 3500 },
+];
+
 const ORDER: Schemas["Order"] = {
   reference: "KT-7042",
   kind: "kit",
@@ -88,6 +93,18 @@ describe("WK07 · suivi de commande", () => {
     expect(screen.getByRole("link", { name: "Retour à la boutique" })).toHaveAttribute("href", "/boutique");
     click.mockRestore();
     vi.unstubAllGlobals();
+  });
+
+  it("taxes de l'API (C25) : sous-total HT, TVA et AIB, total à payer", async () => {
+    getOrder.mockResolvedValueOnce({
+      ok: true,
+      data: { ...ORDER, taxes: TAXES, total: 87100 },
+    });
+    render(<OrderTracking reference="KT-7042" />);
+    expect((await screen.findByText("Sous-total HT")).nextSibling).toHaveTextContent(/^70\s000\sF\sCFA$/);
+    expect(screen.getByText("TVA (18 %)").nextSibling).toHaveTextContent(/^12\s600\sF\sCFA$/);
+    expect(screen.getByText("AIB (5 %)").nextSibling).toHaveTextContent(/^3\s500\sF\sCFA$/);
+    expect(screen.getByText("Total à payer").nextSibling).toHaveTextContent(/^87\s100\sF\sCFA$/);
   });
 
   it("commande en attente ou annulée : pas de timeline ni de reçu ; sans zone ni facture", async () => {

@@ -135,7 +135,7 @@ describe("PaymentRequestSummary (3 objets, 8 états)", () => {
   it("kit sans commande : articles et montant hors livraison (aucun calcul de total)", () => {
     render(<PaymentRequestSummary request={KIT_REQUEST} child={{ ...CHILD, age: null, schoolGrade: null, avatar: null }} state="pending" />);
     expect(screen.getByText("bénéficiaire")).toBeInTheDocument();
-    expect(screen.getByText("Pack capteurs × 2").nextSibling).toHaveTextContent(/5\s000\sF\sCFA l'unité/);
+    expect(screen.getByText("Pack capteurs × 2").nextSibling).toHaveTextContent(/5\s000\sF\sCFA\sHT l'unité/);
     expect(screen.getByText("Total à payer hors livraison").nextSibling).toHaveTextContent(/^45\s000\sF\sCFA$/);
     expect(screen.getByText(/réservé pendant 30 minutes/)).toBeInTheDocument();
   });
@@ -157,6 +157,31 @@ describe("PaymentRequestSummary (3 objets, 8 états)", () => {
     render(<PaymentRequestSummary request={KIT_REQUEST} child={CHILD} state="failed" order={order({ items: [{ ...order().items[0], quantity: 2, title: "Bot" }] })} />);
     expect(screen.getByText("Bot × 2")).toBeInTheDocument();
     expect(screen.getByText("Livraison · Cotonou")).toBeInTheDocument();
+  });
+
+  it("taxes de l'API (C25) : sous-total HT, une ligne par taxe, total sans rien recalculer", () => {
+    const taxes = [
+      { code: "vat" as const, rate: "18", base: 45000, amount: 8100 },
+      { code: "aib" as const, rate: "5", base: 45000, amount: 2250 },
+    ];
+    const { unmount } = render(
+      <PaymentRequestSummary request={{ ...KIT_REQUEST, taxes, total: 55350 }} child={CHILD} state="pending" />,
+    );
+    expect(screen.getByText("Sous-total HT").nextSibling).toHaveTextContent(/^45\s000\sF\sCFA$/);
+    expect(screen.getByText("TVA (18 %)").nextSibling).toHaveTextContent(/^8\s100\sF\sCFA$/);
+    expect(screen.getByText("AIB (5 %)").nextSibling).toHaveTextContent(/^2\s250\sF\sCFA$/);
+    expect(screen.getByText("Total à payer hors livraison").nextSibling).toHaveTextContent(/^55\s350\sF\sCFA$/);
+    unmount();
+    render(
+      <PaymentRequestSummary
+        request={KIT_REQUEST}
+        child={CHILD}
+        state="confirming"
+        order={order({ taxes, total: 58350 })}
+      />,
+    );
+    expect(screen.getByText("TVA (18 %)").nextSibling).toHaveTextContent(/^8\s100\sF\sCFA$/);
+    expect(screen.getByText("Total à payer").nextSibling).toHaveTextContent(/^58\s350\sF\sCFA$/);
   });
 
   it.each([
