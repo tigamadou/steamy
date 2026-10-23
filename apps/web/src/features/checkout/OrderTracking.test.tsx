@@ -19,6 +19,7 @@ const ORDER: Schemas["Order"] = {
   shippingStatus: "preparing",
   subtotal: 70000,
   shippingFee: 1500,
+  taxes: [],
   total: 71500,
   currency: "XOF",
   items: [

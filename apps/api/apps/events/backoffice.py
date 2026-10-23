@@ -36,6 +36,7 @@ def paid_payment(application: EventApplication):
 def refuse_exceptionally(application: EventApplication, reason: str, user, request=None):
     """Annule la candidature en cours ; renvoie le remboursement créé (candidature payée) ou `None`."""
     from apps.payments.models import Refund
+    from apps.payments.taxes import taxes_share
 
     with transaction.atomic():
         application = (
@@ -55,8 +56,11 @@ def refuse_exceptionally(application: EventApplication, reason: str, user, reque
         refund = None
         if payment is not None:
             item = payment.order.items.get(event_application=application)
+            # Prix HT de la place + sa part de taxes, figées sur la commande (C25)
             refund = Refund.objects.create(
-                payment=payment, amount=item.total, reason=f"Refus exceptionnel : {reason}"
+                payment=payment,
+                amount=item.total + taxes_share(payment.order, item.total),
+                reason=f"Refus exceptionnel : {reason}",
             )
         audit(
             "event_application.refused_by_staff",

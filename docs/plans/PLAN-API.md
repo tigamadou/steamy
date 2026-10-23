@@ -522,11 +522,16 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
     dans l'admin Django WAD14 par le Super-admin, journal d'audit existant) ; `apps/payments/taxes.py`
     (`compute_taxes`, pure, arrondi unique au franc demi-haut sur le total) ; `INVOICE_VAT_RATE` et
     `INVOICE_PRICES_INCLUDE_VAT` supprimés. Pas d'écran front : WAD14 est l'admin Django
-  - [ ] **C25.2 · commande, paiement, webhook, API** : taxes figées sur `Order` à la création (total = HT + livraison
-    + TVA + AIB, contrainte DB, commandes existantes à taxes 0) ; webhook, checkout et remboursements sur le montant
-    figé ; API panier/commande/WPD15/événements : sous-total HT, lignes de taxes, total ; tests du montant débité
-    (TVA seule, AIB seule, les deux, aucune)
-  - [ ] **C25.3 · facture** : ventilation HT / TVA / AIB / total lue sur la commande, jamais recalculée
+  - [x] **C25.2 · commande, paiement, webhook, API** : `Order.vat_amount`, `aib_amount`, `taxes` (instantané) figés à
+    la création par `pricing.quote` ; total = HT + livraison + TVA + AIB (contrainte DB
+    `order_total_is_subtotal_shipping_and_taxes`, migration `payments.0011`, commandes existantes à taxes 0) ;
+    débit (`checkout`), webhook (`utils.handle_payment_event`) et remboursements lisent `order.total` figé ;
+    refus exceptionnel d'une place : remboursement = HT + part de taxes (`taxes_share`) ; API : `taxes[{code, rate,
+    base, amount}]` sur la commande, `taxes` et `total` (hors livraison, aperçu) sur le panier et les demandes de
+    paiement ; OpenAPI et types régénérés. Lectures de `order.total` revues : paiements, remboursements, notifications
+    (montant payé), admin ; la facture sera ventilée en C25.3
+  - [x] **C25.3 · facture** : le snapshot garde `taxes` (lues sur `Order.taxes`, jamais recalculées) ; PDF : sous-total
+    HT, livraison, une ligne par taxe (taux et base), « Total à payer » ; factures déjà émises inchangées
   - [ ] **C25.4 · front** (PR séparée, après l'API) : « HT » sur les prix du catalogue, « Total à payer » au paiement
   - [ ] **Taux d'AIB à confirmer** par la comptabilité : défauts éteints et à 0, aucune valeur légale supposée
   - [ ] **Suite `API-L3b.2c`** : facture normalisée e-MECeF, interface `FiscalInvoiceProvider` et faux fournisseur,

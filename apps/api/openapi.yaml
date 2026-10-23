@@ -7630,11 +7630,22 @@ components:
           description: Nombre d'articles (somme des quantités)
         subtotal:
           type: integer
-          description: Somme des lignes, hors livraison (FCFA)
+          description: Somme des lignes HT, hors livraison (FCFA)
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxLine'
+          description: Taxes qui s'ajouteront au HT (livraison exclue), d'après les
+            réglages du moment
+        total:
+          type: integer
+          description: HT + taxes, hors livraison (FCFA)
       required:
       - count
       - items
       - subtotal
+      - taxes
+      - total
     CartItem:
       type: object
       properties:
@@ -11324,10 +11335,18 @@ components:
           type: integer
           readOnly: true
           title: Frais de livraison (FCFA)
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxLine'
+          readOnly: true
+          description: Taxes ajoutées au HT, figées à la création de la commande (vide
+            si aucune)
         total:
           type: integer
           readOnly: true
-          title: Total (FCFA)
+          title: Total à payer (FCFA)
+          description: Sous-total HT + livraison + TVA + AIB
         currency:
           type: string
           readOnly: true
@@ -11395,6 +11414,7 @@ components:
       - shippingStatus
       - status
       - subtotal
+      - taxes
       - total
     OrderCreateKindEnum:
       enum:
@@ -11464,10 +11484,18 @@ components:
           type: integer
           readOnly: true
           title: Frais de livraison (FCFA)
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxLine'
+          readOnly: true
+          description: Taxes ajoutées au HT, figées à la création de la commande (vide
+            si aucune)
         total:
           type: integer
           readOnly: true
-          title: Total (FCFA)
+          title: Total à payer (FCFA)
+          description: Sous-total HT + livraison + TVA + AIB
         currency:
           type: string
           readOnly: true
@@ -11542,6 +11570,7 @@ components:
       - shippingStatus
       - status
       - subtotal
+      - taxes
       - total
     OrderDeliveryAddress:
       type: object
@@ -12667,6 +12696,18 @@ components:
           readOnly: true
           title: Montant (FCFA)
           description: Hors frais de livraison
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxLine'
+          readOnly: true
+          description: Taxes qui s'ajouteront au montant HT (livraison exclue), d'après
+            les réglages du moment ; la commande les fige à sa création
+        total:
+          type: integer
+          readOnly: true
+          description: Montant HT + taxes, hors livraison (FCFA) ; le total à payer
+            définitif est celui de la commande
         learner:
           allOf:
           - $ref: '#/components/schemas/Beneficiary'
@@ -12732,6 +12773,8 @@ components:
       - parentFirstName
       - pendingOrderReference
       - status
+      - taxes
+      - total
     PaymentRequestCreateRequest:
       type: object
       description: '`kind=course` : `courseSlug`. `kind=kit` : `items` (souvent le
@@ -14156,6 +14199,39 @@ components:
       - slug
       - summativePassRate
       - title
+    TaxLine:
+      type: object
+      properties:
+        code:
+          allOf:
+          - $ref: '#/components/schemas/TaxLineCodeEnum'
+          description: |-
+            `vat` : TVA ; `aib` : AIB
+
+            * `vat` - vat
+            * `aib` - aib
+        rate:
+          type: string
+          description: Taux en %, ex. `18` ou `1.5`
+        base:
+          type: integer
+          description: Montant HT sur lequel la taxe est calculée (FCFA)
+        amount:
+          type: integer
+          description: Montant de la taxe, ajouté au total à payer (FCFA)
+      required:
+      - amount
+      - base
+      - code
+      - rate
+    TaxLineCodeEnum:
+      enum:
+      - vat
+      - aib
+      type: string
+      description: |-
+        * `vat` - vat
+        * `aib` - aib
     TeacherActivationRequest:
       type: object
       properties:

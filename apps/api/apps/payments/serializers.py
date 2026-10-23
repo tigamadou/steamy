@@ -5,6 +5,7 @@ l'adresse de livraison (et, en API-L3b.4, les Kit Codes).
 """
 
 from django.utils import timezone
+from django.utils.functional import cached_property
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail, NotAuthenticated
@@ -12,6 +13,7 @@ from rest_framework.exceptions import ErrorDetail, NotAuthenticated
 from apps.accounts.fields import PhoneField, phone_country
 from apps.accounts.models import ParentChildLink
 from apps.catalog.models import Course
+from apps.core.models import PlatformSettings
 from apps.learning.models import Enrollment
 from apps.shop.models import DeliveryZone, Kit
 from libs.errors import message_for
@@ -20,6 +22,8 @@ from libs.phone import mask_phone
 from . import pricing
 from .models import Invoice, KitCode, Order, OrderItem, Payment, PaymentRequest
 from .requests import ensure_pending, next_resend_at
+from .tax_serializers import TaxLineSerializer
+from .taxes import compute_taxes, snapshot_lines
 
 #: Types de commande créables directement (l'événement passe par la candidature)
 ORDER_CREATE_KINDS = [Order.Kind.COURSE, Order.Kind.KIT]
@@ -236,6 +240,9 @@ class BeneficiaryOrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     beneficiary = serializers.SerializerMethodField()
     delivery_zone = DeliveryZoneSummarySerializer(read_only=True, allow_null=True)
+    taxes = serializers.SerializerMethodField(
+        help_text="Taxes ajoutées au HT, figées à la création de la commande (vide si aucune)"
+    )
 
     class Meta:
         model = Order
@@ -246,6 +253,7 @@ class BeneficiaryOrderSerializer(serializers.ModelSerializer):
             "shipping_status",
             "subtotal",
             "shipping_fee",
+            "taxes",
             "total",
             "currency",
             "items",
@@ -256,6 +264,10 @@ class BeneficiaryOrderSerializer(serializers.ModelSerializer):
             "created_at",
         )
         read_only_fields = fields
+
+    @extend_schema_field(TaxLineSerializer(many=True))
+    def get_taxes(self, order):
+        return snapshot_lines(order.taxes)
 
     @extend_schema_field(BeneficiarySerializer(allow_null=True))
     def get_beneficiary(self, order):
@@ -482,6 +494,13 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
     learner = serializers.SerializerMethodField()
     parent_first_name = serializers.CharField(source="parent.first_name", read_only=True)
     next_resend_at = serializers.SerializerMethodField()
+    taxes = serializers.SerializerMethodField(
+        help_text="Taxes qui s'ajouteront au montant HT (livraison exclue), d'après les réglages du moment ; la commande "
+        "les fige à sa création"
+    )
+    total = serializers.SerializerMethodField(
+        help_text="Montant HT + taxes, hors livraison (FCFA) ; le total à payer définitif est celui de la commande"
+    )
     order_reference = serializers.SerializerMethodField()
     pending_order_reference = serializers.SerializerMethodField()
 
@@ -494,6 +513,8 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
             "course",
             "items",
             "amount",
+            "taxes",
+            "total",
             "learner",
             "parent_first_name",
             "created_at",
@@ -506,6 +527,21 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
             "pending_order_reference",
         )
         read_only_fields = fields
+
+    @cached_property
+    def _config(self):
+        """Réglages lus une fois par liste (le serializer enfant sert toutes les demandes)."""
+        return PlatformSettings.load()
+
+    def _quote(self, request):
+        return compute_taxes(request.amount, 0, self._config)
+
+    @extend_schema_field(TaxLineSerializer(many=True))
+    def get_taxes(self, request):
+        return self._quote(request).lines()
+
+    def get_total(self, request) -> int:
+        return self._quote(request).total
 
     @extend_schema_field(CourseSummarySerializer(allow_null=True))
     def get_course(self, request):

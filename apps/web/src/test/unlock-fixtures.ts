@@ -11,6 +11,8 @@ export function paymentRequest(overrides: Partial<PaymentRequest> = {}): Payment
     course: { slug: "capteurs-electroniques", title: "Capteurs électroniques" },
     items: [],
     amount: 18000,
+    taxes: [],
+    total: 18000,
     learner: { id: 3, firstName: "Léa" },
     parentFirstName: "Marie",
     createdAt: "2026-10-13T09:00:00Z",
@@ -34,6 +36,7 @@ export function order(overrides: Partial<Schemas["Order"]> = {}): Schemas["Order
     shippingStatus: "preparing",
     subtotal: 18000,
     shippingFee: 0,
+    taxes: [],
     total: 18000,
     currency: "XOF",
     items: [

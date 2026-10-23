@@ -5,6 +5,7 @@ from rest_framework import serializers
 from apps.accounts.fields import PhoneField
 from apps.catalog.models import Course
 from apps.catalog.serializers import CategorySummarySerializer
+from apps.payments.tax_serializers import TaxLineSerializer
 
 from .models import CartItem, DeliveryAddress, DeliveryZone, Kit
 
@@ -70,7 +71,12 @@ class CartSerializer(serializers.Serializer):
 
     items = CartItemSerializer(many=True)
     count = serializers.IntegerField(help_text="Nombre d'articles (somme des quantités)")
-    subtotal = serializers.IntegerField(help_text="Somme des lignes, hors livraison (FCFA)")
+    subtotal = serializers.IntegerField(help_text="Somme des lignes HT, hors livraison (FCFA)")
+    taxes = TaxLineSerializer(
+        many=True,
+        help_text="Taxes qui s'ajouteront au HT (livraison exclue), d'après les réglages du moment",
+    )
+    total = serializers.IntegerField(help_text="HT + taxes, hors livraison (FCFA)")
 
 
 class CartItemCreateSerializer(serializers.Serializer):

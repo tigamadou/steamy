@@ -41,7 +41,14 @@ class TaxQuote:
 
     @property
     def total(self) -> int:
-        return self.goods + self.shipping + sum(t.amount for t in (self.vat, self.aib) if t)
+        return self.goods + self.shipping + sum(tax.amount for _, tax in self._taxes() if tax)
+
+    def lines(self) -> list[dict]:
+        """Lignes de taxes à afficher, dans l'ordre TVA puis AIB : `{code, rate, base, amount}`."""
+        return [{"code": code, **asdict(tax)} for code, tax in self._taxes() if tax]
+
+    def _taxes(self):
+        return (("vat", self.vat), ("aib", self.aib))
 
     def snapshot(self) -> dict:
         """Contenu figé sur la commande (JSON) : taxes appliquées, jamais recalculées."""
@@ -67,3 +74,15 @@ def compute_taxes(goods: int, shipping: int, config) -> TaxQuote:
             config.aib_enabled, config.aib_rate, goods, shipping, config.aib_applies_to_shipping
         ),
     )
+
+
+def snapshot_lines(snapshot: dict) -> list[dict]:
+    """Lignes de taxes d'une commande, lues dans son instantané figé (`Order.taxes`)."""
+    return [{"code": code, **snapshot[code]} for code in ("vat", "aib") if snapshot.get(code)]
+
+
+def taxes_share(order, goods: int) -> int:
+    """Part de TVA + AIB d'une commande qui revient à `goods` FCFA HT de ses lignes (remboursement partiel), au franc."""
+    if not order.subtotal:
+        return 0
+    return to_franc(Decimal(order.vat_amount + order.aib_amount) * goods / order.subtotal)
