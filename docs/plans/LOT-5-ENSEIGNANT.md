@@ -6,7 +6,7 @@ règles communes, la définition de « terminé » et les outils de test sont da
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : fusion de la pile de PR (5.1 à 5.9 en PR : #147, #149, #152, #155 à #159, #161), CI `ci-ok` verte sur la pile fusionnée, recette produit · Prérequis : `API-L5` (endpoints `classrooms`, `API-L5.1` à `API-L5.5`, seed D2) ; lots 1, 2 et 3 livrés ; lot 4 pour l'affichage des commentaires côté parent (`WPD03`) ; maquette de `WT13` validée (C18) avant 5.2 ; étape 4.10 du lot 4 livrée pendant ce lot, avant 5.9
+Statut : 🟡 fusionné dans `development` (CI verte), recette produit à faire · Prochaine tâche : recette sur le seed, e2e de l'offre échue (après #162) · Prérequis : `API-L5` (endpoints `classrooms`, `API-L5.1` à `API-L5.5`, seed D2) ; lots 1, 2 et 3 livrés ; lot 4 pour l'affichage des commentaires côté parent (`WPD03`) ; maquette de `WT13` validée (C18) avant 5.2 ; étape 4.10 du lot 4 livrée pendant ce lot, avant 5.9
 
 ### Lot 5 · Espace enseignant — 🟡 en cours
 - [x] **5.1** Shell, accueil et navigation · `feature/lot5-shell-accueil` · PR #147 (requiert API-L5)
@@ -93,13 +93,15 @@ Statut : 🟡 en cours · Prochaine tâche : fusion de la pile de PR (5.1 à 5.9
   - [x] Audit final : axe sur chaque route, absence de défilement horizontal, registre (`enseignant-audit.spec.ts`)
   - [ ] Absence de données codées en dur : relue à chaque étape, sans contrôle automatique
   > Écarts : l'invitation de l'enseignante par l'admin est celle du jeu D2 (l'écran d'invitation de l'admin Django est couvert par `admin-comptes.spec.ts`) ; les parcours « Invitation complète », « Compte existant », « Refus » et « Cloisonnement » s'enchaînent sur ce compte à usage unique, dans `activation.spec.ts`. La tâche quotidienne de décrochage n'est pas planifiée dans la stack e2e : sa notification (`WT12`) n'est vérifiée que si elle existe. Le quota de classes du seed (4) est relevé par la PR d'API #160. Les parcours `@donnees-uniques` (activation en série, création de classe, commentaire, proposition d'événement) sont exclus du projet « mobile » (`playwright.config.ts`) : seul l'audit joue à 360 px. Les pages « introuvable » sont servies avec un code 200 sous Suspense (Next) : elles sont vérifiées par leur titre, pas par un code 404 (WT04, WT05, WT10, WL23). Pas d'e2e d'une école à l'offre échue (C21) : le seed D2 n'en contient pas ; les états sont couverts en tests unitaires.
-- [ ] **Critères de fin du lot 5**
-  - [ ] `WT01`-`WT13` livrés, conformes à la spec alignée, avec tous leurs états et la définition de « terminé » du README
-  - [ ] Aucune entrée de navigation sans cible ; aucun « À corriger », « formateur » ou tutoiement
-  - [ ] Parcours Playwright de 5.9 verts en CI (`ci-ok`) sur la stack Docker (preuve attendue : `ci-ok` vert sur `development` après fusion de la pile)
-  - [ ] Compléments d'API livrés (§7.6) et présents dans le client généré (`make openapi`) : profil enseignant #151 fusionné ; quota de seed #160 à fusionner
-  - [ ] Étape 4.10 (`WPD05` d'origine enseignant) livrée et couverte par « Invitation complète »
+- [ ] **Critères de fin du lot 5** (fusionné dans `development`, `ci-ok` vert sur le run 39907292736 ; reste la recette produit)
+  - [x] `WT01`-`WT13` livrés, conformes à la spec alignée, avec tous leurs états (preuve : 5.1 à 5.9 fusionnées, matrice e2e complète pour l'espace enseignant)
+  - [x] Aucune entrée de navigation sans cible ; aucun « À corriger », « formateur » ou tutoiement (preuve : `enseignant-audit.spec.ts`, `ci-ok` vert)
+  - [x] Parcours Playwright de 5.9 verts en CI (`ci-ok`) sur la stack Docker (preuve : run 39907292736 sur `development`)
+  - [x] Compléments d'API livrés (§7.6) et présents dans le client généré (`make openapi`) : profil enseignant (#151) et quota de seed (#160) fusionnés
+  - [x] Étape 4.10 (`WPD05` d'origine enseignant) livrée et couverte par « Invitation complète » (`activation.spec.ts`)
   - [ ] Recette sur le seed (D2) par le produit, y compris acceptation côté parent et commentaires côté apprenant et parent
+  - [ ] E2E d'une école à l'offre échue (C21) : seed #162, test à écrire une fois #162 fusionnée
+  - [ ] Notification de décrochage dans `WT12` (tâche planifiée non jouée par la stack e2e) et carte « commentaires de l'enseignant » dans `WD01` (décision produit)
 
 ## Cadre
 
