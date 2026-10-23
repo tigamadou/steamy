@@ -123,11 +123,11 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WPD14` | Notifications | 4 | Onglets dans l'URL, « Tout marquer comme lu » → cloche à 0, état vide au vouvoiement | `apps/web/e2e/parent-accueil-notifications.spec.ts` |
 | `WT01` | Accueil formateur | 5 | Koffi (jeu D2) : compteurs, classes et tentatives à revoir identiques à l'API, « Commenter » ciblé sur la tentative, sans « À corriger » ; enseignante sans classe : état vide et « Créer une classe » ; apprenant et parent renvoyés vers leur espace ; shell, déconnexion | `apps/web/e2e/enseignant-accueil.spec.ts`, `apps/web/e2e/activation.spec.ts` |
 | `WT02` | Mes parcours encadrés | 5 | Parcours des seules classes de Koffi, classes et élèves identiques à l'API, carte → WT10 | `apps/web/e2e/enseignant-parcours.spec.ts` |
-| `WT03` | Mes classes | 5 |  |  |
-| `WT04` | Apprenants d'une classe | 5 |  |  |
-| `WT05` | Profil apprenant (+ commentaires) | 5 |  |  |
-| `WT06` | Ajouter des apprenants (individuel / lot) | 5 |  |  |
-| `WT07` | Suivi des évaluations | 5 |  |  |
+| `WT03` | Mes classes | 5 | Classes et quota de l'école identiques à l'API, « Créer une classe » → WT13 | `apps/web/e2e/enseignant-classes.spec.ts` |
+| `WT04` | Apprenants d'une classe | 5 | Élèves et invitations (en attente, refusée, expirée) de l'API, aucun numéro de parent ; classe vide → CTA vers WT06 ; annulation d'une invitation confirmée, quota libéré ; classe d'un autre : 404 | `apps/web/e2e/enseignant-classes.spec.ts` |
+| `WT05` | Profil apprenant (+ commentaires) | 5 | « Commenter » depuis WT01 ouvre la tentative ; commentaire envoyé, tentative sortie de « À revoir », apprenant notifié et parent lisant le commentaire (WPD03) ; aucune donnée sensible ; élève hors de la classe, inconnu ou non numérique : page « introuvable » | `apps/web/e2e/enseignant-profil-eleve.spec.ts` |
+| `WT06` | Ajouter des apprenants (individuel / lot) | 5 | Individuel : erreurs de forme, SMS au parent (faux fournisseur), invitation « En attente du parent » ; lot : liste de 5 lignes (doublon, déjà présent, numéro invalide, ligne mal formée), rapport conforme, filtre, correction, renvoi, ligne « envoyée » | `apps/web/e2e/enseignant-ajout-eleves.spec.ts` |
+| `WT07` | Suivi des évaluations | 5 | Filtres Toutes / Formatives / Sommatives / À revoir et classe dans l'URL (rechargement), nombres identiques à l'API, « Commenter » vers WT05, aucune action de correction ; filtre invalide ramené à « Toutes » | `apps/web/e2e/enseignant-evaluations.spec.ts` |
 | `WT08` | Paramètres | 5 |  |  |
 | `WT09` | Steamy Events | 5 |  |  |
 | `WT10` | Détail parcours encadré | 5 | Arbre Projet → Niveau → Mission avec compteurs de l'API, panneau de suivi, mission en lecture seule sans progression ; parcours non encadré : page « introuvable » | `apps/web/e2e/enseignant-parcours.spec.ts` |
@@ -167,4 +167,4 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WL24` | Aide & contact (FAQ + formulaire) | 1 | Contact : « Rejoindre l'équipe » → `?sujet=candidature` → envoi → confirmation ; FAQ et recherche ; ancres | `apps/web/e2e/formulaires.spec.ts` |
 | `WD23` | Mes parcours (liste des inscriptions) | 3 | Onglets En cours / Terminés adressables, carte → arbre ; bandeau « En attente de ton parent » (P3), parcours débloqué listé (P2, P3) | `apps/web/e2e/apprenant-parcours.spec.ts`, `apps/web/e2e/deblocage-p2-kit-code.spec.ts`, `apps/web/e2e/deblocage-p3-demande-parent.spec.ts` |
 | `WPD15` | Demande de paiement (parcours, kit ou événement demandé par l'enfant ; reprend WA03) | 4 | Enfant demande un parcours → SMS → W16 → WPD15 → paiement (faux prestataire, webhook) → demande réglée et inscription ; échec avec raison puis autre numéro ; kit avec adresse et frais du serveur → commande payée ; refus motivé → lecture seule ; autre famille → « Demande introuvable » | `apps/web/e2e/parent-demande-paiement.spec.ts` |
-| `WT13` | Créer une classe (une classe = un parcours, D62) | 5 |  |  |
+| `WT13` | Créer une classe (une classe = un parcours, D62) | 5 | Création → WT04 vide, renommage, nom déjà pris affiché au champ (`CLASSROOM_NAME_TAKEN`) | `apps/web/e2e/enseignant-classes.spec.ts` |

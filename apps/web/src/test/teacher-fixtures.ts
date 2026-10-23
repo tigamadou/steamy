@@ -39,7 +39,7 @@ export function memberLearner(overrides: Partial<Schemas["MemberLearner"]> = {})
 export function review(overrides: Partial<Schemas["Review"]> = {}): Schemas["Review"] {
   return {
     id: 90,
-    quiz: { id: 5, kind: "level", title: "Quiz du niveau 2", projectTitle: "Robot suiveur", levelTitle: "Niveau 2" },
+    quiz: { id: 5, kind: "formative", title: "Quiz du niveau 2", projectTitle: "Robot suiveur", levelTitle: "Niveau 2" },
     percentage: 33,
     status: "ko",
     passed: false,
@@ -143,4 +143,88 @@ export function missionRead(overrides: Partial<Schemas["MissionRead"]> = {}): Sc
     project: { id: 1, title: "Robot suiveur" },
     ...overrides,
   } as Schemas["MissionRead"];
+}
+export function school(overrides: Partial<Schemas["School"]> = {}): Schemas["School"] {
+  return {
+    name: "Collège Steamy de Cotonou",
+    city: "Cotonou",
+    country: "BJ",
+    offer: "Offre Classe Robotique 2026",
+    validUntil: "2026-12-31",
+    offerExpired: false,
+    learnerQuota: 120,
+    learnersUsed: 54,
+    learnersLeft: 66,
+    classroomQuota: 5,
+    classroomsUsed: 3,
+    classroomsLeft: 2,
+    courses: [
+      classroom().course,
+      { ...classroom().course, slug: "scratch", title: "Initiation à Scratch", emoji: "💻" },
+    ],
+    ...overrides,
+  } as Schemas["School"];
+}
+
+export function member(overrides: Partial<Schemas["Member"]> = {}): Schemas["Member"] {
+  return {
+    id: 51,
+    status: "active",
+    firstName: "Yao",
+    lastName: "Kpadé",
+    learner: memberLearner(),
+    invitationStatus: null,
+    invitationExpiresAt: null,
+    progressPct: 40,
+    lastActivityAt: "2026-10-10T10:00:00Z",
+    isDropout: false,
+    joinedAt: "2026-09-02T10:00:00Z",
+    createdAt: "2026-09-01T10:00:00Z",
+    ...overrides,
+  } as Schemas["Member"];
+}
+
+export function invitation(overrides: Partial<Schemas["Member"]> = {}): Schemas["Member"] {
+  return member({
+    id: 52,
+    status: "invited",
+    firstName: "Kémi",
+    lastName: "Ahouandjinou",
+    learner: null,
+    invitationStatus: "pending",
+    invitationExpiresAt: "2026-10-30T10:00:00Z",
+    progressPct: null,
+    lastActivityAt: null,
+    joinedAt: null,
+    ...overrides,
+  });
+}
+
+export function attempt(overrides: Partial<Schemas["TeacherAttempt"]> = {}): Schemas["TeacherAttempt"] {
+  return {
+    id: 90,
+    quiz: { id: 5, kind: "formative", title: "Quiz du niveau 2", projectTitle: "Robot suiveur", levelTitle: "Niveau 2" },
+    percentage: 33,
+    status: "ko",
+    passed: false,
+    createdAt: "2026-10-20T10:00:00Z",
+    commented: false,
+    ...overrides,
+  } as Schemas["TeacherAttempt"];
+}
+
+export function followUp(overrides: Partial<Schemas["LearnerFollowUp"]> = {}): Schemas["LearnerFollowUp"] {
+  return {
+    learner: memberLearner(),
+    classroom: classroom(),
+    joinedAt: "2026-09-02T10:00:00Z",
+    progressPct: 40,
+    lastActivityAt: "2026-10-10T10:00:00Z",
+    isDropout: false,
+    averagePercentage: 55,
+    badges: [{ id: 1, kind: "level", label: "Électricien", icon: "⚡", description: "", awardedAt: "2026-10-01T10:00:00Z" }],
+    attempts: [attempt(), attempt({ id: 91, status: "ok", percentage: 90, passed: true, commented: true, quiz: { id: 6, kind: "summative", title: "Évaluation du projet", projectTitle: "Robot suiveur", levelTitle: null } })],
+    comments: [{ id: 5, body: "Bon début !\nContinuez.", attemptId: 91, createdAt: "2026-10-21T10:00:00Z" }],
+    ...overrides,
+  } as Schemas["LearnerFollowUp"];
 }

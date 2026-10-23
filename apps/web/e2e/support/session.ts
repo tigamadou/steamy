@@ -63,3 +63,25 @@ export async function readApi<T>(page: Page, path: string): Promise<T> {
     return response.json();
   }, path) as Promise<T>;
 }
+
+/** Écriture sur l'API par le navigateur connecté (jeton CSRF relu avant l'envoi), pour préparer des données. */
+export async function writeApi<T>(page: Page, path: string, body: object): Promise<T> {
+  const result = await page.evaluate(
+    async ({ path, body }) => {
+      const { apiUrl } = (await (await fetch("/runtime-config")).json()) as { apiUrl: string };
+      const csrf = (await (await fetch(`${apiUrl}/api/auth/csrf/`, { credentials: "include" })).json()) as {
+        csrfToken: string;
+      };
+      const response = await fetch(`${apiUrl}${path}`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": csrf.csrfToken },
+        body: JSON.stringify(body),
+      });
+      return { status: response.status, data: response.status === 204 ? null : await response.json() };
+    },
+    { path, body },
+  );
+  expect(result.status, `POST ${path}`).toBeLessThan(300);
+  return result.data as T;
+}
