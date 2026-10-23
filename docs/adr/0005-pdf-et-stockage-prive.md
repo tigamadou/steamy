@@ -156,9 +156,10 @@ ici, faute de réponse.
 ## Décision du 23 octobre 2026 (P1 et P2, C25)
 
 - **P1** : Steamy émet des **factures normalisées** (e-MECeF / DGI). Le PDF de Steamy sera donc le support des
-  éléments renvoyés par le dispositif (numéro, signature, code QR). **Reste à obtenir** : le contrat d'API de la DGI
-  et les identifiants (IFU, jetons e-MECeF). L'appel réel n'est **pas** implémenté ; l'interface
-  `FiscalInvoiceProvider` (faux fournisseur en local et en CI) est la suite, dans une nouvelle ADR (voir « Suites »).
+  éléments renvoyés par le dispositif (numéro, signature, code QR). **Le contrat d'API de la DGI est connu**
+  (spécifications dans [`docs/references/emecef/`](../references/emecef/README.md)) ; **restent à obtenir** : l'IFU et
+  l'agrément de Steamy, le jeton d'API, les groupes de taxe et les règles d'arrondi. La cartographie
+  (`FiscalInvoiceProvider`, faux fournisseur, flux, avoirs) est dans l'[ADR 0006](0006-facture-normalisee-emecef.md).
   D'ici là, `INVOICE_PROVISIONAL=true` : le document reste un « Reçu de paiement » non fiscal.
 - **P2** : pas de prix TTC. Les tarifs du catalogue, des kits et des événements sont des prix **HT** (le prix serveur
   en XOF entier, valeur inchangée en base). Dans `PlatformSettings`, l'admin (Super-admin) règle le **taux de TVA**, le
