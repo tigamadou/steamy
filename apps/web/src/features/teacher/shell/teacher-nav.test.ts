@@ -17,6 +17,7 @@ describe("teacherNav", () => {
       "/enseignant",
       "/enseignant/parcours",
       "/enseignant/classes",
+      "/enseignant/evaluations",
     ]);
     expect(teacherNav.map((entry) => entry.href)).toEqual([
       "/enseignant",

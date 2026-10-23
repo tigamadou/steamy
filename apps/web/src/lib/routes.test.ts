@@ -113,6 +113,7 @@ describe("routes.teacher", () => {
     expect(t.mission("robot-bluetooth", 4)).toBe("/enseignant/parcours/robot-bluetooth/missions/4");
     expect(t.classroom(3)).toBe("/enseignant/classes/3");
     expect(t.classroom(3, "creee")).toBe("/enseignant/classes/3?confirmation=creee");
+    expect(t.classroom(3, "invitation")).toBe("/enseignant/classes/3?confirmation=invitation");
     expect(t.editClassroom(3)).toBe("/enseignant/classes/3/modifier");
     expect(t.addLearners()).toBe("/enseignant/eleves/ajouter");
     expect(t.addLearners({ classroomId: 3 })).toBe("/enseignant/eleves/ajouter?classe=3");
@@ -124,6 +125,7 @@ describe("routes.teacher", () => {
       "/enseignant/evaluations?filtre=a-revoir&classe=3&page=2",
     );
     expect(t.reviews({ page: 1 })).toBe("/enseignant/evaluations");
+    expect(t.reviews({ filter: "toutes", classroomId: 3 })).toBe("/enseignant/evaluations?classe=3");
     expect(t.event("robot-cup")).toBe("/enseignant/evenements/robot-cup");
     expect(t.notificationList()).toBe("/enseignant/notifications");
     expect(t.notificationList("non-lues", 2)).toBe("/enseignant/notifications?onglet=non-lues&page=2");

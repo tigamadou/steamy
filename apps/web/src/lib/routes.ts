@@ -196,8 +196,8 @@ export const routes = {
     /** WT13 · création d'une classe. */
     newClassroom: "/enseignant/classes/nouvelle",
     /** WT04 · élèves d'une classe. */
-    /** `confirmation` : rappel après la création ou la modification de la classe (WT13). */
-    classroom: (id: number | string, confirmation?: "creee" | "modifiee") =>
+    /** `confirmation` : rappel après la création ou la modification de la classe (WT13), ou l'envoi d'une demande (WT06). */
+    classroom: (id: number | string, confirmation?: "creee" | "modifiee" | "invitation") =>
       confirmation ? `/enseignant/classes/${id}?confirmation=${confirmation}` : `/enseignant/classes/${id}`,
     /** WT13 · même formulaire en édition. */
     editClassroom: (id: number | string) => `/enseignant/classes/${id}/modifier`,
@@ -220,7 +220,7 @@ export const routes = {
     /** WT07 · filtre (`?filtre=`), classe (`?classe=`) et page dans l'URL (« Toutes » et la page 1 n'y figurent pas). */
     reviews: (options: { filter?: string; classroomId?: number | string; page?: number } = {}) => {
       const query = new URLSearchParams();
-      if (options.filter) query.set("filtre", options.filter);
+      if (options.filter && options.filter !== "toutes") query.set("filtre", options.filter);
       if (options.classroomId !== undefined) query.set("classe", String(options.classroomId));
       if (options.page && options.page > 1) query.set("page", String(options.page));
       const search = query.toString();

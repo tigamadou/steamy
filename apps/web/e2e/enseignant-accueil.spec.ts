@@ -16,7 +16,7 @@ type Dashboard = {
   learnerCount: number;
   toReviewCount: number;
   classrooms: { id: number; name: string }[];
-  toReview: { id: number; learner: { id: number }; classroom: { id: number } }[];
+  toReview: { id: number; learner: { id: number; firstName: string; lastName: string }; classroom: { id: number } }[];
 };
 
 test("l'espace enseignant refuse un apprenant et un parent, renvoyés vers leur espace", async ({ page }) => {
@@ -51,14 +51,18 @@ test("WT01 : Koffi voit ses compteurs, ses classes et ses tentatives à revoir c
   await expect(classes.getByRole("link", { name: /3e A · Code/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "Ajouter des élèves" })).toHaveAttribute("href", "/enseignant/eleves/ajouter");
 
-  // « À revoir » : la tentative `ko` de Yao ; « Commenter » cible la tentative (WT05)
+  // « À revoir » : les tentatives échouées lues dans l'API (le parcours de WT05 en consomme une) ; « Commenter » cible
+  // la tentative (WT05)
   const review = page.getByRole("list", { name: "Tentatives à revoir" });
   const first = dashboard.toReview[0];
-  await expect(review.getByRole("listitem")).toHaveCount(dashboard.toReview.length);
-  await expect(review.getByRole("link", { name: /^Commenter la tentative de Yao Kpadé/ }).first()).toHaveAttribute(
-    "href",
-    `/enseignant/eleves/${first.learner.id}?classe=${first.classroom.id}&tentative=${first.id}`,
-  );
+  if (first) {
+    await expect(review.getByRole("listitem")).toHaveCount(dashboard.toReview.length);
+    await expect(
+      review.getByRole("link", { name: new RegExp(`^Commenter la tentative de ${first.learner.firstName} ${first.learner.lastName}`) }).first(),
+    ).toHaveAttribute("href", `/enseignant/eleves/${first.learner.id}?classe=${first.classroom.id}&tentative=${first.id}`);
+  } else {
+    await expect(page.getByText("Aucune tentative à revoir pour le moment.")).toBeVisible();
+  }
 
   // « Décrochage » : section présente, sans libellé « À corriger » ni « formateur »
   await expect(page.getByRole("heading", { level: 2, name: "Décrochage" })).toBeVisible();
