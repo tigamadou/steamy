@@ -41,7 +41,7 @@ export async function EditClassroom({ params }: { params: Promise<{ id: string }
 /** Squelette de WT13 : formulaire et quota. */
 export function ClassroomFormSkeleton() {
   return (
-    <div role="status" aria-busy="true" aria-label="Chargement du formulaire…" className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
+    <div role="status" aria-busy="true" aria-label="Chargement du formulaire…" className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_18.75rem]">
       <SkeletonBlock className="h-96 rounded-[22px]" />
       <SkeletonBlock className="h-56 rounded-[20px]" />
     </div>
