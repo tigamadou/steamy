@@ -1,8 +1,9 @@
 import type { Schemas } from "@steamy/api-client";
 import { notFound } from "next/navigation";
 
-import { EventAvailability, EventDetail } from "@/components/public/events";
+import { EventAvailability, EventDetail, eventState } from "@/components/public/events";
 import { getEvent } from "@/features/events/api";
+import { CLOSED_REASONS, closedReason } from "@/features/events/status";
 import { getClassrooms } from "@/features/teacher/classes/api";
 import { routes } from "@/lib/routes";
 
@@ -17,6 +18,7 @@ export function teacherEventBreadcrumb(event: Pick<Schemas["SteamyEvent"], "titl
 export async function TeacherEventView({ params }: { params: Promise<{ slug: string }> }) {
   const [event, classrooms] = await Promise.all([getEvent((await params).slug), getClassrooms()]);
   if (!event) notFound();
+  const reason = closedReason(eventState(event));
   return (
     classrooms && (
       <EventDetail
@@ -27,7 +29,13 @@ export async function TeacherEventView({ params }: { params: Promise<{ slug: str
         action={
           <>
             <EventAvailability event={event} />
-            <ProposeButton eventSlug={event.slug} eventTitle={event.title} classrooms={classrooms} size="lg" />
+            <ProposeButton
+              eventSlug={event.slug}
+              eventTitle={event.title}
+              classrooms={classrooms}
+              size="lg"
+              closedReason={reason ? CLOSED_REASONS[reason].cta : undefined}
+            />
           </>
         }
       />

@@ -5,7 +5,7 @@ import { readOrNull } from "@/lib/api-read";
 
 export type ClassroomEventApplication = Schemas["ClassroomEventApplication"];
 
-/** Candidatures lues pour WT09 : celles des élèves de mes classes, une page suffit à l'affichage en lecture seule. */
+/** Candidatures lues pour WT09 (les plus récentes d'abord) : une page, sans « voir plus » en v1 ; au-delà, les plus anciennes ne sont pas listées. */
 export const APPLICATIONS_PAGE_SIZE = 50;
 
 /**

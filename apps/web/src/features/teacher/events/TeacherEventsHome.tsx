@@ -3,7 +3,9 @@ import type { Schemas } from "@steamy/api-client";
 import { Avatar, Badge, Mascot, SectionHeader, SkeletonBlock } from "@/components/ds";
 import type { BadgeTone } from "@/components/ds/Badge";
 import { getClassrooms } from "@/features/teacher/classes/api";
+import { eventState } from "@/components/public/events";
 import { getUpcomingEvents } from "@/features/events/api";
+import { CLOSED_REASONS, closedReason } from "@/features/events/status";
 import { EventTile } from "@/features/events/EventTile";
 import { formatInstant } from "@/lib/dates";
 import { routes } from "@/lib/routes";
@@ -73,17 +75,25 @@ export function TeacherEventsView({
           <Empty title="Aucun événement à venir" body="Les prochains Steamy Events seront annoncés ici." />
         ) : (
           <ul className="m-0 grid list-none gap-4 p-0 sm:grid-cols-2 xl:grid-cols-3">
-            {events.map((event) => (
-              <li key={event.slug}>
-                <EventTile
-                  event={event}
-                  href={routes.teacher.event(event.slug)}
-                  action={
-                    <ProposeButton eventSlug={event.slug} eventTitle={event.title} classrooms={classrooms} />
-                  }
-                />
-              </li>
-            ))}
+            {events.map((event) => {
+              const reason = closedReason(eventState(event));
+              return (
+                <li key={event.slug}>
+                  <EventTile
+                    event={event}
+                    href={routes.teacher.event(event.slug)}
+                    action={
+                      <ProposeButton
+                        eventSlug={event.slug}
+                        eventTitle={event.title}
+                        classrooms={classrooms}
+                        closedReason={reason ? CLOSED_REASONS[reason].cta : undefined}
+                      />
+                    }
+                  />
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

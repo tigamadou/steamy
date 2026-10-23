@@ -18,11 +18,14 @@ export function ProposeButton({
   eventTitle,
   classrooms,
   size = "sm",
+  closedReason,
 }: {
   eventSlug: string;
   eventTitle: string;
   classrooms: Classroom[];
   size?: "sm" | "md" | "lg";
+  /** Motif quand les candidatures sont closes (complet, délai passé, passé) : la proposition n'a plus d'objet. */
+  closedReason?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [classroomId, setClassroomId] = useState("");
@@ -61,12 +64,12 @@ export function ProposeButton({
     setNotified(result.data.notifiedCount);
   }
 
-  if (classrooms.length === 0) {
+  if (closedReason || classrooms.length === 0) {
     return (
-      <Button size={size} disabled aria-describedby={`aucune-classe-${eventSlug}`}>
+      <Button size={size} disabled aria-describedby={`indisponible-${eventSlug}`}>
         Proposer à une classe<span className="sr-only"> : {eventTitle}</span>
-        <span id={`aucune-classe-${eventSlug}`} className="sr-only">
-          Créez d&apos;abord une classe.
+        <span id={`indisponible-${eventSlug}`} className="sr-only">
+          {closedReason ?? "Créez d'abord une classe."}
         </span>
       </Button>
     );
