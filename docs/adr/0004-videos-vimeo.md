@@ -1,7 +1,7 @@
 # ADR 0004 · Vidéos des missions et bandes-annonces (Vimeo)
 
 - **Statut** : **acceptée** pour les principes (vidéos non listées, hachage, restriction d'intégration, exposition
-  conditionnelle, pas de hors ligne) ; **proposée** pour les points V1 à V4 de la section « Points à trancher »
+  conditionnelle, pas de hors ligne) ; points V1 à V4 **tranchés le 23 octobre 2026** (ARBITRAGES C23)
 - **Date** : 15 octobre 2026 (documentation Vimeo consultée le même jour, sources en fin de document)
 - **Étape** : avant `API-L3a.1` ([PLAN-API](../plans/PLAN-API.md#api-l3a--pédagogie))
 - **Décisions appliquées** : D16 (pas de mode hors ligne), D34 et D55 (temps d'apprentissage), D71 (groupe Contenu)
@@ -132,7 +132,9 @@ intégrables y sont limitées à 3 Go.
   (cookies essentiels possibles). La mention figure dans la politique de confidentialité (texte à valider
   juridiquement, D6).
 
-## Points à trancher (statut : proposée)
+## Points à trancher (tranchés le 23 octobre 2026, C23)
+
+V1 : offre gratuite au départ, offre payante à décider plus tard (pas de restriction de domaine en attendant) · V2 : bande-annonce publique, sans hachage · V3 : risque accepté en v1 · V4 : mêmes vidéos partout. Propositions d'origine :
 
 | # | Point | Proposition |
 | --- | --- | --- |
