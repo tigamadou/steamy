@@ -94,7 +94,7 @@ export function TeacherHomeView({ dashboard }: { dashboard: Dashboard }) {
         {classrooms.length === 0 ? (
           <NoClassroom />
         ) : (
-          <ul aria-label="Mes classes" className="m-0 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+          <ul aria-label="Mes classes" className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
             {classrooms.map((classroom) => (
               <li key={classroom.id}>
                 <ClassCard classroom={classroom} />
