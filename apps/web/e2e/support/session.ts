@@ -55,6 +55,15 @@ export async function logoutFromShell(page: Page): Promise<void> {
   await page.getByRole("dialog").getByRole("button", { name: "Se déconnecter" }).click();
 }
 
+/** Lecture d'un endpoint de l'API par le navigateur connecté, pour comparer l'écran aux données du serveur. */
+export async function readApi<T>(page: Page, path: string): Promise<T> {
+  return page.evaluate(async (path) => {
+    const { apiUrl } = (await (await fetch("/runtime-config")).json()) as { apiUrl: string };
+    const response = await fetch(`${apiUrl}${path}`, { credentials: "include" });
+    return response.json();
+  }, path) as Promise<T>;
+}
+
 /** Écriture sur l'API par le navigateur connecté (jeton CSRF relu avant l'envoi), pour préparer des données. */
 export async function writeApi<T>(page: Page, path: string, body: object): Promise<T> {
   const result = await page.evaluate(

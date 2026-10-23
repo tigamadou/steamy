@@ -482,7 +482,7 @@ describe("WT04 · élèves d'une classe", () => {
 describe("Retirer de la classe", () => {
   async function open(row: React.ReactElement) {
     const user = userEvent.setup();
-    render(
+    const view = render(
       <>
         <h3 id="eleves-classe" tabIndex={-1}>
           Élèves
@@ -491,12 +491,12 @@ describe("Retirer de la classe", () => {
       </>,
     );
     await user.click(screen.getByRole("button", { name: /Retirer de la classe|Annuler l'invitation/ }));
-    return { user, dialog: screen.getByRole("dialog") };
+    return { user, dialog: screen.getByRole("dialog"), view };
   }
 
   it("confirmation, puis retrait : POST, page relue et focus au titre de la liste", async () => {
     POST.mockResolvedValue({ response: new Response(null, { status: 200 }) });
-    const { user, dialog } = await open(<MemberRow member={member()} classroomId={3} />);
+    const { user, dialog, view } = await open(<MemberRow member={member()} classroomId={3} />);
     expect(dialog).toHaveTextContent(/place est libérée dans le quota/);
     await user.click(within(dialog).getByRole("button", { name: "Retirer de la classe" }));
     await waitFor(() =>
@@ -506,7 +506,13 @@ describe("Retirer de la classe", () => {
     );
     await waitFor(() => expect(router.refresh).toHaveBeenCalled());
     expect(screen.queryByRole("dialog")).toBeNull();
-    await waitFor(() => expect(document.getElementById("eleves-classe")).toHaveFocus());
+    // La page relue ne contient plus la ligne : elle disparaît et le focus passe au titre de la liste
+    view.rerender(
+      <h3 id="eleves-classe" tabIndex={-1}>
+        Élèves
+      </h3>,
+    );
+    expect(document.getElementById("eleves-classe")).toHaveFocus();
   });
 
   it("invitation en attente : texte et libellé propres", async () => {
@@ -544,9 +550,10 @@ describe("Retirer de la classe", () => {
   it("sans titre de liste dans la page, le focus n'échoue pas", async () => {
     POST.mockResolvedValue({ response: new Response(null, { status: 200 }) });
     const user = userEvent.setup();
-    render(<MemberRow member={member()} classroomId={3} />);
+    const view = render(<MemberRow member={member()} classroomId={3} />);
     await user.click(screen.getByRole("button", { name: /Retirer de la classe/ }));
     await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Retirer de la classe" }));
     await waitFor(() => expect(router.refresh).toHaveBeenCalled());
+    expect(() => view.unmount()).not.toThrow();
   });
 });

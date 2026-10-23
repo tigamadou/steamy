@@ -122,7 +122,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WPD13` | Aide & support | 4 | FAQ du parent, recherche locale, « Contacter le support » → WL24 | `apps/web/e2e/parent-parametres-aide.spec.ts` |
 | `WPD14` | Notifications | 4 | Onglets dans l'URL, « Tout marquer comme lu » → cloche à 0, état vide au vouvoiement | `apps/web/e2e/parent-accueil-notifications.spec.ts` |
 | `WT01` | Accueil formateur | 5 | Koffi (jeu D2) : compteurs, classes et tentatives à revoir identiques à l'API, « Commenter » ciblé sur la tentative, sans « À corriger » ; enseignante sans classe : état vide et « Créer une classe » ; apprenant et parent renvoyés vers leur espace ; shell, déconnexion | `apps/web/e2e/enseignant-accueil.spec.ts`, `apps/web/e2e/activation.spec.ts` |
-| `WT02` | Mes parcours encadrés | 5 |  |  |
+| `WT02` | Mes parcours encadrés | 5 | Parcours des seules classes de Koffi, classes et élèves identiques à l'API, carte → WT10 | `apps/web/e2e/enseignant-parcours.spec.ts` |
 | `WT03` | Mes classes | 5 | Classes et quota de l'école identiques à l'API, « Créer une classe » → WT13 | `apps/web/e2e/enseignant-classes.spec.ts` |
 | `WT04` | Apprenants d'une classe | 5 | Élèves et invitations (en attente, refusée, expirée) de l'API, aucun numéro de parent ; classe vide → CTA vers WT06 ; annulation d'une invitation confirmée, quota libéré ; classe d'un autre : 404 | `apps/web/e2e/enseignant-classes.spec.ts` |
 | `WT05` | Profil apprenant (+ commentaires) | 5 |  |  |
@@ -130,7 +130,7 @@ au moins un test e2e existant. La CI le vérifie avec `python3 scripts/e2e_matri
 | `WT07` | Suivi des évaluations | 5 |  |  |
 | `WT08` | Paramètres | 5 |  |  |
 | `WT09` | Steamy Events | 5 |  |  |
-| `WT10` | Détail parcours encadré | 5 |  |  |
+| `WT10` | Détail parcours encadré | 5 | Arbre Projet → Niveau → Mission avec compteurs de l'API, panneau de suivi, mission en lecture seule sans progression ; parcours non encadré : 404 | `apps/web/e2e/enseignant-parcours.spec.ts` |
 | `WT11` | Aide & support | 5 |  |  |
 | `WT12` | Notifications | 5 |  |  |
 | `WK01` | Catalogue kits | 3 | Boutique dans le shell (h1 du header), cartes vers la fiche, « Ajouter » → toast ; WL07 invité : « Ajouter » seulement si en stock | `apps/web/e2e/boutique-panier.spec.ts`, `apps/web/e2e/evenements-boutique.spec.ts` |

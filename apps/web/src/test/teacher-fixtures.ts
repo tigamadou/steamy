@@ -74,6 +74,76 @@ export function dashboard(overrides: Partial<Schemas["TeacherDashboard"]> = {}):
   };
 }
 
+export function supervisedCourse(overrides: Partial<Schemas["SupervisedCourse"]> = {}): Schemas["SupervisedCourse"] {
+  return {
+    slug: "robot-bluetooth",
+    title: "Robot Bluetooth",
+    emoji: "🤖",
+    category: { slug: "robotique", label: "Robotique", color: "#7c3aed", icon: "🤖" },
+    difficulty: "beginner",
+    durationHours: 12,
+    classroomCount: 2,
+    learnerCount: 15,
+    ...overrides,
+  } as Schemas["SupervisedCourse"];
+}
+
+export function supervisedCourseDetail(
+  overrides: Partial<Schemas["SupervisedCourseDetail"]> = {},
+): Schemas["SupervisedCourseDetail"] {
+  return {
+    ...supervisedCourse(),
+    description: "Un robot piloté par téléphone.",
+    classrooms: [classroom(), classroom({ id: 4, name: "3ᵉ A", averageProgress: 10 })],
+    formativePassRate: 75,
+    summativePassRate: null,
+    projects: [
+      {
+        id: 1,
+        order: 0,
+        title: "Robot suiveur",
+        durationHours: 4,
+        passRate: 50,
+        levels: [
+          {
+            id: 11,
+            order: 0,
+            title: "Les moteurs",
+            durationMin: 90,
+            passRate: 25,
+            missions: [
+              { id: 101, order: 0, title: "Allumer une LED", durationMin: 10, icon: "💡", completedCount: 12 },
+              { id: 102, order: 1, title: "Faire tourner un moteur", durationMin: 75, completedCount: 1 },
+              { id: 103, order: 2, title: "Câbler le pont en H", durationMin: 20, completedCount: 0 },
+            ],
+          },
+          { id: 12, order: 1, title: "Les capteurs", durationMin: 60, passRate: 100, missions: [] },
+        ],
+      },
+      { id: 2, order: 1, title: "Robot dessinateur", durationHours: 3, passRate: null, levels: [] },
+    ],
+    ...overrides,
+  } as Schemas["SupervisedCourseDetail"];
+}
+
+export function missionRead(overrides: Partial<Schemas["MissionRead"]> = {}): Schemas["MissionRead"] {
+  return {
+    id: 101,
+    order: 0,
+    title: "Allumer une LED",
+    durationMin: 10,
+    icon: "💡",
+    vimeoId: "",
+    vimeoHash: "",
+    blocks: [
+      { type: "text", text: "Branchez la LED sur la broche 13." },
+      { type: "tip", text: "Le côté long est l'anode." },
+    ],
+    level: { id: 11, title: "Les moteurs" },
+    project: { id: 1, title: "Robot suiveur" },
+    ...overrides,
+  } as Schemas["MissionRead"];
+}
 export function school(overrides: Partial<Schemas["School"]> = {}): Schemas["School"] {
   return {
     name: "Collège Steamy de Cotonou",

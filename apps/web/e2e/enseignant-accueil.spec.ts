@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { DEMO } from "./support/demo";
-import { loginAs, logoutFromShell, openShellMenu } from "./support/session";
+import { loginAs, logoutFromShell, openShellMenu, readApi } from "./support/session";
 
 // LOT-5 étape 5.1 · shell de l'espace enseignant et accueil (WT01).
 
@@ -11,20 +11,13 @@ async function axe(page: Page) {
   expect(violations).toEqual([]);
 }
 
-/** Tableau de bord lu par le navigateur dans l'API, avec la session de l'enseignant. */
-async function readDashboard(page: Page) {
-  return page.evaluate(async () => {
-    const { apiUrl } = (await (await fetch("/runtime-config")).json()) as { apiUrl: string };
-    const response = await fetch(`${apiUrl}/api/classrooms/dashboard/`, { credentials: "include" });
-    return (await response.json()) as {
-      classroomCount: number;
-      learnerCount: number;
-      toReviewCount: number;
-      classrooms: { id: number; name: string }[];
-      toReview: { id: number; learner: { id: number }; classroom: { id: number } }[];
-    };
-  });
-}
+type Dashboard = {
+  classroomCount: number;
+  learnerCount: number;
+  toReviewCount: number;
+  classrooms: { id: number; name: string }[];
+  toReview: { id: number; learner: { id: number }; classroom: { id: number } }[];
+};
 
 test("l'espace enseignant refuse un apprenant et un parent, renvoyés vers leur espace", async ({ page }) => {
   await loginAs(page, "learner");
@@ -40,7 +33,7 @@ test("WT01 : Koffi voit ses compteurs, ses classes et ses tentatives à revoir c
   await loginAs(page, "teacher");
   await page.goto("/enseignant");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(`Bonjour ${DEMO.teacher.firstName} 👋`);
-  const dashboard = await readDashboard(page);
+  const dashboard = await readApi<Dashboard>(page, "/api/classrooms/dashboard/");
 
   const stats = page.getByRole("region", { name: "Vos statistiques" });
   await expect(stats.getByRole("definition")).toHaveText([

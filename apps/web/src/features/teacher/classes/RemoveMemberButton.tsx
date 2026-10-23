@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ds";
 import { apiCall } from "@/lib/api-call";
@@ -13,8 +13,8 @@ export const MEMBERS_HEADING_ID = "eleves-classe";
 
 /**
  * « Retirer de la classe » (élève actif) ou « Annuler l'invitation » (invitation en attente) : confirmation, puis
- * `POST classrooms/{id}/members/{memberId}/remove/`. La place est libérée côté serveur ; la page est relue et le focus
- * passe au titre de la liste, la ligne (et son bouton) ayant disparu.
+ * `POST classrooms/{id}/members/{memberId}/remove/`. La place est libérée côté serveur ; la page est relue et, quand la ligne
+ * (et son bouton) disparaît, le focus passe au titre de la liste.
  */
 export function RemoveMemberButton({
   classroomId,
@@ -29,6 +29,14 @@ export function RemoveMemberButton({
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const removed = useRef(false);
+  // La ligne disparaît quand la page relue ne la contient plus : le focus passe alors au titre de la liste
+  useEffect(
+    () => () => {
+      if (removed.current) document.getElementById(MEMBERS_HEADING_ID)?.focus();
+    },
+    [],
+  );
   const label = invitation ? "Annuler l'invitation" : "Retirer de la classe";
   return (
     <>
@@ -49,9 +57,8 @@ export function RemoveMemberButton({
           )
         }
         onDone={() => {
+          removed.current = true;
           router.refresh();
-          // Après la fermeture de la fenêtre, qui rend d'abord le focus au bouton d'origine
-          setTimeout(() => document.getElementById(MEMBERS_HEADING_ID)?.focus(), 0);
         }}
       >
         <p className="m-0">
