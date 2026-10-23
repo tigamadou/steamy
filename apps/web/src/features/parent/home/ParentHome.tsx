@@ -65,14 +65,19 @@ export function NoChild() {
 }
 
 /** Confirmation après l'acceptation d'une demande (WPD05 → WPD01). */
-function AcceptedNotice({ firstName }: { firstName: string }) {
+/** Demande acceptée, relue dans l'API : prénom de l'enfant, et classe rejointe pour une invitation d'enseignant. */
+export type AcceptedConsent = { firstName: string; classroom: string | null };
+
+function AcceptedNotice({ accepted }: { accepted: AcceptedConsent }) {
   return (
     <p
       role="status"
       className="m-0 flex items-start gap-3 rounded-lg border-2 border-success-200 bg-success-50 p-4 font-bold text-success-800"
     >
       <span aria-hidden>✅</span>
-      Demande acceptée : {firstName} peut terminer son inscription.
+      {accepted.classroom
+        ? `Invitation acceptée : ${accepted.firstName} a rejoint la classe « ${accepted.classroom} ».`
+        : `Demande acceptée : ${accepted.firstName} peut terminer son inscription.`}
     </p>
   );
 }
@@ -82,18 +87,18 @@ export function ParentHomeView({
   kids,
   count,
   actions,
-  acceptedFirstName,
+  accepted,
 }: {
   kids: Child[];
   count: number;
   actions: Schemas["PendingAction"][];
-  /** Prénom de l'enfant dont la demande vient d'être acceptée (`?consentement=<id>`). */
-  acceptedFirstName?: string;
+  /** Demande qui vient d'être acceptée (`?consentement=<id>`). */
+  accepted?: AcceptedConsent;
 }) {
   const courses = kids.reduce((total, child) => total + child.activeCourses, 0);
   return (
     <div className="flex flex-col gap-5">
-      {acceptedFirstName && <AcceptedNotice firstName={acceptedFirstName} />}
+      {accepted && <AcceptedNotice accepted={accepted} />}
       <Hero count={count} />
       <PendingActionList actions={actions} />
       <section aria-label="Vos statistiques" className="flex flex-col gap-4 sm:flex-row">
@@ -124,16 +129,17 @@ export function ParentHomeView({
 }
 
 /**
- * Prénom de l'enfant dont la demande `?consentement=<id>` est acceptée, relu dans l'API : le paramètre ne porte
- * aucune donnée personnelle et une demande inconnue, d'un autre numéro ou non acceptée n'affiche rien.
+ * Demande `?consentement=<id>` acceptée, relue dans l'API : le paramètre ne porte aucune donnée personnelle et une
+ * demande inconnue, d'un autre numéro ou non acceptée n'affiche rien.
  */
-async function acceptedFirstName(
+async function acceptedConsent(
   api: Awaited<ReturnType<typeof getServerApi>>,
   consent: string | string[] | undefined,
-): Promise<string | undefined> {
+): Promise<AcceptedConsent | undefined> {
   if (typeof consent !== "string" || !/^\d+$/.test(consent)) return undefined;
   const { data } = await api.GET("/api/accounts/consent-requests/{id}/", { params: { path: { id: consent } } });
-  return data?.status === "accepted" ? data.firstName : undefined;
+  if (data?.status !== "accepted") return undefined;
+  return { firstName: data.firstName, classroom: data.origin === "teacher" ? (data.classroom?.name ?? null) : null };
 }
 
 /** WPD01 · accueil du parent : enfants et « À valider », lus côté serveur à chaque requête. */
@@ -142,7 +148,7 @@ export async function ParentHome({ searchParams }: { searchParams: Promise<Recor
   const [children, actions, accepted] = await Promise.all([
     api.GET("/api/accounts/children/", { params: { query: { pageSize: HOME_CHILDREN_PAGE_SIZE } } }),
     api.GET("/api/accounts/pending-actions/"),
-    acceptedFirstName(api, consentement),
+    acceptedConsent(api, consentement),
   ]);
   const list = readOrNull(children);
   const pending = readOrNull(actions);
@@ -153,7 +159,7 @@ export async function ParentHome({ searchParams }: { searchParams: Promise<Recor
       kids={results}
       count={list.count ?? results.length}
       actions={pending}
-      acceptedFirstName={accepted}
+      accepted={accepted}
     />
   );
 }

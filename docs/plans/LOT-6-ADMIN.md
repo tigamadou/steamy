@@ -14,9 +14,9 @@ Back-office du personnel Steamy, réalisé selon S6 : **Next.js** pour WAD01-WAD
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : réponses du produit aux trois questions ouvertes (voir « Questions produit à trancher ») · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
+Statut : ✅ terminé · Prochaine tâche : aucune (questions produit tranchées le 2026-10-23) · Prérequis : `API-0` et `API-1` (6.1), `API-L6` (RBAC, OTP, `AuditLog`, puis `API-L6.4` Impact Tracker avant 6.7 à 6.9), modèles métier des lots d'API précédents (6.2 : `API-L2`, `API-L4`, `API-L5` ; 6.3 : `API-L1`, `API-L3a` ; 6.4 et 6.5 : `API-L3b`) ; lot 1 (étape 1.0 : tokens et outillage) pour 6.6
 
-### Lot 6 · Back-office hybride — 🟡 en cours
+### Lot 6 · Back-office hybride — ✅ terminé
 - [x] **6.1** Socle staff : groupes, TOTP, WAD15, thème, audit · `feature/lot6-socle-staff` · PR #38 (requiert API-0, API-1 ; réalise API-L6.1)
   - [x] `WAD15` Connexion (admin Django) : gabarit `admin/login.html` (email, mot de passe, code TOTP à 6 chiffres), throttling par IP et par email, `next` limité à `WEB_URL/backoffice`
   - [x] Index de l'admin Django
@@ -59,7 +59,7 @@ Statut : 🟡 en cours · Prochaine tâche : réponses du produit aux trois ques
   - [x] Tests : aucune action ne fait passer une `ConsentRequest` à `accepted` ou `refused` (D70) ; relance soumise aux plafonds
   - [x] Tests : Contenu et Finance sans accès aux consentements ni champs sensibles ; Support sans genre/handicap sans permission
   - [x] Tests : invitation enseignant crée une `TeacherInvitation` et aucun `User` actif ; dernier Super-admin non supprimable ; changement de parent sans acceptation = lien inchangé
-  - [ ] Recette sur le jeu D2 : retrouver Léa Adjovi, voir son parent et ses consentements, relancer une demande, inviter un enseignant rattaché à une école
+  - [x] Recette sur le jeu D2 : retrouver Léa Adjovi, voir son parent et ses consentements, relancer une demande, inviter un enseignant rattaché à une école (Q3 : couverture automatique, `e2e/admin-comptes.spec.ts` en lecture ; `accounts/tests/test_backoffice_admin.py::test_resend_follows_the_caps`, `test_admin_wad06_wad07.py::test_inviting_a_teacher_creates_an_invitation_and_no_account` pour les écritures)
   > Notes : l'essentiel de WAD06-WAD08 et WAD13 vient d'API-L6.2 (PR #61) avec ses tests (`accounts/tests/
   > test_backoffice_admin.py`) : personas sans ajout ni suppression, rôle et identifiants en lecture seule, suspendre /
   > désactiver / réactiver avec motif, consentements en suivi seul (relance aux plafonds de W07, litige), changement de
@@ -93,7 +93,7 @@ Statut : 🟡 en cours · Prochaine tâche : réponses du produit aux trois ques
   - [x] `CategoryAdmin` et `BadgeAdmin`
   - [x] Tests : groupe Contenu seul en écriture ; publication refusée sur arbre incomplet ; quiz sur les deux ou aucun = erreur
   - [x] Tests : `isCorrect` absent des réponses de l'API (S8) ; changement de prix sans effet sur les `OrderItem` existants
-  - [ ] Recette : créer un parcours complet (2 projets, niveaux, missions Vimeo, quiz), le publier, le voir dans `WL22` et `WC`
+  - [x] Recette : créer un parcours complet (2 projets, niveaux, missions Vimeo, quiz), le publier, le voir dans `WL22` et `WC` (Q3 : couverture automatique, `e2e/admin-contenu.spec.ts` en lecture ; `catalog/tests/test_admin_wad09.py::test_a_complete_course_is_published_and_audited` et suivants pour les écritures)
   > Notes : une grande partie de WAD09 existait (API-L1, API-L3a : inlines triables, quiz, `SingleCorrectChoiceFormSet`,
   > `CategoryAdmin`, `BadgeAdmin`). Ajouts : colonnes accès (gratuit / payant + prix), kit requis et inscrits
   > (annotation), filtre « kit » ; statut en lecture seule, modifié seulement par « Publier » (`catalog/publication.py` :
@@ -152,8 +152,8 @@ Statut : 🟡 en cours · Prochaine tâche : réponses du produit aux trois ques
   > restantes, accès, fin des candidatures) ; candidatures en lecture seule avec âge, décision du parent et paiement ;
   > permission `refuse_application` (migration `events.0004`) et action « Refus exceptionnel » (Support, motif
   > obligatoire) : candidature annulée, place et ticket rendus, enfant et parent prévenus, `Refund` à traiter par la
-  > Finance si elle était payée, `AuditLog`. Écart : « mode maintenance » et « inscriptions ouvertes » (WAD14) restent
-  > hors réglages, leur comportement d'API n'étant pas spécifié (décision d'API-L6.3, à trancher par le produit).
+  > Finance si elle était payée, `AuditLog`. « Mode maintenance » et « inscriptions ouvertes » (WAD14) : hors v1 (Q1,
+  > arbitré le 2026-10-23), faute de comportement d'API spécifié.
   > Suites de relecture : le refus d'une candidature en attente de paiement annule sa commande sous verrou (stock
   > rendu) ; `confirm` ne confirme qu'une candidature en attente de paiement et `reacquire_seat` ne relance qu'une
   > candidature annulée faute de paiement : un paiement reçu après un refus part en remboursement (C17), la commande
@@ -224,7 +224,7 @@ Statut : 🟡 en cours · Prochaine tâche : réponses du produit aux trois ques
   - [x] Playwright (parcours critique) : Finance via WAD15 (TOTP de développement), brouillon WAD05, validation, export CSV WAD04, soumission, champs en lecture seule ; Support sur la même URL = accès refusé
     - [x] Tout le parcours sauf l'export CSV (`e2e/impact-rapport.spec.ts`, refus de Support dans `e2e/backoffice.spec.ts`)
     - [x] Export CSV téléchargé et vérifié (en-tête, lignes) dans `e2e/impact-rapport.spec.ts` (PR #111)
-  - [ ] Confirmation produit du comportement de « Valider la saisie » (point ouvert)
+  - [x] Confirmation produit du comportement de « Valider la saisie » : aide à la saisie, sans état serveur (Q2, 2026-10-23)
   > Notes : exports (PR #111) : « Exporter CSV / PDF » demande l'export, interroge son état toutes les 2 s (2 min au
   > plus), puis annonce le lien de téléchargement (redirection de l'API vers une URL présignée) ; pas de notification au
   > personnel, sans centre de notifications. « Valider la saisie » (hypothèse de travail, sans champ serveur) :
@@ -240,11 +240,11 @@ Statut : 🟡 en cours · Prochaine tâche : réponses du produit aux trois ques
   > Garde-fou monochrome étendu au rendu (`components/backoffice/monochrome-rendu.test.tsx`) : le HTML de chaque
   > écran et état du back-office, composants du design system compris, ne contient aucune classe primaire ; `Loader`,
   > `Mascot` et les états WX ont une variante encre (le hors-ligne la prend sous `/backoffice`).
-- [ ] **Critères de fin du lot 6** · `feature/lot6-fin-de-lot` · PR #139
+- [x] **Critères de fin du lot 6** · `feature/lot6-fin-de-lot` · PR #139, clôture `feature/lot6-cloture`
   - [x] WAD01-WAD05 conformes à la spec et à la définition de « terminé », monochrome sans `--primary-*`, accessibles, responsive, sans donnée en dur
-  - [ ] WAD06-WAD14 couverts par l'admin Django (colonnes, filtres, recherches, actions, inlines de §5.14), sans élément de « À ne pas porter », thème monochrome, admin en français
+  - [x] WAD06-WAD14 couverts par l'admin Django (colonnes, filtres, recherches, actions, inlines de §5.14), sans élément de « À ne pas porter », thème monochrome, admin en français
     - [x] WAD06-WAD13 couverts (6.2 à 6.5), thème monochrome, admin en français
-    - [ ] WAD14 : « mode maintenance » et « inscriptions ouvertes » (question produit Q1)
+    - [x] WAD14 : réglages, réseaux Mobile Money, annonces et référentiels (6.5) ; « mode maintenance » et « inscriptions ouvertes » hors v1 (Q1), retirés de la spec
   - [x] WAD15 : TOTP obligatoire pour tout membre ; `/api/backoffice/` refuse toute session non vérifiée (`OTP_REQUIRED`)
   - [x] Matrice des groupes figée par test ; chaque permission testée en accès autorisé et refusé
   - [x] Invariants D70, S3/C3, S9, D71, D74 testés côté admin Django et côté API
@@ -252,7 +252,7 @@ Statut : 🟡 en cours · Prochaine tâche : réponses du produit aux trois ques
   - [x] KPI `auto` vérifiés contre des valeurs de référence ; `kpiStatus` conforme à D73/§4.5 ; exports CSV/PDF asynchrones ; rapport soumis verrouillé
   - [x] Parcours Playwright verts : garde d'accès (anonyme, parent, groupe insuffisant) et Impact Tracker de bout en bout
   - [x] `make openapi` à jour ; CI `ci-ok` verte sur chaque PR vers `development`
-  - [ ] Questions produit Q1 à Q3 tranchées (ci-dessous), puis recettes manuelles de 6.2 et 6.3
+  - [x] Questions produit Q1 à Q3 tranchées le 2026-10-23 (ci-dessous) ; recettes de 6.2 et 6.3 couvertes par les tests automatiques (Q3)
   > Vérification des critères (fin de lot) : WAD01-WAD05 livrés par 6.6 à 6.9, garde-fou monochrome au rendu
   > (`components/backoffice/monochrome-rendu.test.tsx`), contrôles d'accessibilité et vérifications visuelles à 360 et
   > 1280 px dans chaque PR ; WAD15 et `OTP_REQUIRED` : `core/tests/test_staff_login.py`, `test_staff_permission.py` ;
@@ -263,41 +263,26 @@ Statut : 🟡 en cours · Prochaine tâche : réponses du produit aux trois ques
   > `AuditedAdminMixin` imposé par `SteamyAdminSite.register` (`core/tests/test_admin_site.py`) et actions métier
   > journalisées ; KPI : `impact/tests/test_compute.py` (valeurs de référence), `test_periods_status.py` (D73),
   > `test_exports.py` ; Playwright : `e2e/backoffice.spec.ts` (anonyme, parent, Support refusé sur l'Impact Tracker),
-  > `impact-tracker.spec.ts`, `impact-rapport.spec.ts` ; contrat : contrôle `openapi.yaml` de la CI. Le lot reste
-  > ouvert sur les trois questions produit.
+  > `impact-tracker.spec.ts`, `impact-rapport.spec.ts` ; contrat : contrôle `openapi.yaml` de la CI. Clôture
+  > (2026-10-23) : WAD14 couvert par 6.5 (`core/tests/test_platform.py`, `test_reglages.py`,
+  > `e2e/admin-evenements-reglages.spec.ts`), les deux réglages restants étant hors v1 (Q1, `ARBITRAGES.md` C22) ;
+  > « Valider la saisie » conservé en aide à la saisie (Q2, spec WAD05) ; recettes de 6.2 et 6.3 acquises par pytest
+  > (écritures) et Playwright (lecture) (Q3).
 
-### Questions produit à trancher
+### Questions produit (tranchées le 2026-10-23)
 
-- **Q1 · WAD14, « mode maintenance » et « inscriptions ouvertes »** (spec §5.14 WAD14, PLAN-API API-L6.3). Les deux
-  réglages sont listés dans WAD14, mais aucun comportement d'API n'est spécifié : ils ne sont ni dans
-  `PlatformSettings` ni dans l'admin. Questions : que bloque chacun, pour qui, et avec quel message ?
-  - Maintenance, option A : hors v1. On retire la ligne de WAD14 et la spec est mise à jour.
-  - Maintenance, option B : coupure des personas. Toute l'API des personas répond 503 `MAINTENANCE`, sauf la santé,
-    l'admin et `/api/backoffice/`. Le front affiche une page de maintenance avec un message éditable. Le personnel
-    garde son accès.
-  - Maintenance, option C : lecture seule. Les lectures passent, les écritures des personas répondent 503
-    `MAINTENANCE`. Le front affiche un bandeau.
-  - Inscriptions, option A : hors v1.
-  - Inscriptions, option B : interrupteur global. La création d'un compte apprenant ou parent répond
-    `SIGNUPS_CLOSED` et le front affiche un message. Les invitations d'enseignants et du personnel ne sont pas
-    concernées.
-  - Inscriptions, option C : interrupteur par persona (apprenant, parent), ou par pays (D76).
-- **Q2 · WAD05, comportement de « Valider la saisie »** (6.9). Hypothèse de travail livrée, sans champ serveur : le
-  bouton enregistre, puis signale chaque indicateur manuel encore vide. « Soumettre » ne l'exige pas, mais sa modale
-  annonce les indicateurs manquants. Question : la validation est-elle une étape métier ?
-  - Option A : garder l'hypothèse. Simple aide à la saisie, aucun état serveur.
-  - Option B : étape serveur. Champs `validated_at` et `validated_by` sur `ImpactReport`, journalisés. La soumission
-    exige un rapport validé, et toute nouvelle saisie annule la validation.
-  - Option C : retirer le bouton. La modale de « Soumettre » suffit à signaler les manques.
-- **Q3 · Recettes manuelles de 6.2 et 6.3**. Ces recettes demandent des écritures sur le jeu D2 (relance d'un
-  consentement, invitation d'un enseignant, création et publication d'un parcours). Les tests Playwright ne couvrent
-  que la lecture, pour garder D2 intact. Pytest couvre les écritures. Question : qui fait ces recettes, où, et à quel
-  moment ?
-  - Option A : le produit les déroule sur l'environnement de recette (staging), avec le jeu D2, avant la clôture du lot.
-  - Option B : on accepte la couverture automatique (pytest pour les écritures, Playwright en lecture) comme recette,
-    et le lot se clôt.
-  - Option C : des scénarios Playwright en écriture tournent sur une copie jetable de D2 (base réinitialisée avant le
-    test). La recette devient automatique, pour un coût de CI plus élevé.
+- **Q1 · WAD14, « mode maintenance » et « inscriptions ouvertes »** : **hors v1** (option A pour les deux). Les deux
+  lignes sont retirées de WAD14 dans la spec (§5.14) et de ce plan ; arbitrage `ARBITRAGES.md` C22. Options
+  écartées : coupure des personas (503 `MAINTENANCE`) ou lecture seule ; interrupteur `SIGNUPS_CLOSED` global, par
+  persona ou par pays. À rouvrir après la v1 si le besoin apparaît.
+- **Q2 · WAD05, « Valider la saisie »** : **aide à la saisie, sans état serveur** (option A). Le bouton enregistre,
+  puis signale chaque indicateur manuel encore vide ; « Soumettre » ne l'exige pas, sa modale annonce les indicateurs
+  manquants. Documenté dans la spec WAD05. Options écartées : étape serveur (`validated_at`, exigée avant la
+  soumission) ; retrait du bouton.
+- **Q3 · Recettes de 6.2 et 6.3** : **couverture automatique** (option B). Pytest (écritures : relance, invitation,
+  création et publication d'un parcours) et Playwright (lecture sur le jeu D2) valent recette ; les cases de recette
+  sont cochées avec leurs tests. Options écartées : recette manuelle sur staging ; e2e en écriture sur une base
+  jetable.
 
 ## Périmètre et principes
 
@@ -489,7 +474,7 @@ agrégats égaux à un calcul de référence sur le jeu D2.
 | --- | --- |
 | WAD12 événements | `SteamyEventAdmin` (Contenu) : titre, dates, lieu, ville, capacité, places restantes, prix (0 = gratuit, S8), date limite, statut de publication |
 | WAD12 candidatures | `EventApplicationAdmin` : élève, âge, événement, accord parental (date), paiement (statut de la commande), statut ; filtres. **Statut en lecture seule**. Seule action : *refus exceptionnel* (motif obligatoire) qui annule la candidature, notifie l'enfant et le parent et, si elle était payée, crée un `Refund` à traiter par Finance (C3) |
-| WAD14 | `PlatformSettingsAdmin` singleton (pas d'ajout ni de suppression, la liste ouvre la fiche) : maintenance, inscriptions ouvertes, fournisseur SMS actif (S10), seuil de décrochage (7 j, D66), barème de points et seuils de rang (C8), plafonds OTP (D24), cooldown sommatif (D32) ; bornes validées, cache invalidé à l'enregistrement. `PaymentNetworkAdmin` : réseaux par pays, Celtiis compris, activation (D76) ; invalide le cache de `referentials/payment-networks/`. `AnnouncementAdmin` : action *diffuser* (notification D7 via Celery, aucun contenu marketing vers les mineurs, D6). Référentiels (pays, localités avec `areaType`, classes, motifs…) |
+| WAD14 | `PlatformSettingsAdmin` singleton (pas d'ajout ni de suppression, la liste ouvre la fiche) : fournisseur SMS actif (S10), seuil de décrochage (7 j, D66), barème de points et seuils de rang (C8), plafonds OTP (D24), cooldown sommatif (D32) ; bornes validées, cache invalidé à l'enregistrement. `PaymentNetworkAdmin` : réseaux par pays, Celtiis compris, activation (D76) ; invalide le cache de `referentials/payment-networks/`. `AnnouncementAdmin` : action *diffuser* (notification D7 via Celery, aucun contenu marketing vers les mineurs, D6). Référentiels (pays, localités avec `areaType`, classes, motifs…) |
 
 Tests : aucune action ne fait passer une candidature à `accepted` (S3, C3) ; refus exceptionnel d'une candidature
 payée → `Refund` créé ; singleton non dupliquable ; désactiver un réseau le retire de l'endpoint public ; seuil hors
@@ -589,7 +574,7 @@ Tranchés depuis la rédaction : statut ≥ cible = « Atteinte » (§4.5, SPEC-
 
 | Point | Hypothèse de travail | Bloque |
 | --- | --- | --- |
-| « Valider la saisie » (WAD05) non défini par D74 | Contrôle de complétude des KPI manuels, valeurs marquées validées ; « Soumettre » exige une saisie validée | 6.9 (à confirmer par le produit) |
+| « Valider la saisie » (WAD05) non défini par D74 | Tranché (Q2, 2026-10-23) : aide à la saisie, sans état serveur ; enregistre puis signale les KPI manuels vides, « Soumettre » ne l'exige pas | — |
 | Répartition par groupe des entrées « événements » et « commandes » (WAD13), proposée par la spec | Matrice ci-dessus | Recette de 6.1 |
 
 ## Critères de fin de lot
