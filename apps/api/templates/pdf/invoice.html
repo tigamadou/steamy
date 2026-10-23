@@ -15,6 +15,9 @@
   .totals td { border: none; }
   .grand td { font-weight: 800; font-size: 12pt; border-top: 2px solid #1F1B3A; }
   .notice { margin-top: 8mm; padding: 3mm; background: #F4F2FB; font-size: 9pt; }
+  .fiscal { margin-top: 8mm; display: flex; gap: 6mm; align-items: center; font-size: 9.5pt; }
+  .fiscal-qr { width: 32mm; height: 32mm; }
+  .fiscal-qr svg { width: 100%; height: 100%; }
   .mentions { margin-top: 4mm; font-size: 8.5pt; color: #4A4670; }
 {% endblock %}
 {% block content %}
@@ -59,6 +62,17 @@
   <tr class="grand"><td>{% if taxes %}Total à payer{% else %}Total payé{% endif %}</td><td class="num">{{ total }} FCFA</td></tr>
 </table>
 <p>Payé le {{ payment.paid_on }} par Mobile Money{% if payment.network %} ({{ payment.network }}){% endif %}{% if payment.transaction %} · transaction {{ payment.transaction }}{% endif %}.</p>
+{% if fiscal %}
+<div class="fiscal">
+  <div class="fiscal-qr">{{ fiscal_qr|safe }}</div>
+  <div>
+    <div class="label">Facture normalisée e-MECeF</div>
+    <div>Code MECeF/DGI : <strong>{{ fiscal.code }}</strong></div>
+    <div>NIM : {{ fiscal.nim }} · Compteurs : {{ fiscal.counters }}</div>
+    <div>Date et heure : {{ fiscal.date_time }}</div>
+  </div>
+</div>
+{% endif %}
 {% if provisional %}
 <div class="notice">Document non fiscal : reçu de paiement émis par Steamy. La facture normalisée n'est pas émise par ce document.</div>
 {% endif %}

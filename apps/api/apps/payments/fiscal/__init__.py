@@ -17,6 +17,7 @@ from .base import (
     FiscalTemporaryError,
     InvoiceRequest,
     InvoiceTotals,
+    PendingRequest,
     SecurityElements,
     TaxGroups,
 )
@@ -39,6 +40,7 @@ __all__ = [
     "FiscalTemporaryError",
     "InvoiceRequest",
     "InvoiceTotals",
+    "PendingRequest",
     "SecurityElements",
     "TaxGroups",
     "get_fiscal_provider",

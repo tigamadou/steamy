@@ -541,7 +541,7 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   - [ ] **Suite `API-L3b.2c`** : facture normalisée e-MECeF ([ADR 0006](../adr/0006-facture-normalisee-emecef.md)).
     Contrat DGI versé dans `docs/references/emecef/` ; cartographie proposée (groupes de taxe, `aib`, avoirs, flux,
     réglages), **à valider** (E1 à E8) ; ensuite : (1) interface `FiscalInvoiceProvider`, faux fournisseur, client
-    e-MCF, réglages (**fait**, `feature/api-emecef-fournisseur` : `apps/payments/fiscal/`, `FISCAL_PROVIDER`, `EMECEF_*`,
+    e-MCF, réglages (**fait**, `feature/api-emecef-fournisseur` : `apps/payments/fiscal/`, `FISCAL_PROVIDER`, `EMECEF_ENVIRONMENT`, `EMECEF_IFU`, `EMECEF_TOKEN`,
     `PlatformSettings.emecef_enabled` / groupes, garde-fou des taux à l'activation) ; (2) émission asynchrone, éléments de sécurité sur `Invoice`, PDF avec QR ; (3) avoirs sur
     remboursement, surveillance du jeton ; IFU, agrément et jeton restent à obtenir de la DGI
   - [ ] **Écart** : format légal non validé (P1 : contrat DGI à obtenir ; P2 : taux à confirmer). Tant que la comptabilité n'a pas répondu, le document reste un

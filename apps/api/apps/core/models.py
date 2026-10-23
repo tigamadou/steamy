@@ -22,6 +22,8 @@ def bounds(low: int, high: int) -> list:
     return [MinValueValidator(low), MaxValueValidator(high)]
 
 
+#: Taux d'AIB admis par e-MECeF (spécification de la DGI : groupe A = 1 %, groupe B = 5 %, pas d'autre valeur)
+EMECEF_AIB_RATES = (Decimal("1"), Decimal("5"))
 #: Barème standard (C8) : points par événement, accordés une seule fois.
 DEFAULT_POINTS_SCALE = {"mission": 10, "formative": 20, "summative": 50, "course": 100}
 #: Paliers de rang standard (C8), aux points strictement croissants.
@@ -145,7 +147,7 @@ class PlatformSettings(models.Model):
 
     def clean(self):
         """Barème : `{événement: points ≥ 0}` ; paliers : `[{rank, points}]` aux points strictement croissants ;
-        TVA ou AIB activé : taux > 0 ; e-MECeF activé : groupes de taxe renseignés."""
+        TVA ou AIB activé : taux > 0 ; e-MECeF activé : groupes de taxe renseignés, AIB à 1 % ou 5 %."""
         errors = {}
         for tax in ("vat", "aib"):
             if getattr(self, f"{tax}_enabled") and not getattr(self, f"{tax}_rate"):
@@ -161,6 +163,10 @@ class PlatformSettings(models.Model):
             for field in ("emecef_taxed_group", "emecef_exempt_group"):
                 if not getattr(self, field):
                     errors[field] = "Un groupe de taxe est requis pour activer e-MECeF."
+            if self.aib_enabled and self.aib_rate not in EMECEF_AIB_RATES:
+                errors["aib_rate"] = (
+                    "Avec e-MECeF, l'AIB vaut 1 % (groupe A) ou 5 % (groupe B) : aucun autre taux."
+                )
         thresholds = self.rank_thresholds
         valid = isinstance(thresholds, list) and all(
             isinstance(t, dict)

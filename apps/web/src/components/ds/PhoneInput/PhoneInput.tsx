@@ -121,7 +121,8 @@ export function PhoneInput({
         value={formatNational(national, country?.phoneFormat)}
         onChange={onNumber}
         placeholder={placeholder}
-        disabled={disabled}
+        // Sans pays, le numéro ne peut pas devenir E.164 : le champ attend la liste plutôt que de laisser saisir en vain
+        disabled={disabled || !country}
         {...a11y}
         className={controlTextClasses}
       />

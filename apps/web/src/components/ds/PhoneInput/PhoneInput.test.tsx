@@ -115,13 +115,14 @@ describe("PhoneInput", () => {
     expect(document.querySelector<HTMLInputElement>('input[name="phone"]')?.value).toBe("");
   });
 
-  it("reste utilisable avec une liste de pays vide ou un pays initial inconnu", async () => {
-    const user = userEvent.setup();
-    const onChange = vi.fn();
-    const { unmount } = render(<PhoneInput countries={[]} onChange={onChange} />);
-    await user.type(screen.getByRole("textbox"), "12");
-    expect(onChange).toHaveBeenLastCalledWith({ country: "", national: "12", e164: null, valid: false });
-    unmount();
+  it("attend la liste des pays avant d'accepter une saisie, puis devient utilisable", () => {
+    const { rerender } = render(<PhoneInput countries={[]} name="phone" />);
+    expect(screen.getByRole("textbox")).toBeDisabled();
+    rerender(<PhoneInput countries={COUNTRIES} name="phone" />);
+    expect(screen.getByRole("textbox")).toBeEnabled();
+  });
+
+  it("retombe sur le premier pays quand le pays initial est inconnu", () => {
     render(<PhoneInput countries={COUNTRIES} defaultCountry="ZZ" />);
     expect(screen.getByRole("combobox", { name: "Pays" })).toHaveValue("TG");
   });
