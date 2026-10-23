@@ -72,7 +72,7 @@ Statut : 🟡 en cours · Prochaine tâche : spécialité de `WT08` (après la P
   - [x] « Candidatures de mes élèves » en lecture seule
   - [x] Branchement API : `events/`, `events/{slug}/`, `proposals/`, `classrooms/event-applications/`
   - [x] Tests unitaires : modale, double proposition à la même classe (message serveur)
-  > Écarts : la carte d'événement est partagée avec le parent (`EventTile`). Le test de la proposition réussie est joué une fois, sur « bureau » (une proposition par classe).
+  > Écarts : la carte d'événement est partagée avec le parent (`EventTile`). « Proposer à une classe » est désactivé (avec le motif) quand l'événement est complet, clos ou passé. Les candidatures sont lues sur une page de 50, sans « voir plus » : au-delà, les plus anciennes ne sont pas listées. Le test de la proposition réussie est joué une fois, sur « bureau » (une proposition par classe).
 - [ ] **5.8** Paramètres, notifications, aide · `feature/lot5-parametres-notifs-aide` (requiert 5.1)
   - [ ] `WT08` Paramètres : profil (nom, spécialité, établissement en lecture seule), connexion (email, mot de passe D25), notifications (in-app et email), légal
   - [ ] `WT08` zone sensible : « Demander la fermeture du compte » vers `public/contact-messages/` (sujet prérempli)

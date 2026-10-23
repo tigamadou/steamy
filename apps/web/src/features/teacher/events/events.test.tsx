@@ -72,6 +72,24 @@ describe("ProposeButton", () => {
     expect(button).toHaveAccessibleDescription(/Créez d'abord une classe/);
   });
 
+  it("candidatures closes : bouton désactivé avec le motif, aucune fenêtre", () => {
+    render(<ProposeButton eventSlug="e" eventTitle="Défi" classrooms={CLASSROOMS} closedReason="Candidatures closes" />);
+    const button = screen.getByRole("button", { name: /Proposer à une classe/ });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAccessibleDescription("Candidatures closes");
+  });
+
+  it("focus : la fenêtre prend le focus à l'ouverture et le rend au bouton à la fermeture", async () => {
+    const user = userEvent.setup();
+    renderButton();
+    const opener = screen.getByRole("button", { name: /Proposer à une classe/ });
+    await user.click(opener);
+    expect(screen.getByRole("dialog")).toContainElement(document.activeElement as HTMLElement);
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(opener).toHaveFocus();
+  });
+
   it("choix de la classe, puis confirmation « Les élèves et leurs parents ont été notifiés »", async () => {
     const user = userEvent.setup();
     POST.mockResolvedValue({ data: { id: 1, event: "defi-robots", classroomId: 4, notifiedCount: 6 }, response: new Response(null, { status: 201 }) });
@@ -174,6 +192,13 @@ describe("WT09 · Steamy Events", () => {
     expect(await axe(container)).toHaveNoViolations();
   });
 
+  it("un événement complet n'a pas de « Proposer à une classe » actif", () => {
+    render(
+      <TeacherEventsView events={[steamyEvent({ seatsLeft: 0 })]} classrooms={CLASSROOMS} applications={[]} />,
+    );
+    expect(screen.getByRole("button", { name: /Proposer à une classe/ })).toBeDisabled();
+  });
+
   it("états vides", () => {
     render(<TeacherEventsView events={[]} classrooms={CLASSROOMS} applications={[]} />);
     expect(screen.getByText("Aucun événement à venir")).toBeInTheDocument();
@@ -212,6 +237,13 @@ describe("WL23 dans le shell enseignant", () => {
     render(await TeacherEventView({ params: Promise.resolve({ slug: event.slug }) }));
     expect(screen.getByRole("heading", { level: 2, name: event.title })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Proposer à une classe/ })).toBeEnabled();
+  });
+
+  it("fiche d'un événement dont les candidatures sont closes : proposition désactivée", async () => {
+    getEvent.mockResolvedValue(steamyEvent({ applicationsOpen: false }));
+    GET.mockResolvedValue(respond(200, { results: CLASSROOMS }));
+    render(await TeacherEventView({ params: Promise.resolve({ slug: "x" }) }));
+    expect(screen.getByRole("button", { name: /Proposer à une classe/ })).toBeDisabled();
   });
 
   it("événement inconnu : introuvable ; sans session : rien", async () => {
