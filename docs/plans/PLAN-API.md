@@ -287,6 +287,12 @@ Source de vérité de l'exécution (convention : [README](README.md#suivi-dexéc
   > (`replaceState`) et le garde dans l'onglet (`sessionStorage`) pour un rechargement, relit l'invitation par
   > `lookup/`, puis active par `accept/`. `Referrer-Policy: no-referrer` reste posé sur `/activation`. L'ancien lien
   > `/activation/<jeton>` redirige vers le fragment le temps que les liens déjà envoyés expirent.
+- [x] **API-L2.8** Correctifs OTP, refus rejoué, identifiant concurrent · `feature/api-l2-correctifs` · PR #148
+  - [x] `issue_token` (WL03) : `verify_challenge` sorti de la transaction englobante, l'incrément d'`attempts` n'est plus annulé, `OTP_TOO_MANY_ATTEMPTS` atteint au 4ᵉ essai (D24) ; autres appelants relus (`parent_signup` WP02, `phone_change`) : aucun `atomic` englobant
+  - [x] `POST auth/learner-signup/` et `…/resume/` retirent `learner_signup_consent` de la session (W18 ne revient plus après un refus)
+  - [x] `create_learner_signup` : `IntegrityError` sur l'identifiant → `USERNAME_TAKEN` ; invitation de classe et `children` le faisaient déjà ; l'activation (`…/password/`) ne crée pas d'identifiant
+  - [x] Tests : 3 codes faux puis le bon refusé (WL03, WP02, changement de numéro), compteur validé en `transaction=True`, clé de session vidée, collision d'identifiant
+  - [ ] Front, hors de cette PR : lever le `test.fixme` de « WL03 bloque la saisie après les essais permis » (`apps/web/e2e/mot-de-passe-oublie.spec.ts`), l'API tient maintenant le plafond
 - [x] **Tâches Celery d'API-L2**
   - [x] `send_sms`, `expire_consent_requests` (7 j), `purge_refused_requests` (30 j), `purge_signup_sessions`
   - [x] Planifiées dans `CELERY_BEAT_SCHEDULE`, exécutables à la main (`manage.py <tâche>`)
