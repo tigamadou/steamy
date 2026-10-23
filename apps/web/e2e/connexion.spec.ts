@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { DEMO, DEMO_PASSWORD } from "./support/demo";
+import { logoutFromShell } from "./support/session";
 
 // W16 · Connexion (LOT-2-AUTH, étape 2.1) : un seul écran pour les trois rôles, retour `next` sûr.
 
@@ -60,7 +61,8 @@ test("W16 : la déconnexion ramène à la connexion", async ({ page }) => {
   await page.goto("/connexion");
   await signIn(page, DEMO.teacher.identifier);
   await expect(page).toHaveURL("/enseignant");
-  await page.getByRole("button", { name: "Se déconnecter" }).click();
+  // L'enseignant a son shell : « Déconnexion » ouvre la confirmation (WD16)
+  await logoutFromShell(page);
   await expect(page).toHaveURL("/connexion");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Bon retour");
 });
