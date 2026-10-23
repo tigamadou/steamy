@@ -51,15 +51,12 @@
   </tbody>
 </table>
 <table class="totals">
-  <tr><td>Sous-total</td><td class="num">{{ subtotal }} FCFA</td></tr>
+  <tr><td>Sous-total HT</td><td class="num">{{ subtotal }} FCFA</td></tr>
   {% if shipping_fee %}<tr><td>Livraison</td><td class="num">{{ shipping_fee }} FCFA</td></tr>{% endif %}
-  {% if vat %}
-  <tr><td>Total HT</td><td class="num">{{ vat.excluding_vat }} FCFA</td></tr>
-  <tr><td>TVA ({{ vat.rate }} %)</td><td class="num">{{ vat.vat }} FCFA</td></tr>
-  <tr class="grand"><td>Total TTC</td><td class="num">{{ vat.including_vat }} FCFA</td></tr>
-  {% else %}
-  <tr class="grand"><td>Total payé</td><td class="num">{{ total }} FCFA</td></tr>
-  {% endif %}
+  {% for tax in taxes %}
+  <tr><td>{% if tax.code == "vat" %}TVA{% else %}AIB{% endif %} ({{ tax.rate }} % de {{ tax.base }} FCFA)</td><td class="num">{{ tax.amount }} FCFA</td></tr>
+  {% endfor %}
+  <tr class="grand"><td>{% if taxes %}Total à payer{% else %}Total payé{% endif %}</td><td class="num">{{ total }} FCFA</td></tr>
 </table>
 <p>Payé le {{ payment.paid_on }} par Mobile Money{% if payment.network %} ({{ payment.network }}){% endif %}{% if payment.transaction %} · transaction {{ payment.transaction }}{% endif %}.</p>
 {% if provisional %}
