@@ -92,7 +92,7 @@ services:
     command: >
       sh -c "corepack enable
       && pnpm install --frozen-lockfile --filter '@steamy/web...' --store-dir /pnpm-store --config.confirm-modules-purge=false
-      && pnpm --filter @steamy/web e2e"
+      && pnpm --filter @steamy/web e2e ${PW_ARGS:-}"
     volumes:
       - .:/repo
       - node_modules:/repo/node_modules
