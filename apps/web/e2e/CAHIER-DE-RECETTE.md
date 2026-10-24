@@ -46,35 +46,35 @@ Document de recette manuelle de la plateforme Steamy : chaque écran, chaque act
   - Événements publiés : « Atelier Électronique débutant » (`atelier-electronique`, gratuit, ouvert, 8 places restantes sur 20), « Défi robots de Cotonou » (`defi-robots-cotonou`, 5 000 F CFA HT), « Hackathon IA junior » (`hackathon-ia`, 2 000 F CFA HT, complet 30/30), « Fête de la science Steamy » (`fete-de-la-science`, passé : absent de la liste, mais fiche accessible avec « Événement terminé »).
   - Kits : « Steamy Bot v1 » (35 000 F CFA HT, Robotique), « Pack Électronique » (22 000 F CFA HT, Électronique), « Kit Énergie Solaire » (19 000 F CFA HT, Énergie, épuisé). Catégorie « Mécanique » : aucun kit.
   - Blog : 4 articles (« Débuter en robotique à 12 ans : par où commencer ? » à la une, puis « Accompagner son enfant dans le STEM sans être expert », « Steamy Events : comment se déroule un atelier ? », « 5 projets Scratch pour s'amuser cet été »). Guides : 3 PDF.
-- Conventions de lecture : les textes entre guillemets sont les libellés exacts affichés. « Registre » : le site public grand public s'adresse à l'apprenant au tutoiement ; les formulaires B2B, contact et newsletter (WL11, WL20, WL24) sont au vouvoiement. Les écrans WL12-WL15 et WL19 (reportés, S7) et WL08 (fusionné dans WL21, S8) n'ont aucune route.
+- Conventions de lecture : les textes entre guillemets sont les libellés exacts affichés. « Registre » : le site public grand public s'adresse à l'apprenant au tutoiement ; les formulaires B2B, contact et newsletter sont au vouvoiement. Les écrans les écrans reportés (S7) et fusionnés (S8) n'ont aucune route.
 - Colonne « Conforme » : cocher ☐ après exécution ; consigner les écarts en « Remarques ».
 
 ### Écrans couverts
 
-| ID | Écran | URL |
-| --- | --- | --- |
-| PublicShell | Chrome commun : navigation, pied de page, bandeau, robots/sitemap | toutes les pages publiques |
-| WL01 | Accueil | `/` |
-| WL06 | Projets & Parcours (catalogue public) | `/parcours` |
-| WL16 | Catégories | `/categories` |
-| WL22 | Fiche parcours publique | `/parcours/[slug]` |
-| WL07 | Boutique de kits (vitrine publique) | `/boutique` |
-| WL08 | Ateliers (fusionné dans WL21, aucune route) | `/ateliers` (404) |
-| WL21 | Événements | `/evenements` |
-| WL23 | Fiche événement | `/evenements/[slug]` |
-| WL09 | Pages légales | `/legal/[doc]` |
-| WL10 | À propos | `/a-propos` |
-| WL11 | Écoles · offre B2B + devis | `/ecoles` |
-| WL17 | Blog | `/blog` |
-| WL18 | Article | `/blog/[slug]` |
-| WL20 | Guides gratuits (+ newsletter) | `/guides` |
-| WL24 | Aide & contact | `/aide` |
-| WX01 | Hors ligne | recouvrement de toute page |
-| WX02 | Erreur réseau / erreur de chargement | `error.tsx` et limite de section |
-| WX03 | Chargement | `loading.tsx` et squelettes de sections |
-| 404 | Page introuvable (URL inconnue et écrans reportés) | toute URL sans route |
+| Écran | URL |
+| --- | --- |
+| Chrome commun : navigation, pied de page, bandeau, robots/sitemap | toutes les pages publiques |
+| Accueil | `/` |
+| Projets & Parcours (catalogue public) | `/parcours` |
+| Catégories | `/categories` |
+| Fiche parcours publique | `/parcours/[slug]` |
+| Boutique de kits (vitrine publique) | `/boutique` |
+| Ateliers (fusionné dans « Événements », aucune route) | `/ateliers` (404) |
+| Événements | `/evenements` |
+| Fiche événement | `/evenements/[slug]` |
+| Pages légales | `/legal/[doc]` |
+| À propos | `/a-propos` |
+| Écoles · offre B2B + devis | `/ecoles` |
+| Blog | `/blog` |
+| Article | `/blog/[slug]` |
+| Guides gratuits (+ newsletter) | `/guides` |
+| Aide & contact | `/aide` |
+| Hors ligne | recouvrement de toute page |
+| Erreur réseau / erreur de chargement | `error.tsx` et limite de section |
+| Chargement | `loading.tsx` et squelettes de sections |
+| Page introuvable (URL inconnue et écrans reportés) | toute URL sans route |
 
-Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèvent du lot 3 et ne sont pas couverts ici ; seuls leurs points d'entrée depuis WL07 sont vérifiés.
+Les écrans du tunnel boutique (fiche kit « Détail kit », panier, commande invité) relèvent du lot 3 et ne sont pas couverts ici ; seuls leurs points d'entrée depuis « Boutique de kits » sont vérifiés.
 
 ---
 
@@ -83,7 +83,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-PUB-001 | Ouvrir une page publique (bureau) | Nominal | En-tête collant en haut avec le logo, les onglets « Accueil », « Parcours », « Boutique », « Écoles », le menu « Ressources », « À propos », puis les boutons « Se connecter » et « Créer un compte » ; pied de page sombre en bas | ☐ | |
-| REC-PUB-002 | Cliquer sur le logo (alt « Steamy, accueil ») | Nominal | Redirection vers `/` (WL01) | ☐ | |
+| REC-PUB-002 | Cliquer sur le logo (alt « Steamy, accueil ») | Nominal | Redirection vers `/` | ☐ | |
 | REC-PUB-003 | Cliquer sur « Accueil » | Nominal | Redirection vers `/` ; l'onglet est surligné (couleur primaire) avec `aria-current="page"` | ☐ | |
 | REC-PUB-004 | Cliquer sur « Parcours » | Nominal | Redirection vers `/parcours` ; onglet « Parcours » surligné | ☐ | |
 | REC-PUB-005 | Cliquer sur « Boutique » | Nominal | Redirection vers `/boutique` ; onglet surligné | ☐ | |
@@ -136,7 +136,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL01 · Accueil (`/`)
+#### Accueil (`/`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -149,14 +149,14 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 | REC-PUB-058 | Observer la section « Comment ça marche » | Nominal | Trois étapes numérotées : « Crée ton compte », « Explore le catalogue », « Paie & commence » avec leurs descriptions ; aucune mention de « mode hors ligne » | ☐ | |
 | REC-PUB-059 | Ouvrir directement `/#comment-ca-marche` | Ancre au chargement | La page s'ouvre positionnée sur la section « Comment ça marche » | ☐ | |
 | REC-PUB-060 | Observer « Parcours populaires » | Nominal (jeu D2) | Exactement trois cartes de parcours (aucun parcours n'est marqué « mis en avant » dans le jeu de démonstration : complétées par les plus populaires) ; chaque carte indique titre, difficulté, prix ou « Gratuit » ; le brouillon « L'IA pour les curieux » n'apparaît pas | ☐ | |
-| REC-PUB-061 | Cliquer sur une carte de parcours | Nominal | Redirection vers `/parcours/<slug>` (WL22) | ☐ | |
-| REC-PUB-062 | Cliquer sur « Explorer tout le catalogue » | Nominal | Redirection vers `/parcours` (WL06), sans filtre | ☐ | |
+| REC-PUB-061 | Cliquer sur une carte de parcours | Nominal | Redirection vers `/parcours/<slug>` | ☐ | |
+| REC-PUB-062 | Cliquer sur « Explorer tout le catalogue » | Nominal | Redirection vers `/parcours`, sans filtre | ☐ | |
 | REC-PUB-063 | Observer la section « Parcours populaires » pendant le chargement | État de chargement | Une grille de 3 squelettes (état « Chargement des parcours… ») s'affiche sans décalage, puis est remplacée par les cartes | ☐ | |
 | REC-PUB-064 | Arrêter l'API (`docker compose stop api`) puis recharger `/` | Erreur serveur | Le reste de la page (hero, piliers, étapes, bandeaux, pied de page) reste affiché ; seule la section « Parcours populaires » est remplacée par un bloc d'erreur « Oups, ça a coupé » avec le bouton « Réessayer » (pas de bouton « Retour ») | ☐ | |
 | REC-PUB-065 | API arrêtée, relancer l'API puis cliquer sur « Réessayer » | Reprise après erreur | La grille de parcours se recharge et remplace le bloc d'erreur sans recharger la page | ☐ | |
 | REC-PUB-066 | Retirer tous les parcours publiés (cas limite) | État vide de la section | À confirmer (spec muette sur le rendu de la grille sans parcours à l'accueil) | ☐ | |
 | REC-PUB-067 | Observer le bandeau boutique | Nominal | Bandeau cyan : badge « 🛒 Boutique », titre « Des kits robotiques livrés chez toi », texte sur le paiement Mobile Money | ☐ | |
-| REC-PUB-068 | Cliquer sur « Voir la boutique » | Nominal | Redirection vers `/boutique` (WL07) | ☐ | |
+| REC-PUB-068 | Cliquer sur « Voir la boutique » | Nominal | Redirection vers `/boutique` | ☐ | |
 | REC-PUB-069 | Observer la section « Espace parent » | Nominal | Mascotte, badge « 👨‍👩‍👧 Espace parent », titre « Vos enfants apprennent en sécurité », texte au vouvoiement | ☐ | |
 | REC-PUB-070 | Cliquer sur « Créer un compte parent » | Nominal | Redirection vers `/inscription/parent` | ☐ | |
 | REC-PUB-071 | Observer la carte « Devenir instructeur » | Nominal | Titre « Devenir instructeur », texte « Partagez vos connaissances… » (vouvoiement) | ☐ | |
@@ -172,7 +172,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL06 · Projets & Parcours (`/parcours`)
+#### Projets & Parcours (`/parcours`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -197,8 +197,8 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 | REC-PUB-099 | Ouvrir `/parcours?page=99` | Page hors limites | À confirmer (spec muette : état vide « Aucun parcours dans cette catégorie » attendu d'après le code) | ☐ | |
 | REC-PUB-100 | Jeu de démonstration (≤ 1 page de résultats) : chercher la pagination | Pagination absente | Aucun bloc « Pagination » tant que la liste tient sur une page | ☐ | |
 | REC-PUB-101 | Catalogue de plus d'une page (ajouter des parcours publiés en admin) : cliquer sur « Suivant » | Pagination | URL `…?page=2` (avec `categorie` conservée), « Page 2 » annoncée, lien « Précédent » disponible ; « Suivant » absent sur la dernière page | ☐ | |
-| REC-PUB-102 | Cliquer sur une carte parcours | Nominal | Redirection vers `/parcours/<slug>` (WL22) | ☐ | |
-| REC-PUB-103 | Cliquer sur « Toutes les catégories » | Nominal | Redirection vers `/categories` (WL16) | ☐ | |
+| REC-PUB-102 | Cliquer sur une carte parcours | Nominal | Redirection vers `/parcours/<slug>` | ☐ | |
+| REC-PUB-103 | Cliquer sur « Toutes les catégories » | Nominal | Redirection vers `/categories` | ☐ | |
 | REC-PUB-104 | Observer le bandeau d'inscription en bas | Nominal | Titre « Crée ton compte gratuit pour commencer », texte « Chaque apprenant est rattaché à un parent qui valide en 1 min. Paiement Mobile Money, sans carte bancaire. » et bouton « Créer un compte » | ☐ | |
 | REC-PUB-105 | Cliquer sur « Créer un compte » du bandeau | Nominal | Redirection vers `/inscription` | ☐ | |
 | REC-PUB-106 | Recharger la page en observant la grille | État de chargement | Squelette de 5 pastilles de filtre et de 6 cartes (« Chargement des parcours… ») puis contenu réel | ☐ | |
@@ -210,7 +210,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL16 · Catégories (`/categories`)
+#### Catégories (`/categories`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -229,7 +229,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL22 · Fiche parcours publique (`/parcours/[slug]`)
+#### Fiche parcours publique (`/parcours/[slug]`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -257,14 +257,14 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 | REC-PUB-145 | Ouvrir `/parcours/slug-inexistant` | Introuvable | Même page « Ce parcours est introuvable » | ☐ | |
 | REC-PUB-146 | Recharger la fiche | État de chargement | Silhouette de la fiche (« Chargement du parcours… ») puis contenu | ☐ | |
 | REC-PUB-147 | Arrêter l'API puis ouvrir une fiche non encore mise en cache | Erreur serveur | Bloc « Oups, ça a coupé » avec « Réessayer » dans le shell public (navigation et pied de page conservés) ; « Réessayer » recharge la fiche après redémarrage de l'API | ☐ | |
-| REC-PUB-148 | Connecté comme Léa (`lea.adjovi`), ouvrir la fiche publique | Visiteur connecté | À confirmer (spec : redirection vers la fiche WC04 de l'espace apprenant, prévue au lot 3 ; non garantie au lot 1) | ☐ | |
+| REC-PUB-148 | Connecté comme Léa (`lea.adjovi`), ouvrir la fiche publique | Visiteur connecté | À confirmer (spec : redirection vers la fiche « Détail parcours gratuit » de l'espace apprenant, prévue au lot 3 ; non garantie au lot 1) | ☐ | |
 | REC-PUB-149 | Analyser trois fiches avec axe (`initiation-scratch`, `capteurs-electroniques`, `robot-bluetooth`) | Accessibilité | Aucune violation WCAG 2 A/AA (voile sombre sur la couleur de catégorie, accordéons) | ☐ | |
 | REC-PUB-150 | Mobile 360 px : ouvrir une fiche | Version mobile | Colonne unique : en-tête, sections, plan, puis encart d'inscription ; pas de défilement horizontal ; encart non collant | ☐ | |
 | REC-PUB-151 | Bureau : défiler la fiche | Encart collant | L'encart « S'inscrire au parcours » reste visible à droite pendant le défilement | ☐ | |
 
 ---
 
-#### WL07 · Boutique de kits (`/boutique`)
+#### Boutique de kits (`/boutique`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -274,7 +274,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 | REC-PUB-155 | Observer la disponibilité d'un kit en stock | Nominal | Badge « Disponible » (ou « Stock limité ») et bouton « Ajouter » | ☐ | |
 | REC-PUB-156 | Observer « Kit Énergie Solaire » | Kit épuisé | Badge « Épuisé », visuel atténué, aucun bouton « Ajouter » | ☐ | |
 | REC-PUB-157 | Compter les boutons « Ajouter … au panier » | Nominal | Deux boutons (kits en stock uniquement) | ☐ | |
-| REC-PUB-158 | Cliquer sur le nom ou n'importe où sur la carte « Kit Énergie Solaire » | Lien de la fiche | Redirection vers `/boutique/kit-energie-solaire` (fiche kit WK02, lot 3) | ☐ | |
+| REC-PUB-158 | Cliquer sur le nom ou n'importe où sur la carte « Kit Énergie Solaire » | Lien de la fiche | Redirection vers `/boutique/kit-energie-solaire` (fiche kit « Détail kit », lot 3) | ☐ | |
 | REC-PUB-159 | Cliquer sur « Ajouter » d'un kit en stock sans être connecté | Ajout au panier invité | Notification (région vocale) « « Steamy Bot v1 » est dans votre panier. » ; pas de redirection vers la création de compte ; le bouton passe en chargement pendant l'appel | ☐ | |
 | REC-PUB-160 | Cliquer sur « Ajouter » alors que le kit vient d'être épuisé | Erreur métier | Notification d'erreur « Ce kit vient d'être épuisé. » | ☐ | |
 | REC-PUB-161 | Cliquer sur « Ajouter » API arrêtée | Erreur serveur/réseau | Notification d'erreur avec le message du serveur ou un message générique au vouvoiement, sans quitter la page | ☐ | |
@@ -296,7 +296,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL08 · Ateliers (fusionné dans WL21, aucune route)
+#### Ateliers (fusionné dans « Événements », aucune route)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -305,7 +305,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL21 · Événements (`/evenements`)
+#### Événements (`/evenements`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -315,7 +315,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 | REC-PUB-182 | Observer le prix de « Atelier Électronique débutant » | Gratuit | Badge vert « Gratuit » | ☐ | |
 | REC-PUB-183 | Observer le prix de « Défi robots de Cotonou » | Payant | Badge « 5 000 F CFA HT » | ☐ | |
 | REC-PUB-184 | Observer « Hackathon IA junior » | Événement complet | Badge rouge « Complet » en plus du badge « 2 000 F CFA HT » ; la ligne reste cliquable | ☐ | |
-| REC-PUB-185 | Cliquer sur « Atelier Électronique débutant » | Nominal | Redirection vers `/evenements/atelier-electronique` (WL23) | ☐ | |
+| REC-PUB-185 | Cliquer sur « Atelier Électronique débutant » | Nominal | Redirection vers `/evenements/atelier-electronique` | ☐ | |
 | REC-PUB-186 | Cliquer sur n'importe quel point de la ligne « Hackathon IA junior » | Nominal | Redirection vers `/evenements/hackathon-ia` | ☐ | |
 | REC-PUB-187 | Chercher un bouton d'inscription directe dans la liste | Pas d'inscription directe | Aucun bouton « Participer » ; l'inscription se fait uniquement depuis la fiche | ☐ | |
 | REC-PUB-188 | Rechercher « Fête de la science Steamy » dans la page | Événement passé exclu | Aucun lien vers cet événement | ☐ | |
@@ -328,7 +328,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL23 · Fiche événement (`/evenements/[slug]`)
+#### Fiche événement (`/evenements/[slug]`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -351,14 +351,14 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 | REC-PUB-211 | Recharger la fiche | État de chargement | Silhouette (« Chargement de l'événement… ») puis contenu | ☐ | |
 | REC-PUB-212 | Arrêter l'API puis ouvrir une fiche non mise en cache | Erreur serveur | Bloc « Oups, ça a coupé » avec « Réessayer » dans le shell public | ☐ | |
 | REC-PUB-213 | Observer l'onglet du navigateur | SEO | Titre = titre de l'événement ; JSON-LD de type `Event` | ☐ | |
-| REC-PUB-214 | Connecté comme Léa ou Marie, ouvrir la fiche dans le shell apprenant/parent | Variante connectée | Hors périmètre de ce lot (WD10/WD11 et WPD06/WPD12) ; vérifier seulement que la fiche publique reste affichable | ☐ | |
+| REC-PUB-214 | Connecté comme Léa ou Marie, ouvrir la fiche dans le shell apprenant/parent | Variante connectée | Hors périmètre de ce lot ; vérifier seulement que la fiche publique reste affichable | ☐ | |
 | REC-PUB-215 | Clavier : Tab jusqu'au bouton « Participer » puis Entrée | Navigation clavier | Navigation vers la connexion avec `next` ; le bouton désactivé n'est pas activable | ☐ | |
 | REC-PUB-216 | Analyser `/evenements/atelier-electronique` et `/evenements/hackathon-ia` avec axe | Accessibilité | Aucune violation WCAG 2 A/AA (jauge avec `role="progressbar"`) | ☐ | |
 | REC-PUB-217 | Mobile 360 px : ouvrir une fiche | Version mobile | Colonne unique, en-tête empilé, encart sous le contenu ; boutons pleine largeur ; pas de défilement horizontal | ☐ | |
 
 ---
 
-#### WL09 · Pages légales (`/legal/[doc]`)
+#### Pages légales (`/legal/[doc]`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -384,7 +384,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL10 · À propos (`/a-propos`)
+#### À propos (`/a-propos`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -399,7 +399,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL11 · Écoles · offre B2B + devis (`/ecoles`)
+#### Écoles · offre B2B + devis (`/ecoles`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -439,7 +439,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL17 · Blog (`/blog`)
+#### Blog (`/blog`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -455,7 +455,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL18 · Article (`/blog/[slug]`)
+#### Article (`/blog/[slug]`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -476,7 +476,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL20 · Guides gratuits (`/guides`)
+#### Guides gratuits (`/guides`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -503,7 +503,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WL24 · Aide & contact (`/aide`)
+#### Aide & contact (`/aide`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -551,7 +551,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WX01 · Hors ligne (recouvrement de toute page)
+#### Hors ligne (recouvrement de toute page)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -567,7 +567,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WX02 · Erreur réseau / erreur de chargement
+#### Erreur réseau / erreur de chargement
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -583,7 +583,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 
 ---
 
-#### WX03 · Chargement
+#### Chargement
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -636,7 +636,7 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 | REC-PUB-412 | Parcours Guides et newsletter : `/guides` → télécharger un guide → inscription newsletter sans cocher → avec les deux cases | Téléchargement libre puis newsletter | PDF téléchargé sans email ; erreurs « Votre consentement est nécessaire. » ; puis « ✅ C'est noté ! » | ☐ | |
 | REC-PUB-413 | Parcours Navigation clavier : Tab depuis le haut d'une page, lien d'évitement, « Ressources » à la flèche bas, flèches, Échap | Clavier de bout en bout | Lien « Aller au contenu » visible ; menu ouvert, parcours des trois entrées, Échap rend le focus à « Ressources » | ☐ | |
 | REC-PUB-414 | Parcours Mobile 360 px : tiroir « Menu » → « Parcours » → fiche → retour → « Boutique » → « Écoles » → formulaire de devis | Navigation mobile | Chaque destination s'ouvre sans défilement horizontal ; le tiroir se ferme après chaque choix | ☐ | |
-| REC-PUB-415 | Parcours Hors ligne : sur `/parcours`, passer hors ligne, « Réessayer », rétablir le réseau | WX01 de bout en bout | « Tu es hors ligne » puis « Toujours pas de réseau… », puis retour automatique du contenu | ☐ | |
+| REC-PUB-415 | Parcours Hors ligne : sur `/parcours`, passer hors ligne, « Réessayer », rétablir le réseau | « Hors ligne » de bout en bout | « Tu es hors ligne » puis « Toujours pas de réseau… », puis retour automatique du contenu | ☐ | |
 | REC-PUB-416 | Parcours Panne de l'API : arrêter l'API, parcourir `/`, `/parcours`, `/boutique`, `/evenements`, `/aide`, puis relancer l'API et « Réessayer » | Résilience | Le shell et les parties statiques restent ; seules les sections de données affichent « Oups, ça a coupé » ; « Réessayer » rétablit chaque section | ☐ | |
 | REC-PUB-417 | Parcours Liens sans impasse : suivre tous les liens internes de `/` | Aucun lien mort | Toutes les destinations répondent sans 404 (hors routes d'authentification du lot 2) ; aucun lien vers les écrans reportés | ☐ | |
 | REC-PUB-418 | Parcours Accessibilité : analyser avec axe `/`, `/parcours`, `/categories`, `/parcours/initiation-scratch`, `/boutique`, `/evenements`, `/evenements/atelier-electronique`, `/legal/cgu`, `/a-propos`, `/blog`, `/blog/debuter-en-robotique`, `/guides`, `/ecoles`, `/aide`, une 404 | Accessibilité globale | Aucune violation WCAG 2 A/AA sur les 15 pages, bureau et mobile 360 px | ☐ | |
@@ -653,123 +653,123 @@ Les écrans du tunnel boutique (fiche kit WK02, panier, commande invité) relèv
 - **Stack** : `make up` démarre la stack Docker (web http://localhost:3000, API http://localhost:8000/api/, admin Django http://localhost:8000/admin/).
 - **Jeu de démonstration** : `make seed` (idempotent, refusé en production). Il recrée aussi l'invitation de Nadia Houngbo (lien d'activation à usage unique, valable 7 jours) : relancer `make seed` avant le parcours d'activation.
 - **Mot de passe de tous les comptes** : `Steamy2026`. Comptes de `apps/api/fixtures/README.md` :
-  - apprenante `lea.adjovi` (profil complet) ; apprenant `noe.adjovi` (profil à compléter, W11-W14) ; apprenants `yao.kpade`, `sena.kpade`
+  - apprenante `lea.adjovi` (profil complet) ; apprenant `noe.adjovi` (profil à compléter, « Profil 1 · infos »-« Avatar ») ; apprenants `yao.kpade`, `sena.kpade`
   - parent Marie Adjovi : `+229 01 90 00 00 01` (ou `0190000001`, ou `01 90 00 00 01` avec le Bénin présélectionné) ; parent Bernard Kpadé : `+229 01 90 00 00 02`
   - enseignant `koffi.adekambi@steamy.test` ; enseignante à offre échue `esther.offre-echue@steamy.test`
   - invitation en attente : `nadia.houngbo@steamy.test` (activation, lien dans Mailpit)
-  - personnel (refusé sur W16, connexion par l'admin Django) : `superadmin@steamy.test`, `contenu@steamy.test`, `support@steamy.test`, `finance@steamy.test`
+  - personnel (refusé sur « Connexion existant », connexion par l'admin Django) : `superadmin@steamy.test`, `contenu@steamy.test`, `support@steamy.test`, `finance@steamy.test`
 - **Mailpit** : http://localhost:8025. Emails (invitation, code de réinitialisation enseignant) et SMS : le faux fournisseur SMS (`SMS_PROVIDER=fake`) envoie chaque SMS comme un email à `<numéro E.164>@sms.test` (codes OTP, liens de consentement). Aucun vrai SMS n'est envoyé.
 - **Numéros de test** : pour un nouveau parent, utiliser un numéro béninois au format national (10 chiffres, préfixe 01) jamais utilisé ; changer de numéro à chaque essai.
 - **Navigateurs** : bureau (par défaut) et mobile **360 px de large** ; pour les parcours à deux acteurs (enfant et parent), utiliser deux navigateurs ou deux profils distincts.
 - **Valeurs par défaut utiles** (réglages `PlatformSettings`, D24) : code OTP à 6 chiffres, valable 5 min, 3 essais, renvoi après 60 s, 5 codes par numéro et par jour ; demande de consentement et inscription en attente : 7 jours ; délai après refus : 30 jours ; jeton de réinitialisation : 15 min. Les plafonds de débit (connexion 5 par minute, inscription 5 par minute, etc.) sont des valeurs du code, la spec ne les chiffre pas.
-- **Registre** : tutoiement côté apprenant (W01-W19), vouvoiement côté parent et enseignant (WP01-WP12, WL02-WL05, activation). W16, écran unique, est tutoyé.
+- **Registre** : tutoiement côté apprenant (« Splash »-« Identifiant déjà utilisé »), vouvoiement côté parent et enseignant (« Créer un compte »-« Refus envoyé », « Mot de passe oublié »-« Réinitialisé ✓ », activation). « Connexion existant », écran unique, est tutoyé.
 - **Lecture des tableaux** : la colonne « Conforme » se coche pendant la recette ; « Remarques » reste vide pour le testeur. Les mentions « à confirmer (spec muette) » signalent un point que la spec ne tranche pas.
 
 ### Écrans couverts
 
-- **WL02** · Mot de passe oublié (`/mot-de-passe-oublie`)
-- **WL02-E** · Mot de passe oublié de l'enseignant (canal email) (`/mot-de-passe-oublie → /code → /nouveau → /termine`)
-- **WL03** · Code OTP (`/mot-de-passe-oublie/code`)
-- **WL04** · Nouveau mot de passe (`/mot-de-passe-oublie/nouveau`)
-- **WL04-A** · Activation du compte enseignant (variante de WL04, C6) (`/activation#jeton=…`)
-- **WL05** · Réinitialisé ✓ (`/mot-de-passe-oublie/termine`)
-- **W01** · Splash (`/inscription (voile d'entrée)`)
-- **W02** · Accueil (`/inscription`)
-- **W03** · Type d'utilisateur (`/inscription/type`)
-- **W04** · Identité & identifiant (`/inscription/apprenant/identite`)
-- **W19** · Identifiant déjà utilisé (`/inscription/apprenant/identite (état d'erreur de W04)`)
-- **W05** · Âge (`/inscription/apprenant/age`)
-- **W06** · Numéro du parent (`/inscription/apprenant/parent`)
-- **W07** · Attente consentement (`/inscription/apprenant/attente`)
-- **W07-R** · Reprendre mon inscription (état de W07) (`/inscription/reprendre`)
-- **W08** · Accord reçu (`/inscription/apprenant/accord`)
-- **W10** · Mot de passe (`/inscription/apprenant/mot-de-passe`)
-- **W11** · Profil 1 · infos (`/inscription/apprenant/profil/infos`)
-- **W12** · Profil 2 · école (`/inscription/apprenant/profil/ecole`)
-- **W13** · Objectifs (`/inscription/apprenant/profil/objectifs`)
-- **W14** · Avatar (`/inscription/apprenant/profil/avatar`)
-- **W15** · Bienvenue (`/inscription/apprenant/bienvenue`)
-- **W16** · Connexion existant (`/connexion`)
-- **W18** · Consentement refusé (terminal) (`/inscription/apprenant/refus`)
-- **WP01** · Créer un compte (`/inscription/parent`)
-- **WP02** · OTP (`/inscription/parent/code`)
-- **WP03** · Mot de passe (`/inscription/parent/mot-de-passe`)
-- **WP04** · Invitation enfant ? (`/inscription/parent/demande`)
-- **WP05-L** · Lien SMS de consentement (avant WP01/WP05) (`/consentement/[jeton] puis /consentement`)
-- **WP05** · Demande de l'enfant (`/inscription/parent/demande/[id]`)
-- **WP06** · Demande acceptée (`/inscription/parent/demande/[id]/acceptee`)
-- **WP07** · Profil 1 · localisation (`/inscription/parent/profil/localisation`)
-- **WP08** · Profil 2 · à propos (`/inscription/parent/profil/a-propos`)
-- **WP09** · Profil 3 · enfants (`/inscription/parent/profil/enfants`)
-- **WP10** · Bienvenue parent (`/inscription/parent/bienvenue`)
-- **WP11** · Motifs de refus (`/inscription/parent/demande/[id]/refus`)
-- **WP12** · Refus envoyé (terminal) (`/inscription/parent/demande/[id]/refusee`)
+- **« Mot de passe oublié »** · Mot de passe oublié (`/mot-de-passe-oublie`)
+- **« Mot de passe oublié de l'enseignant »** · Mot de passe oublié de l'enseignant (canal email) (`/mot-de-passe-oublie → /code → /nouveau → /termine`)
+- **« Code OTP »** · Code OTP (`/mot-de-passe-oublie/code`)
+- **« Nouveau mot de passe »** · Nouveau mot de passe (`/mot-de-passe-oublie/nouveau`)
+- **« Activation du compte enseignant »** · Activation du compte enseignant (variante de « Nouveau mot de passe », C6) (`/activation#jeton=…`)
+- **« Réinitialisé ✓ »** · Réinitialisé ✓ (`/mot-de-passe-oublie/termine`)
+- **« Splash »** · Splash (`/inscription (voile d'entrée)`)
+- **« Accueil »** · Accueil (`/inscription`)
+- **« Type d'utilisateur »** · Type d'utilisateur (`/inscription/type`)
+- **« Identité & identifiant »** · Identité & identifiant (`/inscription/apprenant/identite`)
+- **« Identifiant déjà utilisé »** · Identifiant déjà utilisé (`/inscription/apprenant/identite (état d'erreur de « Identité & identifiant »)`)
+- **« Âge »** · Âge (`/inscription/apprenant/age`)
+- **« Numéro du parent »** · Numéro du parent (`/inscription/apprenant/parent`)
+- **« Attente consentement »** · Attente consentement (`/inscription/apprenant/attente`)
+- **« Reprendre mon inscription »** · Reprendre mon inscription (état de « Attente consentement ») (`/inscription/reprendre`)
+- **« Accord reçu »** · Accord reçu (`/inscription/apprenant/accord`)
+- **« Mot de passe »** · Mot de passe (`/inscription/apprenant/mot-de-passe`)
+- **« Profil 1 · infos »** · Profil 1 · infos (`/inscription/apprenant/profil/infos`)
+- **« Profil 2 · école »** · Profil 2 · école (`/inscription/apprenant/profil/ecole`)
+- **« Objectifs »** · Objectifs (`/inscription/apprenant/profil/objectifs`)
+- **« Avatar »** · Avatar (`/inscription/apprenant/profil/avatar`)
+- **« Bienvenue »** · Bienvenue (`/inscription/apprenant/bienvenue`)
+- **« Connexion existant »** · Connexion existant (`/connexion`)
+- **« Consentement refusé »** · Consentement refusé (terminal) (`/inscription/apprenant/refus`)
+- **« Créer un compte »** · Créer un compte (`/inscription/parent`)
+- **« OTP »** · OTP (`/inscription/parent/code`)
+- **« Mot de passe »** · Mot de passe (`/inscription/parent/mot-de-passe`)
+- **« Invitation enfant ? »** · Invitation enfant ? (`/inscription/parent/demande`)
+- **« Lien SMS de consentement »** · Lien SMS de consentement (avant « Créer un compte »/« Demande de l'enfant ») (`/consentement/[jeton] puis /consentement`)
+- **« Demande de l'enfant »** · Demande de l'enfant (`/inscription/parent/demande/[id]`)
+- **« Demande acceptée »** · Demande acceptée (`/inscription/parent/demande/[id]/acceptee`)
+- **« Profil 1 · localisation »** · Profil 1 · localisation (`/inscription/parent/profil/localisation`)
+- **« Profil 2 · à propos »** · Profil 2 · à propos (`/inscription/parent/profil/a-propos`)
+- **« Profil 3 · enfants »** · Profil 3 · enfants (`/inscription/parent/profil/enfants`)
+- **« Bienvenue parent »** · Bienvenue parent (`/inscription/parent/bienvenue`)
+- **« Motifs de refus »** · Motifs de refus (`/inscription/parent/demande/[id]/refus`)
+- **« Refus envoyé »** · Refus envoyé (terminal) (`/inscription/parent/demande/[id]/refusee`)
 - **GARDE** · Gardes d'accès par rôle, session et déconnexion (`/apprenant, /parent, /enseignant, /backoffice`)
 
 
 Sources : `docs/tests/MATRICE-E2E.md` (lot 2), `docs/SPEC-ECRANS-1-public-auth.md`, `docs/plans/LOT-2-AUTH.md`, `docs/alignement/ARBITRAGES.md` (D20-D27, C5-C14), tests e2e `apps/web/e2e/auth` et `apps/web/e2e/parcours`, code `apps/web/src/app/(auth)`.
 
 
-Les écrans W09 et W17 (OTP apprenant) sont hors périmètre et ne sont pas à recetter.
+Les écrans de saisie du code OTP de l'apprenant sont hors périmètre et ne sont pas à recetter.
 
 ---
 
 
-#### WL02 · Mot de passe oublié (/mot-de-passe-oublie)
+#### Mot de passe oublié (/mot-de-passe-oublie)
 
-Séquence stricte WL02 → WL03 → WL04 → WL05. Réservé au parent (SMS) et à l'enseignant (email) ; l'apprenant passe par son parent (D26). Vouvoiement.
+Séquence stricte « Mot de passe oublié » → « Code OTP » → « Nouveau mot de passe » → « Réinitialisé ✓ ». Réservé au parent (SMS) et à l'enseignant (email) ; l'apprenant passe par son parent (D26). Vouvoiement.
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-001 | Ouvrir la page | Visiteur non connecté, atteinte depuis W16 (« Mot de passe oublié ? » puis « Je suis parent ou enseignant ») | Kicker « Mot de passe oublié », H1 « Pas de panique ! », sous-titre « Indiquez votre numéro de téléphone : nous vous envoyons un code par SMS pour réinitialiser votre mot de passe. », champ « Numéro de téléphone » (indication « Le numéro lié à votre compte Steamy. ») avec sélecteur de pays (Bénin présélectionné), bouton de bascule « Vous êtes enseignant ? Recevoir le code par email », bouton « Recevoir le code » et lien « Se connecter » (« Vous vous en souvenez ? ») | ☐ | |
+| REC-AUT-001 | Ouvrir la page | Visiteur non connecté, atteinte depuis « Connexion existant » (« Mot de passe oublié ? » puis « Je suis parent ou enseignant ») | Kicker « Mot de passe oublié », H1 « Pas de panique ! », sous-titre « Indiquez votre numéro de téléphone : nous vous envoyons un code par SMS pour réinitialiser votre mot de passe. », champ « Numéro de téléphone » (indication « Le numéro lié à votre compte Steamy. ») avec sélecteur de pays (Bénin présélectionné), bouton de bascule « Vous êtes enseignant ? Recevoir le code par email », bouton « Recevoir le code » et lien « Se connecter » (« Vous vous en souvenez ? ») | ☐ | |
 | REC-AUT-002 | Voir le bouton de bascule | Canal SMS affiché | Un bouton discret « Vous êtes enseignant ? Recevoir le code par email » est visible sous le champ | ☐ | |
 | REC-AUT-003 | Cliquer « Vous êtes enseignant ? Recevoir le code par email » | Bascule vers le canal email | Le sous-titre devient « Indiquez l'adresse email de votre compte enseignant : nous vous envoyons un code pour réinitialiser votre mot de passe. », le champ devient « Adresse email », le bouton devient « Recevoir le code par SMS » | ☐ | |
 | REC-AUT-004 | Cliquer « Recevoir le code par SMS » | Retour au canal SMS depuis le canal email | Le champ « Numéro de téléphone » avec sélecteur de pays réapparaît | ☐ | |
 | REC-AUT-005 | Cliquer « Recevoir le code » | Canal SMS, champ vide | Pas d'envoi ; encart « Envoi impossible : » avec « Saisissez un numéro de téléphone valide. » et message sous le champ ; focus sur l'encart | ☐ | |
 | REC-AUT-006 | Cliquer « Recevoir le code » | Canal email, champ vide | Pas d'envoi ; « Saisissez votre adresse email. » dans l'encart « Envoi impossible : » et sous le champ | ☐ | |
-| REC-AUT-007 | Saisir un numéro invalide puis cliquer « Recevoir le code » | Ex. 3 chiffres seulement | Erreur sous le champ issue de l'API (code PHONE_INVALID : « Ce numéro de téléphone n'est pas valide. ») ; pas de passage à WL03 | ☐ | |
+| REC-AUT-007 | Saisir un numéro invalide puis cliquer « Recevoir le code » | Ex. 3 chiffres seulement | Erreur sous le champ issue de l'API (code PHONE_INVALID : « Ce numéro de téléphone n'est pas valide. ») ; pas de passage à « Code OTP » | ☐ | |
 | REC-AUT-008 | Saisir un email mal formé puis cliquer « Recevoir le code » | Canal email, ex. « nadia.houngbo@ » | Erreur de validation affichée sous le champ ou dans l'encart ; libellé exact : à confirmer (spec muette) | ☐ | |
-| REC-AUT-009 | Saisir le numéro d'un parent existant (+229 01 90 00 00 01) puis cliquer « Recevoir le code » | Nominal parent, canal SMS, Bénin présélectionné | Bouton en chargement puis redirection vers /mot-de-passe-oublie/code (WL03) ; SMS « Steamy : votre code de vérification est NNNNNN. Il expire dans 5 min. Ne le communiquez à personne. » reçu dans Mailpit (http://localhost:8025) à l'adresse <numéro E.164>@sms.test (faux fournisseur SMS) | ☐ | |
-| REC-AUT-010 | Saisir un numéro valide mais inconnu puis cliquer « Recevoir le code » | Numéro non inscrit (non-énumération de comptes) | Même réponse que pour un compte existant : passage à WL03 avec le même texte ; aucun SMS dans Mailpit pour ce numéro | ☐ | |
-| REC-AUT-011 | Saisir l'email d'une enseignante (nadia.houngbo@steamy.test) puis cliquer « Recevoir le code » | Nominal enseignant, canal email | Passage à WL03 ; email contenant le code à 6 chiffres reçu dans Mailpit pour cette adresse | ☐ | |
-| REC-AUT-012 | Saisir un email inconnu ou celui d'un compte non enseignant puis cliquer « Recevoir le code » | Email sans compte enseignant | Même réponse neutre (passage à WL03) ; aucun email de code dans Mailpit | ☐ | |
+| REC-AUT-009 | Saisir le numéro d'un parent existant (+229 01 90 00 00 01) puis cliquer « Recevoir le code » | Nominal parent, canal SMS, Bénin présélectionné | Bouton en chargement puis redirection vers /mot-de-passe-oublie/code ; SMS « Steamy : votre code de vérification est NNNNNN. Il expire dans 5 min. Ne le communiquez à personne. » reçu dans Mailpit (http://localhost:8025) à l'adresse <numéro E.164>@sms.test (faux fournisseur SMS) | ☐ | |
+| REC-AUT-010 | Saisir un numéro valide mais inconnu puis cliquer « Recevoir le code » | Numéro non inscrit (non-énumération de comptes) | Même réponse que pour un compte existant : passage à « Code OTP » avec le même texte ; aucun SMS dans Mailpit pour ce numéro | ☐ | |
+| REC-AUT-011 | Saisir l'email d'une enseignante (nadia.houngbo@steamy.test) puis cliquer « Recevoir le code » | Nominal enseignant, canal email | Passage à « Code OTP » ; email contenant le code à 6 chiffres reçu dans Mailpit pour cette adresse | ☐ | |
+| REC-AUT-012 | Saisir un email inconnu ou celui d'un compte non enseignant puis cliquer « Recevoir le code » | Email sans compte enseignant | Même réponse neutre (passage à « Code OTP ») ; aucun email de code dans Mailpit | ☐ | |
 | REC-AUT-013 | Cliquer « Recevoir le code » deux fois de suite rapidement | Double clic | Le bouton passe en état de chargement et n'envoie qu'une demande ; un seul SMS ou email reçu | ☐ | |
 | REC-AUT-014 | Envoyer plus de demandes que le plafond horaire | Plafond du point d'accès « password-reset » (5 par heure par défaut côté code ; valeur de la spec : à confirmer (spec muette)) | Encart « Envoi impossible : » avec « Trop de tentatives. Réessayez dans N secondes. » (ou « dans quelques instants ») | ☐ | |
 | REC-AUT-015 | Dépasser le plafond quotidien de codes (5 par numéro et par jour par défaut) | Plafond quotidien OTP D24 (nombre exact : à confirmer (spec muette)) | Encart « Envoi impossible : » avec « Nombre maximal de codes atteint pour aujourd'hui. Réessayez demain. » ou son équivalent ; pas de SMS supplémentaire | ☐ | |
 | REC-AUT-016 | Couper le réseau puis cliquer « Recevoir le code » | Erreur réseau | Encart « Envoi impossible : » avec « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » ; le formulaire reste saisi | ☐ | |
 | REC-AUT-017 | Arrêter l'API puis cliquer « Recevoir le code » | Erreur serveur (500) | Encart avec « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
-| REC-AUT-018 | Cliquer « Se connecter » (« Vous vous en souvenez ? ») | Lien secondaire | Redirection vers /connexion (W16) | ☐ | |
-| REC-AUT-019 | Arriver ici depuis un rechargement de WL03 ou WL04 | Message de reprise | Message d'information (role status) « Pour votre sécurité, la réinitialisation reprend depuis le début. Indiquez à nouveau votre numéro ou votre email. » affiché en haut du formulaire | ☐ | |
+| REC-AUT-018 | Cliquer « Se connecter » (« Vous vous en souvenez ? ») | Lien secondaire | Redirection vers /connexion | ☐ | |
+| REC-AUT-019 | Arriver ici depuis un rechargement de « Code OTP » ou « Nouveau mot de passe » | Message de reprise | Message d'information (role status) « Pour votre sécurité, la réinitialisation reprend depuis le début. Indiquez à nouveau votre numéro ou votre email. » affiché en haut du formulaire | ☐ | |
 | REC-AUT-020 | Recharger la page (F5) après avoir basculé sur le canal email | Rechargement | La page revient au canal SMS par défaut, champs vides | ☐ | |
-| REC-AUT-021 | Utilisateur déjà connecté ouvre la page | Accès avec session active | À confirmer (spec muette) : la page s'affiche sans redirection selon le code (aucune garde de session sur WL02) | ☐ | |
+| REC-AUT-021 | Utilisateur déjà connecté ouvre la page | Accès avec session active | À confirmer (spec muette) : la page s'affiche sans redirection selon le code (aucune garde de session sur « Mot de passe oublié ») | ☐ | |
 | REC-AUT-022 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-023 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WL02-E · Mot de passe oublié de l'enseignant (canal email) (/mot-de-passe-oublie → /code → /nouveau → /termine)
+#### Mot de passe oublié de l'enseignant (canal email) (/mot-de-passe-oublie → /code → /nouveau → /termine)
 
-Mêmes écrans WL02-WL05 avec un code envoyé par email (C6). Les contrôles détaillés sont dans les sections WL02 à WL05.
+Mêmes écrans « Mot de passe oublié »-« Réinitialisé ✓ » avec un code envoyé par email (C6). Les contrôles détaillés sont dans les sections « Mot de passe oublié » à « Réinitialisé ✓ ».
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-024 | Sur WL02, cliquer « Vous êtes enseignant ? Recevoir le code par email », saisir nadia.houngbo@steamy.test, « Recevoir le code » | Demande par email | Passage à WL03 ; email contenant un code à 6 chiffres reçu dans Mailpit | ☐ | |
-| REC-AUT-025 | Sur WL03, saisir le code de l'email dans « Code à 6 chiffres reçu par email » puis « Vérifier le code » | Code email correct | Redirection vers WL04 | ☐ | |
-| REC-AUT-026 | Sur WL03, saisir un code faux 3 fois puis une 4e fois | Plafond d'essais (email) | « Code incorrect. » ×3 puis « Trop d'essais avec ce code. Demandez un nouveau code. » ; saisie verrouillée | ☐ | |
-| REC-AUT-027 | Sur WL03 (email), attendre plus de 5 minutes | Code email expiré | « Ce code a expiré. Demandez un nouveau code. » | ☐ | |
-| REC-AUT-028 | Sur WL03 (email), cliquer « Modifier l'adresse email » | Correction de l'adresse | Retour à WL02 | ☐ | |
-| REC-AUT-029 | Sur WL04, saisir NadiaReset2026 deux fois, « Enregistrer le mot de passe » | Nouveau mot de passe | Redirection vers WL05 « Mot de passe réinitialisé ! » | ☐ | |
-| REC-AUT-030 | Se connecter sur W16 avec l'email et NadiaReset2026 | Connexion après réinitialisation | Redirection vers /enseignant | ☐ | |
+| REC-AUT-024 | Sur « Mot de passe oublié », cliquer « Vous êtes enseignant ? Recevoir le code par email », saisir nadia.houngbo@steamy.test, « Recevoir le code » | Demande par email | Passage à « Code OTP » ; email contenant un code à 6 chiffres reçu dans Mailpit | ☐ | |
+| REC-AUT-025 | Sur « Code OTP », saisir le code de l'email dans « Code à 6 chiffres reçu par email » puis « Vérifier le code » | Code email correct | Redirection vers « Nouveau mot de passe » | ☐ | |
+| REC-AUT-026 | Sur « Code OTP », saisir un code faux 3 fois puis une 4e fois | Plafond d'essais (email) | « Code incorrect. » ×3 puis « Trop d'essais avec ce code. Demandez un nouveau code. » ; saisie verrouillée | ☐ | |
+| REC-AUT-027 | Sur « Code OTP » (email), attendre plus de 5 minutes | Code email expiré | « Ce code a expiré. Demandez un nouveau code. » | ☐ | |
+| REC-AUT-028 | Sur « Code OTP » (email), cliquer « Modifier l'adresse email » | Correction de l'adresse | Retour à « Mot de passe oublié » | ☐ | |
+| REC-AUT-029 | Sur « Nouveau mot de passe », saisir NadiaReset2026 deux fois, « Enregistrer le mot de passe » | Nouveau mot de passe | Redirection vers « Réinitialisé ✓ » « Mot de passe réinitialisé ! » | ☐ | |
+| REC-AUT-030 | Se connecter sur « Connexion existant » avec l'email et NadiaReset2026 | Connexion après réinitialisation | Redirection vers /enseignant | ☐ | |
 | REC-AUT-031 | Demander un code avec l'email d'un parent ou d'un apprenant | Email d'un compte non enseignant | Même réponse neutre qu'un compte inexistant ; aucun email de code | ☐ | |
 
 
-#### WL03 · Code OTP (/mot-de-passe-oublie/code)
+#### Code OTP (/mot-de-passe-oublie/code)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-032 | Arriver sur la page | Après WL02, canal SMS | Kicker « Réinitialisation · étape 2 », H1 « Saisissez le code reçu », sous-titre « Si un compte Steamy correspond, un code à 6 chiffres vient d'être envoyé à +229 •• NN. » (numéro masqué : indicatif et deux derniers chiffres), 6 cases de saisie (nom accessible « Code à 6 chiffres reçu par SMS »), compte à rebours « Renvoyer le code dans 1:00 » avec bouton « Renvoyer le code » grisé, boutons « Vérifier le code » et « Modifier le numéro », focus dans le champ | ☐ | |
-| REC-AUT-033 | Arriver sur la page | Après WL02, canal email | Même écran ; cases nommées « Code à 6 chiffres reçu par email » ; bouton « Modifier l'adresse email » au lieu de « Modifier le numéro » | ☐ | |
-| REC-AUT-034 | Saisir le code reçu dans Mailpit puis cliquer « Vérifier le code » | Code correct (SMS parent) | Redirection vers /mot-de-passe-oublie/nouveau (WL04) | ☐ | |
-| REC-AUT-035 | Saisir le code reçu par email puis cliquer « Vérifier le code » | Code correct (email enseignant) | Redirection vers WL04 | ☐ | |
+| REC-AUT-032 | Arriver sur la page | Après « Mot de passe oublié », canal SMS | Kicker « Réinitialisation · étape 2 », H1 « Saisissez le code reçu », sous-titre « Si un compte Steamy correspond, un code à 6 chiffres vient d'être envoyé à +229 •• NN. » (numéro masqué : indicatif et deux derniers chiffres), 6 cases de saisie (nom accessible « Code à 6 chiffres reçu par SMS »), compte à rebours « Renvoyer le code dans 1:00 » avec bouton « Renvoyer le code » grisé, boutons « Vérifier le code » et « Modifier le numéro », focus dans le champ | ☐ | |
+| REC-AUT-033 | Arriver sur la page | Après « Mot de passe oublié », canal email | Même écran ; cases nommées « Code à 6 chiffres reçu par email » ; bouton « Modifier l'adresse email » au lieu de « Modifier le numéro » | ☐ | |
+| REC-AUT-034 | Saisir le code reçu dans Mailpit puis cliquer « Vérifier le code » | Code correct (SMS parent) | Redirection vers /mot-de-passe-oublie/nouveau | ☐ | |
+| REC-AUT-035 | Saisir le code reçu par email puis cliquer « Vérifier le code » | Code correct (email enseignant) | Redirection vers « Nouveau mot de passe » | ☐ | |
 | REC-AUT-036 | Coller les 6 chiffres du code dans le champ (Ctrl+V) | Collage | Les 6 cases se remplissent ; seuls les chiffres sont gardés | ☐ | |
 | REC-AUT-037 | Saisir des lettres ou des caractères spéciaux | Caractères non numériques | Les caractères non numériques sont ignorés, seuls les chiffres apparaissent | ☐ | |
 | REC-AUT-038 | Cliquer « Vérifier le code » avec moins de 6 chiffres | Code incomplet ou champ vide | Message sous les cases « Saisissez les 6 chiffres du code. » ; aucun appel à l'API | ☐ | |
@@ -782,43 +782,43 @@ Mêmes écrans WL02-WL05 avec un code envoyé par email (C6). Les contrôles dé
 | REC-AUT-045 | Cliquer « Renvoyer le code » après 60 s | Renvoi nominal | Message vert « Un nouveau code a été envoyé à +229 •• NN. » ; cases vidées et déverrouillées ; nouveau SMS dans Mailpit ; compte à rebours redémarré à 1:00 ; l'ancien code n'est plus valable | ☐ | |
 | REC-AUT-046 | Renvoyer le code après avoir atteint le plafond d'essais ou l'expiration | Déblocage par renvoi | Les cases redeviennent actives avec le nouveau code | ☐ | |
 | REC-AUT-047 | Renvoyer le code au-delà du plafond quotidien (5 par numéro et par jour par défaut) | OTP_DAILY_LIMIT | Message « Vous avez reçu le nombre maximal de codes pour aujourd'hui. Réessayez demain. » ; saisie verrouillée ; aucun SMS supplémentaire | ☐ | |
-| REC-AUT-048 | Cliquer « Modifier le numéro » (SMS) ou « Modifier l'adresse email » (email) | Correction du destinataire | Redirection vers /mot-de-passe-oublie (WL02) | ☐ | |
+| REC-AUT-048 | Cliquer « Modifier le numéro » (SMS) ou « Modifier l'adresse email » (email) | Correction du destinataire | Redirection vers /mot-de-passe-oublie | ☐ | |
 | REC-AUT-049 | Cliquer « Vérifier le code » pendant la requête | État de chargement | Bouton en état chargement, pas de double envoi | ☐ | |
 | REC-AUT-050 | Couper le réseau puis valider un code | Erreur réseau | Message « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » sous les cases ; saisie conservée | ☐ | |
 | REC-AUT-051 | Arrêter l'API puis valider un code | Erreur serveur | Message « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
-| REC-AUT-052 | Recharger la page (F5) | Rechargement sur WL03 | Retour vers /mot-de-passe-oublie (WL02) avec le message « Pour votre sécurité, la réinitialisation reprend depuis le début. Indiquez à nouveau votre numéro ou votre email. » | ☐ | |
-| REC-AUT-053 | Ouvrir directement /mot-de-passe-oublie/code dans un nouvel onglet | Accès sans demande de code préalable | Redirection vers WL02 avec le même message de reprise | ☐ | |
-| REC-AUT-054 | Bouton Retour du navigateur | Retour depuis WL03 | Retour vers WL02 ; le canal choisi est conservé tant que la page n'est pas rechargée | ☐ | |
+| REC-AUT-052 | Recharger la page (F5) | Rechargement sur « Code OTP » | Retour vers /mot-de-passe-oublie avec le message « Pour votre sécurité, la réinitialisation reprend depuis le début. Indiquez à nouveau votre numéro ou votre email. » | ☐ | |
+| REC-AUT-053 | Ouvrir directement /mot-de-passe-oublie/code dans un nouvel onglet | Accès sans demande de code préalable | Redirection vers « Mot de passe oublié » avec le même message de reprise | ☐ | |
+| REC-AUT-054 | Bouton Retour du navigateur | Retour depuis « Code OTP » | Retour vers « Mot de passe oublié » ; le canal choisi est conservé tant que la page n'est pas rechargée | ☐ | |
 | REC-AUT-055 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-056 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WL04 · Nouveau mot de passe (/mot-de-passe-oublie/nouveau)
+#### Nouveau mot de passe (/mot-de-passe-oublie/nouveau)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-AUT-057 | Arriver sur la page | Après un code valide | Kicker « Réinitialisation · étape 3 », H1 « Choisissez un nouveau mot de passe », sous-titre « Il remplacera l'ancien sur tous vos appareils. », champs « Nouveau mot de passe » et « Confirmez le mot de passe », liste des règles « Au moins 8 caractères » et « Au moins une lettre et un chiffre » (grises), bouton « Enregistrer le mot de passe » ; aucune règle « Différent de l'ancien » | ☐ | |
 | REC-AUT-058 | Saisir progressivement le mot de passe | Mise à jour des règles | Chaque règle passe au vert avec une coche au fur et à mesure (8 caractères ; lettre et chiffre), annonce « (respectée) » | ☐ | |
 | REC-AUT-059 | Cliquer l'œil « Afficher le mot de passe » / « Masquer le mot de passe » | Visibilité | Le contenu du champ est affiché en clair puis masqué, libellé du bouton inversé | ☐ | |
-| REC-AUT-060 | Saisir NouveauMdp2026 dans les deux champs puis cliquer « Enregistrer le mot de passe » | Nominal | Redirection vers /mot-de-passe-oublie/termine (WL05) | ☐ | |
+| REC-AUT-060 | Saisir NouveauMdp2026 dans les deux champs puis cliquer « Enregistrer le mot de passe » | Nominal | Redirection vers /mot-de-passe-oublie/termine | ☐ | |
 | REC-AUT-061 | Valider avec des champs vides | Champs obligatoires vides | Encart « Enregistrement impossible : » avec « Choisissez un mot de passe qui respecte les règles, saisi deux fois à l'identique. » ; règles en rouge avec croix ; message « Les mots de passe ne correspondent pas » si pertinent | ☐ | |
 | REC-AUT-062 | Saisir « abcdefg » (7 caractères, sans chiffre) | Mot de passe trop court et sans chiffre | Règles non respectées en rouge ; soumission refusée avec le message de règles | ☐ | |
 | REC-AUT-063 | Saisir « abcdefghij » (10 lettres, sans chiffre) | Mot de passe sans chiffre | Règle « Au moins une lettre et un chiffre » en rouge ; soumission refusée | ☐ | |
 | REC-AUT-064 | Saisir « 12345678 » (sans lettre) | Mot de passe sans lettre | Règle « Au moins une lettre et un chiffre » en rouge ; soumission refusée | ☐ | |
 | REC-AUT-065 | Saisir un mot de passe valide et une confirmation différente | Confirmation non identique | Message « Les mots de passe ne correspondent pas » sous « Confirmez le mot de passe » ; soumission refusée | ☐ | |
 | REC-AUT-066 | Contourner la validation locale (mot de passe jugé trop faible par le serveur) | PASSWORD_TOO_WEAK | Message sous le premier champ « Le mot de passe doit faire au moins 8 caractères, avec au moins une lettre et un chiffre. » ; règles en rouge | ☐ | |
-| REC-AUT-067 | Valider après 15 minutes d'inactivité depuis la vérification du code | Jeton de réinitialisation expiré (RESET_TOKEN_INVALID ; durée de 15 min côté code, spec : à confirmer (spec muette)) | Retour à WL02 avec le message « Pour votre sécurité, la réinitialisation reprend depuis le début. Indiquez à nouveau votre numéro ou votre email. » | ☐ | |
+| REC-AUT-067 | Valider après 15 minutes d'inactivité depuis la vérification du code | Jeton de réinitialisation expiré (RESET_TOKEN_INVALID ; durée de 15 min côté code, spec : à confirmer (spec muette)) | Retour à « Mot de passe oublié » avec le message « Pour votre sécurité, la réinitialisation reprend depuis le début. Indiquez à nouveau votre numéro ou votre email. » | ☐ | |
 | REC-AUT-068 | Cliquer « Enregistrer le mot de passe » | État de chargement | Bouton en chargement, un seul envoi | ☐ | |
 | REC-AUT-069 | Couper le réseau puis valider | Erreur réseau | Encart « Enregistrement impossible : » avec « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
 | REC-AUT-070 | Arrêter l'API puis valider | Erreur serveur | Encart avec « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
-| REC-AUT-071 | Recharger la page (F5) | Rechargement sur WL04 | Redirection vers WL02 avec le message « Pour votre sécurité, la réinitialisation reprend depuis le début… » ; le jeton n'est pas conservé | ☐ | |
-| REC-AUT-072 | Ouvrir directement /mot-de-passe-oublie/nouveau sans passer par WL03 | Accès direct | Redirection vers WL02 avec le même message | ☐ | |
-| REC-AUT-073 | Bouton Retour du navigateur | Retour vers WL03 | À confirmer (spec muette) : retour vers WL03 avec le code déjà consommé ; une nouvelle vérification n'est pas possible avec l'ancien code | ☐ | |
+| REC-AUT-071 | Recharger la page (F5) | Rechargement sur « Nouveau mot de passe » | Redirection vers « Mot de passe oublié » avec le message « Pour votre sécurité, la réinitialisation reprend depuis le début… » ; le jeton n'est pas conservé | ☐ | |
+| REC-AUT-072 | Ouvrir directement /mot-de-passe-oublie/nouveau sans passer par « Code OTP » | Accès direct | Redirection vers « Mot de passe oublié » avec le même message | ☐ | |
+| REC-AUT-073 | Bouton Retour du navigateur | Retour vers « Code OTP » | À confirmer (spec muette) : retour vers « Code OTP » avec le code déjà consommé ; une nouvelle vérification n'est pas possible avec l'ancien code | ☐ | |
 | REC-AUT-074 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-075 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WL04-A · Activation du compte enseignant (variante de WL04, C6) (/activation#jeton=…)
+#### Activation du compte enseignant (variante de « Nouveau mot de passe », C6) (/activation#jeton=…)
 
 Vouvoiement. L'enseignant n'a jamais d'inscription libre (S5) : son compte est créé sur invitation.
 
@@ -842,34 +842,34 @@ Vouvoiement. L'enseignant n'a jamais d'inscription libre (S5) : son compte est c
 | REC-AUT-091 | Couper le réseau à la vérification du lien | Erreur réseau | Écran d'erreur avec « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » et bouton de nouvel essai | ☐ | |
 | REC-AUT-092 | Arrêter l'API à la vérification du lien | Erreur serveur | Écran d'erreur avec « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » et bouton de nouvel essai | ☐ | |
 | REC-AUT-093 | Couper le réseau puis « Activer mon compte » | Erreur réseau à l'envoi | Encart « Activation impossible : » avec « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
-| REC-AUT-094 | Se connecter ensuite sur W16 avec nadia.houngbo@steamy.test et le mot de passe choisi | Connexion après activation | Redirection vers /enseignant | ☐ | |
+| REC-AUT-094 | Se connecter ensuite sur « Connexion existant » avec nadia.houngbo@steamy.test et le mot de passe choisi | Connexion après activation | Redirection vers /enseignant | ☐ | |
 | REC-AUT-095 | Dépasser le plafond d'essais sur le lien (20 par minute côté code) | THROTTLED | Message « Trop de tentatives. Réessayez dans N secondes. » | ☐ | |
 | REC-AUT-096 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-097 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WL05 · Réinitialisé ✓ (/mot-de-passe-oublie/termine)
+#### Réinitialisé ✓ (/mot-de-passe-oublie/termine)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-098 | Arriver sur la page | Après WL04 réussi | Célébration : H1 « Mot de passe réinitialisé ! », texte « Votre nouveau mot de passe est enregistré. Les sessions ouvertes sur vos autres appareils ont été fermées. », bouton « Se connecter » | ☐ | |
-| REC-AUT-099 | Cliquer « Se connecter » | Nominal | Redirection vers /connexion (W16) | ☐ | |
+| REC-AUT-098 | Arriver sur la page | Après « Nouveau mot de passe » réussi | Célébration : H1 « Mot de passe réinitialisé ! », texte « Votre nouveau mot de passe est enregistré. Les sessions ouvertes sur vos autres appareils ont été fermées. », bouton « Se connecter » | ☐ | |
+| REC-AUT-099 | Cliquer « Se connecter » | Nominal | Redirection vers /connexion | ☐ | |
 | REC-AUT-100 | Se connecter avec le numéro du parent et le nouveau mot de passe | Connexion après réinitialisation (parent) | Connexion réussie, arrivée sur /parent | ☐ | |
 | REC-AUT-101 | Se connecter avec l'email de l'enseignante et le nouveau mot de passe | Connexion après réinitialisation (enseignant) | Connexion réussie, arrivée sur /enseignant | ☐ | |
 | REC-AUT-102 | Se connecter avec l'ancien mot de passe | Ancien mot de passe | Encart « Connexion impossible : » avec « Identifiant ou mot de passe incorrect. » | ☐ | |
 | REC-AUT-103 | Recharger une page d'un espace connecté dans un autre navigateur resté ouvert avant la réinitialisation | Fermeture des sessions ouvertes | Redirection vers /connexion?next=%2Fparent (session fermée) | ☐ | |
-| REC-AUT-104 | Recharger la page WL05 (F5) ou y revenir via Retour | Rechargement | À confirmer (spec muette) : la page de confirmation reste affichée (aucune garde de flux sur /termine dans le code) | ☐ | |
+| REC-AUT-104 | Recharger la page « Réinitialisé ✓ » (F5) ou y revenir via Retour | Rechargement | À confirmer (spec muette) : la page de confirmation reste affichée (aucune garde de flux sur /termine dans le code) | ☐ | |
 | REC-AUT-105 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-106 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W01 · Splash (/inscription (voile d'entrée))
+#### Splash (/inscription (voile d'entrée))
 
 Le splash est un voile décoratif de /inscription (pas de page à part).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-107 | Ouvrir /inscription dans un nouvel onglet | Première visite de la session d'onglet | Voile plein écran dégradé primaire : mascotte qui salue, logo blanc, texte « Apprends · Construis · Joue » et indicateur « Chargement… » ; il disparaît seul après environ 1,2 s (au plus 1,5 s) et laisse voir W02 | ☐ | |
+| REC-AUT-107 | Ouvrir /inscription dans un nouvel onglet | Première visite de la session d'onglet | Voile plein écran dégradé primaire : mascotte qui salue, logo blanc, texte « Apprends · Construis · Joue » et indicateur « Chargement… » ; il disparaît seul après environ 1,2 s (au plus 1,5 s) et laisse voir « Accueil » | ☐ | |
 | REC-AUT-108 | Cliquer ou utiliser le clavier pendant le voile | Voile non bloquant | Le voile laisse passer clics et clavier (pas de blocage) ; aucune action intermédiaire n'est requise | ☐ | |
 | REC-AUT-109 | Recharger la page (F5) dans le même onglet | Deuxième visite dans la session | Le voile n'apparaît plus (une fois par session d'onglet) | ☐ | |
 | REC-AUT-110 | Ouvrir /inscription dans un nouvel onglet après avoir fermé le premier | Nouvelle session d'onglet | Le voile réapparaît | ☐ | |
@@ -878,46 +878,46 @@ Le splash est un voile décoratif de /inscription (pas de page à part).
 | REC-AUT-113 | Version mobile 360 px | Voile sur écran de 360 px | Le voile occupe tout l'écran, mascotte, logo et texte restent entièrement visibles, aucun défilement horizontal | ☐ | |
 
 
-#### W02 · Accueil (/inscription)
+#### Accueil (/inscription)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-AUT-114 | Ouvrir la page | Visiteur non connecté | Kicker « Bienvenue », H1 « Apprends à construire les robots de demain. », sous-titre « Steamy, ce sont des parcours STEM ludiques, des kits et des challenges pour les 10–17 ans. », 4 cartes d'arguments (Parcours guidés « Robotique, IA, code » ; Kits physiques « Livrés chez toi » ; Challenges « Concours et Steamy Events » ; Suivi parent « En toute sécurité »), mascotte « cheer » sur le panneau marque | ☐ | |
 | REC-AUT-115 | Lire le panneau marque | Chiffre vitrine | Le texte « Plus de 12 000 jeunes inscrits » est absent. Un chiffre « {valeur} apprenants déjà inscrits » issu du contenu éditorial peut s'afficher ; sa valeur et sa présence sont à confirmer (spec muette) | ☐ | |
-| REC-AUT-116 | Cliquer « Créer un compte gratuit » | Nominal | Redirection vers /inscription/type (W03) | ☐ | |
-| REC-AUT-117 | Cliquer « J'ai déjà un compte » | Déjà inscrit | Redirection vers /connexion (W16) | ☐ | |
+| REC-AUT-116 | Cliquer « Créer un compte gratuit » | Nominal | Redirection vers /inscription/type | ☐ | |
+| REC-AUT-117 | Cliquer « J'ai déjà un compte » | Déjà inscrit | Redirection vers /connexion | ☐ | |
 | REC-AUT-118 | Cliquer « Reprendre mon inscription » (« Inscription en attente ? ») | Reprise d'une inscription en attente | Redirection vers /inscription/reprendre | ☐ | |
-| REC-AUT-119 | Cliquer le lien « conditions d'utilisation » | Lien légal | Ouverture de la page légale CGU (WL09, onglet CGU) | ☐ | |
-| REC-AUT-120 | Cliquer le lien « politique de confidentialité » | Lien légal | Ouverture de la page légale, onglet confidentialité (WL09) | ☐ | |
-| REC-AUT-121 | Cliquer « Nous contacter » (« Besoin d'aide ? ») dans l'en-tête du formulaire | Lien d'aide du shell | Redirection vers la page Aide & contact (WL24) | ☐ | |
+| REC-AUT-119 | Cliquer le lien « conditions d'utilisation » | Lien légal | Ouverture de la page légale CGU (« Pages légales », onglet CGU) | ☐ | |
+| REC-AUT-120 | Cliquer le lien « politique de confidentialité » | Lien légal | Ouverture de la page légale, onglet confidentialité | ☐ | |
+| REC-AUT-121 | Cliquer « Nous contacter » (« Besoin d'aide ? ») dans l'en-tête du formulaire | Lien d'aide du shell | Redirection vers la page Aide & contact | ☐ | |
 | REC-AUT-122 | Ouvrir /inscription en étant connecté (apprenant, parent ou enseignant) | Redirection d'un utilisateur connecté | Redirection immédiate vers l'espace du rôle (/apprenant, /parent ou /enseignant), ou vers l'étape de profil à terminer s'il en reste une | ☐ | |
-| REC-AUT-123 | Recharger la page (F5) | Rechargement | La page se réaffiche à l'identique, sans le voile W01 | ☐ | |
+| REC-AUT-123 | Recharger la page (F5) | Rechargement | La page se réaffiche à l'identique, sans le voile « Splash » | ☐ | |
 | REC-AUT-124 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-125 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W03 · Type d'utilisateur (/inscription/type)
+#### Type d'utilisateur (/inscription/type)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-AUT-126 | Ouvrir la page | Visiteur non connecté | Kicker « Créer un compte » ; deux cartes exclusives : « Un·e apprenant·e » (« J'ai entre 10 et 17 ans et je veux apprendre la robotique, le code, l'IA… ») et « Un parent » (« Je veux inscrire mon enfant ou suivre ses progrès et ses achats. ») ; aucune carte enseignant ; aucune carte pré-sélectionnée ; bouton « Continuer » | ☐ | |
 | REC-AUT-127 | Cliquer « Continuer » sans rien choisir | Aucun choix | Message d'erreur « Choisis ton profil pour continuer. » ; pas de navigation | ☐ | |
-| REC-AUT-128 | Cliquer la carte « Un·e apprenant·e » puis « Continuer » | Choix apprenant | Redirection vers /inscription/apprenant/identite (W04) | ☐ | |
-| REC-AUT-129 | Cliquer la carte « Un parent » puis « Continuer » | Choix parent | Redirection vers /inscription/parent (WP01) | ☐ | |
+| REC-AUT-128 | Cliquer la carte « Un·e apprenant·e » puis « Continuer » | Choix apprenant | Redirection vers /inscription/apprenant/identite | ☐ | |
+| REC-AUT-129 | Cliquer la carte « Un parent » puis « Continuer » | Choix parent | Redirection vers /inscription/parent | ☐ | |
 | REC-AUT-130 | Changer de carte avant de valider | Choix exclusif | Une seule carte est sélectionnée à la fois ; l'erreur disparaît dès qu'une carte est choisie | ☐ | |
 | REC-AUT-131 | Choisir une carte avec les flèches puis valider avec Entrée ou Espace | Clavier | Sélection par le clavier possible ; Entrée valide le formulaire | ☐ | |
 | REC-AUT-132 | Ouvrir la page en étant connecté | Redirection d'un utilisateur connecté | Redirection vers l'espace du rôle (ex. /parent pour le parent connecté) | ☐ | |
-| REC-AUT-133 | Bouton Retour du navigateur | Retour vers W02 | Retour vers /inscription sans voile | ☐ | |
+| REC-AUT-133 | Bouton Retour du navigateur | Retour vers « Accueil » | Retour vers /inscription sans voile | ☐ | |
 | REC-AUT-134 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W04 · Identité & identifiant (/inscription/apprenant/identite)
+#### Identité & identifiant (/inscription/apprenant/identite)
 
 Le kicker affiche « Inscription · étape 1/4 » (un seul kicker, pas de doublon).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-135 | Ouvrir la page | Arrivée depuis W03 | Kicker « Inscription · étape 1/4 », barre de progression 1/4, H1 « Crée ton compte », sous-titre « On a juste besoin de quelques infos pour commencer. », champs « Prénom », « Nom », « Identifiant » (indication « C'est ce que tu utiliseras pour te connecter. »), case à cocher « J'accepte les conditions d'utilisation et la politique de confidentialité. » NON cochée, bouton « Continuer », lien « Connecte-toi » (« Déjà un compte ? »), mascotte et « On t'attendait. 🚀 » | ☐ | |
+| REC-AUT-135 | Ouvrir la page | Arrivée depuis « Type d'utilisateur » | Kicker « Inscription · étape 1/4 », barre de progression 1/4, H1 « Crée ton compte », sous-titre « On a juste besoin de quelques infos pour commencer. », champs « Prénom », « Nom », « Identifiant » (indication « C'est ce que tu utiliseras pour te connecter. »), case à cocher « J'accepte les conditions d'utilisation et la politique de confidentialité. » NON cochée, bouton « Continuer », lien « Connecte-toi » (« Déjà un compte ? »), mascotte et « On t'attendait. 🚀 » | ☐ | |
 | REC-AUT-136 | Cliquer « Continuer » avec tous les champs vides | Champs obligatoires vides | Encart récapitulatif d'erreurs avec focus ; sous les champs : « Indique ton prénom. », « Indique ton nom. », règle d'identifiant « Ton identifiant : 3 à 30 caractères (lettres, chiffres, « . », « _ » ou « - ») avec au moins une lettre, sans « @ ». », « Accepte les conditions d'utilisation pour continuer. » | ☐ | |
 | REC-AUT-137 | Laisser « Prénom » vide, remplir le reste puis « Continuer » | Prénom vide | Seule l'erreur « Indique ton prénom. » est affichée | ☐ | |
 | REC-AUT-138 | Laisser « Nom » vide, remplir le reste puis « Continuer » | Nom vide | Seule l'erreur « Indique ton nom. » est affichée | ☐ | |
@@ -927,166 +927,166 @@ Le kicker affiche « Inscription · étape 1/4 » (un seul kicker, pas de doublo
 | REC-AUT-142 | Saisir un identifiant entièrement numérique (ex. « 123456 ») | Identifiant ressemblant à un numéro (C7) | Erreur de règle d'identifiant (au moins une lettre requise) | ☐ | |
 | REC-AUT-143 | Saisir un identifiant avec espace ou caractère accentué (ex. « awa test », « éva ») | Caractères interdits | Erreur de règle d'identifiant (seuls lettres, chiffres, « . », « _ », « - » sont permis) | ☐ | |
 | REC-AUT-144 | Cocher puis décocher la case des conditions, puis « Continuer » | Conditions non acceptées | Erreur « Accepte les conditions d'utilisation pour continuer. » ; la case n'est jamais pré-cochée | ☐ | |
-| REC-AUT-145 | Cliquer les liens « conditions d'utilisation » et « politique de confidentialité » dans la case | Liens légaux | Pages légales WL09 (CGU puis confidentialité) ; l'état du formulaire est perdu ou conservé selon l'ouverture dans un nouvel onglet : à confirmer (spec muette) | ☐ | |
-| REC-AUT-146 | Saisir un identifiant déjà pris (lea.adjovi) puis quitter le champ (Tab ou clic ailleurs) | W19 : identifiant déjà utilisé, contrôle au blur | Message sous le champ « Cet identifiant est déjà associé à un compte Steamy. » ; apparition des boutons « Se connecter » et « Choisir un autre identifiant » | ☐ | |
-| REC-AUT-147 | Saisir un identifiant déjà pris et cliquer « Continuer » sans avoir quitté le champ | Identifiant déjà pris contrôlé à la soumission | Même message et mêmes boutons ; pas de passage à W05 ; bouton « Continuer » en chargement pendant la vérification | ☐ | |
-| REC-AUT-148 | Cliquer « Choisir un autre identifiant » (W19) | Correction en place | Le message disparaît, le champ « Identifiant » est sélectionné pour une nouvelle saisie | ☐ | |
-| REC-AUT-149 | Cliquer « Se connecter » (W19) | Lien vers la connexion | Redirection vers /connexion (W16) | ☐ | |
+| REC-AUT-145 | Cliquer les liens « conditions d'utilisation » et « politique de confidentialité » dans la case | Liens légaux | Pages légales « Pages légales » (CGU puis confidentialité) ; l'état du formulaire est perdu ou conservé selon l'ouverture dans un nouvel onglet : à confirmer (spec muette) | ☐ | |
+| REC-AUT-146 | Saisir un identifiant déjà pris (lea.adjovi) puis quitter le champ (Tab ou clic ailleurs) | « Identifiant déjà utilisé » : identifiant déjà utilisé, contrôle au blur | Message sous le champ « Cet identifiant est déjà associé à un compte Steamy. » ; apparition des boutons « Se connecter » et « Choisir un autre identifiant » | ☐ | |
+| REC-AUT-147 | Saisir un identifiant déjà pris et cliquer « Continuer » sans avoir quitté le champ | Identifiant déjà pris contrôlé à la soumission | Même message et mêmes boutons ; pas de passage à « Âge » ; bouton « Continuer » en chargement pendant la vérification | ☐ | |
+| REC-AUT-148 | Cliquer « Choisir un autre identifiant » | Correction en place | Le message disparaît, le champ « Identifiant » est sélectionné pour une nouvelle saisie | ☐ | |
+| REC-AUT-149 | Cliquer « Se connecter » | Lien vers la connexion | Redirection vers /connexion | ☐ | |
 | REC-AUT-150 | Modifier l'identifiant pris après l'erreur | Effacement de l'erreur | L'erreur « Cet identifiant est déjà associé… » disparaît dès la modification | ☐ | |
-| REC-AUT-151 | Saisir un identifiant libre, prénom « Awa », nom « Test », cocher la case, puis « Continuer » | Nominal | Redirection vers /inscription/apprenant/age (W05) ; aucun compte n'existe encore (il est créé à l'étape W05) | ☐ | |
+| REC-AUT-151 | Saisir un identifiant libre, prénom « Awa », nom « Test », cocher la case, puis « Continuer » | Nominal | Redirection vers /inscription/apprenant/age ; aucun compte n'existe encore (il est créé à l'étape « Âge ») | ☐ | |
 | REC-AUT-152 | Saisir l'identifiant avec des majuscules (« Awa.Test ») pour un identifiant libre en minuscules déjà pris (« awa.test ») | Casse de l'identifiant | Traitement de la casse (identifiant unique sans distinction de casse ou non) : à confirmer (spec muette) | ☐ | |
 | REC-AUT-153 | Cliquer « Continuer » pendant la vérification de disponibilité | État de chargement | Bouton en chargement, un seul envoi | ☐ | |
-| REC-AUT-154 | Couper le réseau pendant la vérification de l'identifiant | Erreur réseau sur le contrôle de disponibilité | Pas de blocage : le contrôle est ignoré et le serveur tranche à l'étape W05 ; message d'erreur éventuel : à confirmer (spec muette) | ☐ | |
-| REC-AUT-155 | Cliquer « Connecte-toi » | Lien « Déjà un compte ? » | Redirection vers /connexion (W16) | ☐ | |
-| REC-AUT-156 | Cliquer « Nous contacter » dans l'en-tête | Aide | Redirection vers l'Aide & contact (WL24) | ☐ | |
+| REC-AUT-154 | Couper le réseau pendant la vérification de l'identifiant | Erreur réseau sur le contrôle de disponibilité | Pas de blocage : le contrôle est ignoré et le serveur tranche à l'étape « Âge » ; message d'erreur éventuel : à confirmer (spec muette) | ☐ | |
+| REC-AUT-155 | Cliquer « Connecte-toi » | Lien « Déjà un compte ? » | Redirection vers /connexion | ☐ | |
+| REC-AUT-156 | Cliquer « Nous contacter » dans l'en-tête | Aide | Redirection vers l'Aide & contact | ☐ | |
 | REC-AUT-157 | Recharger la page (F5) après avoir rempli le formulaire | Rechargement | Tous les champs sont vidés, la case des conditions est décochée (brouillon en mémoire, rien dans l'URL ni le stockage) | ☐ | |
-| REC-AUT-158 | Bouton Retour du navigateur depuis W05 | Retour W05 → W04 | Retour à W04 avec les champs préremplis par le brouillon (tant que la page n'a pas été rechargée) | ☐ | |
+| REC-AUT-158 | Bouton Retour du navigateur depuis « Âge » | Retour « Âge » → « Identité & identifiant » | Retour à « Identité & identifiant » avec les champs préremplis par le brouillon (tant que la page n'a pas été rechargée) | ☐ | |
 | REC-AUT-159 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-160 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W19 · Identifiant déjà utilisé (/inscription/apprenant/identite (état d'erreur de W04))
+#### Identifiant déjà utilisé (/inscription/apprenant/identite (état d'erreur de « Identité & identifiant »))
 
-État d'erreur de W04, pas une page à part. Les contrôles détaillés de W04 sont dans la section W04.
+État d'erreur de « Identité & identifiant », pas une page à part. Les contrôles détaillés de « Identité & identifiant » sont dans la section « Identité & identifiant ».
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-AUT-161 | Quitter le champ « Identifiant » avec un identifiant existant (lea.adjovi) | Détection au blur | Message sous le champ « Cet identifiant est déjà associé à un compte Steamy. » ; boutons « Se connecter » et « Choisir un autre identifiant » apparaissent sous le champ | ☐ | |
-| REC-AUT-162 | Soumettre avec un identifiant existant | Détection à la soumission | Même état ; le passage à W05 est bloqué | ☐ | |
-| REC-AUT-163 | Cliquer « Se connecter » | Basculer vers la connexion | Redirection vers /connexion (W16) | ☐ | |
+| REC-AUT-162 | Soumettre avec un identifiant existant | Détection à la soumission | Même état ; le passage à « Âge » est bloqué | ☐ | |
+| REC-AUT-163 | Cliquer « Se connecter » | Basculer vers la connexion | Redirection vers /connexion | ☐ | |
 | REC-AUT-164 | Cliquer « Choisir un autre identifiant » | Correction en place | Le message disparaît et le champ « Identifiant » est sélectionné | ☐ | |
-| REC-AUT-165 | Arriver sur W04 après un USERNAME_TAKEN renvoyé par W05 | Course entre contrôle et création | W04 s'ouvre directement avec le message « Cet identifiant est déjà associé à un compte Steamy. » et les deux boutons | ☐ | |
-| REC-AUT-166 | Utiliser l'identifiant d'une inscription refusée (identifiant libéré, W18) | Identifiant libéré | Aucune erreur : l'identifiant est de nouveau accepté | ☐ | |
+| REC-AUT-165 | Arriver sur « Identité & identifiant » après un USERNAME_TAKEN renvoyé par « Âge » | Course entre contrôle et création | « Identité & identifiant » s'ouvre directement avec le message « Cet identifiant est déjà associé à un compte Steamy. » et les deux boutons | ☐ | |
+| REC-AUT-166 | Utiliser l'identifiant d'une inscription refusée (identifiant libéré, « Consentement refusé ») | Identifiant libéré | Aucune erreur : l'identifiant est de nouveau accepté | ☐ | |
 | REC-AUT-167 | Utiliser l'identifiant d'une inscription en attente d'un autre enfant | Identifiant réservé par une inscription en attente | Message « Cet identifiant est déjà associé à un compte Steamy. » | ☐ | |
 | REC-AUT-168 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W05 · Âge (/inscription/apprenant/age)
+#### Âge (/inscription/apprenant/age)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-169 | Ouvrir la page | Arrivée depuis W04 valide | Kicker « Inscription · étape 2/4 », barre 2/4, H1 « Quel âge as-tu ? », sous-titre « On adapte tes parcours à ton âge. Un parent validera toujours ton inscription. », sélecteur d'âge « Ton âge » avec boutons « Diminuer » et « Augmenter », valeur initiale 13 ans, encart « À l'étape suivante, on demandera l'accord d'un parent : c'est lui qui valide ton inscription. », bouton « Continuer » ; aucune mention « 16 ans » | ☐ | |
+| REC-AUT-169 | Ouvrir la page | Arrivée depuis « Identité & identifiant » valide | Kicker « Inscription · étape 2/4 », barre 2/4, H1 « Quel âge as-tu ? », sous-titre « On adapte tes parcours à ton âge. Un parent validera toujours ton inscription. », sélecteur d'âge « Ton âge » avec boutons « Diminuer » et « Augmenter », valeur initiale 13 ans, encart « À l'étape suivante, on demandera l'accord d'un parent : c'est lui qui valide ton inscription. », bouton « Continuer » ; aucune mention « 16 ans » | ☐ | |
 | REC-AUT-170 | Cliquer « Augmenter » à répétition | Borne haute | L'âge s'arrête à 17 ans ; le bouton « Augmenter » est désactivé à 17 | ☐ | |
 | REC-AUT-171 | Cliquer « Diminuer » à répétition | Borne basse | L'âge s'arrête à 10 ans ; le bouton « Diminuer » est désactivé à 10 | ☐ | |
 | REC-AUT-172 | Focaliser le sélecteur puis appuyer sur Fin, puis sur Début | Clavier sur le cadran | Fin → 17 (aria-valuenow = 17) ; Début → 10 (aria-valuenow = 10) | ☐ | |
 | REC-AUT-173 | Appuyer sur les flèches Haut/Bas ou Droite/Gauche sur le sélecteur | Clavier pas à pas | L'âge varie de 1 en 1 dans les bornes 10 à 17 | ☐ | |
 | REC-AUT-174 | Saisir ou forcer un âge hors limites (ex. 9 ou 18 via les outils du navigateur) puis « Continuer » | Âge hors limites (D23, AGE_OUT_OF_RANGE) | Erreur « Steamy est fait pour les 10 à 17 ans. » ; aucun compte créé | ☐ | |
-| REC-AUT-175 | Choisir 14 ans puis cliquer « Continuer » | Nominal | Le serveur crée l'inscription en attente (compte inactif) et un code de reprise (affiché plus tard sur W07) ; redirection vers /inscription/apprenant/parent (W06) | ☐ | |
-| REC-AUT-176 | Cliquer « Continuer » alors que l'identifiant a été pris entre-temps | USERNAME_TAKEN à la création | Retour automatique à W04 en état W19 : « Cet identifiant est déjà associé à un compte Steamy. » | ☐ | |
-| REC-AUT-177 | Cliquer « Continuer » avec un identifiant refusé par le serveur | USERNAME_INVALID | Retour à W04 avec la règle d'identifiant | ☐ | |
+| REC-AUT-175 | Choisir 14 ans puis cliquer « Continuer » | Nominal | Le serveur crée l'inscription en attente (compte inactif) et un code de reprise (affiché plus tard sur « Attente consentement ») ; redirection vers /inscription/apprenant/parent | ☐ | |
+| REC-AUT-176 | Cliquer « Continuer » alors que l'identifiant a été pris entre-temps | USERNAME_TAKEN à la création | Retour automatique à « Identité & identifiant » en état « Identifiant déjà utilisé » : « Cet identifiant est déjà associé à un compte Steamy. » | ☐ | |
+| REC-AUT-177 | Cliquer « Continuer » avec un identifiant refusé par le serveur | USERNAME_INVALID | Retour à « Identité & identifiant » avec la règle d'identifiant | ☐ | |
 | REC-AUT-178 | Cliquer « Continuer » | État de chargement | Bouton en chargement, un seul compte créé | ☐ | |
 | REC-AUT-179 | Dépasser le plafond d'inscriptions (5 par minute côté code, spec : à confirmer (spec muette)) | THROTTLED | Encart d'erreur « Trop de tentatives. Réessaie dans N secondes. » | ☐ | |
 | REC-AUT-180 | Couper le réseau puis « Continuer » | Erreur réseau | Encart « Le serveur est injoignable. Vérifie ta connexion internet puis réessaie. » | ☐ | |
 | REC-AUT-181 | Arrêter l'API puis « Continuer » | Erreur serveur | Encart « Une erreur est survenue de notre côté. Réessaie dans quelques instants. » | ☐ | |
-| REC-AUT-182 | Recharger la page (F5) | Rechargement sur W05 | Redirection vers /inscription/apprenant/identite (W04) avec champs vides (le brouillon est perdu) | ☐ | |
-| REC-AUT-183 | Ouvrir directement /inscription/apprenant/age sans passer par W04 | Accès direct | Redirection vers W04, champs vides | ☐ | |
-| REC-AUT-184 | Bouton Retour du navigateur depuis W06 vers W05 (compte déjà créé) | Retour après création de l'inscription | À confirmer (spec muette) : nouvelle soumission de W05 avec un identifiant déjà réservé par l'inscription en attente | ☐ | |
+| REC-AUT-182 | Recharger la page (F5) | Rechargement sur « Âge » | Redirection vers /inscription/apprenant/identite avec champs vides (le brouillon est perdu) | ☐ | |
+| REC-AUT-183 | Ouvrir directement /inscription/apprenant/age sans passer par « Identité & identifiant » | Accès direct | Redirection vers « Identité & identifiant », champs vides | ☐ | |
+| REC-AUT-184 | Bouton Retour du navigateur depuis « Numéro du parent » vers « Âge » (compte déjà créé) | Retour après création de l'inscription | À confirmer (spec muette) : nouvelle soumission de « Âge » avec un identifiant déjà réservé par l'inscription en attente | ☐ | |
 | REC-AUT-185 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-186 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W06 · Numéro du parent (/inscription/apprenant/parent)
+#### Numéro du parent (/inscription/apprenant/parent)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-187 | Ouvrir la page | Après W05 réussi | Kicker « Inscription · étape 3/4 · Consentement parental », barre 3/4, accent violet (cat-ia), H1 « Numéro d'un parent », sous-titre « On va lui envoyer un SMS pour qu'il accepte ton inscription. Ça prend une minute. », champ « Numéro de téléphone du parent » avec sélecteur de pays (indication « Maman, papa, tutrice, oncle… une personne adulte qui s'occupe de toi. »), liste « Lien de parenté » issue du référentiel, encart « 🔒 Tes données ne servent qu'à valider ton inscription, jamais à de la publicité. », bouton « Envoyer la demande au parent » | ☐ | |
+| REC-AUT-187 | Ouvrir la page | Après « Âge » réussi | Kicker « Inscription · étape 3/4 · Consentement parental », barre 3/4, accent violet (cat-ia), H1 « Numéro d'un parent », sous-titre « On va lui envoyer un SMS pour qu'il accepte ton inscription. Ça prend une minute. », champ « Numéro de téléphone du parent » avec sélecteur de pays (indication « Maman, papa, tutrice, oncle… une personne adulte qui s'occupe de toi. »), liste « Lien de parenté » issue du référentiel, encart « 🔒 Tes données ne servent qu'à valider ton inscription, jamais à de la publicité. », bouton « Envoyer la demande au parent » | ☐ | |
 | REC-AUT-188 | Cliquer « Envoyer la demande au parent » avec tout vide | Champs vides | Erreurs « Indique un numéro de téléphone valide. » et « Choisis ton lien avec ce parent. » dans l'encart et sous les champs | ☐ | |
 | REC-AUT-189 | Saisir un numéro puis ne pas choisir de lien de parenté | Lien de parenté manquant | Erreur « Choisis ton lien avec ce parent. » | ☐ | |
 | REC-AUT-190 | Choisir un lien puis ne pas saisir de numéro | Numéro manquant | Erreur « Indique un numéro de téléphone valide. » | ☐ | |
 | REC-AUT-191 | Saisir un numéro invalide (ex. 3 chiffres) | Numéro invalide (PHONE_INVALID) | Erreur sous le champ « Ce numéro de téléphone n'est pas valide. » ; aucune demande créée | ☐ | |
 | REC-AUT-192 | Ouvrir la liste « Lien de parenté » | Référentiel | Options issues de l'API (ex. Mère, Père, Tutrice…), sans valeur codée en dur ; si le référentiel est en cours de chargement : option « Chargement… » désactivée | ☐ | |
 | REC-AUT-193 | Changer le pays du numéro dans le sélecteur | Autre pays | L'indicatif et le format d'exemple suivent le pays choisi ; le numéro est envoyé au format E.164 | ☐ | |
-| REC-AUT-194 | Saisir un numéro de parent valide non inscrit, choisir « Mère », puis « Envoyer la demande au parent » | Nominal | Redirection vers /inscription/apprenant/attente (W07) ; SMS de consentement reçu dans Mailpit à <numéro E.164>@sms.test avec un lien /consentement/<jeton> | ☐ | |
-| REC-AUT-195 | Saisir le numéro du parent de démo (01 90 00 00 01, Marie) puis envoyer | Parent déjà inscrit | Redirection vers W07 ; SMS reçu avec le lien ; le parent est invité à se connecter (voir WP05 / P4) | ☐ | |
-| REC-AUT-196 | Envoyer une demande vers un numéro ayant refusé il y a moins de 30 jours (CONSENT_COOLDOWN) | Délai de 30 jours après refus (C9) | Message sous le champ « Ce parent a refusé une demande il y a moins de 30 jours. Tu pourras lui en refaire une 30 jours après son refus. » ; pas de passage à W07 | ☐ | |
+| REC-AUT-194 | Saisir un numéro de parent valide non inscrit, choisir « Mère », puis « Envoyer la demande au parent » | Nominal | Redirection vers /inscription/apprenant/attente ; SMS de consentement reçu dans Mailpit à <numéro E.164>@sms.test avec un lien /consentement/<jeton> | ☐ | |
+| REC-AUT-195 | Saisir le numéro du parent de démo (01 90 00 00 01, Marie) puis envoyer | Parent déjà inscrit | Redirection vers « Attente consentement » ; SMS reçu avec le lien ; le parent est invité à se connecter (voir « Demande de l'enfant » / P4) | ☐ | |
+| REC-AUT-196 | Envoyer une demande vers un numéro ayant refusé il y a moins de 30 jours (CONSENT_COOLDOWN) | Délai de 30 jours après refus (C9) | Message sous le champ « Ce parent a refusé une demande il y a moins de 30 jours. Tu pourras lui en refaire une 30 jours après son refus. » ; pas de passage à « Attente consentement » | ☐ | |
 | REC-AUT-197 | Refaire une demande vers le même numéro qu'une demande encore en attente (même enfant) | Annulation de la précédente (C14) | La nouvelle demande annule l'ancienne ; un nouveau SMS est envoyé ; l'ancien lien est invalide | ☐ | |
 | REC-AUT-198 | Cliquer « Envoyer la demande au parent » | État de chargement | Bouton en chargement, un seul SMS | ☐ | |
 | REC-AUT-199 | Dépasser les plafonds d'envoi (SMS par jour, par minute) | THROTTLED / plafond SMS | Encart « Trop de tentatives. Réessaie dans N secondes. » ou message du plafond quotidien : à confirmer (spec muette) | ☐ | |
 | REC-AUT-200 | Couper le réseau puis envoyer | Erreur réseau | Encart « Le serveur est injoignable. Vérifie ta connexion internet puis réessaie. » | ☐ | |
 | REC-AUT-201 | Arrêter l'API puis envoyer | Erreur serveur | Encart « Une erreur est survenue de notre côté. Réessaie dans quelques instants. » | ☐ | |
-| REC-AUT-202 | Recharger la page (F5) | Rechargement sur W06 | La page reste sur W06 (l'état d'inscription est lu côté serveur) avec formulaire vide | ☐ | |
+| REC-AUT-202 | Recharger la page (F5) | Rechargement sur « Numéro du parent » | La page reste sur « Numéro du parent » (l'état d'inscription est lu côté serveur) avec formulaire vide | ☐ | |
 | REC-AUT-203 | Ouvrir /inscription/apprenant/parent sans inscription en cours (navigateur neuf) | Accès sans session d'inscription | Redirection vers /inscription/reprendre | ☐ | |
-| REC-AUT-204 | Ouvrir W06 alors que la demande est déjà envoyée (étape « waiting ») | Étape ultérieure | Redirection vers W07 (/inscription/apprenant/attente) | ☐ | |
+| REC-AUT-204 | Ouvrir « Numéro du parent » alors que la demande est déjà envoyée (étape « waiting ») | Étape ultérieure | Redirection vers « Attente consentement » (/inscription/apprenant/attente) | ☐ | |
 | REC-AUT-205 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-206 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W07 · Attente consentement (/inscription/apprenant/attente)
+#### Attente consentement (/inscription/apprenant/attente)
 
 Écran plein écran (hors WebShell), tutoiement. Le code de reprise n'est jamais régénérable (C14).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-207 | Ouvrir la page | Après envoi de la demande (W06) | Écran plein écran : mascotte endormie, H1 « On attend l'accord de ton parent… », texte « On a envoyé un SMS au +229 •• NN. Cette page se met à jour toute seule dès qu'il ou elle aura répondu. » (numéro masqué), indicateur « En attente de la réponse… », carte « Ton code de reprise » (8 caractères groupés par 4, ex. ABCD EFGH), texte « Note-le : il te permet de reprendre ton inscription jusqu'au <date>. On ne pourra pas te le redonner. », boutons « Copier le code » et « J'ai noté mon code », texte « Ta demande reste valable jusqu'au <date>. » (7 jours), bouton « Renvoyer la demande » avec décompte | ☐ | |
+| REC-AUT-207 | Ouvrir la page | Après envoi de la demande | Écran plein écran : mascotte endormie, H1 « On attend l'accord de ton parent… », texte « On a envoyé un SMS au +229 •• NN. Cette page se met à jour toute seule dès qu'il ou elle aura répondu. » (numéro masqué), indicateur « En attente de la réponse… », carte « Ton code de reprise » (8 caractères groupés par 4, ex. ABCD EFGH), texte « Note-le : il te permet de reprendre ton inscription jusqu'au <date>. On ne pourra pas te le redonner. », boutons « Copier le code » et « J'ai noté mon code », texte « Ta demande reste valable jusqu'au <date>. » (7 jours), bouton « Renvoyer la demande » avec décompte | ☐ | |
 | REC-AUT-208 | Lire le code de reprise | Format | 8 caractères parmi lettres majuscules et chiffres, sans caractères ambigus (pas de I, L, O, 0, 1) ; groupé « XXXX XXXX » | ☐ | |
 | REC-AUT-209 | Cliquer « Copier le code » | Copie réussie | Message « Code copié. » ; le presse-papiers contient le code sans espace | ☐ | |
 | REC-AUT-210 | Cliquer « Copier le code » dans un contexte sans accès au presse-papiers | Copie impossible | Message « Copie impossible : recopie-le à la main. » | ☐ | |
 | REC-AUT-211 | Cliquer « J'ai noté mon code » | Masquage de la carte | La carte du code et le bouton disparaissent (la carte réapparaît après rechargement tant que l'inscription n'est pas résolue) | ☐ | |
 | REC-AUT-212 | Attendre 15 s sans rien faire (onglet visible) | Polling | Mise à jour automatique toutes les 15 s sans recharger ; aucune action requise | ☐ | |
 | REC-AUT-213 | Passer l'onglet en arrière-plan puis le ramener | Polling suspendu / relancé | Pas de requêtes pendant que l'onglet est caché ; une vérification immédiate à son retour | ☐ | |
-| REC-AUT-214 | Le parent accepte la demande (WP05) puis attendre le prochain cycle | Accord détecté | Redirection automatique vers /inscription/apprenant/accord (W08) en 25 s au plus | ☐ | |
-| REC-AUT-215 | Le parent refuse la demande (WP11) puis attendre le prochain cycle | Refus détecté | Redirection automatique vers /inscription/apprenant/refus (W18) | ☐ | |
+| REC-AUT-214 | Le parent accepte la demande puis attendre le prochain cycle | Accord détecté | Redirection automatique vers /inscription/apprenant/accord en 25 s au plus | ☐ | |
+| REC-AUT-215 | Le parent refuse la demande puis attendre le prochain cycle | Refus détecté | Redirection automatique vers /inscription/apprenant/refus | ☐ | |
 | REC-AUT-216 | Couper le réseau pendant le polling | Erreur réseau pendant l'attente | Pas d'erreur bloquante, l'écran reste affiché ; les tentatives s'espacent (jusqu'à 2 minutes maximum) puis reprennent au retour du réseau | ☐ | |
 | REC-AUT-217 | Cliquer « Renvoyer la demande » pendant le décompte | Renvoi trop tôt | Bouton désactivé avec « Renvoyer la demande dans M:SS » | ☐ | |
 | REC-AUT-218 | Cliquer « Renvoyer la demande » après le délai | Renvoi nominal | Nouveau SMS dans Mailpit pour le parent (lien /consentement/<jeton>) ; compte à rebours redémarré ; annonce « Tu peux renvoyer la demande. » à la fin du délai | ☐ | |
 | REC-AUT-219 | Renvoyer la demande au-delà du plafond SMS | Plafond SMS atteint | Message d'erreur en rouge (role alert) sous le bouton, ex. « Trop de tentatives. Réessaie dans N secondes. » ; libellé exact du plafond quotidien : à confirmer (spec muette) | ☐ | |
-| REC-AUT-220 | Recharger la page (F5) dans le même onglet | Rechargement | La page W07 reste affichée ; la carte du code de reprise réapparaît (conservée dans l'onglet jusqu'à W08/W18) | ☐ | |
+| REC-AUT-220 | Recharger la page (F5) dans le même onglet | Rechargement | La page « Attente consentement » reste affichée ; la carte du code de reprise réapparaît (conservée dans l'onglet jusqu'à « Accord reçu »/« Consentement refusé ») | ☐ | |
 | REC-AUT-221 | Ouvrir le même lien dans un autre navigateur sans session d'inscription | Reprise hors de la session | Redirection vers /inscription/reprendre ; la carte du code n'est jamais affichée dans l'autre navigateur | ☐ | |
 | REC-AUT-222 | Attendre l'expiration de 7 jours (ou avancer l'échéance en base) puis rouvrir la page | Demande expirée (D21) | Redirection vers /inscription/reprendre ; saisir identifiant et code donne « Cette inscription a expiré : tu peux recommencer depuis le début. » avec bouton « Recommencer mon inscription » | ☐ | |
-| REC-AUT-223 | Ouvrir W07 alors que le parent a déjà accepté | Étape ultérieure | Redirection vers W08 | ☐ | |
+| REC-AUT-223 | Ouvrir « Attente consentement » alors que le parent a déjà accepté | Étape ultérieure | Redirection vers « Accord reçu » | ☐ | |
 | REC-AUT-224 | Couper le réseau au chargement initial de la page | Erreur au chargement | Page d'erreur de l'application (réessayer) : à confirmer (spec muette) | ☐ | |
 | REC-AUT-225 | Version mobile 360 px | Écran plein écran à 360 px | Code de reprise lisible sans débordement, boutons empilés, aucun défilement horizontal | ☐ | |
 | REC-AUT-226 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 
 
-#### W07-R · Reprendre mon inscription (état de W07) (/inscription/reprendre)
+#### Reprendre mon inscription (état de « Attente consentement ») (/inscription/reprendre)
 
-Variante de W07 prévue par la spec (§2.5, C5) ; accessible depuis W02 et W16.
+Variante de « Attente consentement » prévue par la spec (§2.5, C5) ; accessible depuis « Accueil » et « Connexion existant ».
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-227 | Ouvrir la page depuis W02 (« Reprendre mon inscription ») | Accès depuis l'accueil | H1 « Reprendre mon inscription », champs « Identifiant » et « Code de reprise » (indication « Le code à 8 caractères affiché quand tu as envoyé la demande à ton parent. »), bouton « Reprendre mon inscription », lien « Recommence ton inscription » (« Code perdu ? ») | ☐ | |
-| REC-AUT-228 | Ouvrir la page depuis W16 après le message « Ton inscription attend encore l'accord de ton parent. » et le bouton « Reprendre mon inscription » | Accès depuis la connexion | Le champ « Identifiant » est prérempli avec l'identifiant saisi sur W16 | ☐ | |
+| REC-AUT-227 | Ouvrir la page depuis « Accueil » (« Reprendre mon inscription ») | Accès depuis l'accueil | H1 « Reprendre mon inscription », champs « Identifiant » et « Code de reprise » (indication « Le code à 8 caractères affiché quand tu as envoyé la demande à ton parent. »), bouton « Reprendre mon inscription », lien « Recommence ton inscription » (« Code perdu ? ») | ☐ | |
+| REC-AUT-228 | Ouvrir la page depuis « Connexion existant » après le message « Ton inscription attend encore l'accord de ton parent. » et le bouton « Reprendre mon inscription » | Accès depuis la connexion | Le champ « Identifiant » est prérempli avec l'identifiant saisi sur « Connexion existant » | ☐ | |
 | REC-AUT-229 | Cliquer « Reprendre mon inscription » avec les deux champs vides | Champs vides | Erreurs « Indique ton identifiant. » et « Indique ton code de reprise. » | ☐ | |
 | REC-AUT-230 | Saisir seulement l'identifiant | Code manquant | Erreur « Indique ton code de reprise. » | ☐ | |
 | REC-AUT-231 | Saisir le bon identifiant et un code faux (ZZZZ-ZZZZ) | Code de reprise faux (RESUME_CODE_INVALID) | Message « Identifiant ou code de reprise incorrect. Vérifie ce que tu as noté. » ; l'identifiant reste saisi | ☐ | |
 | REC-AUT-232 | Saisir un identifiant inexistant et un code quelconque | Identifiant inconnu | Même message que pour un code faux (pas de fuite d'information) | ☐ | |
-| REC-AUT-233 | Saisir le bon identifiant et le code en minuscules, avec ou sans tiret | Tolérance de saisie | Code accepté (insensible à la casse, tirets et espaces ignorés) ; arrivée sur W07 | ☐ | |
-| REC-AUT-234 | Saisir le bon identifiant et le bon code (demande en attente) | Nominal, étape « waiting » | Redirection vers /inscription/apprenant/attente (W07) ; la carte du code n'est PAS réaffichée dans ce navigateur | ☐ | |
-| REC-AUT-235 | Saisir le bon identifiant et le bon code (demande acceptée) | Étape « password » | Redirection vers /inscription/apprenant/accord (W08) | ☐ | |
-| REC-AUT-236 | Saisir le bon identifiant et le bon code (demande refusée) | Étape « refused » | Redirection vers /inscription/apprenant/refus (W18) | ☐ | |
-| REC-AUT-237 | Saisir le bon identifiant et le bon code (avant l'envoi au parent) | Étape « parent » | Redirection vers W06 | ☐ | |
+| REC-AUT-233 | Saisir le bon identifiant et le code en minuscules, avec ou sans tiret | Tolérance de saisie | Code accepté (insensible à la casse, tirets et espaces ignorés) ; arrivée sur « Attente consentement » | ☐ | |
+| REC-AUT-234 | Saisir le bon identifiant et le bon code (demande en attente) | Nominal, étape « waiting » | Redirection vers /inscription/apprenant/attente ; la carte du code n'est PAS réaffichée dans ce navigateur | ☐ | |
+| REC-AUT-235 | Saisir le bon identifiant et le bon code (demande acceptée) | Étape « password » | Redirection vers /inscription/apprenant/accord | ☐ | |
+| REC-AUT-236 | Saisir le bon identifiant et le bon code (demande refusée) | Étape « refused » | Redirection vers /inscription/apprenant/refus | ☐ | |
+| REC-AUT-237 | Saisir le bon identifiant et le bon code (avant l'envoi au parent) | Étape « parent » | Redirection vers « Numéro du parent » | ☐ | |
 | REC-AUT-238 | Saisir identifiant et code après 7 jours (SIGNUP_EXPIRED) | Inscription expirée | Message « Cette inscription a expiré : tu peux recommencer depuis le début. » et bouton « Recommencer mon inscription » vers /inscription/type | ☐ | |
 | REC-AUT-239 | Saisir des codes faux au-delà du plafond (5 par minute, 10 par heure et par identifiant côté code) | THROTTLED | Message « Trop de tentatives. Réessaie dans N secondes. » | ☐ | |
-| REC-AUT-240 | Cliquer « Recommence ton inscription » | Code perdu | Redirection vers /inscription/type (W03) ; le code n'est pas régénérable ; une nouvelle demande vers le même numéro de parent annule l'ancienne et libère l'identifiant (C14) | ☐ | |
+| REC-AUT-240 | Cliquer « Recommence ton inscription » | Code perdu | Redirection vers /inscription/type ; le code n'est pas régénérable ; une nouvelle demande vers le même numéro de parent annule l'ancienne et libère l'identifiant (C14) | ☐ | |
 | REC-AUT-241 | Cliquer « Reprendre mon inscription » | État de chargement | Bouton en chargement | ☐ | |
 | REC-AUT-242 | Couper le réseau puis valider | Erreur réseau | Encart « Le serveur est injoignable. Vérifie ta connexion internet puis réessaie. » | ☐ | |
 | REC-AUT-243 | Arrêter l'API puis valider | Erreur serveur | Encart « Une erreur est survenue de notre côté. Réessaie dans quelques instants. » | ☐ | |
-| REC-AUT-244 | Recharger la page (F5) | Rechargement | La page se réaffiche ; l'identifiant prérempli depuis W16 n'est plus conservé | ☐ | |
+| REC-AUT-244 | Recharger la page (F5) | Rechargement | La page se réaffiche ; l'identifiant prérempli depuis « Connexion existant » n'est plus conservé | ☐ | |
 | REC-AUT-245 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-246 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W08 · Accord reçu (/inscription/apprenant/accord)
+#### Accord reçu (/inscription/apprenant/accord)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-247 | Arriver sur la page | Après acceptation par le parent (depuis W07) | Célébration : H1 « Super, c'est validé ! », texte « Bravo <Prénom> : ton parent a accepté ton inscription. Il ne te reste plus qu'à choisir ton mot de passe. 🎉 », bouton « Continuer » ; le code de reprise conservé dans l'onglet est effacé | ☐ | |
+| REC-AUT-247 | Arriver sur la page | Après acceptation par le parent (depuis « Attente consentement ») | Célébration : H1 « Super, c'est validé ! », texte « Bravo <Prénom> : ton parent a accepté ton inscription. Il ne te reste plus qu'à choisir ton mot de passe. 🎉 », bouton « Continuer » ; le code de reprise conservé dans l'onglet est effacé | ☐ | |
 | REC-AUT-248 | Vérifier le nom du parent | Contenu de la spec | La spec indique « {Prénom du parent} a accepté ton inscription » ; l'écran affiche « ton parent a accepté ton inscription » : à confirmer (spec muette) | ☐ | |
-| REC-AUT-249 | Cliquer « Continuer » | Nominal | Redirection vers /inscription/apprenant/mot-de-passe (W10) | ☐ | |
-| REC-AUT-250 | Recharger la page (F5) | Rechargement | La page W08 reste affichée tant que le mot de passe n'est pas défini | ☐ | |
-| REC-AUT-251 | Ouvrir W08 sans accord (étape « waiting » ou « refused ») | Accès hors étape | Redirection vers W07 ou W18 selon l'état | ☐ | |
-| REC-AUT-252 | Ouvrir W08 sans inscription en cours | Accès sans session | Redirection vers /inscription/reprendre | ☐ | |
+| REC-AUT-249 | Cliquer « Continuer » | Nominal | Redirection vers /inscription/apprenant/mot-de-passe | ☐ | |
+| REC-AUT-250 | Recharger la page (F5) | Rechargement | La page « Accord reçu » reste affichée tant que le mot de passe n'est pas défini | ☐ | |
+| REC-AUT-251 | Ouvrir « Accord reçu » sans accord (étape « waiting » ou « refused ») | Accès hors étape | Redirection vers « Attente consentement » ou « Consentement refusé » selon l'état | ☐ | |
+| REC-AUT-252 | Ouvrir « Accord reçu » sans inscription en cours | Accès sans session | Redirection vers /inscription/reprendre | ☐ | |
 | REC-AUT-253 | Couper le réseau au chargement | Erreur réseau | Page d'erreur de l'application avec possibilité de réessayer : à confirmer (spec muette) | ☐ | |
 | REC-AUT-254 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-255 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W10 · Mot de passe (/inscription/apprenant/mot-de-passe)
+#### Mot de passe (/inscription/apprenant/mot-de-passe)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-256 | Ouvrir la page | Après W08 (« Continuer ») | Kicker « Inscription · étape 4/4 », barre 4/4, H1 « Crée ton mot de passe », sous-titre « Choisis un mot de passe que tu retiendras, mais que personne ne peut deviner. », champs « Mot de passe » et « Confirme ton mot de passe », règles PwReq, bouton « Valider mon mot de passe » | ☐ | |
+| REC-AUT-256 | Ouvrir la page | Après « Accord reçu » (« Continuer ») | Kicker « Inscription · étape 4/4 », barre 4/4, H1 « Crée ton mot de passe », sous-titre « Choisis un mot de passe que tu retiendras, mais que personne ne peut deviner. », champs « Mot de passe » et « Confirme ton mot de passe », règles PwReq, bouton « Valider mon mot de passe » | ☐ | |
 | REC-AUT-257 | Saisir progressivement le mot de passe | Mise à jour des règles | Les règles « Au moins 8 caractères » et « Au moins une lettre et un chiffre » passent au vert avec coche au fil de la saisie ; aucune règle « une majuscule ou un chiffre » ni « pas trop évident » | ☐ | |
 | REC-AUT-258 | Cliquer l'œil « Afficher le mot de passe » / « Masquer le mot de passe » | Visibilité | Le champ passe en clair puis masqué | ☐ | |
 | REC-AUT-259 | Cliquer « Valider mon mot de passe » avec les deux champs vides | Champs vides | Encart d'erreur « Choisis un mot de passe qui respecte les règles, saisi deux fois à l'identique. » ; règles non respectées en rouge avec croix | ☐ | |
@@ -1095,26 +1095,26 @@ Variante de W07 prévue par la spec (§2.5, C5) ; accessible depuis W02 et W16.
 | REC-AUT-262 | Saisir « 1234567890 » dans les deux champs | Mot de passe sans lettre | Règle « Au moins une lettre et un chiffre » en rouge ; soumission refusée | ☐ | |
 | REC-AUT-263 | Saisir un mot de passe valide puis une confirmation différente | Confirmation différente | Message « Les mots de passe ne correspondent pas » sous la confirmation ; soumission refusée | ☐ | |
 | REC-AUT-264 | Contourner la validation locale avec un mot de passe refusé par le serveur | PASSWORD_TOO_WEAK | Message « Le mot de passe doit faire au moins 8 caractères, avec au moins une lettre et un chiffre. » sous le premier champ ; règles en rouge | ☐ | |
-| REC-AUT-265 | Saisir Robot2026x dans les deux champs puis cliquer « Valider mon mot de passe » | Nominal | Le compte devient actif, la session s'ouvre, redirection vers /inscription/apprenant/profil/infos (W11) | ☐ | |
+| REC-AUT-265 | Saisir Robot2026x dans les deux champs puis cliquer « Valider mon mot de passe » | Nominal | Le compte devient actif, la session s'ouvre, redirection vers /inscription/apprenant/profil/infos | ☐ | |
 | REC-AUT-266 | Cliquer « Valider mon mot de passe » | État de chargement | Bouton en chargement, un seul envoi | ☐ | |
 | REC-AUT-267 | Couper le réseau puis valider | Erreur réseau | Encart d'erreur « Le serveur est injoignable. Vérifie ta connexion internet puis réessaie. » | ☐ | |
 | REC-AUT-268 | Arrêter l'API puis valider | Erreur serveur | Encart d'erreur « Une erreur est survenue de notre côté. Réessaie dans quelques instants. » | ☐ | |
-| REC-AUT-269 | Recharger la page (F5) | Rechargement | La page reste sur W10 (état lu côté serveur) | ☐ | |
-| REC-AUT-270 | Ouvrir W10 avant l'accord du parent | Accès hors étape | Redirection vers l'étape réelle (W07 si en attente, W18 si refus) | ☐ | |
-| REC-AUT-271 | Ouvrir W10 sans inscription en cours | Accès sans session | Redirection vers /inscription/reprendre | ☐ | |
-| REC-AUT-272 | Se déconnecter puis se reconnecter sur W16 après W10 | Reconnexion avec le mot de passe choisi | Connexion possible avec l'identifiant et le mot de passe de W10 ; arrivée à l'étape de profil à terminer (voir W11) | ☐ | |
+| REC-AUT-269 | Recharger la page (F5) | Rechargement | La page reste sur « Mot de passe » (état lu côté serveur) | ☐ | |
+| REC-AUT-270 | Ouvrir « Mot de passe » avant l'accord du parent | Accès hors étape | Redirection vers l'étape réelle (« Attente consentement » si en attente, « Consentement refusé » si refus) | ☐ | |
+| REC-AUT-271 | Ouvrir « Mot de passe » sans inscription en cours | Accès sans session | Redirection vers /inscription/reprendre | ☐ | |
+| REC-AUT-272 | Se déconnecter puis se reconnecter sur « Connexion existant » après « Mot de passe » | Reconnexion avec le mot de passe choisi | Connexion possible avec l'identifiant et le mot de passe de « Mot de passe » ; arrivée à l'étape de profil à terminer (voir « Profil 1 · infos ») | ☐ | |
 | REC-AUT-273 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-274 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W11 · Profil 1 · infos (/inscription/apprenant/profil/infos)
+#### Profil 1 · infos (/inscription/apprenant/profil/infos)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-275 | Ouvrir la page | Après W10 | Kicker « Profil 1/4 », barre 1/4, H1 « Parle-nous de toi », sous-titre « Pour te proposer des parcours adaptés à ton âge et à ta région. », champs « Date de naissance », « Pays de résidence » (Bénin présélectionné), « Localité (ville / quartier) », « Email » (indication « Facultatif : pour recevoir tes notifications par email. »), bouton « Suivant » | ☐ | |
+| REC-AUT-275 | Ouvrir la page | Après « Mot de passe » | Kicker « Profil 1/4 », barre 1/4, H1 « Parle-nous de toi », sous-titre « Pour te proposer des parcours adaptés à ton âge et à ta région. », champs « Date de naissance », « Pays de résidence » (Bénin présélectionné), « Localité (ville / quartier) », « Email » (indication « Facultatif : pour recevoir tes notifications par email. »), bouton « Suivant » | ☐ | |
 | REC-AUT-276 | Cliquer « Suivant » avec date et localité vides | Champs obligatoires vides | Erreurs « Indique ta date de naissance. » et « Choisis ta ville ou ton quartier. » | ☐ | |
 | REC-AUT-277 | Laisser seulement la localité vide | Localité manquante | Erreur « Choisis ta ville ou ton quartier. » | ☐ | |
-| REC-AUT-278 | Saisir une date de naissance donnant un âge différent de celui de W05 (ex. 11 ans alors que 14 ans choisi) | Incohérence âge / date (BIRTHDATE_AGE_MISMATCH, D23) | Message « Cette date ne correspond pas à l'âge indiqué au début de ton inscription. » ; pas de passage à W12 | ☐ | |
+| REC-AUT-278 | Saisir une date de naissance donnant un âge différent de celui de « Âge » (ex. 11 ans alors que 14 ans choisi) | Incohérence âge / date (BIRTHDATE_AGE_MISMATCH, D23) | Message « Cette date ne correspond pas à l'âge indiqué au début de ton inscription. » ; pas de passage à « Profil 2 · école » | ☐ | |
 | REC-AUT-279 | Saisir une date donnant un âge hors 10-17 ans | Âge hors limites (AGE_OUT_OF_RANGE) | Message « Steamy est fait pour les 10 à 17 ans. » | ☐ | |
 | REC-AUT-280 | Saisir une date dans le futur | Date future | Refus de la date ; libellé exact : à confirmer (spec muette) | ☐ | |
 | REC-AUT-281 | Changer le pays de résidence | Autre pays | La liste « Localité » est rechargée avec les localités du pays choisi ; la localité précédente est réinitialisée | ☐ | |
@@ -1122,99 +1122,99 @@ Variante de W07 prévue par la spec (§2.5, C5) ; accessible depuis W02 et W16.
 | REC-AUT-283 | Saisir un email mal formé (ex. « awa@ ») | Email invalide | Erreur sous le champ « Email » renvoyée par le serveur | ☐ | |
 | REC-AUT-284 | Saisir un email déjà utilisé | EMAIL_TAKEN | Erreur « Cette adresse email est déjà utilisée. » | ☐ | |
 | REC-AUT-285 | Laisser l'email vide | Champ facultatif | Aucune erreur, passage à l'étape suivante | ☐ | |
-| REC-AUT-286 | Saisir une date cohérente avec l'âge de W05, une localité, puis « Suivant » | Nominal | Redirection vers /inscription/apprenant/profil/ecole (W12) | ☐ | |
+| REC-AUT-286 | Saisir une date cohérente avec l'âge de « Âge », une localité, puis « Suivant » | Nominal | Redirection vers /inscription/apprenant/profil/ecole | ☐ | |
 | REC-AUT-287 | Cliquer « Suivant » | État de chargement | Bouton en chargement | ☐ | |
 | REC-AUT-288 | Couper le réseau puis valider | Erreur réseau | Encart « Le serveur est injoignable. Vérifie ta connexion internet puis réessaie. » | ☐ | |
 | REC-AUT-289 | Arrêter l'API puis valider | Erreur serveur | Encart « Une erreur est survenue de notre côté. Réessaie dans quelques instants. » | ☐ | |
-| REC-AUT-290 | Recharger la page (F5) | Rechargement | Page W11 réaffichée, champs vides ; l'étape reste W11 tant que non enregistrée | ☐ | |
+| REC-AUT-290 | Recharger la page (F5) | Rechargement | Page « Profil 1 · infos » réaffichée, champs vides ; l'étape reste « Profil 1 · infos » tant que non enregistrée | ☐ | |
 | REC-AUT-291 | Ouvrir /inscription/apprenant/profil/infos sans être connecté | Accès sans session | Redirection vers /connexion | ☐ | |
-| REC-AUT-292 | Ouvrir /inscription/apprenant/profil/ecole alors que W11 n'est pas faite | Étape non atteinte | Redirection vers /inscription/apprenant/profil/infos | ☐ | |
+| REC-AUT-292 | Ouvrir /inscription/apprenant/profil/ecole alors que « Profil 1 · infos » n'est pas faite | Étape non atteinte | Redirection vers /inscription/apprenant/profil/infos | ☐ | |
 | REC-AUT-293 | Ouvrir /inscription/apprenant/profil/inconnu | Étape inexistante | Page 404 | ☐ | |
 | REC-AUT-294 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-295 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W12 · Profil 2 · école (/inscription/apprenant/profil/ecole)
+#### Profil 2 · école (/inscription/apprenant/profil/ecole)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-296 | Ouvrir la page | Après W11 | Kicker « Profil 2/4 », H1 « Ton école », sous-titre « On adaptera la difficulté et le ton. », liste « Ta classe » (ordre scolaire croissant, pas de désordre « 5ème, 6ème, 4ème »), cartes de choix « Tu es (facultatif) » sans sélection initiale, liste « Situation de handicap (facultatif) » (option « Aucune, ou je préfère ne pas répondre »), encart « Le genre et la situation de handicap sont facultatifs. Ils servent seulement à adapter tes parcours et à mesurer, de façon anonyme, si Steamy profite à tous. Ils ne sont jamais vendus ni montrés aux autres. », bouton « Suivant » | ☐ | |
+| REC-AUT-296 | Ouvrir la page | Après « Profil 1 · infos » | Kicker « Profil 2/4 », H1 « Ton école », sous-titre « On adaptera la difficulté et le ton. », liste « Ta classe » (ordre scolaire croissant, pas de désordre « 5ème, 6ème, 4ème »), cartes de choix « Tu es (facultatif) » sans sélection initiale, liste « Situation de handicap (facultatif) » (option « Aucune, ou je préfère ne pas répondre »), encart « Le genre et la situation de handicap sont facultatifs. Ils servent seulement à adapter tes parcours et à mesurer, de façon anonyme, si Steamy profite à tous. Ils ne sont jamais vendus ni montrés aux autres. », bouton « Suivant » | ☐ | |
 | REC-AUT-297 | Cliquer « Suivant » sans choisir de classe | Classe obligatoire | Erreur « Choisis ta classe. » | ☐ | |
 | REC-AUT-298 | Ouvrir la liste « Ta classe » | Ordre du référentiel | Les classes sont dans l'ordre scolaire (ex. 6ème, 5ème, 4ème…) tel que fourni par le référentiel | ☐ | |
-| REC-AUT-299 | Choisir une classe, laisser genre et handicap vides, « Suivant » | Champs facultatifs vides | Passage à /inscription/apprenant/profil/objectifs (W13) sans erreur | ☐ | |
+| REC-AUT-299 | Choisir une classe, laisser genre et handicap vides, « Suivant » | Champs facultatifs vides | Passage à /inscription/apprenant/profil/objectifs sans erreur | ☐ | |
 | REC-AUT-300 | Choisir un genre (carte) puis le déselectionner | Carte genre | Une carte de genre peut être sélectionnée ; la possibilité de la désélectionner est à confirmer (spec muette) | ☐ | |
-| REC-AUT-301 | Choisir un genre et une situation de handicap puis « Suivant » | Valeurs facultatives renseignées | Passage à W13 ; les valeurs sont enregistrées | ☐ | |
+| REC-AUT-301 | Choisir un genre et une situation de handicap puis « Suivant » | Valeurs facultatives renseignées | Passage à « Objectifs » ; les valeurs sont enregistrées | ☐ | |
 | REC-AUT-302 | Cliquer « Suivant » | État de chargement | Bouton en chargement | ☐ | |
 | REC-AUT-303 | Couper le réseau puis valider | Erreur réseau | Encart « Le serveur est injoignable. Vérifie ta connexion internet puis réessaie. » | ☐ | |
 | REC-AUT-304 | Arrêter l'API puis valider | Erreur serveur | Encart « Une erreur est survenue de notre côté. Réessaie dans quelques instants. » | ☐ | |
-| REC-AUT-305 | Recharger la page (F5) | Rechargement | Page W12 réaffichée, saisies perdues | ☐ | |
-| REC-AUT-306 | Ouvrir W12 sans avoir fait W11 | Accès hors étape | Redirection vers W11 | ☐ | |
-| REC-AUT-307 | Bouton Retour du navigateur | Retour vers W11 | À confirmer (spec muette) : l'étape réelle du profil prime ; retour possible vers W11 ou redirection vers l'étape courante | ☐ | |
+| REC-AUT-305 | Recharger la page (F5) | Rechargement | Page « Profil 2 · école » réaffichée, saisies perdues | ☐ | |
+| REC-AUT-306 | Ouvrir « Profil 2 · école » sans avoir fait « Profil 1 · infos » | Accès hors étape | Redirection vers « Profil 1 · infos » | ☐ | |
+| REC-AUT-307 | Bouton Retour du navigateur | Retour vers « Profil 1 · infos » | À confirmer (spec muette) : l'étape réelle du profil prime ; retour possible vers « Profil 1 · infos » ou redirection vers l'étape courante | ☐ | |
 | REC-AUT-308 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-309 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W13 · Objectifs (/inscription/apprenant/profil/objectifs)
+#### Objectifs (/inscription/apprenant/profil/objectifs)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-310 | Ouvrir la page | Après W12 | Kicker « Profil 3/4 », H1 « Tes objectifs », sous-titre « Choisis ce qui t'intéresse, au moins 2 : tu pourras changer plus tard. », puces d'objectifs avec emoji issues du référentiel, aucune sélectionnée, bouton « Suivant · 0 sélectionné » désactivé | ☐ | |
+| REC-AUT-310 | Ouvrir la page | Après « Profil 2 · école » | Kicker « Profil 3/4 », H1 « Tes objectifs », sous-titre « Choisis ce qui t'intéresse, au moins 2 : tu pourras changer plus tard. », puces d'objectifs avec emoji issues du référentiel, aucune sélectionnée, bouton « Suivant · 0 sélectionné » désactivé | ☐ | |
 | REC-AUT-311 | Sélectionner un seul objectif | Moins de 2 objectifs | Bouton « Suivant · 1 sélectionné » toujours désactivé | ☐ | |
 | REC-AUT-312 | Sélectionner un deuxième objectif | Seuil atteint | Bouton « Suivant · 2 sélectionnés » activé | ☐ | |
 | REC-AUT-313 | Sélectionner plus de 2 objectifs puis désélectionner pour revenir à 1 | Retour sous le seuil | Le bouton redevient désactivé ; libellé « Suivant · n sélectionné(s) » avec accord au pluriel | ☐ | |
-| REC-AUT-314 | Cliquer « Suivant · 2 sélectionnés » | Nominal | Redirection vers /inscription/apprenant/profil/avatar (W14) | ☐ | |
+| REC-AUT-314 | Cliquer « Suivant · 2 sélectionnés » | Nominal | Redirection vers /inscription/apprenant/profil/avatar | ☐ | |
 | REC-AUT-315 | Couper le réseau au chargement des objectifs | Référentiel indisponible | Message d'erreur « Impossible de charger les objectifs. » et bouton « Réessayer » ; « Réessayer » recharge la liste | ☐ | |
 | REC-AUT-316 | Pendant le chargement des objectifs | État de chargement | Indicateur « Chargement des objectifs… » | ☐ | |
 | REC-AUT-317 | Cliquer « Suivant · n sélectionnés » | État de chargement à l'envoi | Bouton en chargement | ☐ | |
 | REC-AUT-318 | Couper le réseau puis valider | Erreur réseau | Encart « Le serveur est injoignable. Vérifie ta connexion internet puis réessaie. » | ☐ | |
 | REC-AUT-319 | Arrêter l'API puis valider | Erreur serveur | Encart « Une erreur est survenue de notre côté. Réessaie dans quelques instants. » | ☐ | |
-| REC-AUT-320 | Recharger la page (F5) | Rechargement | Page W13 réaffichée, sélection perdue | ☐ | |
-| REC-AUT-321 | Ouvrir W13 sans avoir fait W12 | Accès hors étape | Redirection vers W12 | ☐ | |
+| REC-AUT-320 | Recharger la page (F5) | Rechargement | Page « Objectifs » réaffichée, sélection perdue | ☐ | |
+| REC-AUT-321 | Ouvrir « Objectifs » sans avoir fait « Profil 2 · école » | Accès hors étape | Redirection vers « Profil 2 · école » | ☐ | |
 | REC-AUT-322 | Sélectionner une puce avec Espace / Entrée au clavier | Clavier | La puce se coche/décoche ; le focus est visible | ☐ | |
 | REC-AUT-323 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-324 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W14 · Avatar (/inscription/apprenant/profil/avatar)
+#### Avatar (/inscription/apprenant/profil/avatar)
 
 Écran plein écran (hors WebShell).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-325 | Ouvrir la page | Après W13 | Écran plein écran avec barre de progression 4/4 et kicker « Profil 4/4 », H1 « Choisis ton avatar », sous-titre « C'est ta tête sur Steamy : tu pourras le changer plus tard. », grille de 10 avatars, aucun présélectionné, bouton « Terminer mon profil 🚀 » désactivé | ☐ | |
+| REC-AUT-325 | Ouvrir la page | Après « Objectifs » | Écran plein écran avec barre de progression 4/4 et kicker « Profil 4/4 », H1 « Choisis ton avatar », sous-titre « C'est ta tête sur Steamy : tu pourras le changer plus tard. », grille de 10 avatars, aucun présélectionné, bouton « Terminer mon profil 🚀 » désactivé | ☐ | |
 | REC-AUT-326 | Compter les avatars | Contenu | 10 avatars affichés (référentiel) | ☐ | |
 | REC-AUT-327 | Cliquer un avatar | Sélection exclusive | Double anneau ambre et coche sur l'avatar choisi ; bouton « Terminer mon profil 🚀 » activé | ☐ | |
 | REC-AUT-328 | Cliquer un second avatar | Changement de sélection | Un seul avatar reste sélectionné | ☐ | |
-| REC-AUT-329 | Cliquer « Terminer mon profil 🚀 » | Nominal | Redirection vers /inscription/apprenant/bienvenue (W15) | ☐ | |
+| REC-AUT-329 | Cliquer « Terminer mon profil 🚀 » | Nominal | Redirection vers /inscription/apprenant/bienvenue | ☐ | |
 | REC-AUT-330 | Couper le réseau au chargement | Référentiel indisponible | Message « Impossible de charger les avatars. » et bouton « Réessayer » | ☐ | |
 | REC-AUT-331 | Pendant le chargement | État de chargement | Indicateur « Chargement des avatars… » | ☐ | |
 | REC-AUT-332 | Couper le réseau puis « Terminer mon profil 🚀 » | Erreur réseau à l'envoi | Encart « Le serveur est injoignable. Vérifie ta connexion internet puis réessaie. » | ☐ | |
 | REC-AUT-333 | Arrêter l'API puis valider | Erreur serveur | Encart « Une erreur est survenue de notre côté. Réessaie dans quelques instants. » | ☐ | |
-| REC-AUT-334 | Recharger la page (F5) | Rechargement | Page W14 réaffichée, aucun avatar présélectionné | ☐ | |
-| REC-AUT-335 | Ouvrir W14 sans avoir fait W13 | Accès hors étape | Redirection vers l'étape réelle du profil | ☐ | |
+| REC-AUT-334 | Recharger la page (F5) | Rechargement | Page « Avatar » réaffichée, aucun avatar présélectionné | ☐ | |
+| REC-AUT-335 | Ouvrir « Avatar » sans avoir fait « Objectifs » | Accès hors étape | Redirection vers l'étape réelle du profil | ☐ | |
 | REC-AUT-336 | Naviguer au clavier dans la grille d'avatars | Clavier | Sélection possible avec flèches / Espace, focus visible | ☐ | |
 | REC-AUT-337 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W15 · Bienvenue (/inscription/apprenant/bienvenue)
+#### Bienvenue (/inscription/apprenant/bienvenue)
 
 Écran plein écran (hors WebShell).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-338 | Arriver sur la page | Après W14 | Célébration plein écran : avatar choisi, H1 « Bienvenue, <Prénom> ! », texte « Ton compte est prêt. Commence par un parcours gratuit : ils sont ouverts à tous, sans rien payer. » ; aucune mention « 1 parcours gratuit débloqué » ; boutons « Voir les parcours gratuits » et « Aller sur mon tableau de bord » | ☐ | |
+| REC-AUT-338 | Arriver sur la page | Après « Avatar » | Célébration plein écran : avatar choisi, H1 « Bienvenue, <Prénom> ! », texte « Ton compte est prêt. Commence par un parcours gratuit : ils sont ouverts à tous, sans rien payer. » ; aucune mention « 1 parcours gratuit débloqué » ; boutons « Voir les parcours gratuits » et « Aller sur mon tableau de bord » | ☐ | |
 | REC-AUT-339 | Cliquer « Voir les parcours gratuits » | CTA catalogue | Redirection vers /apprenant/catalogue?prix=gratuit, catalogue filtré sur les parcours gratuits | ☐ | |
-| REC-AUT-340 | Cliquer « Aller sur mon tableau de bord » | CTA tableau de bord | Redirection vers /apprenant (accueil nouvel utilisateur, WD01/WD02) | ☐ | |
-| REC-AUT-341 | Se déconnecter puis se reconnecter avec l'identifiant et le mot de passe de W10 | Reconnexion | Connexion réussie sur /connexion, arrivée sur /apprenant (profil terminé) | ☐ | |
+| REC-AUT-340 | Cliquer « Aller sur mon tableau de bord » | CTA tableau de bord | Redirection vers /apprenant (accueil nouvel utilisateur, « Accueil »/« Accueil nouvel utilisateur ») | ☐ | |
+| REC-AUT-341 | Se déconnecter puis se reconnecter avec l'identifiant et le mot de passe de « Mot de passe » | Reconnexion | Connexion réussie sur /connexion, arrivée sur /apprenant (profil terminé) | ☐ | |
 | REC-AUT-342 | Recharger la page (F5) | Rechargement | La page de bienvenue reste affichée | ☐ | |
-| REC-AUT-343 | Ouvrir W15 avec un profil non terminé | Accès hors étape | Redirection vers l'étape de profil à terminer | ☐ | |
-| REC-AUT-344 | Ouvrir W15 non connecté | Accès sans session | Redirection vers /connexion | ☐ | |
-| REC-AUT-345 | Ouvrir W15 connecté comme parent | Mauvais rôle | Redirection vers /parent | ☐ | |
+| REC-AUT-343 | Ouvrir « Bienvenue » avec un profil non terminé | Accès hors étape | Redirection vers l'étape de profil à terminer | ☐ | |
+| REC-AUT-344 | Ouvrir « Bienvenue » non connecté | Accès sans session | Redirection vers /connexion | ☐ | |
+| REC-AUT-345 | Ouvrir « Bienvenue » connecté comme parent | Mauvais rôle | Redirection vers /parent | ☐ | |
 | REC-AUT-346 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-347 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W16 · Connexion existant (/connexion)
+#### Connexion existant (/connexion)
 
 Écran unique pour les trois rôles (S4, C7). Les comptes du personnel (admin, contenu, support, finance) sont refusés ici.
 
@@ -1235,7 +1235,7 @@ Variante de W07 prévue par la spec (§2.5, C5) ; accessible depuis W02 et W16.
 | REC-AUT-360 | Saisir un mot de passe et laisser l'identifiant vide | Identifiant vide | Erreur « Saisis ton identifiant ou ton numéro. » | ☐ | |
 | REC-AUT-361 | Saisir lea.adjovi et un mauvais mot de passe | Mot de passe faux (INVALID_CREDENTIALS) | Encart « Connexion impossible : » avec « Identifiant ou mot de passe incorrect. » ; URL inchangée /connexion | ☐ | |
 | REC-AUT-362 | Saisir un identifiant inconnu | Compte inexistant | Même message « Identifiant ou mot de passe incorrect. » (aucun indice sur l'existence du compte) | ☐ | |
-| REC-AUT-363 | Saisir superadmin@steamy.test et Steamy2026 | Compte du personnel refusé (C7) | Même message « Identifiant ou mot de passe incorrect. » ; la connexion du personnel se fait par l'admin Django (WAD15) | ☐ | |
+| REC-AUT-363 | Saisir superadmin@steamy.test et Steamy2026 | Compte du personnel refusé (C7) | Même message « Identifiant ou mot de passe incorrect. » ; la connexion du personnel se fait par l'admin Django | ☐ | |
 | REC-AUT-364 | Se connecter avec l'identifiant d'une inscription en attente et le code de reprise comme mot de passe | Compte en attente de consentement (ACCOUNT_PENDING_CONSENT) | Message « Ton inscription attend encore l'accord de ton parent. » et bouton « Reprendre mon inscription » au-dessus des champs | ☐ | |
 | REC-AUT-365 | Cliquer « Reprendre mon inscription » (bouton d'erreur) | Basculer vers la reprise | Redirection vers /inscription/reprendre avec le champ « Identifiant » prérempli | ☐ | |
 | REC-AUT-366 | Se connecter avec un compte suspendu (ACCOUNT_SUSPENDED) | Compte suspendu | Message « Ce compte est suspendu. » et lien « Contacter l'équipe Steamy » vers /aide?sujet=question#contact | ☐ | |
@@ -1244,7 +1244,7 @@ Variante de W07 prévue par la spec (§2.5, C5) ; accessible depuis W02 et W16.
 | REC-AUT-369 | Couper le réseau puis « Se connecter » | Erreur réseau | Message « Le serveur est injoignable. Vérifie ta connexion internet puis réessaie. » | ☐ | |
 | REC-AUT-370 | Arrêter l'API puis « Se connecter » | Erreur serveur | Message « Une erreur est survenue de notre côté. Réessaie dans quelques instants. » | ☐ | |
 | REC-AUT-371 | Cliquer « Se connecter » | État de chargement | Bouton en chargement, un seul envoi | ☐ | |
-| REC-AUT-372 | Vérifier le registre de langue du message d'erreur pour un parent ou un enseignant | Tutoiement sur l'écran unique | Les messages de W16 sont au tutoiement (« Saisis… ») pour les trois rôles selon le code ; le vouvoiement pour parent et enseignant est à confirmer (spec muette) | ☐ | |
+| REC-AUT-372 | Vérifier le registre de langue du message d'erreur pour un parent ou un enseignant | Tutoiement sur l'écran unique | Les messages de « Connexion existant » sont au tutoiement (« Saisis… ») pour les trois rôles selon le code ; le vouvoiement pour parent et enseignant est à confirmer (spec muette) | ☐ | |
 | REC-AUT-373 | Ouvrir /connexion?next=%2Fapprenant en étant déconnecté puis se connecter comme Léa | Retour à la page demandée | Après connexion, redirection vers /apprenant | ☐ | |
 | REC-AUT-374 | Ouvrir /parent/enfants/3?onglet=progres non connecté puis se connecter comme Marie | Retour avec chemin et paramètres | Redirection initiale vers /connexion?next=%2Fparent%2Fenfants%2F3%3Fonglet%3Dprogres ; après connexion, retour sur /parent/enfants/3?onglet=progres | ☐ | |
 | REC-AUT-375 | Ouvrir /connexion?next=https://evil.example/apprenant puis se connecter comme Marie | `next` externe ignoré | Redirection vers l'espace du rôle (/parent), jamais vers le site externe | ☐ | |
@@ -1252,12 +1252,12 @@ Variante de W07 prévue par la spec (§2.5, C5) ; accessible depuis W02 et W16.
 | REC-AUT-377 | Ouvrir /connexion?next=/admin puis se connecter | `next` vers un chemin non autorisé | Redirection vers l'espace du rôle (seuls /apprenant, /parent, /enseignant, /backoffice, /parcours, /evenements, /boutique, /consentement et /inscription/parent/demande sont admis) | ☐ | |
 | REC-AUT-378 | Ouvrir /connexion?next=/boutique/panier avec un panier invité non vide puis se connecter comme apprenant ou parent | Fusion du panier invité | Retour sur la page demandée ; le panier invité est versé dans le panier du compte (vérification détaillée dans le lot boutique) | ☐ | |
 | REC-AUT-379 | Cliquer « Mot de passe oublié ? » | Ouverture de la fenêtre de choix | Fenêtre modale 🔑 « Mot de passe oublié ? » avec le texte « Qui es-tu ? La réinitialisation n'est pas la même pour tout le monde. » et deux boutons « Je suis parent ou enseignant » et « Je suis apprenant » | ☐ | |
-| REC-AUT-380 | Cliquer « Je suis parent ou enseignant » | Branche parent / enseignant | Redirection vers /mot-de-passe-oublie (WL02) | ☐ | |
+| REC-AUT-380 | Cliquer « Je suis parent ou enseignant » | Branche parent / enseignant | Redirection vers /mot-de-passe-oublie | ☐ | |
 | REC-AUT-381 | Cliquer « Je suis apprenant » | Branche apprenant (D26) | La fenêtre devient « Demande à ton parent » avec « Demande à ton parent de réinitialiser ton mot de passe depuis son espace Steamy. » et un bouton « J'ai compris » | ☐ | |
 | REC-AUT-382 | Cliquer « J'ai compris » ou appuyer sur Échap | Fermeture de la fenêtre | La fenêtre se ferme, retour au formulaire de connexion, sans perte de saisie | ☐ | |
-| REC-AUT-383 | Cliquer « Inscris-toi » | Lien vers l'inscription | Redirection vers /inscription/type (W03) | ☐ | |
+| REC-AUT-383 | Cliquer « Inscris-toi » | Lien vers l'inscription | Redirection vers /inscription/type | ☐ | |
 | REC-AUT-384 | Cliquer « Reprendre mon inscription » (lien du bas) | Lien vers la reprise | Redirection vers /inscription/reprendre | ☐ | |
-| REC-AUT-385 | Arriver sur /connexion?compte=existant (après WP02) | Numéro de parent déjà inscrit (C13) | Message d'information « Vous avez déjà un compte avec ce numéro : connectez-vous. » au-dessus du formulaire | ☐ | |
+| REC-AUT-385 | Arriver sur /connexion?compte=existant (après « OTP ») | Numéro de parent déjà inscrit (C13) | Message d'information « Vous avez déjà un compte avec ce numéro : connectez-vous. » au-dessus du formulaire | ☐ | |
 | REC-AUT-386 | Ouvrir /connexion en étant déjà connecté | Redirection d'un utilisateur connecté | Redirection immédiate vers l'espace du rôle (ex. /apprenant), ou vers `next` s'il est sûr | ☐ | |
 | REC-AUT-387 | Retour arrière du navigateur après une connexion réussie | Retour vers la connexion | Impossible de revenir sur /connexion : l'historique a été remplacé (replace), l'utilisateur connecté est de toute façon renvoyé vers son espace | ☐ | |
 | REC-AUT-388 | Recharger la page (F5) après une erreur | Rechargement | Formulaire vide, message d'erreur effacé | ☐ | |
@@ -1265,63 +1265,63 @@ Variante de W07 prévue par la spec (§2.5, C5) ; accessible depuis W02 et W16.
 | REC-AUT-390 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### W18 · Consentement refusé (terminal) (/inscription/apprenant/refus)
+#### Consentement refusé (terminal) (/inscription/apprenant/refus)
 
 Terminal. Écran plein écran (hors WebShell).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-391 | Arriver sur la page | Refus du parent détecté (depuis W07) ou page rechargée | Écran plein écran à fond d'erreur : mascotte triste, H1 « Inscription non validée », « Ton parent n'a pas accepté ton inscription. », encart « Motif indiqué : « <motif choisi> » », texte « Tu pourras refaire une demande à ce parent dans 30 jours. Parles-en ensemble d'ici là. », boutons « Retour à l'accueil » et « Besoin d'aide ? » ; aucun bouton « Changer de parent » ni « Réessayer plus tard » | ☐ | |
+| REC-AUT-391 | Arriver sur la page | Refus du parent détecté (depuis « Attente consentement ») ou page rechargée | Écran plein écran à fond d'erreur : mascotte triste, H1 « Inscription non validée », « Ton parent n'a pas accepté ton inscription. », encart « Motif indiqué : « <motif choisi> » », texte « Tu pourras refaire une demande à ce parent dans 30 jours. Parles-en ensemble d'ici là. », boutons « Retour à l'accueil » et « Besoin d'aide ? » ; aucun bouton « Changer de parent » ni « Réessayer plus tard » | ☐ | |
 | REC-AUT-392 | Refus avec le motif « Mon enfant est trop jeune » | Motif prédéfini | L'encart affiche « Motif indiqué : « Mon enfant est trop jeune » » | ☐ | |
 | REC-AUT-393 | Refus avec précisions saisies par le parent | Précisions du parent | Les précisions saisies s'affichent avec le motif (spec : « et ses précisions »); mise en forme exacte : à confirmer (spec muette) | ☐ | |
 | REC-AUT-394 | Refus avec le motif « Autre raison » | Motif « Autre » | L'encart affiche « Motif indiqué : « Autre raison » » | ☐ | |
-| REC-AUT-395 | Cliquer « Retour à l'accueil » | Retour | Redirection vers /inscription (W02) | ☐ | |
-| REC-AUT-396 | Cliquer « Besoin d'aide ? » | Aide / changement de parent | Redirection vers /aide?sujet=changement-parent#contact (WL24), sujet présélectionné « changement de parent » | ☐ | |
-| REC-AUT-397 | Vérifier que l'identifiant est libéré après affichage | Purge du compte en attente (D22) | L'identifiant devient de nouveau disponible : W04 ne signale plus « Cet identifiant est déjà associé à un compte Steamy. » pour lui | ☐ | |
-| REC-AUT-398 | Recommencer une inscription vers le même numéro de parent avant 30 jours | Délai de 30 jours (C9) | Sur W06 : « Ce parent a refusé une demande il y a moins de 30 jours. Tu pourras lui en refaire une 30 jours après son refus. » | ☐ | |
-| REC-AUT-399 | Recommencer une inscription vers un autre numéro de parent depuis le même navigateur | Nouvelle inscription après refus | Le parcours repart normalement jusqu'à W07 ; W18 n'est plus réaffiché (rechargement de W07 reste sur W07) | ☐ | |
+| REC-AUT-395 | Cliquer « Retour à l'accueil » | Retour | Redirection vers /inscription | ☐ | |
+| REC-AUT-396 | Cliquer « Besoin d'aide ? » | Aide / changement de parent | Redirection vers /aide?sujet=changement-parent#contact, sujet présélectionné « changement de parent » | ☐ | |
+| REC-AUT-397 | Vérifier que l'identifiant est libéré après affichage | Purge du compte en attente (D22) | L'identifiant devient de nouveau disponible : « Identité & identifiant » ne signale plus « Cet identifiant est déjà associé à un compte Steamy. » pour lui | ☐ | |
+| REC-AUT-398 | Recommencer une inscription vers le même numéro de parent avant 30 jours | Délai de 30 jours (C9) | Sur « Numéro du parent » : « Ce parent a refusé une demande il y a moins de 30 jours. Tu pourras lui en refaire une 30 jours après son refus. » | ☐ | |
+| REC-AUT-399 | Recommencer une inscription vers un autre numéro de parent depuis le même navigateur | Nouvelle inscription après refus | Le parcours repart normalement jusqu'à « Attente consentement » ; « Consentement refusé » n'est plus réaffiché (rechargement de « Attente consentement » reste sur « Attente consentement ») | ☐ | |
 | REC-AUT-400 | Recharger la page (F5) après le premier affichage | Rechargement | À confirmer (spec muette) : comportement après purge du compte en attente (affichage conservé ou redirection vers la reprise) | ☐ | |
-| REC-AUT-401 | Ouvrir W18 sans refus (étape « waiting ») | Accès hors étape | Redirection vers W07 | ☐ | |
-| REC-AUT-402 | Ouvrir W18 sans inscription en cours | Accès sans session | Redirection vers /inscription/reprendre | ☐ | |
+| REC-AUT-401 | Ouvrir « Consentement refusé » sans refus (étape « waiting ») | Accès hors étape | Redirection vers « Attente consentement » | ☐ | |
+| REC-AUT-402 | Ouvrir « Consentement refusé » sans inscription en cours | Accès sans session | Redirection vers /inscription/reprendre | ☐ | |
 | REC-AUT-403 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-404 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP01 · Créer un compte (/inscription/parent)
+#### Créer un compte (/inscription/parent)
 
 Vouvoiement.
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-405 | Ouvrir la page | Arrivée depuis W03 (choix « Un parent ») | Kicker « Espace parent », H1 « Créez votre compte parent », sous-titre « Quelques informations pour démarrer. Vous pourrez ensuite accompagner et suivre votre enfant. », champs « Prénom », « Nom », « Numéro de téléphone » (Bénin présélectionné), case « J'accepte les conditions d'utilisation et la politique de confidentialité. » non cochée, bouton « Recevoir mon code par SMS », lien « Connectez-vous » (« Déjà un compte ? »), panneau marque « Accompagnez ses premiers pas. 👨‍👩‍👧 » | ☐ | |
+| REC-AUT-405 | Ouvrir la page | Arrivée depuis « Type d'utilisateur » (choix « Un parent ») | Kicker « Espace parent », H1 « Créez votre compte parent », sous-titre « Quelques informations pour démarrer. Vous pourrez ensuite accompagner et suivre votre enfant. », champs « Prénom », « Nom », « Numéro de téléphone » (Bénin présélectionné), case « J'accepte les conditions d'utilisation et la politique de confidentialité. » non cochée, bouton « Recevoir mon code par SMS », lien « Connectez-vous » (« Déjà un compte ? »), panneau marque « Accompagnez ses premiers pas. 👨‍👩‍👧 » | ☐ | |
 | REC-AUT-406 | Cliquer « Recevoir mon code par SMS » avec tout vide | Champs obligatoires vides | Encart « Corrigez les erreurs suivantes : » avec « Indiquez votre prénom. », « Indiquez votre nom. », « Indiquez un numéro de téléphone valide. », « Acceptez les conditions d'utilisation pour continuer. » | ☐ | |
 | REC-AUT-407 | Laisser le prénom vide | Prénom vide | Erreur « Indiquez votre prénom. » | ☐ | |
 | REC-AUT-408 | Laisser le nom vide | Nom vide | Erreur « Indiquez votre nom. » | ☐ | |
 | REC-AUT-409 | Laisser le numéro vide | Numéro vide | Erreur « Indiquez un numéro de téléphone valide. » | ☐ | |
-| REC-AUT-410 | Saisir un numéro invalide (3 chiffres) | Numéro invalide (PHONE_INVALID) | Erreur sous le champ « Ce numéro de téléphone n'est pas valide. » ; pas de passage à WP02 | ☐ | |
+| REC-AUT-410 | Saisir un numéro invalide (3 chiffres) | Numéro invalide (PHONE_INVALID) | Erreur sous le champ « Ce numéro de téléphone n'est pas valide. » ; pas de passage à « OTP » | ☐ | |
 | REC-AUT-411 | Ne pas cocher la case des conditions | CGU non acceptées | Erreur « Acceptez les conditions d'utilisation pour continuer. » | ☐ | |
-| REC-AUT-412 | Cliquer les liens des conditions et de la politique de confidentialité | Liens légaux | Pages légales WL09 (CGU puis confidentialité) | ☐ | |
+| REC-AUT-412 | Cliquer les liens des conditions et de la politique de confidentialité | Liens légaux | Pages légales « Pages légales » (CGU puis confidentialité) | ☐ | |
 | REC-AUT-413 | Changer le pays du numéro | Autre pays | Indicatif et format d'exemple mis à jour ; numéro stocké au format E.164 | ☐ | |
-| REC-AUT-414 | Remplir « Mariam », « Test », un numéro béninois non inscrit, cocher la case, puis « Recevoir mon code par SMS » | Nominal | Redirection vers /inscription/parent/code (WP02) ; SMS « Steamy : votre code de vérification est NNNNNN. Il expire dans 5 min. Ne le communiquez à personne. » dans Mailpit à <numéro E.164>@sms.test | ☐ | |
-| REC-AUT-415 | Saisir le numéro de Marie (01 90 00 00 01) déjà inscrite puis valider | Numéro déjà inscrit (C13) | Réponse neutre : passage normal à WP02 avec envoi d'un code ; aucune mention « déjà inscrit » à cette étape | ☐ | |
+| REC-AUT-414 | Remplir « Mariam », « Test », un numéro béninois non inscrit, cocher la case, puis « Recevoir mon code par SMS » | Nominal | Redirection vers /inscription/parent/code ; SMS « Steamy : votre code de vérification est NNNNNN. Il expire dans 5 min. Ne le communiquez à personne. » dans Mailpit à <numéro E.164>@sms.test | ☐ | |
+| REC-AUT-415 | Saisir le numéro de Marie (01 90 00 00 01) déjà inscrite puis valider | Numéro déjà inscrit (C13) | Réponse neutre : passage normal à « OTP » avec envoi d'un code ; aucune mention « déjà inscrit » à cette étape | ☐ | |
 | REC-AUT-416 | Arriver via le lien SMS d'un enfant (jeton mémorisé) | Préremplissage par le lien SMS | Message « Votre enfant a envoyé sa demande au +229 •• NN : inscrivez-vous avec ce numéro pour la voir. » ; le numéro à utiliser est rappelé ; préremplissage du champ numéro : à confirmer (spec muette) | ☐ | |
 | REC-AUT-417 | Cliquer « Recevoir mon code par SMS » | État de chargement | Bouton en chargement, un seul SMS | ☐ | |
 | REC-AUT-418 | Dépasser le plafond de demandes (5 par minute côté code, plafond quotidien d'OTP : à confirmer (spec muette)) | THROTTLED / OTP_DAILY_LIMIT | Encart avec « Trop de tentatives. Réessayez dans N secondes. » ou « Nombre maximal de codes atteint pour aujourd'hui. Réessayez demain. » | ☐ | |
 | REC-AUT-419 | Couper le réseau puis valider | Erreur réseau | Encart « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
 | REC-AUT-420 | Arrêter l'API puis valider | Erreur serveur | Encart « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
-| REC-AUT-421 | Cliquer « Connectez-vous » | Lien vers la connexion | Redirection vers /connexion (W16) | ☐ | |
+| REC-AUT-421 | Cliquer « Connectez-vous » | Lien vers la connexion | Redirection vers /connexion | ☐ | |
 | REC-AUT-422 | Ouvrir la page en étant connecté | Redirection d'un utilisateur connecté | Redirection vers l'espace du rôle | ☐ | |
 | REC-AUT-423 | Recharger la page (F5) | Rechargement | Champs vidés ; case décochée | ☐ | |
 | REC-AUT-424 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-425 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP02 · OTP (/inscription/parent/code)
+#### OTP (/inscription/parent/code)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-426 | Arriver sur la page | Après WP01 | Kicker « Vérification », H1 « Vérifiez votre numéro », texte « Nous avons envoyé un code à 6 chiffres au +229 •• NN. », 6 cases (nom accessible « Code à 6 chiffres reçu par SMS »), décompte « Renvoyer le code dans 1:00 », boutons « Vérifier le code » et « Modifier le numéro », panneau « On vérifie que c'est bien vous avant de continuer. » | ☐ | |
-| REC-AUT-427 | Saisir le code reçu dans Mailpit (compte nouveau) puis « Vérifier le code » | Code correct, numéro nouveau | Redirection vers /inscription/parent/mot-de-passe (WP03) | ☐ | |
+| REC-AUT-426 | Arriver sur la page | Après « Créer un compte » | Kicker « Vérification », H1 « Vérifiez votre numéro », texte « Nous avons envoyé un code à 6 chiffres au +229 •• NN. », 6 cases (nom accessible « Code à 6 chiffres reçu par SMS »), décompte « Renvoyer le code dans 1:00 », boutons « Vérifier le code » et « Modifier le numéro », panneau « On vérifie que c'est bien vous avant de continuer. » | ☐ | |
+| REC-AUT-427 | Saisir le code reçu dans Mailpit (compte nouveau) puis « Vérifier le code » | Code correct, numéro nouveau | Redirection vers /inscription/parent/mot-de-passe | ☐ | |
 | REC-AUT-428 | Saisir le code reçu pour un numéro déjà inscrit (01 90 00 00 01) | Numéro déjà inscrit (C13) | Redirection vers /connexion?compte=existant avec le message « Vous avez déjà un compte avec ce numéro : connectez-vous. » ; si la demande vient d'un lien SMS de consentement, ajout de `next=/consentement` | ☐ | |
 | REC-AUT-429 | Cliquer « Vérifier le code » avec moins de 6 chiffres | Code incomplet | « Saisissez les 6 chiffres du code. » ; aucun appel API | ☐ | |
 | REC-AUT-430 | Saisir 000000 (1er, 2e, 3e essais) | Code faux | « Code incorrect. » à chaque essai | ☐ | |
@@ -1330,21 +1330,21 @@ Vouvoiement.
 | REC-AUT-433 | Attendre 60 s puis cliquer « Renvoyer le code » | Renvoi nominal | « Un nouveau code a été envoyé à +229 •• NN. » ; nouveau SMS dans Mailpit ; compte à rebours redémarré ; l'ancien code est invalide ; cases déverrouillées | ☐ | |
 | REC-AUT-434 | Cliquer « Renvoyer le code » avant 60 s | Renvoi trop tôt | Bouton désactivé avec décompte ; en cas d'appel direct : « Patientez encore un peu avant de demander un nouveau code. » | ☐ | |
 | REC-AUT-435 | Demander plus de codes que le plafond quotidien (5 par numéro et par jour par défaut) | OTP_DAILY_LIMIT | « Vous avez reçu le nombre maximal de codes pour aujourd'hui. Réessayez demain. » ; saisie verrouillée | ☐ | |
-| REC-AUT-436 | Cliquer « Modifier le numéro » | Correction du numéro | Redirection vers /inscription/parent (WP01) | ☐ | |
+| REC-AUT-436 | Cliquer « Modifier le numéro » | Correction du numéro | Redirection vers /inscription/parent | ☐ | |
 | REC-AUT-437 | Cliquer « Vérifier le code » | État de chargement | Bouton en chargement | ☐ | |
 | REC-AUT-438 | Couper le réseau puis valider | Erreur réseau | « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
 | REC-AUT-439 | Arrêter l'API puis valider | Erreur serveur | « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
 | REC-AUT-440 | Recharger la page (F5) | Rechargement | La page reste affichée (défi conservé dans l'onglet) ; le décompte de renvoi : à confirmer (spec muette) | ☐ | |
-| REC-AUT-441 | Ouvrir /inscription/parent/code sans avoir demandé de code | Accès direct | Redirection vers /inscription/parent (WP01) | ☐ | |
+| REC-AUT-441 | Ouvrir /inscription/parent/code sans avoir demandé de code | Accès direct | Redirection vers /inscription/parent | ☐ | |
 | REC-AUT-442 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-443 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP03 · Mot de passe (/inscription/parent/mot-de-passe)
+#### Mot de passe (/inscription/parent/mot-de-passe)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-444 | Ouvrir la page | Après WP02 valide | Kicker « Sécurité », H1 « Créez votre mot de passe », sous-titre « Un mot de passe solide protège votre compte et celui de votre enfant. », champs « Mot de passe » et « Confirmez votre mot de passe », deux règles PwReq, bouton « Valider mon mot de passe » ; pas de règle « majuscule ou chiffre » ni « pas trop évident » | ☐ | |
+| REC-AUT-444 | Ouvrir la page | Après « OTP » valide | Kicker « Sécurité », H1 « Créez votre mot de passe », sous-titre « Un mot de passe solide protège votre compte et celui de votre enfant. », champs « Mot de passe » et « Confirmez votre mot de passe », deux règles PwReq, bouton « Valider mon mot de passe » ; pas de règle « majuscule ou chiffre » ni « pas trop évident » | ☐ | |
 | REC-AUT-445 | Saisir progressivement le mot de passe | Mise à jour des règles | Les règles « Au moins 8 caractères » et « Au moins une lettre et un chiffre » passent au vert avec coche au fil de la saisie ; aucune règle « une majuscule ou un chiffre » ni « pas trop évident » | ☐ | |
 | REC-AUT-446 | Cliquer l'œil « Afficher le mot de passe » / « Masquer le mot de passe » | Visibilité | Le champ passe en clair puis masqué | ☐ | |
 | REC-AUT-447 | Cliquer « Valider mon mot de passe » avec les deux champs vides | Champs vides | Encart « Corrigez les erreurs suivantes : » avec « Choisissez un mot de passe qui respecte les règles, saisi deux fois à l'identique. » ; règles non respectées en rouge avec croix | ☐ | |
@@ -1353,26 +1353,26 @@ Vouvoiement.
 | REC-AUT-450 | Saisir « 1234567890 » dans les deux champs | Mot de passe sans lettre | Règle « Au moins une lettre et un chiffre » en rouge ; soumission refusée | ☐ | |
 | REC-AUT-451 | Saisir un mot de passe valide puis une confirmation différente | Confirmation différente | Message « Les deux mots de passe ne correspondent pas. » sous la confirmation ; soumission refusée | ☐ | |
 | REC-AUT-452 | Contourner la validation locale avec un mot de passe refusé par le serveur | PASSWORD_TOO_WEAK | Message « Le mot de passe doit faire au moins 8 caractères, avec au moins une lettre et un chiffre. » sous le premier champ ; règles en rouge | ☐ | |
-| REC-AUT-453 | Saisir Robot2026x dans les deux champs puis cliquer « Valider mon mot de passe » | Nominal | Le compte parent est créé et la session ouverte ; redirection vers /inscription/parent/demande (WP04), ou vers /consentement si l'arrivée vient d'un lien SMS | ☐ | |
+| REC-AUT-453 | Saisir Robot2026x dans les deux champs puis cliquer « Valider mon mot de passe » | Nominal | Le compte parent est créé et la session ouverte ; redirection vers /inscription/parent/demande, ou vers /consentement si l'arrivée vient d'un lien SMS | ☐ | |
 | REC-AUT-454 | Cliquer « Valider mon mot de passe » | État de chargement | Bouton en chargement, un seul envoi | ☐ | |
 | REC-AUT-455 | Couper le réseau puis valider | Erreur réseau | Encart d'erreur « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
 | REC-AUT-456 | Arrêter l'API puis valider | Erreur serveur | Encart d'erreur « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
-| REC-AUT-457 | Ouvrir /inscription/parent/mot-de-passe sans avoir vérifié de code | Accès direct | Redirection vers /inscription/parent (WP01) | ☐ | |
+| REC-AUT-457 | Ouvrir /inscription/parent/mot-de-passe sans avoir vérifié de code | Accès direct | Redirection vers /inscription/parent | ☐ | |
 | REC-AUT-458 | Recharger la page (F5) | Rechargement | La page reste affichée (défi conservé dans l'onglet) | ☐ | |
 | REC-AUT-459 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-460 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP04 · Invitation enfant ? (/inscription/parent/demande)
+#### Invitation enfant ? (/inscription/parent/demande)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-461 | Ouvrir la page | Après WP03 | Kicker « Pourquoi êtes-vous ici ? », H1 « Avez-vous reçu une demande ? », deux cartes : « Oui, mon enfant m'a envoyé une demande » et « Non, je crée mon espace » ; bouton « Continuer » ; aucune carte présélectionnée | ☐ | |
+| REC-AUT-461 | Ouvrir la page | Après « Mot de passe » | Kicker « Pourquoi êtes-vous ici ? », H1 « Avez-vous reçu une demande ? », deux cartes : « Oui, mon enfant m'a envoyé une demande » et « Non, je crée mon espace » ; bouton « Continuer » ; aucune carte présélectionnée | ☐ | |
 | REC-AUT-462 | Cliquer « Continuer » sans choisir | Aucun choix | Message « Choisissez une réponse pour continuer. » | ☐ | |
-| REC-AUT-463 | Choisir « Non, je crée mon espace » puis « Continuer » | Création directe | Redirection vers /inscription/parent/profil/localisation (WP07) | ☐ | |
-| REC-AUT-464 | Choisir « Oui, mon enfant m'a envoyé une demande » avec une seule demande en attente puis « Continuer » | Une demande reçue | Redirection directe vers /inscription/parent/demande/<id> (WP05) | ☐ | |
-| REC-AUT-465 | Choisir « Oui… » avec plusieurs demandes en attente | Plusieurs demandes | Liste « Demandes en attente » : un lien par enfant « <Prénom> <Nom> — Voir la demande » vers WP05 | ☐ | |
-| REC-AUT-466 | Choisir « Oui… » sans aucune demande en attente | Aucune demande | Message « Aucune demande en attente n'est adressée à votre numéro. Si votre enfant vient de l'envoyer, elle apparaîtra dans votre espace parent. » et bouton « Continuer » vers WP07 | ☐ | |
+| REC-AUT-463 | Choisir « Non, je crée mon espace » puis « Continuer » | Création directe | Redirection vers /inscription/parent/profil/localisation | ☐ | |
+| REC-AUT-464 | Choisir « Oui, mon enfant m'a envoyé une demande » avec une seule demande en attente puis « Continuer » | Une demande reçue | Redirection directe vers /inscription/parent/demande/<id> | ☐ | |
+| REC-AUT-465 | Choisir « Oui… » avec plusieurs demandes en attente | Plusieurs demandes | Liste « Demandes en attente » : un lien par enfant « <Prénom> <Nom> — Voir la demande » vers « Demande de l'enfant » | ☐ | |
+| REC-AUT-466 | Choisir « Oui… » sans aucune demande en attente | Aucune demande | Message « Aucune demande en attente n'est adressée à votre numéro. Si votre enfant vient de l'envoyer, elle apparaîtra dans votre espace parent. » et bouton « Continuer » vers « Profil 1 · localisation » | ☐ | |
 | REC-AUT-467 | Cliquer « Continuer » (Oui) pendant la requête | État de chargement | Bouton en chargement | ☐ | |
 | REC-AUT-468 | Couper le réseau puis « Continuer » (Oui) | Erreur réseau | Message « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
 | REC-AUT-469 | Arrêter l'API puis « Continuer » (Oui) | Erreur serveur | Message « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
@@ -1384,16 +1384,16 @@ Vouvoiement.
 | REC-AUT-475 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP05-L · Lien SMS de consentement (avant WP01/WP05) (/consentement/[jeton] puis /consentement)
+#### Lien SMS de consentement (avant « Créer un compte »/« Demande de l'enfant ») (/consentement/[jeton] puis /consentement)
 
-Parcours d'entrée du parent depuis le SMS envoyé en W06 (§2.11).
+Parcours d'entrée du parent depuis le SMS envoyé en « Numéro du parent » (§2.11).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-AUT-476 | Ouvrir le lien SMS /consentement/<jeton> dans un navigateur neuf (parent sans compte) | Parent non connecté | Le jeton est retiré de l'URL (arrivée sur /consentement) ; en-tête Referrer-Policy no-referrer ; page « Demande de consentement » avec H1 « Votre enfant vous demande votre accord », sous-titre « Pour voir sa demande et y répondre, connectez-vous à votre compte parent ou créez-le en quelques minutes. », boutons « J'ai déjà un compte » et « Créer mon compte » ; aucune information sur l'enfant (prénom absent) avant authentification | ☐ | |
-| REC-AUT-477 | Cliquer « Créer mon compte » | Parent sans compte | Redirection vers /inscription/parent (WP01) avec le message du numéro attendu ; après WP03, retour sur /consentement puis sur la demande WP05 | ☐ | |
-| REC-AUT-478 | Cliquer « J'ai déjà un compte » | Parent avec compte | Redirection vers /connexion?next=%2Fconsentement ; après connexion, retour sur la demande : WP05 (/inscription/parent/demande/<id>) pour un profil inachevé, ou /parent/consentements/<id> (WPD05) pour un profil complet | ☐ | |
-| REC-AUT-479 | Ouvrir le lien SMS en étant déjà connecté avec le bon compte parent | Parent connecté, bon numéro | Redirection vers la demande (WP05 ou WPD05 selon le profil) | ☐ | |
+| REC-AUT-477 | Cliquer « Créer mon compte » | Parent sans compte | Redirection vers /inscription/parent avec le message du numéro attendu ; après « Mot de passe », retour sur /consentement puis sur la demande « Demande de l'enfant » | ☐ | |
+| REC-AUT-478 | Cliquer « J'ai déjà un compte » | Parent avec compte | Redirection vers /connexion?next=%2Fconsentement ; après connexion, retour sur la demande : « Demande de l'enfant » (/inscription/parent/demande/<id>) pour un profil inachevé, ou /parent/consentements/<id> pour un profil complet | ☐ | |
+| REC-AUT-479 | Ouvrir le lien SMS en étant déjà connecté avec le bon compte parent | Parent connecté, bon numéro | Redirection vers la demande (« Demande de l'enfant » ou « Demande de consentement » selon le profil) | ☐ | |
 | REC-AUT-480 | Ouvrir le lien SMS en étant connecté avec un autre compte parent | Mauvais numéro (CONSENT_PHONE_MISMATCH) | H1 « Cette demande ne vous est pas adressée », texte « Elle a été envoyée à un autre numéro que celui de votre compte. Connectez-vous avec le compte de ce numéro. », aucun détail sur l'enfant ; boutons « Se connecter » et « Contacter l'équipe Steamy » | ☐ | |
 | REC-AUT-481 | Ouvrir le lien SMS en étant connecté comme apprenant ou enseignant | Mauvais rôle (PERMISSION_DENIED) | H1 « Ce lien est réservé au parent », texte « Déconnectez-vous, puis connectez-vous avec le compte parent du numéro qui a reçu le SMS. » | ☐ | |
 | REC-AUT-482 | Ouvrir un lien dont la demande a expiré (plus de 7 jours) | Lien expiré (CONSENT_REQUEST_EXPIRED) | H1 « Cette demande a expiré », texte « Une demande reste valable 7 jours. Votre enfant peut vous en envoyer une nouvelle. » | ☐ | |
@@ -1408,17 +1408,17 @@ Parcours d'entrée du parent depuis le SMS envoyé en W06 (§2.11).
 | REC-AUT-491 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP05 · Demande de l'enfant (/inscription/parent/demande/[id])
+#### Demande de l'enfant (/inscription/parent/demande/[id])
 
-Ce que voit le parent (D20) : prénom, nom, identifiant, âge, lien de parenté. Un parent au profil complet est redirigé vers WPD05 (lot 4).
+Ce que voit le parent (D20) : prénom, nom, identifiant, âge, lien de parenté. Un parent au profil complet est redirigé vers « Demande de consentement » (lot 4).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-AUT-492 | Ouvrir la demande après connexion ou création de compte (profil parent inachevé) | Nominal | Kicker « Demande de consentement », H1 « Votre enfant a besoin de votre accord », sous-titre « Vérifiez sa demande, puis acceptez-la ou refusez-la. », carte « Demande de <Prénom> <Nom> » avec initiales (pas d'avatar), prénom, nom, « @identifiant », « <âge> ans », lien de parenté (ex. « Vous êtes sa mère »), pastille « En attente », « Demande valable jusqu'au <date> », encart « Les données ne servent qu'au suivi pédagogique, jamais à du marketing. » ; aucun bloc « Informations renseignées » (classe, localité, centres d'intérêt) | ☐ | |
-| REC-AUT-493 | Cliquer « Accepter la demande » | Acceptation | Bouton en chargement puis redirection vers /inscription/parent/demande/<id>/acceptee (WP06) | ☐ | |
-| REC-AUT-494 | Cliquer « Refuser » | Refus | Redirection vers /inscription/parent/demande/<id>/refus (WP11) | ☐ | |
-| REC-AUT-495 | Ouvrir la demande d'un enfant lié à une classe (origine enseignant, D60) | Demande d'origine enseignant | Affichage de l'enseignant et de la classe, création de l'identifiant de l'enfant par le parent (détail au lot 5, WPD05) | ☐ | |
-| REC-AUT-496 | Ouvrir la demande d'un parent au profil complet (Marie) | Redirection vers l'espace parent | Redirection vers /parent/consentements/<id> (WPD05) au lieu de WP05 | ☐ | |
+| REC-AUT-493 | Cliquer « Accepter la demande » | Acceptation | Bouton en chargement puis redirection vers /inscription/parent/demande/<id>/acceptee | ☐ | |
+| REC-AUT-494 | Cliquer « Refuser » | Refus | Redirection vers /inscription/parent/demande/<id>/refus | ☐ | |
+| REC-AUT-495 | Ouvrir la demande d'un enfant lié à une classe (origine enseignant, D60) | Demande d'origine enseignant | Affichage de l'enseignant et de la classe, création de l'identifiant de l'enfant par le parent (détail au lot 5, « Demande de consentement ») | ☐ | |
+| REC-AUT-496 | Ouvrir la demande d'un parent au profil complet (Marie) | Redirection vers l'espace parent | Redirection vers /parent/consentements/<id> au lieu de « Demande de l'enfant » | ☐ | |
 | REC-AUT-497 | Ouvrir la demande après son expiration | Demande expirée | Message « Cette demande n'est plus en attente : elle a expiré ou a été remplacée par une plus récente. » | ☐ | |
 | REC-AUT-498 | Ouvrir la demande remplacée par une plus récente (C14) | Demande remplacée | Même message « Cette demande n'est plus en attente… » | ☐ | |
 | REC-AUT-499 | Ouvrir la demande déjà acceptée | Demande déjà acceptée | Redirection vers /inscription/parent/demande/<id>/acceptee | ☐ | |
@@ -1435,14 +1435,14 @@ Ce que voit le parent (D20) : prénom, nom, identifiant, âge, lien de parenté.
 | REC-AUT-510 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP06 · Demande acceptée (/inscription/parent/demande/[id]/acceptee)
+#### Demande acceptée (/inscription/parent/demande/[id]/acceptee)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-AUT-511 | Arriver sur la page | Après « Accepter la demande » | Célébration : H1 « Demande acceptée ! », texte « <Prénom> peut maintenant terminer son inscription. » (prénom en gras), bouton « Compléter mon profil » | ☐ | |
-| REC-AUT-512 | Cliquer « Compléter mon profil » (profil parent inachevé) | Nominal | Redirection vers /inscription/parent/profil/localisation (WP07) | ☐ | |
+| REC-AUT-512 | Cliquer « Compléter mon profil » (profil parent inachevé) | Nominal | Redirection vers /inscription/parent/profil/localisation | ☐ | |
 | REC-AUT-513 | Voir le libellé du bouton avec un profil déjà complet | Parent au profil complet | Le bouton s'intitule « Aller sur mon tableau de bord » et mène à /parent | ☐ | |
-| REC-AUT-514 | Vérifier côté enfant (W07 ouvert) dans les 15 s | Effet côté enfant | W07 passe à W08 « Super, c'est validé ! » sans recharger | ☐ | |
+| REC-AUT-514 | Vérifier côté enfant (« Attente consentement » ouvert) dans les 15 s | Effet côté enfant | « Attente consentement » passe à « Accord reçu » « Super, c'est validé ! » sans recharger | ☐ | |
 | REC-AUT-515 | Recharger la page (F5) | Rechargement | La page reste affichée | ☐ | |
 | REC-AUT-516 | Ouvrir la page pour une demande non acceptée | Accès hors état | Redirection vers /inscription/parent/demande/<id> ou page appropriée selon l'état : à confirmer (spec muette) | ☐ | |
 | REC-AUT-517 | Ouvrir la page sans être connecté | Accès sans session | Redirection vers /connexion?next=... | ☐ | |
@@ -1450,76 +1450,76 @@ Ce que voit le parent (D20) : prénom, nom, identifiant, âge, lien de parenté.
 | REC-AUT-519 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP07 · Profil 1 · localisation (/inscription/parent/profil/localisation)
+#### Profil 1 · localisation (/inscription/parent/profil/localisation)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-520 | Ouvrir la page | Après WP04 (« Non, je crée mon espace ») ou WP06 | Kicker « Profil parent 1/3 », barre 1/3, H1 « Où habitez-vous ? », sous-titre « Pour la facturation, la livraison des kits et les événements près de chez vous. », champs « Pays de résidence » (Bénin), « Localité (ville / quartier) » et « Email » (indication « Facultatif : pour les factures et le suivi de votre enfant. »), bouton « Suivant » | ☐ | |
+| REC-AUT-520 | Ouvrir la page | Après « Invitation enfant ? » (« Non, je crée mon espace ») ou « Demande acceptée » | Kicker « Profil parent 1/3 », barre 1/3, H1 « Où habitez-vous ? », sous-titre « Pour la facturation, la livraison des kits et les événements près de chez vous. », champs « Pays de résidence » (Bénin), « Localité (ville / quartier) » et « Email » (indication « Facultatif : pour les factures et le suivi de votre enfant. »), bouton « Suivant » | ☐ | |
 | REC-AUT-521 | Cliquer « Suivant » sans localité | Localité obligatoire | Erreur « Choisissez votre ville ou votre quartier. » | ☐ | |
 | REC-AUT-522 | Changer le pays de résidence | Autre pays | La liste des localités se recharge pour le pays choisi, la localité est réinitialisée | ☐ | |
 | REC-AUT-523 | Saisir un email mal formé | Email invalide | Erreur sous le champ renvoyée par le serveur | ☐ | |
 | REC-AUT-524 | Saisir un email déjà utilisé | EMAIL_TAKEN | Erreur « Cette adresse email est déjà utilisée. » | ☐ | |
-| REC-AUT-525 | Choisir une localité, laisser l'email vide, « Suivant » | Nominal, email vide | Redirection vers /inscription/parent/profil/a-propos (WP08) | ☐ | |
-| REC-AUT-526 | Choisir une localité, saisir un email valide, « Suivant » | Nominal avec email | Redirection vers WP08 ; email enregistré (utilisé pour les factures et le suivi) | ☐ | |
+| REC-AUT-525 | Choisir une localité, laisser l'email vide, « Suivant » | Nominal, email vide | Redirection vers /inscription/parent/profil/a-propos | ☐ | |
+| REC-AUT-526 | Choisir une localité, saisir un email valide, « Suivant » | Nominal avec email | Redirection vers « Profil 2 · à propos » ; email enregistré (utilisé pour les factures et le suivi) | ☐ | |
 | REC-AUT-527 | Cliquer « Suivant » | État de chargement | Bouton en chargement | ☐ | |
 | REC-AUT-528 | Couper le réseau au chargement des localités | Référentiel indisponible | État d'erreur du sélecteur avec nouvel essai | ☐ | |
 | REC-AUT-529 | Couper le réseau puis « Suivant » | Erreur réseau à l'envoi | Encart « Corrigez les erreurs suivantes : » avec « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
 | REC-AUT-530 | Arrêter l'API puis « Suivant » | Erreur serveur | Encart avec « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
 | REC-AUT-531 | Recharger la page (F5) | Rechargement | Page réaffichée, saisies perdues | ☐ | |
 | REC-AUT-532 | Ouvrir la page sans être connecté | Accès sans session | Redirection vers /connexion | ☐ | |
-| REC-AUT-533 | Ouvrir /inscription/parent/profil/a-propos avant WP07 | Étape non atteinte | Redirection vers WP07 | ☐ | |
+| REC-AUT-533 | Ouvrir /inscription/parent/profil/a-propos avant « Profil 1 · localisation » | Étape non atteinte | Redirection vers « Profil 1 · localisation » | ☐ | |
 | REC-AUT-534 | Ouvrir /inscription/parent/profil/inconnu | Étape inexistante | Page 404 | ☐ | |
 | REC-AUT-535 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-536 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP08 · Profil 2 · à propos (/inscription/parent/profil/a-propos)
+#### Profil 2 · à propos (/inscription/parent/profil/a-propos)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-537 | Ouvrir la page | Après WP07 | Kicker « Profil parent 2/3 », H1 « Parlez-nous de vous », sous-titre « Ces informations sont facultatives et nous aident à personnaliser votre accompagnement. », cartes « Vous êtes (facultatif) » (Femme, Homme, Autre), liste « Situation de handicap (facultatif) », champ « Profession (facultatif) » (exemple « Infirmière, commerçant, ingénieure… »), encart « Ces informations sont facultatives. Elles servent seulement à adapter l'accompagnement et à mesurer, de façon anonyme, si Steamy profite à toutes les familles. », bouton « Suivant » | ☐ | |
-| REC-AUT-538 | Cliquer « Suivant » sans rien renseigner | Tout facultatif | Aucune erreur ; redirection vers /inscription/parent/profil/enfants (WP09) | ☐ | |
+| REC-AUT-537 | Ouvrir la page | Après « Profil 1 · localisation » | Kicker « Profil parent 2/3 », H1 « Parlez-nous de vous », sous-titre « Ces informations sont facultatives et nous aident à personnaliser votre accompagnement. », cartes « Vous êtes (facultatif) » (Femme, Homme, Autre), liste « Situation de handicap (facultatif) », champ « Profession (facultatif) » (exemple « Infirmière, commerçant, ingénieure… »), encart « Ces informations sont facultatives. Elles servent seulement à adapter l'accompagnement et à mesurer, de façon anonyme, si Steamy profite à toutes les familles. », bouton « Suivant » | ☐ | |
+| REC-AUT-538 | Cliquer « Suivant » sans rien renseigner | Tout facultatif | Aucune erreur ; redirection vers /inscription/parent/profil/enfants | ☐ | |
 | REC-AUT-539 | Choisir « Femme », « Homme » ou « Autre » | Genre | Une carte sélectionnée à la fois | ☐ | |
-| REC-AUT-540 | Choisir une situation de handicap puis « Suivant » | Handicap renseigné | Valeur enregistrée, passage à WP09 | ☐ | |
-| REC-AUT-541 | Saisir une profession puis « Suivant » | Profession renseignée | Valeur enregistrée, passage à WP09 | ☐ | |
+| REC-AUT-540 | Choisir une situation de handicap puis « Suivant » | Handicap renseigné | Valeur enregistrée, passage à « Profil 3 · enfants » | ☐ | |
+| REC-AUT-541 | Saisir une profession puis « Suivant » | Profession renseignée | Valeur enregistrée, passage à « Profil 3 · enfants » | ☐ | |
 | REC-AUT-542 | Cliquer « Suivant » | État de chargement | Bouton en chargement | ☐ | |
 | REC-AUT-543 | Couper le réseau puis « Suivant » | Erreur réseau | Encart « Enregistrement impossible : » avec « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
 | REC-AUT-544 | Arrêter l'API puis « Suivant » | Erreur serveur | Encart avec « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
 | REC-AUT-545 | Recharger la page (F5) | Rechargement | Page réaffichée, saisies perdues | ☐ | |
-| REC-AUT-546 | Ouvrir /inscription/parent/profil/a-propos sans avoir fait WP07 | Accès hors étape | Redirection vers WP07 | ☐ | |
+| REC-AUT-546 | Ouvrir /inscription/parent/profil/a-propos sans avoir fait « Profil 1 · localisation » | Accès hors étape | Redirection vers « Profil 1 · localisation » | ☐ | |
 | REC-AUT-547 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-548 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP09 · Profil 3 · enfants (/inscription/parent/profil/enfants)
+#### Profil 3 · enfants (/inscription/parent/profil/enfants)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-549 | Ouvrir la page | Après WP08 | Kicker « Profil parent 3/3 », H1 « Vos enfants et vos objectifs », sous-titre « Pour adapter nos recommandations et le suivi. Choisissez au moins un objectif. », compteur « Nombre d'enfants à inscrire » (1 par défaut, bornes 1 à 10), puces « Vos objectifs pour votre enfant » avec le compteur « 0 choisi · au moins 1 », bouton « Terminer mon profil 🚀 » désactivé | ☐ | |
+| REC-AUT-549 | Ouvrir la page | Après « Profil 2 · à propos » | Kicker « Profil parent 3/3 », H1 « Vos enfants et vos objectifs », sous-titre « Pour adapter nos recommandations et le suivi. Choisissez au moins un objectif. », compteur « Nombre d'enfants à inscrire » (1 par défaut, bornes 1 à 10), puces « Vos objectifs pour votre enfant » avec le compteur « 0 choisi · au moins 1 », bouton « Terminer mon profil 🚀 » désactivé | ☐ | |
 | REC-AUT-550 | Cliquer « Augmenter » du compteur d'enfants à répétition | Borne haute | S'arrête à 10 ; bouton désactivé à 10 | ☐ | |
 | REC-AUT-551 | Cliquer « Diminuer » à répétition | Borne basse | S'arrête à 1 | ☐ | |
 | REC-AUT-552 | Sélectionner aucun objectif | Aucun objectif | Bouton « Terminer mon profil 🚀 » désactivé | ☐ | |
 | REC-AUT-553 | Sélectionner un objectif | Seuil atteint | Compteur « 1 choisi · au moins 1 » ; bouton activé | ☐ | |
 | REC-AUT-554 | Sélectionner plusieurs objectifs | Plusieurs objectifs | Compteur « n choisis · au moins 1 » avec accord au pluriel | ☐ | |
-| REC-AUT-555 | Cliquer « Terminer mon profil 🚀 » | Nominal | Redirection vers /inscription/parent/bienvenue (WP10) | ☐ | |
+| REC-AUT-555 | Cliquer « Terminer mon profil 🚀 » | Nominal | Redirection vers /inscription/parent/bienvenue | ☐ | |
 | REC-AUT-556 | Couper le réseau au chargement des objectifs | Référentiel indisponible | Message « Impossible de charger les objectifs. » et bouton « Réessayer » | ☐ | |
 | REC-AUT-557 | Pendant le chargement des objectifs | État de chargement | Indicateur « Chargement des objectifs… » | ☐ | |
 | REC-AUT-558 | Couper le réseau puis « Terminer mon profil 🚀 » | Erreur réseau | Encart « Enregistrement impossible : » avec « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
 | REC-AUT-559 | Arrêter l'API puis valider | Erreur serveur | Encart avec « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
 | REC-AUT-560 | Recharger la page (F5) | Rechargement | Page réaffichée, sélection perdue | ☐ | |
-| REC-AUT-561 | Ouvrir la page sans avoir fait WP07 | Accès hors étape | Redirection vers WP07 | ☐ | |
+| REC-AUT-561 | Ouvrir la page sans avoir fait « Profil 1 · localisation » | Accès hors étape | Redirection vers « Profil 1 · localisation » | ☐ | |
 | REC-AUT-562 | Navigation clavier | Parcourir la page avec Tab / Maj+Tab puis valider avec Entrée | Ordre de tabulation logique (champs, liens, boutons), focus toujours visible, soumission du formulaire par Entrée | ☐ | |
 | REC-AUT-563 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP10 · Bienvenue parent (/inscription/parent/bienvenue)
+#### Bienvenue parent (/inscription/parent/bienvenue)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-AUT-564 | Arriver sur la page sans enfant rattaché (création directe) | Parent seul | Célébration : H1 « Bienvenue, <Prénom> ! », texte « Votre espace parent est prêt : vous y suivrez la progression de vos enfants et validerez leurs demandes. », message « Aucun enfant rattaché pour le moment. », boutons « Aller sur mon tableau de bord » et « Ajouter un enfant » | ☐ | |
 | REC-AUT-565 | Arriver sur la page avec une demande acceptée (parcours P1) | Enfant rattaché | La carte récapitulative affiche « <Prénom enfant>, <âge> ans · inscription en cours » (ex. « Kossi, 14 ans · inscription en cours ») | ☐ | |
-| REC-AUT-566 | Cliquer « Aller sur mon tableau de bord » | Nominal | Redirection vers /parent (WPD01) | ☐ | |
-| REC-AUT-567 | Cliquer « Ajouter un enfant » | CTA ajout | Redirection vers /parent/enfants/ajouter (WPD04) | ☐ | |
+| REC-AUT-566 | Cliquer « Aller sur mon tableau de bord » | Nominal | Redirection vers /parent | ☐ | |
+| REC-AUT-567 | Cliquer « Ajouter un enfant » | CTA ajout | Redirection vers /parent/enfants/ajouter | ☐ | |
 | REC-AUT-568 | Pendant le chargement des enfants | État de chargement | Indicateur « Chargement de vos enfants… » | ☐ | |
 | REC-AUT-569 | Recharger la page (F5) | Rechargement | La page reste affichée | ☐ | |
 | REC-AUT-570 | Ouvrir la page avec un profil non terminé | Accès hors étape | Redirection vers l'étape de profil restante | ☐ | |
@@ -1529,20 +1529,20 @@ Ce que voit le parent (D20) : prénom, nom, identifiant, âge, lien de parenté.
 | REC-AUT-574 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP11 · Motifs de refus (/inscription/parent/demande/[id]/refus)
+#### Motifs de refus (/inscription/parent/demande/[id]/refus)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-575 | Ouvrir la page via « Refuser » (WP05) | Nominal | Kicker « Refus de la demande », H1 « Pourquoi refusez-vous ? », sous-titre « Indiquez un motif : il sera transmis à votre enfant pour qu'il ou elle comprenne. », liste « Motif du refus » (Mon enfant est trop jeune / Nous en discutons d'abord à la maison / Je n'ai pas demandé cette inscription / Autre raison), champ « Précisions » facultatif (exemple « Un mot pour votre enfant… »), boutons « Confirmer le refus » (rouge) et « Annuler », texte du panneau « Le refus clôt cette demande. Votre enfant pourra vous en refaire une dans 30 jours. » ; aucune mention « définitif » | ☐ | |
+| REC-AUT-575 | Ouvrir la page via « Refuser » | Nominal | Kicker « Refus de la demande », H1 « Pourquoi refusez-vous ? », sous-titre « Indiquez un motif : il sera transmis à votre enfant pour qu'il ou elle comprenne. », liste « Motif du refus » (Mon enfant est trop jeune / Nous en discutons d'abord à la maison / Je n'ai pas demandé cette inscription / Autre raison), champ « Précisions » facultatif (exemple « Un mot pour votre enfant… »), boutons « Confirmer le refus » (rouge) et « Annuler », texte du panneau « Le refus clôt cette demande. Votre enfant pourra vous en refaire une dans 30 jours. » ; aucune mention « définitif » | ☐ | |
 | REC-AUT-576 | Cliquer « Confirmer le refus » sans motif | Motif obligatoire | Message « Choisissez un motif. » (encart « Refus impossible : » et sous la liste) ; pas de fenêtre de confirmation | ☐ | |
 | REC-AUT-577 | Choisir un motif puis effacer le choix | Retour à vide | L'erreur disparaît dès qu'un motif est choisi | ☐ | |
 | REC-AUT-578 | Choisir « Mon enfant est trop jeune », ne rien saisir dans « Précisions », « Confirmer le refus » | Précisions vides | La fenêtre « Refuser la demande de <Prénom> ? » s'ouvre avec le texte « Aucune inscription ne sera créée. Votre enfant pourra vous refaire une demande dans 30 jours. » ; boutons « Revenir » et « Refuser la demande » | ☐ | |
 | REC-AUT-579 | Choisir un motif, saisir « On en reparle ce soir. » dans « Précisions », « Confirmer le refus » | Précisions saisies | Même fenêtre de confirmation | ☐ | |
 | REC-AUT-580 | Cliquer « Revenir » dans la fenêtre | Annulation de la confirmation | La fenêtre se ferme, rien n'est envoyé, le formulaire garde ses valeurs | ☐ | |
 | REC-AUT-581 | Appuyer sur Échap dans la fenêtre | Fermeture au clavier | La fenêtre se ferme, rien n'est envoyé | ☐ | |
-| REC-AUT-582 | Cliquer « Refuser la demande » dans la fenêtre | Refus confirmé | Bouton en chargement puis redirection vers /inscription/parent/demande/<id>/refusee (WP12) ; motif et précisions transmis | ☐ | |
+| REC-AUT-582 | Cliquer « Refuser la demande » dans la fenêtre | Refus confirmé | Bouton en chargement puis redirection vers /inscription/parent/demande/<id>/refusee ; motif et précisions transmis | ☐ | |
 | REC-AUT-583 | Cliquer « Refuser la demande » alors que la demande est déjà traitée | CONSENT_ALREADY_RESOLVED | Fenêtre fermée ; encart « Refus impossible : » avec un message d'erreur | ☐ | |
-| REC-AUT-584 | Cliquer « Annuler » | Annulation | Redirection vers /inscription/parent/demande/<id> (WP05), demande toujours en attente | ☐ | |
+| REC-AUT-584 | Cliquer « Annuler » | Annulation | Redirection vers /inscription/parent/demande/<id>, demande toujours en attente | ☐ | |
 | REC-AUT-585 | Couper le réseau puis confirmer | Erreur réseau | Encart « Refus impossible : » avec « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
 | REC-AUT-586 | Arrêter l'API puis confirmer | Erreur serveur | Encart avec « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
 | REC-AUT-587 | Pendant le chargement du référentiel des motifs | État de chargement | Liste désactivée avec l'option « Chargement… » | ☐ | |
@@ -1552,16 +1552,16 @@ Ce que voit le parent (D20) : prénom, nom, identifiant, âge, lien de parenté.
 | REC-AUT-591 | Version mobile 360 px | Ouvrir l'écran avec une fenêtre de 360 px de large | Mise en page sur une seule colonne, aucun défilement horizontal, champs et boutons entièrement visibles et utilisables au doigt ; panneau marque : à confirmer (spec muette) | ☐ | |
 
 
-#### WP12 · Refus envoyé (terminal) (/inscription/parent/demande/[id]/refusee)
+#### Refus envoyé (terminal) (/inscription/parent/demande/[id]/refusee)
 
 Terminal. Écran plein écran (hors WebShell).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-AUT-592 | Arriver sur la page | Après confirmation du refus | Écran plein écran : ✋, H1 « Demande refusée », texte « <Prénom> verra votre décision. Aucune inscription n'a été créée. », bouton « Retour à l'accueil » | ☐ | |
-| REC-AUT-593 | Cliquer « Retour à l'accueil » | Nominal | Redirection vers l'accueil du rôle : /parent (WPD01) pour un profil complet ; sinon étape de profil à terminer | ☐ | |
-| REC-AUT-594 | Vérifier côté enfant (W07 ouvert) dans les 15 s | Effet côté enfant | W07 passe à W18 « Inscription non validée » avec le motif choisi | ☐ | |
-| REC-AUT-595 | Retenter une demande du même enfant vers le même numéro avant 30 jours | Délai de 30 jours (C9) | Refus avec CONSENT_COOLDOWN sur W06 | ☐ | |
+| REC-AUT-593 | Cliquer « Retour à l'accueil » | Nominal | Redirection vers l'accueil du rôle : /parent pour un profil complet ; sinon étape de profil à terminer | ☐ | |
+| REC-AUT-594 | Vérifier côté enfant (« Attente consentement » ouvert) dans les 15 s | Effet côté enfant | « Attente consentement » passe à « Consentement refusé » « Inscription non validée » avec le motif choisi | ☐ | |
+| REC-AUT-595 | Retenter une demande du même enfant vers le même numéro avant 30 jours | Délai de 30 jours (C9) | Refus avec CONSENT_COOLDOWN sur « Numéro du parent » | ☐ | |
 | REC-AUT-596 | Recharger la page (F5) | Rechargement | La page reste affichée | ☐ | |
 | REC-AUT-597 | Ouvrir la page pour une demande non refusée | Accès hors état | Redirection ou page appropriée selon l'état : à confirmer (spec muette) | ☐ | |
 | REC-AUT-598 | Ouvrir la page sans être connecté | Accès sans session | Redirection vers /connexion?next=... | ☐ | |
@@ -1578,7 +1578,7 @@ Garde optimiste côté serveur web (cookie de session) puis garde de rôle des l
 | REC-AUT-601 | Ouvrir /apprenant sans être connecté | Visiteur sur l'espace apprenant | Redirection immédiate vers /connexion?next=%2Fapprenant | ☐ | |
 | REC-AUT-602 | Ouvrir /parent/enfants/3?onglet=progres sans être connecté | Visiteur sur une page profonde | Redirection vers /connexion avec `next` égal à « /parent/enfants/3?onglet=progres » (chemin et paramètres conservés) ; après connexion du parent, retour sur cette page | ☐ | |
 | REC-AUT-603 | Ouvrir /enseignant sans être connecté | Visiteur sur l'espace enseignant | Redirection vers /connexion?next=%2Fenseignant | ☐ | |
-| REC-AUT-604 | Ouvrir /backoffice sans être connecté | Visiteur sur le back-office | Redirection vers la connexion de l'admin Django (WAD15) : pas de connexion côté front | ☐ | |
+| REC-AUT-604 | Ouvrir /backoffice sans être connecté | Visiteur sur le back-office | Redirection vers la connexion de l'admin Django : pas de connexion côté front | ☐ | |
 | REC-AUT-605 | Se connecter en apprenant puis ouvrir /parent | Apprenant dans l'espace parent | Redirection vers /apprenant | ☐ | |
 | REC-AUT-606 | Se connecter en apprenant puis ouvrir /enseignant | Apprenant dans l'espace enseignant | Redirection vers /apprenant | ☐ | |
 | REC-AUT-607 | Se connecter en parent puis ouvrir /apprenant | Parent dans l'espace apprenant | Redirection vers /parent | ☐ | |
@@ -1609,22 +1609,22 @@ Deux navigateurs (ou profils) : A pour l'enfant, B pour le parent. SMS lus dans 
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-622 | A : ouvrir /inscription, cliquer « Créer un compte gratuit », choisir « Un·e apprenant·e », « Continuer » | Départ enfant | W02 → W03 → W04 (étape 1/4) | ☐ | |
-| REC-AUT-623 | A : saisir prénom « Kossi », nom « Test », un identifiant libre, cocher les conditions, « Continuer » | W04 valide | Arrivée sur W05 (étape 2/4) | ☐ | |
-| REC-AUT-624 | A : choisir 14 ans, « Continuer » | W05 valide | Arrivée sur W06 (étape 3/4) ; compte inactif créé | ☐ | |
-| REC-AUT-625 | A : saisir un numéro béninois non inscrit et le lien « Mère », « Envoyer la demande au parent » | W06 valide | Arrivée sur W07 : « On attend l'accord de ton parent… », numéro masqué, code de reprise de 8 caractères noté par le testeur | ☐ | |
+| REC-AUT-622 | A : ouvrir /inscription, cliquer « Créer un compte gratuit », choisir « Un·e apprenant·e », « Continuer » | Départ enfant | « Accueil » → « Type d'utilisateur » → « Identité & identifiant » (étape 1/4) | ☐ | |
+| REC-AUT-623 | A : saisir prénom « Kossi », nom « Test », un identifiant libre, cocher les conditions, « Continuer » | « Identité & identifiant » valide | Arrivée sur « Âge » (étape 2/4) | ☐ | |
+| REC-AUT-624 | A : choisir 14 ans, « Continuer » | « Âge » valide | Arrivée sur « Numéro du parent » (étape 3/4) ; compte inactif créé | ☐ | |
+| REC-AUT-625 | A : saisir un numéro béninois non inscrit et le lien « Mère », « Envoyer la demande au parent » | « Numéro du parent » valide | Arrivée sur « Attente consentement » : « On attend l'accord de ton parent… », numéro masqué, code de reprise de 8 caractères noté par le testeur | ☐ | |
 | REC-AUT-626 | Mailpit : ouvrir le SMS reçu à <numéro E.164>@sms.test | SMS de consentement | Le SMS contient un lien /consentement/<jeton> | ☐ | |
 | REC-AUT-627 | B : ouvrir le lien SMS dans un navigateur neuf | Parent sans compte | Page « Votre enfant vous demande votre accord », aucun détail sur l'enfant, URL /consentement | ☐ | |
-| REC-AUT-628 | B : cliquer « Créer mon compte » | Création du compte parent | WP01 avec message « Votre enfant a envoyé sa demande au +229 •• NN… » | ☐ | |
-| REC-AUT-629 | B : remplir WP01, cocher les conditions, « Recevoir mon code par SMS » | WP01 valide | Arrivée sur WP02 ; SMS avec code à 6 chiffres dans Mailpit | ☐ | |
-| REC-AUT-630 | B : saisir le code, « Vérifier le code » | WP02 valide | Arrivée sur WP03 | ☐ | |
-| REC-AUT-631 | B : saisir un mot de passe valide deux fois, « Valider mon mot de passe » | WP03 valide | Retour sur la demande : WP05 « Votre enfant a besoin de votre accord » avec la carte « Demande de Kossi Test » (@identifiant, 14 ans, « Vous êtes sa mère », « En attente ») | ☐ | |
-| REC-AUT-632 | B : cliquer « Accepter la demande » | Acceptation | WP06 « Demande acceptée ! » | ☐ | |
-| REC-AUT-633 | A : attendre au plus 25 s sans recharger | Polling côté enfant | W07 passe seul à W08 « Super, c'est validé ! » | ☐ | |
-| REC-AUT-634 | B : cliquer « Compléter mon profil », renseigner WP07 (localité), WP08 (tout facultatif), WP09 (objectif), « Terminer mon profil 🚀 » | Profil parent | Arrivée sur WP10 « Bienvenue, <Prénom> ! » avec « Kossi, 14 ans · inscription en cours » | ☐ | |
+| REC-AUT-628 | B : cliquer « Créer mon compte » | Création du compte parent | « Créer un compte » avec message « Votre enfant a envoyé sa demande au +229 •• NN… » | ☐ | |
+| REC-AUT-629 | B : remplir « Créer un compte », cocher les conditions, « Recevoir mon code par SMS » | « Créer un compte » valide | Arrivée sur « OTP » ; SMS avec code à 6 chiffres dans Mailpit | ☐ | |
+| REC-AUT-630 | B : saisir le code, « Vérifier le code » | « OTP » valide | Arrivée sur « Mot de passe » | ☐ | |
+| REC-AUT-631 | B : saisir un mot de passe valide deux fois, « Valider mon mot de passe » | « Mot de passe » valide | Retour sur la demande : « Demande de l'enfant » « Votre enfant a besoin de votre accord » avec la carte « Demande de Kossi Test » (@identifiant, 14 ans, « Vous êtes sa mère », « En attente ») | ☐ | |
+| REC-AUT-632 | B : cliquer « Accepter la demande » | Acceptation | « Demande acceptée » « Demande acceptée ! » | ☐ | |
+| REC-AUT-633 | A : attendre au plus 25 s sans recharger | Polling côté enfant | « Attente consentement » passe seul à « Accord reçu » « Super, c'est validé ! » | ☐ | |
+| REC-AUT-634 | B : cliquer « Compléter mon profil », renseigner « Profil 1 · localisation » (localité), « Profil 2 · à propos » (tout facultatif), « Profil 3 · enfants » (objectif), « Terminer mon profil 🚀 » | Profil parent | Arrivée sur « Bienvenue parent » « Bienvenue, <Prénom> ! » avec « Kossi, 14 ans · inscription en cours » | ☐ | |
 | REC-AUT-635 | B : cliquer « Aller sur mon tableau de bord » | Fin côté parent | Arrivée sur /parent | ☐ | |
-| REC-AUT-636 | A : cliquer « Continuer » sur W08, saisir un mot de passe valide deux fois (W10) | Mot de passe enfant | Compte actif, arrivée sur W11 « Profil 1/4 » | ☐ | |
-| REC-AUT-637 | A : W11 date de naissance cohérente avec 14 ans + localité ; W12 classe ; W13 deux objectifs ; W14 un avatar ; « Terminer mon profil 🚀 » | Profil enfant | Arrivée sur W15 « Bienvenue, Kossi ! » | ☐ | |
+| REC-AUT-636 | A : cliquer « Continuer » sur « Accord reçu », saisir un mot de passe valide deux fois | Mot de passe enfant | Compte actif, arrivée sur « Profil 1 · infos » « Profil 1/4 » | ☐ | |
+| REC-AUT-637 | A : « Profil 1 · infos » date de naissance cohérente avec 14 ans + localité ; « Profil 2 · école » classe ; « Objectifs » deux objectifs ; « Avatar » un avatar ; « Terminer mon profil 🚀 » | Profil enfant | Arrivée sur « Bienvenue » « Bienvenue, Kossi ! » | ☐ | |
 | REC-AUT-638 | A : cliquer « Aller sur mon tableau de bord » | Fin côté enfant | Arrivée sur /apprenant | ☐ | |
 | REC-AUT-639 | A : se déconnecter (menu puis « Déconnexion » puis « Se déconnecter ») | Déconnexion | Arrivée sur /connexion | ☐ | |
 | REC-AUT-640 | A : se reconnecter avec l'identifiant et le mot de passe choisis | Reconnexion | Arrivée sur /apprenant | ☐ | |
@@ -1632,20 +1632,20 @@ Deux navigateurs (ou profils) : A pour l'enfant, B pour le parent. SMS lus dans 
 
 #### P2 · Refus du parent
 
-Même départ que P1 jusqu'à W07 ; le parent a un compte de profil inachevé (ou refuse depuis WPD05 s'il est complet).
+Même départ que P1 jusqu'à « Attente consentement » ; le parent a un compte de profil inachevé (ou refuse depuis « Demande de consentement » s'il est complet).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-641 | A : parcours W02 → W06, envoyer la demande à un numéro de parent existant, noter l'identifiant | Départ | Arrivée sur W07 | ☐ | |
-| REC-AUT-642 | B : ouvrir le lien SMS, « J'ai déjà un compte », se connecter | Parent existant | Arrivée sur WP05 (profil inachevé) ou WPD05 (profil complet) | ☐ | |
-| REC-AUT-643 | B : cliquer « Refuser » | Vers WP11 | WP11 « Pourquoi refusez-vous ? » | ☐ | |
+| REC-AUT-641 | A : parcours « Accueil » → « Numéro du parent », envoyer la demande à un numéro de parent existant, noter l'identifiant | Départ | Arrivée sur « Attente consentement » | ☐ | |
+| REC-AUT-642 | B : ouvrir le lien SMS, « J'ai déjà un compte », se connecter | Parent existant | Arrivée sur « Demande de l'enfant » (profil inachevé) ou « Demande de consentement » (profil complet) | ☐ | |
+| REC-AUT-643 | B : cliquer « Refuser » | Vers « Motifs de refus » | « Motifs de refus » « Pourquoi refusez-vous ? » | ☐ | |
 | REC-AUT-644 | B : « Confirmer le refus » sans motif | Motif obligatoire | « Choisissez un motif. », pas de fenêtre | ☐ | |
 | REC-AUT-645 | B : choisir « Mon enfant est trop jeune », saisir des précisions, « Confirmer le refus » | Motif choisi | Fenêtre « Refuser la demande de <Prénom> ? » | ☐ | |
-| REC-AUT-646 | B : cliquer « Refuser la demande » | Refus confirmé | WP12 « Demande refusée » avec « <Prénom> verra votre décision. Aucune inscription n'a été créée. » | ☐ | |
-| REC-AUT-647 | A : attendre au plus 25 s | Polling | W07 passe à W18 « Inscription non validée », « Motif indiqué : « Mon enfant est trop jeune » », « Tu pourras refaire une demande à ce parent dans 30 jours. » | ☐ | |
-| REC-AUT-648 | A : vérifier l'identifiant sur W04 dans un nouvel onglet | Identifiant libéré | Plus de message « Cet identifiant est déjà associé… » pour cet identifiant | ☐ | |
-| REC-AUT-649 | A : recommencer une inscription vers le même numéro de parent | Délai de 30 jours | Sur W06 : « Ce parent a refusé une demande il y a moins de 30 jours. Tu pourras lui en refaire une 30 jours après son refus. » | ☐ | |
-| REC-AUT-650 | A : cliquer « Retour à l'accueil » et « Besoin d'aide ? » sur W18 | Sorties de W18 | W02 puis WL24 sujet « changement de parent » | ☐ | |
+| REC-AUT-646 | B : cliquer « Refuser la demande » | Refus confirmé | « Refus envoyé » « Demande refusée » avec « <Prénom> verra votre décision. Aucune inscription n'a été créée. » | ☐ | |
+| REC-AUT-647 | A : attendre au plus 25 s | Polling | « Attente consentement » passe à « Consentement refusé » « Inscription non validée », « Motif indiqué : « Mon enfant est trop jeune » », « Tu pourras refaire une demande à ce parent dans 30 jours. » | ☐ | |
+| REC-AUT-648 | A : vérifier l'identifiant sur « Identité & identifiant » dans un nouvel onglet | Identifiant libéré | Plus de message « Cet identifiant est déjà associé… » pour cet identifiant | ☐ | |
+| REC-AUT-649 | A : recommencer une inscription vers le même numéro de parent | Délai de 30 jours | Sur « Numéro du parent » : « Ce parent a refusé une demande il y a moins de 30 jours. Tu pourras lui en refaire une 30 jours après son refus. » | ☐ | |
+| REC-AUT-650 | A : cliquer « Retour à l'accueil » et « Besoin d'aide ? » sur « Consentement refusé » | Sorties de « Consentement refusé » | « Accueil » puis « Aide & contact » sujet « changement de parent » | ☐ | |
 
 
 #### P3 · Reprise d'inscription
@@ -1654,13 +1654,13 @@ Navigateur A pour l'inscription, navigateur B (profil vierge) pour la reprise.
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-651 | A : parcours W02 → W07, relever le code de reprise (8 caractères) | Départ | Code affiché une seule fois, avec date d'expiration à 7 jours | ☐ | |
+| REC-AUT-651 | A : parcours « Accueil » → « Attente consentement », relever le code de reprise (8 caractères) | Départ | Code affiché une seule fois, avec date d'expiration à 7 jours | ☐ | |
 | REC-AUT-652 | B : ouvrir /connexion, saisir l'identifiant et le code de reprise comme mot de passe, « Se connecter » | Compte en attente | Message « Ton inscription attend encore l'accord de ton parent. » et bouton « Reprendre mon inscription » | ☐ | |
 | REC-AUT-653 | B : cliquer « Reprendre mon inscription » | Reprise préremplie | Arrivée sur /inscription/reprendre avec l'identifiant prérempli | ☐ | |
 | REC-AUT-654 | B : saisir un code faux (AAAA-AAAA), valider | Code faux | « Identifiant ou code de reprise incorrect. Vérifie ce que tu as noté. », l'identifiant reste saisi | ☐ | |
-| REC-AUT-655 | B : saisir le bon code en minuscules, valider | Code correct | Arrivée sur W07 « On attend l'accord de ton parent… » ; la carte du code n'est pas affichée | ☐ | |
-| REC-AUT-656 | A : le parent accepte puis B laisse W07 ouvert | Polling côté B | B passe à W08 après la prochaine interrogation | ☐ | |
-| REC-AUT-657 | B : perdre le code puis cliquer « Recommence ton inscription » | Code perdu | Retour sur W03 ; une nouvelle demande vers le même numéro annule l'ancienne et libère l'identifiant (C14) | ☐ | |
+| REC-AUT-655 | B : saisir le bon code en minuscules, valider | Code correct | Arrivée sur « Attente consentement » « On attend l'accord de ton parent… » ; la carte du code n'est pas affichée | ☐ | |
+| REC-AUT-656 | A : le parent accepte puis B laisse « Attente consentement » ouvert | Polling côté B | B passe à « Accord reçu » après la prochaine interrogation | ☐ | |
+| REC-AUT-657 | B : perdre le code puis cliquer « Recommence ton inscription » | Code perdu | Retour sur « Type d'utilisateur » ; une nouvelle demande vers le même numéro annule l'ancienne et libère l'identifiant (C14) | ☐ | |
 | REC-AUT-658 | Attendre 7 jours (ou avancer l'échéance en base) puis reprendre | Inscription expirée | « Cette inscription a expiré : tu peux recommencer depuis le début. » et bouton « Recommencer mon inscription » | ☐ | |
 
 
@@ -1670,29 +1670,29 @@ Parent du jeu de démo (Marie, 01 90 00 00 01, profil complet) ; exécution isol
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-659 | A : parcours W02 → W06 en saisissant le numéro de Marie (01 90 00 00 01), lien « Mère », prénom d'enfant « Tobi » | Départ | Arrivée sur W07 ; SMS dans Mailpit à <numéro E.164 de Marie>@sms.test avec lien /consentement/<jeton> | ☐ | |
+| REC-AUT-659 | A : parcours « Accueil » → « Numéro du parent » en saisissant le numéro de Marie (01 90 00 00 01), lien « Mère », prénom d'enfant « Tobi » | Départ | Arrivée sur « Attente consentement » ; SMS dans Mailpit à <numéro E.164 de Marie>@sms.test avec lien /consentement/<jeton> | ☐ | |
 | REC-AUT-660 | B : ouvrir le lien SMS | Parent avec compte | Page « Votre enfant vous demande votre accord » (aucun détail sur l'enfant) | ☐ | |
 | REC-AUT-661 | B : cliquer « J'ai déjà un compte » | Vers la connexion | /connexion?next=%2Fconsentement | ☐ | |
-| REC-AUT-662 | B : saisir 01 90 00 00 01 et Steamy2026, « Se connecter » | Connexion du parent | Redirection vers /parent/consentements/<id> (WPD05) car le profil est complet | ☐ | |
+| REC-AUT-662 | B : saisir 01 90 00 00 01 et Steamy2026, « Se connecter » | Connexion du parent | Redirection vers /parent/consentements/<id> car le profil est complet | ☐ | |
 | REC-AUT-663 | B : lire la carte | Contenu de la demande | Carte « Demande de Tobi Test » visible | ☐ | |
 | REC-AUT-664 | B : cliquer « Accepter la demande » | Acceptation | Redirection vers /parent?consentement=<id> avec le message « Demande acceptée : Tobi peut terminer son inscription. » | ☐ | |
-| REC-AUT-665 | A : attendre au plus 25 s | Polling côté enfant | W07 passe à W08 | ☐ | |
-| REC-AUT-666 | B : refaire le scénario avec le refus au lieu de l'acceptation | Variante refus (parent complet) | Refus depuis WPD05 (lot 4) ; côté enfant : W18 | ☐ | |
+| REC-AUT-665 | A : attendre au plus 25 s | Polling côté enfant | « Attente consentement » passe à « Accord reçu » | ☐ | |
+| REC-AUT-666 | B : refaire le scénario avec le refus au lieu de l'acceptation | Variante refus (parent complet) | Refus depuis « Demande de consentement » (lot 4) ; côté enfant : « Consentement refusé » | ☐ | |
 
 
 #### P5 · Mot de passe oublié (parent par SMS, enseignant par email)
 
-Voir aussi les sections WL02 à WL05 et WL02-E.
+Voir aussi les sections « Mot de passe oublié » à « Réinitialisé ✓ » et « Mot de passe oublié de l'enseignant ».
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-667 | Ouvrir /mot-de-passe-oublie, saisir le numéro du parent, « Recevoir le code » | Parent par SMS | WL03 avec SMS contenant le code dans Mailpit | ☐ | |
+| REC-AUT-667 | Ouvrir /mot-de-passe-oublie, saisir le numéro du parent, « Recevoir le code » | Parent par SMS | « Code OTP » avec SMS contenant le code dans Mailpit | ☐ | |
 | REC-AUT-668 | Dans un second navigateur, se connecter comme ce parent | Session ouverte ailleurs | Session active sur /parent | ☐ | |
-| REC-AUT-669 | Saisir le code, « Vérifier le code », saisir un nouveau mot de passe deux fois, « Enregistrer le mot de passe » | Réinitialisation | WL05 « Mot de passe réinitialisé ! » | ☐ | |
+| REC-AUT-669 | Saisir le code, « Vérifier le code », saisir un nouveau mot de passe deux fois, « Enregistrer le mot de passe » | Réinitialisation | « Réinitialisé ✓ » « Mot de passe réinitialisé ! » | ☐ | |
 | REC-AUT-670 | Cliquer « Se connecter » et se connecter avec le numéro et le nouveau mot de passe | Reconnexion | Arrivée sur /parent | ☐ | |
 | REC-AUT-671 | Dans le second navigateur, recharger /parent | Sessions fermées | Redirection vers /connexion?next=%2Fparent | ☐ | |
-| REC-AUT-672 | Refaire avec l'email de l'enseignante (canal email) | Enseignant par email | WL03 avec email dans Mailpit, puis connexion avec le nouvel mot de passe → /enseignant | ☐ | |
-| REC-AUT-673 | Depuis W16, cliquer « Mot de passe oublié ? » puis « Je suis apprenant » | Apprenant (D26) | Fenêtre « Demande à ton parent » ; aucun canal de réinitialisation pour l'apprenant | ☐ | |
+| REC-AUT-672 | Refaire avec l'email de l'enseignante (canal email) | Enseignant par email | « Code OTP » avec email dans Mailpit, puis connexion avec le nouvel mot de passe → /enseignant | ☐ | |
+| REC-AUT-673 | Depuis « Connexion existant », cliquer « Mot de passe oublié ? » puis « Je suis apprenant » | Apprenant (D26) | Fenêtre « Demande à ton parent » ; aucun canal de réinitialisation pour l'apprenant | ☐ | |
 
 
 #### P6 · Activation enseignant
@@ -1705,7 +1705,7 @@ Invitation de Nadia Houngbo du jeu de démo, à usage unique (relancer `make see
 | REC-AUT-675 | Cliquer le lien | Lien valide | Page « Activer votre compte » avec l'email masqué | ☐ | |
 | REC-AUT-676 | Saisir NadiaActive2026 deux fois, « Activer mon compte » | Activation | Arrivée sur /enseignant avec « Aucune classe pour l'instant » et « Créer une classe » | ☐ | |
 | REC-AUT-677 | Rouvrir le même lien | Lien déjà utilisé | « Lien expiré ou déjà utilisé » avec « Contacter l'équipe Steamy » | ☐ | |
-| REC-AUT-678 | Se déconnecter puis se reconnecter sur W16 avec l'email et le mot de passe | Reconnexion | Arrivée sur /enseignant | ☐ | |
+| REC-AUT-678 | Se déconnecter puis se reconnecter sur « Connexion existant » avec l'email et le mot de passe | Reconnexion | Arrivée sur /enseignant | ☐ | |
 
 
 #### P7 · Accessibilité et mobile 360 px
@@ -1716,9 +1716,9 @@ Invitation de Nadia Houngbo du jeu de démo, à usage unique (relancer `make see
 | --- | --- | --- | --- | --- | --- |
 | REC-AUT-679 | Parcourir au clavier seul (Tab, Maj+Tab, Entrée, Espace, flèches, Échap) le parcours P1 côté enfant, de /inscription à /apprenant | Clavier seul | Tout est atteignable et utilisable, focus visible, aucune zone piégeant le focus, fenêtres fermables par Échap | ☐ | |
 | REC-AUT-680 | Parcourir au clavier seul la connexion, le mot de passe oublié et l'activation | Clavier seul | Idem | ☐ | |
-| REC-AUT-681 | Rejouer P1 (enfant et parent) en fenêtre de 360 px | Mobile 360 px | Aucun défilement horizontal, textes lisibles, boutons utilisables, plein écran (W07, W14, W15, W18) sans débordement | ☐ | |
-| REC-AUT-682 | Vérifier les contrastes et l'annonce des erreurs avec un lecteur d'écran sur W04, W16, WL03 | Lecteur d'écran | Encart d'erreurs annoncé, champs en erreur signalés, règles de mot de passe annoncées « (respectée) » / « (non respectée) » | ☐ | |
-| REC-AUT-683 | Activer « Réduire les animations » puis ouvrir /inscription | Mouvement réduit | Pas de voile W01, pas d'animation superflue | ☐ | |
+| REC-AUT-681 | Rejouer P1 (enfant et parent) en fenêtre de 360 px | Mobile 360 px | Aucun défilement horizontal, textes lisibles, boutons utilisables, plein écran sans débordement | ☐ | |
+| REC-AUT-682 | Vérifier les contrastes et l'annonce des erreurs avec un lecteur d'écran sur « Identité & identifiant », « Connexion existant », « Code OTP » | Lecteur d'écran | Encart d'erreurs annoncé, champs en erreur signalés, règles de mot de passe annoncées « (respectée) » / « (non respectée) » | ☐ | |
+| REC-AUT-683 | Activer « Réduire les animations » puis ouvrir /inscription | Mouvement réduit | Pas de voile « Splash », pas d'animation superflue | ☐ | |
 
 
 #### P8 · Accès non autorisé et retour à la page demandée
@@ -1737,8 +1737,8 @@ Invitation de Nadia Houngbo du jeu de démo, à usage unique (relancer `make see
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-AUT-690 | Ouvrir /inscription/parent, saisir le numéro de Marie (01 90 00 00 01), prénom, nom, cocher, « Recevoir mon code par SMS » | WP01 | Passage à WP02 sans mention « déjà inscrit » | ☐ | |
-| REC-AUT-691 | Saisir le code reçu dans Mailpit, « Vérifier le code » | WP02 | Redirection vers /connexion?compte=existant avec « Vous avez déjà un compte avec ce numéro : connectez-vous. » | ☐ | |
+| REC-AUT-690 | Ouvrir /inscription/parent, saisir le numéro de Marie (01 90 00 00 01), prénom, nom, cocher, « Recevoir mon code par SMS » | « Créer un compte » | Passage à « OTP » sans mention « déjà inscrit » | ☐ | |
+| REC-AUT-691 | Saisir le code reçu dans Mailpit, « Vérifier le code » | « OTP » | Redirection vers /connexion?compte=existant avec « Vous avez déjà un compte avec ce numéro : connectez-vous. » | ☐ | |
 | REC-AUT-692 | Se connecter avec 01 90 00 00 01 et Steamy2026 | Connexion | Arrivée sur /parent | ☐ | |
 
 ---
@@ -1748,7 +1748,7 @@ Invitation de Nadia Houngbo du jeu de démo, à usage unique (relancer `make see
 *904 lignes de scénario.*
 
 
-Cahier de recette manuel de l'espace apprenant de Steamy : accueil et notifications, catalogue et souhaits, parcours et pédagogie, déblocage d'un parcours, profil, Steamy Events, boutique de kits et paiement Mobile Money. Registre : **tutoiement** côté apprenant (le tunnel d'achat invité de la boutique publique, WK04 à WK07 et WK09, est au **vouvoiement**). Les résultats attendus citent les libellés exacts de l'application ; quand la spécification ne tranche pas, la ligne dit « à confirmer (spec muette) ».
+Cahier de recette manuel de l'espace apprenant de Steamy : accueil et notifications, catalogue et souhaits, parcours et pédagogie, déblocage d'un parcours, profil, Steamy Events, boutique de kits et paiement Mobile Money. Registre : **tutoiement** côté apprenant (le tunnel d'achat invité de la boutique publique, « Informations invité » à « Confirmation & suivi » et « Paiement échoué », est au **vouvoiement**). Les résultats attendus citent les libellés exacts de l'application ; quand la spécification ne tranche pas, la ligne dit « à confirmer (spec muette) ».
 
 Sources : `docs/tests/MATRICE-E2E.md` (lot 3), `docs/SPEC-ECRANS-2-apprenant.md`, `docs/SPEC-ECRANS-3-parent-teacher-admin.md` §5.13 (boutique), `docs/plans/LOT-3-APPRENANT.md`, `docs/alignement/ARBITRAGES.md` (C4, C8, C10, C12, C17, C25, D27, D30 à D41), tests `apps/web/e2e` et code `apps/web/src/features`.
 
@@ -1759,7 +1759,7 @@ Sources : `docs/tests/MATRICE-E2E.md` (lot 3), `docs/SPEC-ECRANS-2-apprenant.md`
 1. Démarrer la stack : `make up` (web http://localhost:3000, API http://localhost:8000/api/, admin Django http://localhost:8000/admin/).
 2. Charger le jeu de démonstration : `make seed` (idempotent, refusé en production). Pour recetter le délai de 10 minutes entre deux essais d'une sommative ratée en 5 secondes, utiliser plutôt `seed_demo --e2e` (stack `make e2e`).
 3. Boîte mail de développement (SMS et emails simulés) : **Mailpit http://localhost:8025**.
-4. Faux prestataire de paiement Mobile Money, piloté par le dernier chiffre du numéro : `…01` paiement réussi, `…02` paiement refusé, `…03` reste en attente. Commandes utiles : `manage.py simulate_payment <référence> success|failed` et `manage.py pay_payment_request <id>` (règlement d'une demande par le parent, en attendant WPD15).
+4. Faux prestataire de paiement Mobile Money, piloté par le dernier chiffre du numéro : `…01` paiement réussi, `…02` paiement refusé, `…03` reste en attente. Commandes utiles : `manage.py simulate_payment <référence> success|failed` et `manage.py pay_payment_request <id>` (règlement d'une demande par le parent, en attendant « Demande de paiement »).
 5. Navigateurs : exécuter chaque ligne au moins une fois en **bureau (≥ 1280 px)** et les lignes marquées « Mobile 360 px » en **mobile 360 x 760** (outils de développement, émulation tactile). Page sans défilement horizontal à 360 px.
 
 #### Comptes (mot de passe de tous les comptes : `Steamy2026`, source `apps/api/fixtures/README.md`)
@@ -1767,11 +1767,11 @@ Sources : `docs/tests/MATRICE-E2E.md` (lot 3), `docs/SPEC-ECRANS-2-apprenant.md`
 | Rôle | Identifiant | Usage dans ce cahier |
 | --- | --- | --- |
 | Apprenante de démo | `lea.adjovi` (Léa Adjovi, 4e, Cotonou) | Lecture : parcours « Découverte de la robotique » en cours (30 %), « Initiation à Scratch » terminé et certifié, 2 souhaits, streak de 5 jours, demande de paiement en attente pour « Capteurs électroniques », tentatives `ko` / `warn` / `ok` |
-| Apprenant « profil à compléter » | `noe.adjovi` (Noé, 11 ans) | Demande de suppression déjà en attente de Marie (WD15) |
+| Apprenant « profil à compléter » | `noe.adjovi` (Noé, 11 ans) | Demande de suppression déjà en attente de Marie |
 | Parent | `+229 01 90 00 00 01` (ou `0190000001`), Marie Adjovi | Régler une demande, acheter un kit pour un Kit Code, consulter les emails reçus |
 | Parent | `+229 01 90 00 00 02` (Bernard Kpadé) | Parent de Yao et Sèna, apprenants de la classe de M. Adékambi |
 | Enseignant | `koffi.adekambi@steamy.test` | Apprenants `yao.kpade` / `sena.kpade` (inscription par classe) |
-| Personnel | `superadmin@steamy.test` (admin Django, WAD14) | Activer la TVA et l'AIB dans `PlatformSettings` (taxes éteintes par défaut) |
+| Personnel | `superadmin@steamy.test` (admin Django, « Paramètres généraux ») | Activer la TVA et l'AIB dans `PlatformSettings` (taxes éteintes par défaut) |
 
 **Apprenant neuf** : pour les cas qui modifient des données (inscription, souhaits, profil, panier, suppression), créer un compte via l'inscription apprenant (`/inscription/apprenant/...`) puis faire accepter l'accord par un parent (lien reçu dans Mailpit), ou utiliser un compte créé par Marie depuis son espace. Un apprenant neuf n'a ni souhait, ni inscription, ni notification, ni tentative, ni commande.
 
@@ -1789,16 +1789,16 @@ Sources : `docs/tests/MATRICE-E2E.md` (lot 3), `docs/SPEC-ECRANS-2-apprenant.md`
 
 | Famille | Écrans |
 | --- | --- |
-| Accueil, notifications, aide | WD01, WD02, WD03, WD04, WD05, WD06, WD12 |
-| Quiz et progression | WD07, WD08, WD09, WD21 |
-| Steamy Events | WD10, WD11 |
-| Compte et profil | WD13, WD14, WD15, WD16, WD17, WD18, WD19, WD22 |
-| Mes parcours | WD23, WC06a, WC06b |
-| Catalogue et fiche | WC01, WC02, WC02b, WC03, WC04, WC05 |
-| Souhaits | WW01, WW02, WW03 |
-| Déblocage et paiement | WA01, WA02, WA03, WA04, WA05, WA06, WA07 |
-| Parcours pédagogique | WJ01, WJ02, WJ03, WJ04, WJ05, WJ06, WJ07, WJ08, WJ09, WJ10, WJ11 |
-| Boutique de kits et checkout | WK01, WK02, WK03, WK04, WK05, WK06, WK07, WK08, WK09, WK10, WK11 |
+| Accueil, notifications, aide | « Accueil », « Accueil nouvel utilisateur », « Chargement de l'accueil », « Notifications · liste », « Notifications · vide », « Notifications · paramètres », « Aide & support » |
+| Quiz et progression | « Tentatives de quiz · liste », « Tentatives de quiz · détail », « Tentatives de quiz · vide », « Progression & recommandations » |
+| Steamy Events | « Steamy Events », « Demande de participation » |
+| Compte et profil | « Paramètres », « Historique de commande », « Supprimer le compte », « Déconnexion », « Éditer le profil », « Modifier la connexion », « Informations de livraison », « Infos de mon parent » |
+| Mes parcours | « Mes parcours », « Vue inscrit · projets repliés », « Vue inscrit · projet déplié » |
+| Catalogue et fiche | « Catalogue par défaut », « Filtré », « Liste déroulante ouverte », « Aucun résultat », « Détail parcours gratuit », « Détail parcours payant + kit » |
+| Souhaits | « Souhaits · avec éléments », « Souhaits · vide », « Toast après retrait » |
+| Déblocage et paiement | « Saisie du Kit Code », « Paiement par le parent », « Formulaire de paiement Mobile Money », « Paiement en cours », « Paiement réussi », « Kit Code invalide », « Paiement échoué » |
+| Parcours pédagogique | « Détail projet », « Intro niveau », « Contenu mission », « Évaluation formative », « Revue des résultats », « Badge de niveau débloqué », « Certification & fin de parcours », « Échec d'évaluation », « Parcours incomplet », « Évaluation sommative », « Projet validé + badge de projet » |
+| Boutique de kits et checkout | « Catalogue kits », « Détail kit », « Panier », « Informations invité », « Livraison », « Paiement », « Confirmation & suivi », « Paiement par le parent », « Paiement échoué », « Panier vide », « Stock épuisé » |
 
 Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne « Remarques » reçoit l'écart constaté (capture, version, jeu de données).
 
@@ -1806,12 +1806,12 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 
 ### Accueil, notifications et aide
 
-#### WD01 · Accueil (/apprenant)
+#### Accueil (/apprenant)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-001 | Ouvrir /apprenant connecté en `lea.adjovi` | Nominal, parcours en cours | Titre h1 « Salut Léa 👋 ». Carte de reprise « En cours · Projet n · Niveau n » avec le titre « Découverte de la robotique », une barre de progression nommée « Progression du parcours Découverte de la robotique » et le pourcentage lu de l'API (30 % pour le jeu de démo). | ☐ | |
 | REC-APP-002 | Lire la carte de reprise | Prochaine étape = mission | Ligne « Prochaine mission : <titre> » ; bouton « Continuer la mission » dont le lien est `/apprenant/parcours/decouverte-robotique/missions/<id>`. | ☐ | |
-| REC-APP-003 | Cliquer « Continuer la mission » | Prochaine étape = mission | Ouverture de la mission (WJ03) sans erreur. | ☐ | |
+| REC-APP-003 | Cliquer « Continuer la mission » | Prochaine étape = mission | Ouverture de la mission sans erreur. | ☐ | |
 | REC-APP-004 | Lire la carte de reprise | Prochaine étape = quiz | Ligne « Prochain quiz : <titre> » ; bouton « Passer le quiz du niveau » (formative) ou « Passer l'évaluation du projet » (sommative) vers `/apprenant/parcours/<slug>/quiz/<id>`. | ☐ | |
 | REC-APP-005 | Lire la carte de reprise | Prochaine étape = certification | Pas de ligne « Prochaine mission/quiz » ; bouton « Voir ma certification » vers la page de certification. | ☐ | |
 | REC-APP-006 | Lire la carte de reprise | Prochaine étape sans identifiant | Bouton « Voir mon parcours » vers l'arbre du parcours. | ☐ | |
@@ -1821,8 +1821,8 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-010 | Lire le raccourci « Mes souhaits » | Léa avec 2 souhaits | Sous-titre « 2 parcours » ; « Aucun parcours » quand la liste est vide ; valeur lue de l'API, jamais « 3 parcours » en dur. | ☐ | |
 | REC-APP-011 | Cliquer le raccourci « Catalogue » | Nominal | Arrivée sur /apprenant/catalogue. | ☐ | |
 | REC-APP-012 | Cliquer le raccourci « Mes souhaits » | Nominal | Arrivée sur /apprenant/souhaits. | ☐ | |
-| REC-APP-013 | Cliquer le raccourci « Mes quiz » | Nominal | Arrivée sur /apprenant/quiz (WD07). | ☐ | |
-| REC-APP-014 | Cliquer le raccourci « Steamy Events » | Nominal | Arrivée sur /apprenant/evenements (WD10), h1 « Steamy Events ». | ☐ | |
+| REC-APP-013 | Cliquer le raccourci « Mes quiz » | Nominal | Arrivée sur /apprenant/quiz. | ☐ | |
+| REC-APP-014 | Cliquer le raccourci « Steamy Events » | Nominal | Arrivée sur /apprenant/evenements, h1 « Steamy Events ». | ☐ | |
 | REC-APP-015 | Lire la section « Pour toi » | Recommandations disponibles | Au plus 3 cartes de parcours (article) ; lien « Voir tout » vers /apprenant/catalogue. | ☐ | |
 | REC-APP-016 | Lire la section « Pour toi » | Aucune recommandation (tous les parcours suivis) | Texte « Tu suis déjà tous nos parcours publiés. Reviens voir le catalogue pour les prochains ! ». | ☐ | |
 | REC-APP-017 | Cliquer une carte de « Pour toi » | Nominal | Ouverture de la fiche du parcours /apprenant/catalogue/<slug>. | ☐ | |
@@ -1836,7 +1836,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-025 | Simuler une erreur serveur de l'API (arrêt du conteneur api) | Erreur serveur | Même état « Oups, ça a coupé » ; « Réessayer » recharge la page une fois l'API revenue. | ☐ | |
 | REC-APP-026 | Afficher la page à 360 px | Mobile 360 px | Aucun défilement horizontal ; navigation dans un tiroir (bouton « Ouvrir le menu ») ; carte de reprise lisible, pastilles empilées, raccourcis en colonne. | ☐ | |
 
-#### WD02 · Accueil nouvel utilisateur (/apprenant)
+#### Accueil nouvel utilisateur (/apprenant)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-027 | Ouvrir /apprenant avec un apprenant neuf (aucune inscription) | Nominal | h1 « Salut <Prénom> 👋 » ; carte pointillée avec h2 « Bienvenue <Prénom> ! » et le texte « Tu n'as pas encore commencé de parcours. Choisis-en un pour démarrer ton aventure robotique. » ; mascotte visible. | ☐ | |
@@ -1848,14 +1848,14 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-033 | Ouvrir /apprenant | Aucun parcours gratuit publié | Section de suggestions absente ou message d'absence ; pas d'erreur (à confirmer : spec muette). | ☐ | |
 | REC-APP-034 | Afficher la page à 360 px | Mobile 360 px | Mascotte masquée, bouton « Explorer le catalogue » pleine largeur lisible, aucun défilement horizontal. | ☐ | |
 
-#### WD03 · Chargement de l'accueil (/apprenant)
+#### Chargement de l'accueil (/apprenant)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-035 | Ouvrir /apprenant avec le réseau limité (Slow 3G des outils de développement) | Chargement | Un squelette nommé « Chargement de ton tableau de bord… » (statut) s'affiche d'abord, fidèle à la carte de reprise, aux pastilles, aux raccourcis et aux suggestions. | ☐ | |
 | REC-APP-036 | Attendre la fin du chargement | Nominal | Le squelette est remplacé par le tableau de bord ; plus d'élément de rôle statut « Chargement de ton tableau de bord… ». | ☐ | |
 | REC-APP-037 | Afficher la page à 360 px pendant le chargement | Mobile 360 px | Squelette sans défilement horizontal. | ☐ | |
 
-#### WD04 · Notifications · liste (/apprenant/notifications)
+#### Notifications · liste (/apprenant/notifications)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-038 | Cliquer la cloche du header | Nominal | Arrivée sur /apprenant/notifications, h1 « Notifications » ; la cloche porte un nom accessible du type « Notifications, n non lues » ou « Notifications, aucune non lue ». | ☐ | |
@@ -1870,23 +1870,23 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-047 | Cliquer « Tout marquer comme lu » | Aucune non lue | Bouton désactivé, aucune action. | ☐ | |
 | REC-APP-048 | Recharger après « Tout marquer comme lu » | Rechargement | Cloche toujours à 0 ; plus aucun marqueur « Non lue : ». | ☐ | |
 | REC-APP-049 | Ouvrir l'onglet « Non lues (0) » | Liste filtrée vide | Mascotte, texte « Tu as tout lu, rien de neuf. » et lien « Voir toutes mes notifications » vers l'onglet « Toutes ». | ☐ | |
-| REC-APP-050 | Cliquer l'icône engrenage « Régler les notifications » | Nominal | Arrivée sur /apprenant/notifications/preferences (WD06). | ☐ | |
+| REC-APP-050 | Cliquer l'icône engrenage « Régler les notifications » | Nominal | Arrivée sur /apprenant/notifications/preferences. | ☐ | |
 | REC-APP-051 | Atteindre plus de 20 notifications | Pagination | Navigation « Pagination des notifications » avec liens de page ; le focus passe à la liste à chaque changement d'onglet ou de page. | ☐ | |
 | REC-APP-052 | Ouvrir /apprenant/notifications?page=abc | Paramètre invalide | Retour à la page 1 sans erreur. | ☐ | |
 | REC-APP-053 | Ouvrir /apprenant/notifications sans session | Accès non autorisé | Redirection vers /connexion?next=%2Fapprenant%2Fnotifications. | ☐ | |
 | REC-APP-054 | Simuler une erreur de l'API | Erreur serveur / réseau | État « Oups, ça a coupé » avec « Réessayer ». | ☐ | |
 | REC-APP-055 | Observer la liste pendant le chargement | Chargement | Squelette « Chargement de tes notifications… » (onglets et cinq lignes). | ☐ | |
 | REC-APP-056 | Afficher la page à 360 px | Mobile 360 px | Onglets et éléments sur une colonne, aucun débordement horizontal. | ☐ | |
-| REC-APP-057 | Valider l'arrivée d'une notification métier | Après règlement d'une demande par le parent | Une notification « <Parcours> est débloqué » apparaît (voir WA02). | ☐ | |
+| REC-APP-057 | Valider l'arrivée d'une notification métier | Après règlement d'une demande par le parent | Une notification « <Parcours> est débloqué » apparaît (voir « Paiement par le parent »). | ☐ | |
 
-#### WD05 · Notifications · vide (/apprenant/notifications)
+#### Notifications · vide (/apprenant/notifications)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-058 | Ouvrir /apprenant/notifications avec un apprenant neuf | Nominal | h2 « Tout est calme par ici » ; mascotte endormie ; texte « Tu n'as aucune notification. On te prévient dès qu'il se passe quelque chose d'important. » ; bouton « Régler les notifications ». | ☐ | |
 | REC-APP-059 | Cliquer « Régler les notifications » | Nominal | Arrivée sur /apprenant/notifications/preferences. | ☐ | |
 | REC-APP-060 | Afficher la page à 360 px | Mobile 360 px | Contenu centré, bouton accessible, aucun débordement. | ☐ | |
 
-#### WD06 · Notifications · paramètres (/apprenant/notifications/preferences)
+#### Notifications · paramètres (/apprenant/notifications/preferences)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-061 | Ouvrir la page | Nominal | Fil « Notifications > Paramètres » ; section « Canaux » avec « Dans l'application » (« Toujours actif : toutes tes notifications s'affichent dans ton espace. ») et « Email ». | ☐ | |
@@ -1903,7 +1903,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-072 | Observer le chargement | Chargement | Squelette « Chargement de tes préférences… ». | ☐ | |
 | REC-APP-073 | Afficher la page à 360 px | Mobile 360 px | Libellés et interrupteurs sur une colonne sans débordement. | ☐ | |
 
-#### WD12 · Aide & support (/apprenant/aide)
+#### Aide & support (/apprenant/aide)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-074 | Ouvrir la page | Nominal | h1 « Aide & Support » ; h2 « Questions fréquentes » ; accordéon par thèmes : « Débloquer un parcours », « Mon compte », « Ma progression ». | ☐ | |
@@ -1915,7 +1915,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-080 | Saisir « kit code » dans la recherche « Rechercher une question » | Recherche locale | Les questions sans rapport (ex. « J'ai oublié mon mot de passe ») disparaissent ; « Où trouver mon Kit Code ? » reste visible. | ☐ | |
 | REC-APP-081 | Saisir un terme sans résultat (ex. « zzzz ») | Aucun résultat | Message « Aucune question ne correspond. Écris-nous avec le bouton ci-dessous. ». | ☐ | |
 | REC-APP-082 | Effacer la recherche | Nominal | Toutes les questions réapparaissent. | ☐ | |
-| REC-APP-083 | Cliquer « Contacter le support » | Nominal | Arrivée sur /aide#contact (formulaire de contact WL24, espace public). | ☐ | |
+| REC-APP-083 | Cliquer « Contacter le support » | Nominal | Arrivée sur /aide#contact (formulaire de contact « Aide & contact », espace public). | ☐ | |
 | REC-APP-084 | Lire le bloc de contact | Nominal | « Tu ne trouves pas ta réponse ? » et « Notre équipe te répond en français. ». | ☐ | |
 | REC-APP-085 | Parcourir au clavier | Clavier | Champ de recherche, questions et bouton atteignables ; Entrée/Espace déplient. | ☐ | |
 | REC-APP-086 | Ouvrir /apprenant/aide sans session | Accès non autorisé | Redirection vers /connexion?next=%2Fapprenant%2Faide. | ☐ | |
@@ -1923,7 +1923,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 
 ### Quiz, progression et Steamy Events
 
-#### WD07 · Tentatives de quiz · liste (/apprenant/quiz)
+#### Tentatives de quiz · liste (/apprenant/quiz)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-088 | Ouvrir la page en `lea.adjovi` | Nominal | h1 « Mes tentatives de quiz » ; bandeau avec « Taux de réussite » (en %), « Tentatives », « Quiz parfaits », « Streak » (« n j ») lus de l'API. | ☐ | |
@@ -1935,39 +1935,39 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-094 | Recharger la page sur ?statut=ok | Rechargement | Le filtre reste actif. | ☐ | |
 | REC-APP-095 | Cliquer l'onglet « Tous » | Filtre | Retour sur /apprenant/quiz sans paramètre. | ☐ | |
 | REC-APP-096 | Filtrer un statut sans tentative | Liste filtrée vide | Message « Aucune tentative « <statut> » pour l'instant. ». | ☐ | |
-| REC-APP-097 | Cliquer une ligne | Nominal | Arrivée sur /apprenant/quiz/<id> (WD08). | ☐ | |
+| REC-APP-097 | Cliquer une ligne | Nominal | Arrivée sur /apprenant/quiz/<id>. | ☐ | |
 | REC-APP-098 | Avoir plus d'une page de tentatives | Pagination | Liens « ‹ Plus récentes » / « Plus anciennes › » dans « Pages des tentatives » ; le filtre est conservé. | ☐ | |
 | REC-APP-099 | Ouvrir /apprenant/quiz?statut=inconnu | Paramètre invalide | Retour à « Tous » sans erreur (à confirmer). | ☐ | |
-| REC-APP-100 | Ouvrir la page avec un apprenant neuf | État vide | Voir WD09. | ☐ | |
+| REC-APP-100 | Ouvrir la page avec un apprenant neuf | État vide | Voir « Tentatives de quiz · vide ». | ☐ | |
 | REC-APP-101 | Observer le chargement | Chargement | Squelette « Chargement de tes tentatives… ». | ☐ | |
 | REC-APP-102 | Simuler une erreur de l'API | Erreur serveur / réseau | État « Oups, ça a coupé » et « Réessayer ». | ☐ | |
 | REC-APP-103 | Ouvrir /apprenant/quiz sans session | Accès non autorisé | Redirection vers /connexion?next=%2Fapprenant%2Fquiz. | ☐ | |
 | REC-APP-104 | Afficher la page à 360 px | Mobile 360 px | Statistiques en grille, lignes lisibles, aucun débordement. | ☐ | |
 
-#### WD08 · Tentatives de quiz · détail (/apprenant/quiz/<id>)
+#### Tentatives de quiz · détail (/apprenant/quiz/<id>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-105 | Ouvrir une tentative réussie | Réussi | Fil « Mes quiz > <titre du quiz> » ; bloc de score « <n> % » ; « n bonnes réponses sur N · seuil s % » ; badge « Réussi » ; « Bien joué ! » ; « Tu as validé le niveau. » (formative) ou « Tu as validé le projet. » (sommative) ; « +n points » si des points ont été gagnés. | ☐ | |
 | REC-APP-106 | Ouvrir une tentative en dessous du seuil | Échoué ou À refaire | Badge de statut correspondant ; « Pas encore validé » ; « Il faut au moins s %. Revois les concepts ci-contre, puis réessaie. » ; section « Concepts à revoir » avec des liens « Revoir « <mission> » ». | ☐ | |
 | REC-APP-107 | Lire le seuil | Formative / sommative | Seuil 70 % pour une formative, 80 % pour une sommative (valeur de l'API, jamais en dur). | ☐ | |
 | REC-APP-108 | Lire « Récapitulatif des questions » | Nominal | Liste numérotée : texte de la question, icône « Juste » ou « Faux », « Concept : <concept> ». La réponse donnée et la bonne réponse de chaque question sont-elles montrées ? À confirmer (spec : « avec la réponse donnée et la bonne réponse », l'écran livré montre juste/faux et le concept). | ☐ | |
-| REC-APP-109 | Cliquer un lien « Revoir « <mission> » » | Nominal | Ouverture de la mission concernée (WJ03). | ☐ | |
-| REC-APP-110 | Cliquer « Voir le parcours » | Nominal | Arrivée sur /apprenant/parcours/<slug> (arbre WC06a). | ☐ | |
-| REC-APP-111 | Cliquer « Réessayer le quiz » | Formative échouée | Ouverture du quiz (WJ04) sans délai. | ☐ | |
+| REC-APP-109 | Cliquer un lien « Revoir « <mission> » » | Nominal | Ouverture de la mission concernée. | ☐ | |
+| REC-APP-110 | Cliquer « Voir le parcours » | Nominal | Arrivée sur /apprenant/parcours/<slug> (arbre « Vue inscrit · projets repliés »). | ☐ | |
+| REC-APP-111 | Cliquer « Réessayer le quiz » | Formative échouée | Ouverture du quiz sans délai. | ☐ | |
 | REC-APP-112 | Lire le bouton de réessai | Sommative échouée, délai en cours | Bouton désactivé « Réessayer le quiz dans mm:ss » avec compte à rebours ; il devient actif à la fin du délai (10 min en production, 5 s en `--e2e`). | ☐ | |
 | REC-APP-113 | Ouvrir /apprenant/quiz/999999 | Tentative inconnue ou d'un autre apprenant | Page 404 (« Cette page est introuvable »). | ☐ | |
 | REC-APP-114 | Ouvrir une tentative de Léa en `sena.kpade` | Accès non autorisé | Page 404 (la tentative n'appartient pas à l'apprenant). | ☐ | |
 | REC-APP-115 | Cliquer « Mes quiz » dans le fil d'Ariane | Nominal | Retour sur /apprenant/quiz. | ☐ | |
 | REC-APP-116 | Afficher la page à 360 px | Mobile 360 px | Bloc de score au-dessus, panneau de statut sous le récapitulatif, aucun débordement. | ☐ | |
 
-#### WD09 · Tentatives de quiz · vide (/apprenant/quiz)
+#### Tentatives de quiz · vide (/apprenant/quiz)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-117 | Ouvrir /apprenant/quiz avec un apprenant neuf | Nominal | h2 « Pas encore de quiz » ; « Termine les missions d'un niveau pour passer ton premier quiz : tes résultats apparaîtront ici. » ; bouton « Voir mes parcours en cours » ; aucune mention de classement. | ☐ | |
 | REC-APP-118 | Cliquer « Voir mes parcours en cours » | Nominal | Arrivée sur /apprenant/parcours. | ☐ | |
 | REC-APP-119 | Afficher la page à 360 px | Mobile 360 px | Mascotte et bouton centrés, aucun débordement. | ☐ | |
 
-#### WD21 · Progression & recommandations (/apprenant/profil/progression)
+#### Progression & recommandations (/apprenant/profil/progression)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-120 | Ouvrir la page en `lea.adjovi` | Nominal | h1 « Ma progression » ; pastilles « Cette semaine » (temps d'apprentissage), « Streak », « Points », « Badges obtenus » (nombre). | ☐ | |
@@ -1981,7 +1981,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-128 | Simuler une erreur de l'API | Erreur serveur / réseau | État « Oups, ça a coupé » et « Réessayer ». | ☐ | |
 | REC-APP-129 | Afficher la page à 360 px | Mobile 360 px | Pastilles et barres empilées, histogramme lisible, aucun débordement. | ☐ | |
 
-#### WD10 · Steamy Events (/apprenant/evenements)
+#### Steamy Events (/apprenant/evenements)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-130 | Ouvrir la page avec un apprenant neuf | Nominal | h1 « Steamy Events » ; h2 « Événements à venir » avec des cartes (visuel, titre, date, lieu, prix) ; h2 « Mes candidatures » avec « Pas encore de candidature » et « Choisis un événement et envoie ta candidature : ton parent recevra ta demande pour donner son accord. ». | ☐ | |
@@ -1993,7 +1993,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-136 | Lire la liste « Tes candidatures » | Autres statuts | Badges possibles : « En attente du paiement », « Acceptée », « Refusée » (avec « Motif : <motif> » si le parent l'a donné), « Annulée ». | ☐ | |
 | REC-APP-137 | Lire une candidature | Ticket Steamy Events utilisé | Mention « Ticket Steamy Events utilisé » sur la ligne ; prix non demandé au parent. | ☐ | |
 | REC-APP-138 | Cliquer le titre d'un événement | Nominal | Fiche de l'événement dans le shell : /apprenant/evenements/<slug> (h1 « Steamy Events », h2 du titre). | ☐ | |
-| REC-APP-139 | Cliquer « Participer » | Nominal | Arrivée sur /apprenant/evenements/<slug>/candidature (WD11). | ☐ | |
+| REC-APP-139 | Cliquer « Participer » | Nominal | Arrivée sur /apprenant/evenements/<slug>/candidature. | ☐ | |
 | REC-APP-140 | Arriver avec ?candidature=envoyee | Après envoi d'une candidature | Toast « Ta candidature est envoyée à ton parent. » ; le paramètre est retiré de l'URL ; un rechargement n'affiche plus le toast. | ☐ | |
 | REC-APP-141 | Lire la section « Événements à venir » | Aucun événement publié | Message « Aucun événement à venir » et « Les prochains Steamy Events seront annoncés ici. Reviens bientôt ! ». | ☐ | |
 | REC-APP-142 | Ouvrir /apprenant/evenements/evenement-inconnu | Événement introuvable | h2 « Cet événement est introuvable ». | ☐ | |
@@ -2005,7 +2005,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-148 | Simuler une erreur de l'API | Erreur serveur / réseau | État « Oups, ça a coupé » et « Réessayer ». | ☐ | |
 | REC-APP-149 | Afficher la page à 360 px | Mobile 360 px | Cartes empilées, aucun débordement. | ☐ | |
 
-#### WD11 · Demande de participation (/apprenant/evenements/<slug>/candidature)
+#### Demande de participation (/apprenant/evenements/<slug>/candidature)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-150 | Ouvrir la page pour un événement ouvert | Nominal | Rappel de l'événement (titre, date, lieu, prix) ; champ « Pourquoi veux-tu participer ? » (obligatoire, placeholder « Dis-nous ce qui te motive… ») ; liste « Ton expérience en robotique » ; encart « Ta candidature sera envoyée à ton parent pour accord. » ; bouton « Envoyer ma candidature ». Le mot « niveau » n'apparaît pas. | ☐ | |
@@ -2013,7 +2013,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-152 | Ouvrir la page | Événement payant et ticket Steamy Events libre | Encart « Ton ticket Steamy Events rend cette candidature gratuite : ton parent donne seulement son accord. ». | ☐ | |
 | REC-APP-153 | Cliquer « Envoyer ma candidature » | Motivation vide | Erreur « Dis-nous pourquoi tu veux participer. » (rôle alerte) ; aucun envoi. | ☐ | |
 | REC-APP-154 | Lire la liste d'expérience | Nominal | Option par défaut « Choisis ton expérience » puis Débutant, Intermédiaire, Avancé ; champ facultatif. | ☐ | |
-| REC-APP-155 | Envoyer avec motivation seule | Expérience non choisie | Candidature envoyée ; retour sur WD10 avec toast « Ta candidature est envoyée à ton parent. ». | ☐ | |
+| REC-APP-155 | Envoyer avec motivation seule | Expérience non choisie | Candidature envoyée ; retour sur « Steamy Events » avec toast « Ta candidature est envoyée à ton parent. ». | ☐ | |
 | REC-APP-156 | Envoyer avec motivation et expérience « Débutant » | Nominal | Retour sur /apprenant/evenements ; la candidature est listée « En attente de ton parent » ; plus de « Participer » pour cet événement. | ☐ | |
 | REC-APP-157 | Saisir plus de 2 000 caractères | Limite | La saisie est limitée à 2 000 caractères. | ☐ | |
 | REC-APP-158 | Envoyer une seconde fois (second onglet ouvert avant) | Candidature déjà envoyée (ALREADY_APPLIED) | Message « Tu as déjà une candidature en cours pour cet événement : retrouve-la dans « Mes candidatures ». » ; le bouton d'envoi disparaît. | ☐ | |
@@ -2031,22 +2031,22 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 
 ### Compte et profil
 
-#### WD13 · Paramètres (hub) (/apprenant/profil)
+#### Paramètres (hub) (/apprenant/profil)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-169 | Ouvrir la page avec un apprenant neuf | Nominal | h1 « Profil » ; sections « Mon profil », « Connexion », « Livraison », « Notifications », « Mon compte », « Zone sensible ». | ☐ | |
 | REC-APP-170 | Lire « Mes informations » | Profil complet | Termes « Nom », « Date de naissance », « Classe », « Localité » avec leurs valeurs ; « Non renseigné » pour une donnée absente. | ☐ | |
 | REC-APP-171 | Lire la section « Connexion » | Nominal | Ligne « Identifiant » avec l'identifiant en lecture seule (texte « Il te sert à te connecter et ne peut pas être modifié. »), sans lien ; ligne « Mot de passe » (« Change ton mot de passe de connexion. »). | ☐ | |
 | REC-APP-172 | Rechercher téléphone, Mobile Money, « Bientôt » sur la page | Éléments retirés (D30) | Aucun « Téléphone », aucune carte Mobile Money, aucune mention « Bientôt ». | ☐ | |
-| REC-APP-173 | Cliquer « Modifier » (Mes informations) | Nominal | Arrivée sur /apprenant/profil/modifier (WD17). | ☐ | |
-| REC-APP-174 | Cliquer « Mot de passe » | Nominal | Arrivée sur /apprenant/profil/mot-de-passe (WD18), h1 « Mot de passe ». | ☐ | |
-| REC-APP-175 | Cliquer « Adresse de livraison » | Nominal | Arrivée sur /apprenant/profil/livraison (WD19) ; texte d'aide « Proposée quand ton parent te commande un kit. ». | ☐ | |
-| REC-APP-176 | Cliquer « Préférences de notification » | Nominal | Arrivée sur /apprenant/notifications/preferences (WD06). | ☐ | |
-| REC-APP-177 | Cliquer « Mes commandes » | Nominal | Arrivée sur /apprenant/profil/commandes (WD14). | ☐ | |
-| REC-APP-178 | Cliquer « Ma progression » | Nominal | Arrivée sur /apprenant/profil/progression (WD21). | ☐ | |
-| REC-APP-179 | Cliquer « Mon parent » | Nominal | Arrivée sur /apprenant/profil/parent (WD22). | ☐ | |
+| REC-APP-173 | Cliquer « Modifier » (Mes informations) | Nominal | Arrivée sur /apprenant/profil/modifier. | ☐ | |
+| REC-APP-174 | Cliquer « Mot de passe » | Nominal | Arrivée sur /apprenant/profil/mot-de-passe, h1 « Mot de passe ». | ☐ | |
+| REC-APP-175 | Cliquer « Adresse de livraison » | Nominal | Arrivée sur /apprenant/profil/livraison ; texte d'aide « Proposée quand ton parent te commande un kit. ». | ☐ | |
+| REC-APP-176 | Cliquer « Préférences de notification » | Nominal | Arrivée sur /apprenant/notifications/preferences. | ☐ | |
+| REC-APP-177 | Cliquer « Mes commandes » | Nominal | Arrivée sur /apprenant/profil/commandes. | ☐ | |
+| REC-APP-178 | Cliquer « Ma progression » | Nominal | Arrivée sur /apprenant/profil/progression. | ☐ | |
+| REC-APP-179 | Cliquer « Mon parent » | Nominal | Arrivée sur /apprenant/profil/parent. | ☐ | |
 | REC-APP-180 | Cliquer « CGU et politiques » | Nominal | Arrivée sur /legal/cgu. | ☐ | |
-| REC-APP-181 | Cliquer « Supprimer mon compte » | Nominal | Arrivée sur /apprenant/profil/suppression (WD15), texte « La demande est envoyée à ton parent pour accord. ». | ☐ | |
+| REC-APP-181 | Cliquer « Supprimer mon compte » | Nominal | Arrivée sur /apprenant/profil/suppression, texte « La demande est envoyée à ton parent pour accord. ». | ☐ | |
 | REC-APP-182 | Cliquer « Profil » dans le fil d'Ariane d'une sous-page | Nominal | Retour sur /apprenant/profil. | ☐ | |
 | REC-APP-183 | Cliquer l'avatar du header | Nominal | Arrivée sur /apprenant/profil. | ☐ | |
 | REC-APP-184 | Lire le bloc utilisateur de la barre latérale | Léa | Nom « Léa A. » et sous-titre « <classe> · Cotonou ». | ☐ | |
@@ -2056,7 +2056,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-188 | Ouvrir /apprenant/profil sans session | Accès non autorisé | Redirection vers /connexion?next=%2Fapprenant%2Fprofil. | ☐ | |
 | REC-APP-189 | Afficher la page à 360 px | Mobile 360 px | Lignes de réglage pleine largeur, aucun débordement. | ☐ | |
 
-#### WD14 · Historique de commande (/apprenant/profil/commandes)
+#### Historique de commande (/apprenant/profil/commandes)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-190 | Ouvrir la page | Nominal | h1 « Mes commandes » ; fil « Profil > Mes commandes » ; onglets (navigation « Filtrer les commandes ») : « Toutes », « Payées », « En attente », « Annulées ». Le filtre « Échouées » de la spec n'existe pas dans l'écran livré : à confirmer. | ☐ | |
@@ -2065,7 +2065,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-193 | Lire une commande d'événement | Type événement | Libellé « Événement » (à confirmer : présence dans le jeu de démo). | ☐ | |
 | REC-APP-194 | Lire une demande non encore réglée | Demande en attente | En tête de la première page : badge « En attente de ton parent », « Demandée le <date> · à régler avant le <date> », montant et lien « Voir la demande ». | ☐ | |
 | REC-APP-195 | Chercher un bouton « Facture » | Nominal | Aucun bouton ni mention « Facture » côté apprenant. | ☐ | |
-| REC-APP-196 | Cliquer « Voir la demande » | Demande en attente | Arrivée sur /apprenant/demandes/<id> (WA02 ou WK08). | ☐ | |
+| REC-APP-196 | Cliquer « Voir la demande » | Demande en attente | Arrivée sur /apprenant/demandes/<id>. | ☐ | |
 | REC-APP-197 | Cliquer l'onglet « Payées » | Filtre | URL /apprenant/profil/commandes?statut=payees ; seules les commandes payées (badge « Payée »). | ☐ | |
 | REC-APP-198 | Cliquer l'onglet « En attente » | Filtre | URL ?statut=en-attente ; commandes en attente de paiement et demandes en attente. | ☐ | |
 | REC-APP-199 | Cliquer l'onglet « Annulées » | Filtre | URL ?statut=annulees ; badge « Annulée » ; les remboursées s'affichent « Remboursée » dans « Toutes ». | ☐ | |
@@ -2077,7 +2077,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-205 | Simuler une erreur de l'API | Erreur serveur / réseau | État « Oups, ça a coupé » et « Réessayer ». | ☐ | |
 | REC-APP-206 | Afficher la page à 360 px | Mobile 360 px | Lignes empilées (badge et montant sous le titre), aucun débordement. | ☐ | |
 
-#### WD15 · Supprimer le compte (/apprenant/profil/suppression)
+#### Supprimer le compte (/apprenant/profil/suppression)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-207 | Ouvrir la page avec un apprenant sans demande | Nominal | h1 « Supprimer mon compte » ; h2 « Supprimer ton compte ? » ; texte : demande envoyée au parent, compte désactivé puis anonymisé 30 jours plus tard (J+30) ; « Les factures de tes commandes sont conservées. ». Pas de « Elle est irréversible ». | ☐ | |
@@ -2095,7 +2095,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-219 | Observer le chargement | Chargement | Squelette « Chargement de ta demande… ». | ☐ | |
 | REC-APP-220 | Afficher la page à 360 px | Mobile 360 px | Texte, champ et boutons empilés, aucun débordement. | ☐ | |
 
-#### WD16 · Déconnexion (modal partagé)
+#### Déconnexion (modal partagé)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-221 | Cliquer « Déconnexion » dans la barre latérale | Nominal | Fenêtre modale « Déjà l'heure de partir ? » avec « Annuler » et « Se déconnecter » ; fond non flouté ; focus piégé dans la modale. | ☐ | |
@@ -2109,7 +2109,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-229 | Se déconnecter | Erreur serveur / réseau | Message d'erreur ou nouvel essai possible (à confirmer : spec muette). | ☐ | |
 | REC-APP-230 | Ouvrir le menu puis « Déconnexion » à 360 px | Mobile 360 px | Le tiroir « Menu » donne accès à « Déconnexion » ; la modale est lisible et se ferme par Échap. | ☐ | |
 
-#### WD17 · Éditer le profil (/apprenant/profil/modifier)
+#### Éditer le profil (/apprenant/profil/modifier)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-231 | Ouvrir la page | Nominal | h1 « Modifier mon profil » ; formulaire prérempli : avatar (« Ton avatar »), « Date de naissance », « Pays », « Localité (ville / quartier) », « Email » (facultatif), « Classe », « Genre (facultatif) », « Objectifs » ; boutons « Annuler » et « Enregistrer ». Aucun libellé « Niveau / classe ». | ☐ | |
@@ -2121,10 +2121,10 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-237 | Effacer la classe puis Enregistrer | Champ obligatoire vide | Erreur « Choisis ta classe. ». | ☐ | |
 | REC-APP-238 | Saisir une date de naissance incohérente avec l'âge déclaré (ex. 2010-01-01) puis Enregistrer | Règle D23 | Récapitulatif « Corrige les erreurs » contenant « ne correspond pas à l'âge indiqué » ; rien n'est enregistré. | ☐ | |
 | REC-APP-239 | Saisir un email invalide puis Enregistrer | Validation email | Erreur de champ renvoyée par l'API, en français, sous le champ (à confirmer : texte exact). | ☐ | |
-| REC-APP-240 | Saisir un email valide (kofi@exemple.bj) puis Enregistrer | Nominal | « Ton profil est enregistré. » ; après rechargement l'email est conservé ; les envois par email deviennent activables dans WD06. | ☐ | |
-| REC-APP-241 | Vider l'email puis Enregistrer | Email facultatif | Enregistré sans email (« Aucune adresse » dans WD06). | ☐ | |
+| REC-APP-240 | Saisir un email valide (kofi@exemple.bj) puis Enregistrer | Nominal | « Ton profil est enregistré. » ; après rechargement l'email est conservé ; les envois par email deviennent activables dans « Notifications · paramètres ». | ☐ | |
+| REC-APP-241 | Vider l'email puis Enregistrer | Email facultatif | Enregistré sans email (« Aucune adresse » dans « Notifications · paramètres »). | ☐ | |
 | REC-APP-242 | Changer pays puis localité | Dépendance pays-localité | La liste des localités se recharge selon le pays choisi. | ☐ | |
-| REC-APP-243 | Choisir une classe différente puis Enregistrer | Nominal | Après rechargement la classe est conservée ; le hub WD13 et la barre latérale reprennent la nouvelle classe. | ☐ | |
+| REC-APP-243 | Choisir une classe différente puis Enregistrer | Nominal | Après rechargement la classe est conservée ; le hub « Paramètres » et la barre latérale reprennent la nouvelle classe. | ☐ | |
 | REC-APP-244 | Choisir « Garçon » puis « Ne pas dire » | Genre facultatif | Les deux sont enregistrables ; texte « Le genre est facultatif. Il sert seulement à adapter tes parcours et à mesurer, de façon anonyme, … » visible. | ☐ | |
 | REC-APP-245 | Cocher / décocher des objectifs | Objectifs | La sélection est conservée après rechargement. | ☐ | |
 | REC-APP-246 | Charger la page | Référentiels indisponibles | Messages « Impossible de charger les objectifs. » ou chargement « Chargement des objectifs… ». | ☐ | |
@@ -2135,7 +2135,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-251 | Observer le chargement | Chargement | Squelette « Chargement de ton profil… ». | ☐ | |
 | REC-APP-252 | Afficher la page à 360 px | Mobile 360 px | Champs pleine largeur, boutons accessibles, aucun débordement. | ☐ | |
 
-#### WD18 · Modifier la connexion (/apprenant/profil/mot-de-passe)
+#### Modifier la connexion (/apprenant/profil/mot-de-passe)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-253 | Ouvrir la page | Nominal | h1 « Mot de passe » ; champs « Mot de passe actuel », « Nouveau mot de passe », « Confirme ton nouveau mot de passe » ; règles « Au moins 8 caractères » et « Au moins une lettre et un chiffre » ; bouton « Mettre à jour le mot de passe ». Aucun champ numéro de téléphone, aucun code OTP. | ☐ | |
@@ -2153,7 +2153,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-265 | Cliquer « Profil » dans le fil d'Ariane | Nominal | Retour sur /apprenant/profil. | ☐ | |
 | REC-APP-266 | Afficher la page à 360 px | Mobile 360 px | Champs pleine largeur, règles lisibles, aucun débordement. | ☐ | |
 
-#### WD19 · Informations de livraison (/apprenant/profil/livraison)
+#### Informations de livraison (/apprenant/profil/livraison)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-267 | Ouvrir la page avec un apprenant neuf | Nominal | h1 « Adresse de livraison » ; pays prérempli depuis le profil (Bénin) ; liste « Ville ou zone » activée avec les zones du référentiel ; champs « Ville », « Quartier », « Rue » ; bouton « Enregistrer l'adresse ». | ☐ | |
@@ -2165,10 +2165,10 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-273 | Modifier un champ puis ré-enregistrer | Mise à jour | L'adresse mise à jour est conservée. | ☐ | |
 | REC-APP-274 | Enregistrer | Erreur serveur / réseau | Message d'erreur en français ; saisie conservée. | ☐ | |
 | REC-APP-275 | Observer le chargement | Chargement | Squelette « Chargement de ton adresse… ». | ☐ | |
-| REC-APP-276 | Acheter un kit demandé au parent | Adresse enregistrée | L'adresse est proposée par défaut au parent (voir WK08). | ☐ | |
+| REC-APP-276 | Acheter un kit demandé au parent | Adresse enregistrée | L'adresse est proposée par défaut au parent (voir « Paiement par le parent »). | ☐ | |
 | REC-APP-277 | Afficher la page à 360 px | Mobile 360 px | Champs pleine largeur, aucun débordement. | ☐ | |
 
-#### WD22 · Infos de mon parent (/apprenant/profil/parent)
+#### Infos de mon parent (/apprenant/profil/parent)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-278 | Ouvrir la page avec un apprenant lié à un parent | Nominal | h1 « Mon parent » ; carte avec le nom du parent, « Lien de parenté : <lien> · depuis le <date> » et badge « Lien validé » ; encart « Ton parent valide tes achats et tes participations aux événements, et reçoit un résumé de ta progression. ». | ☐ | |
@@ -2181,18 +2181,18 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 
 ### Mes parcours et arbre du parcours
 
-#### WD23 · Mes parcours (liste des inscriptions) (/apprenant/parcours)
+#### Mes parcours (liste des inscriptions) (/apprenant/parcours)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-285 | Ouvrir la page en `lea.adjovi` | Nominal | h1 « Mes parcours » ; onglets « En cours (n) » (actif, aria-current) et « Terminés (n) ». Note « Triés par dernière activité » quand plus d'une carte. | ☐ | |
 | REC-APP-286 | Lire une carte « en cours » | Découverte de la robotique | Badge de difficulté, titre (lien vers l'arbre), barre « Progression : Découverte de la robotique », pourcentage, « · Projet n · Niveau n », « 🎯 Prochaine mission : <titre> », « 🕒 Dernière activité : … » ; bouton « Continuer » vers `/apprenant/parcours/decouverte-robotique/…`. | ☐ | |
 | REC-APP-287 | Lire une carte | Inscription issue d'une classe | Badge « Avec ta classe » (à confirmer : la spec parle de « Classe de M. … »). | ☐ | |
-| REC-APP-288 | Cliquer le titre d'un parcours | Nominal | Arrivée sur /apprenant/parcours/<slug> (arbre WC06a). | ☐ | |
-| REC-APP-289 | Cliquer « Continuer » | Prochaine étape = mission | Ouverture de la mission suivante (WJ03). | ☐ | |
-| REC-APP-290 | Cliquer « Continuer » | Prochaine étape = quiz / certification | Ouverture du quiz (WJ04/WJ10) ou de la certification (WJ07) selon l'étape renvoyée par l'API. | ☐ | |
+| REC-APP-288 | Cliquer le titre d'un parcours | Nominal | Arrivée sur /apprenant/parcours/<slug> (arbre « Vue inscrit · projets repliés »). | ☐ | |
+| REC-APP-289 | Cliquer « Continuer » | Prochaine étape = mission | Ouverture de la mission suivante. | ☐ | |
+| REC-APP-290 | Cliquer « Continuer » | Prochaine étape = quiz / certification | Ouverture du quiz ou de la certification selon l'étape renvoyée par l'API. | ☐ | |
 | REC-APP-291 | Cliquer l'onglet « Terminés (n) » | Nominal | URL /apprenant/parcours?onglet=termines ; onglet actif. | ☐ | |
 | REC-APP-292 | Lire une carte « terminée » | Initiation à Scratch | Badge « Terminé · 100 % », « 🏅 Certifié le <date> · certificat n° CERT-… », lien « Voir ma certification ›». | ☐ | |
-| REC-APP-293 | Cliquer « Voir ma certification › » | Nominal | Arrivée sur /apprenant/parcours/initiation-scratch/certification (WJ07). | ☐ | |
+| REC-APP-293 | Cliquer « Voir ma certification › » | Nominal | Arrivée sur /apprenant/parcours/initiation-scratch/certification. | ☐ | |
 | REC-APP-294 | Lire la carte terminée | PDF prêt | Bouton « Télécharger la certification » (téléchargement d'un .pdf). | ☐ | |
 | REC-APP-295 | Lire la carte terminée | PDF en préparation | Pas de bouton de téléchargement ; le lien « Voir ma certification › » reste disponible. | ☐ | |
 | REC-APP-296 | Lire le bas de l'onglet « Terminés » | Nominal | Note « Un parcours passe dans « Terminés » quand toutes ses missions et ses évaluations sommatives sont réussies : ta certification est alors générée (cela peut prendre quelques minutes). ». | ☐ | |
@@ -2202,7 +2202,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-300 | Ouvrir la page avec un apprenant neuf | État vide | h2 « Tu n'as pas encore de parcours » ; « Commence par un parcours gratuit : tu pourras le suivre tout de suite, sans attendre ton parent. » ; bouton « Commence par un parcours gratuit » vers /apprenant/catalogue?prix=gratuit ; note « Tu as reçu un kit Steamy ? Saisis ton Kit Code depuis la fiche du parcours pour le débloquer. ». | ☐ | |
 | REC-APP-301 | Lire le bandeau d'attente | Une demande de paiement en cours (ex. Léa et « Capteurs électroniques ») | Bandeau « En attente de ton parent · 1 demande » avec titre, montant, « demandé le … · ton parent a jusqu'au … pour la régler » et bouton « Voir la demande ». | ☐ | |
 | REC-APP-302 | Lire le bandeau d'attente | Plusieurs demandes | Titre « En attente de ton parent · n demandes » (pluriel). | ☐ | |
-| REC-APP-303 | Cliquer « Voir la demande » | Nominal | Arrivée sur /apprenant/demandes/<id> (WA02). | ☐ | |
+| REC-APP-303 | Cliquer « Voir la demande » | Nominal | Arrivée sur /apprenant/demandes/<id>. | ☐ | |
 | REC-APP-304 | Régler la demande côté parent puis recharger | Demande réglée | Le bandeau disparaît ; le parcours figure dans « En cours ». | ☐ | |
 | REC-APP-305 | Débloquer un parcours par Kit Code puis revenir | Parcours débloqué | Le parcours est listé dans « En cours » avec 0 %. | ☐ | |
 | REC-APP-306 | Recharger sur ?onglet=termines | Rechargement | L'onglet « Terminés » reste actif. | ☐ | |
@@ -2211,7 +2211,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-309 | Ouvrir la page sans session | Accès non autorisé | Redirection vers /connexion?next=%2Fapprenant%2Fparcours. | ☐ | |
 | REC-APP-310 | Afficher la page à 360 px | Mobile 360 px | Cartes en colonne, bouton « Continuer » pleine largeur, aucun débordement. | ☐ | |
 
-#### WC06a · Vue inscrit · projets repliés (/apprenant/parcours/<slug>)
+#### Vue inscrit · projets repliés (/apprenant/parcours/<slug>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-311 | Ouvrir /apprenant/parcours/decouverte-robotique | Nominal | Fil « Mes parcours > Découverte de la robotique » ; en-tête avec la catégorie, « Projet n sur N », barre « Progression : Découverte de la robotique », pourcentage, « · <durée> restant », bouton d'étape (« Continuer la mission », etc.) ; entrée « Mes parcours » active dans la navigation. | ☐ | |
@@ -2227,14 +2227,14 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-321 | Observer le chargement | Chargement | Squelette « Chargement de ton parcours… ». | ☐ | |
 | REC-APP-322 | Afficher la page à 360 px | Mobile 360 px | En-tête empilé, bouton pleine largeur, aucun débordement. | ☐ | |
 
-#### WC06b · Vue inscrit · projet déplié (/apprenant/parcours/<slug>?projet=<id>)
+#### Vue inscrit · projet déplié (/apprenant/parcours/<slug>?projet=<id>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-323 | Ouvrir ?projet=<id> d'un projet en cours | Nominal | Le projet est déplié : niveaux puis missions avec « Mission n », durée et état (terminée, en cours, verrouillée). | ☐ | |
 | REC-APP-324 | Lire la mission suivante | Prochaine étape | Elle porte l'état « en cours » (aria-current="step"). | ☐ | |
 | REC-APP-325 | Cliquer une mission terminée ou en cours | Accessible | Ouverture de la mission /apprenant/parcours/<slug>/missions/<id>. | ☐ | |
 | REC-APP-326 | Chercher un lien sur une mission verrouillée | Mission verrouillée | Aucun lien : l'élément n'est pas cliquable. | ☐ | |
-| REC-APP-327 | Cliquer le titre du projet | Nominal | Ouverture ou repli selon l'état ; le lien « Voir le projet n » mène à WJ01. | ☐ | |
+| REC-APP-327 | Cliquer le titre du projet | Nominal | Ouverture ou repli selon l'état ; le lien « Voir le projet n » mène à « Détail projet ». | ☐ | |
 | REC-APP-328 | Ouvrir ?projet=<id> d'un projet verrouillé | Projet verrouillé par URL | Le projet reste replié, aucune étape accessible (à confirmer). | ☐ | |
 | REC-APP-329 | Ouvrir ?projet=abc | Paramètre invalide | La page s'affiche repliée, sans erreur. | ☐ | |
 | REC-APP-330 | Recharger la page | Rechargement | Le projet reste déplié. | ☐ | |
@@ -2244,7 +2244,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 
 ### Catalogue, fiche parcours et souhaits
 
-#### WC01 · Catalogue par défaut (/apprenant/catalogue)
+#### Catalogue par défaut (/apprenant/catalogue)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-334 | Ouvrir la page | Nominal | h1 « Catalogue » ; bandeau « <n> parcours · <n> catégories · pour les 10-17 ans » (valeurs réelles) ; entrée « Catalogue » active dans la navigation ; filtre « Difficulté · Toutes » ; aucun « Effacer les filtres » ; aucune occurrence du mot « Niveau ». | ☐ | |
@@ -2269,7 +2269,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-353 | Parcourir au clavier | Clavier | Cartes, cœurs, filtres atteignables ; le cœur est distinct du lien de la carte. | ☐ | |
 | REC-APP-354 | Afficher la page à 360 px | Mobile 360 px | Grille sur une colonne, filtres en défilement ou empilés, aucun débordement. | ☐ | |
 
-#### WC02 · Filtré (Robotique · Débutant) (/apprenant/catalogue?...)
+#### Filtré (Robotique · Débutant) (/apprenant/catalogue?...)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-355 | Ouvrir ?q=robot | Recherche | Puce « Retirer le filtre « robot » » ; compteur mis à jour. | ☐ | |
@@ -2282,7 +2282,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-362 | Utiliser Retour arrière après un filtre | Retour arrière | Le filtre précédent est restauré. | ☐ | |
 | REC-APP-363 | Recharger la page | Rechargement | Les filtres actifs sont conservés. | ☐ | |
 
-#### WC02b · Liste déroulante ouverte (filtre Difficulté)
+#### Liste déroulante ouverte (filtre Difficulté)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-364 | Cliquer le bouton « Difficulté · Toutes » | Nominal | Un menu « Difficulté » s'ouvre avec les choix « Toutes », « Débutant », « Intermédiaire », « Avancé » (menuitemradio) ; la grille n'est pas atténuée. | ☐ | |
@@ -2292,7 +2292,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-368 | Choisir « Toutes » | Retrait | Le paramètre difficulte est retiré de l'URL. | ☐ | |
 | REC-APP-369 | Ouvrir le menu à 360 px | Mobile 360 px | Le menu reste entièrement visible dans l'écran. | ☐ | |
 
-#### WC03 · Aucun résultat (/apprenant/catalogue?categorie=energie&prix=payant)
+#### Aucun résultat (/apprenant/catalogue?categorie=energie&prix=payant)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-370 | Ouvrir une combinaison sans résultat | Nominal | h3 « Aucun parcours ne correspond » ; « Essaie de retirer un filtre ou explore d'autres catégories. ». | ☐ | |
@@ -2301,13 +2301,13 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-373 | Saisir une recherche sans résultat (?q=zzzz) | Recherche vide | Même état « Aucun parcours ne correspond ». | ☐ | |
 | REC-APP-374 | Afficher la page à 360 px | Mobile 360 px | Mascotte, texte et deux boutons empilés sans débordement. | ☐ | |
 
-#### WC04 · Détail parcours gratuit (/apprenant/catalogue/<slug>)
+#### Détail parcours gratuit (/apprenant/catalogue/<slug>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-375 | Ouvrir /apprenant/catalogue/initiation-scratch avec un apprenant neuf | Gratuit, non inscrit | h1 « Catalogue » ; fil d'Ariane « Catalogue > <titre> » ; h2 du titre ; badge « Gratuit » ; catégorie, difficulté (« Difficulté : … »), durée ; sections « À propos du parcours », « Ce que tu vas apprendre », « Programme · n projets », « Public visé » ; carte « Inscription au parcours » avec badge « Gratuit · accès complet » et bouton « Commencer le parcours ». Ni note (★) ni nombre d'inscrits. | ☐ | |
 | REC-APP-376 | Lire le programme | Nominal | Projets, niveaux et missions avec titres et durées seulement (pas de contenu de mission). | ☐ | |
 | REC-APP-377 | Lire la carte d'inscription | Nominal | Bloc « Inclus dans le parcours » (durée de contenu, projets · niveaux, « Certificat à la fin » si activé) et « Prérequis » si présents. | ☐ | |
-| REC-APP-378 | Cliquer « Commencer le parcours » | Gratuit, non inscrit | L'inscription est créée, arrivée sur /apprenant/parcours/<slug>/projets/<id> (WJ01 du projet 1). | ☐ | |
+| REC-APP-378 | Cliquer « Commencer le parcours » | Gratuit, non inscrit | L'inscription est créée, arrivée sur /apprenant/parcours/<slug>/projets/<id> (« Détail projet » du projet 1). | ☐ | |
 | REC-APP-379 | Cliquer « Commencer le parcours » | Erreur serveur / réseau | Message d'erreur sous le bouton ; aucune inscription partielle ; bouton réutilisable. | ☐ | |
 | REC-APP-380 | Cliquer deux fois rapidement | Double clic | Une seule inscription créée. | ☐ | |
 | REC-APP-381 | Ouvrir la fiche d'un parcours suivi (`lea.adjovi`, decouverte-robotique) | Inscrit | Badge « Tu suis ce parcours », barre « Ta progression » ; bouton « Continuer » vers /apprenant/parcours/decouverte-robotique ; plus de « Commencer le parcours ». | ☐ | |
@@ -2323,38 +2323,38 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-391 | Recharger la page | Rechargement | Mêmes données. | ☐ | |
 | REC-APP-392 | Afficher la page à 360 px | Mobile 360 px | La carte d'inscription passe sous l'en-tête (non fixe), aucun débordement. | ☐ | |
 
-#### WC05 · Détail parcours payant + kit (/apprenant/catalogue/<slug>)
+#### Détail parcours payant + kit (/apprenant/catalogue/<slug>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-393 | Ouvrir /apprenant/catalogue/robot-bluetooth | Parcours avec kit | Carte « Inscription au parcours » : « Débloqué avec le Kit Code fourni avec le kit Steamy Bot v1. Pas de paiement séparé. » ; aucun prix de parcours ; bouton « J'ai un Kit Code ». | ☐ | |
 | REC-APP-394 | Lire le bloc « Kit requis » | Parcours avec kit | Nom « Steamy Bot v1 », prix « 35 000 F CFA HT » et « En stock » lus de la boutique ; aucun prix « 25 000 ». | ☐ | |
-| REC-APP-395 | Cliquer le bloc « Kit requis » | Nominal | Arrivée sur /apprenant/boutique/steamy-bot-v1 (WK02). | ☐ | |
-| REC-APP-396 | Cliquer « J'ai un Kit Code » | Nominal | Arrivée sur /apprenant/catalogue/robot-bluetooth/kit-code (WA01). | ☐ | |
+| REC-APP-395 | Cliquer le bloc « Kit requis » | Nominal | Arrivée sur /apprenant/boutique/steamy-bot-v1. | ☐ | |
+| REC-APP-396 | Cliquer « J'ai un Kit Code » | Nominal | Arrivée sur /apprenant/catalogue/robot-bluetooth/kit-code. | ☐ | |
 | REC-APP-397 | Lire le bloc « Kit requis » | Kit en rupture | Mention « Indisponible » sur la miniature du kit ; le Kit Code reste saisissable. | ☐ | |
 | REC-APP-398 | Ouvrir /apprenant/catalogue/capteurs-electroniques | Payant sans kit, aucune demande | Prix « 18 000 F CFA HT » ; « Payé par ton parent · accès à vie » ; bouton « Demander à mon parent » ; aucun « Acheter » ni « Mobile Money ». | ☐ | |
-| REC-APP-399 | Cliquer « Demander à mon parent » | Payant sans kit, première demande | Une demande est créée (SMS au parent) ; arrivée sur /apprenant/demandes/<id> (WA02). | ☐ | |
+| REC-APP-399 | Cliquer « Demander à mon parent » | Payant sans kit, première demande | Une demande est créée (SMS au parent) ; arrivée sur /apprenant/demandes/<id>. | ☐ | |
 | REC-APP-400 | Cliquer « Demander à mon parent » | Erreur serveur / réseau | Message d'erreur sous le bouton ; pas de demande créée. | ☐ | |
 | REC-APP-401 | Cliquer « Demander à mon parent » | Demande déjà en cours créée ailleurs | Message d'erreur du champ parcours (ex. demande déjà en cours) ou redirection vers la demande (à confirmer). | ☐ | |
 | REC-APP-402 | Ouvrir /apprenant/catalogue/capteurs-electroniques avec `lea.adjovi` | Demande déjà en cours | Le bouton est remplacé par le lien « Demande envoyée » vers /apprenant/demandes/<id>. | ☐ | |
 | REC-APP-403 | Ouvrir la fiche d'un parcours payant | Déjà inscrit | Badge « Tu suis ce parcours » et « Continuer » à la place des boutons de déblocage. | ☐ | |
 | REC-APP-404 | Ouvrir la fiche d'un parcours à kit | Déjà inscrit | Même état « Continuer » ; plus de « J'ai un Kit Code ». | ☐ | |
-| REC-APP-405 | Lire les prix | Taxes activées dans WAD14 | Le prix du parcours reste affiché hors taxes (« … F CFA HT ») ; les lignes de taxe n'apparaissent qu'au paiement du parent. | ☐ | |
+| REC-APP-405 | Lire les prix | Taxes activées dans « Paramètres généraux » | Le prix du parcours reste affiché hors taxes (« … F CFA HT ») ; les lignes de taxe n'apparaissent qu'au paiement du parent. | ☐ | |
 | REC-APP-406 | Chercher « Acheter le parcours » | Nominal | Absent côté apprenant. | ☐ | |
 | REC-APP-407 | Chercher un attribut `title="Bientôt"` | Nominal | Aucun. | ☐ | |
-| REC-APP-408 | Cliquer « Ajouter aux souhaits » | Nominal | Même comportement que WC04. | ☐ | |
+| REC-APP-408 | Cliquer « Ajouter aux souhaits » | Nominal | Même comportement que « Détail parcours gratuit ». | ☐ | |
 | REC-APP-409 | Afficher la page à 360 px | Mobile 360 px | Carte de déblocage sous l'en-tête, bouton pleine largeur, bloc « Kit requis » lisible. | ☐ | |
 
-#### WW01 · Souhaits · avec éléments (/apprenant/souhaits)
+#### Souhaits · avec éléments (/apprenant/souhaits)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-410 | Ouvrir la page en `lea.adjovi` | Nominal | h1 « Mes souhaits » ; « 2 parcours sauvegardés » ; grille de cartes avec cœur plein ; entrée « Mes souhaits » active. | ☐ | |
 | REC-APP-411 | Lire le compteur | 1 seul souhait | « 1 parcours sauvegardé » (singulier). | ☐ | |
 | REC-APP-412 | Lire une carte | Parcours avec kit | Mention « Avec le Kit Code ». | ☐ | |
-| REC-APP-413 | Cliquer le titre d'une carte | Nominal | Arrivée sur /apprenant/catalogue/<slug> (WC04 ou WC05). | ☐ | |
+| REC-APP-413 | Cliquer le titre d'une carte | Nominal | Arrivée sur /apprenant/catalogue/<slug>. | ☐ | |
 | REC-APP-414 | Ouvrir le menu « Trier · … » | Tri | Options « Plus récents » (défaut), « Titre », « Prix croissant ». | ☐ | |
 | REC-APP-415 | Choisir « Titre » | Tri | URL /apprenant/souhaits?tri=titre ; bouton « Trier · Titre » ; liste triée par titre. | ☐ | |
 | REC-APP-416 | Choisir « Prix croissant » | Tri | URL ?tri=prix ; liste triée par prix croissant. | ☐ | |
-| REC-APP-417 | Cliquer le cœur d'une carte | Retrait | Retrait optimiste immédiat, toast (voir WW03). | ☐ | |
+| REC-APP-417 | Cliquer le cœur d'une carte | Retrait | Retrait optimiste immédiat, toast (voir « Toast après retrait »). | ☐ | |
 | REC-APP-418 | Ouvrir ?tri=inconnu | Paramètre invalide | Tri par défaut « Plus récents », aucune erreur. | ☐ | |
 | REC-APP-419 | Recharger la page | Rechargement | Mêmes souhaits et même tri. | ☐ | |
 | REC-APP-420 | Observer le chargement | Chargement | Squelette « Chargement de tes souhaits… » (3 cartes). | ☐ | |
@@ -2362,7 +2362,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-422 | Ouvrir la page sans session | Accès non autorisé | Redirection vers /connexion?next=%2Fapprenant%2Fsouhaits. | ☐ | |
 | REC-APP-423 | Afficher la page à 360 px | Mobile 360 px | Une colonne, aucun débordement. | ☐ | |
 
-#### WW02 · Souhaits · vide (/apprenant/souhaits)
+#### Souhaits · vide (/apprenant/souhaits)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-424 | Ouvrir la page avec un apprenant neuf | Nominal | h2 « Aucun parcours en souhaits » ; « Repère tes parcours préférés en cliquant sur le cœur : tu les retrouveras ici pour les commencer plus tard. » ; bouton « Découvrir le catalogue ». | ☐ | |
@@ -2370,7 +2370,7 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 | REC-APP-426 | Retirer le dernier souhait | Dernier souhait retiré | L'état vide s'affiche aussitôt ; il persiste après rechargement. | ☐ | |
 | REC-APP-427 | Afficher la page à 360 px | Mobile 360 px | Contenu centré, aucun débordement. | ☐ | |
 
-#### WW03 · Toast après retrait (/apprenant/souhaits)
+#### Toast après retrait (/apprenant/souhaits)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-428 | Cliquer le cœur d'une carte | Retrait | Toast (région `aria-live`, rôle statut) « Parcours retiré des souhaits » avec bouton « Annuler » ; la carte disparaît immédiatement. | ☐ | |
@@ -2385,9 +2385,9 @@ Convention : la colonne « Conforme » se coche (☑) ou reste ☐ ; la colonne 
 
 ### Débloquer un parcours et paiement Mobile Money
 
-Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un Kit Code (WA01, WA06) ou en le demandant à son parent (WA02). Les écrans de paiement WA03, WA04, WA05 et WA07 sont les états d'un paiement fait par le parent : composants `PaymentForm` et `PaymentStatusPanel` exercés ici par le checkout invité de la boutique (WK06, WK09, vouvoiement) et, au lot 4, par WPD15 (shell parent).
+Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un Kit Code ou en le demandant à son parent. Les écrans de paiement « Formulaire de paiement Mobile Money », « Paiement en cours », « Paiement réussi » et « Paiement échoué » sont les états d'un paiement fait par le parent : composants `PaymentForm` et `PaymentStatusPanel` exercés ici par le checkout invité de la boutique (« Paiement », « Paiement échoué », vouvoiement) et, au lot 4, par « Demande de paiement » (shell parent).
 
-#### WA01 · Saisie du Kit Code (/apprenant/catalogue/<slug>/kit-code)
+#### Saisie du Kit Code (/apprenant/catalogue/<slug>/kit-code)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-436 | Cliquer « J'ai un Kit Code » depuis la fiche de « Construis ton robot Bluetooth » | Nominal | Arrivée sur /apprenant/catalogue/robot-bluetooth/kit-code ; h1 « Débloquer le parcours » ; fil « Catalogue > Construis ton robot Bluetooth > Code Kit ». | ☐ | |
@@ -2397,11 +2397,11 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-440 | Cliquer « Valider le code » | Champ vide | Erreur de champ « Saisis le code imprimé sur la notice de ton kit. » ; aucun appel à l'API. | ☐ | |
 | REC-APP-441 | Saisir un code valide inutilisé puis « Valider le code » | Code valide | Redirection vers /apprenant/parcours/robot-bluetooth avec le toast « Parcours débloqué » ; l'inscription est créée ; le parcours figure dans « Mes parcours ». | ☐ | |
 | REC-APP-442 | Valider un code valide | Parcours déjà débloqué par le même apprenant | Redirection vers le parcours sans nouvelle inscription ni erreur (à confirmer : pas de toast « Parcours débloqué »). | ☐ | |
-| REC-APP-443 | Valider un code | Code inconnu | Voir WA06 (« Code Kit invalide »). | ☐ | |
-| REC-APP-444 | Valider un code | Code déjà utilisé | Voir WA06 (« Code déjà utilisé »). | ☐ | |
-| REC-APP-445 | Valider un code | Code d'un autre kit | Voir WA06 (« Ce code ne débloque pas ce parcours »). | ☐ | |
-| REC-APP-446 | Valider un code plusieurs fois de suite | Trop de tentatives | Voir WA06 (« Trop de tentatives »). | ☐ | |
-| REC-APP-447 | Cliquer le lien « Commander dans la boutique » | Nominal | Arrivée sur /apprenant/boutique (WK01) ; texte « Pas encore de kit ? ». | ☐ | |
+| REC-APP-443 | Valider un code | Code inconnu | Voir « Kit Code invalide » (« Code Kit invalide »). | ☐ | |
+| REC-APP-444 | Valider un code | Code déjà utilisé | Voir « Kit Code invalide » (« Code déjà utilisé »). | ☐ | |
+| REC-APP-445 | Valider un code | Code d'un autre kit | Voir « Kit Code invalide » (« Ce code ne débloque pas ce parcours »). | ☐ | |
+| REC-APP-446 | Valider un code plusieurs fois de suite | Trop de tentatives | Voir « Kit Code invalide » (« Trop de tentatives »). | ☐ | |
+| REC-APP-447 | Cliquer le lien « Commander dans la boutique » | Nominal | Arrivée sur /apprenant/boutique ; texte « Pas encore de kit ? ». | ☐ | |
 | REC-APP-448 | Cliquer le fil d'Ariane « Construis ton robot Bluetooth » | Nominal | Retour sur la fiche du parcours. | ☐ | |
 | REC-APP-449 | Valider | Erreur serveur / réseau | Titre « Le code n'a pas pu être vérifié » avec le message d'erreur de l'API ou « Le serveur est injoignable. Vérifie ta connexion internet puis réessaie. » ; saisie conservée. | ☐ | |
 | REC-APP-450 | Appuyer sur Entrée dans le champ | Clavier | Le formulaire est soumis comme avec le bouton. | ☐ | |
@@ -2410,7 +2410,7 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-453 | Observer le chargement | Chargement | Squelette « Chargement… » (fil d'Ariane et carte). | ☐ | |
 | REC-APP-454 | Afficher la page à 360 px | Mobile 360 px | Carte pleine largeur, champ et bouton accessibles, aucun débordement. | ☐ | |
 
-#### WA02 · Paiement par le parent (/apprenant/demandes/<id>)
+#### Paiement par le parent (/apprenant/demandes/<id>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-455 | Cliquer « Demander à mon parent » (fiche payante) | Première demande | Arrivée sur /apprenant/demandes/<id> ; h1 « Demande à ton parent » ; fil « Catalogue > … > Demande à ton parent » ; h2 « On a envoyé ta demande à <Parent> » (« Maman » pour un apprenant de test) ; « C'est <Parent> qui règle tes achats. Tu recevras une notification dès que ce sera fait. ». | ☐ | |
@@ -2428,21 +2428,21 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-467 | Cliquer « Refaire la demande » | Demande annulée | Une nouvelle demande est créée ; l'URL change (/apprenant/demandes/<nouvel id>) ; h2 « On a envoyé ta demande à <Parent> ». | ☐ | |
 | REC-APP-468 | Faire régler la demande par le parent (`manage.py pay_payment_request <id>`) | Demande réglée | Dans les 10 secondes environ (interrogation périodique, onglet visible), h2 « C'est réglé ! » ; « <Parent> a réglé ta demande : ton parcours est débloqué. » ; bouton « Accéder au parcours ». | ☐ | |
 | REC-APP-469 | Cliquer « Accéder au parcours » | Demande réglée | Arrivée sur /apprenant/parcours/<slug> ; l'inscription existe. | ☐ | |
-| REC-APP-470 | Ouvrir les notifications | Demande réglée | Notification « <Parcours> est débloqué » (voir WD04). | ☐ | |
-| REC-APP-471 | Ouvrir WD23 et WD14 | Demande réglée | Le parcours est dans « En cours » ; la commande figure « Payée » dans « Mes commandes » ; le bandeau d'attente a disparu. | ☐ | |
+| REC-APP-470 | Ouvrir les notifications | Demande réglée | Notification « <Parcours> est débloqué » (voir « Notifications · liste »). | ☐ | |
+| REC-APP-471 | Ouvrir « Mes parcours » et « Historique de commande » | Demande réglée | Le parcours est dans « En cours » ; la commande figure « Payée » dans « Mes commandes » ; le bandeau d'attente a disparu. | ☐ | |
 | REC-APP-472 | Faire refuser la demande côté parent | Demande refusée | Titre « <Parent> a refusé ta demande » ; « Parles-en avec <Parent>. Tu pourras refaire une demande quand vous serez d'accord. » ; boutons « Retour au catalogue » et « Refaire la demande ». | ☐ | |
 | REC-APP-473 | Laisser expirer la demande (après 7 jours ou par modification de la date en base) | Demande expirée | Titre « Ta demande a expiré » ; « <Parent> ne l'a pas réglée à temps. Tu peux refaire une demande. » ; boutons « Retour au catalogue » et « Refaire la demande ». | ☐ | |
 | REC-APP-474 | Cliquer « Refaire la demande » | Erreur serveur / réseau | Message d'erreur sous les boutons ; bouton de nouveau actif. | ☐ | |
 | REC-APP-475 | Annuler | Demande déjà réglée entre-temps | Message d'erreur de l'API, puis l'écran relit et affiche le vrai statut (« C'est réglé ! »). | ☐ | |
 | REC-APP-476 | Cliquer « Demande envoyée » depuis la fiche du parcours | Demande en cours | Retour sur la même demande /apprenant/demandes/<id>. | ☐ | |
-| REC-APP-477 | Cliquer « Voir la demande » dans WD14 ou le bandeau de WD23 | Demande en cours | Ouverture de la même demande. | ☐ | |
+| REC-APP-477 | Cliquer « Voir la demande » dans « Historique de commande » ou le bandeau de « Mes parcours » | Demande en cours | Ouverture de la même demande. | ☐ | |
 | REC-APP-478 | Ouvrir /apprenant/demandes/999999 | Demande inconnue | h2 « Cette demande est introuvable » ; « Elle n'existe pas ou ne t'appartient pas. Retrouve tes demandes en cours dans « Mes commandes ». » ; bouton « Voir mes commandes ». | ☐ | |
 | REC-APP-479 | Ouvrir la demande de Léa en `sena.kpade` | Demande d'un autre apprenant | Même page « Cette demande est introuvable ». | ☐ | |
 | REC-APP-480 | Laisser la page ouverte dans un onglet masqué | Onglet masqué | L'interrogation reprend quand l'onglet redevient visible. | ☐ | |
 | REC-APP-481 | Observer le chargement | Chargement | Squelette de la demande. | ☐ | |
 | REC-APP-482 | Afficher la page à 360 px | Mobile 360 px | Récapitulatif, boutons empilés pleine largeur, aucun débordement. | ☐ | |
 
-#### WA03 · Formulaire de paiement Mobile Money (/boutique/commande/paiement ; parent : WPD15)
+#### Formulaire de paiement Mobile Money (/boutique/commande/paiement ; parent : « Demande de paiement »)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-483 | Ouvrir le formulaire (étape Paiement du checkout invité) | Nominal | Section « Paiement Mobile Money » : champ « Pays », cartes de réseaux Mobile Money du pays, « Numéro Mobile Money », mention « Paiement sécurisé · aucune carte bancaire » et bouton « Payer <montant> F CFA » (montant du serveur). | ☐ | |
@@ -2453,35 +2453,35 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-488 | Changer le pays | Pays avec réseaux | Les réseaux actifs du pays remplacent les précédents ; l'indicatif du numéro suit le pays. | ☐ | |
 | REC-APP-489 | Cliquer « Payer » | Aucun réseau choisi | Erreur « Choisissez votre réseau Mobile Money. ». | ☐ | |
 | REC-APP-490 | Cliquer « Payer » | Numéro vide ou invalide | Erreur « Saisissez un numéro Mobile Money valide pour ce pays. ». | ☐ | |
-| REC-APP-491 | Choisir « MTN Mobile Money » et saisir un numéro en `…01` | Nominal | Le paiement est lancé, le panneau d'attente WA04 s'affiche. | ☐ | |
+| REC-APP-491 | Choisir « MTN Mobile Money » et saisir un numéro en `…01` | Nominal | Le paiement est lancé, le panneau d'attente « Paiement en cours » s'affiche. | ☐ | |
 | REC-APP-492 | Cliquer deux fois rapidement sur « Payer » | Double clic | Un seul paiement initié (bouton occupé). | ☐ | |
 | REC-APP-493 | Cliquer « Payer » | Erreur serveur / réseau | Message d'erreur en français ; saisie conservée. | ☐ | |
 | REC-APP-494 | Utiliser le formulaire au clavier | Clavier | Les cartes de réseau sont sélectionnables (radios) ; Entrée soumet. | ☐ | |
-| REC-APP-495 | Ouvrir le formulaire côté parent (WPD15, lot 4) | Parent | Mêmes champs en vouvoiement, récap « Parcours … pour Léa » et montant calculé par le serveur. | ☐ | |
+| REC-APP-495 | Ouvrir le formulaire côté parent (« Demande de paiement », lot 4) | Parent | Mêmes champs en vouvoiement, récap « Parcours … pour Léa » et montant calculé par le serveur. | ☐ | |
 | REC-APP-496 | Afficher la page à 360 px | Mobile 360 px | Champs et cartes pleine largeur, bouton « Payer » visible sans défilement horizontal. | ☐ | |
 
-#### WA04 · Paiement en cours (/boutique/commande/paiement ; parent : WPD15)
+#### Paiement en cours (/boutique/commande/paiement ; parent : « Demande de paiement »)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-497 | Payer avec un numéro en `…01` | Attente | h2 « On confirme votre paiement… » (« On confirme ton paiement… » en tutoiement) ; libellé « Demande envoyée au <numéro masqué> » ; texte « Validez la demande sur votre téléphone (notification ou code USSD). Cela peut prendre quelques secondes : ne fermez pas cette page. ». L'attente n'est pas bloquante. | ☐ | |
 | REC-APP-498 | Payer avec un numéro en `…03` | Reste en attente | Après le délai d'attente, message « Le paiement est toujours en attente de validation. Vous pouvez quitter cette page : son issue apparaîtra dans vos commandes. » avec le lien « Voir mes commandes ». | ☐ | |
-| REC-APP-499 | Laisser le prestataire notifier (faux prestataire, `FAKE_PAYMENT_DELAY`) | Issue notifiée | Le panneau passe à l'issue (WA05 ou WA07) sans recharger la page. | ☐ | |
+| REC-APP-499 | Laisser le prestataire notifier (faux prestataire, `FAKE_PAYMENT_DELAY`) | Issue notifiée | Le panneau passe à l'issue sans recharger la page. | ☐ | |
 | REC-APP-500 | Fermer l'onglet puis rouvrir la commande | Paiement en attente | La page de suivi / « Mes commandes » reflète l'état réel ; le webhook du prestataire fait foi. | ☐ | |
 | REC-APP-501 | Perdre le réseau pendant l'attente | Erreur réseau | L'attente continue ; la lecture suivante réessaie ; aucune fausse issue. | ☐ | |
 | REC-APP-502 | Rester dans un onglet masqué | Onglet masqué | L'interrogation du statut ne tourne que quand l'onglet est visible. | ☐ | |
 | REC-APP-503 | Afficher la page à 360 px | Mobile 360 px | Mascotte, texte et message lisibles, aucun débordement. | ☐ | |
 
-#### WA05 · Paiement réussi
+#### Paiement réussi
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-504 | Payer avec un numéro en `…01` (checkout invité) | Paiement accepté | Le panneau « Paiement réussi ! » (bref) puis redirection vers /boutique/commandes/<référence> (WK07), h1 « Merci, c'est commandé ! ». | ☐ | |
+| REC-APP-504 | Payer avec un numéro en `…01` (checkout invité) | Paiement accepté | Le panneau « Paiement réussi ! » (bref) puis redirection vers /boutique/commandes/<référence>, h1 « Merci, c'est commandé ! ». | ☐ | |
 | REC-APP-505 | Lire le panneau | Message de succès | « Votre commande <référence> est confirmée. Un SMS vous permet d'en suivre la livraison. » ; bouton « Suivre ma commande ». | ☐ | |
-| REC-APP-506 | Payer une demande de parcours côté parent (`pay_payment_request` ou WPD15) | Demande réglée | Succès affiché seulement quand le statut est `succeeded` ; côté apprenant : « C'est réglé ! » (voir WA02) et notification. | ☐ | |
+| REC-APP-506 | Payer une demande de parcours côté parent (`pay_payment_request` ou « Demande de paiement ») | Demande réglée | Succès affiché seulement quand le statut est `succeeded` ; côté apprenant : « C'est réglé ! » (voir « Paiement par le parent ») et notification. | ☐ | |
 | REC-APP-507 | Vérifier le panier | Paiement réussi | Le panier invité est vidé (aucune clé `steamy:panier` en stockage local). | ☐ | |
 | REC-APP-508 | Payer sur une commande expirée dont le stock reste disponible | Paiement tardif (C17) | Commande honorée ; sinon remboursement automatique et notification (à confirmer en recette dédiée). | ☐ | |
 | REC-APP-509 | Afficher la page à 360 px | Mobile 360 px | Panneau de succès lisible, bouton pleine largeur. | ☐ | |
 
-#### WA06 · Kit Code invalide (/apprenant/catalogue/<slug>/kit-code)
+#### Kit Code invalide (/apprenant/catalogue/<slug>/kit-code)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-510 | Valider `STEAMY-ZZZZ-ZZZZ` | Code inconnu (KIT_CODE_INVALID) | h2 « Code Kit invalide » ; « Ce code n'existe pas. Vérifie les caractères imprimés sur la notice de ton kit. » ; le champ est marqué en erreur (aria-invalid) ; le bouton devient « Réessayer ». | ☐ | |
@@ -2494,12 +2494,12 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-517 | Valider le même code deux fois en parallèle (deux onglets) | Consommation atomique | Un seul onglet débloque le parcours ; l'autre reçoit « Code déjà utilisé ». | ☐ | |
 | REC-APP-518 | Afficher la page à 360 px | Mobile 360 px | Icône, titre d'erreur et message lisibles, aucun débordement. | ☐ | |
 
-#### WA07 · Paiement échoué (/boutique/commande/paiement ; parent : WPD15)
+#### Paiement échoué (/boutique/commande/paiement ; parent : « Demande de paiement »)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-519 | Payer avec un numéro en `…02` | Paiement refusé (DECLINED) | h2 « Paiement échoué » ; « La transaction n'a pas pu aboutir. Aucun montant n'a été débité. » ; éventuellement « Raison : <raison du prestataire en français> » ; boutons « Changer de numéro » et « Réessayer le paiement ». | ☐ | |
 | REC-APP-520 | Lire le message | Échec côté checkout invité | Message « Votre panier est conservé : vous pouvez réessayer avec un autre numéro. » ; le panier invité contient toujours le kit. | ☐ | |
-| REC-APP-521 | Cliquer « Changer de numéro » | Après un échec | Retour au formulaire de paiement (WA03) ; saisir un numéro en `…01` mène à la réussite (WK07). | ☐ | |
+| REC-APP-521 | Cliquer « Changer de numéro » | Après un échec | Retour au formulaire de paiement ; saisir un numéro en `…01` mène à la réussite. | ☐ | |
 | REC-APP-522 | Cliquer « Réessayer le paiement » | Après un échec | Nouvel essai avec les mêmes pays, réseau et numéro ; un seul essai à la fois. | ☐ | |
 | REC-APP-523 | Cliquer « Réessayer le paiement » | Le nouvel essai échoue au lancement | Message d'erreur sous le panneau. | ☐ | |
 | REC-APP-524 | Obtenir un échec dont l'issue est inconnue | Échec sans certitude de non-débit | Message « La transaction n'a pas pu aboutir. Vérifiez l'état de la commande dans vos commandes avant de réessayer. ». | ☐ | |
@@ -2510,15 +2510,15 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 
 ### Parcours pédagogique
 
-#### WJ01 · Détail projet (/apprenant/parcours/<slug>/projets/<id>)
+#### Détail projet (/apprenant/parcours/<slug>/projets/<id>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-529 | Ouvrir un projet d'un parcours suivi | Nominal | Fil « Mes parcours > <parcours> > Projet n » ; en-tête « Projet n · ⏱ <durée> » et h2 du titre ; blocs « Objectifs », « Prérequis », « Matériel » (seulement s'ils ont du contenu) ; « Les niveaux de ce projet ». | ☐ | |
 | REC-APP-530 | Lire la liste des niveaux | Nominal | Chaque niveau : « Niveau n », titre, durée, état (terminé / en cours / verrouillé) ; le niveau courant porte l'état « en cours ». | ☐ | |
-| REC-APP-531 | Cliquer un niveau | Niveau accessible | Arrivée sur /apprenant/parcours/<slug>/niveaux/<id> (WJ02). | ☐ | |
+| REC-APP-531 | Cliquer un niveau | Niveau accessible | Arrivée sur /apprenant/parcours/<slug>/niveaux/<id>. | ☐ | |
 | REC-APP-532 | Chercher un lien sur un niveau verrouillé | Niveau verrouillé | Élément non cliquable. | ☐ | |
 | REC-APP-533 | Lire « Ta progression » | Nominal | Barre « Missions du projet n » ; « n mission(s) terminée(s) sur N » ; bouton « Continuer le niveau n ». | ☐ | |
-| REC-APP-534 | Cliquer « Continuer le niveau n » | Nominal | Ouverture de WJ02 du niveau courant. | ☐ | |
+| REC-APP-534 | Cliquer « Continuer le niveau n » | Nominal | Ouverture de « Intro niveau » du niveau courant. | ☐ | |
 | REC-APP-535 | Lire « Récompenses du projet » | Nominal | Un « Badge du niveau n » par niveau et « Badge du projet » ; ceux obtenus portent 🏅 / 🏆 et « (obtenu) » pour lecteur d'écran. | ☐ | |
 | REC-APP-536 | Ouvrir un projet dont tous les niveaux sont terminés | Projet terminé | Pas de bouton « Continuer le niveau » ; badges obtenus. | ☐ | |
 | REC-APP-537 | Ouvrir un projet d'un parcours non suivi | Non inscrit | Écran « Ce contenu n'est pas encore ouvert » (NOT_ENROLLED) avec « Voir le parcours ». | ☐ | |
@@ -2528,7 +2528,7 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-541 | Observer le chargement | Chargement | Squelette de contenu. | ☐ | |
 | REC-APP-542 | Afficher la page à 360 px | Mobile 360 px | Cartes de progression sous les niveaux, aucun débordement. | ☐ | |
 
-#### WJ02 · Intro niveau (/apprenant/parcours/<slug>/niveaux/<id>)
+#### Intro niveau (/apprenant/parcours/<slug>/niveaux/<id>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-543 | Ouvrir un niveau accessible | Nominal | Fil « Mes parcours > … > Projet n > Niveau n » ; vidéo d'intro « Introduction : <titre> » ; h2 « Au programme de ce niveau » avec les missions (« Mission n », titre, durée, état). | ☐ | |
@@ -2537,13 +2537,13 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-546 | Lire le bouton principal | Niveau pas commencé | « Commencer la 1ʳᵉ mission » vers la première mission. | ☐ | |
 | REC-APP-547 | Lire le bouton principal | Niveau commencé | « Continuer la mission n » vers la première mission à faire. | ☐ | |
 | REC-APP-548 | Lire le bouton principal | Niveau terminé | Bouton « Retour à mon parcours » vers l'arbre. | ☐ | |
-| REC-APP-549 | Cliquer une mission terminée ou en cours | Nominal | Ouverture de la mission (WJ03). | ☐ | |
+| REC-APP-549 | Cliquer une mission terminée ou en cours | Nominal | Ouverture de la mission. | ☐ | |
 | REC-APP-550 | Chercher un lien sur une mission verrouillée | Mission verrouillée | Élément non cliquable. | ☐ | |
 | REC-APP-551 | Ouvrir un niveau verrouillé par URL | Niveau verrouillé | Écran « Ce contenu n'est pas encore ouvert ». | ☐ | |
 | REC-APP-552 | Ouvrir un niveau d'un parcours non suivi | Non inscrit | Écran « Ce contenu n'est pas encore ouvert » avec « Voir le parcours ». | ☐ | |
 | REC-APP-553 | Afficher la page à 360 px | Mobile 360 px | Vidéo en 16/9 sur toute la largeur, missions en liste, aucun débordement. | ☐ | |
 
-#### WJ03 · Contenu mission (/apprenant/parcours/<slug>/missions/<id>)
+#### Contenu mission (/apprenant/parcours/<slug>/missions/<id>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-554 | Ouvrir une mission accessible | Nominal | Fil « Mes parcours > <parcours> > Projet n > Niveau n > Mission n » ; en-tête « Mission n · ⏱ <durée> » et h2 du titre ; vidéo et/ou blocs de contenu (texte, images, « Astuce : »). | ☐ | |
@@ -2551,14 +2551,14 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-556 | Lire la vidéo | Vidéo indisponible | Message « La vidéo ne peut pas être lue. ». | ☐ | |
 | REC-APP-557 | Ouvrir une mission sans vidéo | Texte seul | Seuls les blocs de contenu sont affichés. | ☐ | |
 | REC-APP-558 | Cliquer « Marquer comme terminée » | Mission non terminée suivie d'une autre mission | La mission est enregistrée ; redirection vers la mission suivante renvoyée par l'API. | ☐ | |
-| REC-APP-559 | Cliquer « Marquer comme terminée » | Dernière mission d'un niveau | Redirection vers le quiz du niveau (WJ04). | ☐ | |
+| REC-APP-559 | Cliquer « Marquer comme terminée » | Dernière mission d'un niveau | Redirection vers le quiz du niveau. | ☐ | |
 | REC-APP-560 | Cliquer « Marquer comme terminée » | Dernière mission du dernier niveau, sans quiz | Redirection vers l'étape renvoyée par l'API (évaluation de projet ou certification). | ☐ | |
 | REC-APP-561 | Cliquer « Marquer comme terminée » sans avoir lu la vidéo | Visionnage non obligatoire | La mission est quand même validée (l'API reste juge). | ☐ | |
 | REC-APP-562 | Cliquer « Marquer comme terminée » | Mission précédente non terminée (CONTENT_LOCKED) | Message « Cette mission n'est pas encore ouverte : termine d'abord les précédentes. ». | ☐ | |
 | REC-APP-563 | Cliquer « Marquer comme terminée » | Erreur serveur / réseau | Message d'erreur en français sous le bouton ; la mission reste à terminer. | ☐ | |
 | REC-APP-564 | Cliquer deux fois rapidement | Double clic | Une seule validation (bouton occupé). | ☐ | |
 | REC-APP-565 | Ouvrir une mission déjà terminée | Mission terminée | Texte « ✓ Mission terminée » ; bouton d'étape suivante (« Continuer la mission », « Passer le quiz du niveau », etc.) au lieu de « Marquer comme terminée ». | ☐ | |
-| REC-APP-566 | Cliquer « Retour au niveau » | Nominal | Retour sur WJ02 du niveau. | ☐ | |
+| REC-APP-566 | Cliquer « Retour au niveau » | Nominal | Retour sur « Intro niveau » du niveau. | ☐ | |
 | REC-APP-567 | Chercher un bouton « Précédent » | Spec vs écran | La spec cite « Précédent » ; l'écran livré propose « Retour au niveau » : à confirmer. | ☐ | |
 | REC-APP-568 | Ouvrir par URL une mission verrouillée | Séquence non respectée | h2 « Ce contenu n'est pas encore ouvert » ; le titre de la mission n'est pas divulgué ; aucun bouton « Marquer comme terminée » ; bouton « Voir mon parcours » vers l'arbre. | ☐ | |
 | REC-APP-569 | Ouvrir une mission d'un parcours non suivi | Non inscrit | Écran « Ce contenu n'est pas encore ouvert » avec « Voir le parcours ». | ☐ | |
@@ -2568,7 +2568,7 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-573 | Observer le chargement | Chargement | Squelette de contenu. | ☐ | |
 | REC-APP-574 | Afficher la page à 360 px | Mobile 360 px | Vidéo sur toute la largeur, boutons « Retour au niveau » et « Marquer comme terminée » empilés, aucun débordement. | ☐ | |
 
-#### WJ04 · Évaluation formative (≥ 70 %) (/apprenant/parcours/<slug>/quiz/<id>)
+#### Évaluation formative (≥ 70 %) (/apprenant/parcours/<slug>/quiz/<id>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-575 | Ouvrir le quiz du niveau après la dernière mission | Nominal | Fil « Mes parcours > … > Projet n > Niveau n > Quiz du niveau » ; encart avec le titre du quiz et « Obtiens au moins 70 % pour valider le niveau et gagner ton badge. » (seuil lu de l'API) ; éventuellement « Durée conseillée : n min. ». | ☐ | |
@@ -2578,8 +2578,8 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-579 | Cliquer « Question suivante » | Nominal | « Question 2 sur N » ; sur la dernière question, le bouton devient « Envoyer mes réponses ». | ☐ | |
 | REC-APP-580 | Cliquer « Question précédente » | Question ≥ 2 | Retour à la question précédente avec la réponse déjà choisie conservée. | ☐ | |
 | REC-APP-581 | Lire le bouton « Envoyer mes réponses » | Toutes les questions non répondues | Bouton désactivé tant que toutes les réponses ne sont pas données. | ☐ | |
-| REC-APP-582 | Cliquer « Envoyer mes réponses » | Score ≥ seuil | « On corrige tes réponses… » puis redirection vers /apprenant/parcours/<slug>/quiz/<id>/resultats/<tentative> (WJ05). | ☐ | |
-| REC-APP-583 | Cliquer « Envoyer mes réponses » | Score < seuil | Redirection vers les résultats d'échec (WJ08). | ☐ | |
+| REC-APP-582 | Cliquer « Envoyer mes réponses » | Score ≥ seuil | « On corrige tes réponses… » puis redirection vers /apprenant/parcours/<slug>/quiz/<id>/resultats/<tentative>. | ☐ | |
+| REC-APP-583 | Cliquer « Envoyer mes réponses » | Score < seuil | Redirection vers les résultats d'échec. | ☐ | |
 | REC-APP-584 | Recharger la page en cours de quiz | Rechargement | Les réponses déjà données et la question courante sont conservées (brouillon local). | ☐ | |
 | REC-APP-585 | Revenir sur le quiz après l'avoir envoyé | Nouvel essai | Le quiz repart à zéro. | ☐ | |
 | REC-APP-586 | Ouvrir un quiz déjà réussi | Quiz déjà réussi | Message « Tu as déjà réussi ce quiz : tu peux le refaire pour t'entraîner. ». | ☐ | |
@@ -2591,13 +2591,13 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-592 | Ouvrir un quiz d'un parcours non suivi | Non inscrit | Écran « Ce contenu n'est pas encore ouvert ». | ☐ | |
 | REC-APP-593 | Afficher la page à 360 px | Mobile 360 px | Question et choix pleine largeur, boutons empilés, aucun débordement. | ☐ | |
 
-#### WJ05 · Revue des résultats (/apprenant/parcours/<slug>/quiz/<id>/resultats/<tentative>)
+#### Revue des résultats (/apprenant/parcours/<slug>/quiz/<id>/resultats/<tentative>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-594 | Réussir une formative | Réussi | Fil « Mes parcours > Mon parcours > Résultats · <quiz> » ; bloc « Score du quiz du niveau » avec « <n> % » ; « 2 bonnes réponses sur 2 · seuil 70 % » ; badge « Réussi » ; « Bien joué ! » ; « Tu as validé le niveau. Un nouveau badge t'attend. » ; « +n points » si des points sont gagnés (barème de PlatformSettings). | ☐ | |
 | REC-APP-595 | Lire « Récapitulatif des questions » | Nominal | Chaque question : numéro, icône « Juste » ou « Faux », énoncé, « Concept : <concept> ». | ☐ | |
-| REC-APP-596 | Cliquer « Voir mon badge » | Réussite avec badge | Arrivée sur /apprenant/parcours/<slug>/niveaux/<id>/badge?tentative=<id> (WJ06). | ☐ | |
-| REC-APP-597 | Cliquer « Revoir le niveau » | Réussite | Retour sur WJ02 du niveau. | ☐ | |
+| REC-APP-596 | Cliquer « Voir mon badge » | Réussite avec badge | Arrivée sur /apprenant/parcours/<slug>/niveaux/<id>/badge?tentative=<id>. | ☐ | |
+| REC-APP-597 | Cliquer « Revoir le niveau » | Réussite | Retour sur « Intro niveau » du niveau. | ☐ | |
 | REC-APP-598 | Lire « Un nouveau badge t'attend » | Réussite sans nouveau badge (déjà obtenu) | Pas de bouton « Voir mon badge » ni de phrase sur le badge. | ☐ | |
 | REC-APP-599 | Recharger la page | Rechargement | La tentative est relue par son identifiant, mêmes résultats. | ☐ | |
 | REC-APP-600 | Ouvrir une URL de résultats d'une tentative inconnue | Tentative inconnue | Écran verrouillé ou 404 (à confirmer). | ☐ | |
@@ -2605,12 +2605,12 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-602 | Observer le chargement | Chargement | Squelette de contenu. | ☐ | |
 | REC-APP-603 | Afficher la page à 360 px | Mobile 360 px | Bloc de score au-dessus, panneau de statut sous le récapitulatif, aucun débordement. | ☐ | |
 
-#### WJ06 · Badge de niveau débloqué (/apprenant/parcours/<slug>/niveaux/<id>/badge?tentative=<id>)
+#### Badge de niveau débloqué (/apprenant/parcours/<slug>/niveaux/<id>/badge?tentative=<id>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-604 | Cliquer « Voir mon badge » depuis WJ05 | Nominal | Écran plein écran (hors shell) : h1 « Niveau terminé ! » ; médaille « Badge de niveau débloqué » ; « Score : <n> % · +<n> points » si des points ont été gagnés. Aucun lien « Voir mes badges ». | ☐ | |
-| REC-APP-605 | Lire le bouton principal | Niveau suivant disponible | « Niveau suivant » vers WJ02 du niveau suivant. | ☐ | |
-| REC-APP-606 | Lire le bouton principal | Dernier niveau du projet | « Passer l'évaluation du projet » vers la sommative (WJ10). | ☐ | |
+| REC-APP-604 | Cliquer « Voir mon badge » depuis « Revue des résultats » | Nominal | Écran plein écran (hors shell) : h1 « Niveau terminé ! » ; médaille « Badge de niveau débloqué » ; « Score : <n> % · +<n> points » si des points ont été gagnés. Aucun lien « Voir mes badges ». | ☐ | |
+| REC-APP-605 | Lire le bouton principal | Niveau suivant disponible | « Niveau suivant » vers « Intro niveau » du niveau suivant. | ☐ | |
+| REC-APP-606 | Lire le bouton principal | Dernier niveau du projet | « Passer l'évaluation du projet » vers la sommative. | ☐ | |
 | REC-APP-607 | Lire le bouton principal | Dernier niveau du dernier projet, sans sommative restante | « Voir ma certification ». | ☐ | |
 | REC-APP-608 | Cliquer « Retour à mon parcours » | Nominal | Arrivée sur l'arbre du parcours. | ☐ | |
 | REC-APP-609 | Ouvrir l'URL sans paramètre `tentative` ou avec une tentative non réussie | Tentative absente ou échouée | Écran verrouillé ou redirection (à confirmer : spec muette). | ☐ | |
@@ -2619,7 +2619,7 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-612 | Utiliser Échap ou Retour arrière | Clavier / retour | Retour sans erreur à la page précédente. | ☐ | |
 | REC-APP-613 | Afficher la page à 360 px | Mobile 360 px | Médaille et boutons centrés, aucun débordement. | ☐ | |
 
-#### WJ07 · Certification & fin de parcours (/apprenant/parcours/<slug>/certification)
+#### Certification & fin de parcours (/apprenant/parcours/<slug>/certification)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-614 | Ouvrir /apprenant/parcours/initiation-scratch/certification en `lea.adjovi` | Parcours certifié | Fil « Mes parcours > <parcours> > Certification » ; carte « Certification Steamy » ; h2 « Initiation à Scratch » ; « Léa Adjovi · <mois année> · n° CERT-… » ; liste « Badges de projet ». | ☐ | |
@@ -2627,62 +2627,62 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-616 | Cliquer « Télécharger la certification (PDF) » | PDF prêt | Téléchargement d'un fichier .pdf (nom en `.pdf`). | ☐ | |
 | REC-APP-617 | Lire l'état du PDF | Génération en échec (failed) | Message « La création du PDF a échoué. L'équipe Steamy est prévenue : réessaie plus tard. ». | ☐ | |
 | REC-APP-618 | Lire le bloc ticket | Ticket Steamy Events attribué | Titre « Ticket Steamy Events offert ! » ; « Ta candidature à un prochain événement sera gratuite (l'accord de ton parent reste demandé). » ; bouton « Voir les événements » vers /apprenant/evenements. Le ticket n'est attribué qu'une seule fois. | ☐ | |
-| REC-APP-619 | Cliquer « Voir les événements » | Nominal | Arrivée sur WD10. | ☐ | |
+| REC-APP-619 | Cliquer « Voir les événements » | Nominal | Arrivée sur « Steamy Events ». | ☐ | |
 | REC-APP-620 | Lire « Continue ton aventure » | Recommandations | Cartes de parcours ; lien « Voir tout » vers le catalogue. | ☐ | |
 | REC-APP-621 | Ouvrir la certification d'un parcours qui ne délivre pas de certificat | Certificat désactivé | Message « Ce parcours ne délivre pas de certification. ». | ☐ | |
-| REC-APP-622 | Ouvrir la certification d'un parcours non terminé | Conditions non remplies | Voir WJ09. | ☐ | |
-| REC-APP-623 | Terminer un parcours (dernière sommative réussie) puis ouvrir la certification | Fin de parcours | Certificat généré ; le parcours passe dans l'onglet « Terminés » de WD23 ; notification « certification prête ». | ☐ | |
+| REC-APP-622 | Ouvrir la certification d'un parcours non terminé | Conditions non remplies | Voir « Parcours incomplet ». | ☐ | |
+| REC-APP-623 | Terminer un parcours (dernière sommative réussie) puis ouvrir la certification | Fin de parcours | Certificat généré ; le parcours passe dans l'onglet « Terminés » de « Mes parcours » ; notification « certification prête ». | ☐ | |
 | REC-APP-624 | Ouvrir la certification d'un parcours non suivi | Non inscrit | Écran « Ce contenu n'est pas encore ouvert ». | ☐ | |
 | REC-APP-625 | Observer le chargement | Chargement | Squelette de contenu. | ☐ | |
 | REC-APP-626 | Afficher la page à 360 px | Mobile 360 px | Carte du certificat lisible, bouton pleine largeur, aucun débordement. | ☐ | |
 
-#### WJ08 · Échec d'évaluation (/apprenant/parcours/<slug>/quiz/<id>/resultats/<tentative>)
+#### Échec d'évaluation (/apprenant/parcours/<slug>/quiz/<id>/resultats/<tentative>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-627 | Rater une formative | Score < 70 % | h3 « Pas encore validé » ; « Il faut au moins 70 %. Revois les concepts ci-contre, puis réessaie. » ; badge « Échoué » (sous 50 %) ou « À refaire » (entre 50 % et 70 %) ; « n bonne(s) réponse(s) sur N · seuil 70 % ». | ☐ | |
 | REC-APP-628 | Lire « Concepts à revoir » | Nominal | Liste de liens « <concept> / Revoir « <mission> » » vers les missions concernées. | ☐ | |
-| REC-APP-629 | Cliquer « Revoir « <mission> » » | Nominal | Ouverture de la mission liée (WJ03). | ☐ | |
-| REC-APP-630 | Cliquer « Réessayer le quiz » | Formative ratée | Réessai immédiat : ouverture du quiz (WJ04), aucun délai. | ☐ | |
+| REC-APP-629 | Cliquer « Revoir « <mission> » » | Nominal | Ouverture de la mission liée. | ☐ | |
+| REC-APP-630 | Cliquer « Réessayer le quiz » | Formative ratée | Réessai immédiat : ouverture du quiz, aucun délai. | ☐ | |
 | REC-APP-631 | Rater une sommative | Score < 80 % | Même écran avec « Il faut au moins 80 %. » ; missions à revoir réparties sur le projet. | ☐ | |
 | REC-APP-632 | Lire le bouton de réessai | Sommative ratée, délai en cours | Bouton désactivé « Réessayer le quiz dans mm:ss » avec compte à rebours (10 min en production, 5 s avec `--e2e`). | ☐ | |
 | REC-APP-633 | Attendre la fin du compte à rebours | Délai écoulé | Le bouton devient actif et mène au quiz ; l'envoi est accepté. | ☐ | |
 | REC-APP-634 | Forcer l'envoi avant la fin du délai (rejouer la requête) | Cooldown côté serveur | Refus (QUIZ_COOLDOWN) : carte « Encore un peu de patience » avec compte à rebours. | ☐ | |
-| REC-APP-635 | Cliquer « Revoir le niveau » / « Revoir le projet » | Nominal | Retour sur WJ02 (formative) ou WJ01 (sommative). | ☐ | |
+| REC-APP-635 | Cliquer « Revoir le niveau » / « Revoir le projet » | Nominal | Retour sur « Intro niveau » (formative) ou « Détail projet » (sommative). | ☐ | |
 | REC-APP-636 | Enchaîner trois tentatives ratées | Tentatives illimitées | Aucune limite de nombre d'essais pour une sommative, seulement le délai. | ☐ | |
 | REC-APP-637 | Recharger la page | Rechargement | Mêmes résultats ; le compte à rebours reprend la valeur restante. | ☐ | |
 | REC-APP-638 | Observer les statuts | Entre 50 % et le seuil / sous 50 % | « À refaire » (warn) / « Échoué » (ko), calculés par le serveur (D31). | ☐ | |
 | REC-APP-639 | Afficher la page à 360 px | Mobile 360 px | Concepts à revoir et boutons empilés, aucun débordement. | ☐ | |
 
-#### WJ09 · Parcours incomplet (/apprenant/parcours/<slug>/certification)
+#### Parcours incomplet (/apprenant/parcours/<slug>/certification)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-640 | Ouvrir /apprenant/parcours/decouverte-robotique/certification | Conditions non remplies | h2 « Encore un effort ! » ; « Il te reste n projet(s) ou n mission(s) pour obtenir ta certification : toutes les missions et toutes les évaluations des projets doivent être réussies. » ; « n/N missions · n/N évaluations réussies ». | ☐ | |
 | REC-APP-641 | Lire la liste des projets | Nominal | Chaque projet avec son statut (terminé, en cours, verrouillé). | ☐ | |
 | REC-APP-642 | Chercher le mot « parent » sur la page | Message retiré | Aucune mention d'un point d'avancement envoyé au parent. | ☐ | |
-| REC-APP-643 | Cliquer « Continuer le projet n » | Nominal | Arrivée sur la mission ou le quiz suivants du parcours (/apprenant/parcours/decouverte-robotique/missions\|quiz/<id>). | ☐ | |
+| REC-APP-643 | Cliquer « Continuer le projet n » | Nominal | Arrivée sur la mission ou le quiz suivants du parcours (/apprenant/parcours/decouverte-robotique/missions|quiz/<id>). | ☐ | |
 | REC-APP-644 | Lire le bouton | Projet courant inconnu | Bouton « Continuer mon parcours ». | ☐ | |
 | REC-APP-645 | Lire la page | Étape suivante = certification | Aucun bouton de reprise. | ☐ | |
 | REC-APP-646 | Afficher la page à 360 px | Mobile 360 px | Carte d'alerte et liste empilées, aucun débordement. | ☐ | |
 
-#### WJ10 · Évaluation sommative (≥ 80 %) (/apprenant/parcours/<slug>/quiz/<id>)
+#### Évaluation sommative (≥ 80 %) (/apprenant/parcours/<slug>/quiz/<id>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-647 | Cliquer « Passer l'évaluation du projet » | Nominal | Fil « … > Évaluation du projet » ; encart avec « Obtiens au moins 80 % pour valider le projet et gagner ton badge. » ; icône drapeau. | ☐ | |
-| REC-APP-648 | Répondre à toutes les questions | Nominal | Même mécanique que WJ04 (Question suivante, Question précédente, Envoyer mes réponses). | ☐ | |
-| REC-APP-649 | Envoyer | Score ≥ 80 % | Redirection vers les résultats puis WJ11 : « Tu as validé le projet. ». | ☐ | |
-| REC-APP-650 | Envoyer | Score < 80 % | Redirection vers WJ08 (variante sommative) avec compte à rebours. | ☐ | |
+| REC-APP-648 | Répondre à toutes les questions | Nominal | Même mécanique que « Évaluation formative » (Question suivante, Question précédente, Envoyer mes réponses). | ☐ | |
+| REC-APP-649 | Envoyer | Score ≥ 80 % | Redirection vers les résultats puis « Projet validé + badge de projet » : « Tu as validé le projet. ». | ☐ | |
+| REC-APP-650 | Envoyer | Score < 80 % | Redirection vers « Échec d'évaluation » (variante sommative) avec compte à rebours. | ☐ | |
 | REC-APP-651 | Ouvrir la sommative avant d'avoir réussi toutes les formatives du projet | Séquence non respectée | Écran « Ce contenu n'est pas encore ouvert ». | ☐ | |
 | REC-APP-652 | Ouvrir la sommative pendant le délai | Délai de 10 min en cours | Carte « Encore un peu de patience » avec compte à rebours à la place du quiz. | ☐ | |
 | REC-APP-653 | Ouvrir la sommative d'un projet déjà validé | Déjà réussie | Message « Tu as déjà réussi ce quiz : tu peux le refaire pour t'entraîner. ». | ☐ | |
 | REC-APP-654 | Envoyer | Erreur serveur / réseau | Message d'erreur ; réponses conservées. | ☐ | |
-| REC-APP-655 | Afficher la page à 360 px | Mobile 360 px | Mise en page identique à WJ04. | ☐ | |
+| REC-APP-655 | Afficher la page à 360 px | Mobile 360 px | Mise en page identique à « Évaluation formative ». | ☐ | |
 
-#### WJ11 · Projet validé + badge de projet (/apprenant/parcours/<slug>/projets/<id>/badge?tentative=<id>)
+#### Projet validé + badge de projet (/apprenant/parcours/<slug>/projets/<id>/badge?tentative=<id>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-656 | Cliquer « Voir mon badge » après une sommative réussie | Nominal | Écran plein écran : h1 « Projet validé ! » ; « Badge de projet débloqué » ; « Score : <n> % · +<n> points ». Aucun « Voir mes badges ». | ☐ | |
-| REC-APP-657 | Lire le bouton principal | Projet suivant | « Projet suivant » vers WJ01 du projet suivant. | ☐ | |
-| REC-APP-658 | Lire le bouton principal | Dernier projet validé | « Voir ma certification » vers WJ07. | ☐ | |
+| REC-APP-657 | Lire le bouton principal | Projet suivant | « Projet suivant » vers « Détail projet » du projet suivant. | ☐ | |
+| REC-APP-658 | Lire le bouton principal | Dernier projet validé | « Voir ma certification » vers « Certification & fin de parcours ». | ☐ | |
 | REC-APP-659 | Cliquer « Voir ma certification » | Nominal | Arrivée sur /apprenant/parcours/<slug>/certification. | ☐ | |
 | REC-APP-660 | Cliquer « Retour à mon parcours » | Nominal | Arrivée sur l'arbre du parcours. | ☐ | |
 | REC-APP-661 | Ouvrir l'URL sans tentative réussie | Tentative absente | Écran verrouillé ou redirection (à confirmer). | ☐ | |
@@ -2691,11 +2691,11 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 
 ### Boutique de kits et checkout
 
-Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, tutoiement, panier serveur, pas de paiement : « Demander à mon parent ») et la boutique **publique** (/boutique, vouvoiement, panier invité dans le navigateur, checkout invité WK04 à WK07 et WK09). Les prix des kits sont affichés **hors taxes** (« … F CFA HT ») ; la TVA et l'AIB, si activées, apparaissent comme lignes distinctes du récapitulatif.
+Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, tutoiement, panier serveur, pas de paiement : « Demander à mon parent ») et la boutique **publique** (/boutique, vouvoiement, panier invité dans le navigateur, checkout invité « Informations invité » à « Confirmation & suivi » et « Paiement échoué »). Les prix des kits sont affichés **hors taxes** (« … F CFA HT ») ; la TVA et l'AIB, si activées, apparaissent comme lignes distinctes du récapitulatif.
 
-**Préparation des taxes (C25)** : taxes éteintes par défaut. Pour les lignes « TVA (n %) » et « AIB (n %) », activer dans l'admin Django (WAD14, `PlatformSettings`) `vat_enabled` avec un taux (ex. 18) et `aib_enabled` avec un taux (ex. 5), puis rejouer les lignes marquées « Taxes activées ». Règle : total à payer = HT + livraison + TVA + AIB, arrondi au franc une seule fois sur le total ; taux et montants figés à la création de la commande.
+**Préparation des taxes (C25)** : taxes éteintes par défaut. Pour les lignes « TVA (n %) » et « AIB (n %) », activer dans l'admin Django (« Paramètres généraux », `PlatformSettings`) `vat_enabled` avec un taux (ex. 18) et `aib_enabled` avec un taux (ex. 5), puis rejouer les lignes marquées « Taxes activées ». Règle : total à payer = HT + livraison + TVA + AIB, arrondi au franc une seule fois sur le total ; taux et montants figés à la création de la commande.
 
-#### WK01 · Catalogue kits (/apprenant/boutique ; invité : /boutique)
+#### Catalogue kits (/apprenant/boutique ; invité : /boutique)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-663 | Ouvrir /apprenant/boutique | Nominal | h1 « Boutique de kits » (titre du header) ; texte « Des kits livrés chez toi, payés par ton parent. » ; bouton « Mon panier » ; entrée de navigation « Catalogue » active (la boutique est rattachée au catalogue) ; cartes de kits (nom, prix « … F CFA HT », stock). | ☐ | |
@@ -2707,8 +2707,8 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-669 | Cliquer « Ajouter » | Erreur serveur / réseau | Toast d'erreur en français ; le panier n'est pas modifié. | ☐ | |
 | REC-APP-670 | Cliquer une catégorie de kits | Filtre | URL ?categorie=<slug> ; h2 « Kits : <catégorie> ». | ☐ | |
 | REC-APP-671 | Ouvrir une catégorie sans kit | Catégorie vide | « Aucun kit dans cette catégorie » et bouton « Voir tous les kits ». | ☐ | |
-| REC-APP-672 | Cliquer une carte | Nominal | Arrivée sur /apprenant/boutique/<slug> (WK02). | ☐ | |
-| REC-APP-673 | Cliquer « Mon panier » | Nominal | Arrivée sur /apprenant/boutique/panier (WK03). | ☐ | |
+| REC-APP-672 | Cliquer une carte | Nominal | Arrivée sur /apprenant/boutique/<slug>. | ☐ | |
+| REC-APP-673 | Cliquer « Mon panier » | Nominal | Arrivée sur /apprenant/boutique/panier. | ☐ | |
 | REC-APP-674 | Observer le chargement | Chargement | Squelette « Chargement des kits… ». | ☐ | |
 | REC-APP-675 | Simuler une erreur de l'API | Erreur serveur / réseau | État « Oups, ça a coupé » et « Réessayer ». | ☐ | |
 | REC-APP-676 | Ouvrir /apprenant/boutique sans session | Accès non autorisé | Redirection vers /connexion?next=%2Fapprenant%2Fboutique. | ☐ | |
@@ -2716,14 +2716,14 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-678 | Parcourir au clavier | Clavier | Cartes et boutons « Ajouter » focusables ; Entrée ajoute. | ☐ | |
 | REC-APP-679 | Afficher la page à 360 px | Mobile 360 px | Une colonne de cartes, aucun débordement. | ☐ | |
 
-#### WK02 · Détail kit (/apprenant/boutique/<slug> ; invité : /boutique/<slug>)
+#### Détail kit (/apprenant/boutique/<slug> ; invité : /boutique/<slug>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-680 | Ouvrir /apprenant/boutique/steamy-bot-v1 | Kit en stock | Fil « Boutique > Steamy Bot v1 » ; h2 « Steamy Bot v1 » sous le h1 du header ; galerie ; « Ce que contient le kit » ; « Parcours compatibles » ; colonne d'achat avec le prix « … F CFA HT » et le badge « En stock ». | ☐ | |
 | REC-APP-681 | Cliquer « Ajouter au panier » | Kit en stock | Toast « « Steamy Bot v1 » est dans ton panier. ». | ☐ | |
-| REC-APP-682 | Cliquer « Acheter maintenant » | Kit en stock | Le kit est ajouté puis arrivée sur /apprenant/boutique/panier (WK03). | ☐ | |
+| REC-APP-682 | Cliquer « Acheter maintenant » | Kit en stock | Le kit est ajouté puis arrivée sur /apprenant/boutique/panier. | ☐ | |
 | REC-APP-683 | Cliquer « Acheter maintenant » | Invité | Arrivée sur /boutique/panier. | ☐ | |
-| REC-APP-684 | Cliquer un parcours compatible (ex. « Découverte de la robotique ») | Nominal | Arrivée sur /apprenant/catalogue/decouverte-robotique (WC05 pour un parcours à kit). | ☐ | |
+| REC-APP-684 | Cliquer un parcours compatible (ex. « Découverte de la robotique ») | Nominal | Arrivée sur /apprenant/catalogue/decouverte-robotique (« Détail parcours payant + kit » pour un parcours à kit). | ☐ | |
 | REC-APP-685 | Lire « Livraison selon ta zone » | Nominal | Délais et frais par zone lus de l'API (« Cotonou et Abomey-Calavi » 1 000 F CFA, 24 à 48 h ; « Porto-Novo » 1 500 F CFA ; « Reste du Bénin » 2 500 F CFA). | ☐ | |
 | REC-APP-686 | Ouvrir /apprenant/boutique/kit-energie-solaire | Kit en rupture (apprenant) | Badge « Indisponible » ; aucun bouton « Ajouter au panier » ; texte « Tu recevras une notification dans l'appli dès que ce kit sera de retour. » ; bouton « Préviens-moi » ; aucun champ téléphone ; bouton « Voir des kits similaires ». | ☐ | |
 | REC-APP-687 | Cliquer « Préviens-moi » | Apprenant, kit en rupture | Message « C'est noté : tu recevras une notification dès son retour. ». | ☐ | |
@@ -2738,7 +2738,7 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-696 | Observer le chargement | Chargement | Squelette « Chargement du kit… ». | ☐ | |
 | REC-APP-697 | Afficher la page à 360 px | Mobile 360 px | La colonne d'achat passe sous la galerie, boutons pleine largeur, aucun débordement. | ☐ | |
 
-#### WK03 · Panier (/apprenant/boutique/panier ; invité : /boutique/panier)
+#### Panier (/apprenant/boutique/panier ; invité : /boutique/panier)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-698 | Ouvrir le panier avec deux kits (apprenant) | Nominal | h1 « Mon panier » ; lignes (nom lié au kit, prix unitaire « … F CFA HT », total de ligne « … HT », quantité) ; récapitulatif : « Sous-total HT (3 articles) », « Livraison : Calculée à l'étape suivante », « Total hors livraison ». | ☐ | |
@@ -2748,24 +2748,24 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-702 | Lire le récapitulatif | Taxes activées (TVA 18 %, AIB 5 %) | Entre le sous-total HT et la livraison : lignes « TVA (18 %) » et « AIB (5 %) » avec les montants lus de l'API ; « Total hors livraison » = HT + taxes ; rien n'est recalculé dans l'écran. | ☐ | |
 | REC-APP-703 | Lire le récapitulatif | Taxes éteintes | Aucune ligne de taxe. | ☐ | |
 | REC-APP-704 | Lire le récapitulatif | Panier invité | Libellés « Sous-total HT estimé », « Total estimé hors livraison » et note « Les taxes éventuelles sont ajoutées au moment du paiement. ». | ☐ | |
-| REC-APP-705 | Cliquer « Demander à mon parent » | Apprenant, panier valide | Une demande est créée ; arrivée sur /apprenant/demandes/<id> (WK08). | ☐ | |
+| REC-APP-705 | Cliquer « Demander à mon parent » | Apprenant, panier valide | Une demande est créée ; arrivée sur /apprenant/demandes/<id>. | ☐ | |
 | REC-APP-706 | Cliquer « Demander à mon parent » | Erreur serveur / réseau | Message d'erreur sous le bouton ; bouton de nouveau actif. | ☐ | |
 | REC-APP-707 | Cliquer « Demander à mon parent » | Un kit du panier est indisponible | Bouton désactivé ; alerte « Retire les kits indisponibles pour continuer. ». | ☐ | |
-| REC-APP-708 | Cliquer « Commander » | Invité, panier valide | Arrivée sur /boutique/commande/coordonnees (WK04). | ☐ | |
+| REC-APP-708 | Cliquer « Commander » | Invité, panier valide | Arrivée sur /boutique/commande/coordonnees. | ☐ | |
 | REC-APP-709 | Lire le bouton « Commander » | Invité, kit indisponible | Bouton désactivé ; alerte « Retirez les kits indisponibles pour continuer. ». | ☐ | |
 | REC-APP-710 | Cliquer « Continuer mes achats » | Nominal | Retour sur la liste des kits. | ☐ | |
 | REC-APP-711 | Se déconnecter puis se reconnecter | Panier serveur | Le panier de l'apprenant est conservé. | ☐ | |
 | REC-APP-712 | Ajouter un kit en invité, puis se connecter via /connexion?next=%2Fboutique%2Fpanier | Fusion du panier invité | Arrivée sur /apprenant/boutique/panier avec le kit ajouté ; « Sous-total HT (1 article) » ; le stockage local `steamy:panier` est vidé. | ☐ | |
 | REC-APP-713 | Fusionner un panier invité contenant un kit devenu indisponible | Kit retiré à la fusion | Message « Un kit de ton panier n'est plus disponible : il a été retiré. » (ou « n kits … ne sont plus disponibles : ils ont été retirés. »). | ☐ | |
 | REC-APP-714 | Ouvrir /boutique/panier connecté en apprenant | Panier public | Redirection vers /apprenant/boutique/panier. | ☐ | |
-| REC-APP-715 | Ouvrir le panier | Panier vide | Voir WK10. | ☐ | |
+| REC-APP-715 | Ouvrir le panier | Panier vide | Voir « Panier vide ». | ☐ | |
 | REC-APP-716 | Ouvrir le panier | Erreur serveur / réseau | Alerte avec le message d'erreur et bouton « Réessayer ». | ☐ | |
 | REC-APP-717 | Observer le chargement | Chargement | Squelette « Chargement du panier… ». | ☐ | |
 | REC-APP-718 | Recharger la page | Rechargement | Mêmes lignes et quantités. | ☐ | |
 | REC-APP-719 | Utiliser les boutons de quantité au clavier | Clavier | Les boutons « Ajouter un exemplaire de … » et « Retirer … » sont atteignables et activables. | ☐ | |
 | REC-APP-720 | Afficher la page à 360 px | Mobile 360 px | Récapitulatif sous les lignes (non fixe), boutons pleine largeur, aucun débordement. | ☐ | |
 
-#### WK04 · Informations invité (/boutique/commande/coordonnees)
+#### Informations invité (/boutique/commande/coordonnees)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-721 | Ouvrir la page avec un panier invité non vide | Nominal | h1 « Vos coordonnées » ; étape 1 sur 3 « Vos coordonnées » ; « Pas besoin de compte pour commander : un SMS vous permettra de suivre la livraison. » ; champs « Prénom », « Nom », « Numéro de téléphone » (aide « Pour le suivi de la livraison par SMS. »), case « J'accepte… » jamais précochée ; bouton « Continuer vers la livraison ». | ☐ | |
@@ -2782,7 +2782,7 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-732 | Lire l'indicateur d'étape | Nominal | « Étape 1 sur 3 : Vos coordonnées » ; fil « Panier > … ». | ☐ | |
 | REC-APP-733 | Afficher la page à 360 px | Mobile 360 px | Champs pleine largeur, aucun débordement. | ☐ | |
 
-#### WK05 · Livraison (/boutique/commande/livraison)
+#### Livraison (/boutique/commande/livraison)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-734 | Ouvrir la page | Nominal | Étape 2 sur 3 « Livraison » ; groupe « Adresse de livraison » : « Pays », « Ville ou zone de livraison », « Ville », « Quartier », « Rue / repère » ; « Téléphone du destinataire » (aide « Le livreur vous appelle à ce numéro. ») ; bouton « Continuer vers le paiement ». | ☐ | |
@@ -2791,7 +2791,7 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-737 | Choisir la zone « Porto-Novo » | Nominal | Texte « Livraison Porto-Novo : 1 500 F CFA · délai annoncé 2 à 3 jours » (frais et délai lus de la zone). | ☐ | |
 | REC-APP-738 | Choisir un pays sans zone | Pays sans zone | La liste des zones reste vide ; message cohérent (à confirmer : spec muette). | ☐ | |
 | REC-APP-739 | Remplir quartier « Ouando », rue « Près du marché » puis « Continuer vers le paiement » | Nominal | La commande est créée (statut en attente), arrivée sur /boutique/commande/paiement. | ☐ | |
-| REC-APP-740 | Revenir sur cette page depuis WK06 sans rien changer | Retour arrière | Les valeurs sont conservées ; « Continuer vers le paiement » reprend la même commande en attente (aucune nouvelle commande, même référence). | ☐ | |
+| REC-APP-740 | Revenir sur cette page depuis « Paiement » sans rien changer | Retour arrière | Les valeurs sont conservées ; « Continuer vers le paiement » reprend la même commande en attente (aucune nouvelle commande, même référence). | ☐ | |
 | REC-APP-741 | Modifier la zone après un retour arrière | Adresse modifiée | Une nouvelle commande est créée avec les nouveaux frais (à confirmer : annulation de l'ancienne). | ☐ | |
 | REC-APP-742 | Valider | Kit épuisé entre-temps (OUT_OF_STOCK) | Message de stock insuffisant avec retour au panier. | ☐ | |
 | REC-APP-743 | Valider | Erreur de zone renvoyée par l'API | Erreur sous le champ « zone » avec le message de l'API. | ☐ | |
@@ -2799,16 +2799,16 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-745 | Ouvrir la page avec un panier vide | Panier vide | « Votre panier est vide. » et « Voir les kits ». | ☐ | |
 | REC-APP-746 | Afficher la page à 360 px | Mobile 360 px | Champs pleine largeur, aucun débordement. | ☐ | |
 
-#### WK06 · Paiement (/boutique/commande/paiement)
+#### Paiement (/boutique/commande/paiement)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-747 | Ouvrir la page après WK05 | Nominal | Étape 3 sur 3 « Paiement » ; bloc « Total à payer · 1 article + livraison » avec le total en grand ; détail « Articles HT », « Livraison (<zone>) » ; « Vos kits sont réservés jusqu'à <hh:mm> : payez avant cette heure. » ; formulaire « Paiement Mobile Money » (WA03). | ☐ | |
+| REC-APP-747 | Ouvrir la page après « Livraison » | Nominal | Étape 3 sur 3 « Paiement » ; bloc « Total à payer · 1 article + livraison » avec le total en grand ; détail « Articles HT », « Livraison (<zone>) » ; « Vos kits sont réservés jusqu'à <hh:mm> : payez avant cette heure. » ; formulaire « Paiement Mobile Money ». | ☐ | |
 | REC-APP-748 | Lire le détail du total | Taxes activées (TVA 18 %, AIB 5 %) | Lignes « TVA (18 %) » et « AIB (5 %) » ajoutées au détail ; le total en grand est le total du serveur (HT + livraison + TVA + AIB) et le bouton affiche « Payer <ce total> F CFA ». | ☐ | |
 | REC-APP-749 | Lire le détail du total | Taxes éteintes | Aucune ligne de taxe ; total = HT + livraison. | ☐ | |
 | REC-APP-750 | Comparer le total au panier | Nominal | Le total est celui de la commande créée par le serveur (jamais recalculé dans le navigateur). | ☐ | |
-| REC-APP-751 | Payer | Numéro en `…02` | Voir WA07 / WK09. | ☐ | |
-| REC-APP-752 | Payer | Numéro en `…01` | Voir WA05 / WK07. | ☐ | |
-| REC-APP-753 | Payer | Numéro en `…03` | Voir WA04 (reste en attente). | ☐ | |
+| REC-APP-751 | Payer | Numéro en `…02` | Voir « Paiement échoué » / « Paiement échoué ». | ☐ | |
+| REC-APP-752 | Payer | Numéro en `…01` | Voir « Paiement réussi » / « Confirmation & suivi ». | ☐ | |
+| REC-APP-753 | Payer | Numéro en `…03` | Voir « Paiement en cours » (reste en attente). | ☐ | |
 | REC-APP-754 | Ouvrir la page directement sans commande en cours | Aucune commande en session | Redirection vers /boutique/commande/livraison. | ☐ | |
 | REC-APP-755 | Ouvrir la page | Commande introuvable (NOT_FOUND) | Alerte « Cette commande est introuvable. Reprenez depuis votre panier. » et bouton « Retour au panier ». | ☐ | |
 | REC-APP-756 | Ouvrir la page | Commande déjà payée | Redirection vers /boutique/commandes/<référence>. | ☐ | |
@@ -2817,7 +2817,7 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-759 | Observer le chargement | Chargement | Squelette « Chargement de votre commande… ». | ☐ | |
 | REC-APP-760 | Afficher la page à 360 px | Mobile 360 px | Bloc de total et formulaire pleine largeur, aucun débordement. | ☐ | |
 
-#### WK07 · Confirmation & suivi (/boutique/commandes/<référence>)
+#### Confirmation & suivi (/boutique/commandes/<référence>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-761 | Payer en `…01` | Paiement réussi | Redirection vers /boutique/commandes/<référence> ; h1 « Merci, c'est commandé ! » ; « Commande <référence> · un reçu vous a été envoyé par SMS. Vous êtes prévenu à chaque étape de la livraison. » ; mascotte en fête. | ☐ | |
@@ -2839,7 +2839,7 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-777 | Observer le chargement | Chargement | Squelette « Chargement de la commande… ». | ☐ | |
 | REC-APP-778 | Afficher la page à 360 px | Mobile 360 px | Chronologie et récapitulatif empilés, boutons pleine largeur, aucun débordement. | ☐ | |
 
-#### WK08 · Paiement par le parent (/apprenant/demandes/<id> pour une demande de kit)
+#### Paiement par le parent (/apprenant/demandes/<id> pour une demande de kit)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-779 | Cliquer « Demander à mon parent » depuis le panier | Demande de kit | Arrivée sur /apprenant/demandes/<id> ; h1 « Demande à ton parent » ; fil « Boutique > Mon panier > Demande à ton parent » ; h2 « On a envoyé ta demande à <Parent> » ; « <Parent> ajoutera l'adresse et les frais de livraison, puis réglera la commande. Tu recevras une notification dès que ce sera fait. ». | ☐ | |
@@ -2854,17 +2854,17 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-788 | Vérifier le stock | Demande non réglée | Le stock n'est réservé qu'au paiement par le parent (C10). | ☐ | |
 | REC-APP-789 | Afficher la page à 360 px | Mobile 360 px | Récapitulatif et boutons empilés, aucun débordement. | ☐ | |
 
-#### WK09 · Paiement échoué (/boutique/commande/paiement)
+#### Paiement échoué (/boutique/commande/paiement)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-790 | Payer avec un numéro en `…02` | Paiement refusé | h2 « Paiement échoué » ; « La transaction n'a pas pu aboutir. Aucun montant n'a été débité. » ; message « Votre panier est conservé : vous pouvez réessayer avec un autre numéro. ». | ☐ | |
 | REC-APP-791 | Vérifier le stockage local | Après échec | Le panier invité contient toujours le kit (`steamy:panier`). | ☐ | |
-| REC-APP-792 | Cliquer « Changer de numéro » | Après échec | Retour au formulaire de paiement ; choisir « MTN Mobile Money » et saisir 0197123401 mène à WK07. | ☐ | |
+| REC-APP-792 | Cliquer « Changer de numéro » | Après échec | Retour au formulaire de paiement ; choisir « MTN Mobile Money » et saisir 0197123401 mène à « Confirmation & suivi ». | ☐ | |
 | REC-APP-793 | Cliquer « Réessayer le paiement » | Après échec | Nouvel essai avec les mêmes informations. | ☐ | |
-| REC-APP-794 | Revenir en arrière (WK05) puis repayer | Même commande | La commande en attente est reprise ; aucune nouvelle commande si rien n'a changé. | ☐ | |
-| REC-APP-795 | Afficher la page à 360 px | Mobile 360 px | Voir WA07. | ☐ | |
+| REC-APP-794 | Revenir en arrière puis repayer | Même commande | La commande en attente est reprise ; aucune nouvelle commande si rien n'a changé. | ☐ | |
+| REC-APP-795 | Afficher la page à 360 px | Mobile 360 px | Voir « Paiement échoué ». | ☐ | |
 
-#### WK10 · Panier vide (/apprenant/boutique/panier ; invité : /boutique/panier)
+#### Panier vide (/apprenant/boutique/panier ; invité : /boutique/panier)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-796 | Ouvrir le panier avec un apprenant neuf | Apprenant | h1 « Mon panier » ; h2 « Ton panier est vide » ; « Choisis un kit pour construire pour de vrai, puis demande-le à ton parent. » ; bouton « Voir les kits » ; « Livraison selon ta zone » avec les délais par zone. | ☐ | |
@@ -2874,7 +2874,7 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-800 | Ouvrir le panier | Tous les kits ont été retirés (plus en vente) | Message « Un kit de ton panier n'est plus disponible : il a été retiré. » au-dessus de l'état vide. | ☐ | |
 | REC-APP-801 | Afficher la page à 360 px | Mobile 360 px | Mascotte et bouton centrés, délais lisibles, aucun débordement. | ☐ | |
 
-#### WK11 · Stock épuisé (/apprenant/boutique/kit-energie-solaire ; invité : /boutique/kit-energie-solaire)
+#### Stock épuisé (/apprenant/boutique/kit-energie-solaire ; invité : /boutique/kit-energie-solaire)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-802 | Ouvrir la fiche en apprenant | Kit en rupture | « Indisponible » ; pas de bouton « Ajouter au panier » ; alerte dans l'application sans champ téléphone (D30). | ☐ | |
@@ -2886,7 +2886,7 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-808 | Ouvrir la fiche pendant le chargement | Chargement | Texte « Chargement… » avant l'apparition du formulaire d'alerte. | ☐ | |
 | REC-APP-809 | Afficher la page à 360 px | Mobile 360 px | Formulaire d'alerte pleine largeur, aucun débordement. | ☐ | |
 
-### Navigation transverse de l'espace apprenant (shell, WD16)
+### Navigation transverse de l'espace apprenant (shell, « Déconnexion »)
 
 #### SHELL · Shell apprenant (toutes les pages /apprenant/...)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
@@ -2911,22 +2911,22 @@ Chaque parcours se joue de bout en bout avec des comptes neufs (rejouable), en b
 #### PT1 · Inscription gratuite → mission → quiz → certificat (P1, parcours « Premiers pas avec Zeti »)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-821 | Créer un apprenant neuf, faire accepter l'accord par le parent (lien dans Mailpit), compléter le profil puis ouvrir /apprenant | Préparation | Arrivée sur WD02 : « Bienvenue <Prénom> ! » et suggestions gratuites. | ☐ | |
-| REC-APP-822 | Ouvrir /apprenant/catalogue/premiers-pas-zeti puis « Commencer le parcours » | Inscription | Arrivée sur WJ01 du projet 1 (/apprenant/parcours/premiers-pas-zeti/projets/<id>). | ☐ | |
+| REC-APP-821 | Créer un apprenant neuf, faire accepter l'accord par le parent (lien dans Mailpit), compléter le profil puis ouvrir /apprenant | Préparation | Arrivée sur « Accueil nouvel utilisateur » : « Bienvenue <Prénom> ! » et suggestions gratuites. | ☐ | |
+| REC-APP-822 | Ouvrir /apprenant/catalogue/premiers-pas-zeti puis « Commencer le parcours » | Inscription | Arrivée sur « Détail projet » du projet 1 (/apprenant/parcours/premiers-pas-zeti/projets/<id>). | ☐ | |
 | REC-APP-823 | Ouvrir /apprenant/parcours | Mes parcours | Le parcours figure dans « En cours (1) » avec 0 %. | ☐ | |
-| REC-APP-824 | Cliquer le titre du parcours puis le projet 1 | Arbre | WC06a puis WC06b : projet déplié, première mission « en cours », suivantes verrouillées. | ☐ | |
-| REC-APP-825 | Cliquer « Voir le projet 1 » puis « Continuer le niveau 1 » puis « Commencer la 1ʳᵉ mission » | WJ01 → WJ02 → WJ03 | Arrivée sur /apprenant/parcours/premiers-pas-zeti/missions/<id>. | ☐ | |
+| REC-APP-824 | Cliquer le titre du parcours puis le projet 1 | Arbre | « Vue inscrit · projets repliés » puis « Vue inscrit · projet déplié » : projet déplié, première mission « en cours », suivantes verrouillées. | ☐ | |
+| REC-APP-825 | Cliquer « Voir le projet 1 » puis « Continuer le niveau 1 » puis « Commencer la 1ʳᵉ mission » | « Détail projet » → « Intro niveau » → « Contenu mission » | Arrivée sur /apprenant/parcours/premiers-pas-zeti/missions/<id>. | ☐ | |
 | REC-APP-826 | Cliquer « Lire la vidéo » | Vidéo | L'iframe Vimeo se charge seulement après le clic. | ☐ | |
 | REC-APP-827 | Cliquer « Marquer comme terminée » (mission 1) | Mission 1 | Redirection vers la mission 2. | ☐ | |
-| REC-APP-828 | Cliquer « Marquer comme terminée » (mission 2, dernière du niveau) | Mission 2 | Redirection vers /apprenant/parcours/premiers-pas-zeti/quiz/<id> (WJ04) : « Obtiens au moins 70 % pour valider le niveau ». | ☐ | |
-| REC-APP-829 | Répondre juste à toutes les questions (réponse « L'idée vue dans la mission ») puis « Envoyer mes réponses » | Formative réussie | WJ05 : « Réussi », « 2 bonnes réponses sur 2 · seuil 70 % ». | ☐ | |
-| REC-APP-830 | Cliquer « Voir mon badge » | Badge de niveau | WJ06 : « Niveau terminé ! ». | ☐ | |
-| REC-APP-831 | Cliquer « Passer l'évaluation du projet » | Sommative | WJ10 : « Obtiens au moins 80 % pour valider le projet ». | ☐ | |
-| REC-APP-832 | Répondre faux à toutes les questions puis envoyer | Sommative ratée | WJ08 : « Pas encore validé », « Échoué », liens « Revoir « … » » et bouton désactivé « Réessayer le quiz dans mm:ss ». | ☐ | |
+| REC-APP-828 | Cliquer « Marquer comme terminée » (mission 2, dernière du niveau) | Mission 2 | Redirection vers /apprenant/parcours/premiers-pas-zeti/quiz/<id> : « Obtiens au moins 70 % pour valider le niveau ». | ☐ | |
+| REC-APP-829 | Répondre juste à toutes les questions (réponse « L'idée vue dans la mission ») puis « Envoyer mes réponses » | Formative réussie | « Revue des résultats » : « Réussi », « 2 bonnes réponses sur 2 · seuil 70 % ». | ☐ | |
+| REC-APP-830 | Cliquer « Voir mon badge » | Badge de niveau | « Badge de niveau débloqué » : « Niveau terminé ! ». | ☐ | |
+| REC-APP-831 | Cliquer « Passer l'évaluation du projet » | Sommative | « Évaluation sommative » : « Obtiens au moins 80 % pour valider le projet ». | ☐ | |
+| REC-APP-832 | Répondre faux à toutes les questions puis envoyer | Sommative ratée | « Échec d'évaluation » : « Pas encore validé », « Échoué », liens « Revoir « … » » et bouton désactivé « Réessayer le quiz dans mm:ss ». | ☐ | |
 | REC-APP-833 | Attendre la fin du compte à rebours puis « Réessayer le quiz » | Délai écoulé | Le quiz s'ouvre ; en production le délai est de 10 min. | ☐ | |
 | REC-APP-834 | Répondre juste puis envoyer | Sommative réussie | Résultats : « Tu as validé le projet. » ; bouton « Voir mon badge ». | ☐ | |
-| REC-APP-835 | Cliquer « Voir mon badge » | Badge de projet | WJ11 : « Projet validé ! ». | ☐ | |
-| REC-APP-836 | Cliquer « Voir ma certification » | Certification | WJ07 : « Certification Steamy », « Premiers pas avec Zeti ». | ☐ | |
+| REC-APP-835 | Cliquer « Voir mon badge » | Badge de projet | « Projet validé + badge de projet » : « Projet validé ! ». | ☐ | |
+| REC-APP-836 | Cliquer « Voir ma certification » | Certification | « Certification & fin de parcours » : « Certification Steamy », « Premiers pas avec Zeti ». | ☐ | |
 | REC-APP-837 | Attendre « Préparation… » puis cliquer « Télécharger la certification (PDF) » | PDF | Téléchargement d'un fichier .pdf (worker de génération démarré). | ☐ | |
 | REC-APP-838 | Ouvrir /apprenant/parcours?onglet=termines | Mes parcours | Le parcours est dans « Terminés (1) » avec « Terminé · 100 % » et « Voir ma certification ›». | ☐ | |
 | REC-APP-839 | Ouvrir /apprenant/quiz | Tentatives | Trois tentatives : une formative réussie, une sommative échouée, une sommative réussie ; bandeau de statistiques cohérent. | ☐ | |
@@ -2939,81 +2939,81 @@ Chaque parcours se joue de bout en bout avec des comptes neufs (rejouable), en b
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-843 | Créer un apprenant (parent associé), faire acheter par le parent le kit « Steamy Bot v1 » (livraison au Bénin, paiement en `…01`) | Préparation | Le Kit Code `STEAMY-XXXX-XXXX` est visible côté parent dans la commande et imprimé sur la notice. | ☐ | |
 | REC-APP-844 | Ouvrir /apprenant/catalogue/robot-bluetooth | Parcours avec kit | « Débloqué avec le Kit Code », « Kit requis » (Steamy Bot v1, prix HT lu de la boutique), aucun prix de parcours. | ☐ | |
-| REC-APP-845 | Cliquer « J'ai un Kit Code » | WC05 → WA01 | Arrivée sur /apprenant/catalogue/robot-bluetooth/kit-code, h1 « Débloquer le parcours ». | ☐ | |
-| REC-APP-846 | Saisir `STEAMY-ZZZZ-ZZZZ` puis « Valider le code » | Code inconnu | WA06 : « Code Kit invalide », champ en erreur, lien « Contacter le support ». | ☐ | |
+| REC-APP-845 | Cliquer « J'ai un Kit Code » | « Détail parcours payant + kit » → « Saisie du Kit Code » | Arrivée sur /apprenant/catalogue/robot-bluetooth/kit-code, h1 « Débloquer le parcours ». | ☐ | |
+| REC-APP-846 | Saisir `STEAMY-ZZZZ-ZZZZ` puis « Valider le code » | Code inconnu | « Kit Code invalide » : « Code Kit invalide », champ en erreur, lien « Contacter le support ». | ☐ | |
 | REC-APP-847 | Effacer le champ | Nouvelle saisie | Le titre d'erreur disparaît. | ☐ | |
 | REC-APP-848 | Saisir le code reçu en minuscules et sans tirets puis « Valider le code » | Code valide | Redirection vers /apprenant/parcours/robot-bluetooth avec le toast « Parcours débloqué ». | ☐ | |
 | REC-APP-849 | Ouvrir /apprenant/parcours | Mes parcours | Le parcours « Construis ton robot Bluetooth » est dans « En cours ». | ☐ | |
-| REC-APP-850 | Se connecter avec un autre apprenant et saisir le même code | Code déjà utilisé | WA06 : « Code déjà utilisé » et « un Kit Code ne s'utilise qu'une seule fois ». | ☐ | |
+| REC-APP-850 | Se connecter avec un autre apprenant et saisir le même code | Code déjà utilisé | « Kit Code invalide » : « Code déjà utilisé » et « un Kit Code ne s'utilise qu'une seule fois ». | ☐ | |
 | REC-APP-851 | Saisir un code d'un autre kit | Code incompatible | « Ce code ne débloque pas ce parcours ». | ☐ | |
 | REC-APP-852 | Enchaîner de nombreuses saisies fausses | Plafond de tentatives | « Trop de tentatives » ; bouton temporairement désactivé. | ☐ | |
-| REC-APP-853 | Cliquer « Commander dans la boutique » depuis WA01 | Pas encore de kit | Arrivée sur /apprenant/boutique (WK01). | ☐ | |
+| REC-APP-853 | Cliquer « Commander dans la boutique » depuis « Saisie du Kit Code » | Pas encore de kit | Arrivée sur /apprenant/boutique. | ☐ | |
 | REC-APP-854 | Répéter à 360 px | Mobile 360 px | Mêmes résultats, aucun débordement. | ☐ | |
 
 #### PT3 · Demande au parent pour un parcours payant (P3)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-855 | Ouvrir /apprenant/catalogue/capteurs-electroniques avec un apprenant neuf | Parcours payant | Prix « 18 000 F CFA HT », « Payé par ton parent · accès à vie », bouton « Demander à mon parent ». | ☐ | |
-| REC-APP-856 | Cliquer « Demander à mon parent » | WC05 → WA02 | /apprenant/demandes/<id> ; « On a envoyé ta demande à <Parent> » ; SMS du parent dans Mailpit ; « Relancer mon parent » désactivé avec « Tu pourras relancer ton parent le … ». | ☐ | |
+| REC-APP-856 | Cliquer « Demander à mon parent » | « Détail parcours payant + kit » → « Paiement par le parent » | /apprenant/demandes/<id> ; « On a envoyé ta demande à <Parent> » ; SMS du parent dans Mailpit ; « Relancer mon parent » désactivé avec « Tu pourras relancer ton parent le … ». | ☐ | |
 | REC-APP-857 | Retourner sur la fiche du parcours | Demande en cours | Le lien « Demande envoyée » ramène à la même demande. | ☐ | |
-| REC-APP-858 | Ouvrir /apprenant/parcours | WD23 | Bandeau « En attente de ton parent · 1 demande ». | ☐ | |
-| REC-APP-859 | Ouvrir /apprenant/profil puis « Mes commandes » | WD14 | La demande figure « En attente de ton parent », sans facture ; lien « Voir la demande ». | ☐ | |
+| REC-APP-858 | Ouvrir /apprenant/parcours | « Mes parcours » | Bandeau « En attente de ton parent · 1 demande ». | ☐ | |
+| REC-APP-859 | Ouvrir /apprenant/profil puis « Mes commandes » | « Historique de commande » | La demande figure « En attente de ton parent », sans facture ; lien « Voir la demande ». | ☐ | |
 | REC-APP-860 | Annuler la demande (confirmation) puis « Refaire la demande » | Annulation et nouvelle demande | « Tu as annulé cette demande » puis nouvelle page de demande avec un autre identifiant. | ☐ | |
 | REC-APP-861 | Faire payer le parent (`manage.py pay_payment_request <id>` ou lien SMS dans l'espace parent) | Règlement | Dans les 10 secondes : « C'est réglé ! » ; bouton « Accéder au parcours ». | ☐ | |
 | REC-APP-862 | Cliquer « Accéder au parcours » | Règlement | Arrivée sur l'arbre du parcours, inscription créée. | ☐ | |
 | REC-APP-863 | Ouvrir /apprenant/notifications | Notification | « Capteurs électroniques est débloqué ». | ☐ | |
-| REC-APP-864 | Ouvrir /apprenant/parcours | WD23 | Le parcours est listé ; plus de bandeau d'attente. | ☐ | |
-| REC-APP-865 | Ouvrir /apprenant/profil/commandes?statut=payees | WD14 | La commande « Capteurs électroniques » est « Payée ». | ☐ | |
+| REC-APP-864 | Ouvrir /apprenant/parcours | « Mes parcours » | Le parcours est listé ; plus de bandeau d'attente. | ☐ | |
+| REC-APP-865 | Ouvrir /apprenant/profil/commandes?statut=payees | « Historique de commande » | La commande « Capteurs électroniques » est « Payée ». | ☐ | |
 | REC-APP-866 | Répéter avec refus du parent puis avec expiration | Refus / expiration | « <Parent> a refusé ta demande » ou « Ta demande a expiré » ; « Refaire la demande » crée une nouvelle demande. | ☐ | |
 | REC-APP-867 | Répéter à 360 px | Mobile 360 px | Mêmes résultats, aucun débordement. | ☐ | |
 
 #### PT4 · Achat d'un kit : demande au parent (P5) et checkout invité (P4)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-868 | Ouvrir /apprenant/boutique/panier avec un apprenant neuf | WK10 | « Ton panier est vide » et « Voir les kits ». | ☐ | |
-| REC-APP-869 | Cliquer « Voir les kits » puis « Ajouter » sur Pack Électronique | WK01 | Toast « « Pack Électronique » est dans ton panier. ». | ☐ | |
-| REC-APP-870 | Ouvrir « Steamy Bot v1 » puis « Acheter maintenant » | WK02 → WK03 | Arrivée sur /apprenant/boutique/panier avec deux lignes. | ☐ | |
-| REC-APP-871 | Augmenter la quantité de Pack Électronique | WK03 | « Sous-total HT (3 articles) » ; prix « HT » ; « Total hors livraison » ; « Livraison : Calculée à l'étape suivante ». | ☐ | |
-| REC-APP-872 | Activer TVA 18 % et AIB 5 % dans WAD14 puis recharger le panier | Taxes activées | Lignes « TVA (18 %) » et « AIB (5 %) » entre le sous-total HT et la livraison ; total hors livraison = HT + taxes. | ☐ | |
-| REC-APP-873 | Se déconnecter puis se reconnecter | WK03 | Le panier serveur est conservé. | ☐ | |
-| REC-APP-874 | Enregistrer l'adresse de livraison dans WD19 | Adresse | Adresse conservée (proposée au parent). | ☐ | |
-| REC-APP-875 | Cliquer « Demander à mon parent » | WK03 → WK08 | /apprenant/demandes/<id> ; « Montant des articles · livraison ajoutée par ton parent ». | ☐ | |
+| REC-APP-868 | Ouvrir /apprenant/boutique/panier avec un apprenant neuf | « Panier vide » | « Ton panier est vide » et « Voir les kits ». | ☐ | |
+| REC-APP-869 | Cliquer « Voir les kits » puis « Ajouter » sur Pack Électronique | « Catalogue kits » | Toast « « Pack Électronique » est dans ton panier. ». | ☐ | |
+| REC-APP-870 | Ouvrir « Steamy Bot v1 » puis « Acheter maintenant » | « Détail kit » → « Panier » | Arrivée sur /apprenant/boutique/panier avec deux lignes. | ☐ | |
+| REC-APP-871 | Augmenter la quantité de Pack Électronique | « Panier » | « Sous-total HT (3 articles) » ; prix « HT » ; « Total hors livraison » ; « Livraison : Calculée à l'étape suivante ». | ☐ | |
+| REC-APP-872 | Activer TVA 18 % et AIB 5 % dans « Paramètres généraux » puis recharger le panier | Taxes activées | Lignes « TVA (18 %) » et « AIB (5 %) » entre le sous-total HT et la livraison ; total hors livraison = HT + taxes. | ☐ | |
+| REC-APP-873 | Se déconnecter puis se reconnecter | « Panier » | Le panier serveur est conservé. | ☐ | |
+| REC-APP-874 | Enregistrer l'adresse de livraison dans « Informations de livraison » | Adresse | Adresse conservée (proposée au parent). | ☐ | |
+| REC-APP-875 | Cliquer « Demander à mon parent » | « Panier » → « Paiement par le parent » | /apprenant/demandes/<id> ; « Montant des articles · livraison ajoutée par ton parent ». | ☐ | |
 | REC-APP-876 | Annuler la demande puis revenir au panier et redemander | Annulation | Nouvelle demande avec un autre identifiant. | ☐ | |
 | REC-APP-877 | Faire payer le parent avec adresse et livraison | Règlement | « C'est réglé ! » ; bouton « Voir mes commandes ». | ☐ | |
-| REC-APP-878 | Cliquer « Voir mes commandes » | WD14 | Commande « Pack Électronique », « Payée », « Livraison : En préparation » ; aucune facture proposée. | ☐ | |
-| REC-APP-879 | En invité, ajouter Pack Électronique depuis /boutique puis « Commander » | P4 : WL07 → WK03 → WK04 | Arrivée sur /boutique/commande/coordonnees. | ☐ | |
-| REC-APP-880 | Remplir les coordonnées, cocher les conditions, valider | WK04 | Arrivée sur /boutique/commande/livraison. | ☐ | |
-| REC-APP-881 | Choisir Bénin, « Porto-Novo », quartier et rue, valider | WK05 | Arrivée sur /boutique/commande/paiement ; « Total à payer · 1 article + livraison » ; « Articles HT », « Livraison (Porto-Novo) », lignes de taxes si activées. | ☐ | |
-| REC-APP-882 | Choisir « MTN Mobile Money », saisir un numéro en `…02`, payer | WK06 → WA04 → WA07 | « On confirme votre paiement… » puis « Paiement échoué », « Aucun montant n'a été débité. », panier conservé. | ☐ | |
-| REC-APP-883 | Cliquer « Changer de numéro », saisir un numéro en `…01`, payer | WA03 → WA05 | Redirection vers /boutique/commandes/<référence> : « Merci, c'est commandé ! ». | ☐ | |
-| REC-APP-884 | Contrôler le récapitulatif de WK07 | Total | Lignes HT, livraison, TVA/AIB et « Total à payer » égaux au montant payé. | ☐ | |
+| REC-APP-878 | Cliquer « Voir mes commandes » | « Historique de commande » | Commande « Pack Électronique », « Payée », « Livraison : En préparation » ; aucune facture proposée. | ☐ | |
+| REC-APP-879 | En invité, ajouter Pack Électronique depuis /boutique puis « Commander » | P4 : « Boutique de kits » → « Panier » → « Informations invité » | Arrivée sur /boutique/commande/coordonnees. | ☐ | |
+| REC-APP-880 | Remplir les coordonnées, cocher les conditions, valider | « Informations invité » | Arrivée sur /boutique/commande/livraison. | ☐ | |
+| REC-APP-881 | Choisir Bénin, « Porto-Novo », quartier et rue, valider | « Livraison » | Arrivée sur /boutique/commande/paiement ; « Total à payer · 1 article + livraison » ; « Articles HT », « Livraison (Porto-Novo) », lignes de taxes si activées. | ☐ | |
+| REC-APP-882 | Choisir « MTN Mobile Money », saisir un numéro en `…02`, payer | « Paiement » → « Paiement en cours » → « Paiement échoué » | « On confirme votre paiement… » puis « Paiement échoué », « Aucun montant n'a été débité. », panier conservé. | ☐ | |
+| REC-APP-883 | Cliquer « Changer de numéro », saisir un numéro en `…01`, payer | « Formulaire de paiement Mobile Money » → « Paiement réussi » | Redirection vers /boutique/commandes/<référence> : « Merci, c'est commandé ! ». | ☐ | |
+| REC-APP-884 | Contrôler le récapitulatif de « Confirmation & suivi » | Total | Lignes HT, livraison, TVA/AIB et « Total à payer » égaux au montant payé. | ☐ | |
 | REC-APP-885 | Contrôler Mailpit | Notification | SMS de suivi avec le lien de la commande. | ☐ | |
-| REC-APP-886 | Télécharger le reçu | WK07 | Fichier `recu-<référence>.pdf`. | ☐ | |
+| REC-APP-886 | Télécharger le reçu | « Confirmation & suivi » | Fichier `recu-<référence>.pdf`. | ☐ | |
 | REC-APP-887 | Répéter à 360 px | Mobile 360 px | Mêmes résultats, aucun débordement. | ☐ | |
 
 #### PT5 · Souhaits, profil et suppression du compte
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-888 | Ouvrir /apprenant/souhaits avec un apprenant neuf | WW02 | « Aucun parcours en souhaits ». | ☐ | |
+| REC-APP-888 | Ouvrir /apprenant/souhaits avec un apprenant neuf | « Souhaits · vide » | « Aucun parcours en souhaits ». | ☐ | |
 | REC-APP-889 | Ouvrir le catalogue et cliquer le cœur de « Initiation à Scratch » | Ajout | Cœur pressé ; toast « Parcours ajouté à tes souhaits ». | ☐ | |
-| REC-APP-890 | Ouvrir /apprenant/souhaits | WW01 | « 1 parcours sauvegardé ». | ☐ | |
-| REC-APP-891 | Retirer par le cœur puis « Annuler » | WW03 | La carte revient ; conservé après rechargement. | ☐ | |
+| REC-APP-890 | Ouvrir /apprenant/souhaits | « Souhaits · avec éléments » | « 1 parcours sauvegardé ». | ☐ | |
+| REC-APP-891 | Retirer par le cœur puis « Annuler » | « Toast après retrait » | La carte revient ; conservé après rechargement. | ☐ | |
 | REC-APP-892 | Retirer à nouveau sans annuler puis recharger | Retrait définitif | « Aucun parcours en souhaits ». | ☐ | |
-| REC-APP-893 | Modifier le profil (classe, email) dans WD17, enregistrer | WD17 | « Ton profil est enregistré. » ; conservé après rechargement ; classe reprise dans WD13. | ☐ | |
-| REC-APP-894 | Changer le mot de passe dans WD18 puis se reconnecter | WD18 | Connexion avec le nouveau mot de passe uniquement. | ☐ | |
-| REC-APP-895 | Envoyer une demande de suppression dans WD15 avec un motif | WD15 | « Demande envoyée à ton parent » ; le parent la retrouve dans « À valider ». | ☐ | |
-| REC-APP-896 | Annuler la demande depuis WD15 | WD15 | Toast « Ta demande de suppression est annulée. ». | ☐ | |
+| REC-APP-893 | Modifier le profil (classe, email) dans « Éditer le profil », enregistrer | « Éditer le profil » | « Ton profil est enregistré. » ; conservé après rechargement ; classe reprise dans « Paramètres ». | ☐ | |
+| REC-APP-894 | Changer le mot de passe dans « Modifier la connexion » puis se reconnecter | « Modifier la connexion » | Connexion avec le nouveau mot de passe uniquement. | ☐ | |
+| REC-APP-895 | Envoyer une demande de suppression dans « Supprimer le compte » avec un motif | « Supprimer le compte » | « Demande envoyée à ton parent » ; le parent la retrouve dans « À valider ». | ☐ | |
+| REC-APP-896 | Annuler la demande depuis « Supprimer le compte » | « Supprimer le compte » | Toast « Ta demande de suppression est annulée. ». | ☐ | |
 | REC-APP-897 | Faire accepter la suppression par le parent | Validation | Titre « Suppression validée par ton parent », compte désactivé, anonymisation à J+30, factures conservées. | ☐ | |
-| REC-APP-898 | Se déconnecter via WD16 | WD16 | Modale « Déjà l'heure de partir ? » puis retour sur /connexion. | ☐ | |
+| REC-APP-898 | Se déconnecter via « Déconnexion » | « Déconnexion » | Modale « Déjà l'heure de partir ? » puis retour sur /connexion. | ☐ | |
 
 #### Points « à confirmer (spec muette) » relevés dans ce cahier
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-899 | Vérifier la réponse donnée et la bonne réponse dans WD08 | Écart spec / écran | La spec demande le récapitulatif avec la réponse donnée et la bonne réponse ; l'écran livré montre « Juste » / « Faux » et le concept : à confirmer. | ☐ | |
-| REC-APP-900 | Vérifier le bouton « Précédent » de WJ03 | Écart spec / écran | La spec cite « Précédent » ; l'écran livré propose « Retour au niveau » : à confirmer. | ☐ | |
-| REC-APP-901 | Vérifier le filtre « Échouées » de WD14 | Écart spec / écran | La spec liste Toutes / Payées / En attente / Échouées ; l'écran livré propose Toutes / Payées / En attente / Annulées : à confirmer. | ☐ | |
-| REC-APP-902 | Vérifier l'origine d'une inscription par classe dans WD23 | Écart spec / écran | La spec cite « Classe de M. … » ; l'écran livré affiche « Avec ta classe » : à confirmer. | ☐ | |
-| REC-APP-903 | Vérifier la carte « Mot de ton enseignant » de WC06a | Écart spec / écran | Prévue par la spec (D63) ; présence non constatée dans le code de l'arbre : à confirmer. | ☐ | |
+| REC-APP-899 | Vérifier la réponse donnée et la bonne réponse dans « Tentatives de quiz · détail » | Écart spec / écran | La spec demande le récapitulatif avec la réponse donnée et la bonne réponse ; l'écran livré montre « Juste » / « Faux » et le concept : à confirmer. | ☐ | |
+| REC-APP-900 | Vérifier le bouton « Précédent » de « Contenu mission » | Écart spec / écran | La spec cite « Précédent » ; l'écran livré propose « Retour au niveau » : à confirmer. | ☐ | |
+| REC-APP-901 | Vérifier le filtre « Échouées » de « Historique de commande » | Écart spec / écran | La spec liste Toutes / Payées / En attente / Échouées ; l'écran livré propose Toutes / Payées / En attente / Annulées : à confirmer. | ☐ | |
+| REC-APP-902 | Vérifier l'origine d'une inscription par classe dans « Mes parcours » | Écart spec / écran | La spec cite « Classe de M. … » ; l'écran livré affiche « Avec ta classe » : à confirmer. | ☐ | |
+| REC-APP-903 | Vérifier la carte « Mot de ton enseignant » de « Vue inscrit · projets repliés » | Écart spec / écran | Prévue par la spec (D63) ; présence non constatée dans le code de l'arbre : à confirmer. | ☐ | |
 | REC-APP-904 | Vérifier les taux et la base de la TVA et de l'AIB | Taxes C25 | Taxes éteintes et taux à 0 par défaut (aucun taux légal confirmé) : les valeurs 18 % et 5 % de ce cahier sont des valeurs de test, à confirmer avec la Finance. | ☐ | |
 
 ---
@@ -3023,7 +3023,7 @@ Chaque parcours se joue de bout en bout avec des comptes neufs (rejouable), en b
 *432 lignes de scénario.*
 
 
-Partie 04 du cahier de recette Steamy. Périmètre : espace parent, écrans `WPD01` à `WPD15`, leurs modales, états et sous-écrans (suivi d'une commande, achat direct de kit, fiche événement `WL23` dans le shell parent). Registre : vouvoiement partout. Sources de référence : `docs/tests/MATRICE-E2E.md` (Lot 4), `docs/SPEC-ECRANS-3-parent-teacher-admin.md` §5.11, `docs/plans/LOT-4-PARENT.md`, `docs/alignement/ARBITRAGES.md` (D20-D26, D37, D38, D40, D50-D56, D63, D76, C1, C3, C4, C9-C12, C17, C25, C26), ADR 0005 et 0006, maquette `design/screens-parent-a-concevoir-web.jsx`, code `apps/web/src/features/parent`.
+Partie 04 du cahier de recette Steamy. Périmètre : espace parent, écrans `« Accueil parent »` à `« Demande de paiement »`, leurs modales, états et sous-écrans (suivi d'une commande, achat direct de kit, fiche événement `« Fiche événement »` dans le shell parent). Registre : vouvoiement partout. Sources de référence : `docs/tests/MATRICE-E2E.md` (Lot 4), `docs/SPEC-ECRANS-3-parent-teacher-admin.md` §5.11, `docs/plans/LOT-4-PARENT.md`, `docs/alignement/ARBITRAGES.md` (D20-D26, D37, D38, D40, D50-D56, D63, D76, C1, C3, C4, C9-C12, C17, C25, C26), ADR 0005 et 0006, maquette `design/screens-parent-a-concevoir-web.jsx`, code `apps/web/src/features/parent`.
 
 Conventions : les textes entre guillemets sont ceux du code à la date de rédaction ; « à confirmer (spec muette) » signale un comportement que ni la spécification ni les arbitrages ne tranchent. Les montants cités (22 000 F CFA pour « Pack Électronique », 5 000 F CFA HT pour « Défi robots de Cotonou ») viennent du jeu de démonstration et des tests e2e : à comparer à ce que renvoie l'API, jamais à recalculer à la main côté écran.
 
@@ -3040,7 +3040,7 @@ Conventions : les textes entre guillemets sont ceux du code à la date de rédac
 | Appareils | Bureau (au moins 1280 px de large) **et** mobile 360 px (émulation 360 × 760, comme le projet Playwright « mobile ») : chaque écran est à passer dans les deux formats ; à 360 px, aucun défilement horizontal de la page |
 | Faux prestataire de paiement | Pilotable par le numéro Mobile Money : numéro se terminant par `…01` = succès, `…02` = échec, `…03` = reste en attente. En ligne de commande : `manage.py simulate_payment <référence> success\|failed`, `manage.py pay_payment_request <id>` |
 | Faux fournisseur de facture normalisée | `FISCAL_PROVIDER=fake` (local, e2e) ; la facture est un « Reçu de paiement » non fiscal tant que e-MECeF n'est pas activé (`PlatformSettings.emecef_enabled` faux par défaut, ADR 0005/0006) |
-| Réglages de taxes | WAD14 (`vat_enabled`, `aib_enabled`, taux, « s'applique à la livraison ») : éteints et à 0 par défaut (C25). À modifier pour les cas de la section « Montants, TVA, AIB et facture » |
+| Réglages de taxes | « Paramètres généraux » (`vat_enabled`, `aib_enabled`, taux, « s'applique à la livraison ») : éteints et à 0 par défaut (C25). À modifier pour les cas de la section « Montants, TVA, AIB et facture » |
 
 #### Comptes (mot de passe de tous les comptes : `Steamy2026`, source `apps/api/fixtures/README.md`)
 
@@ -3051,16 +3051,16 @@ Conventions : les textes entre guillemets sont ceux du code à la date de rédac
 | Apprenante · Léa | `lea.adjovi` | Côté enfant (demande de parcours, de kit, candidature, suppression) |
 | Apprenant · Noé | `noe.adjovi` | Cas « profil à compléter », suppression demandée |
 | Apprenants · Yao, Sèna | `yao.kpade`, `sena.kpade` | Enfants de Bernard, élèves de M. Adékambi |
-| Enseignant · Koffi Adékambi | `koffi.adekambi@steamy.test` | Invitations d'élèves (WT06) pour la variante enseignant de `WPD05` ; classes « 4ᵉ B · Robotique » et « 3ᵉ A · Code » |
-| Parent sans enfant | à créer (inscription parent `/inscription/parent`, hors de ce cahier) | États vides (`WPD01`, `WPD02`, `WPD07`, `WPD14`, `WPD12`) |
-| Enfant « famille neuve » | créé par un parent via `WPD04` | Cas de création, de réinitialisation du mot de passe, de suppression : ne pas abîmer le jeu D2 |
-| Personnel | `finance@steamy.test`, `support@steamy.test` (admin Django, TOTP de démonstration) | Réglage des taxes (WAD14), remboursement manuel, annulation de la suppression du compte parent |
+| Enseignant · Koffi Adékambi | `koffi.adekambi@steamy.test` | Invitations d'élèves pour la variante enseignant de `« Demande de consentement »` ; classes « 4ᵉ B · Robotique » et « 3ᵉ A · Code » |
+| Parent sans enfant | à créer (inscription parent `/inscription/parent`, hors de ce cahier) | États vides (`« Accueil parent »`, `« Mes enfants »`, `« Historique de commande »`, `« Notifications »`, `« Faire participer un enfant à un événement »`) |
+| Enfant « famille neuve » | créé par un parent via `« Ajouter un enfant »` | Cas de création, de réinitialisation du mot de passe, de suppression : ne pas abîmer le jeu D2 |
+| Personnel | `finance@steamy.test`, `support@steamy.test` (admin Django, TOTP de démonstration) | Réglage des taxes, remboursement manuel, annulation de la suppression du compte parent |
 
 Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, suppression). Relancer `make seed` avant de rejouer un cas sur Marie (à confirmer : le seed ne remet pas à zéro les demandes déjà traitées ; préférer une famille neuve).
 
 #### Écrans couverts
 
-`WPD01` Accueil · `WPD02` Mes enfants · `WPD03` Détail enfant (+ modale « Nouveau mot de passe pour … ») · `WPD04` Ajouter un enfant · `WPD05` Demande de consentement (origine enfant et origine enseignant, + modale « Refuser la demande de … ? ») · `WPD06` Steamy Events (candidatures, modale « Refuser la candidature de … ? », `WL23` dans le shell parent) · `WPD07` Commandes (+ suivi d'une commande, + achat direct de kit `/parent/boutique`) · `WPD08` Paramètres · `WPD09` Supprimer un enfant (initiative du parent, demande `WD15` de l'enfant) · `WPD10` Modifier le profil enfant · `WPD11` Rapport hebdomadaire · `WPD12` Inscrire un enfant à un événement · `WPD13` Aide & support · `WPD14` Notifications · `WPD15` Demande de paiement (3 objets, 8 états, modale « Refuser la demande de … ? », « Demande introuvable », lien SMS, mobile 360 px) · section transverse « Shell » et section « Montants, TVA, AIB et facture normalisée ».
+`« Accueil parent »` Accueil · `« Mes enfants »` Mes enfants · `« Détail enfant »` Détail enfant (+ modale « Nouveau mot de passe pour … ») · `« Ajouter un enfant »` Ajouter un enfant · `« Demande de consentement »` Demande de consentement (origine enfant et origine enseignant, + modale « Refuser la demande de … ? ») · `« Steamy Events »` Steamy Events (candidatures, modale « Refuser la candidature de … ? », `« Fiche événement »` dans le shell parent) · `« Historique de commande »` Commandes (+ suivi d'une commande, + achat direct de kit `/parent/boutique`) · `« Paramètres parent »` Paramètres · `« Supprimer un enfant »` Supprimer un enfant (initiative du parent, demande `« Supprimer le compte »` de l'enfant) · `« Modifier le profil enfant »` Modifier le profil enfant · `« Rapport hebdomadaire »` Rapport hebdomadaire · `« Faire participer un enfant à un événement »` Inscrire un enfant à un événement · `« Aide & support »` Aide & support · `« Notifications »` Notifications · `« Demande de paiement »` Demande de paiement (3 objets, 8 états, modale « Refuser la demande de … ? », « Demande introuvable », lien SMS, mobile 360 px) · section transverse « Shell » et section « Montants, TVA, AIB et facture normalisée ».
 
 ### SHELL · Shell de l'espace parent et états globaux (`/parent/*`)
 
@@ -3071,10 +3071,10 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-003 | Se connecter en apprenant (`lea.adjovi`) puis ouvrir `/parent` | Rôle refusé (apprenant) | Redirection vers l'accueil de l'espace apprenant ; aucune donnée parent affichée | ☐ | |
 | REC-PAR-004 | Se connecter en enseignant (`koffi.adekambi@steamy.test`) puis ouvrir `/parent/notifications` | Rôle refusé (enseignant) | Redirection vers l'accueil de l'espace enseignant | ☐ | |
 | REC-PAR-005 | Se connecter en Marie, observer la navigation | Entrées du shell | Six entrées dans cet ordre : « Accueil », « Mes enfants », « Événements », « Commandes », « Aide », « Paramètres » ; navigation nommée « Navigation de votre espace » ; aucune entrée « Bientôt » ni masquée | ☐ | |
-| REC-PAR-006 | Parcourir chaque route de l'espace | Entrée active selon l'écran | `aria-current="page"` sur : Accueil pour `/parent`, `WPD05`, `WPD15` ; Mes enfants pour `WPD02`, `WPD03`, `WPD04`, `WPD09`, `WPD10`, `WPD11` ; Événements pour `WPD06`, `WPD12`, `WL23` ; Commandes pour `WPD07`, le suivi et `/parent/boutique/*` ; Aide pour `WPD13` ; Paramètres pour `WPD08` ; aucune entrée active pour `WPD14` | ☐ | |
-| REC-PAR-007 | Lire le titre (h1) de chaque route | Titres du header | `/parent` : « Bonjour Marie 👋 » ; `/parent/notifications` : « Notifications » ; `WPD05` : « Demande de consentement » ; `WPD15` : « Demande de paiement » ; `WPD04` : « Ajouter un enfant » ; `WPD10` : « Modifier le profil » ; `WPD11` : « Rapport hebdomadaire » ; `WPD09` : « Supprimer le compte » ; `WPD02`/`WPD03` : « Mes enfants » ; `WPD06`/`WL23` : « Steamy Events » ; `WPD12` : « Inscrire un enfant » ; `WPD07` : « Commandes » ; boutique : « Boutique de kits », « Mon panier », « Commande de kits » ; `WPD13` : « Aide & support » ; `WPD08` : « Paramètres » | ☐ | |
+| REC-PAR-006 | Parcourir chaque route de l'espace | Entrée active selon l'écran | `aria-current="page"` sur : Accueil pour `/parent`, `« Demande de consentement »`, `« Demande de paiement »` ; Mes enfants pour `« Mes enfants »`, `« Détail enfant »`, `« Ajouter un enfant »`, `« Supprimer un enfant »`, `« Modifier le profil enfant »`, `« Rapport hebdomadaire »` ; Événements pour `« Steamy Events »`, `« Faire participer un enfant à un événement »`, `« Fiche événement »` ; Commandes pour `« Historique de commande »`, le suivi et `/parent/boutique/*` ; Aide pour `« Aide & support »` ; Paramètres pour `« Paramètres parent »` ; aucune entrée active pour `« Notifications »` | ☐ | |
+| REC-PAR-007 | Lire le titre (h1) de chaque route | Titres du header | `/parent` : « Bonjour Marie 👋 » ; `/parent/notifications` : « Notifications » ; `« Demande de consentement »` : « Demande de consentement » ; `« Demande de paiement »` : « Demande de paiement » ; `« Ajouter un enfant »` : « Ajouter un enfant » ; `« Modifier le profil enfant »` : « Modifier le profil » ; `« Rapport hebdomadaire »` : « Rapport hebdomadaire » ; `« Supprimer un enfant »` : « Supprimer le compte » ; `« Mes enfants »`/`« Détail enfant »` : « Mes enfants » ; `« Steamy Events »`/`« Fiche événement »` : « Steamy Events » ; `« Faire participer un enfant à un événement »` : « Inscrire un enfant » ; `« Historique de commande »` : « Commandes » ; boutique : « Boutique de kits », « Mon panier », « Commande de kits » ; `« Aide & support »` : « Aide & support » ; `« Paramètres parent »` : « Paramètres » | ☐ | |
 | REC-PAR-008 | Observer l'utilisateur dans le header | Utilisateur issu de la session | Nom court et sous-titre « Parent · <ville> » lus dans la session (pas de « Marie A. · Parent · Cotonou » en dur) : se connecter avec Bernard Kpadé affiche son propre nom | ☐ | |
-| REC-PAR-009 | Cliquer le profil du header | Lien du profil | Mène à `/parent/parametres` (`WPD08`) | ☐ | |
+| REC-PAR-009 | Cliquer le profil du header | Lien du profil | Mène à `/parent/parametres` (`« Paramètres parent »`) | ☐ | |
 | REC-PAR-010 | Cliquer la cloche du header | Accès aux notifications | Mène à `/parent/notifications` ; nom accessible « Notifications, aucune non lue » ou « N notifications non lues » selon le compteur | ☐ | |
 | REC-PAR-011 | Se déconnecter depuis le menu du shell | Déconnexion | Redirection vers `/connexion` ; `/parent` redirige ensuite vers `/connexion?next=%2Fparent` | ☐ | |
 | REC-PAR-012 | Ouvrir `/parent/une-page-inexistante` | Route inconnue | Page 404 dans le shell : « Cette page est introuvable » / « Elle n'existe pas ou a été déplacée. Revenez à l'accueil pour poursuivre votre navigation. » ; bouton « Retour à l'accueil » vers `/parent` | ☐ | |
@@ -3085,21 +3085,21 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-017 | Relire tous les textes de l'espace | Registre | Vouvoiement partout (« votre », « vous ») ; aucun « ton », « tu », « Tes » dans l'espace parent, y compris dans les composants réutilisés des lots 2 et 3 (formulaire de paiement, modale de refus) | ☐ | |
 | REC-PAR-018 | Naviguer au clavier sur chaque écran (Tab, Maj+Tab, Entrée, Échap) | Accessibilité | Focus visible, ordre logique, modales avec focus piégé et fermeture par Échap qui rend le focus au déclencheur ; récapitulatifs d'erreurs qui prennent le focus à chaque envoi invalide | ☐ | |
 
-### WPD01 · Accueil parent (`/parent`)
+### Accueil parent (`/parent`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-PAR-019 | Ouvrir `/parent` pendant le chargement | Chargement | Squelette nommé « Chargement de votre espace… » (bandeau, « À valider », trois pastilles, cartes enfants), puis contenu | ☐ | |
 | REC-PAR-020 | Se connecter en Marie, ouvrir `/parent` | Nominal | h1 « Bonjour Marie 👋 » ; bandeau « Espace parent » avec « N enfants accompagnés sur Steamy » (N ≥ 2 : Léa et Noé) et « Suivez leur progression, validez leurs demandes et réglez leurs achats en toute sécurité. » ; aucune alerte de connexion (D56) | ☐ | |
-| REC-PAR-021 | Cliquer « Ajouter un enfant » dans le bandeau | Navigation | Mène à `/parent/enfants/ajouter` (`WPD04`) | ☐ | |
+| REC-PAR-021 | Cliquer « Ajouter un enfant » dans le bandeau | Navigation | Mène à `/parent/enfants/ajouter` (`« Ajouter un enfant »`) | ☐ | |
 | REC-PAR-022 | Lire la section « À valider » | Jeu D2 | Liste « Demandes à valider » avec au moins : « Demande de suppression du compte · Noé Adjovi », « Demande de paiement · Léa Adjovi », « Candidature à un Steamy Event · Léa Adjovi » ; chaque ligne affiche l'enfant, un texte, « Reçue le <date> » et un bouton ; la plus récente d'abord (ordre de l'API) | ☐ | |
 | REC-PAR-023 | Cliquer « Examiner » sur la demande de suppression de Noé | Cible suppression | Mène à `/parent/enfants/<id de Noé>/supprimer?demande=<id>` ; texte de la ligne : « Noé demande la suppression de son compte. » | ☐ | |
-| REC-PAR-024 | Cliquer « Payer » sur la demande de paiement de Léa | Cible paiement | Mène à `/parent/demandes/<id>` (`WPD15`) ; texte : « Léa vous demande de régler un achat. » ; bouton « Payer » en magenta (primaire, C1) | ☐ | |
+| REC-PAR-024 | Cliquer « Payer » sur la demande de paiement de Léa | Cible paiement | Mène à `/parent/demandes/<id>` (`« Demande de paiement »`) ; texte : « Léa vous demande de régler un achat. » ; bouton « Payer » en magenta (primaire, C1) | ☐ | |
 | REC-PAR-025 | Cliquer « Examiner » sur la candidature de Léa | Cible candidature | Mène à `/parent/evenements?candidature=<id>` ; la candidature est mise en avant et reçoit le focus ; texte : « Léa souhaite participer à un événement et attend votre accord. » | ☐ | |
 | REC-PAR-026 | Créer une demande de consentement reçue (un apprenant s'inscrit avec le numéro d'un parent) puis ouvrir l'accueil de ce parent | Consentement dans « À valider » | Ligne « Demande de consentement · <Prénom Nom> », texte « <Prénom> souhaite s'inscrire sur Steamy et attend votre accord. », « Examiner » vers `/parent/consentements/<id>` | ☐ | |
 | REC-PAR-027 | Comparer la pastille « À valider » au nombre de lignes de la liste | Cohérence des compteurs | La valeur de la pastille « À valider » égale le nombre de lignes de « Demandes à valider » ; « Enfants » = nombre d'enfants ; « Parcours en cours » = somme des parcours en cours des cartes | ☐ | |
 | REC-PAR-028 | Traiter une demande (par exemple refuser un paiement) puis revenir à `/parent` | Compteur après traitement | La ligne disparaît et « À valider » diminue de 1 | ☐ | |
-| REC-PAR-029 | Lire la section « Mes enfants » | Cartes enfants | Une carte par enfant : avatar, « Prénom Nom », « <âge> ans · <classe> » (par exemple « 13 ans · 4ᵉ »), « N parcours en cours » ou « Aucun parcours en cours » ; toute la carte mène à `/parent/enfants/<id>` (`WPD03`) | ☐ | |
+| REC-PAR-029 | Lire la section « Mes enfants » | Cartes enfants | Une carte par enfant : avatar, « Prénom Nom », « <âge> ans · <classe> » (par exemple « 13 ans · 4ᵉ »), « N parcours en cours » ou « Aucun parcours en cours » ; toute la carte mène à `/parent/enfants/<id>` (`« Détail enfant »`) | ☐ | |
 | REC-PAR-030 | Cliquer « Voir tout » | Navigation | Mène à `/parent/enfants` ; le lien n'existe pas quand le parent n'a aucun enfant | ☐ | |
 | REC-PAR-031 | Se connecter avec un parent d'un seul enfant | Singulier | Bandeau « 1 enfant accompagné sur Steamy » | ☐ | |
 | REC-PAR-032 | Se connecter avec un parent sans enfant ni demande | État vide | Bandeau « Aucun enfant accompagné pour l'instant » ; « À valider » : « Aucune demande en attente. Nous vous prévenons dès que l'un de vos enfants a besoin de votre accord. » ; pastilles à 0 ; bloc « Créez le compte de votre enfant avec un identifiant et un mot de passe, ou acceptez la demande qu'il vous a envoyée. » avec le bouton « Ajouter un enfant » vers `/parent/enfants/ajouter` | ☐ | |
@@ -3109,17 +3109,17 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-036 | Rendre l'API indisponible (arrêt du service) puis ouvrir `/parent` | Erreur serveur | État d'erreur « Oups, ça a coupé » dans le shell avec « Retour » et « Réessayer » (voir `SHELL`) | ☐ | |
 | REC-PAR-037 | Ouvrir `/parent` en 360 px | Version mobile | Bandeau lisible sans la mascotte (masquée sous `md`), lignes « À valider » en colonne avec le bouton aligné à droite, pastilles empilées, cartes enfants en une colonne ; aucun défilement horizontal | ☐ | |
 
-### WPD02 · Mes enfants (`/parent/enfants`)
+### Mes enfants (`/parent/enfants`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-PAR-038 | Ouvrir `/parent/enfants` | Chargement | Squelette « Chargement de vos enfants… », puis la liste | ☐ | |
 | REC-PAR-039 | Ouvrir `/parent/enfants` en Marie | Nominal | h1 « Mes enfants » ; h2 « Vos enfants » ; liste « Vos enfants » avec Léa et Noé ; chaque ligne : avatar, nom, « <âge> ans · <classe> », « N parcours en cours » / « Aucun parcours en cours », bouton « Voir le profil » | ☐ | |
 | REC-PAR-040 | Cliquer « Ajouter un enfant » | Navigation | Mène à `/parent/enfants/ajouter` | ☐ | |
-| REC-PAR-041 | Cliquer « Voir le profil » de Léa | Navigation | Mène à `/parent/enfants/<id>` (`WPD03`) | ☐ | |
+| REC-PAR-041 | Cliquer « Voir le profil » de Léa | Navigation | Mène à `/parent/enfants/<id>` (`« Détail enfant »`) | ☐ | |
 | REC-PAR-042 | Avec un parent dont un enfant a envoyé une demande de consentement, ouvrir la liste | Demande à examiner (D50) | Ligne en tête de liste : nom de l'enfant, badge ambre « Demande à examiner », « Reçue le <date> », bouton « Examiner » vers `/parent/consentements/<id>` ; pas de progression ; **aucun** bouton « Relancer l'invitation » ni badge « Inscription en attente » | ☐ | |
 | REC-PAR-043 | Ouvrir la liste de Marie (suppression de Noé demandée par l'enfant) | Suppression demandée par l'enfant | Ligne de Noé avec badge ambre « Suppression demandée », boutons « Examiner » (vers `/parent/enfants/<id>/supprimer?demande=<id>`) et « Voir le profil » | ☐ | |
-| REC-PAR-044 | Supprimer le compte d'un enfant (voir `WPD09`) puis ouvrir la liste | Suppression programmée (D54) | Ligne de l'enfant avec badge rouge « Supprimé le <date J+30> », boutons « Annuler la suppression » et « Voir le profil » ; ligne sans avatar encadré | ☐ | |
+| REC-PAR-044 | Supprimer le compte d'un enfant (voir `« Supprimer un enfant »`) puis ouvrir la liste | Suppression programmée (D54) | Ligne de l'enfant avec badge rouge « Supprimé le <date J+30> », boutons « Annuler la suppression » et « Voir le profil » ; ligne sans avatar encadré | ☐ | |
 | REC-PAR-045 | Cliquer « Annuler la suppression » sur cette ligne | Annulation de la suppression | Redirection vers `/parent/enfants?annulation=<id>` ; confirmation « La suppression du compte de <Prénom Nom> est annulée : <Prénom> peut de nouveau se connecter. » ; le focus revient sur la ligne de l'enfant ; le badge « Supprimé le … » disparaît ; l'enfant peut se reconnecter sur `/connexion` | ☐ | |
 | REC-PAR-046 | Provoquer une erreur de l'API puis cliquer « Annuler la suppression » | Échec de l'annulation | Message d'erreur sous le bouton, au vouvoiement (par exemple « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. ») ; la ligne reste inchangée | ☐ | |
 | REC-PAR-047 | Ouvrir `/parent/enfants?annulation=abc` | Paramètre illisible | Paramètre ignoré, liste normale, aucun message | ☐ | |
@@ -3127,11 +3127,11 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-049 | Ouvrir la liste en 360 px | Version mobile | Lignes en colonne, boutons alignés à droite et retournant à la ligne si besoin, pas de défilement horizontal | ☐ | |
 | REC-PAR-050 | Vérifier les données d'un enfant d'un autre parent | Isolation des familles | Les enfants de Bernard (Yao, Sèna) n'apparaissent jamais dans la liste de Marie | ☐ | |
 
-### WPD03 · Détail enfant (`/parent/enfants/[id]`)
+### Détail enfant (`/parent/enfants/[id]`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-051 | Ouvrir le profil de Léa depuis `WPD01` ou `WPD02` | Chargement | Squelette « Chargement du profil de votre enfant… », puis le profil | ☐ | |
+| REC-PAR-051 | Ouvrir le profil de Léa depuis `« Accueil parent »` ou `« Mes enfants »` | Chargement | Squelette « Chargement du profil de votre enfant… », puis le profil | ☐ | |
 | REC-PAR-052 | Lire la page | Nominal | Fil d'Ariane « Mes enfants › Léa Adjovi » (« Mes enfants » est un lien vers `/parent/enfants`, le nom est la page courante) ; colonne gauche : « Progression des parcours », « Dernières tentatives de quiz », « Commentaires des enseignants » ; colonne droite : carte profil (avatar, nom en h2, « <âge> ans · <classe> · <ville> », Badges / Points / Streak « N j ») puis « Informations » | ☐ | |
 | REC-PAR-053 | Lire « Progression des parcours » | Progression par parcours | Par parcours : titre, barre « Progression : <titre> », « X/Y missions terminées », pourcentage fourni par le serveur ; badge « Terminé » à 100 % (Léa : « Découverte de la robotique » à 30 %, « Initiation à Scratch » terminé) | ☐ | |
 | REC-PAR-054 | Lire « Dernières tentatives de quiz » | Statut serveur (D31) | Lignes en lecture seule avec titre du quiz, parcours · étape · date, score ; statut `ok` / `warn` / `ko` calculé par le serveur (Léa : une formative avec tentatives `ko`, `warn`, `ok`) ; aucun lien vers le détail (réservé à l'apprenant) | ☐ | |
@@ -3139,8 +3139,8 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-056 | Ouvrir un enfant sans parcours, sans quiz et sans commentaire | États vides | « Aucun parcours commencé pour l'instant. » ; « Aucun quiz passé pour l'instant. » ; « Aucun commentaire des enseignants pour l'instant. » | ☐ | |
 | REC-PAR-057 | Rendre l'API des commentaires indisponible puis ouvrir le profil | Lecture des commentaires en échec | Le reste du profil s'affiche ; la section commentaires affiche son état vide (une lecture en échec n'empêche pas l'affichage) ; à confirmer (spec muette) : pas de message d'erreur dédié | ☐ | |
 | REC-PAR-058 | Lire la carte « Informations » | Données affichées | Lignes : Identifiant, Lien de parenté, Date de naissance, Inscrit le, Localité, Situation de handicap (« Aucune » si non renseignée) ; « Non renseigné » pour une valeur absente ; le genre n'est pas affiché | ☐ | |
-| REC-PAR-059 | Cliquer « Modifier le profil » | Navigation | Mène à `/parent/enfants/<id>/modifier` (`WPD10`) | ☐ | |
-| REC-PAR-060 | Cliquer « Rapport hebdomadaire » | Navigation | Mène à `/parent/enfants/<id>/rapport` (`WPD11`) | ☐ | |
+| REC-PAR-059 | Cliquer « Modifier le profil » | Navigation | Mène à `/parent/enfants/<id>/modifier` (`« Modifier le profil enfant »`) | ☐ | |
+| REC-PAR-060 | Cliquer « Rapport hebdomadaire » | Navigation | Mène à `/parent/enfants/<id>/rapport` (`« Rapport hebdomadaire »`) | ☐ | |
 | REC-PAR-061 | Cliquer « Réinitialiser le mot de passe » | Ouverture de la modale | Modale « Nouveau mot de passe pour <Prénom> » : « Identifiant : <identifiant>. L'ancien mot de passe ne fonctionnera plus. » ; champs « Nouveau mot de passe » (avec règles de mot de passe) et « Confirmation » ; encart « Communiquez-le à votre enfant. » ; boutons « Annuler » et « Enregistrer » ; focus piégé | ☐ | |
 | REC-PAR-062 | Dans la modale, laisser les champs vides puis « Enregistrer » | Champs vides | Récapitulatif « Réinitialisation impossible : » et message « Choisissez un mot de passe qui respecte les règles, saisi deux fois à l'identique. » ; aucun appel envoyé ; la modale reste ouverte | ☐ | |
 | REC-PAR-063 | Saisir un mot de passe trop faible (par exemple `abc`) puis « Enregistrer » | Règle D25 non respectée | Même message ; règles non remplies signalées (8 caractères minimum, au moins une lettre et un chiffre) | ☐ | |
@@ -3150,16 +3150,16 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-067 | Cliquer « Annuler » dans la modale (ou touche Échap) | Annulation | La modale se ferme, aucun appel API, mot de passe inchangé | ☐ | |
 | REC-PAR-068 | Rendre l'API indisponible puis « Enregistrer » dans la modale | Erreur serveur ou réseau | Récapitulatif d'erreur au vouvoiement (« Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » ou « Une erreur est survenue de notre côté. Réessayez dans quelques instants. ») ; la modale reste ouverte | ☐ | |
 | REC-PAR-069 | Cliquer deux fois vite sur « Enregistrer » | Double envoi | Une seule réinitialisation ; bouton en état de chargement | ☐ | |
-| REC-PAR-070 | Lire le bas de la colonne droite d'un enfant sans suppression | Lien de suppression | Lien rouge « Supprimer le compte » vers `/parent/enfants/<id>/supprimer` (`WPD09`) | ☐ | |
+| REC-PAR-070 | Lire le bas de la colonne droite d'un enfant sans suppression | Lien de suppression | Lien rouge « Supprimer le compte » vers `/parent/enfants/<id>/supprimer` (`« Supprimer un enfant »`) | ☐ | |
 | REC-PAR-071 | Ouvrir le profil d'un enfant dont la suppression est programmée | Suppression programmée | Encart « Compte désactivé : suppression programmée le <date>. » et bouton « Annuler la suppression » ; le lien « Supprimer le compte » n'est pas affiché | ☐ | |
-| REC-PAR-072 | Cliquer « Annuler la suppression » depuis le profil | Annulation depuis `WPD03` | Redirection vers `/parent/enfants/<id>?confirmation=suppression-annulee` ; message « La suppression est annulée : <Prénom> peut de nouveau se connecter. » ; focus sur le nom de l'enfant (h2) ; le lien « Supprimer le compte » réapparaît | ☐ | |
-| REC-PAR-073 | Ouvrir `/parent/enfants/<id>?confirmation=cree` (juste après `WPD04`) | Rappel de l'identifiant | Bandeau « Le compte de <Prénom> est créé. » avec « Son identifiant : <identifiant>. Communiquez-lui cet identifiant et le mot de passe que vous avez choisi : à sa première connexion, <Prénom> complétera son profil. » | ☐ | |
+| REC-PAR-072 | Cliquer « Annuler la suppression » depuis le profil | Annulation depuis `« Détail enfant »` | Redirection vers `/parent/enfants/<id>?confirmation=suppression-annulee` ; message « La suppression est annulée : <Prénom> peut de nouveau se connecter. » ; focus sur le nom de l'enfant (h2) ; le lien « Supprimer le compte » réapparaît | ☐ | |
+| REC-PAR-073 | Ouvrir `/parent/enfants/<id>?confirmation=cree` (juste après `« Ajouter un enfant »`) | Rappel de l'identifiant | Bandeau « Le compte de <Prénom> est créé. » avec « Son identifiant : <identifiant>. Communiquez-lui cet identifiant et le mot de passe que vous avez choisi : à sa première connexion, <Prénom> complétera son profil. » | ☐ | |
 | REC-PAR-074 | Ouvrir `?confirmation=modifie` / `supprime` / `demande-refusee` / une valeur inconnue | Confirmations de l'URL | « Le profil de <Prénom> est enregistré. » ; « Le compte de <Prénom> est désactivé : la suppression reste annulable 30 jours. » ; « La demande de suppression est refusée : <Prénom> en est informé·e. » ; une valeur inconnue est ignorée sans message | ☐ | |
 | REC-PAR-075 | Se connecter en Bernard puis ouvrir `/parent/enfants/<id de Léa>` | Enfant d'un autre parent | Page « Cet enfant est introuvable » / « Ce profil n'existe pas ou n'est pas rattaché à votre compte. Retrouvez vos enfants dans votre espace. » ; bouton « Voir mes enfants » vers `/parent/enfants` ; aucune donnée de Léa visible | ☐ | |
 | REC-PAR-076 | Ouvrir `/parent/enfants/abc` et `/parent/enfants/999999` | Identifiant illisible ou inconnu | Même page « Cet enfant est introuvable » | ☐ | |
 | REC-PAR-077 | Ouvrir le profil en 360 px | Version mobile | Carte profil et boutons pleine largeur, colonnes empilées, aucune donnée coupée, pas de défilement horizontal ; la modale de mot de passe tient dans l'écran | ☐ | |
 
-### WPD04 · Ajouter un enfant (`/parent/enfants/ajouter`)
+### Ajouter un enfant (`/parent/enfants/ajouter`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -3172,19 +3172,19 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-084 | Saisir une date de naissance donnant 9 ans, puis 18 ans, puis une date future | Âge hors 10-17 ans (D23) | Refus par le serveur (`AGE_OUT_OF_RANGE`) affiché sous le champ « Date de naissance » ; libellé exact : à confirmer (spec muette, message fourni par l'API) | ☐ | |
 | REC-PAR-085 | Saisir une date donnant exactement 10 ans, puis exactement 17 ans | Bornes de l'âge | Création acceptée dans les deux cas (10-17 ans inclus) | ☐ | |
 | REC-PAR-086 | Remplir le formulaire avec un mot de passe que le serveur juge trop faible | Erreur serveur `PASSWORD_TOO_WEAK` | Message d'erreur au champ « Mot de passe initial » (libellé de l'API, à confirmer) ; aucun compte créé | ☐ | |
-| REC-PAR-087 | Remplir : Inès, Test, date donnant 12 ans, lien « Mère », identifiant unique, mot de passe `robot2026`, puis « Créer le compte » | Création réussie | Redirection vers `/parent/enfants/<id>?confirmation=cree` ; bandeau « Le compte de Inès est créé. » avec l'identifiant saisi ; fil d'Ariane « Mes enfants › Inès Test » ; l'enfant apparaît dans `WPD02` avec « Voir le profil » | ☐ | |
-| REC-PAR-088 | Se déconnecter puis se connecter en Inès (identifiant + `robot2026`) sur `/connexion` | Première connexion de l'enfant (D51) | Connexion acceptée ; arrivée sur la première étape du profil (`/inscription/apprenant/profil/infos`, W11) ; aucun écran de consentement | ☐ | |
+| REC-PAR-087 | Remplir : Inès, Test, date donnant 12 ans, lien « Mère », identifiant unique, mot de passe `robot2026`, puis « Créer le compte » | Création réussie | Redirection vers `/parent/enfants/<id>?confirmation=cree` ; bandeau « Le compte de Inès est créé. » avec l'identifiant saisi ; fil d'Ariane « Mes enfants › Inès Test » ; l'enfant apparaît dans `« Mes enfants »` avec « Voir le profil » | ☐ | |
+| REC-PAR-088 | Se déconnecter puis se connecter en Inès (identifiant + `robot2026`) sur `/connexion` | Première connexion de l'enfant (D51) | Connexion acceptée ; arrivée sur la première étape du profil (`/inscription/apprenant/profil/infos`, « Profil 1 · infos ») ; aucun écran de consentement | ☐ | |
 | REC-PAR-089 | Cliquer deux fois vite sur « Créer le compte » | Double envoi | Un seul compte créé (pas d'erreur d'identifiant pris sur le second envoi) | ☐ | |
 | REC-PAR-090 | Couper le réseau puis « Créer le compte » avec un formulaire valide | Erreur réseau | Récapitulatif « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » ; valeurs saisies conservées | ☐ | |
 | REC-PAR-091 | Rendre l'API des liens de parenté indisponible puis ouvrir la page | Référentiel en échec | Le menu « Lien de parenté » affiche un état d'erreur avec action pour réessayer (comportement du sélecteur de référentiel) ; libellé exact à confirmer | ☐ | |
 | REC-PAR-092 | Ouvrir la page en 360 px | Version mobile | Champs sur une colonne, bouton « Créer le compte » pleine largeur, clavier de date utilisable, pas de défilement horizontal | ☐ | |
 
-### WPD05 · Demande de consentement (`/parent/consentements/[id]`)
+### Demande de consentement (`/parent/consentements/[id]`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-PAR-093 | Un apprenant crée sa demande (inscription avec le numéro d'un parent déjà inscrit, profil complet) ; ouvrir le lien reçu par SMS dans Mailpit | Lien SMS, parent déjà inscrit (D20) | Atterrissage sur le lien de consentement ; « J'ai déjà un compte » → `/connexion` ; après connexion, arrivée sur `/parent/consentements/<id>` (h1 « Demande de consentement ») | ☐ | |
-| REC-PAR-094 | Ouvrir la demande depuis `WPD01` (« Examiner ») ou `WPD02` | Chargement | Squelette « Chargement de la demande… » puis la demande | ☐ | |
+| REC-PAR-094 | Ouvrir la demande depuis `« Accueil parent »` (« Examiner ») ou `« Mes enfants »` | Chargement | Squelette « Chargement de la demande… » puis la demande | ☐ | |
 | REC-PAR-095 | Lire la carte de la demande (origine enfant) | Données affichées (D20) | Fil d'Ariane « Accueil › Demande de consentement » ; carte « Demande de <Prénom Nom> » avec `@identifiant`, âge (« 14 ans »), lien de parenté (« Vous êtes sa mère »), badge « En attente » et date d'expiration ; encart « Demande envoyée par <Prénom> » (« … vous l'a envoyée le <date> en créant son compte Steamy : son inscription attend votre accord. ») ; **aucune** classe, localité, centre d'intérêt ni « Informations renseignées » | ☐ | |
 | REC-PAR-096 | Lire l'encart du responsable légal | Texte légal | « En acceptant, vous confirmez être le responsable légal de <Prénom>. Si vous refusez, la demande est close : une nouvelle demande sera possible dans 30 jours. » | ☐ | |
 | REC-PAR-097 | Cliquer « Accepter la demande » | Acceptation (origine enfant) | Redirection vers `/parent?consentement=<id>` ; bandeau « Demande acceptée : <Prénom> peut terminer son inscription. » ; côté enfant, la page d'attente passe à l'étape d'accord (`/inscription/apprenant/accord`) en quelques secondes, puis « Continuer » mène à `/inscription/apprenant/mot-de-passe` | ☐ | |
@@ -3193,7 +3193,7 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-100 | Dans la modale, « Annuler » (puis Échap) | Annulation du refus | La modale se ferme, aucun appel à l'API, la demande reste en attente | ☐ | |
 | REC-PAR-101 | Dans la modale, cliquer « Refuser la demande » sans motif | Motif obligatoire | Récapitulatif « Refus impossible : » + « Choisissez un motif. » sous le champ ; focus sur le récapitulatif ; aucun appel | ☐ | |
 | REC-PAR-102 | Choisir « Mon enfant est trop jeune », préciser « Attends l'an prochain. » puis « Refuser la demande » | Refus réussi | La modale se ferme ; la page est relue en lecture seule : « Vous avez refusé cette demande le <date> (motif : « Mon enfant est trop jeune »). Une nouvelle demande sera possible 30 jours après votre refus. » ; badge « Refusée » ; plus de boutons de décision | ☐ | |
-| REC-PAR-103 | Côté enfant, attendre la page d'attente après le refus | Effet côté enfant (W18) | L'enfant arrive sur `/inscription/apprenant/refus` avec « Motif indiqué : « Mon enfant est trop jeune » » | ☐ | |
+| REC-PAR-103 | Côté enfant, attendre la page d'attente après le refus | Effet côté enfant | L'enfant arrive sur `/inscription/apprenant/refus` avec « Motif indiqué : « Mon enfant est trop jeune » » | ☐ | |
 | REC-PAR-104 | Un nouvel apprenant refait une demande vers le même numéro de parent | Délai de 30 jours (D22, C9) | Erreur `CONSENT_COOLDOWN` côté enfant : « … a refusé une demande il y a moins de 30 jours » ; aucune nouvelle demande chez le parent | ☐ | |
 | REC-PAR-105 | Rouvrir une demande après le refus ou l'acceptation dans un autre onglet, puis cliquer « Accepter la demande » | Déjà traitée entre-temps | Erreur au vouvoiement dans « Réponse impossible : » (`CONSENT_ALREADY_RESOLVED`) et l'écran se relit en lecture seule ; libellé exact : à confirmer (message de l'API) | ☐ | |
 | REC-PAR-106 | Ouvrir une demande dont le délai de 7 jours est écoulé (la faire expirer en base) | Demande expirée (D21) | Lecture seule : « Cette demande a expiré le <date>, sans réponse pendant 7 jours. Votre enfant peut vous en envoyer une nouvelle. » ; badge « Expirée » ; pas d'acceptation ni de refus | ☐ | |
@@ -3203,24 +3203,24 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-110 | Rendre l'API indisponible puis cliquer « Accepter la demande » | Erreur réseau ou serveur | Récapitulatif « Réponse impossible : » avec le message d'erreur au vouvoiement ; la demande reste en attente | ☐ | |
 | REC-PAR-111 | Cliquer deux fois vite sur « Accepter la demande » | Double envoi | Une seule acceptation, une seule redirection | ☐ | |
 | REC-PAR-112 | Ouvrir la demande en 360 px | Version mobile | Carte, encarts et boutons « Accepter la demande » / « Refuser » en colonne pleine largeur ; modale de refus utilisable sans défilement horizontal | ☐ | |
-| REC-PAR-113 | L'enseignant Koffi invite un élève (WT06 : prénom, nom, téléphone du parent de Marie, lien de parenté) ; ouvrir le lien SMS en Marie connectée | Variante enseignant : lecture (D60) | `/parent/consentements/<id>` : encart « Invitation de M. Koffi Adékambi » (« … est invité·e à rejoindre une classe sur Steamy. Le parcours est couvert par l'établissement, sans paiement. ») avec Enseignant, Classe, Établissement, Parcours ; encart « Si vous refusez, l'invitation est close et l'enseignant en est informé. » ; formulaire nommé « Accepter l'invitation » | ☐ | |
+| REC-PAR-113 | L'enseignant Koffi invite un élève (« Ajouter des élèves » : prénom, nom, téléphone du parent de Marie, lien de parenté) ; ouvrir le lien SMS en Marie connectée | Variante enseignant : lecture (D60) | `/parent/consentements/<id>` : encart « Invitation de M. Koffi Adékambi » (« … est invité·e à rejoindre une classe sur Steamy. Le parcours est couvert par l'établissement, sans paiement. ») avec Enseignant, Classe, Établissement, Parcours ; encart « Si vous refusez, l'invitation est close et l'enseignant en est informé. » ; formulaire nommé « Accepter l'invitation » | ☐ | |
 | REC-PAR-114 | Avec un parent ayant déjà un enfant actif (Marie), regarder le choix proposé | Variante enseignant : choix création / rattachement (C11) | Groupe « <Prénom> a-t-il déjà un compte Steamy ? » avec « Créer le compte de <Prénom> » (coché par défaut) et « Rattacher <enfant existant> à la classe » pour chaque enfant actif | ☐ | |
 | REC-PAR-115 | Avec un parent sans enfant rattaché, ouvrir une invitation d'enseignant | Variante enseignant : pas de choix | Aucun groupe de choix : seul le formulaire de création est affiché | ☐ | |
 | REC-PAR-116 | Laisser « Créer le compte » coché et lire l'identifiant proposé | Identifiant proposé | Champ « Identifiant » prérempli d'après le prénom et le nom (« Kossi Test » → `kossi.test`), modifiable ; champ « Mot de passe initial » avec règles | ☐ | |
 | REC-PAR-117 | Vider l'identifiant et le mot de passe puis « Accepter l'invitation » | Variante enseignant : champs invalides | Récapitulatif « Acceptation impossible : » avec la règle d'identifiant et « Choisissez un mot de passe qui respecte les règles. » | ☐ | |
 | REC-PAR-118 | Saisir un identifiant déjà pris puis « Accepter l'invitation » | Variante enseignant : identifiant pris | « Cet identifiant est déjà associé à un compte Steamy. Choisissez-en un autre. » au champ ; invitation non acceptée | ☐ | |
-| REC-PAR-119 | Saisir un identifiant libre et `Robot2026x`, puis « Accepter l'invitation » | Variante enseignant : création et rattachement à la classe | Redirection vers `/parent?consentement=<id>` ; bandeau « Invitation acceptée : <Prénom> a rejoint la classe « <classe> ». » ; l'élève est actif dans la classe côté enseignant (WT04) ; l'élève se connecte avec l'identifiant et le mot de passe choisis | ☐ | |
+| REC-PAR-119 | Saisir un identifiant libre et `Robot2026x`, puis « Accepter l'invitation » | Variante enseignant : création et rattachement à la classe | Redirection vers `/parent?consentement=<id>` ; bandeau « Invitation acceptée : <Prénom> a rejoint la classe « <classe> ». » ; l'élève est actif dans la classe côté enseignant ; l'élève se connecte avec l'identifiant et le mot de passe choisis | ☐ | |
 | REC-PAR-120 | Choisir « Rattacher Yao à la classe » | Variante enseignant : rattachement d'un enfant existant (C11) | Les champs identifiant et mot de passe disparaissent ; texte « Yao rejoint la classe « <classe> » avec son compte actuel : aucun nouvel identifiant n'est créé. » ; « Accepter l'invitation » → `/parent?consentement=<id>` ; Yao apparaît dans la classe, sans nouvel identifiant | ☐ | |
 | REC-PAR-121 | Envoyer un rattachement d'un enfant d'une autre famille (requête forgée) | Enfant non rattaché au parent | Erreur « Cet enfant n'est pas rattaché à votre compte. » ; aucun rattachement | ☐ | |
 | REC-PAR-122 | Refuser l'invitation d'un enseignant via « Refuser » + motif | Variante enseignant : refus | Même modale de refus ; lecture seule ensuite ; l'enseignant est informé (notification « invitation refusée » côté enseignant) | ☐ | |
 | REC-PAR-123 | Rouvrir une invitation d'enseignant acceptée / expirée / retirée | Variante enseignant : lecture seule | Acceptée : « Vous avez accepté cette invitation le <date> : <Prénom> a rejoint la classe « <classe> ». » ; expirée : « … L'enseignant peut vous inviter de nouveau. » ; retirée : « Cette invitation a été retirée par l'enseignant. » | ☐ | |
 | REC-PAR-124 | Accepter une invitation alors que l'offre de l'école est échue (C21, enseignante Esther Gnonlonfoun) | Offre d'école échue | Acceptation refusée par `SCHOOL_OFFER_EXPIRED` ; message exact affiché : à confirmer (spec muette sur le libellé) | ☐ | |
 
-### WPD10 · Modifier le profil enfant (`/parent/enfants/[id]/modifier`)
+### Modifier le profil enfant (`/parent/enfants/[id]/modifier`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-125 | Depuis `WPD03`, cliquer « Modifier le profil » | Affichage | h1 « Modifier le profil » ; fil d'Ariane « Mes enfants › <Nom> › Modifier » ; « Identifiant : <identifiant> (il ne peut pas être modifié). » sans champ de saisie d'identifiant ; champs Prénom*, Nom*, Date de naissance* (aide « Cohérente avec l'âge indiqué à l'inscription. »), Classe, Pays, Localité (ville / quartier), Genre (facultatif), Situation de handicap (facultatif) ; mention « Le genre et la situation de handicap sont facultatifs. Ils servent seulement à adapter les parcours et à mesurer, de façon anonyme, si Steamy profite à tous. Ils ne sont jamais vendus ni montrés aux autres. » ; boutons « Annuler » et « Enregistrer » ; pas de champ mot de passe | ☐ | |
+| REC-PAR-125 | Depuis `« Détail enfant »`, cliquer « Modifier le profil » | Affichage | h1 « Modifier le profil » ; fil d'Ariane « Mes enfants › <Nom> › Modifier » ; « Identifiant : <identifiant> (il ne peut pas être modifié). » sans champ de saisie d'identifiant ; champs Prénom*, Nom*, Date de naissance* (aide « Cohérente avec l'âge indiqué à l'inscription. »), Classe, Pays, Localité (ville / quartier), Genre (facultatif), Situation de handicap (facultatif) ; mention « Le genre et la situation de handicap sont facultatifs. Ils servent seulement à adapter les parcours et à mesurer, de façon anonyme, si Steamy profite à tous. Ils ne sont jamais vendus ni montrés aux autres. » ; boutons « Annuler » et « Enregistrer » ; pas de champ mot de passe | ☐ | |
 | REC-PAR-126 | Vider Prénom, Nom et Date de naissance puis « Enregistrer » | Champs obligatoires | « Indiquez le prénom de votre enfant. », « Indiquez le nom de votre enfant. », « Indiquez la date de naissance de votre enfant. » (récapitulatif « Corrigez les erreurs suivantes : » et sous les champs) ; aucun envoi | ☐ | |
 | REC-PAR-127 | Remplacer la date par une date donnant 15 ans pour un enfant inscrit à 12 ans | Incohérence âge / date (D23) | Message « La date de naissance ne correspond pas à l'âge indiqué … » dans le récapitulatif et sous le champ (`BIRTHDATE_AGE_MISMATCH`) ; le champ décrit l'erreur (description accessible) ; rien n'est enregistré | ☐ | |
 | REC-PAR-128 | Corriger la date (12 ans), changer le prénom en « Inès-Marie », choisir une classe, le pays « Bénin » (BJ), une localité, le genre « Fille », une situation de handicap, puis « Enregistrer » | Enregistrement réussi | Redirection vers `/parent/enfants/<id>?confirmation=modifie` ; message « Le profil de Inès-Marie est enregistré. » ; la carte profil affiche « 12 ans · <classe> · <ville> » ; « Situation de handicap » affiche le libellé choisi | ☐ | |
@@ -3232,7 +3232,7 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-134 | En Bernard, ouvrir `/parent/enfants/<id de Léa>/modifier` | Enfant d'un autre parent | Page « Cet enfant est introuvable » ; aucune donnée de Léa | ☐ | |
 | REC-PAR-135 | Ouvrir la page en 360 px | Version mobile | Champs en une colonne, boutons « Enregistrer » puis « Annuler » empilés (annuler en bas), pas de défilement horizontal | ☐ | |
 
-### WPD06 · Steamy Events (`/parent/evenements`)
+### Steamy Events (`/parent/evenements`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -3241,8 +3241,8 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-138 | Lire la candidature de Léa (jeu D2, événement payant « Défi robots de Cotonou ») | Candidature en attente | Ligne : titre de l'événement (lien vers la fiche), « Léa · 📅 <date> · 5 000 F CFA HT » (prix HT du serveur ; le ticket de Léa peut ajouter « · 🎟️ Ticket Steamy Events »), motivation entre « », badge ambre « À examiner », boutons « Refuser » et « Accepter » | ☐ | |
 | REC-PAR-139 | Lire un événement gratuit dans une candidature | Prix gratuit | Le prix s'affiche « Gratuit » | ☐ | |
 | REC-PAR-140 | Ouvrir `/parent/evenements?candidature=<id>` (depuis « À valider » ou une notification) | Candidature mise en avant | La ligne est entourée (anneau) et reçoit le focus ; un identifiant non numérique est ignoré | ☐ | |
-| REC-PAR-141 | L'enfant candidate (côté enfant, événement payant) puis cliquer « Accepter » en parent | Accord, événement payant (D53 amendé, S8) | Pas de passage par `WPD15` : la ligne passe au badge « Paiement en attente » ; message « Place réservée jusqu'au <heure> : la participation est confirmée dès le paiement, dans la limite des places. » ; formulaire « Payer par Mobile Money » avec le montant exact de la commande d'événement lu dans l'API ; côté enfant, la candidature est « En attente du paiement » | ☐ | |
-| REC-PAR-142 | Dans ce formulaire, choisir un réseau, saisir un numéro se terminant par `01`, cliquer « Payer <montant> » | Paiement réussi | Attente « On confirme votre paiement… » puis « Paiement réussi ! », « La participation de <Prénom> à <événement> est confirmée. », bouton « Voir les événements » ; la candidature passe à « Acceptée » (badge vert) ; côté enfant : « Acceptée » (`WD10`) | ☐ | |
+| REC-PAR-141 | L'enfant candidate (côté enfant, événement payant) puis cliquer « Accepter » en parent | Accord, événement payant (D53 amendé, S8) | Pas de passage par `« Demande de paiement »` : la ligne passe au badge « Paiement en attente » ; message « Place réservée jusqu'au <heure> : la participation est confirmée dès le paiement, dans la limite des places. » ; formulaire « Payer par Mobile Money » avec le montant exact de la commande d'événement lu dans l'API ; côté enfant, la candidature est « En attente du paiement » | ☐ | |
+| REC-PAR-142 | Dans ce formulaire, choisir un réseau, saisir un numéro se terminant par `01`, cliquer « Payer <montant> » | Paiement réussi | Attente « On confirme votre paiement… » puis « Paiement réussi ! », « La participation de <Prénom> à <événement> est confirmée. », bouton « Voir les événements » ; la candidature passe à « Acceptée » (badge vert) ; côté enfant : « Acceptée » (`« Steamy Events »`) | ☐ | |
 | REC-PAR-143 | Même parcours avec un numéro se terminant par `02` | Paiement échoué | « Paiement échoué » avec « Raison : … » du prestataire et boutons « Changer de numéro » et « Réessayer le paiement » ; la candidature reste « Paiement en attente » ; un nouveau numéro en `01` aboutit | ☐ | |
 | REC-PAR-144 | Même parcours avec un numéro se terminant par `03` | Paiement en attente | « On confirme votre paiement… » avec « Validez la demande sur votre téléphone (notification ou code USSD)… » ; après 2 minutes : « Le paiement est toujours en attente de validation. Vous pouvez quitter cette page : son issue apparaîtra dans vos commandes. » + lien « Voir mes commandes » ; candidature toujours « Paiement en attente » | ☐ | |
 | REC-PAR-145 | Après avoir accepté sans payer, quitter la page puis revenir | Reprise du paiement | La ligne « Paiement en attente » propose le bouton « Payer la participation » qui rouvre le formulaire ; si la réservation a expiré : « Commande annulée : elle n'a pas été payée à temps et le stock a été libéré. » (et la place libérée) | ☐ | |
@@ -3257,12 +3257,12 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-154 | Lire une candidature annulée par l'enfant | Statut « Annulée » | Badge neutre « Annulée », aucun bouton d'action | ☐ | |
 | REC-PAR-155 | Ouvrir la page avec un parent dont les enfants n'ont aucune candidature | État vide candidatures | « Aucune candidature » / « Quand votre enfant demande à participer à un événement, sa candidature attend ici votre accord. » | ☐ | |
 | REC-PAR-156 | Ouvrir la page quand aucun événement n'est publié à venir | État vide événements | « Aucun événement à venir » / « Les prochains Steamy Events seront annoncés ici. » | ☐ | |
-| REC-PAR-157 | Lire les cartes « Événements à venir » | Boutons d'inscription | Carte ouverte : bouton « Inscrire un enfant » (vers `WPD12`) ; carte complète, close ou passée : badge neutre « Complet » / « Candidatures closes » / « Événement terminé » à la place du bouton | ☐ | |
-| REC-PAR-158 | Cliquer le titre ou la carte d'un événement | Fiche dans le shell parent | Mène à `/parent/evenements/<slug>` (`WL23` dans le shell parent, entrée « Événements » active) | ☐ | |
+| REC-PAR-157 | Lire les cartes « Événements à venir » | Boutons d'inscription | Carte ouverte : bouton « Inscrire un enfant » (vers `« Faire participer un enfant à un événement »`) ; carte complète, close ou passée : badge neutre « Complet » / « Candidatures closes » / « Événement terminé » à la place du bouton | ☐ | |
+| REC-PAR-158 | Cliquer le titre ou la carte d'un événement | Fiche dans le shell parent | Mène à `/parent/evenements/<slug>` (`« Fiche événement »` dans le shell parent, entrée « Événements » active) | ☐ | |
 | REC-PAR-159 | Se connecter en Bernard et chercher les candidatures de Léa | Isolation des familles | Les candidatures des enfants de Marie n'apparaissent pas ; une candidature forgée d'un autre parent n'est ni acceptable ni refusable (404) | ☐ | |
 | REC-PAR-160 | Ouvrir la page en 360 px | Version mobile | Lignes de candidature en colonne, boutons et modale utilisables, formulaire de paiement sans défilement horizontal | ☐ | |
 
-#### WL23 · Fiche événement dans le shell parent (`/parent/evenements/[slug]`)
+#### Fiche événement dans le shell parent (`/parent/evenements/[slug]`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -3271,14 +3271,14 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-163 | Ouvrir une fiche dont la date limite est passée, puis une fiche d'événement passé | Clos ou passé | Bouton désactivé « Candidatures closes » + « La date limite de candidature est passée. » ; « Événement terminé » + « Cet événement a déjà eu lieu. » | ☐ | |
 | REC-PAR-164 | Ouvrir `/parent/evenements/inconnu` | Événement inconnu | « Cet événement est introuvable » / « Il n'existe pas ou n'est plus publié. Découvrez les prochains Steamy Events. » ; bouton « Voir les événements » | ☐ | |
 
-### WPD07 · Historique de commande (`/parent/commandes`)
+### Historique de commande (`/parent/commandes`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-PAR-165 | Ouvrir `/parent/commandes` | Chargement | Squelette « Chargement de vos commandes… » | ☐ | |
 | REC-PAR-166 | Ouvrir la page en Marie | Nominal | h1 « Commandes » ; onglets « Toutes », « Payées », « En attente », « Annulées », « Remboursées » (navigation « Filtrer les commandes ») ; bouton « Acheter un kit » ; liste « Mes commandes » avec la commande de kit de Léa | ☐ | |
 | REC-PAR-167 | Lire une ligne de commande de kit payée | Contenu d'une ligne | Pictogramme 📦 selon le `kind` (jamais déduit du libellé), repère « Kit », titre des articles, « Pour <bénéficiaire> · N° <référence> · <date> · Livraison : En préparation / Expédiée / Livrée » ; badge « Payée » ; montant (total à payer du serveur, taxes comprises) ; boutons « Facture » et « Suivre » | ☐ | |
-| REC-PAR-168 | Lire des commandes de parcours et d'événement | Icône par `kind` | 📚 « Parcours » et 🎟️ « Événement » ; pas de livraison ni de « Suivre » (réservé aux kits) ; commande de parcours d'une demande (`WPD15`) ou d'événement payé listée avec le bénéficiaire | ☐ | |
+| REC-PAR-168 | Lire des commandes de parcours et d'événement | Icône par `kind` | 📚 « Parcours » et 🎟️ « Événement » ; pas de livraison ni de « Suivre » (réservé aux kits) ; commande de parcours d'une demande (`« Demande de paiement »`) ou d'événement payé listée avec le bénéficiaire | ☐ | |
 | REC-PAR-169 | Cliquer l'onglet « Payées » | Filtre dans l'URL | URL `/parent/commandes?statut=payees` ; onglet actif ; seules les commandes payées ; rechargement de la page conserve le filtre | ☐ | |
 | REC-PAR-170 | Cliquer « En attente », « Annulées », « Remboursées » | Autres filtres | URLs `?statut=en-attente`, `?statut=annulees`, `?statut=remboursees` ; badges respectifs « En attente de paiement », « Annulée », « Remboursée » | ☐ | |
 | REC-PAR-171 | Filtrer sur un statut sans commande | État vide filtré | « Aucune commande « <libellé du filtre> » pour l'instant. » | ☐ | |
@@ -3287,27 +3287,27 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-174 | Avoir plus de 10 commandes puis parcourir | Pagination | 10 commandes par page ; liens « Plus anciennes › » et « ‹ Plus récentes » (navigation « Pages des commandes ») avec le filtre conservé | ☐ | |
 | REC-PAR-175 | Cliquer « Facture » sur une commande payée dont le PDF est prêt | Téléchargement de la facture | Lien direct vers `/api/payments/orders/<référence>/invoice/` ; le navigateur reçoit le PDF (redirection vers une URL signée valable 5 minutes) nommé `facture-<numéro>.pdf` ; contenu : voir la section « Montants, TVA, AIB et facture normalisée » | ☐ | |
 | REC-PAR-176 | Ouvrir la liste juste après un paiement, avant la fin de la génération du PDF | Facture en préparation | À la place du bouton : « Facture en préparation » ; le bouton « Facture » apparaît quand le PDF est prêt (après rechargement) | ☐ | |
-| REC-PAR-177 | Se connecter en Bernard puis ouvrir `/parent/commandes`, puis se connecter en Léa (bénéficiaire) et ouvrir ses commandes | Facture réservée au payeur (C12) | La commande payée par Marie n'est pas listée chez Bernard ; l'apprenante bénéficiaire (Léa) n'a aucun bouton « Facture » sur ses commandes (`WD14`) ; le lien direct de facture répond « introuvable » à un autre compte | ☐ | |
+| REC-PAR-177 | Se connecter en Bernard puis ouvrir `/parent/commandes`, puis se connecter en Léa (bénéficiaire) et ouvrir ses commandes | Facture réservée au payeur (C12) | La commande payée par Marie n'est pas listée chez Bernard ; l'apprenante bénéficiaire (Léa) n'a aucun bouton « Facture » sur ses commandes (`« Historique de commande »`) ; le lien direct de facture répond « introuvable » à un autre compte | ☐ | |
 | REC-PAR-178 | Cliquer « Payer » sur une commande « En attente de paiement » | Reprise de paiement | Mène à `/parent/commandes/<référence>` (détail), qui reprend le paiement (voir suivi) | ☐ | |
-| REC-PAR-179 | Supprimer l'enfant bénéficiaire (`WPD09`) puis ouvrir `WPD07` | Factures conservées (D40) | La commande reste listée, la facture reste téléchargeable | ☐ | |
+| REC-PAR-179 | Supprimer l'enfant bénéficiaire (`« Supprimer un enfant »`) puis ouvrir `« Historique de commande »` | Factures conservées (D40) | La commande reste listée, la facture reste téléchargeable | ☐ | |
 | REC-PAR-180 | Ouvrir la liste en 360 px | Version mobile | Lignes en colonne, badge, montant et boutons sous le libellé ; onglets défilables ou renvoyés à la ligne ; pas de défilement horizontal de la page | ☐ | |
 | REC-PAR-181 | Rendre l'API indisponible puis ouvrir la liste | Erreur serveur | État d'erreur « Oups, ça a coupé » du shell | ☐ | |
 
-#### WPD07 (suite) · Suivi d'une commande (`/parent/commandes/[reference]`)
+#### « Historique de commande » (suite) · Suivi d'une commande (`/parent/commandes/[reference]`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-PAR-182 | Cliquer « Suivre » sur la commande de kit de Léa | Commande de kit payée | Fil d'Ariane « Commandes › <référence> » ; carte : « Kit · N° <référence> », titre, badge « Payée », « Passée le … · pour Léa · payée le … » ; lignes d'articles, « Livraison (<zone>) », une ligne par taxe, « Total à payer » (valeurs du serveur) ; adresse « 🚚 <destinataire> · <quartier>, <rue>, <ville> » ; bouton « Télécharger la facture » | ☐ | |
 | REC-PAR-183 | Lire la section « Livraison » | Frise de livraison | Liste « Suivi de livraison » : confirmée, en préparation, expédiée, livrée selon le statut serveur | ☐ | |
 | REC-PAR-184 | Lire la section « Kit Codes » | Kit Codes (C10, D35) | Texte « Transmettez un code à votre enfant … Il est aussi imprimé sur la notice du kit. » ; liste « Kit Codes de la commande » au format `STEAMY-XXXX-XXXX` avec le nom du kit ; bouton « Copier » (devient « Copié », annonce « Code … copié. ») | ☐ | |
-| REC-PAR-185 | L'enfant saisit le Kit Code sur un parcours compatible (WA01) puis rouvrir le suivi | Code utilisé | Le code porte le badge « Utilisé » sans bouton « Copier » ; le parcours compatible est débloqué côté enfant | ☐ | |
+| REC-PAR-185 | L'enfant saisit le Kit Code sur un parcours compatible puis rouvrir le suivi | Code utilisé | Le code porte le badge « Utilisé » sans bouton « Copier » ; le parcours compatible est débloqué côté enfant | ☐ | |
 | REC-PAR-186 | Faire révoquer un Kit Code par le Support puis rouvrir le suivi | Code révoqué | Badge rouge « Révoqué », pas de bouton « Copier » ; le code reste listé | ☐ | |
 | REC-PAR-187 | Ouvrir une commande en attente (kit réservé) | Commande en attente | Badge « En attente de paiement » ; encart « À payer avant le <heure> : passé ce délai, la commande est annulée. » ; formulaire « Payer par Mobile Money » prérempli avec le Mobile Money préféré ; paiement réussi → la page se relit (payée, facture, livraison, Kit Codes) | ☐ | |
 | REC-PAR-188 | Ouvrir une commande annulée puis une commande remboursée | Commande annulée ou remboursée | « Commande annulée : elle n'a pas été payée à temps et le stock a été libéré. » ; « Commande remboursée : elle vous a été remboursée. » ; aucun formulaire de paiement ni bouton facture (sauf remboursée payée : à confirmer, spec muette) | ☐ | |
 | REC-PAR-189 | En Bernard, ouvrir la référence d'une commande de Marie | Commande d'un autre payeur | « Commande introuvable » / « Cette commande n'existe pas ou n'a pas été passée depuis votre compte. » ; bouton « Voir mes commandes » ; aucune donnée de la commande | ☐ | |
 | REC-PAR-190 | Ouvrir le suivi en 360 px | Version mobile | Cartes empilées, frise et Kit Codes lisibles, bouton « Copier » accessible | ☐ | |
 
-#### WPD07 (suite) · Achat direct de kit par le parent (`/parent/boutique`, `/parent/boutique/panier`, `/parent/boutique/commande`)
+#### « Historique de commande » (suite) · Achat direct de kit par le parent (`/parent/boutique`, `/parent/boutique/panier`, `/parent/boutique/commande`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -3317,10 +3317,10 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-194 | Ouvrir `/parent/boutique/panier` avec un panier vide | Panier vide | « Votre panier est vide » / « Choisissez un kit pour construire pour de vrai, livré chez vous. » | ☐ | |
 | REC-PAR-195 | Ouvrir le panier avec un kit | Panier | Lignes, « Sous-total HT (N article) », « Livraison : Calculée à l'étape suivante », « Total hors livraison », « Les taxes éventuelles sont ajoutées au moment du paiement. » ; bouton « Commander » | ☐ | |
 | REC-PAR-196 | Avoir un kit devenu indisponible dans le panier puis « Commander » | Kit indisponible | « Retirez les kits indisponibles pour continuer. » ; commande bloquée ; sur `/commande` : « Un kit de votre panier n'est plus disponible : retirez-le avant de commander. » | ☐ | |
-| REC-PAR-197 | Cliquer « Commander » | Étape livraison | `/parent/boutique/commande` (h1 « Commande de kits ») : « Votre panier » avec « Sous-total HT hors livraison », taxes éventuelles, « Total hors livraison » ; champ « Pour quel enfant ? (facultatif) » (option « Pour la famille » + enfants actifs, aide « Il recevra les Kit Codes du kit pour débloquer ses parcours. ») ; formulaire « Adresse de livraison » prérempli avec l'adresse par défaut de `WPD08` | ☐ | |
+| REC-PAR-197 | Cliquer « Commander » | Étape livraison | `/parent/boutique/commande` (h1 « Commande de kits ») : « Votre panier » avec « Sous-total HT hors livraison », taxes éventuelles, « Total hors livraison » ; champ « Pour quel enfant ? (facultatif) » (option « Pour la famille » + enfants actifs, aide « Il recevra les Kit Codes du kit pour débloquer ses parcours. ») ; formulaire « Adresse de livraison » prérempli avec l'adresse par défaut de `« Paramètres parent »` | ☐ | |
 | REC-PAR-198 | Cliquer « Continuer vers le paiement » sans zone, ville, quartier ni rue | Adresse incomplète | Récapitulatif « Corrigez les erreurs suivantes : » : « Choisissez la zone de livraison. », « Indiquez la ville. », « Indiquez le quartier. », « Indiquez la rue ou un repère. » ; aucune commande créée | ☐ | |
-| REC-PAR-199 | Saisir une adresse valide, cocher « Enregistrer comme adresse par défaut », « Continuer vers le paiement » | Commande créée | Encart « Commande <référence> » avec le total du serveur, lignes d'articles, « Livraison (<zone>) » (frais de la zone), taxes, « Vos kits sont réservés jusqu'au <heure> : payez avant cette heure. » ; l'adresse est enregistrée dans `WPD08` ; le stock est réservé 30 minutes | ☐ | |
-| REC-PAR-200 | Payer avec un numéro en `01` | Paiement réussi | « Paiement réussi ! » + « Votre commande est confirmée : suivez sa livraison et retrouvez ses Kit Codes. » + bouton « Suivre ma commande » ; la commande est « Payée » dans `WPD07` avec le bénéficiaire choisi | ☐ | |
+| REC-PAR-199 | Saisir une adresse valide, cocher « Enregistrer comme adresse par défaut », « Continuer vers le paiement » | Commande créée | Encart « Commande <référence> » avec le total du serveur, lignes d'articles, « Livraison (<zone>) » (frais de la zone), taxes, « Vos kits sont réservés jusqu'au <heure> : payez avant cette heure. » ; l'adresse est enregistrée dans `« Paramètres parent »` ; le stock est réservé 30 minutes | ☐ | |
+| REC-PAR-200 | Payer avec un numéro en `01` | Paiement réussi | « Paiement réussi ! » + « Votre commande est confirmée : suivez sa livraison et retrouvez ses Kit Codes. » + bouton « Suivre ma commande » ; la commande est « Payée » dans `« Historique de commande »` avec le bénéficiaire choisi | ☐ | |
 | REC-PAR-201 | Payer avec un numéro en `02` puis `03` | Échec et attente | Échec : « Paiement échoué », « Raison : … », « Changer de numéro » / « Réessayer le paiement » ; `03` : attente puis « toujours en attente » après 2 minutes | ☐ | |
 | REC-PAR-202 | Laisser expirer la réservation (30 min) puis payer | Délai de réservation dépassé | Message « Le délai de réservation est dépassé : confirmez de nouveau l'adresse pour réserver vos kits. » ; retour au formulaire d'adresse | ☐ | |
 | REC-PAR-203 | Valider la commande alors que le kit vient d'être épuisé | Rupture à la commande (`OUT_OF_STOCK`) | « Un kit vient d'être épuisé : votre panier a été relu, vérifiez-le avant de commander. » ; aucune commande créée | ☐ | |
@@ -3329,34 +3329,34 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-206 | Rendre l'API du panier indisponible | Erreur de chargement du panier | Message d'erreur avec bouton « Réessayer » | ☐ | |
 | REC-PAR-207 | Parcourir le tunnel en 360 px | Version mobile | Panier, adresse, paiement lisibles sans défilement horizontal ; boutons pleine largeur | ☐ | |
 
-### WPD11 · Rapport hebdomadaire (`/parent/enfants/[id]/rapport`)
+### Rapport hebdomadaire (`/parent/enfants/[id]/rapport`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-208 | Depuis `WPD03` de Léa, cliquer « Rapport hebdomadaire » | Chargement | Squelette « Chargement du rapport hebdomadaire… » | ☐ | |
-| REC-PAR-209 | Lire le rapport de la semaine en cours (Léa, jeu D2) | Nominal | h1 « Rapport hebdomadaire » ; fil d'Ariane « Mes enfants › Léa Adjovi › Rapport hebdomadaire » ; lien « Voir le profil de Léa Adjovi » vers `WPD03` ; « Semaine du <lundi> au <dimanche> » ; trois pastilles « Temps d'apprentissage » (« N min » / « 1 h 05 »), « Missions terminées », « Quiz réussis » **identiques** à `GET accounts/children/<id>/weekly-report/` ; « Activité de la semaine » (histogramme 7 jours, légende « Temps d'apprentissage de Léa, jour par jour », tableau de données en alternative) ; « Progression des parcours » | ☐ | |
+| REC-PAR-208 | Depuis `« Détail enfant »` de Léa, cliquer « Rapport hebdomadaire » | Chargement | Squelette « Chargement du rapport hebdomadaire… » | ☐ | |
+| REC-PAR-209 | Lire le rapport de la semaine en cours (Léa, jeu D2) | Nominal | h1 « Rapport hebdomadaire » ; fil d'Ariane « Mes enfants › Léa Adjovi › Rapport hebdomadaire » ; lien « Voir le profil de Léa Adjovi » vers `« Détail enfant »` ; « Semaine du <lundi> au <dimanche> » ; trois pastilles « Temps d'apprentissage » (« N min » / « 1 h 05 »), « Missions terminées », « Quiz réussis » **identiques** à `GET accounts/children/<id>/weekly-report/` ; « Activité de la semaine » (histogramme 7 jours, légende « Temps d'apprentissage de Léa, jour par jour », tableau de données en alternative) ; « Progression des parcours » | ☐ | |
 | REC-PAR-210 | Lire l'encart d'envoi quand une adresse email est renseignée (Marie) | Encart email (D55) | « Ce rapport vous est envoyé chaque semaine à marie.adjovi@steamy.test. » ; aucun bouton d'envoi ponctuel (« Recevoir par email » absent) | ☐ | |
 | REC-PAR-211 | Lire l'encart avec un parent sans email | Parent sans email | « Recevez ce rapport chaque semaine par email : » + lien « Ajouter un email » vers `/parent/parametres` | ☐ | |
 | REC-PAR-212 | Cliquer « Semaine précédente » | Navigation vers une semaine passée | URL `/parent/enfants/<id>/rapport?semaine=AAAA-Www` ; titre de la semaine mis à jour ; chiffres égaux à l'API pour cette semaine ; liens « Semaine suivante » (vers la semaine suivante) et « Cette semaine » affichés | ☐ | |
 | REC-PAR-213 | Cliquer « Cette semaine » | Retour à la semaine en cours | URL sans `?semaine=` ; « Cette semaine » disparaît ; « Semaine suivante » est inactif (grisé) sur la semaine en cours | ☐ | |
 | REC-PAR-214 | Ouvrir `?semaine=abc` | Semaine illisible | Semaine en cours affichée | ☐ | |
-| REC-PAR-215 | Ouvrir `?semaine=2099-W10` | Semaine à venir | Rapport accepté par l'API (semaine à venir) avec chiffres à 0 et « Semaine suivante » inactif ; état vide ci-dessous | ☐ | |
-| REC-PAR-216 | Ouvrir `?semaine=1999-W10` | Semaine hors bornes | Redirection vers `/parent/enfants/<id>/rapport` (semaine en cours) | ☐ | |
+| REC-PAR-215 | Ouvrir `?semaine=2099-« Mot de passe »` | Semaine à venir | Rapport accepté par l'API (semaine à venir) avec chiffres à 0 et « Semaine suivante » inactif ; état vide ci-dessous | ☐ | |
+| REC-PAR-216 | Ouvrir `?semaine=1999-« Mot de passe »` | Semaine hors bornes | Redirection vers `/parent/enfants/<id>/rapport` (semaine en cours) | ☐ | |
 | REC-PAR-217 | Ouvrir le rapport d'un enfant sans activité cette semaine | Semaine vide | « Aucune activité cette semaine : <Prénom> n'a pas encore travaillé sur Steamy. » à la place de l'histogramme ; « Temps d'apprentissage » à « 0 min » ; « Aucun parcours commencé pour l'instant. » | ☐ | |
-| REC-PAR-218 | En Bernard, ouvrir le rapport de Léa | Enfant d'un autre parent | « Cet enfant est introuvable » (même page que `WPD03`) | ☐ | |
+| REC-PAR-218 | En Bernard, ouvrir le rapport de Léa | Enfant d'un autre parent | « Cet enfant est introuvable » (même page que `« Détail enfant »`) | ☐ | |
 | REC-PAR-219 | Rendre l'API indisponible puis ouvrir le rapport | Erreur serveur | État d'erreur « Oups, ça a coupé » | ☐ | |
 | REC-PAR-220 | Ouvrir le rapport en 360 px | Version mobile | Pastilles empilées, histogramme lisible, aucun défilement horizontal (y compris le tableau alternatif) | ☐ | |
 
-### WPD12 · Faire participer un enfant à un événement (`/parent/evenements/[slug]/inscription`)
+### Faire participer un enfant à un événement (`/parent/evenements/[slug]/inscription`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-221 | Depuis `WL23` ou `WPD06`, cliquer « Inscrire un enfant » sur « Défi robots de Cotonou » | Affichage (événement payant) | h1 « Inscrire un enfant » ; fil d'Ariane « Steamy Events › <titre> › Inscrire un enfant » ; en-tête : titre, date, horaires, lieu, badge de prix (prix HT du serveur) ; formulaire « Inscrire un enfant » : liste « Enfant » (« Choisissez l'enfant », enfants **actifs** seulement), « Motivation (facultatif) » (aide « Ce que votre enfant attend de l'événement. ») ; texte « Participation : 5 000 F CFA HT. La place est réservée dès que vous continuez, puis confirmée au paiement ; si votre enfant a un ticket Steamy Events, il est utilisé et il n'y a rien à payer. » ; bouton « Continuer » | ☐ | |
+| REC-PAR-221 | Depuis `« Fiche événement »` ou `« Steamy Events »`, cliquer « Inscrire un enfant » sur « Défi robots de Cotonou » | Affichage (événement payant) | h1 « Inscrire un enfant » ; fil d'Ariane « Steamy Events › <titre> › Inscrire un enfant » ; en-tête : titre, date, horaires, lieu, badge de prix (prix HT du serveur) ; formulaire « Inscrire un enfant » : liste « Enfant » (« Choisissez l'enfant », enfants **actifs** seulement), « Motivation (facultatif) » (aide « Ce que votre enfant attend de l'événement. ») ; texte « Participation : 5 000 F CFA HT. La place est réservée dès que vous continuez, puis confirmée au paiement ; si votre enfant a un ticket Steamy Events, il est utilisé et il n'y a rien à payer. » ; bouton « Continuer » | ☐ | |
 | REC-PAR-222 | Avec un seul enfant actif, ouvrir la page | Préselection | L'enfant est présélectionné | ☐ | |
 | REC-PAR-223 | Avec un enfant dont la suppression est programmée, ouvrir la liste | Enfant non actif exclu | L'enfant désactivé n'est pas proposé | ☐ | |
 | REC-PAR-224 | Cliquer « Continuer » sans choisir d'enfant | Enfant obligatoire | Récapitulatif « Corrigez les erreurs suivantes : » + « Choisissez l'enfant à inscrire. » sous le champ ; aucune réservation | ☐ | |
-| REC-PAR-225 | Choisir l'enfant, saisir une motivation et « Continuer » | Inscription payante : réservation | Message « Place réservée jusqu'au <heure> : la participation est confirmée dès le paiement, dans la limite des places. » ; formulaire « Payer par Mobile Money » avec « Payer <montant> » (total de la commande d'événement lu dans l'API) ; la candidature de l'enfant apparaît « Paiement en attente » dans `WPD06` | ☐ | |
-| REC-PAR-226 | Payer avec `01` | Paiement réussi | « Paiement réussi ! » + « La participation de <Prénom> à <événement> est confirmée. » + « Voir les événements » ; côté enfant, la candidature est « Acceptée » (`WD10`) | ☐ | |
+| REC-PAR-225 | Choisir l'enfant, saisir une motivation et « Continuer » | Inscription payante : réservation | Message « Place réservée jusqu'au <heure> : la participation est confirmée dès le paiement, dans la limite des places. » ; formulaire « Payer par Mobile Money » avec « Payer <montant> » (total de la commande d'événement lu dans l'API) ; la candidature de l'enfant apparaît « Paiement en attente » dans `« Steamy Events »` | ☐ | |
+| REC-PAR-226 | Payer avec `01` | Paiement réussi | « Paiement réussi ! » + « La participation de <Prénom> à <événement> est confirmée. » + « Voir les événements » ; côté enfant, la candidature est « Acceptée » (`« Steamy Events »`) | ☐ | |
 | REC-PAR-227 | Payer avec `02`, puis « Changer de numéro » avec `01` | Échec puis réussite | « Paiement échoué » + « Raison : … », puis le formulaire revient avec pays, réseau et numéro saisis préremplis ; second essai réussi | ☐ | |
 | REC-PAR-228 | Payer avec `03` | Paiement en attente | Attente, puis après 2 minutes « Le paiement est toujours en attente de validation… » | ☐ | |
 | REC-PAR-229 | Payer après expiration de la réservation (place libérée) | Paiement après expiration (C17) | Si la place est encore disponible : paiement honoré ; sinon « Paiement remboursé » / « Votre paiement est arrivé après le délai de réservation : la commande n'a pas été validée et il vous est remboursé automatiquement. » + « Voir mes commandes » | ☐ | |
@@ -3365,13 +3365,13 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-232 | S'inscrire deux fois le même enfant au même événement | `ALREADY_APPLIED` | « Votre enfant est déjà inscrit ou candidat à cet événement. » | ☐ | |
 | REC-PAR-233 | Ouvrir l'inscription d'un événement complet (`hackathon-ia`) | Événement complet | Statut « Toutes les places sont prises. L'inscription n'est plus possible. » ; aucun formulaire ni bouton « Payer » | ☐ | |
 | REC-PAR-234 | Ouvrir l'inscription d'un événement clos ou passé | Clos ou passé | « La date limite de candidature est passée. L'inscription n'est plus possible. » ou « Cet événement a déjà eu lieu. L'inscription n'est plus possible. » | ☐ | |
-| REC-PAR-235 | Ouvrir l'inscription avec un parent sans enfant actif | Aucun enfant actif | « Aucun enfant actif à inscrire. Ajoutez d'abord le compte de votre enfant. » + bouton « Ajouter un enfant » vers `WPD04` | ☐ | |
+| REC-PAR-235 | Ouvrir l'inscription avec un parent sans enfant actif | Aucun enfant actif | « Aucun enfant actif à inscrire. Ajoutez d'abord le compte de votre enfant. » + bouton « Ajouter un enfant » vers `« Ajouter un enfant »` | ☐ | |
 | REC-PAR-236 | Ouvrir `/parent/evenements/inconnu/inscription` | Événement inconnu | « Cet événement est introuvable » | ☐ | |
 | REC-PAR-237 | Rendre l'API indisponible puis « Continuer » | Erreur serveur ou réseau | Message d'erreur au vouvoiement dans le récapitulatif | ☐ | |
 | REC-PAR-238 | Cliquer deux fois vite sur « Continuer » | Double envoi | Une seule candidature et une seule commande d'événement | ☐ | |
 | REC-PAR-239 | Parcourir la page en 360 px | Version mobile | Formulaire et paiement lisibles sans défilement horizontal | ☐ | |
 
-### WPD08 · Paramètres parent (`/parent/parametres`)
+### Paramètres parent (`/parent/parametres`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -3381,7 +3381,7 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-243 | Cliquer « Modifier », vider Prénom et Nom, « Enregistrer » | Champs obligatoires | « Indiquez votre prénom. » et « Indiquez votre nom. » (récapitulatif « Corrigez les erreurs suivantes : » + sous les champs) ; aucun envoi | ☐ | |
 | REC-PAR-244 | Saisir un email invalide (`abc`) puis « Enregistrer » | Email invalide | Erreur sous le champ « Email » (libellé de l'API, à confirmer) ; le nom, lui, est enregistré : message « Votre nom est enregistré, mais pas l'email ni la profession. … » si seule la seconde requête échoue | ☐ | |
 | REC-PAR-245 | Saisir `sena.test@steamy.test` et une profession, « Enregistrer » | Enregistrement réussi | Message « Vos informations sont enregistrées. » ; le formulaire se referme ; le nom du header est relu ; aide du champ Email : « Facultatif. Le rapport hebdomadaire de vos enfants y est envoyé chaque semaine. » | ☐ | |
-| REC-PAR-246 | Vider l'email et enregistrer | Email retiré (D55) | Email effacé ; `WPD11` affiche ensuite « Ajouter un email » à la place de l'adresse ; section Notifications : « Aucune adresse email n'est renseignée dans votre profil : vos notifications restent dans l'application. » | ☐ | |
+| REC-PAR-246 | Vider l'email et enregistrer | Email retiré (D55) | Email effacé ; `« Rapport hebdomadaire »` affiche ensuite « Ajouter un email » à la place de l'adresse ; section Notifications : « Aucune adresse email n'est renseignée dans votre profil : vos notifications restent dans l'application. » | ☐ | |
 | REC-PAR-247 | « Annuler » dans le formulaire | Annulation | Formulaire refermé, valeurs inchangées | ☐ | |
 | REC-PAR-248 | Lire la carte « Connexion » | Connexion (S4) | « Numéro de téléphone » et « Mot de passe » (••••••••) ; bouton « Changer de numéro » ; bouton « Changer de mot de passe » | ☐ | |
 | REC-PAR-249 | Cliquer « Changer de numéro » puis « Recevoir le code » sans rien saisir | Numéro et mot de passe vides | « Saisissez un numéro valide pour ce pays. » et « Indiquez votre mot de passe actuel. » ; aucun SMS | ☐ | |
@@ -3397,7 +3397,7 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-259 | Saisir un mauvais mot de passe actuel | Mot de passe actuel faux | Erreur sous le champ « Mot de passe actuel » (libellé de l'API, à confirmer) | ☐ | |
 | REC-PAR-260 | Lire « Adresse de livraison par défaut » | Adresse | Formulaire « Adresse de livraison » prérempli (Marie : zone, ville, quartier, rue) ; pays et zones du référentiel | ☐ | |
 | REC-PAR-261 | Vider les champs et enregistrer | Adresse incomplète | « Choisissez votre pays. », « Choisissez votre zone de livraison. », « Indiquez votre ville. », « Indiquez votre quartier. », « Indiquez votre rue ou un repère. » | ☐ | |
-| REC-PAR-262 | Modifier l'adresse et enregistrer | Adresse enregistrée | Message « Votre adresse de livraison est enregistrée. » ; l'adresse est préremplie dans `WPD15` (kit) et dans l'achat direct | ☐ | |
+| REC-PAR-262 | Modifier l'adresse et enregistrer | Adresse enregistrée | Message « Votre adresse de livraison est enregistrée. » ; l'adresse est préremplie dans `« Demande de paiement »` (kit) et dans l'achat direct | ☐ | |
 | REC-PAR-263 | Lire la carte « Mobile Money » | Mobile Money préféré (D76) | Lignes « Pays », « Réseau », « Numéro » (Marie : MTN, `+229 01 90 00 00 01`) ; bouton « Modifier » | ☐ | |
 | REC-PAR-264 | Modifier : vider réseau et numéro puis enregistrer | Mobile Money incomplet | « Choisissez votre réseau Mobile Money. » et « Saisissez un numéro Mobile Money valide pour ce pays. » ; récapitulatif d'erreurs | ☐ | |
 | REC-PAR-265 | Changer le pays du numéro | Réseau dépendant du pays | Le réseau est vidé et la liste des réseaux est rechargée pour ce pays (aucun réseau en dur) | ☐ | |
@@ -3406,41 +3406,41 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-268 | Lire la section « Notifications » (Marie avec email) | Préférences (D7) | Canal « Dans l'application » toujours actif (« Toujours actif : toutes vos notifications s'affichent dans votre espace. ») ; canal « Email » ; une catégorie par ligne avec description : consentements (« Quand un enfant a besoin de votre accord : inscription, candidature, suppression. »), paiements, progression, enseignants, événements | ☐ | |
 | REC-PAR-269 | Couper l'interrupteur « Progression par email » | Préférence enregistrée | Message « Préférence enregistrée. » ; après rechargement l'interrupteur reste coupé ; l'API note `email_enabled` à faux pour la catégorie ; plus de rapport hebdomadaire par email (vérification de l'envoi du lundi : à confirmer, non testé automatiquement) | ☐ | |
 | REC-PAR-270 | Couper le réseau puis changer un interrupteur | Échec d'enregistrement | L'interrupteur revient à son état précédent, message d'erreur au vouvoiement | ☐ | |
-| REC-PAR-271 | Lire la section « Légal » | Liens légaux | Trois liens : « Conditions générales d'utilisation », « Mentions légales », « Politique de confidentialité » vers `WL09` | ☐ | |
+| REC-PAR-271 | Lire la section « Légal » | Liens légaux | Trois liens : « Conditions générales d'utilisation », « Mentions légales », « Politique de confidentialité » vers `« Pages légales »` | ☐ | |
 | REC-PAR-272 | Lire la « Zone sensible » en Marie (enfants rattachés) | Suppression du compte bloquée (D54) | Le bouton « Supprimer » est désactivé ; texte « Supprimez d'abord le compte de chacun de vos enfants, ou demandez son transfert à un autre parent en contactant le support. » ; le lien « contactant le support » mène au formulaire de contact (motif `changement-parent`) | ☐ | |
 | REC-PAR-273 | Lire la « Zone sensible » avec un parent sans enfant | Suppression possible | Texte « Votre compte est désactivé immédiatement puis anonymisé dans 30 jours. Pendant ce délai, notre équipe peut l'annuler à votre demande. Les factures sont conservées. » (ni « définitivement » ni « irréversible ») ; bouton « Supprimer » actif | ☐ | |
 | REC-PAR-274 | Cliquer « Supprimer » puis « Annuler » dans la modale | Annulation de la suppression du compte | Modale « Supprimer votre compte ? » fermée, compte intact | ☐ | |
 | REC-PAR-275 | Cliquer « Supprimer » puis « Supprimer mon compte » | Suppression confirmée | Compte désactivé, session fermée, redirection vers `/` ; `/parent` redirige vers `/connexion?next=%2Fparent` ; l'annulation passe par le support uniquement (aucun endpoint côté parent : point signalé au produit, D54) | ☐ | |
 | REC-PAR-276 | Forcer la suppression alors que des enfants sont rattachés (requête directe) | `CHILDREN_STILL_LINKED` | « Des enfants sont encore rattachés à votre compte : supprimez ou transférez chacun d'eux d'abord. » dans la modale | ☐ | |
-| REC-PAR-277 | Ouvrir `/parent/parametres#notifications` | Ancre depuis la cloche ou `WPD14` | La section « Notifications » est atteinte | ☐ | |
+| REC-PAR-277 | Ouvrir `/parent/parametres#notifications` | Ancre depuis la cloche ou `« Notifications »` | La section « Notifications » est atteinte | ☐ | |
 | REC-PAR-278 | Ouvrir la page en 360 px | Version mobile | Cartes sur une colonne, formulaires et modale utilisables, pas de défilement horizontal | ☐ | |
 
-### WPD09 · Supprimer un enfant (`/parent/enfants/[id]/supprimer`)
+### Supprimer un enfant (`/parent/enfants/[id]/supprimer`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-279 | Depuis `WPD03`, cliquer « Supprimer le compte » | Affichage (initiative du parent) | h1 « Supprimer le compte » ; fil d'Ariane « Mes enfants › <Nom> › Supprimer le compte » ; formulaire « Supprimer le compte de <Prénom> » : « Le compte de <Prénom> est désactivé immédiatement : <Prénom> ne peut plus se connecter. Il est anonymisé 30 jours plus tard ; d'ici là, vous pouvez annuler la suppression depuis « Mes enfants ». » et « Les factures de vos commandes sont conservées. » ; ni « définitivement » ni « irréversible » | ☐ | |
+| REC-PAR-279 | Depuis `« Détail enfant »`, cliquer « Supprimer le compte » | Affichage (initiative du parent) | h1 « Supprimer le compte » ; fil d'Ariane « Mes enfants › <Nom> › Supprimer le compte » ; formulaire « Supprimer le compte de <Prénom> » : « Le compte de <Prénom> est désactivé immédiatement : <Prénom> ne peut plus se connecter. Il est anonymisé 30 jours plus tard ; d'ici là, vous pouvez annuler la suppression depuis « Mes enfants ». » et « Les factures de vos commandes sont conservées. » ; ni « définitivement » ni « irréversible » | ☐ | |
 | REC-PAR-280 | Lire le champ « Motif de la suppression » | Liste fermée | Liste issue du référentiel `deletion-reasons` (par exemple « Le compte n'est plus utilisé ») ; champ « Précisions (facultatif) » (1000 caractères au plus) | ☐ | |
 | REC-PAR-281 | Cliquer « Supprimer le compte » sans motif | Motif obligatoire | « Choisissez le motif de la suppression. » (lien du récapitulatif vers le champ) ; aucun appel | ☐ | |
 | REC-PAR-282 | Choisir un motif puis « Supprimer le compte » | Suppression réussie | Redirection vers `/parent/enfants/<id>?confirmation=supprime` ; message « Le compte de <Prénom> est désactivé : la suppression reste annulable 30 jours. » ; encart « Compte désactivé : suppression programmée le <date J+30>. » ; l'enfant ne peut plus se connecter (`ACCOUNT_DEACTIVATED`) | ☐ | |
-| REC-PAR-283 | Cliquer « Annuler » | Annulation | Retour à `WPD03` sans suppression | ☐ | |
+| REC-PAR-283 | Cliquer « Annuler » | Annulation | Retour à `« Détail enfant »` sans suppression | ☐ | |
 | REC-PAR-284 | Rendre l'API indisponible puis valider | Erreur serveur ou réseau | Message d'erreur au vouvoiement dans le récapitulatif ; compte non supprimé | ☐ | |
-| REC-PAR-285 | Rouvrir `WPD09` d'un enfant dont la suppression est déjà programmée | Suppression déjà programmée | Titre « Suppression programmée » : « Le compte de <Prénom> est désactivé et sera anonymisé le <date>. Vous pouvez encore annuler la suppression. » ; bouton « Annuler la suppression » ; bouton « Retour au profil » ; pas de formulaire | ☐ | |
-| REC-PAR-286 | Cliquer « Annuler la suppression » | Annulation de la suppression | Redirection vers `WPD03?confirmation=suppression-annulee` ; « La suppression est annulée : <Prénom> peut de nouveau se connecter. » ; l'enfant se reconnecte | ☐ | |
-| REC-PAR-287 | Depuis « À valider » (Marie), cliquer « Examiner » sur la demande de Noé | Demande de l'enfant (`WD15`, D40) | `?demande=<id>` : titre « Noé demande la suppression de son compte », « Reçue le <date> » ; bloc « Motif » (libellé choisi par l'enfant, ou « Aucun motif indiqué ») et « Précisions » entre « » ; règle D54 ; boutons « Refuser la demande » et « Valider la suppression » | ☐ | |
+| REC-PAR-285 | Rouvrir `« Supprimer un enfant »` d'un enfant dont la suppression est déjà programmée | Suppression déjà programmée | Titre « Suppression programmée » : « Le compte de <Prénom> est désactivé et sera anonymisé le <date>. Vous pouvez encore annuler la suppression. » ; bouton « Annuler la suppression » ; bouton « Retour au profil » ; pas de formulaire | ☐ | |
+| REC-PAR-286 | Cliquer « Annuler la suppression » | Annulation de la suppression | Redirection vers `« Détail enfant »?confirmation=suppression-annulee` ; « La suppression est annulée : <Prénom> peut de nouveau se connecter. » ; l'enfant se reconnecte | ☐ | |
+| REC-PAR-287 | Depuis « À valider » (Marie), cliquer « Examiner » sur la demande de Noé | Demande de l'enfant (`« Supprimer le compte »`, D40) | `?demande=<id>` : titre « Noé demande la suppression de son compte », « Reçue le <date> » ; bloc « Motif » (libellé choisi par l'enfant, ou « Aucun motif indiqué ») et « Précisions » entre « » ; règle D54 ; boutons « Refuser la demande » et « Valider la suppression » | ☐ | |
 | REC-PAR-288 | Cliquer « Valider la suppression » | Ouverture de la confirmation | Modale « Valider la suppression du compte de <Prénom> ? » : « Le compte est désactivé immédiatement, puis anonymisé 30 jours plus tard. Vous pourrez annuler la suppression d'ici là depuis « Mes enfants ». » ; boutons « Annuler » et « Valider la suppression » | ☐ | |
 | REC-PAR-289 | Dans la modale, cliquer « Annuler » | Annulation de la validation | Modale fermée, demande toujours en attente | ☐ | |
-| REC-PAR-290 | Dans la modale, cliquer « Valider la suppression » | Demande validée | Redirection vers `WPD03?confirmation=supprime` ; compte désactivé (`ACCOUNT_DEACTIVATED` à la connexion de l'enfant) ; la ligne disparaît de « À valider » | ☐ | |
-| REC-PAR-291 | Cliquer « Refuser la demande » | Demande refusée | Redirection vers `WPD03?confirmation=demande-refusee` ; « La demande de suppression est refusée : <Prénom> en est informé·e. » ; le compte reste actif ; la demande de l'enfant passe à « refusée » | ☐ | |
+| REC-PAR-290 | Dans la modale, cliquer « Valider la suppression » | Demande validée | Redirection vers `« Détail enfant »?confirmation=supprime` ; compte désactivé (`ACCOUNT_DEACTIVATED` à la connexion de l'enfant) ; la ligne disparaît de « À valider » | ☐ | |
+| REC-PAR-291 | Cliquer « Refuser la demande » | Demande refusée | Redirection vers `« Détail enfant »?confirmation=demande-refusee` ; « La demande de suppression est refusée : <Prénom> en est informé·e. » ; le compte reste actif ; la demande de l'enfant passe à « refusée » | ☐ | |
 | REC-PAR-292 | Rouvrir `?demande=<id>` d'une demande déjà traitée | Demande déjà traitée | Titre « Cette demande a déjà été traitée » / « La demande de suppression de <Prénom> n'attend plus votre réponse. » ; bouton « Retour au profil » | ☐ | |
 | REC-PAR-293 | Ouvrir `?demande=<id d'une demande d'un autre enfant ou d'une autre famille>` | Demande d'un autre enfant ou d'une autre famille | Page « introuvable » | ☐ | |
 | REC-PAR-294 | Cliquer deux fois vite sur « Valider la suppression » / « Refuser la demande » | Double décision | Une seule décision appliquée (verrou jusqu'à la navigation) | ☐ | |
 | REC-PAR-295 | Rendre l'API indisponible puis décider | Erreur serveur ou réseau | Message d'erreur au vouvoiement sous les boutons, décision non appliquée | ☐ | |
 | REC-PAR-296 | En Bernard, ouvrir `/parent/enfants/<id de Léa>/supprimer` | Enfant d'un autre parent | Page « Cet enfant est introuvable » | ☐ | |
-| REC-PAR-297 | Supprimer l'enfant bénéficiaire d'une commande payée puis ouvrir `WPD07` | Factures conservées (D40) | Commande et facture toujours accessibles au parent | ☐ | |
+| REC-PAR-297 | Supprimer l'enfant bénéficiaire d'une commande payée puis ouvrir `« Historique de commande »` | Factures conservées (D40) | Commande et facture toujours accessibles au parent | ☐ | |
 | REC-PAR-298 | Ouvrir la page en 360 px | Version mobile | Formulaire et boutons pleine largeur empilés (« Annuler » puis « Supprimer le compte »), pas de défilement horizontal | ☐ | |
 
-### WPD13 · Aide & support (`/parent/aide`)
+### Aide & support (`/parent/aide`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -3452,11 +3452,11 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-304 | Saisir « zzzz » | Recherche sans résultat | « Aucune question ne correspond. Écrivez-nous avec le bouton ci-dessous. » | ☐ | |
 | REC-PAR-305 | Vider la recherche | Réinitialisation | Toutes les questions réapparaissent | ☐ | |
 | REC-PAR-306 | Relire toutes les questions de la FAQ | Cohérence avec les décisions | Suppression d'un enfant : « désactivé immédiatement puis anonymisé dans 30 jours … Les factures sont conservées » ; changement de numéro : code reçu par SMS sur le **nouveau** numéro ; suppression du compte parent : supprimer ou faire transférer d'abord les enfants ; vouvoiement partout | ☐ | |
-| REC-PAR-307 | Cliquer « Contacter le support » | Navigation | Mène à `/aide#contact` (formulaire de contact `WL24`) | ☐ | |
+| REC-PAR-307 | Cliquer « Contacter le support » | Navigation | Mène à `/aide#contact` (formulaire de contact `« Aide & contact »`) | ☐ | |
 | REC-PAR-308 | Naviguer au clavier dans l'accordéon (Entrée, Espace, Tab) | Accessibilité | Chaque question s'ouvre et se ferme au clavier ; focus visible ; état déplié annoncé | ☐ | |
 | REC-PAR-309 | Ouvrir la page en 360 px | Version mobile | Accordéon et bloc « Vous ne trouvez pas votre réponse ? » (« Notre équipe vous répond en français. ») lisibles, pas de défilement horizontal | ☐ | |
 
-### WPD14 · Notifications (`/parent/notifications`)
+### Notifications (`/parent/notifications`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -3474,7 +3474,7 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-321 | Chercher une « alerte de connexion » | Hors périmètre (D56) | Aucune notification ni réglage « alerte sécurité » dans l'espace | ☐ | |
 | REC-PAR-322 | Ouvrir la page en 360 px | Version mobile | Onglets et boutons sur une ou deux lignes, notifications lisibles, pas de défilement horizontal | ☐ | |
 
-### WPD15 · Demande de paiement (`/parent/demandes/[id]`)
+### Demande de paiement (`/parent/demandes/[id]`)
 
 Rappel des états de l'écran (pastille de la carte enfant) : « À payer » (en attente), « Confirmation… » (attente de confirmation), « Payée », « Échec », « Refusée », « Expirée », « Annulée » (annulée par l'enfant), « Rupture » (kit en rupture), plus « Remboursé » (paiement arrivé après le délai, C17). La demande vit 7 jours (C4). Le webhook du prestataire est la source de vérité (S9) : le succès n'est affiché qu'au statut `succeeded` du paiement.
 
@@ -3482,7 +3482,7 @@ Rappel des états de l'écran (pastille de la carte enfant) : « À payer » (en
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-323 | Créer une demande côté enfant (par exemple Léa demande « Capteurs électroniques » depuis `WA02`), ouvrir Mailpit et le SMS reçu par le parent | Lien SMS | Le SMS (email à `<numéro parent>@sms.test`) contient un lien vers `/parent/demandes/<id>` | ☐ | |
+| REC-PAR-323 | Créer une demande côté enfant (par exemple Léa demande « Capteurs électroniques » depuis `« Paiement par le parent »`), ouvrir Mailpit et le SMS reçu par le parent | Lien SMS | Le SMS (email à `<numéro parent>@sms.test`) contient un lien vers `/parent/demandes/<id>` | ☐ | |
 | REC-PAR-324 | Ouvrir ce lien sans session | Parent non connecté | Redirection vers `/connexion?next=` ; connexion avec le numéro du parent et `Steamy2026` ; retour automatique sur `/parent/demandes/<id>` avec h1 « Demande de paiement » | ☐ | |
 | REC-PAR-325 | Ouvrir le lien en étant déjà connecté en bon parent | Parent connecté | Affichage direct de la demande ; entrée « Accueil » active | ☐ | |
 | REC-PAR-326 | Ouvrir la demande depuis « À valider » (bouton « Payer ») ou depuis une notification « paiement à valider » | Autres entrées | Même écran | ☐ | |
@@ -3499,18 +3499,18 @@ Rappel des états de l'écran (pastille de la carte enfant) : « À payer » (en
 | REC-PAR-332 | Lire la demande de Léa pour le parcours « Capteurs électroniques » | Objet : parcours | Titre de section « Demande de votre enfant » ; carte enfant (avatar, « Léa Adjovi », « 13 ans · 4ᵉ · bénéficiaire ») avec la pastille « À payer » ; « Reçue le <date> · valable jusqu'au <date + 7 jours> » ; icône 📚, repère « Parcours », titre du parcours en h2 ; ligne « Total à payer » avec le montant du serveur ; phrase « Le parcours est débloqué pour Léa dès la confirmation du paiement. » | ☐ | |
 | REC-PAR-333 | Ouvrir une demande de parcours qui exige un kit | Kit requis | Ligne « Kit requis : <nom du kit> · non inclus (<Prénom> saisira le Kit Code livré avec le kit) » | ☐ | |
 | REC-PAR-334 | Lire une demande de kit avant la saisie de l'adresse (« Pack Électronique ») | Objet : kit, avant la commande | Icône 📦, repère « Kit » ; une ligne par article (« Pack Électronique » à `22 000 F CFA HT`, ou « <kit> × N » avec « … l'unité ») ; « Sous-total HT » si des taxes existent, lignes de taxes ; libellé du total « Total à payer hors livraison » ; phrase « Le kit est réservé pendant 30 minutes dès que vous passez au paiement. Les frais de livraison dépendent de la zone choisie. » | ☐ | |
-| REC-PAR-335 | Ouvrir une demande portant sur un événement (si l'API en fournit une) | Objet : événement | Icône 📅, repère « Événement », titre de l'événement (date et lieu) ; à confirmer (spec muette) : D53 amendé fait passer l'événement payant par une commande d'événement (`WPD06`/`WPD12`), pas par une demande ; vérifier si ce cas est atteignable en pratique | ☐ | |
-| REC-PAR-336 | Comparer le montant à celui de la demande côté enfant (`WK08`/`WA02`) | Montants du serveur | Le montant des articles (HT) est identique ; la livraison est absente côté enfant et ajoutée ici ; aucun calcul côté écran (montants figés par le serveur) | ☐ | |
+| REC-PAR-335 | Ouvrir une demande portant sur un événement (si l'API en fournit une) | Objet : événement | Icône 📅, repère « Événement », titre de l'événement (date et lieu) ; à confirmer (spec muette) : D53 amendé fait passer l'événement payant par une commande d'événement (`« Steamy Events »`/`« Faire participer un enfant à un événement »`), pas par une demande ; vérifier si ce cas est atteignable en pratique | ☐ | |
+| REC-PAR-336 | Comparer le montant à celui de la demande côté enfant (`« Paiement par le parent »`/`« Paiement par le parent »`) | Montants du serveur | Le montant des articles (HT) est identique ; la livraison est absente côté enfant et ajoutée ici ; aucun calcul côté écran (montants figés par le serveur) | ☐ | |
 
 #### Demande de kit · adresse de livraison
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-PAR-337 | Ouvrir une demande de kit (parent sans adresse enregistrée) | Adresse à saisir | Panneau « Livraison du kit » avec formulaire « Adresse de livraison » (Pays, Ville ou zone de livraison, Ville, Quartier, Rue / repère), case « Enregistrer comme adresse par défaut » et bouton « Continuer vers le paiement » ; pas encore de formulaire de paiement | ☐ | |
-| REC-PAR-338 | Ouvrir la demande avec un parent qui a une adresse par défaut (Marie) | Adresse préremplie | Zone, ville, quartier et rue préremplis depuis `WPD08`, modifiables | ☐ | |
+| REC-PAR-338 | Ouvrir la demande avec un parent qui a une adresse par défaut (Marie) | Adresse préremplie | Zone, ville, quartier et rue préremplis depuis `« Paramètres parent »`, modifiables | ☐ | |
 | REC-PAR-339 | Changer le pays | Zones dépendantes du pays | La liste des zones est rechargée (zones du référentiel, aucun nom en dur) | ☐ | |
 | REC-PAR-340 | « Continuer vers le paiement » sans rien saisir | Adresse incomplète | Récapitulatif « Corrigez les erreurs suivantes : » : « Choisissez la zone de livraison. », « Indiquez la ville. », « Indiquez le quartier. », « Indiquez la rue ou un repère. » ; aucune commande créée, stock non réservé | ☐ | |
-| REC-PAR-341 | Renseigner une adresse valide, cocher « Enregistrer comme adresse par défaut », « Continuer vers le paiement » | Adresse valide : commande créée | Récapitulatif d'adresse « Adresse de livraison » (« <destinataire> · <quartier>, <rue>, <ville> », « Zone : <zone> · <délai> », « Kit réservé jusqu'au <heure>. ») ; ligne « Livraison · <zone> » avec les frais de la zone ; lignes de taxes ; « Total à payer » recalculé par le serveur ; formulaire « Payer par Mobile Money » apparaît ; l'adresse est enregistrée dans `WPD08` | ☐ | |
+| REC-PAR-341 | Renseigner une adresse valide, cocher « Enregistrer comme adresse par défaut », « Continuer vers le paiement » | Adresse valide : commande créée | Récapitulatif d'adresse « Adresse de livraison » (« <destinataire> · <quartier>, <rue>, <ville> », « Zone : <zone> · <délai> », « Kit réservé jusqu'au <heure>. ») ; ligne « Livraison · <zone> » avec les frais de la zone ; lignes de taxes ; « Total à payer » recalculé par le serveur ; formulaire « Payer par Mobile Money » apparaît ; l'adresse est enregistrée dans `« Paramètres parent »` | ☐ | |
 | REC-PAR-342 | Cliquer « Modifier » sur le récapitulatif d'adresse | Modification de l'adresse | Retour au formulaire d'adresse ; un nouvel envoi crée une nouvelle commande (frais et total recalculés par le serveur selon la nouvelle zone) | ☐ | |
 | REC-PAR-343 | Choisir une zone qui n'est plus desservie (désactivée entre-temps) | `DELIVERY_ZONE_UNAVAILABLE` | « Cette zone n'est plus desservie. Choisissez-en une autre. » sous le champ zone | ☐ | |
 | REC-PAR-344 | Valider alors que le kit vient d'être épuisé | Rupture à la commande (`OUT_OF_STOCK`) | Panneau « Kit en rupture de stock » : « <kit> n'est plus disponible pour le moment : le paiement est impossible. Vous pouvez refuser la demande ; <Prénom> en sera informé·e et pourra la renvoyer quand le kit sera de retour. » ; pastille « Rupture » ; bouton rouge « Refuser la demande » ; **aucun** formulaire de paiement | ☐ | |
@@ -3522,7 +3522,7 @@ Rappel des états de l'écran (pastille de la carte enfant) : « À payer » (en
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-348 | Lire le formulaire « Payer par Mobile Money » (Marie, Mobile Money préféré MTN) | Préremplissage (WPD08) | Champs Pays*, cartes de réseau (réseaux actifs du pays, D76, aucun réseau en dur), « Numéro Mobile Money »* ; pays, réseau et numéro préremplis ; bouton primaire magenta « Payer <montant> » avec le total du serveur (par exemple « Payer 22 000 F CFA » + frais et taxes pour un kit) ; mention « Paiement sécurisé · aucune carte bancaire » | ☐ | |
+| REC-PAR-348 | Lire le formulaire « Payer par Mobile Money » (Marie, Mobile Money préféré MTN) | Préremplissage | Champs Pays*, cartes de réseau (réseaux actifs du pays, D76, aucun réseau en dur), « Numéro Mobile Money »* ; pays, réseau et numéro préremplis ; bouton primaire magenta « Payer <montant> » avec le total du serveur (par exemple « Payer 22 000 F CFA » + frais et taxes pour un kit) ; mention « Paiement sécurisé · aucune carte bancaire » | ☐ | |
 | REC-PAR-349 | Avec un parent sans Mobile Money préféré | Aucun préremplissage | Pays présélectionné selon la localité du parent, aucun réseau coché, numéro vide | ☐ | |
 | REC-PAR-350 | Cliquer « Payer » sans réseau ni numéro | Champs vides | « Choisissez votre réseau Mobile Money. » et « Saisissez un numéro Mobile Money valide pour ce pays. » ; aucun appel | ☐ | |
 | REC-PAR-351 | Saisir un numéro trop court ou aux lettres | Numéro invalide | « Saisissez un numéro Mobile Money valide pour ce pays. » | ☐ | |
@@ -3540,14 +3540,14 @@ Rappel des états de l'écran (pastille de la carte enfant) : « À payer » (en
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-PAR-360 | Payer une demande de parcours avec un numéro se terminant par `01` | Paiement réussi (parcours) | Pastille « Confirmation… » puis « Payée » ; panneau d'attente (« On confirme votre paiement… », « Demande envoyée au <numéro masqué> », « Validez la demande sur votre téléphone (notification ou code USSD). Cela peut prendre quelques secondes : ne fermez pas cette page. ») ; puis « Paiement réussi ! » et « Le parcours <titre> est débloqué pour <Prénom>. » + bouton « Retour à l'accueil » (vers `/parent`) ; le numéro complet n'apparaît jamais (seulement masqué) | ☐ | |
-| REC-PAR-361 | Après ce paiement, vérifier côté enfant | Effet côté enfant | La demande de l'enfant (`WA02`) passe à « réglée » ; l'enfant est inscrit au parcours (`WD23`/`WC06a`) et le voit débloqué ; une notification lui est envoyée | ☐ | |
+| REC-PAR-361 | Après ce paiement, vérifier côté enfant | Effet côté enfant | La demande de l'enfant (`« Paiement par le parent »`) passe à « réglée » ; l'enfant est inscrit au parcours (`« Mes parcours »`/`« Vue inscrit · projets repliés »`) et le voit débloqué ; une notification lui est envoyée | ☐ | |
 | REC-PAR-362 | Recharger la page `/parent/demandes/<id>` payée | Demande réglée (lecture seule) | h2 « Cette demande est réglée » / « Payée le <date>. » ; boutons « Voir la commande » (vers `/parent/commandes/<référence>`) et « Retour à l'accueil » ; pastille « Payée » ; montant libellé « Montant demandé » ; aucun formulaire | ☐ | |
-| REC-PAR-363 | Payer une demande de kit avec `01` | Paiement réussi (kit) | « Paiement réussi ! » + « Votre commande est confirmée : vous pouvez suivre la livraison du kit dans vos commandes. <Prénom> a été prévenu·e. » ; la commande apparaît « Payée » dans `WPD07` avec « Pour <Prénom> » et l'adresse saisie ; l'enfant voit sa demande réglée (`WK08` « C'est réglé ! ») | ☐ | |
+| REC-PAR-363 | Payer une demande de kit avec `01` | Paiement réussi (kit) | « Paiement réussi ! » + « Votre commande est confirmée : vous pouvez suivre la livraison du kit dans vos commandes. <Prénom> a été prévenu·e. » ; la commande apparaît « Payée » dans `« Historique de commande »` avec « Pour <Prénom> » et l'adresse saisie ; l'enfant voit sa demande réglée (`« Paiement par le parent »` « C'est réglé ! ») | ☐ | |
 | REC-PAR-364 | Payer avec un numéro se terminant par `02` | Paiement échoué | Pastille « Échec » ; « Paiement échoué » ; « La transaction n'a pas pu aboutir. Aucun montant n'a été débité. » ; « Raison : <raison du prestataire> » ; boutons « Changer de numéro » et « Réessayer le paiement » ; la demande reste ouverte | ☐ | |
 | REC-PAR-365 | Cliquer « Réessayer le paiement » après un échec | Réessai avec le même numéro | Une seule nouvelle initiation (bouton en chargement) avec les mêmes pays, réseau et numéro ; en cas d'échec de l'envoi, message d'erreur annoncé sous le panneau | ☐ | |
 | REC-PAR-366 | Cliquer « Changer de numéro » après un échec | Autre numéro | Retour au formulaire avec pays, réseau et numéro du dernier essai préremplis, pastille « À payer » ; saisir un numéro en `01` → « Paiement réussi ! » | ☐ | |
 | REC-PAR-367 | Payer avec un numéro se terminant par `03` | Paiement en attente | Panneau « On confirme votre paiement… » qui reste ; la page interroge le statut toutes les 3 secondes tant que l'onglet est visible ; après 2 minutes : « Le paiement est toujours en attente de validation. Vous pouvez quitter cette page : son issue apparaîtra dans vos commandes. » avec le lien « Voir mes commandes » | ☐ | |
-| REC-PAR-368 | Quitter la page en attente, puis lancer `manage.py simulate_payment <référence> success`, puis rouvrir la page | Webhook après abandon (S9) | La demande est « Payée » ; la commande est « Payée » dans `WPD07` ; l'enfant a accès | ☐ | |
+| REC-PAR-368 | Quitter la page en attente, puis lancer `manage.py simulate_payment <référence> success`, puis rouvrir la page | Webhook après abandon (S9) | La demande est « Payée » ; la commande est « Payée » dans `« Historique de commande »` ; l'enfant a accès | ☐ | |
 | REC-PAR-369 | Pendant l'attente, lancer `simulate_payment <référence> failed` | Webhook d'échec | Le panneau passe à « Paiement échoué » avec sa raison | ☐ | |
 | REC-PAR-370 | Simuler un paiement reçu après l'expiration de la commande de kit (stock vendu entre-temps) | Paiement tardif sans stock (C17) | Panneau « Paiement remboursé » / « Votre paiement est arrivé après le délai de réservation : la commande n'a pas été validée et il vous est remboursé automatiquement. » ; pastille « Remboursé » ; bouton « Voir mes commandes » ; commande « Remboursée » ; notification envoyée | ☐ | |
 | REC-PAR-371 | Simuler un paiement reçu après expiration alors que le stock ou la place est encore disponible | Paiement tardif honoré (C17) | La commande est payée ; « Paiement réussi ! » | ☐ | |
@@ -3560,7 +3560,7 @@ Rappel des états de l'écran (pastille de la carte enfant) : « À payer » (en
 | --- | --- | --- | --- | --- | --- |
 | REC-PAR-374 | Cliquer « Refuser la demande » sous le formulaire de paiement | Ouverture de la modale | Modale « Refuser la demande de <Prénom> ? » : « Parcours <titre> · <montant>. <Prénom> sera prévenu·e de votre refus. » (ou « Kit … ») ; champ « Motif (facultatif) » (aide « Il sera transmis à <Prénom>. », 500 caractères au plus) ; boutons « Annuler » et « Refuser la demande » (danger) | ☐ | |
 | REC-PAR-375 | Cliquer « Annuler » (ou Échap) | Annulation du refus | Modale fermée, demande inchangée, aucun appel API | ☐ | |
-| REC-PAR-376 | Saisir « On en reparle après les examens. » puis « Refuser la demande » | Refus avec motif | La page passe en lecture seule : h2 « Vous avez refusé cette demande » ; « Refusée le <date>. Motif transmis à <Prénom> : « On en reparle après les examens. » » ; pastille « Refusée » ; aucun bouton « Payer » ; côté enfant (`WA02`/`WK08`) la demande est « refusée » avec le motif et une notification arrive | ☐ | |
+| REC-PAR-376 | Saisir « On en reparle après les examens. » puis « Refuser la demande » | Refus avec motif | La page passe en lecture seule : h2 « Vous avez refusé cette demande » ; « Refusée le <date>. Motif transmis à <Prénom> : « On en reparle après les examens. » » ; pastille « Refusée » ; aucun bouton « Payer » ; côté enfant (`« Paiement par le parent »`/`« Paiement par le parent »`) la demande est « refusée » avec le motif et une notification arrive | ☐ | |
 | REC-PAR-377 | Refuser sans motif | Refus sans motif (facultatif) | Refus accepté ; « Refusée le <date>. » sans phrase de motif | ☐ | |
 | REC-PAR-378 | Saisir plus de 500 caractères | Limite du motif | La saisie est limitée à 500 caractères | ☐ | |
 | REC-PAR-379 | Refuser une demande déjà réglée ou annulée entre-temps | Déjà traitée | Dans la modale : « Cette demande n'est plus en attente : elle a été réglée, annulée ou a expiré. » ; la page se relit en lecture seule | ☐ | |
@@ -3572,7 +3572,7 @@ Rappel des états de l'écran (pastille de la carte enfant) : « À payer » (en
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-383 | Ouvrir une demande dont l'enfant a annulé la demande (`WK08` « Annuler la demande ») | Annulée par l'enfant | h2 « <Prénom> a annulé sa demande » / « Annulée le <date>. Il n'y a plus rien à régler. » ; pastille « Annulée » ; bouton « Retour à l'accueil » ; aucun paiement possible | ☐ | |
+| REC-PAR-383 | Ouvrir une demande dont l'enfant a annulé la demande (`« Paiement par le parent »` « Annuler la demande ») | Annulée par l'enfant | h2 « <Prénom> a annulé sa demande » / « Annulée le <date>. Il n'y a plus rien à régler. » ; pastille « Annulée » ; bouton « Retour à l'accueil » ; aucun paiement possible | ☐ | |
 | REC-PAR-384 | Ouvrir une demande vieille de plus de 7 jours (faire expirer en base) | Expirée | h2 « Cette demande a expiré » / « Elle n'a pas été réglée avant le <date> (7 jours). <Prénom> peut vous envoyer une nouvelle demande depuis son espace. » ; pastille « Expirée » ; la demande disparaît de « À valider » | ☐ | |
 | REC-PAR-385 | Lire le libellé du montant d'une demande close | Libellé « Montant demandé » | « Montant demandé » (et non « Total à payer ») pour payée, refusée, expirée, annulée ; « hors livraison » en plus pour un kit sans commande | ☐ | |
 | REC-PAR-386 | Vérifier la page des demandes closes en tant qu'autre parent | Isolation | « Demande introuvable » | ☐ | |
@@ -3588,9 +3588,9 @@ Rappel des états de l'écran (pastille de la carte enfant) : « À payer » (en
 | REC-PAR-391 | Ouvrir « Demande introuvable » en 360 px | Mobile : introuvable | Message et bouton « Voir mes demandes à valider » lisibles | ☐ | |
 | REC-PAR-392 | Passer l'écran dans un outil d'accessibilité (axe, zoom 200 %) | Accessibilité | Aucune violation WCAG 2 A/AA ; contrastes des pastilles d'état suffisants ; états annoncés (région « polite » pour succès et échec) | ☐ | |
 
-### MONTANTS · Prix HT, lignes TVA et AIB, « Total à payer » et facture normalisée (transverse `WPD15`, `WPD07`, `WPD12`, achat direct)
+### MONTANTS · Prix HT, lignes TVA et AIB, « Total à payer » et facture normalisée (transverse `« Demande de paiement »`, `« Historique de commande »`, `« Faire participer un enfant à un événement »`, achat direct)
 
-Principes (C25, C26, ADR 0005 et 0006) : tous les prix affichés sont HT ; la TVA et l'AIB, si elles sont activées, s'ajoutent : total à payer = HT + livraison + TVA + AIB. Rien n'est recalculé côté écran. Arrondi au franc, demi-haut, une seule fois sur le total. Taux, bases et montants sont figés sur la commande à sa création. Réglages dans WAD14 (personnel Finance) : `vat_enabled`, `aib_enabled`, `vat_rate`, `aib_rate`, `vat_applies_to_shipping`, `aib_applies_to_shipping`. Exemple de référence pour les cas ci-dessous : kit à 22 000 F CFA HT, livraison 1 000 F CFA, TVA 18 % appliquée à la livraison, AIB 5 % hors livraison (exemple de recette ; les taux légaux ne sont pas confirmés, valeurs par défaut : taxes éteintes, taux à 0).
+Principes (C25, C26, ADR 0005 et 0006) : tous les prix affichés sont HT ; la TVA et l'AIB, si elles sont activées, s'ajoutent : total à payer = HT + livraison + TVA + AIB. Rien n'est recalculé côté écran. Arrondi au franc, demi-haut, une seule fois sur le total. Taux, bases et montants sont figés sur la commande à sa création. Réglages dans « Paramètres généraux » (personnel Finance) : `vat_enabled`, `aib_enabled`, `vat_rate`, `aib_rate`, `vat_applies_to_shipping`, `aib_applies_to_shipping`. Exemple de référence pour les cas ci-dessous : kit à 22 000 F CFA HT, livraison 1 000 F CFA, TVA 18 % appliquée à la livraison, AIB 5 % hors livraison (exemple de recette ; les taux légaux ne sont pas confirmés, valeurs par défaut : taxes éteintes, taux à 0).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -3601,12 +3601,12 @@ Principes (C25, C26, ADR 0005 et 0006) : tous les prix affichés sont HT ; la TV
 | REC-PAR-397 | Régler `vat_applies_to_shipping` à faux, créer une commande | TVA hors livraison | TVA calculée sur le HT des articles seulement (3 960 F CFA dans l'exemple) | ☐ | |
 | REC-PAR-398 | Régler `aib_applies_to_shipping` à vrai, créer une commande | AIB sur la livraison | Base de l'AIB incluant la livraison (à confirmer : spec muette sur le comportement exact d'affichage) | ☐ | |
 | REC-PAR-399 | Choisir des taux produisant des décimales (par exemple TVA 18 % sur 12 345 F CFA) | Arrondi | Arrondi au franc, demi-haut, une seule fois sur le total de la commande (pas par ligne) ; le total affiché est celui du serveur ; à confirmer (spec muette) : écart toléré d'au plus 1 F CFA entre la somme des lignes affichées et le total | ☐ | |
-| REC-PAR-400 | Modifier les taux dans WAD14 après la création d'une commande en attente, puis ouvrir cette commande et la payer | Montants figés | La commande en attente garde ses taux, bases et montants d'origine ; le paiement attendu par le webhook est le total figé ; seule une nouvelle commande utilise les nouveaux taux | ☐ | |
+| REC-PAR-400 | Modifier les taux dans « Paramètres généraux » après la création d'une commande en attente, puis ouvrir cette commande et la payer | Montants figés | La commande en attente garde ses taux, bases et montants d'origine ; le paiement attendu par le webhook est le total figé ; seule une nouvelle commande utilise les nouveaux taux | ☐ | |
 | REC-PAR-401 | Comparer le montant du bouton « Payer » au montant reçu par le faux prestataire (Mailpit / journal du paiement) | Montant débité | Le montant demandé au prestataire égale le total affiché (taxes comprises) | ☐ | |
-| REC-PAR-402 | Ouvrir `WPD07` et le suivi d'une commande avec taxes | Cohérence dans les commandes | Le montant de la ligne de `WPD07` égale le « Total à payer » du suivi, qui détaille « TVA (18 %) » et « AIB (5 %) » comme le serveur les a figées | ☐ | |
-| REC-PAR-403 | Avoir un événement payant à 5 000 F CFA HT avec TVA activée, passer par `WPD06` (accord) ou `WPD12` | Prix HT d'un événement | Le prix de l'événement s'affiche « 5 000 F CFA HT » ; le montant du bouton « Payer » est le total de la commande d'événement (HT + taxes) lu dans l'API | ☐ | |
+| REC-PAR-402 | Ouvrir `« Historique de commande »` et le suivi d'une commande avec taxes | Cohérence dans les commandes | Le montant de la ligne de `« Historique de commande »` égale le « Total à payer » du suivi, qui détaille « TVA (18 %) » et « AIB (5 %) » comme le serveur les a figées | ☐ | |
+| REC-PAR-403 | Avoir un événement payant à 5 000 F CFA HT avec TVA activée, passer par `« Steamy Events »` (accord) ou `« Faire participer un enfant à un événement »` | Prix HT d'un événement | Le prix de l'événement s'affiche « 5 000 F CFA HT » ; le montant du bouton « Payer » est le total de la commande d'événement (HT + taxes) lu dans l'API | ☐ | |
 | REC-PAR-404 | Vérifier les catalogues (parcours, kits, événements) avec taxes activées | Tarifs affichés HT | Chaque prix du catalogue, de la boutique et des événements porte la mention HT ; aucune TTC annoncée avant la commande | ☐ | |
-| REC-PAR-405 | Payer une commande puis cliquer « Facture » dans `WPD07` (ou « Télécharger la facture » dans le suivi) | Facture : contenu (e-MECeF désactivé, reçu provisoire) | PDF « Reçu de paiement » N° `FAC-AAAA-NNNNNN` (sans trou), « émis le <date> », « Commande <référence> » ; blocs Vendeur (nom, adresse, IFU, RCCM selon la configuration) et « Payé par » (nom et téléphone du parent) ; tableau Désignation / Prix unitaire / Qté / Montant ; « Sous-total HT », « Livraison », « TVA (<taux> % de <base> FCFA) », « AIB (<taux> % de <base> FCFA) », « Total à payer » (ou « Total payé » sans taxe) ; « Payé le <date> par Mobile Money (<réseau>) · transaction <référence> » ; mention « Document non fiscal : reçu de paiement émis par Steamy. La facture normalisée n'est pas émise par ce document. » | ☐ | |
+| REC-PAR-405 | Payer une commande puis cliquer « Facture » dans `« Historique de commande »` (ou « Télécharger la facture » dans le suivi) | Facture : contenu (e-MECeF désactivé, reçu provisoire) | PDF « Reçu de paiement » N° `FAC-AAAA-NNNNNN` (sans trou), « émis le <date> », « Commande <référence> » ; blocs Vendeur (nom, adresse, IFU, RCCM selon la configuration) et « Payé par » (nom et téléphone du parent) ; tableau Désignation / Prix unitaire / Qté / Montant ; « Sous-total HT », « Livraison », « TVA (<taux> % de <base> FCFA) », « AIB (<taux> % de <base> FCFA) », « Total à payer » (ou « Total payé » sans taxe) ; « Payé le <date> par Mobile Money (<réseau>) · transaction <référence> » ; mention « Document non fiscal : reçu de paiement émis par Steamy. La facture normalisée n'est pas émise par ce document. » | ☐ | |
 | REC-PAR-406 | Activer e-MECeF (faux fournisseur) puis payer une commande en TVA activée, rouvrir la facture après quelques secondes | Facture normalisée confirmée | PDF intitulé « Facture » avec bloc « Facture normalisée e-MECeF » : QR code, « Code MECeF/DGI : <29 caractères avec tirets> », « NIM : … · Compteurs : … », « Date et heure : … » ; plus de mention « Document non fiscal » ; les montants du PDF égalent ceux de la commande | ☐ | |
 | REC-PAR-407 | Payer avec un parent dont le réseau Mobile Money est hors Bénin | Facture d'exportation EV (C26) | Facture de type EV (groupe d'exportation) ; le montant payé n'est pas modifié ; type figé sur la facture | ☐ | |
 | REC-PAR-408 | Faire échouer l'émission fiscale (faux fournisseur en erreur) après un paiement réussi | Échec de l'émission fiscale | Le paiement et la commande restent « Payée » ; le montant payé n'est jamais modifié ; le reçu reste téléchargeable ; l'alerte est côté Finance (hors espace parent) | ☐ | |
@@ -3614,29 +3614,29 @@ Principes (C25, C26, ADR 0005 et 0006) : tous les prix affichés sont HT ; la TV
 | REC-PAR-410 | Ouvrir le lien de facture avec un autre compte, ou une commande non payée | Accès à la facture | Réservée au payeur d'une commande payée : un autre parent ou l'enfant bénéficiaire obtient « introuvable » ; une commande non payée n'a pas de facture | ☐ | |
 | REC-PAR-411 | Copier le lien de facture et l'ouvrir plus de 5 minutes après la redirection | Expiration de l'URL signée | L'URL présignée a expiré (5 minutes) ; rouvrir le lien `/api/payments/orders/<référence>/invoice/` en étant connecté fournit une nouvelle redirection | ☐ | |
 | REC-PAR-412 | Supprimer l'enfant bénéficiaire puis rouvrir la facture | Conservation (D40) | La facture reste téléchargeable avec les mêmes données figées | ☐ | |
-| REC-PAR-413 | Rembourser la commande à la main (Finance, hors application) puis rouvrir `WPD07` | Remboursement (C26) | La commande passe « Remboursée » ; aucun avoir n'est émis par l'application (retiré de la v1) ; la facture d'origine reste téléchargeable | ☐ | |
+| REC-PAR-413 | Rembourser la commande à la main (Finance, hors application) puis rouvrir `« Historique de commande »` | Remboursement (C26) | La commande passe « Remboursée » ; aucun avoir n'est émis par l'application (retiré de la v1) ; la facture d'origine reste téléchargeable | ☐ | |
 
 ### Parcours transverses du domaine
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-414 | Parcours A · Léa (connectée) demande le parcours « Capteurs électroniques » depuis `WA02` ; ouvrir Mailpit, lire le SMS adressé à Marie | L'enfant demande un parcours : SMS | Demande créée côté enfant (`WK08`/`WA02` « en attente du paiement ») ; SMS reçu avec un lien `/parent/demandes/<id>` ; Marie a aussi une notification « paiement à valider » et une ligne « À valider » | ☐ | |
-| REC-PAR-415 | Parcours A (suite) · Ouvrir le lien SMS en navigation privée, se connecter sur `W16` en Marie, vérifier le retour | Lien SMS vers connexion puis demande | Connexion sur `/connexion?next=…` puis retour automatique sur `WPD15` ; récapitulatif et formulaire corrects | ☐ | |
+| REC-PAR-414 | Parcours A · Léa (connectée) demande le parcours « Capteurs électroniques » depuis `« Paiement par le parent »` ; ouvrir Mailpit, lire le SMS adressé à Marie | L'enfant demande un parcours : SMS | Demande créée côté enfant (`« Paiement par le parent »`/`« Paiement par le parent »` « en attente du paiement ») ; SMS reçu avec un lien `/parent/demandes/<id>` ; Marie a aussi une notification « paiement à valider » et une ligne « À valider » | ☐ | |
+| REC-PAR-415 | Parcours A (suite) · Ouvrir le lien SMS en navigation privée, se connecter sur `« Connexion existant »` en Marie, vérifier le retour | Lien SMS vers connexion puis demande | Connexion sur `/connexion?next=…` puis retour automatique sur `« Demande de paiement »` ; récapitulatif et formulaire corrects | ☐ | |
 | REC-PAR-416 | Parcours A (suite) · Payer avec le Mobile Money préféré prérempli (`01`) | Paiement réussi | « Paiement réussi ! » ; la demande passe « Payée » ; la page rechargée affiche « Cette demande est réglée » avec « Voir la commande » | ☐ | |
-| REC-PAR-417 | Parcours A (fin) · Se reconnecter en Léa | Accès de l'enfant | Le parcours est débloqué et l'enfant y est inscrit (`WD23`, `WC06a`) ; la demande est « réglée » ; la commande est visible dans `WPD07` avec la facture | ☐ | |
+| REC-PAR-417 | Parcours A (fin) · Se reconnecter en Léa | Accès de l'enfant | Le parcours est débloqué et l'enfant y est inscrit (`« Mes parcours »`, `« Vue inscrit · projets repliés »`) ; la demande est « réglée » ; la commande est visible dans `« Historique de commande »` avec la facture | ☐ | |
 | REC-PAR-418 | Parcours A bis · Même demande, payer avec `02` (échec avec raison), « Changer de numéro », payer avec `01` | Échec puis réussite | « Paiement échoué » + « Raison : … » + « Échec » ; après changement de numéro, « Paiement réussi ! » ; une seule commande payée | ☐ | |
-| REC-PAR-419 | Parcours B · Marie ouvre `/parent/boutique`, ajoute « Pack Électronique » au panier, « Commander », choisit Léa comme bénéficiaire, saisit l'adresse, « Continuer vers le paiement », paie avec `01` | Achat direct de kit (C10) | Commande payée avec « Pour Léa » dans `WPD07` (filtre « Payées ») ; frise de livraison ; Kit Code `STEAMY-XXXX-XXXX` visible dans le suivi ; facture en lien direct | ☐ | |
-| REC-PAR-420 | Parcours B (suite) · Transmettre le Kit Code à Léa ; Léa le saisit sur le parcours compatible (WA01) | Kit Code qui débloque le parcours | Le parcours compatible est débloqué pour Léa ; le code passe « Utilisé » dans le suivi de Marie | ☐ | |
-| REC-PAR-421 | Parcours C · Léa candidate à « Défi robots de Cotonou » (`WD11`) ; Marie ouvre `/parent/evenements?candidature=<id>`, clique « Accepter », paie 5 000 F CFA HT (+ taxes) avec `01` | Accord à un événement payant | Candidature « À examiner » → « Paiement en attente » (place réservée) → « Acceptée » après paiement (webhook) ; côté enfant `WD10` : « En attente du paiement » puis « Acceptée » ; commande d'événement « Payée » dans `WPD07` | ☐ | |
+| REC-PAR-419 | Parcours B · Marie ouvre `/parent/boutique`, ajoute « Pack Électronique » au panier, « Commander », choisit Léa comme bénéficiaire, saisit l'adresse, « Continuer vers le paiement », paie avec `01` | Achat direct de kit (C10) | Commande payée avec « Pour Léa » dans `« Historique de commande »` (filtre « Payées ») ; frise de livraison ; Kit Code `STEAMY-XXXX-XXXX` visible dans le suivi ; facture en lien direct | ☐ | |
+| REC-PAR-420 | Parcours B (suite) · Transmettre le Kit Code à Léa ; Léa le saisit sur le parcours compatible | Kit Code qui débloque le parcours | Le parcours compatible est débloqué pour Léa ; le code passe « Utilisé » dans le suivi de Marie | ☐ | |
+| REC-PAR-421 | Parcours C · Léa candidate à « Défi robots de Cotonou » (`« Demande de participation »`) ; Marie ouvre `/parent/evenements?candidature=<id>`, clique « Accepter », paie 5 000 F CFA HT (+ taxes) avec `01` | Accord à un événement payant | Candidature « À examiner » → « Paiement en attente » (place réservée) → « Acceptée » après paiement (webhook) ; côté enfant `« Steamy Events »` : « En attente du paiement » puis « Acceptée » ; commande d'événement « Payée » dans `« Historique de commande »` | ☐ | |
 | REC-PAR-422 | Parcours C bis · Léa candidate ; Marie clique « Refuser » avec le motif « Pas pendant les examens. » | Refus d'une candidature | Badge « Refusée » avec le motif ; Léa est notifiée et voit « Refusée » ; aucune commande créée | ☐ | |
-| REC-PAR-423 | Parcours C ter · Marie inscrit directement Léa via `WPD12` à l'événement payant, paie | Inscription directe par le parent | « Paiement réussi ! » puis candidature de Léa « Acceptée » sans accord supplémentaire | ☐ | |
-| REC-PAR-424 | Parcours D · Un nouvel apprenant s'inscrit avec le numéro de Marie (ou d'un parent de test) ; le parent ouvre le SMS, se connecte, « Refuser » avec motif « Mon enfant est trop jeune » | Refus de consentement | `WPD05` passe en lecture seule « Vous avez refusé cette demande » ; l'enfant arrive sur `W18` avec le motif ; une nouvelle demande vers le même numéro est refusée pendant 30 jours (`CONSENT_COOLDOWN`) | ☐ | |
-| REC-PAR-425 | Parcours D bis · Même départ, mais « Accepter la demande » | Acceptation de consentement | Retour sur `WPD01` avec « Demande acceptée : <Prénom> peut terminer son inscription. » ; l'enfant poursuit en `W08` puis `W10` | ☐ | |
-| REC-PAR-426 | Parcours E · Koffi Adékambi invite un élève (prénom, nom, téléphone du parent, lien de parenté) ; le parent ouvre le SMS, accepte en créant l'identifiant (ou rattache son enfant existant) | Invitation d'enseignant (D60, C11) | `WPD05` affiche enseignant, classe, établissement, parcours ; après acceptation, `WPD01` : « Invitation acceptée : … a rejoint la classe « … ». » ; l'élève apparaît dans la classe (WT04) et se connecte avec l'identifiant choisi | ☐ | |
-| REC-PAR-427 | Parcours F · Marie ouvre « À valider », « Examiner » la suppression de Noé, « Valider la suppression », confirmer en modale | Suppression de compte demandée par l'enfant | Compte de Noé désactivé (`ACCOUNT_DEACTIVATED` à la connexion), `WPD03` affiche « Le compte de Noé est désactivé : la suppression reste annulable 30 jours. » ; la ligne quitte « À valider » | ☐ | |
-| REC-PAR-428 | Parcours F bis · `WPD02` : « Annuler la suppression » sur Noé | Annulation de la suppression | « La suppression du compte de Noé Adjovi est annulée : Noé peut de nouveau se connecter. » ; Noé se reconnecte ; ses commandes et factures sont inchangées | ☐ | |
-| REC-PAR-429 | Parcours F ter · Sur une famille neuve, `WPD03` › « Supprimer le compte » avec motif ; puis supprimer le compte parent dans `WPD08` | Suppression d'un enfant puis du compte parent (D54) | Le bouton « Supprimer » de `WPD08` n'est actif qu'une fois le dernier enfant supprimé ; après confirmation, session fermée, retour à `/`, `/parent` redirige vers la connexion ; factures conservées | ☐ | |
-| REC-PAR-430 | Parcours G · Marie refuse la demande de paiement de Léa avec un motif ; Léa se reconnecte | Refus d'une demande de paiement | `WPD15` en lecture seule « Vous avez refusé cette demande » ; Léa voit sa demande « refusée » avec le motif et peut en refaire une | ☐ | |
+| REC-PAR-423 | Parcours C ter · Marie inscrit directement Léa via `« Faire participer un enfant à un événement »` à l'événement payant, paie | Inscription directe par le parent | « Paiement réussi ! » puis candidature de Léa « Acceptée » sans accord supplémentaire | ☐ | |
+| REC-PAR-424 | Parcours D · Un nouvel apprenant s'inscrit avec le numéro de Marie (ou d'un parent de test) ; le parent ouvre le SMS, se connecte, « Refuser » avec motif « Mon enfant est trop jeune » | Refus de consentement | `« Demande de consentement »` passe en lecture seule « Vous avez refusé cette demande » ; l'enfant arrive sur `« Consentement refusé »` avec le motif ; une nouvelle demande vers le même numéro est refusée pendant 30 jours (`CONSENT_COOLDOWN`) | ☐ | |
+| REC-PAR-425 | Parcours D bis · Même départ, mais « Accepter la demande » | Acceptation de consentement | Retour sur `« Accueil parent »` avec « Demande acceptée : <Prénom> peut terminer son inscription. » ; l'enfant poursuit en `« Accord reçu »` puis `« Mot de passe »` | ☐ | |
+| REC-PAR-426 | Parcours E · Koffi Adékambi invite un élève (prénom, nom, téléphone du parent, lien de parenté) ; le parent ouvre le SMS, accepte en créant l'identifiant (ou rattache son enfant existant) | Invitation d'enseignant (D60, C11) | `« Demande de consentement »` affiche enseignant, classe, établissement, parcours ; après acceptation, `« Accueil parent »` : « Invitation acceptée : … a rejoint la classe « … ». » ; l'élève apparaît dans la classe et se connecte avec l'identifiant choisi | ☐ | |
+| REC-PAR-427 | Parcours F · Marie ouvre « À valider », « Examiner » la suppression de Noé, « Valider la suppression », confirmer en modale | Suppression de compte demandée par l'enfant | Compte de Noé désactivé (`ACCOUNT_DEACTIVATED` à la connexion), `« Détail enfant »` affiche « Le compte de Noé est désactivé : la suppression reste annulable 30 jours. » ; la ligne quitte « À valider » | ☐ | |
+| REC-PAR-428 | Parcours F bis · `« Mes enfants »` : « Annuler la suppression » sur Noé | Annulation de la suppression | « La suppression du compte de Noé Adjovi est annulée : Noé peut de nouveau se connecter. » ; Noé se reconnecte ; ses commandes et factures sont inchangées | ☐ | |
+| REC-PAR-429 | Parcours F ter · Sur une famille neuve, `« Détail enfant »` › « Supprimer le compte » avec motif ; puis supprimer le compte parent dans `« Paramètres parent »` | Suppression d'un enfant puis du compte parent (D54) | Le bouton « Supprimer » de `« Paramètres parent »` n'est actif qu'une fois le dernier enfant supprimé ; après confirmation, session fermée, retour à `/`, `/parent` redirige vers la connexion ; factures conservées | ☐ | |
+| REC-PAR-430 | Parcours G · Marie refuse la demande de paiement de Léa avec un motif ; Léa se reconnecte | Refus d'une demande de paiement | `« Demande de paiement »` en lecture seule « Vous avez refusé cette demande » ; Léa voit sa demande « refusée » avec le motif et peut en refaire une | ☐ | |
 | REC-PAR-431 | Parcours H · Bernard ouvre l'URL de la demande, de la commande, de la candidature et du profil de Léa | Isolation entre familles | Chaque accès renvoie la page « introuvable » correspondante (« Demande introuvable », « Commande introuvable », « Cet enfant est introuvable ») ; aucune donnée de la famille de Marie | ☐ | |
 | REC-PAR-432 | Parcours I · Rejouer les parcours A à C en 360 px | Version mobile de bout en bout | Chaque étape est réalisable au doigt, sans défilement horizontal, avec le lien SMS ouvert sur le même téléphone | ☐ | |
 
@@ -3663,7 +3663,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | Nadia (invitée, non activée) | `nadia.houngbo@steamy.test` | Invitation en attente, email « Activez votre compte enseignant Steamy » dans Mailpit avec le lien `/activation#jeton=…` (valable 7 jours), même école que Koffi, aucune classe |
 | Léa Adjovi (apprenante) | `lea.adjovi` | Élève de « 4e B · Robotique » ; tentatives `ko`, `warn`, `ok` ; commentaire de Koffi sur la tentative `warn` |
 | Yao / Sèna Kpadé (apprenants) | `yao.kpade`, `sena.kpade` | Élèves de Koffi ; la tentative `ko` de Yao est « À revoir » |
-| Marie Adjovi (parent de Léa) | `+229 01 90 00 00 01` | Lit les commentaires des enseignants dans WPD03 |
+| Marie Adjovi (parent de Léa) | `+229 01 90 00 00 01` | Lit les commentaires des enseignants dans « Détail enfant » |
 | Bernard Kpadé (parent de Yao et Sèna) | `+229 01 90 00 00 02` | |
 | Parent de la demande en attente (Kémi) | `+229 01 90 00 00 03` | SMS de consentement dans Mailpit |
 
@@ -3676,23 +3676,23 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 
 ### Écrans couverts
 
-| ID | Écran | URL |
-| --- | --- | --- |
-| WT01 | Accueil | `/enseignant` |
-| WT02 | Mes parcours encadrés | `/enseignant/parcours` |
-| WT03 | Mes classes (et quota de l'école) | `/enseignant/classes` |
-| WT04 | Élèves d'une classe | `/enseignant/classes/{id}` |
-| WT05 | Profil de l'élève et commentaires | `/enseignant/eleves/{id}?classe={id}[&tentative={id}]` |
-| WT06 | Ajouter des élèves (individuel / import par lot) | `/enseignant/eleves/ajouter?classe={id}[&onglet=lot]` |
-| WT07 | Évaluations | `/enseignant/evaluations[?filtre=…&classe=…]` |
-| WT08 | Paramètres | `/enseignant/parametres` |
-| WT09 | Steamy Events | `/enseignant/evenements`, `/enseignant/evenements/{slug}` |
-| WT10 | Détail d'un parcours encadré (et mission en lecture seule) | `/enseignant/parcours/{slug}`, `/enseignant/parcours/{slug}/missions/{id}` |
-| WT11 | Aide & support | `/enseignant/aide` |
-| WT12 | Notifications | `/enseignant/notifications` |
-| WT13 | Créer / modifier une classe | `/enseignant/classes/nouvelle`, `/enseignant/classes/{id}/modifier` |
-| ACT | Activation du compte enseignant (lien d'invitation) | `/activation#jeton=…` |
-| SHELL | Shell de l'espace enseignant, accès réservé, cloisonnement transverse | tout `/enseignant/*` |
+| Écran | URL |
+| --- | --- |
+| Accueil | `/enseignant` |
+| Mes parcours encadrés | `/enseignant/parcours` |
+| Mes classes (et quota de l'école) | `/enseignant/classes` |
+| Élèves d'une classe | `/enseignant/classes/{id}` |
+| Profil de l'élève et commentaires | `/enseignant/eleves/{id}?classe={id}[&tentative={id}]` |
+| Ajouter des élèves (individuel / import par lot) | `/enseignant/eleves/ajouter?classe={id}[&onglet=lot]` |
+| Évaluations | `/enseignant/evaluations[?filtre=…&classe=…]` |
+| Paramètres | `/enseignant/parametres` |
+| Steamy Events | `/enseignant/evenements`, `/enseignant/evenements/{slug}` |
+| Détail d'un parcours encadré (et mission en lecture seule) | `/enseignant/parcours/{slug}`, `/enseignant/parcours/{slug}/missions/{id}` |
+| Aide & support | `/enseignant/aide` |
+| Notifications | `/enseignant/notifications` |
+| Créer / modifier une classe | `/enseignant/classes/nouvelle`, `/enseignant/classes/{id}/modifier` |
+| Activation du compte enseignant (lien d'invitation) | `/activation#jeton=…` |
+| Shell de l'espace enseignant, accès réservé, cloisonnement transverse | tout `/enseignant/*` |
 
 ### Écrans
 
@@ -3712,7 +3712,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-010 | Couper l'API puis ouvrir un lien valide | Erreur serveur / réseau | Écran d'erreur au vouvoiement (titre h1) avec le détail de l'erreur et un bouton de nouvel essai ; le nouvel essai relance la vérification de l'invitation et, API rétablie, affiche le formulaire | ☐ | |
 | REC-ENS-011 | Observer l'écran pendant la vérification (réseau lent) | Chargement | Indicateur « Vérification de votre invitation… » centré, sans formulaire tant que le serveur n'a pas répondu | ☐ | |
 | REC-ENS-012 | Valider le formulaire deux fois de suite rapidement | Double envoi | Un seul envoi est traité (bouton en chargement) ; pas de message d'erreur parasite | ☐ | |
-| REC-ENS-013 | Après activation, utiliser « Mot de passe oublié » côté enseignant (WL02-WL05) puis se reconnecter | Réinitialisation par email | Sur `/mot-de-passe-oublie`, le bouton « Vous êtes enseignant ? Recevoir le code par email » permet de recevoir un code à 6 chiffres par email (Mailpit) ; après saisie du code et d'un nouveau mot de passe, `/mot-de-passe-oublie/termine` s'affiche ; la connexion avec le nouveau mot de passe mène à `/enseignant` | ☐ | |
+| REC-ENS-013 | Après activation, utiliser « Mot de passe oublié » côté enseignant (« Mot de passe oublié »-« Réinitialisé ✓ ») puis se reconnecter | Réinitialisation par email | Sur `/mot-de-passe-oublie`, le bouton « Vous êtes enseignant ? Recevoir le code par email » permet de recevoir un code à 6 chiffres par email (Mailpit) ; après saisie du code et d'un nouveau mot de passe, `/mot-de-passe-oublie/termine` s'affiche ; la connexion avec le nouveau mot de passe mène à `/enseignant` | ☐ | |
 | REC-ENS-014 | Rejouer `make seed` après activation de Nadia | Nouveau lien | Un nouvel email d'activation arrive dans Mailpit, l'ancien lien ne vaut plus (« Lien expiré ou déjà utilisé »), l'invitation est de nouveau en attente | ☐ | |
 | REC-ENS-015 | Afficher l'écran en 360 px | Version mobile | Formulaire utilisable sans défilement horizontal ; la mascotte peut disparaître ; bouton « Activer mon compte » pleine largeur | ☐ | |
 
@@ -3723,7 +3723,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-016 | Se connecter en tant que Koffi puis observer le shell | Nominal | Navigation « Navigation de votre espace » avec 7 entrées dans l'ordre : Accueil, Mes parcours, Mes classes, Évaluations, Événements, Aide, Paramètres ; l'entrée de la page courante porte l'état actif (`aria-current=page`) ; sous-titre utilisateur « Enseignant » ; cloche de notifications avec compteur | ☐ | |
 | REC-ENS-017 | Parcourir chaque entrée de navigation | Titres de page | Titres (h1) : Accueil → « Bonjour Koffi 👋 » ; Mes parcours → « Mes parcours encadrés » ; Mes classes → « Mes classes » ; Évaluations → « Évaluations » ; Événements → « Steamy Events » ; Aide → « Aide & support » ; Paramètres → « Paramètres » ; le titre de l'onglet du navigateur est renseigné | ☐ | |
 | REC-ENS-018 | Cliquer la cloche du header | Notifications | Ouverture de `/enseignant/notifications` ; aucune entrée de navigation active ; le nom accessible de la cloche est « Notifications, aucune non lue » ou indique le nombre de non lues | ☐ | |
-| REC-ENS-019 | Cliquer le profil dans le header | Raccourci profil | Ouverture de `/enseignant/parametres` (WT08) | ☐ | |
+| REC-ENS-019 | Cliquer le profil dans le header | Raccourci profil | Ouverture de `/enseignant/parametres` | ☐ | |
 | REC-ENS-020 | Se déconnecter depuis le menu du shell | Déconnexion | Redirection vers `/connexion` ; ouvrir ensuite `/enseignant` redirige vers `/connexion?next=%2Fenseignant` | ☐ | |
 | REC-ENS-021 | Se connecter en tant qu'apprenante (lea.adjovi) puis ouvrir `/enseignant` | Rôle interdit : apprenant | Redirection vers l'accueil de l'espace apprenant ; aucun contenu enseignant affiché | ☐ | |
 | REC-ENS-022 | Se connecter en tant que parent (Marie) puis ouvrir `/enseignant` | Rôle interdit : parent | Redirection vers l'accueil de l'espace parent | ☐ | |
@@ -3739,7 +3739,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-032 | Parcourir tous les écrans en 360 px | Version mobile | Navigation repliée derrière le bouton de menu du shell (fermeture par Échap) ; aucun défilement horizontal sur aucun écran ; aucun tutoiement dans les titres, libellés et boutons | ☐ | |
 | REC-ENS-033 | Vérifier le vocabulaire sur tous les écrans | Registre | Aucun libellé « formateur » ni « À corriger » ; aucun « tu / ton / ta / tes » dans les titres, libellés, boutons et onglets | ☐ | |
 
-#### WT01 · Accueil (/enseignant)
+#### Accueil (/enseignant)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -3747,14 +3747,14 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-035 | Lire la zone « Vos statistiques » | Compteurs | Trois pastilles dans l'ordre : Élèves, Classes, À revoir ; valeurs égales au nombre d'élèves actifs, au nombre de classes et au nombre de tentatives à revoir du serveur (jeu D2 : 2 tentatives à revoir avant tout commentaire : Yao et Léa) | ☐ | |
 | REC-ENS-036 | Lire la liste « Mes classes » | Cartes de classes | Une carte par classe (« 4e B · Robotique », « 3e A · Code ») avec emoji du parcours, intitulé du parcours, « n élèves » (« Aucun élève » si vide), « n invitation(s) en attente » le cas échéant et barre « Progression moyenne » ; la carte est un lien vers `/enseignant/classes/{id}` | ☐ | |
 | REC-ENS-037 | Cliquer « Voir tout » dans l'en-tête « Mes classes » | Navigation | Ouverture de `/enseignant/classes` | ☐ | |
-| REC-ENS-038 | Cliquer une carte de classe | Navigation | Ouverture de WT04 de cette classe | ☐ | |
+| REC-ENS-038 | Cliquer une carte de classe | Navigation | Ouverture de « Élèves d'une classe » de cette classe | ☐ | |
 | REC-ENS-039 | Cliquer « Ajouter des élèves » du bandeau | Navigation | Ouverture de `/enseignant/eleves/ajouter` (aucune classe présélectionnée) | ☐ | |
 | REC-ENS-040 | Lire la section « À revoir » | Tentatives à revoir | Liste « Tentatives à revoir » : une ligne par tentative échouée non commentée avec « Prénom Nom · titre du quiz », contexte « niveau ou projet · classe », badge de statut serveur, score en %, et bouton « Commenter » (nom accessible « Commenter la tentative de Prénom Nom ») | ☐ | |
-| REC-ENS-041 | Cliquer « Commenter » sur la tentative de Yao | Navigation ciblée | Ouverture de `/enseignant/eleves/{id Yao}?classe={id}&tentative={id}` (WT05) avec la tentative présélectionnée | ☐ | |
+| REC-ENS-041 | Cliquer « Commenter » sur la tentative de Yao | Navigation ciblée | Ouverture de `/enseignant/eleves/{id Yao}?classe={id}&tentative={id}` avec la tentative présélectionnée | ☐ | |
 | REC-ENS-042 | Avec plus de tentatives à revoir que de lignes affichées, observer l'en-tête de section | Lien « Voir tout » | Lien « Voir tout (N) » vers `/enseignant/evaluations?filtre=a-revoir` ; absent si toutes les tentatives sont affichées | ☐ | |
 | REC-ENS-043 | Commenter toutes les tentatives à revoir puis revenir sur l'accueil | État vide « À revoir » | Texte « Aucune tentative à revoir pour le moment. » ; compteur « À revoir » à 0 | ☐ | |
 | REC-ENS-044 | Lire la section « Décrochage » | Élève en décrochage | Liste « Élèves en décrochage » : Sèna Kpadé, « 3e A · Code · dernière activité … » (environ 10 jours), badge « Décrochage » et bouton « Voir le profil » (nom accessible « Voir le profil de Sèna Kpadé ») | ☐ | |
-| REC-ENS-045 | Cliquer « Voir le profil » sur Sèna | Navigation | Ouverture de `/enseignant/eleves/{id}?classe={id}` (WT05) avec le badge « Décrochage » visible | ☐ | |
+| REC-ENS-045 | Cliquer « Voir le profil » sur Sèna | Navigation | Ouverture de `/enseignant/eleves/{id}?classe={id}` avec le badge « Décrochage » visible | ☐ | |
 | REC-ENS-046 | Se connecter avec un compte dont tous les élèves sont actifs récemment | État vide « Décrochage » | Texte « Aucun élève en décrochage : tous ont été actifs récemment. » (à confirmer sur un jeu sans décrocheur) | ☐ | |
 | REC-ENS-047 | Se connecter en tant que Nadia (aucune classe) | Enseignante sans classe | Bandeau « Aucune classe pour l'instant » sans bouton « Ajouter des élèves » ; section « Mes classes » avec Zeti et le texte « Créez votre première classe : choisissez un parcours de l'offre de votre établissement, puis invitez vos élèves. » ; bouton « Créer une classe » vers `/enseignant/classes/nouvelle` ; sections « À revoir » et « Décrochage » absentes ; compteurs à 0 | ☐ | |
 | REC-ENS-048 | Rechercher les mots interdits sur la page | Vocabulaire | Aucun texte « À corriger » ni « formateur » n'est visible | ☐ | |
@@ -3762,27 +3762,27 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-050 | Couper l'API puis recharger | Erreur serveur / réseau | Écran « Oups, ça a coupé » dans le shell, bouton de nouvel essai fonctionnel une fois l'API rétablie | ☐ | |
 | REC-ENS-051 | Afficher la page en 360 px | Version mobile | Pastilles empilées, cartes en une colonne, lignes « À revoir » et « Décrochage » lisibles (boutons accessibles), mascotte du bandeau masquée, aucun défilement horizontal | ☐ | |
 
-#### WT02 · Mes parcours encadrés (/enseignant/parcours)
+#### Mes parcours encadrés (/enseignant/parcours)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-ENS-052 | Ouvrir la page en tant que Koffi | Nominal | Titre « Mes parcours encadrés » ; liste « Mes parcours encadrés » contenant uniquement les parcours de ses classes (Découverte de la robotique, Initiation à Scratch) ; aucun autre parcours de l'offre ni du catalogue | ☐ | |
 | REC-ENS-053 | Lire une carte de parcours | Contenu de la carte | Emoji, badges de catégorie et de difficulté, titre en lien, « n classe(s) · n élève(s) » identique à l'API | ☐ | |
-| REC-ENS-054 | Cliquer le titre d'un parcours | Navigation | Ouverture de `/enseignant/parcours/{slug}` (WT10) | ☐ | |
+| REC-ENS-054 | Cliquer le titre d'un parcours | Navigation | Ouverture de `/enseignant/parcours/{slug}` | ☐ | |
 | REC-ENS-055 | Se connecter en tant que Nadia (sans classe) | État vide | Texte « Vous n'encadrez aucun parcours pour l'instant. Créez une classe : son parcours apparaîtra ici. » avec bouton « Créer une classe » vers `/enseignant/classes/nouvelle` | ☐ | |
 | REC-ENS-056 | Créer une classe sur un nouveau parcours puis revenir ici | Mise à jour | Le parcours de la nouvelle classe apparaît avec « 1 classe · 0 élève » | ☐ | |
 | REC-ENS-057 | Ralentir le réseau | Chargement | Squelette « Chargement de vos parcours… » puis cartes | ☐ | |
 | REC-ENS-058 | Couper l'API puis recharger | Erreur serveur / réseau | Écran d'erreur au vouvoiement avec nouvel essai | ☐ | |
 | REC-ENS-059 | Afficher en 360 px | Version mobile | Cartes en une colonne, aucun défilement horizontal | ☐ | |
 
-#### WT10 · Détail d'un parcours encadré (/enseignant/parcours/{slug}) et mission en lecture seule
+#### Détail d'un parcours encadré (/enseignant/parcours/{slug}) et mission en lecture seule
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-ENS-060 | Ouvrir le détail d'un parcours encadré | Nominal | Titre de page « Parcours encadré » ; fil « Mes parcours › titre » ; en-tête avec emoji, badges catégorie et difficulté, durée en heures, « n classe(s) · n élève(s) » et description ; section « Contenu du parcours » | ☐ | |
 | REC-ENS-061 | Lire l'arbre du parcours | Arbre Projet → Niveau → Mission | Titres « Projet n · … », « Niveau n · … » (avec durée) puis une ligne par mission « Mission n », titre, durée « ⏱ … » et compteur « Aucun élève ne l'a terminée » / « 1 élève l'a terminée » / « n élèves l'ont terminée » identique à l'API ; nombre de liens « Mission … » égal au nombre de missions | ☐ | |
 | REC-ENS-062 | Cliquer une mission | Navigation | Ouverture de `/enseignant/parcours/{slug}/missions/{id}` (titre de page « Mission ») | ☐ | |
-| REC-ENS-063 | Lire le panneau « Suivi du parcours » | Progression par classe | Section « Progression par classe » : un lien par classe vers WT04 et une barre « Progression : nom de la classe » avec le pourcentage moyen | ☐ | |
+| REC-ENS-063 | Lire le panneau « Suivi du parcours » | Progression par classe | Section « Progression par classe » : un lien par classe vers « Élèves d'une classe » et une barre « Progression : nom de la classe » avec le pourcentage moyen | ☐ | |
 | REC-ENS-064 | Lire « Taux de réussite » | Taux | « Quiz formatifs » et « Évaluations sommatives » affichent un pourcentage ou « Aucune tentative » si aucune | ☐ | |
 | REC-ENS-065 | Lire « Les plus échoués » | Niveaux et projets en difficulté | Jusqu'à 3 lignes « Niveau · titre » ou « Projet · titre » avec « n % de réussite » (uniquement < 100 %) ; sinon « Aucun niveau ni projet en difficulté pour l'instant. » | ☐ | |
 | REC-ENS-066 | Ouvrir une mission | Mission en lecture seule | Fil « Mes parcours › parcours › Mission n » ; titre, projet · niveau · durée, vidéo éventuelle et contenu ; aucun bouton « Marquer comme terminée », aucun quiz à passer, aucune progression | ☐ | |
@@ -3794,15 +3794,15 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-072 | Couper l'API puis recharger | Erreur serveur / réseau | Écran d'erreur au vouvoiement avec nouvel essai | ☐ | |
 | REC-ENS-073 | Afficher en 360 px | Version mobile | Panneau de suivi sous l'arbre, lignes de mission lisibles, aucun défilement horizontal | ☐ | |
 
-#### WT03 · Mes classes et quota de l'école (/enseignant/classes)
+#### Mes classes et quota de l'école (/enseignant/classes)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-ENS-074 | Ouvrir la page en tant que Koffi | Nominal | Titre « Mes classes » ; sous-titre de liste « 2 classes » ; liste « Mes classes » avec « 4e B · Robotique » et « 3e A · Code » (cartes identiques à celles de l'accueil, liens vers `/enseignant/classes/{id}`) ; bouton « Créer une classe » vers `/enseignant/classes/nouvelle` | ☐ | |
 | REC-ENS-075 | Lire le bandeau « Quota de l'offre » | Quota valide | Zone « Quota de l'offre » : « Offre de l'établissement », nom « Offre Classe Robotique 2026 », « Valable jusqu'au … », lignes « Classes » et « Élèves » avec « utilisés / quota » identiques à l'API de l'école, barres « Classes utilisées » et « Élèves utilisés », et « Il reste n classe(s) et n place(s) d'élève(s), invitations en attente comprises. Les élèves ne paient pas : l'accès au parcours est couvert par l'offre. » | ☐ | |
 | REC-ENS-076 | Comparer le quota d'élèves avant et après l'envoi d'une invitation | Invitations comptées | Le nombre d'élèves utilisés augmente d'une unité par invitation en attente (C19) ; une invitation annulée libère la place | ☐ | |
-| REC-ENS-077 | Cliquer « Créer une classe » | Navigation | Ouverture de `/enseignant/classes/nouvelle` (WT13) | ☐ | |
-| REC-ENS-078 | Cliquer une carte de classe | Navigation | Ouverture de WT04 | ☐ | |
+| REC-ENS-077 | Cliquer « Créer une classe » | Navigation | Ouverture de `/enseignant/classes/nouvelle` | ☐ | |
+| REC-ENS-078 | Cliquer une carte de classe | Navigation | Ouverture de « Élèves d'une classe » | ☐ | |
 | REC-ENS-079 | Atteindre le quota de classes de l'offre (créer des classes jusqu'à la limite, ou ajuster l'offre côté admin) puis recharger | Quota de classes atteint | Bouton « Créer une classe » désactivé (sous forme de bouton, non lien) avec le texte « Le quota de classes de l'offre est atteint : vous ne pouvez plus créer de classe. » ; bandeau de quota avec bordure d'alerte et « Le quota de classes de l'offre est atteint. Pour l'augmenter, contactez la direction de votre établissement. » ; les cartes de classes restent ouvertes | ☐ | |
 | REC-ENS-080 | Se connecter en tant qu'Esther (offre échue) | Offre échue (C21) | Classe « 6e A · Robotique » toujours listée et ouvrable ; le bouton « Créer une classe » est désactivé (aucun lien) avec « L'offre de votre établissement est échue : la création de classes est bloquée. » ; bandeau de quota : « Échue depuis le 31 décembre 2025 » et « L'offre de l'établissement est échue : la création de classes et l'ajout d'élèves sont bloqués. Contactez la direction de votre établissement. » | ☐ | |
 | REC-ENS-081 | Se connecter en tant que Nadia (aucune classe) | État vide | Titre de liste « Aucune classe » ; Zeti et « Vous n'avez pas encore de classe. Créez-en une pour inviter vos élèves sur un parcours de l'offre de votre établissement. » ; bouton « Créer une classe » actif vers `/enseignant/classes/nouvelle` | ☐ | |
@@ -3811,13 +3811,13 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-084 | Couper l'API puis recharger | Erreur serveur / réseau | Écran d'erreur au vouvoiement avec nouvel essai | ☐ | |
 | REC-ENS-085 | Afficher en 360 px | Version mobile | Cartes en une colonne, bandeau de quota sous la liste, aucun défilement horizontal | ☐ | |
 
-#### WT13 · Créer une classe (/enseignant/classes/nouvelle) et modifier une classe (/enseignant/classes/{id}/modifier)
+#### Créer une classe (/enseignant/classes/nouvelle) et modifier une classe (/enseignant/classes/{id}/modifier)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-ENS-086 | Ouvrir `/enseignant/classes/nouvelle` en tant que Koffi | Nominal | Titre « Créer une classe » ; formulaire « Créer une classe » : champ « Nom de la classe » (obligatoire, aide « Par exemple « 4ᵉ B · Robotique ». Unique dans l'établissement. », 120 caractères au plus), groupe « Parcours » (un choix par parcours de l'offre, avec catégorie et durée « · n h »), « Niveau scolaire » (facultatif, liste du référentiel), « Établissement » en lecture seule (« nom · ville »), texte « Une classe suit un seul parcours. Seuls les parcours inclus dans l'offre de votre école sont proposés. » ; boutons « Annuler » et « Créer la classe » ; bandeau « Quota de l'offre » à droite | ☐ | |
-| REC-ENS-087 | Remplir un nom unique, choisir un parcours, un niveau scolaire, cliquer « Créer la classe » | Création réussie | Redirection vers `/enseignant/classes/{id}?confirmation=creee` (WT04) : message « La classe est créée. », titre de la classe, état vide « Ajoutez vos premiers élèves » ; le quota « Classes » augmente d'une unité dans WT03 | ☐ | |
-| REC-ENS-088 | Créer une classe sans choisir de niveau scolaire | Niveau scolaire facultatif | La classe est créée ; aucune mention de niveau sous le titre dans WT04 | ☐ | |
+| REC-ENS-087 | Remplir un nom unique, choisir un parcours, un niveau scolaire, cliquer « Créer la classe » | Création réussie | Redirection vers `/enseignant/classes/{id}?confirmation=creee` : message « La classe est créée. », titre de la classe, état vide « Ajoutez vos premiers élèves » ; le quota « Classes » augmente d'une unité dans « Mes classes » | ☐ | |
+| REC-ENS-088 | Créer une classe sans choisir de niveau scolaire | Niveau scolaire facultatif | La classe est créée ; aucune mention de niveau sous le titre dans « Élèves d'une classe » | ☐ | |
 | REC-ENS-089 | Cliquer « Créer la classe » avec tous les champs vides | Erreur de validation : champs vides | Résumé « Corrigez les erreurs suivantes : » avec « Indiquez le nom de la classe. » et « Choisissez un parcours. » ; messages affichés sous les champs ; focus sur le résumé ; aucune classe créée | ☐ | |
 | REC-ENS-090 | Saisir un nom, ne pas choisir de parcours, valider | Erreur de validation : parcours manquant | Erreur « Choisissez un parcours. » sous le groupe « Parcours » ; le nom saisi est conservé | ☐ | |
 | REC-ENS-091 | Saisir uniquement des espaces comme nom, choisir un parcours, valider | Erreur de validation : nom blanc | Erreur « Indiquez le nom de la classe. » (le nom est rogné) | ☐ | |
@@ -3829,43 +3829,43 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-097 | Ouvrir la page en tant qu'Esther (offre échue) | Offre échue (C21) | Bandeau « ⛔ L'offre de votre établissement est échue : impossible de créer une nouvelle classe. » ; bouton « Créer la classe » désactivé ; si l'offre échoit entre l'ouverture et l'envoi : message « L'offre de votre établissement est échue : la création de classes est bloquée. » | ☐ | |
 | REC-ENS-098 | Cliquer « Annuler » | Annulation | Retour sur `/enseignant/classes` sans création | ☐ | |
 | REC-ENS-099 | Double-cliquer rapidement « Créer la classe » | Double envoi | Une seule classe est créée (bouton en chargement) | ☐ | |
-| REC-ENS-100 | Ouvrir « Modifier » depuis WT04 (`/enseignant/classes/{id}/modifier`) sur une classe sans élève | Modification : classe vide | Titre « Modifier la classe » ; formulaire « Modifier la classe » prérempli ; le parcours reste modifiable ; bouton « Enregistrer » (et non « Créer la classe ») | ☐ | |
-| REC-ENS-101 | Renommer la classe puis « Enregistrer » | Modification réussie | Retour sur WT04 avec `?confirmation=modifiee` : message « La classe est enregistrée. » et nouveau nom en titre | ☐ | |
+| REC-ENS-100 | Ouvrir « Modifier » depuis « Élèves d'une classe » (`/enseignant/classes/{id}/modifier`) sur une classe sans élève | Modification : classe vide | Titre « Modifier la classe » ; formulaire « Modifier la classe » prérempli ; le parcours reste modifiable ; bouton « Enregistrer » (et non « Créer la classe ») | ☐ | |
+| REC-ENS-101 | Renommer la classe puis « Enregistrer » | Modification réussie | Retour sur « Élèves d'une classe » avec `?confirmation=modifiee` : message « La classe est enregistrée. » et nouveau nom en titre | ☐ | |
 | REC-ENS-102 | Renommer en un nom déjà pris puis enregistrer | Modification : nom déjà pris | Erreur « Une classe porte déjà ce nom dans votre établissement. » au champ nom ; classe inchangée | ☐ | |
 | REC-ENS-103 | Vider le nom en modification puis enregistrer | Modification : nom vide | Erreur « Indiquez le nom de la classe. » | ☐ | |
 | REC-ENS-104 | Ouvrir « Modifier » sur « 4e B · Robotique » (élèves inscrits) | Parcours verrouillé | Le groupe de choix du parcours est remplacé par « Parcours » en lecture seule (emoji, titre, cadenas) ; le nom et le niveau scolaire restent modifiables | ☐ | |
 | REC-ENS-105 | Modifier le niveau scolaire d'une classe avec élèves puis enregistrer | Modification partielle | Enregistrement réussi, le parcours est inchangé | ☐ | |
 | REC-ENS-106 | Ouvrir `/enseignant/classes/{id}/modifier` de la classe d'une autre enseignante | Cloisonnement | Page « Cette classe est introuvable » | ☐ | |
 | REC-ENS-107 | Ouvrir `/enseignant/classes/999999/modifier` | Classe inconnue | Page « Cette classe est introuvable » | ☐ | |
-| REC-ENS-108 | Se connecter en tant que Nadia et créer sa première classe depuis l'accueil | Première classe | Création réussie sur un parcours de l'offre, redirection vers l'état vide de WT04 « Ajoutez vos premiers élèves » | ☐ | |
+| REC-ENS-108 | Se connecter en tant que Nadia et créer sa première classe depuis l'accueil | Première classe | Création réussie sur un parcours de l'offre, redirection vers l'état vide de « Élèves d'une classe » « Ajoutez vos premiers élèves » | ☐ | |
 | REC-ENS-109 | Ralentir la liste des niveaux scolaires (réseau lent) ou couper l'API des référentiels | Chargement / erreur du référentiel | Le champ « Niveau scolaire » affiche un état de chargement ou d'erreur avec nouvel essai ; le reste du formulaire reste utilisable (le niveau est facultatif) | ☐ | |
 | REC-ENS-110 | Afficher en 360 px | Version mobile | Formulaire pleine largeur, boutons « Annuler » et « Créer la classe » accessibles, bandeau de quota sous le formulaire, aucun défilement horizontal | ☐ | |
 
-#### WT04 · Élèves d'une classe (/enseignant/classes/{id})
+#### Élèves d'une classe (/enseignant/classes/{id})
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ENS-111 | Ouvrir « 4e B · Robotique » depuis WT03 | Nominal | Titre de page « Élèves de la classe » ; fil « Mes classes › 4e B · Robotique » ; en-tête avec nom, parcours (et niveau scolaire éventuel) ; boutons « Modifier » et « Ajouter des élèves » | ☐ | |
+| REC-ENS-111 | Ouvrir « 4e B · Robotique » depuis « Mes classes » | Nominal | Titre de page « Élèves de la classe » ; fil « Mes classes › 4e B · Robotique » ; en-tête avec nom, parcours (et niveau scolaire éventuel) ; boutons « Modifier » et « Ajouter des élèves » | ☐ | |
 | REC-ENS-112 | Lire la section « Élèves (n) » | Élèves actifs | Liste « Élèves de la classe » : Léa et Yao, chacun avec « Dernière activité … » (ou « Pas encore d'activité »), barre « Progression : nom » en % et bouton « Retirer de la classe » ; nombre de lignes égal au nombre d'élèves actifs de l'API | ☐ | |
 | REC-ENS-113 | Lire la section « Invitations (n) » | Invitations en attente, refusée, expirée | Liste « Invitations » : Kémi Ahouandjinou avec badge « En attente du parent » et « Invitation envoyée le … · expire le … » ; Ola Gbaguidi avec badge « Refusée » ; Tobi Zinsou avec badge « Expirée » (ces deux dernières sans date d'expiration) | ☐ | |
 | REC-ENS-114 | Chercher un numéro de téléphone sur la page | Confidentialité | Aucun numéro de parent (« +229 », « 0190… ») n'est affiché nulle part | ☐ | |
-| REC-ENS-115 | Cliquer sur la ligne d'un élève actif | Navigation | Ouverture de `/enseignant/eleves/{id}?classe={id}` (WT05) | ☐ | |
+| REC-ENS-115 | Cliquer sur la ligne d'un élève actif | Navigation | Ouverture de `/enseignant/eleves/{id}?classe={id}` | ☐ | |
 | REC-ENS-116 | Observer la ligne de Sèna dans « 3e A · Code » | Badge « Décrochage » | Badge « Décrochage » à côté du nom de Sèna ; le lien mène à son profil | ☐ | |
 | REC-ENS-117 | Cliquer « Modifier » | Navigation | Ouverture de `/enseignant/classes/{id}/modifier` | ☐ | |
 | REC-ENS-118 | Cliquer « Ajouter des élèves » | Navigation | Ouverture de `/enseignant/eleves/ajouter?classe={id}` avec la classe présélectionnée | ☐ | |
 | REC-ENS-119 | Cliquer « Retirer de la classe » sur un élève actif | Retrait : ouverture de la confirmation | Fenêtre « Retirer cet élève de la classe ? » : « Prénom Nom ne fait plus partie de la classe et sa place est libérée dans le quota de l'établissement. » avec boutons « Annuler » et « Retirer de la classe » | ☐ | |
 | REC-ENS-120 | Dans cette fenêtre, cliquer « Annuler » (ou Échap) | Retrait annulé | La fenêtre se ferme, l'élève reste dans la classe | ☐ | |
-| REC-ENS-121 | Confirmer « Retirer de la classe » (sur un élève de test, pas Léa ni Yao du jeu D2) | Retrait confirmé | La ligne disparaît, le focus passe au titre de la liste « Élèves (n) » ; le quota d'élèves de WT03 diminue d'une unité (à confirmer sur la conservation du compte et de la progression de l'élève : spec muette) | ☐ | |
+| REC-ENS-121 | Confirmer « Retirer de la classe » (sur un élève de test, pas Léa ni Yao du jeu D2) | Retrait confirmé | La ligne disparaît, le focus passe au titre de la liste « Élèves (n) » ; le quota d'élèves de « Mes classes » diminue d'une unité (à confirmer sur la conservation du compte et de la progression de l'élève : spec muette) | ☐ | |
 | REC-ENS-122 | Cliquer « Annuler l'invitation » sur Kémi (invitation en attente) | Annulation d'une invitation en attente : confirmation | Fenêtre « Annuler cette invitation ? » : « L'invitation de Kémi Ahouandjinou est annulée et sa place est libérée dans le quota de l'établissement. » ; boutons « Annuler » et « Annuler l'invitation » | ☐ | |
-| REC-ENS-123 | Confirmer l'annulation de l'invitation | Annulation confirmée, quota libéré | La ligne disparaît ; si c'était la dernière invitation, la section « Invitations » disparaît et le focus passe à la liste ; « Élèves utilisés » diminue d'une unité dans WT03 ; le lien SMS envoyé au parent ne permet plus d'accepter (à confirmer : spec muette) | ☐ | |
+| REC-ENS-123 | Confirmer l'annulation de l'invitation | Annulation confirmée, quota libéré | La ligne disparaît ; si c'était la dernière invitation, la section « Invitations » disparaît et le focus passe à la liste ; « Élèves utilisés » diminue d'une unité dans « Mes classes » ; le lien SMS envoyé au parent ne permet plus d'accepter (à confirmer : spec muette) | ☐ | |
 | REC-ENS-124 | Cliquer « Retirer l'invitation » sur Ola (refusée) ou Tobi (expirée) | Retrait d'une invitation refusée ou expirée | Fenêtre « Retirer cette invitation ? » : « L'invitation de … est retirée de la liste. » (la place n'est pas libérée car elle ne retenait déjà plus de place) ; après confirmation la ligne disparaît | ☐ | |
 | REC-ENS-125 | Provoquer une erreur serveur à la confirmation (API coupée) puis réessayer | Erreur à la confirmation | Un message d'erreur reste affiché dans la fenêtre (alerte) pour réessayer ; la ligne n'est pas retirée | ☐ | |
 | REC-ENS-126 | Cliquer deux fois vite sur le bouton de confirmation | Double envoi | Une seule requête de retrait est traitée | ☐ | |
-| REC-ENS-127 | Ouvrir une classe sans élève ni invitation (juste créée) | Classe vide | Message de confirmation « La classe est créée. » (si arrivé après création) ; encart « Ajoutez vos premiers élèves » avec Zeti, le texte « Un par un ou par import d'un fichier. Chaque parent reçoit une demande de consentement par SMS ; l'élève rejoint la classe après son accord. » et le bouton « Ajouter des élèves » vers WT06 sur cette classe | ☐ | |
+| REC-ENS-127 | Ouvrir une classe sans élève ni invitation (juste créée) | Classe vide | Message de confirmation « La classe est créée. » (si arrivé après création) ; encart « Ajoutez vos premiers élèves » avec Zeti, le texte « Un par un ou par import d'un fichier. Chaque parent reçoit une demande de consentement par SMS ; l'élève rejoint la classe après son accord. » et le bouton « Ajouter des élèves » vers « Ajouter des élèves » sur cette classe | ☐ | |
 | REC-ENS-128 | Ouvrir une classe qui n'a que des invitations (aucun élève actif) | Aucun élève actif | Section « Élèves (0) » avec « Aucun élève actif : les élèves apparaissent ici dès que leur parent a accepté l'invitation. » ; section « Invitations » listée | ☐ | |
-| REC-ENS-129 | Après une invitation individuelle réussie (WT06), observer la page | Confirmation d'invitation | Message « La demande est envoyée au parent. L'élève rejoindra la classe après son accord. » ; le paramètre `confirmation` disparaît de l'URL après affichage | ☐ | |
-| REC-ENS-130 | Après acceptation du parent, rouvrir la classe | Invitation acceptée | L'élève passe dans « Élèves (n) » en élève actif ; la ligne d'invitation disparaît ; une notification « … a rejoint la classe » arrive dans WT12 | ☐ | |
-| REC-ENS-131 | Après refus du parent, rouvrir la classe | Invitation refusée | L'invitation affiche le badge « Refusée » ; notification « Invitation refusée : Prénom Nom » dans WT12 | ☐ | |
+| REC-ENS-129 | Après une invitation individuelle réussie, observer la page | Confirmation d'invitation | Message « La demande est envoyée au parent. L'élève rejoindra la classe après son accord. » ; le paramètre `confirmation` disparaît de l'URL après affichage | ☐ | |
+| REC-ENS-130 | Après acceptation du parent, rouvrir la classe | Invitation acceptée | L'élève passe dans « Élèves (n) » en élève actif ; la ligne d'invitation disparaît ; une notification « … a rejoint la classe » arrive dans « Notifications » | ☐ | |
+| REC-ENS-131 | Après refus du parent, rouvrir la classe | Invitation refusée | L'invitation affiche le badge « Refusée » ; notification « Invitation refusée : Prénom Nom » dans « Notifications » | ☐ | |
 | REC-ENS-132 | Ouvrir `/enseignant/classes/{id}` de la classe d'une autre enseignante | Cloisonnement | Page « Cette classe est introuvable » dans le shell, bouton « Retour à l'accueil » | ☐ | |
 | REC-ENS-133 | Ouvrir `/enseignant/classes/999999` | Classe inconnue | Page « Cette classe est introuvable » | ☐ | |
 | REC-ENS-134 | Ouvrir `/enseignant/classes/abc` | Identifiant non numérique | Page « introuvable » (à confirmer le titre exact : spec muette) | ☐ | |
@@ -3874,33 +3874,33 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-137 | Couper l'API puis recharger | Erreur serveur / réseau | Écran d'erreur au vouvoiement avec nouvel essai | ☐ | |
 | REC-ENS-138 | Afficher en 360 px | Version mobile | Lignes d'élèves et d'invitations empilées, boutons de retrait accessibles, aucun défilement horizontal | ☐ | |
 
-#### WT05 · Profil de l'élève et commentaires (/enseignant/eleves/{id}?classe={id})
+#### Profil de l'élève et commentaires (/enseignant/eleves/{id}?classe={id})
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ENS-139 | Ouvrir le profil d'un élève actif depuis WT04 | Nominal | Titre de page « Profil de l'élève » ; fil « Mes classes › classe › Prénom Nom » (liens vers `/enseignant/classes` et la classe) ; à gauche « Progression sur <parcours> » avec barre « Progression de Prénom Nom » et « Dernière activité … » ; section « Tentatives » ; à droite avatar, nom et lien de la classe, carte « Sur le parcours » (« Moyenne des quiz », « Dans la classe depuis le »), « Badges du parcours », « Commenter », « Commentaires envoyés » | ☐ | |
+| REC-ENS-139 | Ouvrir le profil d'un élève actif depuis « Élèves d'une classe » | Nominal | Titre de page « Profil de l'élève » ; fil « Mes classes › classe › Prénom Nom » (liens vers `/enseignant/classes` et la classe) ; à gauche « Progression sur <parcours> » avec barre « Progression de Prénom Nom » et « Dernière activité … » ; section « Tentatives » ; à droite avatar, nom et lien de la classe, carte « Sur le parcours » (« Moyenne des quiz », « Dans la classe depuis le »), « Badges du parcours », « Commenter », « Commentaires envoyés » | ☐ | |
 | REC-ENS-140 | Lire la section « Tentatives » d'un élève avec tentatives | Liste des tentatives | Liste « Tentatives de l'élève » : titre du quiz, « niveau ou projet · date », badge de statut serveur, score en %, et bouton/lien « Commenter » (ou badge « Commentée » si déjà commentée) | ☐ | |
 | REC-ENS-141 | Ouvrir le profil d'un élève sans tentative | Aucune tentative | Texte « Aucune tentative de quiz sur ce parcours pour l'instant. » | ☐ | |
 | REC-ENS-142 | Lire « Moyenne des quiz » d'un élève sans tentative | Moyenne absente | La valeur affichée est « — » | ☐ | |
 | REC-ENS-143 | Lire « Badges du parcours » | Badges | Liste « Badges obtenus » avec médailles et libellés ; sinon « Aucun badge obtenu pour l'instant. » | ☐ | |
 | REC-ENS-144 | Chercher des données sensibles sur la page | Confidentialité | Aucun âge (« n ans »), téléphone, date de naissance, mention de handicap ni libellé « Message au parent » | ☐ | |
 | REC-ENS-145 | Ouvrir le profil de Sèna | Élève en décrochage | Badge « Décrochage » à côté de « Dernière activité … » (environ 10 jours) | ☐ | |
-| REC-ENS-146 | Arriver depuis « Commenter » de WT01 sur la tentative de Yao | Tentative ciblée | L'URL contient `&tentative={id}` ; la ligne de la tentative est mise en évidence ; la liste « À propos de la tentative » du formulaire est présélectionnée sur ce quiz ; le texte « Visible par l'élève et son parent, qui en sont notifiés. » est affiché | ☐ | |
+| REC-ENS-146 | Arriver depuis « Commenter » de « Accueil » sur la tentative de Yao | Tentative ciblée | L'URL contient `&tentative={id}` ; la ligne de la tentative est mise en évidence ; la liste « À propos de la tentative » du formulaire est présélectionnée sur ce quiz ; le texte « Visible par l'élève et son parent, qui en sont notifiés. » est affiché | ☐ | |
 | REC-ENS-147 | Cliquer « Envoyer le commentaire » avec le champ vide | Erreur de validation : commentaire vide | Message « Écrivez votre commentaire. » sous le champ « Commentaire » ; le focus revient au champ ; rien n'est envoyé | ☐ | |
 | REC-ENS-148 | Saisir uniquement des espaces puis envoyer | Erreur de validation : commentaire blanc | Message « Écrivez votre commentaire. » | ☐ | |
 | REC-ENS-149 | Saisir un texte et suivre le compteur | Compteur de caractères | Compteur « n / 1000 » mis à jour ; la saisie est limitée à 1000 caractères | ☐ | |
 | REC-ENS-150 | Saisir un commentaire valide, tentative ciblée présélectionnée, cliquer « Envoyer le commentaire » | Commentaire envoyé | Message « Commentaire envoyé. » ; le champ est vidé et reprend le focus ; le commentaire apparaît en tête de la liste « Commentaires envoyés » avec la date, le quiz et son contexte ; la tentative affiche « Commentée » ; la liste « À propos de la tentative » est réinitialisée sur « Aucune tentative en particulier » | ☐ | |
-| REC-ENS-151 | Retourner sur l'accueil (WT01) après ce commentaire | Tentative sortie de « À revoir » | La tentative n'est plus dans « Tentatives à revoir » ; le compteur « À revoir » diminue d'une unité | ☐ | |
-| REC-ENS-152 | Ouvrir `/enseignant/evaluations?filtre=a-revoir` après le commentaire | Sortie de « À revoir » dans WT07 | La tentative n'apparaît plus dans le filtre « À revoir » ; elle apparaît avec le badge « Commentée » dans « Toutes » | ☐ | |
+| REC-ENS-151 | Retourner sur l'accueil après ce commentaire | Tentative sortie de « À revoir » | La tentative n'est plus dans « Tentatives à revoir » ; le compteur « À revoir » diminue d'une unité | ☐ | |
+| REC-ENS-152 | Ouvrir `/enseignant/evaluations?filtre=a-revoir` après le commentaire | Sortie de « À revoir » dans « Évaluations » | La tentative n'apparaît plus dans le filtre « À revoir » ; elle apparaît avec le badge « Commentée » dans « Toutes » | ☐ | |
 | REC-ENS-153 | Envoyer un commentaire sans choisir de tentative | Commentaire général | Le commentaire est enregistré, listé dans « Commentaires envoyés » sans quiz associé, aucune tentative ne passe à « Commentée » | ☐ | |
 | REC-ENS-154 | Choisir dans « À propos de la tentative » un autre quiz que celui présélectionné, envoyer | Rattachement à une autre tentative | Le commentaire est rattaché au quiz choisi ; ce quiz affiche « Commentée » | ☐ | |
-| REC-ENS-155 | Se connecter en tant que l'apprenant concerné (ex. yao.kpade) après un commentaire | Notification de l'apprenant | Une notification de type commentaire d'enseignant (« classroom.comment ») contenant le texte du commentaire est présente dans ses notifications (WD04) | ☐ | |
-| REC-ENS-156 | Se connecter en tant que le parent de l'élève (Marie pour Léa) après un commentaire | Commentaire vu par le parent | Le commentaire est lisible, en lecture seule, dans « Détail enfant » (WPD03, section commentaires des enseignants) ; le parent est notifié (WPD14, commentaire d'un enseignant). Pour Yao, dont le parent n'a pas fini son inscription : lecture à confirmer via l'API | ☐ | |
+| REC-ENS-155 | Se connecter en tant que l'apprenant concerné (ex. yao.kpade) après un commentaire | Notification de l'apprenant | Une notification de type commentaire d'enseignant (« classroom.comment ») contenant le texte du commentaire est présente dans ses notifications | ☐ | |
+| REC-ENS-156 | Se connecter en tant que le parent de l'élève (Marie pour Léa) après un commentaire | Commentaire vu par le parent | Le commentaire est lisible, en lecture seule, dans « Détail enfant » (« Détail enfant », section commentaires des enseignants) ; le parent est notifié (« Notifications », commentaire d'un enseignant). Pour Yao, dont le parent n'a pas fini son inscription : lecture à confirmer via l'API | ☐ | |
 | REC-ENS-157 | Se connecter en tant qu'un autre enseignant de la même classe | Commentaire d'un collègue (C27) | Le commentaire est visible par tous les enseignants de la classe ; la tentative commentée par un collègue n'est plus « À revoir » pour les autres | ☐ | |
 | REC-ENS-158 | Provoquer une erreur serveur à l'envoi (API coupée) | Erreur serveur / réseau | Message d'erreur au vouvoiement sous le champ ; le texte saisi est conservé ; aucun message « Commentaire envoyé. » | ☐ | |
 | REC-ENS-159 | Double-cliquer « Envoyer le commentaire » | Double envoi | Un seul commentaire est créé | ☐ | |
 | REC-ENS-160 | Cliquer « Commenter » sur une tentative de la liste « Tentatives » | Ciblage depuis la liste | L'URL ajoute `&tentative={id}` ; le formulaire se réinitialise avec la tentative présélectionnée | ☐ | |
-| REC-ENS-161 | Cliquer le lien de la classe dans la carte élève ou dans le fil | Navigation | Retour sur WT04 de la classe / sur `/enseignant/classes` | ☐ | |
+| REC-ENS-161 | Cliquer le lien de la classe dans la carte élève ou dans le fil | Navigation | Retour sur « Élèves d'une classe » de la classe / sur `/enseignant/classes` | ☐ | |
 | REC-ENS-162 | Ouvrir `/enseignant/eleves/{id}?classe={id d'une autre classe où l'élève n'est pas}` | Élève hors de la classe | Page « Cet élève est introuvable » | ☐ | |
 | REC-ENS-163 | Ouvrir `/enseignant/eleves/999999` et `/enseignant/eleves/abc` | Élève inconnu / identifiant non numérique | Page « Cet élève est introuvable » dans les deux cas | ☐ | |
 | REC-ENS-164 | Ouvrir le profil d'un élève de Koffi avec le compte de Nadia | Cloisonnement | Page « Cet élève est introuvable » | ☐ | |
@@ -3910,11 +3910,11 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-168 | Couper l'API puis recharger | Erreur serveur / réseau | Écran d'erreur au vouvoiement avec nouvel essai | ☐ | |
 | REC-ENS-169 | Afficher en 360 px | Version mobile | Colonne droite sous la colonne gauche, formulaire de commentaire et boutons utilisables, aucun défilement horizontal | ☐ | |
 
-#### WT06 · Ajouter des élèves, onglet Individuel (/enseignant/eleves/ajouter?classe={id})
+#### Ajouter des élèves, onglet Individuel (/enseignant/eleves/ajouter?classe={id})
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ENS-170 | Cliquer « Ajouter des élèves » dans WT04 | Nominal : classe présélectionnée | URL `/enseignant/eleves/ajouter?classe={id}` ; titre « Ajouter des élèves » ; fil « Mes classes › classe › Ajouter des élèves » ; onglets « Individuel » (actif) et « Import par lot » ; formulaire « Ajouter un élève » : « Prénom », « Nom », « Téléphone du parent » (avec choix du pays), « Lien de parenté » (« Choisissez le lien »), « Classe » présélectionnée ; encart « 📩 Le parent reçoit une demande de consentement par SMS. L'élève rejoint la classe après son accord. » ; bouton « Envoyer la demande » ; bandeau « Quota de l'offre » | ☐ | |
+| REC-ENS-170 | Cliquer « Ajouter des élèves » dans « Élèves d'une classe » | Nominal : classe présélectionnée | URL `/enseignant/eleves/ajouter?classe={id}` ; titre « Ajouter des élèves » ; fil « Mes classes › classe › Ajouter des élèves » ; onglets « Individuel » (actif) et « Import par lot » ; formulaire « Ajouter un élève » : « Prénom », « Nom », « Téléphone du parent » (avec choix du pays), « Lien de parenté » (« Choisissez le lien »), « Classe » présélectionnée ; encart « 📩 Le parent reçoit une demande de consentement par SMS. L'élève rejoint la classe après son accord. » ; bouton « Envoyer la demande » ; bandeau « Quota de l'offre » | ☐ | |
 | REC-ENS-171 | Ouvrir la page depuis le bandeau de l'accueil (sans classe) | Aucune classe présélectionnée | Le champ « Classe » affiche « Choisissez une classe » | ☐ | |
 | REC-ENS-172 | Chercher un téléphone ou un âge de l'apprenant sur la page | Aucun champ apprenant | Aucun champ « Téléphone de l'apprenant » ni mention « 16 ans » (D60) | ☐ | |
 | REC-ENS-173 | Cliquer « Envoyer la demande » avec tous les champs vides (classe présélectionnée) | Erreur de validation : champs vides | Résumé « Corrigez les erreurs suivantes : » ; messages « Indiquez le prénom de l'élève. », « Indiquez le nom de l'élève. », « Saisissez un numéro valide pour ce pays. », « Choisissez le lien de parenté. » ; aucun SMS envoyé ; focus sur le résumé | ☐ | |
@@ -3931,12 +3931,12 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-184 | Saisir un lien de parenté dans la liste du référentiel | Lien de parenté | La liste propose les liens du référentiel (mère, père, tuteur…) ; l'envoi accepte le lien choisi (liste exacte à confirmer : référentiel) | ☐ | |
 | REC-ENS-185 | Cliquer « Envoyer la demande » deux fois de suite | Double envoi | Une seule invitation est créée (un SMS) | ☐ | |
 | REC-ENS-186 | Couper l'API puis envoyer une demande complète | Erreur serveur / réseau | Message d'erreur au vouvoiement dans le résumé d'erreurs ; saisie conservée | ☐ | |
-| REC-ENS-187 | Ouvrir la page en tant que Nadia sans classe | Aucune classe | Zeti et « Créez d'abord une classe : les élèves rejoignent une classe, sur son parcours. » avec le bouton « Créer une classe » vers WT13 | ☐ | |
+| REC-ENS-187 | Ouvrir la page en tant que Nadia sans classe | Aucune classe | Zeti et « Créez d'abord une classe : les élèves rejoignent une classe, sur son parcours. » avec le bouton « Créer une classe » vers « Créer / modifier une classe » | ☐ | |
 | REC-ENS-188 | Ouvrir `/enseignant/eleves/ajouter?classe=999999` ou la classe d'une autre enseignante | Classe d'un autre | La classe inconnue est ignorée : le champ « Classe » reste sur « Choisissez une classe » et la classe de l'autre enseignante n'est pas proposée | ☐ | |
 | REC-ENS-189 | Ralentir le réseau, couper le référentiel des liens de parenté | Chargement / erreur du référentiel | Le champ « Lien de parenté » affiche un état de chargement ou une erreur avec nouvel essai | ☐ | |
 | REC-ENS-190 | Afficher en 360 px | Version mobile | Champs empilés, boutons accessibles, bandeau de quota sous le formulaire, aucun défilement horizontal | ☐ | |
 
-#### WT06 · Ajouter des élèves, onglet Import par lot (/enseignant/eleves/ajouter?classe={id}&onglet=lot)
+#### Ajouter des élèves, onglet Import par lot (/enseignant/eleves/ajouter?classe={id}&onglet=lot)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -3967,7 +3967,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-215 | Basculer entre « Individuel » et « Import par lot » | Onglets | L'URL change (`onglet=lot` ajouté ou retiré) et la classe présélectionnée est conservée | ☐ | |
 | REC-ENS-216 | Afficher en 360 px | Version mobile | Aperçu et rapport défilables dans leur zone sans défilement horizontal de la page ; champs de correction empilés ; boutons accessibles | ☐ | |
 
-#### WT07 · Évaluations (/enseignant/evaluations)
+#### Évaluations (/enseignant/evaluations)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -3976,7 +3976,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-219 | Cliquer l'onglet « Formatives » | Filtre formatives | URL `/enseignant/evaluations?filtre=formatives` ; seules les formatives ; compteur identique à l'API | ☐ | |
 | REC-ENS-220 | Cliquer l'onglet « Sommatives » | Filtre sommatives | URL `?filtre=sommatives` ; seules les sommatives | ☐ | |
 | REC-ENS-221 | Cliquer l'onglet « À revoir » | Filtre « À revoir » | URL `?filtre=a-revoir` ; seules les tentatives échouées non commentées ; liste « Évaluations : À revoir » ; recharger la page conserve l'onglet actif | ☐ | |
-| REC-ENS-222 | Cliquer « Commenter » sur une ligne « À revoir » | Navigation | Ouverture de `/enseignant/eleves/{id}?classe={id}&tentative={id}` (WT05) | ☐ | |
+| REC-ENS-222 | Cliquer « Commenter » sur une ligne « À revoir » | Navigation | Ouverture de `/enseignant/eleves/{id}?classe={id}&tentative={id}` | ☐ | |
 | REC-ENS-223 | Commenter toutes les tentatives à revoir puis revenir sur l'onglet « À revoir » | État vide « À revoir » | Texte « Rien à revoir : toutes les tentatives échouées ont été commentées. » | ☐ | |
 | REC-ENS-224 | Utiliser un onglet vide « Formatives » / « Sommatives » (aucune évaluation de ce type) | États vides par filtre | « Aucune évaluation formative pour l'instant. » / « Aucune évaluation sommative pour l'instant. » ; sans aucune évaluation : « Aucune évaluation pour l'instant : les tentatives de quiz de vos élèves apparaîtront ici. » | ☐ | |
 | REC-ENS-225 | Choisir « 4e B · Robotique » dans le sélecteur « Classe » | Filtre par classe | URL `/enseignant/evaluations?classe={id}` ; les évaluations de cette classe uniquement ; compteur identique à l'API | ☐ | |
@@ -3992,7 +3992,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-235 | Couper l'API puis recharger | Erreur serveur / réseau | Écran d'erreur au vouvoiement avec nouvel essai | ☐ | |
 | REC-ENS-236 | Afficher en 360 px | Version mobile | Onglets et sélecteur de classe sur plusieurs lignes sans débordement, lignes d'évaluation lisibles, bouton « Commenter » accessible, aucun défilement horizontal | ☐ | |
 
-#### WT08 · Paramètres (/enseignant/parametres)
+#### Paramètres (/enseignant/parametres)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -4024,7 +4024,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-262 | Ralentir le réseau | Chargement | Squelette « Chargement de vos paramètres… » | ☐ | |
 | REC-ENS-263 | Afficher en 360 px | Version mobile | Cartes pleine largeur, formulaires et fenêtres utilisables, aucun défilement horizontal | ☐ | |
 
-#### WT09 · Steamy Events (/enseignant/evenements et /enseignant/evenements/{slug})
+#### Steamy Events (/enseignant/evenements et /enseignant/evenements/{slug})
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -4039,7 +4039,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-272 | Cliquer « Envoyer la proposition » sans classe | Erreur de validation : classe manquante | Message « Choisissez une classe. » sous le champ « Classe » ; rien n'est envoyé | ☐ | |
 | REC-ENS-273 | Choisir « 4e B · Robotique » (déjà proposé dans le jeu D2) puis « Envoyer la proposition » | Seconde proposition à la même classe (EVENT_ALREADY_PROPOSED) | Message du serveur « Cet événement a déjà été proposé à cette classe. » dans la fenêtre ; aucun message de succès ; aucune nouvelle notification | ☐ | |
 | REC-ENS-274 | Choisir « 3e A · Code » puis « Envoyer la proposition » | Proposition réussie | Titre de fenêtre « Proposition envoyée » ; message « Les élèves et leurs parents ont été notifiés (n notification(s)). » ; bouton « Terminer » ferme la fenêtre | ☐ | |
-| REC-ENS-275 | Se connecter en tant que Sèna et son parent après la proposition | Notifications des destinataires | Sèna et Bernard Kpadé reçoivent une notification d'événement (WD04, WPD14) ; chaque élève candidate ensuite seul avec l'accord du parent (S8) | ☐ | |
+| REC-ENS-275 | Se connecter en tant que Sèna et son parent après la proposition | Notifications des destinataires | Sèna et Bernard Kpadé reçoivent une notification d'événement ; chaque élève candidate ensuite seul avec l'accord du parent (S8) | ☐ | |
 | REC-ENS-276 | Rejouer la même proposition (3e A · Code) | Seconde proposition après succès | Même message « Cet événement a déjà été proposé à cette classe. » | ☐ | |
 | REC-ENS-277 | Cliquer « Annuler » dans la fenêtre | Annulation | La fenêtre se ferme, aucune proposition envoyée ; la fenêtre rouverte est réinitialisée | ☐ | |
 | REC-ENS-278 | Proposer un événement complet, annulé ou passé (selon le jeu de données) | Événement fermé | Le bouton « Proposer à une classe » est désactivé avec une description accessible indiquant la raison de fermeture (texte exact à confirmer : libellés d'états des événements) | ☐ | |
@@ -4048,7 +4048,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-281 | Ralentir le réseau | Chargement | Squelette « Chargement des événements… » | ☐ | |
 | REC-ENS-282 | Afficher en 360 px | Version mobile | Tuiles en une colonne, fenêtre de proposition utilisable, aucun défilement horizontal | ☐ | |
 
-#### WT11 · Aide & support (/enseignant/aide)
+#### Aide & support (/enseignant/aide)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -4058,23 +4058,23 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | REC-ENS-286 | Saisir « quota » dans la recherche | Recherche locale : résultat | La question « Combien de classes et d'élèves puis-je avoir ? » est affichée | ☐ | |
 | REC-ENS-287 | Saisir « zzzz » dans la recherche | Recherche locale : aucun résultat | Message « Aucune question ne correspond. Écrivez-nous avec le formulaire ci-dessous. » | ☐ | |
 | REC-ENS-288 | Effacer la recherche | Réinitialisation | Les quatre sujets sont de nouveau tous affichés | ☐ | |
-| REC-ENS-289 | Envoyer le formulaire de contact avec tous les champs vides | Erreur de validation : champs vides | Messages d'erreur sur les champs obligatoires (nom, email ou téléphone, sujet, message) ; rien n'est envoyé (textes exacts à confirmer : formulaire commun WL24) | ☐ | |
+| REC-ENS-289 | Envoyer le formulaire de contact avec tous les champs vides | Erreur de validation : champs vides | Messages d'erreur sur les champs obligatoires (nom, email ou téléphone, sujet, message) ; rien n'est envoyé (textes exacts à confirmer : formulaire commun « Aide & contact ») | ☐ | |
 | REC-ENS-290 | Remplir « Nom », « Email ou téléphone », « Sujet » = question, « Message » puis « Envoyer » | Envoi réussi | Titre « Message envoyé » ; un email contenant le message et l'adresse indiquée arrive à l'équipe (Mailpit, `contact@steamy.local`) | ☐ | |
 | REC-ENS-291 | Saisir un email ou téléphone invalide | Contact invalide | Message d'erreur sur le champ « Email ou téléphone » (texte à confirmer) | ☐ | |
 | REC-ENS-292 | Ouvrir `/enseignant/aide?sujet=question` | Sujet présélectionné | Le sujet « question » est présélectionné dans le formulaire | ☐ | |
 | REC-ENS-293 | Couper l'API puis envoyer le formulaire | Erreur serveur / réseau | Message d'erreur au vouvoiement ; saisie conservée | ☐ | |
 | REC-ENS-294 | Afficher en 360 px | Version mobile | FAQ et formulaire en une colonne, aucun défilement horizontal | ☐ | |
 
-#### WT12 · Notifications (/enseignant/notifications)
+#### Notifications (/enseignant/notifications)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-ENS-295 | Ouvrir la page via la cloche | Nominal | Titre « Notifications » ; navigation « Filtrer les notifications » avec onglets « Toutes » (actif) et « Non lues (n) » ; liste des notifications du plus récent au plus ancien | ☐ | |
-| REC-ENS-296 | Faire refuser une invitation par un parent (SMS Mailpit, refus du consentement) puis rouvrir la page | Invitation refusée | Notification « Invitation refusée : Prénom Nom » ; un clic mène à la liste des classes (`/enseignant/classes`) ou à la classe concernée (cible exacte à confirmer : spec §5.12 indique WT04) | ☐ | |
-| REC-ENS-297 | Faire accepter une invitation par le parent | Élève ayant rejoint la classe | Notification « Prénom Nom a rejoint la classe <classe> » ; un clic mène à la classe (WT04) | ☐ | |
+| REC-ENS-296 | Faire refuser une invitation par un parent (SMS Mailpit, refus du consentement) puis rouvrir la page | Invitation refusée | Notification « Invitation refusée : Prénom Nom » ; un clic mène à la liste des classes (`/enseignant/classes`) ou à la classe concernée (cible exacte à confirmer : spec §5.12 indique « Élèves d'une classe ») | ☐ | |
+| REC-ENS-297 | Faire accepter une invitation par le parent | Élève ayant rejoint la classe | Notification « Prénom Nom a rejoint la classe <classe> » ; un clic mène à la classe | ☐ | |
 | REC-ENS-298 | Laisser une invitation expirer (ou rejouer la tâche d'expiration) | Invitation expirée | Notification d'invitation expirée (type `classroom.invitation_expired`) menant à la classe (libellé exact à confirmer : spec muette) | ☐ | |
-| REC-ENS-299 | Lancer la tâche quotidienne de détection du décrochage (`detect_dropouts`, 7 h) puis ouvrir la page | Risque de décrochage | Notification « Sèna Kpadé décroche » avec le texte « Aucune activité depuis n jours dans la classe 3e A · Code. » ; un clic mène à `/enseignant/eleves/{id}?classe={id}` (WT05) ; une seule alerte par période d'inactivité (relancer la tâche ne crée pas de doublon) ; la tâche n'est pas planifiée dans la stack e2e | ☐ | |
-| REC-ENS-300 | Faire passer une tentative à « À revoir » | Tentative à revoir | Notification menant à WT05 sur l'élève (déclenchement et texte exacts à confirmer : spec muette sur le texte) | ☐ | |
+| REC-ENS-299 | Lancer la tâche quotidienne de détection du décrochage (`detect_dropouts`, 7 h) puis ouvrir la page | Risque de décrochage | Notification « Sèna Kpadé décroche » avec le texte « Aucune activité depuis n jours dans la classe 3e A · Code. » ; un clic mène à `/enseignant/eleves/{id}?classe={id}` ; une seule alerte par période d'inactivité (relancer la tâche ne crée pas de doublon) ; la tâche n'est pas planifiée dans la stack e2e | ☐ | |
+| REC-ENS-300 | Faire passer une tentative à « À revoir » | Tentative à revoir | Notification menant à « Profil de l'élève et commentaires » sur l'élève (déclenchement et texte exacts à confirmer : spec muette sur le texte) | ☐ | |
 | REC-ENS-301 | Proposer un événement ou publier une annonce Steamy Events | Steamy Events | Notification d'événement menant à `/enseignant/evenements` (texte à confirmer) | ☐ | |
 | REC-ENS-302 | Cliquer l'onglet « Non lues (n) » | Filtre non lues | URL `/enseignant/notifications?onglet=non-lues` ; seules les notifications non lues ; le nom accessible de la cloche n'est pas « Notifications, aucune non lue » | ☐ | |
 | REC-ENS-303 | Cliquer une notification non lue | Lecture d'une notification | La notification passe à lue, la cible s'ouvre, le compteur de la cloche diminue d'une unité | ☐ | |
@@ -4094,73 +4094,73 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 | --- | --- | --- | --- | --- | --- |
 | REC-ENS-311 | Rejouer `make seed`, ouvrir Mailpit et ouvrir le lien de l'email « Activez votre compte enseignant Steamy » de Nadia | Étape 1 : invitation | L'écran « Activer votre compte » s'affiche avec l'email masqué de Nadia ; URL `/activation` après lecture du fragment | ☐ | |
 | REC-ENS-312 | Définir le mot de passe et cliquer « Activer mon compte » | Étape 2 : activation | Arrivée sur `/enseignant` « Bonjour Nadia 👋 », « Aucune classe pour l'instant », bouton « Créer une classe » | ☐ | |
-| REC-ENS-313 | Cliquer « Créer une classe », saisir un nom unique, choisir un parcours de l'offre, « Créer la classe » | Étape 3 : création de classe | Redirection vers la classe vide avec « La classe est créée. » et « Ajoutez vos premiers élèves » ; la classe et son parcours apparaissent dans WT03 et WT02 ; le quota « Classes » augmente | ☐ | |
+| REC-ENS-313 | Cliquer « Créer une classe », saisir un nom unique, choisir un parcours de l'offre, « Créer la classe » | Étape 3 : création de classe | Redirection vers la classe vide avec « La classe est créée. » et « Ajoutez vos premiers élèves » ; la classe et son parcours apparaissent dans « Mes classes » et « Mes parcours encadrés » ; le quota « Classes » augmente | ☐ | |
 | REC-ENS-314 | Cliquer « Ajouter des élèves », remplir l'élève (prénom, nom, téléphone d'un parent de test, lien), « Envoyer la demande » | Étape 4 : ajout d'un élève | Retour sur la classe avec « La demande est envoyée au parent. L'élève rejoindra la classe après son accord. » ; l'élève est « En attente du parent » ; un SMS avec lien `/consentement/…` est dans Mailpit | ☐ | |
-| REC-ENS-315 | Côté parent, ouvrir le lien du SMS (connexion du parent, WPD05), lire la demande | Étape 5 : demande de consentement | La demande indique l'invitation de Nadia (nom de l'enseignante, classe, établissement, parcours) et « couvert par l'établissement, sans paiement » | ☐ | |
-| REC-ENS-316 | Le parent crée l'identifiant de l'enfant (mot de passe initial) et clique « Accepter l'invitation » | Étape 6 : acceptation | Le parent est redirigé vers son espace (`/parent?consentement=…`) ; côté enseignante, l'élève passe dans « Élèves » et l'invitation disparaît ; notification « Prénom Nom a rejoint la classe » dans WT12 ; le quota d'élèves reste décompté | ☐ | |
-| REC-ENS-317 | Se connecter comme l'élève créé, suivre une mission et échouer à un quiz (jeu court ou compte du jeu D2 pour Yao) | Étape 7 : activité de l'élève | La tentative échouée apparaît côté enseignante dans « À revoir » de WT01, dans WT05 et dans WT07 (filtre « À revoir »), avec compteur « À revoir » incrémenté | ☐ | |
-| REC-ENS-318 | Ouvrir « Commenter » sur cette tentative, écrire un commentaire, « Envoyer le commentaire » | Étape 8 : suivi et commentaire | Message « Commentaire envoyé. » ; commentaire dans l'historique ; la tentative affiche « Commentée » et sort de « À revoir » (accueil et WT07) | ☐ | |
-| REC-ENS-319 | Se connecter comme l'élève et ouvrir ses notifications | Étape 9 : côté apprenant | Notification du commentaire de l'enseignant contenant son texte (WD04) | ☐ | |
-| REC-ENS-320 | Se connecter comme le parent et ouvrir le détail de l'enfant (WPD03) puis ses notifications (WPD14) | Étape 10 : côté parent | Le commentaire est lisible en lecture seule parmi les commentaires des enseignants de WPD03 ; notification « commentaire d'un enseignant » menant à WPD03 | ☐ | |
-| REC-ENS-321 | Retourner sur la classe de Nadia, ouvrir WT04 et WT03 | Étape 11 : contrôle final | Les compteurs d'élèves, d'invitations et le quota de WT03 sont cohérents avec l'API ; aucun numéro de parent affiché | ☐ | |
+| REC-ENS-315 | Côté parent, ouvrir le lien du SMS (connexion du parent, « Demande de consentement »), lire la demande | Étape 5 : demande de consentement | La demande indique l'invitation de Nadia (nom de l'enseignante, classe, établissement, parcours) et « couvert par l'établissement, sans paiement » | ☐ | |
+| REC-ENS-316 | Le parent crée l'identifiant de l'enfant (mot de passe initial) et clique « Accepter l'invitation » | Étape 6 : acceptation | Le parent est redirigé vers son espace (`/parent?consentement=…`) ; côté enseignante, l'élève passe dans « Élèves » et l'invitation disparaît ; notification « Prénom Nom a rejoint la classe » dans « Notifications » ; le quota d'élèves reste décompté | ☐ | |
+| REC-ENS-317 | Se connecter comme l'élève créé, suivre une mission et échouer à un quiz (jeu court ou compte du jeu D2 pour Yao) | Étape 7 : activité de l'élève | La tentative échouée apparaît côté enseignante dans « À revoir » de « Accueil », dans « Profil de l'élève et commentaires » et dans « Évaluations » (filtre « À revoir »), avec compteur « À revoir » incrémenté | ☐ | |
+| REC-ENS-318 | Ouvrir « Commenter » sur cette tentative, écrire un commentaire, « Envoyer le commentaire » | Étape 8 : suivi et commentaire | Message « Commentaire envoyé. » ; commentaire dans l'historique ; la tentative affiche « Commentée » et sort de « À revoir » (accueil et « Évaluations ») | ☐ | |
+| REC-ENS-319 | Se connecter comme l'élève et ouvrir ses notifications | Étape 9 : côté apprenant | Notification du commentaire de l'enseignant contenant son texte | ☐ | |
+| REC-ENS-320 | Se connecter comme le parent et ouvrir le détail de l'enfant puis ses notifications | Étape 10 : côté parent | Le commentaire est lisible en lecture seule parmi les commentaires des enseignants de « Détail enfant » ; notification « commentaire d'un enseignant » menant à « Détail enfant » | ☐ | |
+| REC-ENS-321 | Retourner sur la classe de Nadia, ouvrir « Élèves d'une classe » et « Mes classes » | Étape 11 : contrôle final | Les compteurs d'élèves, d'invitations et le quota de « Mes classes » sont cohérents avec l'API ; aucun numéro de parent affiché | ☐ | |
 
 #### PT2 · Invitation refusée, expirée et annulée
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ENS-322 | Envoyer une demande individuelle (WT06) à un parent de test | Départ | Invitation « En attente du parent » dans WT04 | ☐ | |
-| REC-ENS-323 | Le parent ouvre le lien du SMS puis « Refuser » avec un motif | Refus du parent | WT04 : badge « Refusée » ; WT12 : « Invitation refusée : Prénom Nom » ; la place n'est plus retenue dans le quota (WT03) | ☐ | |
+| REC-ENS-322 | Envoyer une demande individuelle à un parent de test | Départ | Invitation « En attente du parent » dans « Élèves d'une classe » | ☐ | |
+| REC-ENS-323 | Le parent ouvre le lien du SMS puis « Refuser » avec un motif | Refus du parent | « Élèves d'une classe » : badge « Refusée » ; « Notifications » : « Invitation refusée : Prénom Nom » ; la place n'est plus retenue dans le quota | ☐ | |
 | REC-ENS-324 | Renvoyer une demande au même parent dans les 30 jours | Nouvelle demande trop tôt | Message du serveur « Une demande a été refusée par ce parent il y a moins de 30 jours. » | ☐ | |
 | REC-ENS-325 | Cliquer « Retirer l'invitation » sur la ligne refusée puis confirmer | Nettoyage | La ligne disparaît (« Retirer cette invitation ? ») | ☐ | |
-| REC-ENS-326 | Laisser une invitation dépasser 7 jours (ou utiliser Tobi Zinsou du jeu D2) | Expiration | Badge « Expirée » ; notification d'expiration dans WT12 ; retrait possible par « Retirer l'invitation » | ☐ | |
+| REC-ENS-326 | Laisser une invitation dépasser 7 jours (ou utiliser Tobi Zinsou du jeu D2) | Expiration | Badge « Expirée » ; notification d'expiration dans « Notifications » ; retrait possible par « Retirer l'invitation » | ☐ | |
 | REC-ENS-327 | Annuler une invitation en attente (« Annuler l'invitation ») puis tenter d'accepter via l'ancien lien SMS côté parent | Annulation puis lien du parent | Le quota d'élèves est libéré ; le lien du parent ne permet plus de rejoindre la classe (message de demande invalide ou traitée : texte à confirmer) | ☐ | |
 
 #### PT3 · Compte existant (C11) : le parent rattache son enfant à la classe
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ENS-328 | Envoyer une invitation (WT06) pour un enfant qui possède déjà un compte Steamy, au numéro du parent de cet enfant | Départ | Invitation « En attente du parent » dans WT04 | ☐ | |
+| REC-ENS-328 | Envoyer une invitation pour un enfant qui possède déjà un compte Steamy, au numéro du parent de cet enfant | Départ | Invitation « En attente du parent » dans « Élèves d'une classe » | ☐ | |
 | REC-ENS-329 | Le parent ouvre le lien et choisit « Rattacher Prénom à la classe » dans « Prénom a-t-il déjà un compte Steamy ? », puis « Accepter l'invitation » | Rattachement | Aucune création d'identifiant n'est demandée ; retour sur `/parent?consentement=…` | ☐ | |
-| REC-ENS-330 | Retourner sur WT04 | Résultat côté enseignante | L'élève est actif dans la classe ; sa progression et son profil sont ouvrables (WT05) | ☐ | |
+| REC-ENS-330 | Retourner sur « Élèves d'une classe » | Résultat côté enseignante | L'élève est actif dans la classe ; sa progression et son profil sont ouvrables | ☐ | |
 | REC-ENS-331 | Se connecter comme cet élève | Résultat côté apprenant | Le parcours de la classe lui est accessible sans commande ni paiement | ☐ | |
 
 #### PT4 · Import par lot de bout en bout avec correction
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ENS-332 | Dans WT06, onglet « Import par lot », coller une liste de 5 lignes (valide, doublon, déjà invité, numéro invalide, ligne mal formée) et importer | Import | Rapport « 1 demande envoyée · 4 lignes à vérifier » ; lignes en erreur étiquetées « Doublon dans la liste », « Déjà dans la classe », « Numéro invalide », « Ligne mal formée » | ☐ | |
+| REC-ENS-332 | Dans « Ajouter des élèves », onglet « Import par lot », coller une liste de 5 lignes (valide, doublon, déjà invité, numéro invalide, ligne mal formée) et importer | Import | Rapport « 1 demande envoyée · 4 lignes à vérifier » ; lignes en erreur étiquetées « Doublon dans la liste », « Déjà dans la classe », « Numéro invalide », « Ligne mal formée » | ☐ | |
 | REC-ENS-333 | Corriger le numéro et le lien de parenté, « Renvoyer les lignes corrigées » | Correction | « 3 demandes envoyées · 2 lignes à vérifier » | ☐ | |
-| REC-ENS-334 | Cliquer « Voir la classe » | Contrôle dans WT04 | Les élèves envoyés sont « En attente du parent » ; les SMS sont dans Mailpit ; le quota d'élèves de WT03 a augmenté du nombre de demandes envoyées | ☐ | |
-| REC-ENS-335 | Les parents acceptent ou refusent | Suite | Les invitations se transforment en élèves actifs ou « Refusée », avec les notifications correspondantes dans WT12 | ☐ | |
+| REC-ENS-334 | Cliquer « Voir la classe » | Contrôle dans « Élèves d'une classe » | Les élèves envoyés sont « En attente du parent » ; les SMS sont dans Mailpit ; le quota d'élèves de « Mes classes » a augmenté du nombre de demandes envoyées | ☐ | |
+| REC-ENS-335 | Les parents acceptent ou refusent | Suite | Les invitations se transforment en élèves actifs ou « Refusée », avec les notifications correspondantes dans « Notifications » | ☐ | |
 
 #### PT5 · Proposer un événement à une classe
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ENS-336 | Ouvrir WT09, choisir un événement à venir, « Proposer à une classe », choisir une classe jamais ciblée, « Envoyer la proposition » | Proposition | « Les élèves et leurs parents ont été notifiés (n notification(s)). » | ☐ | |
-| REC-ENS-337 | Se connecter comme un élève de la classe puis comme son parent | Réception | Notification d'événement reçue des deux côtés (WD04, WPD14) | ☐ | |
-| REC-ENS-338 | L'élève candidate, le parent accepte (ou refuse) la candidature | Candidature | Dans WT09, section « Candidatures de mes élèves », la ligne de l'élève apparaît avec le statut correspondant (En attente du parent, En attente du paiement, Acceptée ou Refusée), sans bouton d'action | ☐ | |
+| REC-ENS-336 | Ouvrir « Steamy Events », choisir un événement à venir, « Proposer à une classe », choisir une classe jamais ciblée, « Envoyer la proposition » | Proposition | « Les élèves et leurs parents ont été notifiés (n notification(s)). » | ☐ | |
+| REC-ENS-337 | Se connecter comme un élève de la classe puis comme son parent | Réception | Notification d'événement reçue des deux côtés | ☐ | |
+| REC-ENS-338 | L'élève candidate, le parent accepte (ou refuse) la candidature | Candidature | Dans « Steamy Events », section « Candidatures de mes élèves », la ligne de l'élève apparaît avec le statut correspondant (En attente du parent, En attente du paiement, Acceptée ou Refusée), sans bouton d'action | ☐ | |
 | REC-ENS-339 | Reproposer le même événement à la même classe | Doublon | Message « Cet événement a déjà été proposé à cette classe. » | ☐ | |
 
 #### PT6 · Offre d'école échue (C21) : suivi ouvert, création et ajout bloqués
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ENS-340 | Se connecter en tant qu'Esther et ouvrir WT03 | Création de classe bloquée | « Créer une classe » désactivé avec « L'offre de votre établissement est échue : la création de classes est bloquée. » ; quota « Échue depuis le 31 décembre 2025 » | ☐ | |
+| REC-ENS-340 | Se connecter en tant qu'Esther et ouvrir « Mes classes » | Création de classe bloquée | « Créer une classe » désactivé avec « L'offre de votre établissement est échue : la création de classes est bloquée. » ; quota « Échue depuis le 31 décembre 2025 » | ☐ | |
 | REC-ENS-341 | Ouvrir `/enseignant/classes/nouvelle` | Formulaire bloqué | Bandeau d'explication et bouton « Créer la classe » désactivé | ☐ | |
-| REC-ENS-342 | Ouvrir « 6e A · Robotique » (WT04) | Suivi ouvert, ajout bloqué | Élèves, invitations et profils consultables ; « Ajouter des élèves » désactivé avec explication | ☐ | |
-| REC-ENS-343 | Ouvrir WT06 (onglets Individuel et Import par lot) | Ajout bloqué | Bandeau « L'offre de votre établissement est échue : l'ajout d'élèves est bloqué. » ; « Envoyer la demande » et « Importer et envoyer les demandes » désactivés | ☐ | |
+| REC-ENS-342 | Ouvrir « 6e A · Robotique » | Suivi ouvert, ajout bloqué | Élèves, invitations et profils consultables ; « Ajouter des élèves » désactivé avec explication | ☐ | |
+| REC-ENS-343 | Ouvrir « Ajouter des élèves » (onglets Individuel et Import par lot) | Ajout bloqué | Bandeau « L'offre de votre établissement est échue : l'ajout d'élèves est bloqué. » ; « Envoyer la demande » et « Importer et envoyer les demandes » désactivés | ☐ | |
 | REC-ENS-344 | Contourner l'interface en appelant directement l'API de création de classe ou d'invitation (outil de test d'API) avec la session d'Esther | Refus serveur | Réponse d'erreur `SCHOOL_OFFER_EXPIRED` (403) « L'offre de votre école a expiré : contactez l'équipe Steamy pour la renouveler. » ; aucune donnée créée | ☐ | |
 | REC-ENS-345 | Côté parent, accepter une invitation en attente d'une classe de l'école d'Esther | Acceptation par le parent (C21) | L'acceptation est refusée par le serveur (`SCHOOL_OFFER_EXPIRED`) ; message côté parent à confirmer (spec muette) | ☐ | |
-| REC-ENS-346 | Ouvrir WT01, WT02, WT05, WT07 avec le compte d'Esther | Suivi ouvert | Compteurs, parcours, profils d'élèves, évaluations et commentaires restent consultables et utilisables | ☐ | |
+| REC-ENS-346 | Ouvrir « Accueil », « Mes parcours encadrés », « Profil de l'élève et commentaires », « Évaluations » avec le compte d'Esther | Suivi ouvert | Compteurs, parcours, profils d'élèves, évaluations et commentaires restent consultables et utilisables | ☐ | |
 
 #### PT7 · Cloisonnement entre enseignantes
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-ENS-347 | Avec Nadia, ouvrir successivement la classe, la page de modification, le profil d'un élève et le parcours de Koffi (identifiants lus avec la session de Koffi) | Accès direct par URL | Chaque page affiche « Cette classe est introuvable », « Cet élève est introuvable », « Ce contenu est introuvable » (jamais 403) | ☐ | |
-| REC-ENS-348 | Avec Nadia, ouvrir WT01, WT02, WT03, WT07, WT09 | Données listées | Aucune classe, aucun élève, aucun parcours, aucune évaluation, aucune candidature de Koffi n'apparaît | ☐ | |
-| REC-ENS-349 | Avec Nadia, ouvrir WT06 avec `?classe=` d'une classe de Koffi | Pré-sélection | La classe n'est pas proposée ni présélectionnée | ☐ | |
+| REC-ENS-348 | Avec Nadia, ouvrir « Accueil », « Mes parcours encadrés », « Mes classes », « Évaluations », « Steamy Events » | Données listées | Aucune classe, aucun élève, aucun parcours, aucune évaluation, aucune candidature de Koffi n'apparaît | ☐ | |
+| REC-ENS-349 | Avec Nadia, ouvrir « Ajouter des élèves » avec `?classe=` d'une classe de Koffi | Pré-sélection | La classe n'est pas proposée ni présélectionnée | ☐ | |
 | REC-ENS-350 | Avec Nadia, proposer un événement | Choix de classe | Seules les classes de Nadia sont proposées | ☐ | |
 
 ---
@@ -4170,7 +4170,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 *610 lignes de scénario.*
 
 
-Domaine : back-office du personnel Steamy (WAD01 à WAD15), droits des quatre groupes, admin Django, facturation normalisée e-MECeF, TVA et AIB paramétrables, remboursements.
+Domaine : back-office du personnel Steamy (« Vue d'ensemble » à « Connexion admin »), droits des quatre groupes, admin Django, facturation normalisée e-MECeF, TVA et AIB paramétrables, remboursements.
 
 ### Pré-requis
 
@@ -4180,12 +4180,12 @@ Domaine : back-office du personnel Steamy (WAD01 à WAD15), droits des quatre gr
 
 | Groupe | Email | Accès attendu (matrice D71) |
 | --- | --- | --- |
-| Super-admin | `superadmin@steamy.test` | Tout, dont WAD13 et WAD14 ; pas `is_superuser` |
-| Contenu | `contenu@steamy.test` | WAD09, kits et stock de WAD10, événements de WAD12 |
-| Support | `support@steamy.test` | WAD06 à WAD08, commandes et livraisons de WAD10, candidatures de WAD12 |
-| Finance | `finance@steamy.test` | WAD02 à WAD05, WAD11, remboursements, factures |
+| Super-admin | `superadmin@steamy.test` | Tout, dont « Équipe et rôles » et « Paramètres généraux » ; pas `is_superuser` |
+| Contenu | `contenu@steamy.test` | « Contenu / Parcours », kits et stock de « Boutique et commandes », événements de « Steamy Events » |
+| Support | `support@steamy.test` | « Utilisateurs » à « Modération et consentements », commandes et livraisons de « Boutique et commandes », candidatures de « Steamy Events » |
+| Finance | `finance@steamy.test` | « Impact Tracker · tableau de bord KPI » à « Impact Tracker · saisie manuelle », « Paiements Mobile Money », remboursements, factures |
 
-   Tout membre du personnel vérifié ouvre WAD01.
+   Tout membre du personnel vérifié ouvre « Vue d'ensemble ».
 4. **Code TOTP** : en développement, chaque compte du personnel a un appareil « Démo » confirmé avec le secret fixe base32 `GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ` (hexadécimal `3132333435363738393031323334353637383930`). Saisir ce secret dans une application d'authentification, ou calculer le code (par exemple `oathtool -b --totp GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ`). **Un code ne sert qu'une fois par compte** : attendre la fenêtre suivante (30 s) pour se reconnecter avec le même compte. En staging, aucun appareil n'est créé : chaque membre enrôle le sien (QR code).
 5. **Comptes de test hors personnel** : parent Marie Adjovi `+229 01 90 00 00 01` (Mobile Money pilotable par le dernier chiffre du numéro : `…01` succès, `…02` échec, `…03` reste en attente), apprenante `lea.adjovi`, enseignant `koffi.adekambi@steamy.test`, parent `+229 01 90 00 00 02` (Bernard Kpadé) ; mot de passe `Steamy2026`. Léa Adjovi a une demande de pseudonyme public « LéaBot » en attente de modération.
 6. **Données D2 utiles** : une commande de kit payée, expédiée, avec Kit Code et reçu PDF ; réseaux Mobile Money du Bénin dont Celtiis ; zones de livraison (1 000 / 1 500 / 2 500 FCFA) ; l'invitation enseignant de Nadia Houngbo.
@@ -4195,44 +4195,44 @@ Domaine : back-office du personnel Steamy (WAD01 à WAD15), droits des quatre gr
 
 ### Écrans et fonctions couverts
 
-| ID | Nom | URL |
-| --- | --- | --- |
-| WAD15 | Connexion admin (2FA) | /admin/login/ |
-| WAD15-ENR | Enrôlement TOTP (première connexion) | /admin/ (redirection) |
-| ADM-IDX | Index de l'admin Django | /admin/ |
-| ADM-ERR | États transverses du back-office (accès refusé, introuvable, chargement, erreur, hors ligne) | /backoffice/… |
-| WAD01 | Vue d'ensemble | /backoffice |
-| WAD02 | Impact Tracker · tableau de bord KPI | /backoffice/impact |
-| WAD03 | Impact Tracker · détail indicateur | /backoffice/impact/indicateurs/[code] |
-| WAD04 | Impact Tracker · rapport trimestriel | /backoffice/impact/rapports/[periode] |
-| WAD05 | Impact Tracker · saisie manuelle | /backoffice/impact/rapports/[periode]/saisie |
-| WAD06 | Utilisateurs | /admin/accounts/user/ |
-| WAD07 | Détail utilisateur | /admin/accounts/user/[id]/change/ |
-| WAD08 | Modération et consentements | /admin/accounts/consentrequest/ et /admin/accounts/publicprofilereview/ |
-| WAD09 | Contenu / Parcours | /admin/catalog/course/ |
-| WAD10 | Boutique et commandes (kits, stock, commandes, Kit Codes) | /admin/shop/kit/, /admin/payments/order/, /admin/payments/kitcode/ |
-| WAD11 | Paiements Mobile Money | /admin/payments/payment/ |
-| WAD12 | Steamy Events (modération) | /admin/events/steamyevent/ et /admin/events/eventapplication/ |
-| WAD13 | Équipe et rôles (RBAC), appareils TOTP | /admin/accounts/staffmember/ |
-| WAD13-ACT | Activation d'un membre invité | /admin/activation/[jeton]/ |
-| WAD14 | Paramètres généraux | /admin/core/platformsettings/ |
-| WAD14-GAM | Barème de points (C8) et paliers de rang | /admin/core/platformsettings/[id]/change/ |
-| WAD14-TAX | TVA et AIB paramétrables (C25) | /admin/core/platformsettings/[id]/change/ |
-| WAD14-EMC | Facture normalisée e-MECeF (C26) | /admin/core/platformsettings/[id]/change/ |
-| WAD14-RES | Réseaux Mobile Money et annonces | /admin/referentials/paymentnetwork/, /admin/core/announcement/ |
-| ADM-PERM | Groupes et permissions (matrice D71) | /admin/ |
-| ADM-AUD | Journal d'audit | /admin/core/auditlog/ |
-| ADM-REM | Remboursements | /admin/payments/refund/ |
-| ADM-FAC | Factures normalisées (PDF, éléments de sécurité, facture d'export EV, échec) | /admin/payments/invoice/ |
-| ADM-SURV | Surveillance quotidienne du jeton e-MECeF | tâche `check_emecef_status` (6 h) |
-| ADM-CLI | Commandes `emecef_check` et `emecef_probe` | ligne de commande (hors CI) |
-| PARC | Parcours transverses du domaine | — |
+| Nom | URL |
+| --- | --- |
+| Connexion admin (2FA) | /admin/login/ |
+| Enrôlement TOTP (première connexion) | /admin/ (redirection) |
+| Index de l'admin Django | /admin/ |
+| États transverses du back-office (accès refusé, introuvable, chargement, erreur, hors ligne) | /backoffice/… |
+| Vue d'ensemble | /backoffice |
+| Impact Tracker · tableau de bord KPI | /backoffice/impact |
+| Impact Tracker · détail indicateur | /backoffice/impact/indicateurs/[code] |
+| Impact Tracker · rapport trimestriel | /backoffice/impact/rapports/[periode] |
+| Impact Tracker · saisie manuelle | /backoffice/impact/rapports/[periode]/saisie |
+| Utilisateurs | /admin/accounts/user/ |
+| Détail utilisateur | /admin/accounts/user/[id]/change/ |
+| Modération et consentements | /admin/accounts/consentrequest/ et /admin/accounts/publicprofilereview/ |
+| Contenu / Parcours | /admin/catalog/course/ |
+| Boutique et commandes (kits, stock, commandes, Kit Codes) | /admin/shop/kit/, /admin/payments/order/, /admin/payments/kitcode/ |
+| Paiements Mobile Money | /admin/payments/payment/ |
+| Steamy Events (modération) | /admin/events/steamyevent/ et /admin/events/eventapplication/ |
+| Équipe et rôles (RBAC), appareils TOTP | /admin/accounts/staffmember/ |
+| Activation d'un membre invité | /admin/activation/[jeton]/ |
+| Paramètres généraux | /admin/core/platformsettings/ |
+| Barème de points (C8) et paliers de rang | /admin/core/platformsettings/[id]/change/ |
+| TVA et AIB paramétrables (C25) | /admin/core/platformsettings/[id]/change/ |
+| Facture normalisée e-MECeF (C26) | /admin/core/platformsettings/[id]/change/ |
+| Réseaux Mobile Money et annonces | /admin/referentials/paymentnetwork/, /admin/core/announcement/ |
+| Groupes et permissions (matrice D71) | /admin/ |
+| Journal d'audit | /admin/core/auditlog/ |
+| Remboursements | /admin/payments/refund/ |
+| Factures normalisées (PDF, éléments de sécurité, facture d'export EV, échec) | /admin/payments/invoice/ |
+| Surveillance quotidienne du jeton e-MECeF | tâche `check_emecef_status` (6 h) |
+| Commandes `emecef_check` et `emecef_probe` | ligne de commande (hors CI) |
+| Parcours transverses du domaine | — |
 
 Convention : « Conforme » à cocher à l'exécution ; « Remarques » à remplir en cas d'écart. Les textes entre guillemets sont ceux du code ; « à confirmer (spec muette) » signale un comportement non spécifié.
 
 ---
 
-#### WAD15 · Connexion admin (2FA) (/admin/login/)
+#### Connexion admin (2FA) (/admin/login/)
 
 Page de connexion Django unique, hors shell, pour le personnel. Toute page de l'admin et tout endpoint `/api/backoffice/…` exigent une session vérifiée par TOTP (D72).
 
@@ -4259,16 +4259,16 @@ Page de connexion Django unique, hors shell, pour le personnel. Toute page de l'
 | REC-ADM-019 | Envoyer plus de 10 tentatives en une minute depuis la même adresse IP | Limitation par IP | Réponse 429 ; « Trop de tentatives de connexion : réessayez dans quelques minutes. » ; événement `staff.login_throttled` dans le journal d'audit | ☐ | |
 | REC-ADM-020 | Envoyer plus de 10 tentatives en une heure pour le même email | Limitation par email | Réponse 429 ; même message de limitation | ☐ | |
 | REC-ADM-021 | Se connecter avec un compte non membre du personnel (ex. parent Marie) | Compte hors personnel | Refus : le compte n'a pas accès à cette page (message de la page de connexion « Vous êtes connecté avec le compte …, qui n'a pas accès à cette page. » si une session existe) ; aucun accès à l'admin | ☐ | |
-| REC-ADM-022 | Se connecter sur W16 (/connexion) avec un compte du personnel | Personnel refusé sur W16 (C7) | Refus de la connexion publique ; le personnel passe uniquement par WAD15 | ☐ | |
+| REC-ADM-022 | Se connecter sur « Connexion existant » (/connexion) avec un compte du personnel | Personnel refusé sur « Connexion existant » (C7) | Refus de la connexion publique ; le personnel passe uniquement par « Connexion admin » | ☐ | |
 | REC-ADM-023 | Se connecter, puis ouvrir /admin/ après 8 heures d'inactivité (ou session invalidée) | Session expirée (C20) | Retour à /admin/login/ ; la session du personnel est limitée à 8 h | ☐ | |
-| REC-ADM-024 | Se connecter avec Finance, puis réinitialiser son TOTP depuis WAD13 (Super-admin) | Session invalidée | La session de Finance tombe ; la page suivante renvoie à /admin/login/ | ☐ | |
-| REC-ADM-025 | Désactiver le compte Support depuis WAD13 ou WAD06 pendant qu'il est connecté | Session invalidée | La session du compte désactivé tombe | ☐ | |
+| REC-ADM-024 | Se connecter avec Finance, puis réinitialiser son TOTP depuis « Équipe et rôles » (Super-admin) | Session invalidée | La session de Finance tombe ; la page suivante renvoie à /admin/login/ | ☐ | |
+| REC-ADM-025 | Désactiver le compte Support depuis « Équipe et rôles » ou « Utilisateurs » pendant qu'il est connecté | Session invalidée | La session du compte désactivé tombe | ☐ | |
 | REC-ADM-026 | Ouvrir /admin/login/ à 360 px de large | Responsive | Formulaire lisible, sans défilement horizontal | ☐ | |
 | REC-ADM-027 | Couper le serveur API puis envoyer le formulaire | Erreur réseau ou serveur | Page d'erreur du navigateur ou erreur serveur ; aucune session créée (état attendu à confirmer : spec muette) | ☐ | |
 
-#### WAD15-ENR · Enrôlement TOTP (première connexion) (/admin/ via la connexion)
+#### Enrôlement TOTP (première connexion) (/admin/ via la connexion)
 
-Un membre sans appareil TOTP confirmé n'obtient aucune session : après son mot de passe, il enrôle son application (D72). Pour tester : compte sans appareil (membre invité WAD13 ou appareil supprimé dans WAD13, ou staging).
+Un membre sans appareil TOTP confirmé n'obtient aucune session : après son mot de passe, il enrôle son application (D72). Pour tester : compte sans appareil (membre invité « Équipe et rôles » ou appareil supprimé dans « Équipe et rôles », ou staging).
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -4279,7 +4279,7 @@ Un membre sans appareil TOTP confirmé n'obtient aucune session : après son mot
 | REC-ADM-032 | Valider le formulaire sans code | Code manquant | « Saisissez le code à 6 chiffres de votre application d'authentification. » | ☐ | |
 | REC-ADM-033 | Saisir plusieurs codes faux d'affilée | Limitation | « Trop de codes incorrects : patientez quelques instants avant de réessayer. » | ☐ | |
 | REC-ADM-034 | Attendre plus de 10 minutes avant de valider le code | Enrôlement expiré | « Session de configuration expirée : reconnectez-vous. » ; retour à la connexion | ☐ | |
-| REC-ADM-035 | Après enrôlement réussi, se reconnecter | QR code non réaffiché | La connexion suivante demande le code ; aucun QR code ni secret n'est plus visible (ni dans WAD13 ni dans les appareils TOTP) | ☐ | |
+| REC-ADM-035 | Après enrôlement réussi, se reconnecter | QR code non réaffiché | La connexion suivante demande le code ; aucun QR code ni secret n'est plus visible (ni dans « Équipe et rôles » ni dans les appareils TOTP) | ☐ | |
 | REC-ADM-036 | Ouvrir directement /admin/ sans avoir confirmé l'appareil | Aucune page avant l'enrôlement | Aucune page de l'admin n'est accessible sans session vérifiée | ☐ | |
 
 #### ADM-IDX · Index de l'admin Django (/admin/)
@@ -4292,7 +4292,7 @@ Un membre sans appareil TOTP confirmé n'obtient aucune session : après son mot
 | REC-ADM-040 | Ouvrir /admin/ avec Finance | Modèles visibles | Paiements, factures, remboursements, commandes (lecture), rapports d'impact ; comptes en lecture ; pas de contenu en écriture | ☐ | |
 | REC-ADM-041 | Cliquer « Pilotage » | Lien vers le back-office | Ouvre http://localhost:3000/backoffice sans nouvelle connexion | ☐ | |
 | REC-ADM-042 | Ouvrir /admin/ sans session | Anonyme | Redirection vers /admin/login/ | ☐ | |
-| REC-ADM-043 | Se déconnecter (déconnexion de l'admin) | Déconnexion | Retour à la page de connexion ; /backoffice renvoie ensuite à WAD15 | ☐ | |
+| REC-ADM-043 | Se déconnecter (déconnexion de l'admin) | Déconnexion | Retour à la page de connexion ; /backoffice renvoie ensuite à « Connexion admin » | ☐ | |
 | REC-ADM-044 | Ouvrir l'admin à 360 px | Responsive | Navigation latérale repliable, pas de défilement horizontal de la page | ☐ | |
 | REC-ADM-045 | Modifier un objet quelconque d'un modèle (ex. un kit) | Audit | La modification apparaît dans le journal d'audit (ADM-AUD) avec l'acteur | ☐ | |
 
@@ -4303,7 +4303,7 @@ Garde du back-office (layout) : session vérifiée par TOTP, puis contrôle du g
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-ADM-046 | Ouvrir /backoffice/impact sans être connecté | Anonyme | Redirection vers /admin/login/?next=http://localhost:3000/backoffice/impact ; après connexion, retour sur la page demandée | ☐ | |
-| REC-ADM-047 | Se connecter comme parent Marie sur le front, puis ouvrir /backoffice | Parent connecté | Redirection vers WAD15 avec `next` vers /backoffice | ☐ | |
+| REC-ADM-047 | Se connecter comme parent Marie sur le front, puis ouvrir /backoffice | Parent connecté | Redirection vers « Connexion admin » avec `next` vers /backoffice | ☐ | |
 | REC-ADM-048 | Se connecter comme Support, puis ouvrir /backoffice/impact | Groupe insuffisant | Redirection vers /backoffice/acces-refuse ; titre « Accès refusé » ; « Cette page n'est pas ouverte à votre groupe » ; « Votre compte appartient au groupe Support. Un Super-admin peut modifier vos droits si nécessaire. » ; bouton « Retour à la vue d'ensemble » | ☐ | |
 | REC-ADM-049 | Support : ouvrir /backoffice/impact/rapports/2026-t4/saisie | Groupe insuffisant (saisie) | Redirection vers /backoffice/acces-refuse | ☐ | |
 | REC-ADM-050 | Support : ouvrir /backoffice/impact/rapports/2026-t4 et /backoffice/impact/indicateurs/ventes | Groupe insuffisant (rapport, détail) | Redirection vers /backoffice/acces-refuse dans les deux cas | ☐ | |
@@ -4321,11 +4321,11 @@ Garde du back-office (layout) : session vérifiée par TOTP, puis contrôle du g
 | REC-ADM-062 | Menu : se connecter en Finance | Navigation filtrée | « Vue d'ensemble », « Impact Tracker », « Paiements » ; ni Utilisateurs ni Contenu | ☐ | |
 | REC-ADM-063 | Menu : se connecter en Super-admin | Navigation filtrée | Toutes les entrées, dont Système : « Équipe & rôles » (groupes) et « Paramètres » ; lien « Paiements » vers /admin/payments/ | ☐ | |
 | REC-ADM-064 | Vérifier le bloc utilisateur du shell | Identité | Nom issu de la session et groupe(s) (ex. « Support ») sous le nom ; si plusieurs groupes, séparés par « · » | ☐ | |
-| REC-ADM-065 | Cliquer « Se déconnecter » | Déconnexion | Retour sur /admin/login/ ; /backoffice renvoie ensuite vers WAD15 | ☐ | |
+| REC-ADM-065 | Cliquer « Se déconnecter » | Déconnexion | Retour sur /admin/login/ ; /backoffice renvoie ensuite vers « Connexion admin » | ☐ | |
 | REC-ADM-066 | Parcourir les écrans du back-office en monochrome | Aspect | Aucune couleur primaire de marque ; couleur réservée aux statuts et aux graphes | ☐ | |
 | REC-ADM-067 | Lancer une vérification d'accessibilité (axe) sur chaque écran | Accessibilité | Aucune violation WCAG 2 A/AA ; focus visible ; zones de tableau défilantes nommées | ☐ | |
 
-#### WAD01 · Vue d'ensemble (/backoffice)
+#### Vue d'ensemble (/backoffice)
 
 Accessible à tout membre du personnel vérifié. Chiffres lus côté serveur (`GET backoffice/overview/`).
 
@@ -4337,8 +4337,8 @@ Accessible à tout membre du personnel vérifié. Chiffres lus côté serveur (`
 | REC-ADM-071 | Support : chercher « Voir l'Impact Tracker » et « Ouvrir le rapport » | Pas de lien Impact pour Support | Aucun de ces deux liens n'est présent | ☐ | |
 | REC-ADM-072 | Finance : ouvrir /backoffice | Liens Impact | Lien « Voir l'Impact Tracker » dans le hero (vers /backoffice/impact) et bouton « Ouvrir le rapport » (vers le trimestre) | ☐ | |
 | REC-ADM-073 | Super-admin : ouvrir /backoffice | Liens Impact | Mêmes liens que Finance | ☐ | |
-| REC-ADM-074 | Cliquer « Voir l'Impact Tracker » | Navigation | Arrivée sur /backoffice/impact (WAD02) | ☐ | |
-| REC-ADM-075 | Cliquer « Ouvrir le rapport » | Navigation | Arrivée sur /backoffice/impact/rapports/<trimestre> (WAD04) | ☐ | |
+| REC-ADM-074 | Cliquer « Voir l'Impact Tracker » | Navigation | Arrivée sur /backoffice/impact | ☐ | |
+| REC-ADM-075 | Cliquer « Ouvrir le rapport » | Navigation | Arrivée sur /backoffice/impact/rapports/<trimestre> | ☐ | |
 | REC-ADM-076 | Support : bloc « À traiter » | Liste | Titre « À traiter », sous-titre « Files d'attente de vos groupes, dans l'admin Django » ; ligne « Consentements en attente » (« Suivi des demandes adressées aux parents ») avec le nombre | ☐ | |
 | REC-ADM-077 | Support : cliquer « Consentements en attente » | Lien vers l'admin Django | Ouverture de /admin/accounts/consentrequest/?status__exact=pending avec la même session ; titre de niveau 1 contenant « demande de consentement » ; liste filtrée sur le statut en attente | ☐ | |
 | REC-ADM-078 | Finance : bloc « À traiter » | État vide | « Rien à traiter pour vos groupes. » (Finance n'a pas d'entrée aujourd'hui) | ☐ | |
@@ -4348,10 +4348,10 @@ Accessible à tout membre du personnel vérifié. Chiffres lus côté serveur (`
 | REC-ADM-082 | Avant calcul nocturne : vérifier les KPI auto | Valeur en attente | Hero « calcul en attente » ; statut « En attente » ; carte Ventes « calcul en attente » | ☐ | |
 | REC-ADM-083 | Lancer `make manage c="aggregate_daily_stats"` puis recharger | Calcul des KPI | Les valeurs des KPI automatiques apparaissent (hero, ventes) | ☐ | |
 | REC-ADM-084 | Rapport déjà soumis | Rapport soumis | Hero : « Rapport <T> soumis. » ; badge « Soumis » ; échéance de soumission faite | ☐ | |
-| REC-ADM-085 | Ouvrir WAD01 à 360 px | Responsive | Cartes empilées, hero lisible, pas de défilement horizontal | ☐ | |
-| REC-ADM-086 | Arrêter l'API puis recharger /backoffice | Erreur serveur | État d'erreur WX02 neutre (voir ADM-ERR) | ☐ | |
+| REC-ADM-085 | Ouvrir « Vue d'ensemble » à 360 px | Responsive | Cartes empilées, hero lisible, pas de défilement horizontal | ☐ | |
+| REC-ADM-086 | Arrêter l'API puis recharger /backoffice | Erreur serveur | État d'erreur « Erreur réseau / erreur de chargement » neutre (voir ADM-ERR) | ☐ | |
 
-#### WAD02 · Impact Tracker · tableau de bord KPI (/backoffice/impact)
+#### Impact Tracker · tableau de bord KPI (/backoffice/impact)
 
 Finance et Super-admin seulement. Période dans l'URL (`?periode=mois|trimestre|annee`), valeurs relues côté serveur.
 
@@ -4368,49 +4368,49 @@ Finance et Super-admin seulement. Période dans l'URL (`?periode=mois|trimestre|
 | REC-ADM-095 | Vérifier les statuts d'indicateurs | Statut D73 | Libellés « Indisponible », « En attente », « Renseignée », « Hors-cible » (< 70 % de la cible), « En dessous » (70 à moins de 100 %), « Atteinte » (≥ cible), calculés par le serveur | ☐ | |
 | REC-ADM-096 | Vérifier l'absence de tuiles de collecte | D75 | Aucun texte « Activer la collecte » ni « Configurer la collecte » | ☐ | |
 | REC-ADM-097 | Vérifier les cartes d'inclusion avec base nulle | Donnée absente | Cercle vide « — » à la place de l'anneau quand la base est nulle ou la valeur absente | ☐ | |
-| REC-ADM-098 | Cliquer « Saisie manuelle » | Navigation | Ouvre /backoffice/impact/rapports/<trimestre en cours>/saisie (WAD05) | ☐ | |
-| REC-ADM-099 | Cliquer « Rapport trimestriel » | Navigation | Redirection vers /backoffice/impact/rapports/<trimestre en cours> (WAD04) | ☐ | |
-| REC-ADM-100 | Cliquer le libellé d'un indicateur | Navigation vers WAD03 | Ouvre /backoffice/impact/indicateurs/<code> avec la période conservée (`?periode=trimestre` si choisie) | ☐ | |
+| REC-ADM-098 | Cliquer « Saisie manuelle » | Navigation | Ouvre /backoffice/impact/rapports/<trimestre en cours>/saisie | ☐ | |
+| REC-ADM-099 | Cliquer « Rapport trimestriel » | Navigation | Redirection vers /backoffice/impact/rapports/<trimestre en cours> | ☐ | |
+| REC-ADM-100 | Cliquer le libellé d'un indicateur | Navigation vers « Impact Tracker · détail indicateur » | Ouvre /backoffice/impact/indicateurs/<code> avec la période conservée (`?periode=trimestre` si choisie) | ☐ | |
 | REC-ADM-101 | Super-admin : ouvrir /backoffice/impact | Autre groupe autorisé | Même affichage que Finance | ☐ | |
 | REC-ADM-102 | Support ou Contenu : ouvrir /backoffice/impact | Refus de permission | Redirection vers /backoffice/acces-refuse (voir ADM-ERR) ; l'API répond 403 `PERMISSION_DENIED` à `backoffice/kpis/` | ☐ | |
-| REC-ADM-103 | Session non vérifiée par TOTP : appeler /api/backoffice/kpis/ | OTP requis | 403 `OTP_REQUIRED` ; le front renvoie vers WAD15 | ☐ | |
+| REC-ADM-103 | Session non vérifiée par TOTP : appeler /api/backoffice/kpis/ | OTP requis | 403 `OTP_REQUIRED` ; le front renvoie vers « Connexion admin » | ☐ | |
 | REC-ADM-104 | Aucun KPI disponible dans un groupe | État vide | « Aucun indicateur. » dans la carte du groupe | ☐ | |
 | REC-ADM-105 | Série à un seul point | Tendance | Pas de mini-courbe pour un KPI à un seul point | ☐ | |
 | REC-ADM-106 | Ralentir le réseau | Chargement | Squelette de chargement du back-office | ☐ | |
-| REC-ADM-107 | Arrêter l'API | Erreur serveur | État d'erreur WX02 neutre avec nouvel essai | ☐ | |
+| REC-ADM-107 | Arrêter l'API | Erreur serveur | État d'erreur « Erreur réseau / erreur de chargement » neutre avec nouvel essai | ☐ | |
 | REC-ADM-108 | Ouvrir la page à 360 px | Responsive | Actions de l'en-tête repliables, aucune coupure de texte, pas de défilement horizontal | ☐ | |
 | REC-ADM-109 | Vérifier les valeurs d'un KPI auto sur le jeu D2 | Valeurs de référence | Valeurs égales au calcul de référence (tâche `aggregate_daily_stats`) ; valeurs non recalculées côté navigateur | ☐ | |
 
-#### WAD03 · Impact Tracker · détail indicateur (/backoffice/impact/indicateurs/[code])
+#### Impact Tracker · détail indicateur (/backoffice/impact/indicateurs/[code])
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ADM-110 | Finance : depuis WAD02, cliquer « Ventes réalisées » | Nominal | URL /backoffice/impact/indicateurs/ventes (+ `?periode=` conservée) ; titre « Détail de l'indicateur » ; région « Ventes réalisées » avec statut, période et plage | ☐ | |
+| REC-ADM-110 | Finance : depuis « Impact Tracker · tableau de bord KPI », cliquer « Ventes réalisées » | Nominal | URL /backoffice/impact/indicateurs/ventes (+ `?periode=` conservée) ; titre « Détail de l'indicateur » ; région « Ventes réalisées » avec statut, période et plage | ☐ | |
 | REC-ADM-111 | Vérifier la carte valeur | Valeur et cible | Valeur formatée ; « Cible … · atteinte à x %» ou « Sans cible » ; histogramme « <libellé> par période » ; mention de source (« recalculé chaque nuit depuis la plateforme », « saisi par le personnel avant la soumission du rapport » ou « donnée non collectée ») | ☐ | |
 | REC-ADM-112 | Vérifier la région « Définition » | Définition serveur | Source (étiquette), Calcul (« Montant des commandes payées dans la période (FCFA) » pour Ventes réalisées), Fréquence (« Mensuelle » ou « Trimestrielle »), Référence si présente | ☐ | |
 | REC-ADM-113 | Vérifier « Historique par période » | Tableau | Tableau « Historique de l'indicateur Ventes réalisées » ; colonnes Période, Du, Au, Réponse, Statut | ☐ | |
 | REC-ADM-114 | Indicateur sans historique | État vide | « Aucune période. » dans le tableau | ☐ | |
 | REC-ADM-115 | Indicateur avec composition (inclusion) | Composition | Carte « Composition (<période>) » avec anneaux ; « — » si valeur nulle | ☐ | |
 | REC-ADM-116 | Cliquer « Impact Tracker » dans le fil d'Ariane | Navigation | Retour sur /backoffice/impact avec la même période | ☐ | |
-| REC-ADM-117 | Changer la période sur WAD03 | Période | La période change dans l'URL et les valeurs sont relues | ☐ | |
+| REC-ADM-117 | Changer la période sur « Impact Tracker · détail indicateur » | Période | La période change dans l'URL et les valeurs sont relues | ☐ | |
 | REC-ADM-118 | Ouvrir /backoffice/impact/indicateurs/inconnu | Code inconnu | Page « Page introuvable » (404 dans le shell) | ☐ | |
 | REC-ADM-119 | Support : ouvrir /backoffice/impact/indicateurs/ventes | Refus de permission | Redirection vers /backoffice/acces-refuse | ☐ | |
-| REC-ADM-120 | Anonyme : ouvrir l'URL | Non connecté | Redirection vers WAD15 avec retour à cette page | ☐ | |
-| REC-ADM-121 | Erreur serveur ou réseau | Erreur | État d'erreur WX02 neutre | ☐ | |
+| REC-ADM-120 | Anonyme : ouvrir l'URL | Non connecté | Redirection vers « Connexion admin » avec retour à cette page | ☐ | |
+| REC-ADM-121 | Erreur serveur ou réseau | Erreur | État d'erreur « Erreur réseau / erreur de chargement » neutre | ☐ | |
 | REC-ADM-122 | Ouvrir à 360 px | Responsive | Tableau défilant dans une zone nommée, pas de défilement horizontal de la page | ☐ | |
 
-#### WAD04 · Impact Tracker · rapport trimestriel (/backoffice/impact/rapports/[periode])
+#### Impact Tracker · rapport trimestriel (/backoffice/impact/rapports/[periode])
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ADM-123 | Finance : WAD02 puis « Rapport trimestriel » | Nominal | URL /backoffice/impact/rapports/<AAAA-tN> ; titre « Rapport d'impact trimestriel » ; fil d'Ariane « Impact Tracker » > « Rapport <T> » | ☐ | |
+| REC-ADM-123 | Finance : « Impact Tracker · tableau de bord KPI » puis « Rapport trimestriel » | Nominal | URL /backoffice/impact/rapports/<AAAA-tN> ; titre « Rapport d'impact trimestriel » ; fil d'Ariane « Impact Tracker » > « Rapport <T> » | ☐ | |
 | REC-ADM-124 | Vérifier l'en-tête | Contenu | « Trimestre », libellé (ex. T4 2026), badge « Brouillon », « Du … au … », barre « x / y indicateurs manuels renseignés », échéances | ☐ | |
 | REC-ADM-125 | Vérifier le tableau | Colonnes | Tableau « Indicateurs du rapport <T> » : « Indicateur clé de performance », Du, Au, Réponse, Statut, Source ; compteur « n indicateurs · format Impact Tracker (Du · Au · Réponse · Statut) » ; plages calculées par le serveur | ☐ | |
 | REC-ADM-126 | Indicateur manuel non saisi | Valeur vide | « Non renseignée » en italique dans Réponse ; statut « En attente » | ☐ | |
 | REC-ADM-127 | Rapport sans indicateur | État vide | « Aucun indicateur. » | ☐ | |
 | REC-ADM-128 | Ouvrir un trimestre inconnu (ex. /backoffice/impact/rapports/2026-t9) | Trimestre inconnu | Page « Page introuvable » (404) | ☐ | |
 | REC-ADM-129 | Ouvrir /backoffice/impact/rapports | Redirection | Redirige vers le trimestre en cours | ☐ | |
-| REC-ADM-130 | Cliquer « Saisie manuelle » (rapport en brouillon) | Navigation | Ouvre WAD05 du même trimestre | ☐ | |
+| REC-ADM-130 | Cliquer « Saisie manuelle » (rapport en brouillon) | Navigation | Ouvre « Impact Tracker · saisie manuelle » du même trimestre | ☐ | |
 | REC-ADM-131 | Cliquer « Exporter CSV » | Export asynchrone nominal | Bouton en chargement ; message de statut « Préparation de l'export CSV… Vous pouvez rester sur cette page. » ; puis « Export CSV prêt : Télécharger le CSV » (worker Celery actif) | ☐ | |
 | REC-ADM-132 | Cliquer « Télécharger le CSV » | Contenu du fichier | Fichier `rapport-impact-<AAAA-tN>.csv` ; BOM UTF-8 ; première ligne `Indicateur;Du;Au;Réponse;Statut;Source` ; séparateur `;` ; fins de ligne CRLF ; dates JJ/MM/AAAA ; décimale à virgule ; montants suffixés « FCFA » ; Oui / Non pour les booléens ; une ligne par indicateur (ex. « Recommandation du programme (1-10);… ») | ☐ | |
 | REC-ADM-133 | Saisir dans un indicateur texte une valeur commençant par =, +, - ou @ (ex. =1+1), puis exporter | Neutralisation des formules | Dans le CSV, la cellule texte est préfixée d'une apostrophe (`'=1+1`) ; les nombres négatifs restent inchangés (non préfixés) | ☐ | |
@@ -4427,14 +4427,14 @@ Finance et Super-admin seulement. Période dans l'URL (`?periode=mois|trimestre|
 | REC-ADM-144 | Cliquer « Soumettre le rapport » | Soumission nominale | Modale fermée ; badge « Soumis » ; mention « soumis le … par … » ; bouton « Soumettre » disparu ; le bouton de saisie devient « Voir la saisie » | ☐ | |
 | REC-ADM-145 | Soumettre un rapport déjà soumis (deuxième onglet) | Soumission idempotente / verrouillé | Aucune erreur visible : la page est relue ; le rapport reste « Soumis » et inchangé | ☐ | |
 | REC-ADM-146 | Support forcé à soumettre via l'API | Refus de permission | 403 `PERMISSION_DENIED` ; « Votre groupe ne peut pas soumettre le rapport d'impact. » | ☐ | |
-| REC-ADM-147 | Session TOTP expirée pendant la soumission | OTP requis | La page est rechargée et renvoie vers WAD15 | ☐ | |
+| REC-ADM-147 | Session TOTP expirée pendant la soumission | OTP requis | La page est rechargée et renvoie vers « Connexion admin » | ☐ | |
 | REC-ADM-148 | Erreur serveur pendant la soumission | Erreur serveur | Message d'erreur dans la modale (rôle alerte) : « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » ; modale reste ouverte | ☐ | |
 | REC-ADM-149 | Réseau coupé pendant la soumission | Erreur réseau | « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
-| REC-ADM-150 | Rapport soumis : cliquer « Voir la saisie » | Lecture seule | Ouvre WAD05 en lecture seule | ☐ | |
-| REC-ADM-151 | Vérifier le CSV d'un rapport soumis | Cohérence | Contenu identique à celui affiché dans WAD04 | ☐ | |
-| REC-ADM-152 | Ouvrir WAD04 à 360 px | Responsive | Tableau dans une zone défilante nommée ; actions repliables | ☐ | |
+| REC-ADM-150 | Rapport soumis : cliquer « Voir la saisie » | Lecture seule | Ouvre « Impact Tracker · saisie manuelle » en lecture seule | ☐ | |
+| REC-ADM-151 | Vérifier le CSV d'un rapport soumis | Cohérence | Contenu identique à celui affiché dans « Impact Tracker · rapport trimestriel » | ☐ | |
+| REC-ADM-152 | Ouvrir « Impact Tracker · rapport trimestriel » à 360 px | Responsive | Tableau dans une zone défilante nommée ; actions repliables | ☐ | |
 
-#### WAD05 · Impact Tracker · saisie manuelle (/backoffice/impact/rapports/[periode]/saisie)
+#### Impact Tracker · saisie manuelle (/backoffice/impact/rapports/[periode]/saisie)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -4445,7 +4445,7 @@ Finance et Super-admin seulement. Période dans l'URL (`?periode=mois|trimestre|
 | REC-ADM-157 | Appuyer sur Entrée dans un champ | Raccourci | Enregistre le brouillon (comportement du bouton par défaut) | ☐ | |
 | REC-ADM-158 | Cliquer « Valider la saisie » avec des champs vides | Vides signalés | Alerte « Saisie enregistrée, mais n indicateurs restent à renseigner. » (ou « 1 indicateur reste à renseigner. ») ; chaque champ vide affiche « À renseigner avant la soumission. » ; la saisie est tout de même enregistrée | ☐ | |
 | REC-ADM-159 | Remplir tous les champs puis « Valider la saisie » | Saisie complète | « Saisie validée : tous les indicateurs manuels sont renseignés. » avec le lien « Revoir le rapport avant de le soumettre » | ☐ | |
-| REC-ADM-160 | Cliquer « Revoir le rapport avant de le soumettre » | Navigation | Arrive sur WAD04 du trimestre ; barre de progression à 100 % | ☐ | |
+| REC-ADM-160 | Cliquer « Revoir le rapport avant de le soumettre » | Navigation | Arrive sur « Impact Tracker · rapport trimestriel » du trimestre ; barre de progression à 100 % | ☐ | |
 | REC-ADM-161 | Saisir un texte non numérique dans un champ nombre (ex. « abc ») | Validation de type | Alerte « Certaines valeurs sont invalides : corrigez les champs signalés. » ; message sous le champ : « Un nombre entier positif. » (compteur) ou « Un montant positif. » (FCFA) | ☐ | |
 | REC-ADM-162 | Saisir un nombre négatif dans un champ compteur ou FCFA | Validation de borne | Message sous le champ (« Un nombre entier positif. » / « Un montant positif. ») | ☐ | |
 | REC-ADM-163 | Saisir un décimal dans un compteur (ex. 2,5) | Validation de type | « Un nombre entier positif. » | ☐ | |
@@ -4456,7 +4456,7 @@ Finance et Super-admin seulement. Période dans l'URL (`?periode=mois|trimestre|
 | REC-ADM-168 | Enregistrer pendant que le rapport a été soumis dans un autre onglet | Rapport verrouillé | « Ce rapport a été soumis : la saisie n'est plus modifiable. » ; champs désactivés ; page relue | ☐ | |
 | REC-ADM-169 | Rapport soumis : ouvrir la saisie | Lecture seule | Bandeau « Le rapport <T> est soumis : la saisie est en lecture seule. » ; champs désactivés ; boutons « Enregistrer le brouillon » et « Valider la saisie » absents | ☐ | |
 | REC-ADM-170 | Support : ouvrir la saisie | Refus de permission | Redirection vers /backoffice/acces-refuse ; via l'API, « Votre groupe ne peut pas saisir les indicateurs d'impact. » | ☐ | |
-| REC-ADM-171 | Session TOTP expirée pendant l'enregistrement | OTP requis | La page est rechargée et renvoie vers WAD15 | ☐ | |
+| REC-ADM-171 | Session TOTP expirée pendant l'enregistrement | OTP requis | La page est rechargée et renvoie vers « Connexion admin » | ☐ | |
 | REC-ADM-172 | Arrêter l'API puis enregistrer | Erreur serveur | Alerte « Une erreur est survenue de notre côté. Réessayez dans quelques instants. » | ☐ | |
 | REC-ADM-173 | Couper le réseau puis enregistrer | Erreur réseau | « Le serveur est injoignable. Vérifiez votre connexion internet puis réessayez. » | ☐ | |
 | REC-ADM-174 | Ouvrir la saisie d'un trimestre inconnu | Trimestre inconnu | Page « Page introuvable » | ☐ | |
@@ -4464,7 +4464,7 @@ Finance et Super-admin seulement. Période dans l'URL (`?periode=mois|trimestre|
 | REC-ADM-176 | Après « Valider la saisie » seul (sans soumettre) | Aide à la saisie (Q2) | Aucun état serveur « validé » : le rapport reste « Brouillon » ; « Soumettre » ne l'exige pas | ☐ | |
 | REC-ADM-177 | Ouvrir la saisie à 360 px | Responsive | Cartes empilées, champs lisibles | ☐ | |
 
-#### WAD06 · Utilisateurs (/admin/accounts/user/)
+#### Utilisateurs (/admin/accounts/user/)
 
 Admin Django, groupe Support (lecture et modification limitée) et Super-admin ; Finance en lecture. Aucun ajout ni suppression de compte depuis cette liste (S1, S5).
 
@@ -4477,7 +4477,7 @@ Admin Django, groupe Support (lecture et modification limitée) et Super-admin ;
 | REC-ADM-182 | Filtrer par rôle (apprenant, parent, enseignant) | Filtre rôle | Seuls les comptes du rôle choisi ; le rôle « admin » n'existe pas | ☐ | |
 | REC-ADM-183 | Filtrer par statut | Filtre statut | Statuts proposés : « En attente de consentement », « Actif », « Suspendu », « Désactivé », « Anonymisé » | ☐ | |
 | REC-ADM-184 | Filtrer par pays | Filtre pays | Les comptes du pays choisi | ☐ | |
-| REC-ADM-185 | Vérifier l'absence de rôle « Admins » et de colonne « personnel » | À ne pas porter | Le personnel n'est pas listé ici (il l'est dans WAD13) ; pas de « Inviter » générique | ☐ | |
+| REC-ADM-185 | Vérifier l'absence de rôle « Admins » et de colonne « personnel » | À ne pas porter | Le personnel n'est pas listé ici (il l'est dans « Équipe et rôles ») ; pas de « Inviter » générique | ☐ | |
 | REC-ADM-186 | Cliquer « Inviter un enseignant » | Formulaire d'invitation | Ouvre /admin/classrooms/teacherinvitation/add/ ; champs email, prénom, nom, école | ☐ | |
 | REC-ADM-187 | Inviter Nadia Houngbo (email inédit, école « Collège Steamy de Cotonou ») | Invitation nominale | « Invitation envoyée à <email>. » ; email « Activez votre compte enseignant Steamy » dans Mailpit avec lien `/activation#jeton=…` valable 7 jours ; aucun compte `User` actif créé avant l'acceptation (S5) | ☐ | |
 | REC-ADM-188 | Inviter avec un email déjà utilisé par un compte | Email déjà pris | Erreur de champ : « Un compte utilise déjà cette adresse email. » ; aucune invitation | ☐ | |
@@ -4504,7 +4504,7 @@ Admin Django, groupe Support (lecture et modification limitée) et Super-admin ;
 | REC-ADM-209 | Trier par colonne et par date d'inscription | Tri | Tri croissant et décroissant corrects | ☐ | |
 | REC-ADM-210 | Panne serveur lors du chargement de la liste | Erreur serveur | Page d'erreur 500 de Django (état à confirmer : spec muette) | ☐ | |
 
-#### WAD07 · Détail utilisateur (/admin/accounts/user/[id]/change/)
+#### Détail utilisateur (/admin/accounts/user/[id]/change/)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -4531,21 +4531,21 @@ Admin Django, groupe Support (lecture et modification limitée) et Super-admin ;
 | REC-ADM-231 | Le nouveau parent accepte la demande de consentement | Remplacement du lien | Le lien parent ↔ enfant est remplacé ; l'ancien parent est prévenu | ☐ | |
 | REC-ADM-232 | Le nouveau parent refuse ou la demande expire | Demande non aboutie | Le lien d'origine reste en place | ☐ | |
 
-#### WAD08 · Modération et consentements (/admin/accounts/consentrequest/ et /admin/accounts/publicprofilereview/)
+#### Modération et consentements (/admin/accounts/consentrequest/ et /admin/accounts/publicprofilereview/)
 
 Suivi uniquement (D70) : aucune action n'accepte ni ne refuse une demande à la place du parent.
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-ADM-233 | Support : ouvrir /admin/accounts/consentrequest/ | Nominal | Colonnes : « Enfant », « Âge », origine, téléphone du parent, date, « Statut », litige ; filtres statut, origine, litige | ☐ | |
-| REC-ADM-234 | Ouvrir la liste via « Consentements en attente » de WAD01 | Filtre appliqué | URL …?status__exact=pending ; seules les demandes en attente | ☐ | |
+| REC-ADM-234 | Ouvrir la liste via « Consentements en attente » de « Vue d'ensemble » | Filtre appliqué | URL …?status__exact=pending ; seules les demandes en attente | ☐ | |
 | REC-ADM-235 | Filtrer par statut | Valeurs | « En attente », « Acceptée », « Refusée », « Expirée », « Annulée » | ☐ | |
 | REC-ADM-236 | Filtrer par origine (enfant, parent, enseignant) | Filtre origine | Les demandes de l'origine choisie | ☐ | |
 | REC-ADM-237 | Rechercher par téléphone du parent, identifiant de l'enfant, nom | Recherche | Résultats correspondants | ☐ | |
 | REC-ADM-238 | Liste des actions disponibles | D70 | Seules « Relancer le parent (SMS) » et « Marquer en litige » ; aucune action « Accepter » ni « Valider » ni « Refuser » | ☐ | |
 | REC-ADM-239 | Ouvrir la fiche d'une demande | Fiche en lecture seule | Tous les champs en lecture seule (origine, enfant, parent, statut, expiration, motif de refus, litige…) ; aucun bouton d'enregistrement | ☐ | |
 | REC-ADM-240 | Action « Relancer le parent (SMS) » sur une demande en attente | Relance nominale | « 1 relance envoyée. » ; SMS dans Mailpit | ☐ | |
-| REC-ADM-241 | Relancer deux fois de suite | Plafond de relance (W07) | Avertissement « <demande> : » + message de délai minimal entre deux envois ; aucun nouvel SMS | ☐ | |
+| REC-ADM-241 | Relancer deux fois de suite | Plafond de relance | Avertissement « <demande> : » + message de délai minimal entre deux envois ; aucun nouvel SMS | ☐ | |
 | REC-ADM-242 | Relancer au-delà des plafonds par numéro ou par IP (D24) | Quotas | Avertissement avec le message de limite | ☐ | |
 | REC-ADM-243 | Relancer une demande déjà acceptée, refusée ou expirée | Statut non relançable | Avertissement avec le message d'erreur de l'API (à confirmer : texte exact, spec muette) | ☐ | |
 | REC-ADM-244 | Action « Marquer en litige » | Litige : page de note | Page « Marquer en litige » : « La demande reste à trancher par le parent ; la note est visible du support. » ; champ « Note du litige » | ☐ | |
@@ -4561,7 +4561,7 @@ Suivi uniquement (D70) : aucune action n'accepte ni ne refuse une demande à la 
 | REC-ADM-254 | Rechercher une demande sans résultat | État vide | Message standard d'absence de résultat | ☐ | |
 | REC-ADM-255 | Suppressions programmées (/admin/accounts/deletionrequest/) | Suivi | Liste en lecture seule avec action « Annuler la suppression » ; messages de succès et d'avertissement selon l'état (à confirmer : textes, spec muette) | ☐ | |
 
-#### WAD09 · Contenu / Parcours (/admin/catalog/course/)
+#### Contenu / Parcours (/admin/catalog/course/)
 
 Groupe Contenu (écriture et publication), Super-admin (idem), Support et Finance en lecture. Le statut n'est modifiable que par les actions « Publier » et « Repasser en brouillon ».
 
@@ -4600,9 +4600,9 @@ Groupe Contenu (écriture et publication), Super-admin (idem), Support et Financ
 | REC-ADM-286 | Contenu : accéder à /admin/accounts/user/ | Refus de permission croisé | 403 | ☐ | |
 | REC-ADM-287 | Catégories et badges (/admin/catalog/category/, /admin/catalog/badge/) | Référentiels de contenu | Contenu et Super-admin en écriture ; liste « Libellé, slug, icône, couleur, parcours » pour les catégories | ☐ | |
 | REC-ADM-288 | Vérifier l'API publique des questions | `isCorrect` | Le champ `isCorrect` n'apparaît pas dans les réponses de l'API (S8) | ☐ | |
-| REC-ADM-289 | Vérifier le parcours créé dans le catalogue public (WL22) | Publication visible | Le parcours publié apparaît dans le catalogue ; le brouillon n'y apparaît pas | ☐ | |
+| REC-ADM-289 | Vérifier le parcours créé dans le catalogue public | Publication visible | Le parcours publié apparaît dans le catalogue ; le brouillon n'y apparaît pas | ☐ | |
 
-#### WAD10 · Boutique et commandes (/admin/shop/kit/, /admin/payments/order/, /admin/payments/kitcode/)
+#### Boutique et commandes (/admin/shop/kit/, /admin/payments/order/, /admin/payments/kitcode/)
 
 Kits et stock : Contenu et Super-admin (écriture), Support et Finance (lecture). Commandes : Support (livraison), Super-admin et Finance (lecture). Kit Codes : Support (révocation).
 
@@ -4637,7 +4637,7 @@ Kits et stock : Contenu et Super-admin (écriture), Support et Finance (lecture)
 | REC-ADM-316 | Ouvrir /admin/payments/paymentrequest/ | Demandes de paiement de l'enfant au parent | Liste en lecture seule (demandeur, parent, type, montant, statut, expiration) ; filtres type et statut | ☐ | |
 | REC-ADM-317 | Rechercher une commande inexistante | État vide | Message standard d'absence de résultat | ☐ | |
 
-#### WAD11 · Paiements Mobile Money (/admin/payments/payment/)
+#### Paiements Mobile Money (/admin/payments/payment/)
 
 Finance (lecture complète), Super-admin et Support (lecture, sans le champ `payload`). Contenu : aucun accès.
 
@@ -4661,7 +4661,7 @@ Finance (lecture complète), Super-admin et Support (lecture, sans le champ `pay
 | REC-ADM-333 | Chercher une action de remboursement ou de modification sur la liste | Lecture seule | Aucune action sur la liste ; le remboursement passe par ADM-REM | ☐ | |
 | REC-ADM-334 | Ouvrir /admin/payments/payment/ à 360 px | Responsive | Bandeau d'agrégats sur plusieurs lignes, sans défilement horizontal de la page | ☐ | |
 
-#### WAD12 · Steamy Events (modération) (/admin/events/steamyevent/ et /admin/events/eventapplication/)
+#### Steamy Events (modération) (/admin/events/steamyevent/ et /admin/events/eventapplication/)
 
 Événements : Contenu et Super-admin. Candidatures : suivi par Support, aucune confirmation par le personnel (S3, C3).
 
@@ -4687,7 +4687,7 @@ Finance (lecture complète), Super-admin et Support (lecture, sans le champ `pay
 | REC-ADM-352 | Ouvrir /admin/events/eventticket/ et /admin/events/eventproposal/ | Tickets et propositions | Listes en lecture seule (tickets offerts à la certification, propositions des enseignants) | ☐ | |
 | REC-ADM-353 | Liste de candidatures vide | État vide | Message standard d'absence de résultat | ☐ | |
 
-#### WAD13 · Équipe et rôles (RBAC), appareils TOTP (/admin/accounts/staffmember/)
+#### Équipe et rôles (RBAC), appareils TOTP (/admin/accounts/staffmember/)
 
 Super-admin seulement. Les autres groupes n'ont aucun accès à l'équipe.
 
@@ -4708,7 +4708,7 @@ Super-admin seulement. Les autres groupes n'ont aucun accès à l'équipe.
 | REC-ADM-366 | Action « Révoquer l'invitation » sur une invitation en attente | Révocation nominale | « <membre> : invitation révoquée. » ; lien invalidé ; compte désactivé ; journal `staff.invitation_revoked` | ☐ | |
 | REC-ADM-367 | Révoquer une invitation déjà acceptée ou inexistante | Aucune invitation en attente | Avertissement « <membre> : aucune invitation en attente. » | ☐ | |
 | REC-ADM-368 | Action « Réinitialiser le TOTP » sur un membre | Réinitialisation nominale | « TOTP réinitialisé : le membre se réenrôle à sa prochaine connexion. » ; colonne « TOTP » décochée ; ses sessions sont fermées | ☐ | |
-| REC-ADM-369 | Le membre réinitialisé se reconnecte | Réenrôlement | Mot de passe puis page « Configurer la double authentification » (voir WAD15-ENR) | ☐ | |
+| REC-ADM-369 | Le membre réinitialisé se reconnecte | Réenrôlement | Mot de passe puis page « Configurer la double authentification » (voir « Enrôlement TOTP ») | ☐ | |
 | REC-ADM-370 | Ouvrir la fiche d'un membre | Fiche | Sections : identité, accès (groupes, indicateur de super-utilisateur en lecture seule, statut en lecture seule), dates ; sélecteur horizontal de groupes | ☐ | |
 | REC-ADM-371 | Changer les groupes d'un membre | Modification des groupes | Droits mis à jour à la prochaine requête (matrice D71) ; journal d'audit | ☐ | |
 | REC-ADM-372 | Retirer le groupe Super-admin au dernier Super-admin | Garde-fou du dernier Super-admin | Erreur « Le dernier Super-admin ne peut pas quitter ce groupe. » | ☐ | |
@@ -4721,12 +4721,12 @@ Super-admin seulement. Les autres groupes n'ont aucun accès à l'équipe.
 | REC-ADM-379 | Ouvrir /admin/auth/group/ | Groupes | Liste des 4 groupes (Super-admin, Contenu, Support, Finance) ; permissions conformes à la matrice (voir ADM-PERM) ; un droit ajouté à la main disparaît au `migrate` suivant | ☐ | |
 | REC-ADM-380 | Rechercher dans l'équipe sans résultat | État vide | Message standard d'absence de résultat | ☐ | |
 
-#### WAD13-ACT · Activation d'un membre invité (/admin/activation/[jeton]/)
+#### Activation d'un membre invité (/admin/activation/[jeton]/)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-ADM-381 | Ouvrir le lien reçu dans Mailpit | Nominal | Le jeton est retiré de l'URL (redirection vers /admin/activation/definir/) ; page « Activer votre accès » : « Choisissez le mot de passe du compte <email>. Vous configurerez ensuite votre application d'authentification. » ; bouton « Enregistrer et continuer » | ☐ | |
-| REC-ADM-382 | Choisir un mot de passe valide | Mot de passe valide | Passage à l'enrôlement TOTP (WAD15-ENR) ; aucune session avant le premier code confirmé ; journal `staff.activated` | ☐ | |
+| REC-ADM-382 | Choisir un mot de passe valide | Mot de passe valide | Passage à l'enrôlement TOTP ; aucune session avant le premier code confirmé ; journal `staff.activated` | ☐ | |
 | REC-ADM-383 | Choisir un mot de passe trop faible ou deux mots de passe différents | Mot de passe refusé | « Le mot de passe n'a pas été accepté. » + messages des validateurs | ☐ | |
 | REC-ADM-384 | Ouvrir un lien expiré (plus de 72 h) | Lien expiré | « Ce lien d'activation n'est plus valable : il a expiré ou a déjà servi. » ; « Demandez un nouveau lien à un Super-admin, ou connectez-vous si votre accès est déjà activé. » | ☐ | |
 | REC-ADM-385 | Rouvrir un lien déjà utilisé | Lien utilisé | Même message de lien non valable | ☐ | |
@@ -4736,7 +4736,7 @@ Super-admin seulement. Les autres groupes n'ont aucun accès à l'équipe.
 | REC-ADM-389 | Vérifier les journaux d'accès | Jeton masqué | Le jeton n'apparaît pas dans les journaux d'accès | ☐ | |
 | REC-ADM-390 | Après activation, se connecter normalement | Connexion suivante | Email, mot de passe choisi, code TOTP de l'application | ☐ | |
 
-#### WAD14 · Paramètres généraux (/admin/core/platformsettings/)
+#### Paramètres généraux (/admin/core/platformsettings/)
 
 Super-admin (lecture et modification). Support : lecture seule. Réglage unique (singleton) relu à chaque usage, aucun cache serveur à invalider.
 
@@ -4753,13 +4753,13 @@ Super-admin (lecture et modification). Support : lecture seule. Réglage unique 
 | REC-ADM-399 | Laisser un champ numérique vide | Champ requis | Erreur « Ce champ est obligatoire. » | ☐ | |
 | REC-ADM-400 | Saisir une valeur non numérique | Type invalide | Erreur « Saisissez un nombre entier. » (ou décimal selon le champ) | ☐ | |
 | REC-ADM-401 | Chercher un bouton « Ajouter » ou « Supprimer » | Singleton | Ni ajout ni suppression de réglages ; aucune seconde ligne possible | ☐ | |
-| REC-ADM-402 | Chercher « Mode maintenance » et « Inscriptions ouvertes » | Hors v1 (C22) | Ces deux réglages n'existent pas dans WAD14 | ☐ | |
+| REC-ADM-402 | Chercher « Mode maintenance » et « Inscriptions ouvertes » | Hors v1 (C22) | Ces deux réglages n'existent pas dans « Paramètres généraux » | ☐ | |
 | REC-ADM-403 | Support : ouvrir la fiche | Lecture seule | Fiche consultable, aucun bouton d'enregistrement | ☐ | |
 | REC-ADM-404 | Contenu ou Finance : ouvrir l'URL | Refus de permission | 403 ; « Paramètres » absent du shell pour ces groupes | ☐ | |
 | REC-ADM-405 | Modifier un réglage | Audit | Entrée dans le journal d'audit (acteur, objet) | ☐ | |
-| REC-ADM-406 | Lire les réglages publics dans les formulaires de paiement après modification des réseaux | Lecture publique | Voir WAD14-RES | ☐ | |
+| REC-ADM-406 | Lire les réglages publics dans les formulaires de paiement après modification des réseaux | Lecture publique | Voir « Réseaux Mobile Money et annonces » | ☐ | |
 
-#### WAD14-GAM · Barème de points (C8) et paliers de rang (/admin/core/platformsettings/1/change/)
+#### Barème de points (C8) et paliers de rang (/admin/core/platformsettings/1/change/)
 
 Section « Gamification (C8) » : champs « Barème de points » et « Paliers de rang » (JSON).
 
@@ -4779,7 +4779,7 @@ Section « Gamification (C8) » : champs « Barème de points » et « Paliers d
 | REC-ADM-418 | Vider la liste des paliers | Paliers vides | Accepté (liste vide) ; pastille Rang masquée | ☐ | |
 | REC-ADM-419 | Comparer l'effet avec un apprenant existant (Léa) | Effet sur l'existant | Les points déjà acquis ne sont pas recalculés rétroactivement (à confirmer : spec muette) | ☐ | |
 
-#### WAD14-TAX · TVA et AIB paramétrables (C25) (/admin/core/platformsettings/1/change/)
+#### TVA et AIB paramétrables (C25) (/admin/core/platformsettings/1/change/)
 
 Section « Factures : TVA et AIB (C25) » : « TVA activée », « Taux de TVA (%) », « TVA sur la livraison », « AIB activé », « Taux d'AIB (%) » (aide : « Acompte sur impôt sur les bénéfices, calculé sur le montant HT (jamais sur la TVA) »), « AIB sur la livraison ». Les tarifs affichés sont HT ; les taxes s'ajoutent au total à payer.
 
@@ -4808,7 +4808,7 @@ Section « Factures : TVA et AIB (C25) » : « TVA activée », « Taux de TVA (
 | REC-ADM-440 | Support : modifier les taux | Refus de permission | Fiche en lecture seule ; aucune modification possible | ☐ | |
 | REC-ADM-441 | Vérifier l'affichage public des prix | Prix HT | Catalogue, boutique, événements et kits affichent le prix HT inchangé | ☐ | |
 
-#### WAD14-EMC · Facture normalisée e-MECeF (C26) (/admin/core/platformsettings/1/change/)
+#### Facture normalisée e-MECeF (C26) (/admin/core/platformsettings/1/change/)
 
 Section « Facture normalisée e-MECeF (C26) » : « Facture normalisée e-MECeF activée », « Groupe de taxe des articles taxés » (défaut B), « Groupe de taxe des articles exonérés » (défaut E), « Groupe de taxe des ventes à l'exportation » (défaut C). Libellés des groupes : « A · EXO · Exonéré », « B · TAX · Taxable », « C · EXP · Exportation de produits taxables », « D · MP · TVA régime d'exception », « E · TPS · Régime fiscal TPS », « F · RES · Réservé ». Activer e-MECeF vérifie, auprès du fournisseur (faux en local), le jeton, l'e-MCF « Actif », l'IFU et les taux.
 
@@ -4841,7 +4841,7 @@ Section « Facture normalisée e-MECeF (C26) » : « Facture normalisée e-MECeF
 | REC-ADM-466 | En production : fournisseur `fake` | Fournisseur interdit | `fake` refuse de fonctionner en staging et en production (à vérifier en staging) | ☐ | |
 | REC-ADM-467 | Environnement non production avec `EMECEF_ENVIRONMENT=production` | Environnement interdit | Refusé : production acceptée seulement par l'environnement de production de Steamy | ☐ | |
 
-#### WAD14-RES · Réseaux Mobile Money et annonces (/admin/referentials/paymentnetwork/, /admin/core/announcement/)
+#### Réseaux Mobile Money et annonces (/admin/referentials/paymentnetwork/, /admin/core/announcement/)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -4925,11 +4925,11 @@ Finance seule demande et traite. Les remboursements sont faits à la main, hors 
 | REC-ADM-526 | Modifier ou supprimer un remboursement existant | Lecture seule | Impossible (pas de modification ni suppression) | ☐ | |
 | REC-ADM-527 | Super-admin : ouvrir la liste des remboursements | Lecture seule | Liste visible ; ni ajout ni action « Traiter » | ☐ | |
 | REC-ADM-528 | Support : ouvrir la liste | Refus de permission | 403 | ☐ | |
-| REC-ADM-529 | Refus exceptionnel d'une candidature payée (WAD12) puis Finance traite | Remboursement issu d'un événement | Le remboursement apparaît « à traiter » ; après traitement, la commande de l'événement passe à « Remboursée » | ☐ | |
+| REC-ADM-529 | Refus exceptionnel d'une candidature payée puis Finance traite | Remboursement issu d'un événement | Le remboursement apparaît « à traiter » ; après traitement, la commande de l'événement passe à « Remboursée » | ☐ | |
 
 #### ADM-FAC · Factures normalisées (/admin/payments/invoice/)
 
-Émission asynchrone après paiement, éléments de sécurité sur le PDF, facture d'export EV pour un payeur hors Bénin, échec visible pour la Finance. Pré-requis : e-MECeF activé (WAD14-EMC), worker Celery actif.
+Émission asynchrone après paiement, éléments de sécurité sur le PDF, facture d'export EV pour un payeur hors Bénin, échec visible pour la Finance. Pré-requis : e-MECeF activé, worker Celery actif.
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -4999,7 +4999,7 @@ Alerte à la Finance : courriel (objet « [Steamy] Facture normalisée e-MECeF �
 | REC-ADM-579 | `emecef_probe --yes-test` sur le serveur de test | Nominal | Factures d'essai (« SONDE STEAMY, annulée ») créées puis toutes annulées ; aucune facture normalisée émise ; bloc final « À rapporter (aucun secret) : » avec les taux de chaque groupe, la TVA extraite d'un prix TTC par groupe, « total inclut l'AIB » pour l'AIB A et B, le montant d'AIB sur 11 800 FCFA, l'arrondi (3 × 101 en groupe B) | ☐ | |
 | REC-ADM-580 | `emecef_probe --yes-test` avec jeton expiré ou e-MCF inactif | Jeton ou e-MCF KO | Erreur « Jeton expiré ou e-MCF non actif : voir `emecef_check`. » | ☐ | |
 | REC-ADM-581 | `emecef_probe --yes-test` avec serveur injoignable | Erreur API | Erreur « e-MECeF : <détail> » | ☐ | |
-| REC-ADM-582 | Renseigner `EMECEF_AIB_IN_TOTAL` selon le bloc « À rapporter » puis activer e-MECeF avec AIB | Après la sonde | L'activation avec AIB (1 % ou 5 %) devient possible (voir WAD14-EMC) | ☐ | |
+| REC-ADM-582 | Renseigner `EMECEF_AIB_IN_TOTAL` selon le bloc « À rapporter » puis activer e-MECeF avec AIB | Après la sonde | L'activation avec AIB (1 % ou 5 %) devient possible (voir « Facture normalisée e-MECeF ») | ☐ | |
 | REC-ADM-583 | Lancer `emecef_probe --yes-test` en CI | Hors CI | Ne doit jamais être exécutée en CI ; vérifier que la CI ne l'appelle pas (aucun appel réseau réel en test) | ☐ | |
 
 ---
@@ -5012,12 +5012,12 @@ Chaque parcours enchaîne plusieurs écrans ; ils complètent les cas unitaires 
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ADM-584 | Super-admin : WAD14, TVA activée à 18 % (livraison taxée), AIB activé à 5 % (livraison taxée), e-MECeF activé (`EMECEF_AIB_IN_TOTAL` renseigné, groupes B, E, C) | Préparation | Réglages enregistrés sans erreur | ☐ | |
+| REC-ADM-584 | Super-admin : « Paramètres généraux », TVA activée à 18 % (livraison taxée), AIB activé à 5 % (livraison taxée), e-MECeF activé (`EMECEF_AIB_IN_TOTAL` renseigné, groupes B, E, C) | Préparation | Réglages enregistrés sans erreur | ☐ | |
 | REC-ADM-585 | Parent Marie : ajouter un kit au panier et choisir une zone de livraison | Récapitulatif | Prix du kit HT inchangé ; frais de livraison de la zone ; lignes « TVA (18 %) » et « AIB (5 %) » ; total à payer = HT + livraison + TVA + AIB | ☐ | |
 | REC-ADM-586 | Vérifier le calcul sur un exemple | Calcul des taxes | Exemple : HT 10 000 + livraison 1 000 FCFA ; TVA = 18 % de 11 000 = 1 980 ; AIB = 5 % de 11 000 = 550 ; total = 13 530 FCFA (arrondi au franc, demi-haut, une seule fois sur le total) | ☐ | |
-| REC-ADM-587 | Payer avec le numéro de Marie `…01` | Paiement réussi | Commande « Payée » ; montant payé = total figé ; commande visible dans WAD10 | ☐ | |
-| REC-ADM-588 | Support : fiche de la commande dans WAD10 | Taxes figées | Sous-total, livraison, TVA, AIB et total affichés ; « taxes » avec taux, bases et montants figés | ☐ | |
-| REC-ADM-589 | Finance : WAD11 | Paiement | Paiement « Réussi » ; numéro masqué ; agrégats mis à jour ; `payload` visible | ☐ | |
+| REC-ADM-587 | Payer avec le numéro de Marie `…01` | Paiement réussi | Commande « Payée » ; montant payé = total figé ; commande visible dans « Boutique et commandes » | ☐ | |
+| REC-ADM-588 | Support : fiche de la commande dans « Boutique et commandes » | Taxes figées | Sous-total, livraison, TVA, AIB et total affichés ; « taxes » avec taux, bases et montants figés | ☐ | |
+| REC-ADM-589 | Finance : « Paiements Mobile Money » | Paiement | Paiement « Réussi » ; numéro masqué ; agrégats mis à jour ; `payload` visible | ☐ | |
 | REC-ADM-590 | Finance : ADM-FAC, attendre moins d'une minute | Émission asynchrone | Facture « confirmée », type fiscal « FV » ; journal `invoice.fiscal_confirmed` | ☐ | |
 | REC-ADM-591 | Télécharger le PDF | QR code et éléments de sécurité | QR code, « Code MECeF/DGI », « NIM », « Compteurs », « Date et heure » ; lignes TVA et AIB avec taux et bases ; « Total à payer » | ☐ | |
 | REC-ADM-592 | Parent : télécharger la facture dans « Mes commandes » | Facture côté parent | Même facture normalisée | ☐ | |
@@ -5028,7 +5028,7 @@ Chaque parcours enchaîne plusieurs écrans ; ils complètent les cas unitaires 
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ADM-595 | Activer un réseau Mobile Money d'un autre pays (WAD14-RES) et payer une commande avec ce réseau | Paiement hors Bénin | Paiement réussi avec le pays du réseau | ☐ | |
+| REC-ADM-595 | Activer un réseau Mobile Money d'un autre pays et payer une commande avec ce réseau | Paiement hors Bénin | Paiement réussi avec le pays du réseau | ☐ | |
 | REC-ADM-596 | Finance : ADM-FAC | Type EV | Facture « confirmée » de type fiscal « EV » ; lignes au groupe d'export (C par défaut) au montant payé ; QR code et Code MECeF/DGI sur le PDF | ☐ | |
 
 #### PARC-3 · Remboursement d'une commande payée
@@ -5055,7 +5055,7 @@ Chaque parcours enchaîne plusieurs écrans ; ils complètent les cas unitaires 
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-ADM-607 | Super-admin invite un membre Finance (WAD13), le membre active son accès et enrôle son TOTP | Intégration d'un membre | Connexion réussie avec TOTP ; accès limité à Finance (Impact Tracker, paiements, remboursements, factures) | ☐ | |
+| REC-ADM-607 | Super-admin invite un membre Finance, le membre active son accès et enrôle son TOTP | Intégration d'un membre | Connexion réussie avec TOTP ; accès limité à Finance (Impact Tracker, paiements, remboursements, factures) | ☐ | |
 | REC-ADM-608 | Le nouveau membre ouvre /admin/accounts/consentrequest/ | Refus de groupe | 403 | ☐ | |
 | REC-ADM-609 | Jeton e-MECeF à moins de 14 jours (faux fournisseur configuré en conséquence) puis lancer la surveillance | Alerte Finance | Courriel reçu par le nouveau membre Finance dans Mailpit | ☐ | |
 | REC-ADM-610 | Super-admin réinitialise le TOTP du membre | Réinitialisation | Ses sessions sont fermées ; réenrôlement à la prochaine connexion | ☐ | |
