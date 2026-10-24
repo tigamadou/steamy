@@ -4,6 +4,8 @@ API     := $(COMPOSE) run --rm api
 WEB     := $(COMPOSE) run --rm --no-deps web sh -c
 # Stack des parcours Playwright : projet séparé, sans port publié (cohabite avec `make up`)
 E2E     := docker compose -p steamy-e2e -f compose.yml -f compose.e2e.yml
+# `--no-build` en CI (images déjà construites, avec cache) ; PW_ARGS=--shard=1/4 pour n'en jouer qu'une part
+E2E_BUILD ?= --build
 
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
@@ -97,7 +99,7 @@ coverage-web: ## Tests du front + couverture 100 % exigée sur le code modifié 
 	   && diff-cover apps/web/coverage/cobertura-coverage.xml --compare-branch=origin/development --fail-under=100"
 
 e2e: ## Parcours Playwright sur la stack Docker (web en image prod, worker pour les emails et PDF, données rechargées avec seed_demo --e2e)
-	$(E2E) up -d --build --wait web worker
+	$(E2E) up -d $(E2E_BUILD) --wait web worker
 	$(MAKE) migrate seed COMPOSE="$(E2E)" SEED_ARGS=--e2e
 	@# Tous les parcours partent d'une même IP : plafonds quotidiens d'OTP relevés (D24, testés côté API)
 	$(E2E) run --rm api python manage.py shell -c "from apps.core.models import PlatformSettings as P; \
