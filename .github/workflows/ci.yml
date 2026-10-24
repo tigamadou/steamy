@@ -1,6 +1,8 @@
-# Intégration continue, sur toutes les branches :
-# - à chaque push, pour être prévenu dès qu'une branche casse quelque chose ;
-# - à chaque PR, sur le résultat de la fusion avec la branche cible.
+# Intégration continue :
+# - à chaque PR, sur le résultat de la fusion avec la branche cible (une poussée sur une branche
+#   qui a une PR ne déclenche donc qu'UN run, pas deux : `push` + `pull_request`) ;
+# - à chaque push sur main et development, pour vérifier ce qui vient d'être fusionné.
+# Une branche sans PR n'est pas testée : ouvrir une PR (même brouillon) pour lancer la CI.
 # Seules les parties touchées sont testées ; le job `ci-ok` agrège le résultat
 # et c'est LUI qu'on rend obligatoire dans la protection de branche.
 name: CI
@@ -8,11 +10,14 @@ name: CI
 on:
   pull_request:
   push:
-    branches: ["**"]
+    branches: [main, development]
 
+# Une nouvelle poussée annule le run obsolète de la même PR. Sur main et development, jamais :
+# la couverture du code modifié se compare au push précédent (`github.event.before`), un run
+# annulé laisserait son commit sans contrôle. Groupe propre au commit, donc aucun run en attente écarté.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.ref }}-${{ (github.ref_name == 'main' || github.ref_name == 'development') && github.event_name == 'push' && github.sha || 'pr' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
