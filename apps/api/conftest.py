@@ -2,6 +2,16 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
+def fast_password_hasher(settings):
+    """
+    MD5 au lieu de PBKDF2 (1 million d'itérations en Django 5.2) : chaque création de compte ou de connexion
+    coûtait plusieurs dixièmes de seconde, soit l'essentiel des ~20 minutes de la suite. Le hachage de production
+    n'est pas modifié ; les tests qui le concernent le rétablissent explicitement.
+    """
+    settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+
+
+@pytest.fixture(autouse=True)
 def isolated_cache(settings):
     """
     Cache en mémoire et vidé pour chaque test : les compteurs de throttling (S9) ne doivent ni
