@@ -2659,7 +2659,7 @@ Rappel : l'apprenant ne paie jamais (S3, D30). Il débloque un parcours avec un 
 | REC-APP-640 | Ouvrir /apprenant/parcours/decouverte-robotique/certification | Conditions non remplies | h2 « Encore un effort ! » ; « Il te reste n projet(s) ou n mission(s) pour obtenir ta certification : toutes les missions et toutes les évaluations des projets doivent être réussies. » ; « n/N missions · n/N évaluations réussies ». | ☐ | |
 | REC-APP-641 | Lire la liste des projets | Nominal | Chaque projet avec son statut (terminé, en cours, verrouillé). | ☐ | |
 | REC-APP-642 | Chercher le mot « parent » sur la page | Message retiré | Aucune mention d'un point d'avancement envoyé au parent. | ☐ | |
-| REC-APP-643 | Cliquer « Continuer le projet n » | Nominal | Arrivée sur la mission ou le quiz suivants du parcours (/apprenant/parcours/decouverte-robotique/missions|quiz/<id>). | ☐ | |
+| REC-APP-643 | Cliquer « Continuer le projet n » | Nominal | Arrivée sur la mission ou le quiz suivants du parcours (/apprenant/parcours/decouverte-robotique/missions\|quiz/<id>). | ☐ | |
 | REC-APP-644 | Lire le bouton | Projet courant inconnu | Bouton « Continuer mon parcours ». | ☐ | |
 | REC-APP-645 | Lire la page | Étape suivante = certification | Aucun bouton de reprise. | ☐ | |
 | REC-APP-646 | Afficher la page à 360 px | Mobile 360 px | Carte d'alerte et liste empilées, aucun débordement. | ☐ | |
