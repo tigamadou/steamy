@@ -6,6 +6,8 @@ const baseURL = process.env.BASE_URL ?? "http://localhost:3000";
 
 export default defineConfig({
   testDir: "./e2e",
+  // Tests fonctionnels sur fausse API : leur propre configuration (playwright.fixtures.config.ts)
+  testIgnore: "**/*.fixtures.spec.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

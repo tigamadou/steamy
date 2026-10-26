@@ -281,6 +281,34 @@ jobs:
         if: always()
         run: make e2e-down
 
+  # Tests fonctionnels sur fixtures (docs/tests/PLAN-DE-TESTS.md, § 3) : le front de production contre la fausse API de
+  # apps/web/e2e/fausse-api/, sans base ni Docker. Un seul job, tous les tests en parallèle (workers Playwright).
+  e2e-fixtures:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @steamy/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @steamy/web build
+      - run: pnpm --filter @steamy/web e2e:fixtures
+      - name: Rapport Playwright
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-fixtures
+          path: |
+            apps/web/playwright-report-fixtures/
+            apps/web/test-results/
+          retention-days: 7
+
   helm:
     needs: changes
     if: needs.changes.outputs.infra == 'true'
@@ -323,7 +351,7 @@ jobs:
   # et « tout sauté » ne doit pas passer pour un succès.
   ci-ok:
     if: always()
-    needs: [changes, api, web, image-api, image-web, e2e, helm, e2e-matrice]
+    needs: [changes, api, web, image-api, image-web, e2e, e2e-fixtures, helm, e2e-matrice]
     runs-on: ubuntu-latest
     steps:
       - name: Tous les jobs exécutés ont réussi
