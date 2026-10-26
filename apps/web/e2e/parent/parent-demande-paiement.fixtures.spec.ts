@@ -103,6 +103,9 @@ test("à payer · parcours : formulaire, validations, pays, réseau coupé, paie
     await expect(phoneField(page)).toHaveValue("");
     await expect(payButton(page)).toHaveText(`Payer ${fcfa(COURSE.total)}`);
     await expect(page.getByText("Paiement sécurisé · aucune carte bancaire")).toBeVisible();
+  });
+
+  await test.step("REC-PAR-392 · Accessibilité : aucune violation WCAG 2 A/AA sur la demande à payer, aucun défilement horizontal", async () => {
     await expectAccessible(page);
   });
 

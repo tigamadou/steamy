@@ -345,6 +345,9 @@ jobs:
       - uses: actions/checkout@v5
       - name: Matrice écran → test e2e
         run: python3 scripts/e2e_matrix.py --check
+      # Cahier et tests : toute ligne `auto` du cahier a son étape `REC-…` dans un test, toute étape cite une ligne existante
+      - name: Cahier de recette ↔ tests automatiques
+        run: python3 scripts/cahier_check.py
 
   # Point de contrôle unique pour la protection de branche.
   # `changes` est surveillé aussi : s'il échoue, tous les autres jobs sont sautés,
