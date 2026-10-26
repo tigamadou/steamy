@@ -6,6 +6,10 @@ const baseURL = process.env.BASE_URL ?? "http://localhost:3000";
 
 export default defineConfig({
   testDir: "./e2e",
+  // Seulement les `*.spec.ts` (les `*.test.ts` de e2e/fausse-api sont ceux de Vitest) ; les tests fonctionnels sur
+  // fausse API ont leur propre configuration (playwright.fixtures.config.ts)
+  testMatch: "**/*.spec.ts",
+  testIgnore: "**/*.fixtures.spec.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

@@ -11,7 +11,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
-    include: ["src/**/*.test.{ts,tsx}"],
+    include: ["src/**/*.test.{ts,tsx}", "e2e/fausse-api/**/*.test.ts"],
     css: false,
     // Rapport cobertura lu par diff-cover en CI : 100 % exigé sur le code ajouté ou modifié (`make coverage-web`)
     coverage: {
