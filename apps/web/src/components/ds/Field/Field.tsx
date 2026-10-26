@@ -69,7 +69,7 @@ export function Field({ label, required = false, hint, error, id, className, chi
         {children}
         <div aria-live="polite">
           {error ? (
-            <p id={messageId} className="flex items-center gap-1 text-[13px] font-bold text-error-600">
+            <p id={messageId} className="flex items-center gap-1 text-[13px] font-bold text-error-700">
               <Icon name="alert" size={14} strokeWidth={2.5} />
               {error}
             </p>

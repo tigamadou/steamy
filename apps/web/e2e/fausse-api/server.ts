@@ -186,7 +186,7 @@ route("GET", /^\/api\/auth\/csrf\/$/, false, ({ respond }) => {
 });
 route("GET", /^\/api\/referentials\/countries\/$/, false, ({ respond }) => respond(200, COUNTRIES));
 route("GET", /^\/api\/referentials\/payment-networks\/$/, false, ({ instance, url, respond }) => {
-  if (instance?.scenario.faults.networksError) return respond(500, SERVER_ERROR);
+  if (instance && once(instance, "networks-error", instance.scenario.faults.networksError)) return respond(500, SERVER_ERROR);
   respond(200, NETWORKS.filter((network) => network.country === url.searchParams.get("country")));
 });
 route("GET", /^\/api\/shop\/delivery-zones\/$/, false, ({ url, respond }) =>
@@ -286,16 +286,23 @@ route("POST", /^\/api\/payments\/orders\/([\w-]+)\/payments\/$/, true, ({ instan
 route("GET", /^\/api\/payments\/payments\/(\d+)\/$/, true, ({ instance, match, respond }) => {
   const entry = instance.payments.get(Number(match[1]));
   if (!entry) return respond(404, apiError("NOT_FOUND", "Introuvable."));
-  const { faults } = instance.scenario;
   // L'issue arrive à la première interrogation, comme le webhook du prestataire (S9)
-  if (entry.behaviour === "success" && entry.payment.status === "pending") {
+  resolve(instance, entry);
+  respond(200, entry.payment);
+});
+
+/** Applique l'issue du paiement : commande et demande réglées (ou remboursée, paiement tardif), ou échec. */
+function resolve(instance: Instance, entry: { payment: Schemas["Payment"]; behaviour: Behaviour }) {
+  const { faults } = instance.scenario;
+  if (entry.payment.status !== "pending") return;
+  if (entry.behaviour === "success") {
     entry.payment = { ...entry.payment, status: "succeeded", confirmedAt: CREATED_AT };
     const order = instance.order;
     if (order) {
       instance.order = { ...order, status: faults.latePayment ? "refunded" : "paid", paidAt: CREATED_AT };
       close(instance, "paid", order);
     }
-  } else if (entry.behaviour === "failure" && entry.payment.status === "pending") {
+  } else if (entry.behaviour === "failure") {
     entry.payment = {
       ...entry.payment,
       status: "failed",
@@ -303,13 +310,23 @@ route("GET", /^\/api\/payments\/payments\/(\d+)\/$/, true, ({ instance, match, r
       failureReason: "Solde insuffisant.",
     };
   }
-  respond(200, entry.payment);
-});
+}
 
 /** Journal des appels d'une instance, pour les assertions « aucun appel » et « un seul appel » des tests. */
 function calls(url: URL, respond: Context["respond"]) {
   const known = instances.get(url.searchParams.get("session") ?? "");
   respond(200, known?.calls ?? []);
+}
+
+/** Webhook du prestataire simulé : règle le dernier paiement en attente de la session (`outcome=success|failure`). */
+function settle(url: URL, respond: Context["respond"]) {
+  const known = instances.get(url.searchParams.get("session") ?? "");
+  const entries = [...(known?.payments.values() ?? [])];
+  const entry = entries.findLast((candidate) => candidate.payment.status === "pending");
+  if (!known || !entry) return respond(404, apiError("NOT_FOUND", "Aucun paiement en attente."));
+  entry.behaviour = url.searchParams.get("outcome") === "failure" ? "failure" : "success";
+  resolve(known, entry);
+  respond(200, entry.payment);
 }
 
 const CORS = (origin: string) => ({
@@ -331,6 +348,7 @@ export function start(port: number) {
 
     if (url.pathname === "/__fx/health") return send(response, 200, { ok: true });
     if (url.pathname === "/__fx/calls") return calls(url, (status, body) => send(response, status, body, cors));
+    if (url.pathname === "/__fx/settle") return settle(url, (status, body) => send(response, status, body, cors));
 
     const cookies = cookiesOf(request);
     const session = cookies[SESSION_COOKIE];

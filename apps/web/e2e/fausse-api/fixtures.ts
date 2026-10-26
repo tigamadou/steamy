@@ -79,7 +79,7 @@ export const PARENT_PROFILE: Schemas["ParentProfile"] = {
   profileStep: null,
 };
 
-export const MOBILE_MONEY: Schemas["MobileMoney"] = { country: "BJ", network: "mtn", phone: "0197000001" };
+export const MOBILE_MONEY: Schemas["MobileMoney"] = { country: "BJ", network: "mtn", phone: "+2290197000001" };
 
 export const SAVED_ADDRESS: Schemas["DeliveryAddress"] = {
   zoneId: 1,
