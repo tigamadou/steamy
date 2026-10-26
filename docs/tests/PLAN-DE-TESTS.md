@@ -2,7 +2,7 @@
 
 Ce document décrit **comment** Steamy est testé : les niveaux de tests, les données utilisées, les environnements, les priorités et les critères de fin. Le **quoi** (chaque scénario) est dans le [cahier de recette](../../apps/web/e2e/CAHIER-DE-RECETTE.md).
 
-Statut : proposition du 2026-10-26. Les points marqués **À valider** attendent une décision du produit.
+Statut : validé le 2026-10-26 par le produit, y compris les parcours de bout en bout sur la vraie stack et le renvoi des résultats dans le cahier.
 
 ## 1. Objectifs
 
@@ -17,7 +17,7 @@ Statut : proposition du 2026-10-26. Les points marqués **À valider** attendent
 | **Unitaire API** | pytest | Règles métier, droits, paiements, taxes, factures, base de données | Base de test, fabriques |
 | **Unitaire front** | Vitest | Composants et logique d'écran | Données en mémoire |
 | **Fonctionnel (e2e)** | Playwright | Ce que voit et fait l'utilisateur dans le navigateur, écran par écran | **Fixtures** contre une fausse API |
-| **Parcours de bout en bout** (**À valider**) | Playwright | Quelques parcours critiques sur la vraie stack, pour vérifier que le front et l'API se parlent bien | Jeu de démonstration, base jetable |
+| **Parcours de bout en bout** | Playwright | Quelques parcours critiques sur la vraie stack, pour vérifier que le front et l'API se parlent bien | Jeu de démonstration, base jetable |
 
 Principe : l'API et la base sont déjà testées en unitaire. Les tests fonctionnels **ne les retestent pas** : ils vérifient l'interface.
 
