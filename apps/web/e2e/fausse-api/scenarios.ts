@@ -27,7 +27,7 @@ export type Faults = {
   outOfStock?: boolean;
   /** Création de la commande : `DELIVERY_ZONE_UNAVAILABLE`. */
   zoneUnavailable?: boolean;
-  /** Création de la commande : `PAYMENT_REQUEST_CLOSED` (la demande est alors réglée dans un autre onglet). */
+  /** Création de la commande : `PAYMENT_REQUEST_CLOSED` (la demande est alors réglée dans un autre onglet), une fois. */
   requestClosedOnOrder?: boolean;
   /** Premier paiement : `ORDER_EXPIRED` (réservation du kit dépassée). */
   orderExpiredOnPay?: boolean;
@@ -49,7 +49,7 @@ export type Faults = {
   declineClosed?: boolean;
   /** Refus de la demande : 500. */
   declineServerError?: boolean;
-  /** Référentiel des réseaux Mobile Money : 500. */
+  /** Référentiel des réseaux Mobile Money : 500 à la première lecture seulement. */
   networksError?: boolean;
 };
 
@@ -140,7 +140,8 @@ export const SCENARIOS = {
   "paiement-deja-en-cours": { ...BASE, faults: { paymentInProgress: true } },
   "paiement-trop-de-tentatives": { ...BASE, faults: { throttled: 45 } },
   "paiement-erreur-serveur": { ...BASE, faults: { paymentServerError: true } },
-  "paiement-demande-close": { ...BASE, faults: { requestClosedOnPay: true } },
+  "paiement-demande-close": { ...BASE, faults: { requestClosedOnOrder: true } },
+  "paiement-demande-close-au-paiement": { ...BASE, faults: { requestClosedOnPay: true } },
   "paiement-tardif-rembourse": {
     ...BASE,
     request: kitRequest({ pendingOrderReference: "CMD-501" }),

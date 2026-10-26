@@ -160,7 +160,7 @@ describe("la fausse API répond selon le contrat OpenAPI", () => {
       ["paiement-erreur-serveur", "SERVER_ERROR"],
       ["paiement-trop-de-tentatives", "THROTTLED"],
       ["paiement-deja-en-cours", "PAYMENT_IN_PROGRESS"],
-      ["paiement-demande-close", "PAYMENT_REQUEST_CLOSED"],
+      ["paiement-demande-close-au-paiement", "PAYMENT_REQUEST_CLOSED"],
       ["kit-reservation-depassee", "ORDER_EXPIRED"],
       ["kit-commande-deja-payee", "ORDER_ALREADY_PAID"],
     ];
@@ -176,6 +176,44 @@ describe("la fausse API répond selon le contrat OpenAPI", () => {
       expect(result.json.code).toBe(code);
       check("/api/payments/orders/{reference}/payments/", "POST", result.status, result.json);
     }
+  });
+
+  it("demande close à la création de la commande, commande impossible, zone indisponible", async () => {
+    const closed = await call("paiement-demande-close", "POST", "/api/payments/orders/", { paymentRequestId: 501 });
+    expect(closed.json.code).toBe("PAYMENT_REQUEST_CLOSED");
+    check("/api/payments/orders/", "POST", closed.status, closed.json);
+    const stock = await call("kit-rupture-de-stock", "POST", "/api/payments/orders/", { paymentRequestId: 501, deliveryAddress: address });
+    expect(stock.json.code).toBe("OUT_OF_STOCK");
+    check("/api/payments/orders/", "POST", stock.status, stock.json);
+    const zone = await call("kit-zone-indisponible", "POST", "/api/payments/orders/", { paymentRequestId: 501, deliveryAddress: address });
+    expect(zone.json.code).toBe("DELIVERY_ZONE_UNAVAILABLE");
+    check("/api/payments/orders/", "POST", zone.status, zone.json);
+  });
+
+  it("refus impossible : demande déjà close, erreur serveur", async () => {
+    const closed = await call("refus-demande-close", "POST", "/api/payments/payment-requests/501/decline/", { reason: "" });
+    expect(closed.json.code).toBe("PAYMENT_REQUEST_CLOSED");
+    check("/api/payments/payment-requests/{id}/decline/", "POST", closed.status, closed.json);
+    const failed = await call("refus-erreur-serveur", "POST", "/api/payments/payment-requests/501/decline/", { reason: "" });
+    expect(failed.json.code).toBe("SERVER_ERROR");
+    check("/api/payments/payment-requests/{id}/decline/", "POST", failed.status, failed.json);
+  });
+
+  it("webhook simulé : l'issue du paiement en attente est réglée", async () => {
+    const session = "parcours-en-attente.vitest-webhook";
+    const headers = { "Content-Type": "application/json", "X-CSRFToken": "t", Cookie: `sessionid=${session}; csrftoken=t` };
+    const order = await (await fetch(`${base}/api/payments/orders/`, { method: "POST", headers, body: JSON.stringify({ paymentRequestId: 501 }) })).json();
+    await fetch(`${base}/api/payments/orders/${order.reference}/payments/`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ country: "BJ", network: "mtn", msisdn: "0197000003" }),
+    });
+    const settled = await fetch(`${base}/__fx/settle?session=${session}&outcome=failure`);
+    expect((await settled.json()).status).toBe("failed");
+    const none = await fetch(`${base}/__fx/settle?session=${session}&outcome=failure`);
+    expect(none.status).toBe(404);
+    const journal = await (await fetch(`${base}/__fx/calls?session=${session}`)).json();
+    expect(journal.map((entry: { method: string }) => entry.method)).toContain("POST");
   });
 
   it("refuse une requête qui modifie des données sans jeton CSRF", async () => {

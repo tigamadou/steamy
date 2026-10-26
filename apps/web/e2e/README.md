@@ -13,5 +13,14 @@ Un dossier par secteur ; les aides partagées sont dans `support/`. Lancer : `ma
 | `boutique/` | Panier, paiement invité, demande de kit au parent |
 | `parcours/` | Parcours transverses entre plusieurs rôles (P1 à P7, déblocage, quiz) |
 
+Deux familles de tests, deux configurations :
+
+| Famille | Fichiers | Lancer | Données |
+| --- | --- | --- | --- |
+| Parcours sur la vraie stack | `*.spec.ts` | `make e2e` | Jeu de démonstration, base jetable |
+| Tests fonctionnels sur fixtures | `*.fixtures.spec.ts` | `pnpm --filter @steamy/web e2e:fixtures` (après `pnpm build`) | Fausse API (`fausse-api/`) : voir `docs/tests/FIXTURES-FAUSSE-API.md` |
+
+Un test fonctionnel nomme sa fixture (`signInAs(context, "demande-payee")`) et porte une étape `test.step("REC-… · …")` par scénario du cahier (`python3 scripts/cahier_check.py` le vérifie).
+
 Un nouveau test va dans le dossier du rôle qui le joue ; un parcours qui traverse plusieurs rôles va dans `parcours/`.
 Ajouter son chemin dans `docs/tests/MATRICE-E2E.md` (contrôlé par `python3 scripts/e2e_matrix.py --check`).

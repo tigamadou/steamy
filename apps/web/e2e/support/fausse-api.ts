@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, type BrowserContext, type Page } from "@playwright/test";
+import { expect, type BrowserContext } from "@playwright/test";
 
 import type { Call } from "../fausse-api/server.ts";
 import type { ScenarioName } from "../fausse-api/scenarios.ts";
@@ -46,6 +46,9 @@ export async function expectNoUnhandledCall(current: Session): Promise<void> {
   expect(unhandled.map((call) => `${call.method} ${call.path}`)).toEqual([]);
 }
 
-export async function visibleHeading(page: Page, name: string, level = 2) {
-  await expect(page.getByRole("heading", { level, name })).toBeVisible();
+
+/** Webhook du prestataire simulé : règle le dernier paiement en attente de la session. */
+export async function settlePayment(current: Session, outcome: "success" | "failure"): Promise<void> {
+  const response = await fetch(`${API_URL}/__fx/settle?session=${encodeURIComponent(current.id)}&outcome=${outcome}`);
+  expect(response.status).toBe(200);
 }
