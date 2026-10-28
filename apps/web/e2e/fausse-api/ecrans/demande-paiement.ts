@@ -8,6 +8,8 @@ import {
   courseOrder,
   courseRequest,
   DECIDED_AT,
+  EVENT,
+  eventOrder,
   kitOrder,
   kitRequest,
   LEARNER_ME,
@@ -25,6 +27,10 @@ const SERVER_ERROR = apiError("SERVER_ERROR", "Une erreur est survenue côté se
 
 route("GET", /^\/api\/catalog\/courses\/([\w-]+)\/$/, true, ({ instance, respond }) =>
   respond(200, instance.scenario.course),
+);
+
+route("GET", /^\/api\/events\/([\w-]+)\/$/, true, ({ match, respond }) =>
+  match[1] === EVENT.slug ? respond(200, EVENT) : fail(respond, "NOT_FOUND", "Événement introuvable."),
 );
 
 route("GET", /^\/api\/payments\/payment-requests\/(\d+)\/$/, true, async ({ instance, match, respond }) => {
@@ -85,11 +91,14 @@ function orderOfRequest(instance: Instance, address?: Schemas["DeliveryAddressIn
 onInstance((instance) => {
   const { scenario: current, request, address } = instance;
   if (!current.pendingOrder || !request) return;
+  const kitAddress = address ?? { zoneId: 1, recipientName: "Marie Adjovi", city: "Cotonou", district: "Fidjrossè", addressLine: "Rue 12, villa verte" };
   putOrder(
     instance,
     request.kind === "kit"
-      ? kitOrder("CMD-501", ZONES[0], address ?? { zoneId: 1, recipientName: "Marie Adjovi", city: "Cotonou", district: "Fidjrossè", addressLine: "Rue 12, villa verte" }, current.rates)
-      : courseOrder("CMD-501", current.rates),
+      ? kitOrder("CMD-501", ZONES[0], kitAddress, current.rates)
+      : request.kind === "event"
+        ? eventOrder("CMD-501", current.rates)
+        : courseOrder("CMD-501", current.rates),
   );
 });
 
@@ -109,12 +118,18 @@ export const SCENARIOS_DEMANDE_PAIEMENT = {
   "kit-sans-taxes": scenario({ request: kitRequest({}, TAXES_OFF), rates: TAXES_OFF }),
   "kit-adresse-enregistree": scenario({ request: kitRequest(), address: SAVED_ADDRESS }),
   "kit-commande-en-attente": scenario({ request: kitRequest({ pendingOrderReference: "CMD-501" }), pendingOrder: true }),
+  // Événement : la demande ne porte ni date ni lieu, l'écran les lit sur la fiche de l'événement de la commande
   "evenement-en-attente": scenario({
     request: courseRequest({
       kind: "event",
       course: null,
       items: [{ kitSlug: "", title: "Défi robots de Cotonou", unitPrice: 5000, quantity: 1 }],
+      amount: eventOrder("CMD-501").subtotal,
+      taxes: eventOrder("CMD-501").taxes,
+      total: eventOrder("CMD-501").total,
+      pendingOrderReference: "CMD-501",
     }),
+    pendingOrder: true,
   }),
   // Demande close (lecture seule)
   "demande-payee": scenario({ request: closed("paid", { orderReference: "CMD-501" }) }),

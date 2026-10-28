@@ -21,6 +21,7 @@ type Order = Pick<
   Schemas["Order"],
   "reference" | "items" | "shippingFee" | "taxes" | "total" | "deliveryZone" | "deliveryAddress" | "expiresAt"
 >;
+type EventInfo = NonNullable<Parameters<typeof PaymentRequestSummary>[0]["event"]>;
 type Child = Parameters<typeof PaymentRequestSummary>[0]["child"];
 
 export type PaymentRequestFlowProps = {
@@ -29,6 +30,8 @@ export type PaymentRequestFlowProps = {
   requiredKit: Schemas["RequiredKit"] | null;
   /** Commande en attente de la demande (`pendingOrderReference`), reprise telle quelle. */
   order: Order | null;
+  /** Événement d'une demande d'événement (date et lieu), lu sur la fiche de l'événement de la commande. */
+  event?: EventInfo | null;
   /** Adresse par défaut (WPD08) et pays de la localité, pour une demande de kit. */
   address: Schemas["DeliveryAddress"] | null;
   defaultCountry: string;
@@ -83,7 +86,7 @@ function AddressRecap({ order, onEdit, locked }: { order: Order; onEdit: () => v
  * « Refuser la demande » (motif facultatif).
  */
 export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
-  const { request, child, requiredKit, address, defaultCountry, parentName, countries, preferred } = props;
+  const { request, child, requiredKit, event, address, defaultCountry, parentName, countries, preferred } = props;
   const router = useRouter();
   const isKit = request.kind === "kit";
   const [order, setOrder] = useState<Order | null>(props.order);
@@ -133,6 +136,10 @@ export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
       <p className="m-0">
         Votre commande est confirmée : vous pouvez suivre la livraison du kit dans vos commandes. {child.firstName} a été
         prévenu·e.
+      </p>
+    ) : request.kind === "event" ? (
+      <p className="m-0">
+        Votre place à <strong>{title}</strong> est confirmée pour {child.firstName}. {child.firstName} a été prévenu·e.
       </p>
     ) : (
       <p className="m-0">
@@ -212,6 +219,7 @@ export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
         state={state}
         requiredKit={requiredKit}
         order={order}
+        event={event}
         address={
           isKit && order && !editing ? (
             <AddressRecap order={order} locked={settling} onEdit={() => setEditing(true)} />

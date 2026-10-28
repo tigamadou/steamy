@@ -71,6 +71,11 @@ export async function PaymentRequestScreen({ params }: { params: Promise<{ id: s
   ]);
   const parent = readOrNull(profile);
   if (!parent) return null;
+  // Date et lieu d'un événement : la demande ne les porte pas, on les lit sur la fiche de l'événement de la commande
+  const eventSlug = order?.data?.items.find((item) => item.eventSlug)?.eventSlug;
+  const event = eventSlug
+    ? ((await api.GET("/api/events/{slug}/", { params: { path: { slug: eventSlug } } })).data ?? null)
+    : null;
 
   return (
     <PaymentRequestFlow
@@ -78,6 +83,7 @@ export async function PaymentRequestScreen({ params }: { params: Promise<{ id: s
       child={child}
       requiredKit={requiredKit}
       order={order?.data ?? null}
+      event={event}
       address={address}
       defaultCountry={parent.locality?.country ?? ""}
       parentName={`${me.firstName} ${me.lastName}`.trim()}

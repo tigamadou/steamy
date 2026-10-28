@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 
 import { Avatar, Badge } from "@/components/ds";
 import type { PaymentRequest } from "@/features/unlock/types";
-import { formatInstant } from "@/lib/dates";
+import { eventPlace } from "@/components/public/events";
+import { formatFullDate, formatInstant } from "@/lib/dates";
 import { formatPrice, formatPriceHt, quantityLabel, TAX_LABELS } from "@/lib/format";
 
 import { STATE_BADGES, type ScreenState } from "./messages";
@@ -19,6 +20,8 @@ export type PaymentRequestSummaryProps = {
   requiredKit?: Schemas["RequiredKit"] | null;
   /** Commande créée pour la demande : ses lignes, frais et total (serveur) remplacent ceux de la demande. */
   order?: Order | null;
+  /** Événement d'une demande d'événement : date et lieu affichés sous son titre. */
+  event?: Pick<Schemas["SteamyEventDetail"], "startsAt" | "online" | "city" | "place"> | null;
   /** Adresse de livraison d'un kit (récapitulatif ou formulaire). */
   address?: ReactNode;
 };
@@ -53,7 +56,7 @@ function Line({ label, value }: { label: string; value: string }) {
  * montants tels que reçus du serveur (D37). Avant la commande d'un kit, les frais de livraison ne sont pas encore
  * connus : le montant de la demande est annoncé « hors livraison ».
  */
-export function PaymentRequestSummary({ request, child, state, requiredKit, order, address }: PaymentRequestSummaryProps) {
+export function PaymentRequestSummary({ request, child, state, requiredKit, order, event, address }: PaymentRequestSummaryProps) {
   const name = `${child.firstName} ${child.lastName}`.trim();
   const meta = [child.age !== null ? `${child.age} ans` : null, child.schoolGrade?.label, "bénéficiaire"]
     .filter(Boolean)
@@ -95,6 +98,11 @@ export function PaymentRequestSummary({ request, child, state, requiredKit, orde
           <h2 id="demande-objet" className="m-0 mt-1 text-[17px] font-black text-ink-900">
             {title}
           </h2>
+          {event && (
+            <p className="m-0 text-[13px] font-bold text-ink-600">
+              📅 <time dateTime={event.startsAt}>{formatFullDate(event.startsAt)}</time> · 📍 {eventPlace(event)}
+            </p>
+          )}
         </div>
       </div>
 
@@ -161,7 +169,9 @@ export function PaymentRequestSummary({ request, child, state, requiredKit, orde
       <p className="m-0 text-[13px] leading-normal font-bold text-ink-600">
         {request.kind === "kit"
           ? "Le kit est réservé pendant 30 minutes dès que vous passez au paiement. Les frais de livraison dépendent de la zone choisie."
-          : `Le parcours est débloqué pour ${child.firstName} dès la confirmation du paiement.`}
+          : request.kind === "event"
+            ? `La place de ${child.firstName} est confirmée dès la confirmation du paiement.`
+            : `Le parcours est débloqué pour ${child.firstName} dès la confirmation du paiement.`}
       </p>
     </section>
   );
