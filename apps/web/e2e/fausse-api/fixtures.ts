@@ -319,6 +319,19 @@ export function courseOrder(reference: string, rates: TaxRates = DEFAULT_RATES, 
   }, overrides);
 }
 
+/** Commande d'un événement payant (5 000 F CFA HT). */
+export function eventOrder(reference: string, rates: TaxRates = DEFAULT_RATES, overrides: Partiel<Schemas["Order"]> = {}): Schemas["Order"] {
+  const taxes = taxLines(5000, rates);
+  return courseOrder(reference, rates, {
+    kind: "event",
+    subtotal: 5000,
+    taxes,
+    total: 5000 + sum(taxes),
+    items: [{ id: 1, title: "Défi robots de Cotonou", courseSlug: "", kitSlug: "", eventSlug: "defi-robots-cotonou", unitPrice: 5000, quantity: 1, total: 5000 }],
+    ...overrides,
+  });
+}
+
 export function payment(
   id: number,
   order: Schemas["Order"],

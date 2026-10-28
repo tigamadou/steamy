@@ -66,6 +66,16 @@ route("GET", /^\/api\/payments\/payments\/(\d+)\/$/, "invite", (context: Context
   respond(200, entry.payment);
 });
 
+/** À la confirmation du paiement l'API émet la facture (PDF en préparation) et, pour un kit, un Kit Code par exemplaire. */
+function paidKit(order: Schemas["Order"]): Partial<Schemas["Order"]> {
+  const codes = order.items.flatMap((item) =>
+    item.kitSlug
+      ? Array.from({ length: item.quantity }, (_, index) => ({ code: `STEAMY-FX${item.id}0-000${index + 1}`, kitSlug: item.kitSlug, redeemed: false, revoked: false }))
+      : [],
+  );
+  return { invoice: { number: "FAC-2026-900001", pdfStatus: "pending" }, kitCodes: codes };
+}
+
 /** Applique l'issue du paiement : commande et demande réglées (ou remboursée, paiement tardif), ou échec. */
 export function resolve(instance: Instance, entry: { payment: Schemas["Payment"]; behaviour: Behaviour }) {
   const { faults } = instance.scenario;
@@ -74,8 +84,11 @@ export function resolve(instance: Instance, entry: { payment: Schemas["Payment"]
     entry.payment = { ...entry.payment, status: "succeeded", confirmedAt: CREATED_AT };
     const order = instance.store.get(entry.payment.orderReference)?.order;
     if (order) {
-      updateOrder(instance, { ...order, status: faults.latePayment ? "refunded" : "paid", paidAt: CREATED_AT });
+      const settled = faults.latePayment ? {} : paidKit(order);
+      updateOrder(instance, { ...order, status: faults.latePayment ? "refunded" : "paid", paidAt: CREATED_AT, ...settled });
       close(instance, "paid", order);
+      // Les kits payés quittent le panier (API)
+      if (!faults.latePayment) instance.cart = instance.cart.filter((line) => !order.items.some((item) => item.kitSlug === line.kitSlug));
     }
   } else if (entry.behaviour === "failure") {
     entry.payment = {

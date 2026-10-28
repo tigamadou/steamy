@@ -1,13 +1,13 @@
 import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 import type { Schemas } from "@steamy/api-client";
 
 // Table `code d'erreur → statut HTTP et message` de la fausse API, LUE dans `apps/api/libs/errors.py` au lieu d'être
 // recopiée : un statut qui change côté API change aussi ici, et un code inconnu de l'API fait échouer le démarrage.
 
-const SOURCE = resolve(dirname(fileURLToPath(import.meta.url)), "../../../api/libs/errors.py");
+// Lancée depuis apps/web (Playwright, Vitest, `node e2e/fausse-api/server.ts`)
+const SOURCE = resolve(process.cwd(), "../api/libs/errors.py");
 const ENTRY = /"([A-Z][A-Z_]+)":\s*\(\s*S\.HTTP_(\d{3})_[A-Z_]+,\s*"([^"]*)"/g;
 
 const TABLE = new Map<string, { status: number; message: string }>(
