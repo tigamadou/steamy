@@ -88,4 +88,5 @@ Indicateurs : nombre de scénarios, part automatisée, part verte, scénarios «
 
 1. **Plan de tests** (ce document).
 2. **Écran pilote** : la demande de paiement du parent, avec fausse API, fixtures et cahier au nouveau format ; mesure du coût et de la vitesse.
-3. Déroulement par vagues, selon les priorités ci-dessus.
+3. Vague 2 : parcours de paiement (checkout invité, commandes du parent, achat direct de kit), voir [VAGUE-2-PAIEMENT.md](VAGUE-2-PAIEMENT.md).
+4. Déroulement des vagues suivantes, selon les priorités ci-dessus.

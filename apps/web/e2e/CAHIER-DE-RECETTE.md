@@ -2791,7 +2791,7 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-735 | « Continuer vers le paiement » sans rien saisir | `invite-panier` · Erreur · auto | Cinq erreurs, aucune commande créée. | ☐ | |
 | REC-APP-736 | Choisir le pays Bénin | `invite-panier` · Nominal · auto | Les zones du pays sont chargées dans la liste. | ☐ | |
 | REC-APP-737 | Choisir la zone « Porto-Novo » | `invite-panier` · Nominal · auto | Frais et délai lus de la zone. | ☐ | |
-| REC-APP-738 | Choisir un pays sans zone (Côte d'Ivoire) | `invite-panier` · Erreur · auto | La liste des zones reste vide, aucune ligne de frais. | ☐ | |
+| REC-APP-738 | Choisir un pays sans zone (Côte d'Ivoire) | `invite-panier` · Erreur · auto | La liste des zones reste vide, aucune ligne de frais. Écart relevé : aucune phrase n'explique l'absence de zone de livraison pour ce pays (spec muette) ; à décider avec le produit. | ☐ | |
 | REC-APP-739 | 1. Remplir quartier « Ouando » et rue « Près du marché »<br>2. « Continuer vers le paiement » | `invite-panier` · Nominal · auto | Commande créée sans aucun prix, arrivée sur le paiement. | ☐ | |
 | REC-APP-740 | Revenir sur la livraison depuis le paiement sans rien changer | `invite-panier` · Nominal · auto | Valeurs conservées, la même commande est reprise, aucune nouvelle commande. | ☐ | |
 | REC-APP-741 | Modifier la zone après un retour arrière | `invite-panier` · Nominal · auto | Une nouvelle commande est créée avec les nouveaux frais. Écart relevé : la page de paiement déjà ouverte reste affichée avec l'ancienne commande (frais et total) tant qu'elle n'est pas rechargée ; à décider avec le produit. | ☐ | |
@@ -2810,7 +2810,7 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-750 | Comparer le total à la commande | `invite-commande-en-attente` · Nominal · auto | C'est celui de la commande lue dans l'API, jamais recalculé dans le navigateur. | ☐ | |
 | REC-APP-751 | Payer avec un numéro en …02 | `invite-commande-en-attente` · Nominal · auto | Attente « On confirme votre paiement… » puis « Paiement échoué » | ☐ | |
 | REC-APP-752 | Payer avec un numéro en …01 | `invite-commande-en-attente` · Accès refusé · auto | Attente puis redirection vers /boutique/commandes/<référence>, merci affiché. | ☐ | |
-| REC-APP-753 | Payer avec un numéro en …03 | `invite-commande-en-attente` · Nominal · auto | « On confirme votre paiement… », puis « toujours en attente » avec un lien vers le suivi de la commande. | ☐ | |
+| REC-APP-753 | Payer avec un numéro en …03 | `invite-commande-en-attente` · Nominal · auto | « On confirme votre paiement… », puis « toujours en attente » avec un lien vers le suivi de la commande. Écart relevé : le lien « Voir mes commandes » du panneau d'attente mène, pour un invité, à la page de suivi de sa seule commande (libellé à revoir) ; à décider avec le produit. | ☐ | |
 | REC-APP-754 | Ouvrir la page sans commande en cours | `invite-commande-en-attente` · Vide · auto | Redirection vers /boutique/commande/livraison. | ☐ | |
 | REC-APP-755 | Ouvrir la page avec une commande que l'API ne connaît pas | `invite-commande-en-attente` · Accès refusé · auto | « Cette commande est introuvable… » et « Retour au panier » | ☐ | |
 | REC-APP-756 | Ouvrir la page d'une commande déjà payée | `invite-commande-introuvable` · Accès refusé · auto | Redirection vers /boutique/commandes/<référence>. | ☐ | |
