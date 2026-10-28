@@ -13,6 +13,9 @@ type Order = Schemas["OrderCreated"];
 /** Adresse envoyée à la commande (`deliveryAddress`). */
 export type DeliveryAddressInput = Schemas["DeliveryAddressInputRequest"];
 
+/** Adresse déjà saisie pour la commande de la demande : repli du formulaire quand aucune adresse par défaut n'existe. */
+export type EnteredAddress = Pick<Address, "zoneId" | "city" | "district" | "addressLine"> & { country: string };
+
 const REQUIRED: Record<Exclude<AddressField, "country">, string> = {
   zone: "Choisissez la zone de livraison.",
   city: "Indiquez la ville.",
@@ -45,6 +48,8 @@ export type KitAddressStepProps = {
   createOrder: (deliveryAddress: DeliveryAddressInput) => Promise<ApiResult<Order>>;
   /** Adresse par défaut (WPD08), préremplie et modifiable. */
   address: Address | null;
+  /** Adresse déjà saisie pour la commande, reprise (« Modifier ») quand aucune adresse par défaut n'est enregistrée. */
+  entered?: EnteredAddress | null;
   /** Pays de la localité du parent, faute d'adresse enregistrée. */
   defaultCountry: string;
   recipientName: string;
@@ -52,6 +57,8 @@ export type KitAddressStepProps = {
   onOrder: (order: Order) => void;
   /** Kit en rupture : paiement impossible. */
   onOutOfStock: () => void;
+  /** Demande de l'enfant fermée entre-temps : l'écran se relit en lecture seule (WPD15). */
+  onRequestClosed?: () => void;
 };
 
 /**
@@ -62,13 +69,16 @@ export type KitAddressStepProps = {
 export function KitAddressStep({
   createOrder,
   address,
+  entered,
   defaultCountry,
   recipientName,
   onOrder,
   onOutOfStock,
+  onRequestClosed,
 }: KitAddressStepProps) {
   const countries = useReferential("countries");
-  const [country, setCountry] = useState(address?.zone.country ?? defaultCountry);
+  const start: EnteredAddress | null = address ? { ...address, country: address.zone.country } : (entered ?? null);
+  const [country, setCountry] = useState(start?.country ?? defaultCountry);
   const zones = useDeliveryZones(country);
   const [fields, setFields] = useState<Partial<Record<AddressField, string>>>({});
   const [error, setError] = useState<string>();
@@ -105,6 +115,7 @@ export function KitAddressStep({
     setPending(false);
     if (result.ok) return onOrder(result.data);
     if (result.code === "OUT_OF_STOCK") return onOutOfStock();
+    if (result.code === "PAYMENT_REQUEST_CLOSED" && onRequestClosed) return onRequestClosed();
     const byField = Object.fromEntries(
       Object.entries(result.fields)
         .filter(([name]) => name in API_FIELDS)
@@ -147,8 +158,8 @@ export function KitAddressStep({
         onCountryChange={setCountry}
         zoneValueKey="id"
         defaultValues={
-          address
-            ? { zone: String(address.zoneId), city: address.city, district: address.district, street: address.addressLine }
+          start
+            ? { zone: String(start.zoneId), city: start.city, district: start.district, street: start.addressLine }
             : undefined
         }
         errors={fields}

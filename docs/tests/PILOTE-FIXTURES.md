@@ -70,8 +70,8 @@ Aucun n'a été corrigé hors du premier ; les autres sont listés pour décisio
 | 1 | Message d'erreur d'un champ (`Field`) : contraste 4,29:1 (rouge `#dc2626` sur le fond de l'adresse de livraison), 4,5:1 exigé | **Corrigé** dans cette PR (`text-error-700`) ; trouvé par axe sur l'état « erreurs d'adresse », jamais testé avant |
 | 2 | Demande de kit **payée** : le libellé reste « Montant demandé hors livraison », la page close étant relue sans sa commande | **Corrigé** (tranché le 2026-10-28) : la demande de kit payée est relue avec sa commande (livraison, taxes, « Total payé ») |
 | 3 | Demande d'événement : la date et le lieu annoncés par le cahier ne sont pas affichés, et la phrase du bas dit « Le parcours est débloqué… » | À décider (spec muette, D53 amendé) : l'événement payant passe par une commande, pas par une demande |
-| 4 | Demande close entre la commande et le paiement : le message est affiché mais la page n'est pas relue en lecture seule (elle l'est quand la fermeture est vue à la création de la commande) | À décider ; la fiche `REC-PAR-439` décrit le comportement actuel |
-| 5 | « Modifier » l'adresse d'un kit rouvre un formulaire vierge si aucune adresse par défaut n'est enregistrée | À décider (confort) |
+| 4 | Demande close entre la commande et le paiement : le message est affiché mais la page n'est pas relue en lecture seule (elle l'est quand la fermeture est vue à la création de la commande) | **Corrigé** (tranché le 2026-10-28) : un seul comportement, lecture seule avec le motif (fiches `REC-PAR-439` et `REC-PAR-481`) |
+| 5 | « Modifier » l'adresse d'un kit rouvre un formulaire vierge si aucune adresse par défaut n'est enregistrée | **Corrigé** (tranché le 2026-10-28) : le formulaire s'ouvre prérempli avec l'adresse de la demande |
 | 6 | Le contrat OpenAPI ne documente pas les statuts d'erreur métier ni le 404 de l'adresse de livraison | À corriger côté API (`@extend_schema`) |
 | 7 | Cahier : « Kit réservé jusqu'au <heure> » est en réalité « <date> à <heure> » ; mobile « Validez le paiement sur ce téléphone » inexistant | Fiches mises à jour ou signalées « à confirmer » |
 
