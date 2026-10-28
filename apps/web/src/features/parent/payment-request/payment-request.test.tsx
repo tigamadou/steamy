@@ -384,6 +384,61 @@ describe("KitAddressStep (adresse d'un kit, C10, D38)", () => {
   }
   const zone = () => screen.getByRole("combobox", { name: /^Ville ou zone/ });
 
+  it("demande fermée à la commande : l'écran se relit si le parent le demande, sinon message d'erreur", async () => {
+    const user = userEvent.setup();
+    const onRequestClosed = vi.fn();
+    const { rerender } = render(
+      <KitAddressStep
+        createOrder={(deliveryAddress) =>
+          apiCall((api) => api.POST("/api/payments/orders/", { body: { paymentRequestId: 12, deliveryAddress } }))
+        }
+        address={ADDRESS}
+        defaultCountry="BJ"
+        recipientName="Marie Adjovi"
+        onOrder={vi.fn()}
+        onOutOfStock={vi.fn()}
+        onRequestClosed={onRequestClosed}
+      />,
+    );
+    POST.mockResolvedValue(failure(409, "PAYMENT_REQUEST_CLOSED"));
+    await waitFor(() => expect(zone()).toHaveValue("2"));
+    await user.click(screen.getByRole("button", { name: "Continuer vers le paiement" }));
+    await waitFor(() => expect(onRequestClosed).toHaveBeenCalled());
+
+    rerender(
+      <KitAddressStep
+        createOrder={(deliveryAddress) =>
+          apiCall((api) => api.POST("/api/payments/orders/", { body: { paymentRequestId: 12, deliveryAddress } }))
+        }
+        address={ADDRESS}
+        defaultCountry="BJ"
+        recipientName="Marie Adjovi"
+        onOrder={vi.fn()}
+        onOutOfStock={vi.fn()}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Continuer vers le paiement" }));
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+  });
+
+  it("sans adresse par défaut : reprend l'adresse déjà saisie pour la commande", async () => {
+    render(
+      <KitAddressStep
+        createOrder={vi.fn()}
+        address={null}
+        entered={{ zoneId: 2, country: "BJ", city: "Cotonou", district: "Cocotomey", addressLine: "Rue 12.045" }}
+        defaultCountry="TG"
+        recipientName="Marie Adjovi"
+        onOrder={vi.fn()}
+        onOutOfStock={vi.fn()}
+      />,
+    );
+    await waitFor(() => expect(zone()).toHaveValue("2"));
+    expect(screen.getByRole("textbox", { name: /^Ville\b/ })).toHaveValue("Cotonou");
+    expect(screen.getByRole("textbox", { name: /^Quartier/ })).toHaveValue("Cocotomey");
+    expect(screen.getByRole("textbox", { name: /^Rue/ })).toHaveValue("Rue 12.045");
+  });
+
   it("préremplie, enregistre l'adresse par défaut puis crée la commande de la demande", async () => {
     const user = userEvent.setup();
     PUT.mockResolvedValue(respond(200, ADDRESS));
@@ -468,6 +523,36 @@ describe("PaymentRequestFlow (WPD15 en attente)", () => {
     await screen.findByRole("radio", { name: "MTN Mobile Money" });
     await user.click(payButton());
     await waitFor(() => expect(router.refresh).toHaveBeenCalled());
+  });
+
+  it("demande fermée entre la commande et le paiement : même comportement, l'écran se relit en lecture seule", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValue(failure(409, "PAYMENT_REQUEST_CLOSED"));
+    render(<PaymentRequestFlow {...BASE} request={paymentRequest()} order={order({ kind: "course", total: 18000 })} />);
+    await screen.findByRole("radio", { name: "MTN Mobile Money" });
+    await user.click(payButton());
+    expect(POST).toHaveBeenCalledWith("/api/payments/orders/{reference}/payments/", expect.anything());
+    await waitFor(() => expect(router.refresh).toHaveBeenCalled());
+  });
+
+  it("kit sans adresse par défaut : « Modifier » rouvre le formulaire prérempli avec l'adresse de la demande", async () => {
+    const user = userEvent.setup();
+    render(<PaymentRequestFlow {...BASE} address={null} request={KIT_REQUEST} order={order()} />);
+    await user.click(screen.getByRole("button", { name: /^Modifier/ }));
+    await waitFor(() => expect(screen.getByRole("combobox", { name: /^Ville ou zone/ })).toHaveValue("2"));
+    expect(screen.getByRole("textbox", { name: /^Ville\b/ })).toHaveValue("Cotonou");
+    expect(screen.getByRole("textbox", { name: /^Quartier/ })).toHaveValue("Cocotomey");
+    expect(screen.getByRole("textbox", { name: /^Rue/ })).toHaveValue("Rue 12.045");
+  });
+
+  it("kit sans adresse par défaut, réservation dépassée : le formulaire garde l'adresse saisie", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValue(failure(409, "ORDER_EXPIRED"));
+    render(<PaymentRequestFlow {...BASE} address={null} request={KIT_REQUEST} order={order()} />);
+    await screen.findByRole("radio", { name: "MTN Mobile Money" });
+    await user.click(payButton());
+    expect(await screen.findByRole("status")).toHaveTextContent("Le délai de réservation est dépassé");
+    await waitFor(() => expect(screen.getByRole("textbox", { name: /^Ville\b/ })).toHaveValue("Cotonou"));
   });
 
   it("commande en attente reprise, déjà payée : l'écran se relit", async () => {

@@ -27,8 +27,8 @@ export type OrderPaymentProps = {
   preferred?: PaymentFormProps["preferred"];
   /** WA05 : message et retour, dans le shell parent. */
   success: { message: ReactNode; action: { label: string; href: string } };
-  /** La commande a expiré ou est déjà payée : l'écran se met à jour. */
-  onOrderClosed: (code: "ORDER_EXPIRED" | "ORDER_ALREADY_PAID") => void;
+  /** La commande a expiré ou est déjà payée, ou la demande s'est fermée entre-temps : l'écran se met à jour. */
+  onOrderClosed: (code: "ORDER_EXPIRED" | "ORDER_ALREADY_PAID" | "PAYMENT_REQUEST_CLOSED") => void;
   /** État du paiement en cours, pour la pastille de l'écran ; `refunded` : paiement arrivé après le délai (C17). */
   onState?: (state: "pending" | "confirming" | "failed" | "paid" | "refunded") => void;
 };
@@ -68,7 +68,9 @@ export function OrderPayment({ amount, reference, countries, preferred, success,
       onState?.(result.data.status === "failed" ? "failed" : "confirming");
       return result;
     }
-    if (result.code === "ORDER_EXPIRED" || result.code === "ORDER_ALREADY_PAID") onOrderClosed(result.code);
+    if (result.code === "ORDER_EXPIRED" || result.code === "ORDER_ALREADY_PAID" || result.code === "PAYMENT_REQUEST_CLOSED") {
+      onOrderClosed(result.code);
+    }
     return translated(result);
   }
 
