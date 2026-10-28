@@ -112,6 +112,35 @@ describe("PaymentRequestScreen (WPD15, serveur)", () => {
     expect(GET).not.toHaveBeenCalledWith("/api/accounts/me/parent-profile/");
   });
 
+  it("demande de kit payée : relue avec sa commande (frais de livraison, taxes et total figés par le serveur)", async () => {
+    routeApi(respond(200, { ...KIT_REQUEST, status: "paid", orderReference: "CMD-ABC123" }));
+    render((await PaymentRequestScreen({ params: params("12") })) as ReactElement);
+    expect(GET).toHaveBeenCalledWith("/api/payments/orders/{reference}/", {
+      params: { path: { reference: "CMD-ABC123" } },
+    });
+    expect(screen.getByText("Total payé")).toBeInTheDocument();
+    expect(screen.getByText(/^Livraison/)).toBeInTheDocument();
+    expect(screen.queryByText(/hors livraison/)).not.toBeInTheDocument();
+  });
+
+  it("demande de parcours payée : récapitulatif de la demande, commande non relue", async () => {
+    routeApi(respond(200, paymentRequest({ status: "paid", orderReference: "CMD-ABC123" })));
+    render((await PaymentRequestScreen({ params: params("12") })) as ReactElement);
+    expect(GET).not.toHaveBeenCalledWith("/api/payments/orders/{reference}/", expect.anything());
+  });
+
+  it("demande de kit payée dont la commande est illisible : récapitulatif de la demande", async () => {
+    GET.mockImplementation(async (path: string) =>
+      path === "/api/payments/orders/{reference}/"
+        ? respond(404)
+        : path === "/api/payments/payment-requests/{id}/"
+          ? respond(200, { ...KIT_REQUEST, status: "paid", orderReference: "CMD-X" })
+          : respond(200, CHILD),
+    );
+    render((await PaymentRequestScreen({ params: params("12") })) as ReactElement);
+    expect(screen.getByText("Montant demandé hors livraison")).toBeInTheDocument();
+  });
+
   it("session perdue : ne rend rien", async () => {
     routeApi(respond(401));
     expect(await PaymentRequestScreen({ params: params("12") })).toBeNull();

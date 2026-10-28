@@ -437,12 +437,13 @@ test("à payer · kit : adresse de livraison, commande créée, reprise après r
     await expectAccessible(page);
   });
 
-  await test.step("REC-PAR-435 · Recharger la demande de kit payée : « Voir la commande », « Montant demandé »", async () => {
+  await test.step("REC-PAR-435 · Recharger la demande de kit payée : « Voir la commande », commande relue (livraison, taxes, « Total payé »)", async () => {
     await page.reload();
     await expect(page.getByRole("heading", { level: 2, name: "Cette demande est réglée" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Voir la commande" })).toHaveAttribute("href", /^\/parent\/commandes\/CMD-501/);
-    // Écart relevé : la demande payée est relue sans sa commande, le libellé reste « hors livraison » (PILOTE-FIXTURES.md)
-    await expect(page.getByText(/^Montant demandé/)).toBeVisible();
+    await expect(page.getByText(/^Livraison · /)).toBeVisible();
+    await expect(page.getByText(/^Montant demandé/)).toHaveCount(0);
+    await expect(page.getByText("Total payé", { exact: true })).toBeVisible();
   });
   await expectNoUnhandledCall(session);
 });
@@ -931,6 +932,21 @@ test("états en lecture seule : refusée, expirée, annulée, kit expiré, régl
     await closedAt("demande-refusee-sans-motif");
     await expect(line(page, "Montant demandé")).toContainText(fcfa(COURSE.total));
     await expect(page.getByText("Total à payer")).toHaveCount(0);
+  });
+
+  await test.step("REC-PAR-477 · Lire une demande de kit payée : commande figée, livraison facturée, taxes et « Total payé » du serveur", async () => {
+    await closedAt("demande-payee-kit");
+    const order = kitOrder("CMD-501", ZONES[0], SAVED_ADDRESS, undefined, { status: "paid" });
+    await expect(page.getByRole("heading", { level: 2, name: "Cette demande est réglée" })).toBeVisible();
+    await expect(line(page, `Livraison · ${ZONES[0].name}`)).toContainText(fcfa(order.shippingFee));
+    for (const tax of order.taxes) {
+      await expect(line(page, `${tax.code === "vat" ? "TVA" : "AIB"} (${tax.rate} %)`)).toContainText(fcfa(tax.amount));
+    }
+    await expect(line(page, "Total payé")).toContainText(fcfa(order.total));
+    expect(order.total).toBe(order.subtotal + order.shippingFee + order.taxes.reduce((sum, tax) => sum + tax.amount, 0));
+    await expect(page.getByText("Total à payer")).toHaveCount(0);
+    await expect(page.getByText(/hors livraison/)).toHaveCount(0);
+    await expectAccessible(page);
   });
 
   await test.step("REC-PAR-362 · Lire une demande réglée : « Cette demande est réglée », « Voir la commande », « Retour à l'accueil »", async () => {
