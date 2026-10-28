@@ -6,6 +6,7 @@ import Ajv, { type ValidateFunction } from "ajv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { parse } from "yaml";
 
+import { courseOrder, courseRequest, kitOrder, kitRequest, payment, ZONES } from "./fixtures.ts";
 import { SCENARIOS, type ScenarioName } from "./scenarios.ts";
 import { start } from "./server.ts";
 
@@ -88,6 +89,22 @@ function check(openApiPath: string, method: string, status: number, json: unknow
   const valid = validator(documented);
   expect(valid(json), JSON.stringify(valid.errors)).toBe(true);
 }
+
+describe("les objets par défaut respectent le contrat OpenAPI", () => {
+  const schema = (name: string) => ({ $ref: `#/components/schemas/${name}` });
+  const defaults: [string, string, unknown][] = [
+    ["PaymentRequest", "demande de parcours", courseRequest()],
+    ["PaymentRequest", "demande de kit", kitRequest()],
+    ["PaymentRequest", "demande sans taxes", courseRequest({}, { vat: null, aib: null })],
+    ["Order", "commande de parcours", courseOrder("CMD-1")],
+    ["Order", "commande de kit", kitOrder("CMD-2", ZONES[0], { zoneId: 1, recipientName: "A", city: "B", district: "C", addressLine: "D" })],
+    ["Payment", "paiement", payment(1, courseOrder("CMD-1"), "pending", { country: "BJ", network: "mtn", msisdn: "0197000001" })],
+  ];
+  it.each(defaults)("%s : %s", (name, _label, value) => {
+    const valid = validator(schema(name));
+    expect(valid(value), JSON.stringify(valid.errors)).toBe(true);
+  });
+});
 
 const address = { zoneId: 1, recipientName: "Marie Adjovi", city: "Cotonou", district: "Akpakpa", addressLine: "Rue 5" };
 
