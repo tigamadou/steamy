@@ -47,6 +47,10 @@ function validator(schema: object): ValidateFunction {
 }
 
 /**
+ * Ce qui dépend de cette liste de tolérance tant que l'API ne documente pas ses statuts d'erreur : tous les incidents
+ * des scénarios (409 `OUT_OF_STOCK`, `PAYMENT_*`, `ORDER_*`, 410, 402, 500…) et le 404 de `accounts/me/delivery-address/` ;
+ * le retrait d'une ligne du panier (`DELETE shop/cart/items/{id}/`) répond 200 avec le panier alors que le contrat annonce 204.
+ *
  * Statuts que le contrat ne décrit pas mais que l'API renvoie (409/410/402 métier, 500, et 404 de l'adresse de livraison
  * absente, que le front lit comme « rien d'enregistré ») : seul le corps est contrôlé.
  */
@@ -90,6 +94,79 @@ function check(openApiPath: string, method: string, status: number, json: unknow
   expect(valid(json), JSON.stringify(valid.errors)).toBe(true);
 }
 
+describe("boutique et checkout invité : réponses conformes au contrat", () => {
+  const cookie = (session: string) => `sessionid=${session}; csrftoken=t`;
+  const send = async (session: string, method: string, path: string, body?: object, extra: Record<string, string> = {}) => {
+    const response = await fetch(`${base}${path}`, {
+      method,
+      headers: { "Content-Type": "application/json", "X-CSRFToken": "t", Cookie: cookie(session), ...extra },
+      body: body && JSON.stringify(body),
+    });
+    const text = await response.text();
+    return { status: response.status, json: text ? JSON.parse(text) : undefined };
+  };
+  const kitAddress = { zoneId: 2, recipientName: "Awa Invitée", phone: "+2290197123402", city: "Porto-Novo", district: "Ouando", addressLine: "Près du marché" };
+
+  it("l'invité crée sa commande, la lit avec son jeton, la paie et lit sa facture", async () => {
+    const session = "invite-panier.vitest-invite";
+    const kit = await send(session, "GET", "/api/shop/kits/pack-electronique/");
+    check("/api/shop/kits/{slug}/", "GET", kit.status, kit.json);
+    const zones = await send(session, "GET", "/api/shop/delivery-zones/");
+    check("/api/shop/delivery-zones/", "GET", zones.status, zones.json);
+    const created = await send(session, "POST", "/api/payments/orders/", {
+      kind: "kit",
+      items: [{ kitSlug: "pack-electronique", quantity: 2 }],
+      guest: { firstName: "Awa", lastName: "Invitée", phone: "+2290197123402" },
+      deliveryAddress: kitAddress,
+    });
+    check("/api/payments/orders/", "POST", created.status, created.json);
+    expect(created.json.guestToken).toMatch(/^jeton-/);
+    const token = { "X-Guest-Token": created.json.guestToken };
+    const read = await send(session, "GET", `/api/payments/orders/${created.json.reference}/`, undefined, token);
+    check("/api/payments/orders/{reference}/", "GET", read.status, read.json);
+    expect((await send(session, "GET", `/api/payments/orders/${created.json.reference}/`)).status).toBe(404);
+    const pay = await send(session, "POST", `/api/payments/orders/${created.json.reference}/payments/`, { country: "BJ", network: "mtn", msisdn: "0197123401" }, token);
+    check("/api/payments/orders/{reference}/payments/", "POST", pay.status, pay.json);
+    const settled = await send(session, "GET", `/api/payments/payments/${pay.json.id}/`, undefined, token);
+    check("/api/payments/payments/{id}/", "GET", settled.status, settled.json);
+    expect(settled.json.status).toBe("succeeded");
+    expect((await send(session, "GET", `/api/payments/payments/${pay.json.id}/`)).status).toBe(404);
+  });
+
+  it("commandes de départ : suivi, facture et refus sans jeton", async () => {
+    const session = "invite-commande-payee.vitest-suivi";
+    const token = { "X-Guest-Token": "jeton-invite-test" };
+    const order = await send(session, "GET", "/api/payments/orders/CMD-INV-1/", undefined, token);
+    check("/api/payments/orders/{reference}/", "GET", order.status, order.json);
+    const invoice = await fetch(`${base}/api/payments/orders/CMD-INV-1/invoice/`, { headers: { Cookie: cookie(session), ...token } });
+    expect(invoice.status).toBe(200);
+    expect(invoice.headers.get("content-type")).toBe("application/pdf");
+    expect(invoice.headers.get("content-disposition")).toContain("facture-FAC-2026-000001.pdf");
+    expect((await send(session, "GET", "/api/payments/orders/CMD-INV-1/invoice/")).status).toBe(404);
+    const me = await send(session, "GET", "/api/accounts/me/");
+    expect(me.status).toBe(401);
+  });
+
+  it("panier serveur : lecture, ajout, quantité, retrait", async () => {
+    const session = "parcours-en-attente.vitest-panier";
+    const empty = await send(session, "GET", "/api/shop/cart/");
+    check("/api/shop/cart/", "GET", empty.status, empty.json);
+    const added = await send(session, "POST", "/api/shop/cart/items/", { kitSlug: "pack-electronique", quantity: 2 });
+    check("/api/shop/cart/items/", "POST", added.status, added.json);
+    expect(added.json.items[0].total).toBe(44000);
+    expect(added.json.taxes.map((tax: { code: string }) => tax.code)).toEqual(["vat", "aib"]);
+    const id = added.json.items[0].id;
+    const changed = await send(session, "PATCH", `/api/shop/cart/items/${id}/`, { quantity: 3 });
+    check("/api/shop/cart/items/{id}/", "PATCH", changed.status, changed.json);
+    const removed = await send(session, "DELETE", `/api/shop/cart/items/${id}/`);
+    // Le contrat annonce 204 ; l'API renvoie le panier (200), que le front relit comme tel
+    expect(removed.status).toBe(200);
+    expect(validator({ $ref: "#/components/schemas/Cart" })(removed.json)).toBe(true);
+    const soldOut = await send("invite-kit-indisponible.vitest-panier", "GET", "/api/shop/kits/pack-electronique/");
+    expect(soldOut.json.available).toBe(false);
+  });
+});
+
 describe("les objets par défaut respectent le contrat OpenAPI", () => {
   const schema = (name: string) => ({ $ref: `#/components/schemas/${name}` });
   const defaults: [string, string, unknown][] = [
@@ -123,7 +200,9 @@ describe("la fausse API répond selon le contrat OpenAPI", () => {
       ["/api/shop/delivery-zones/?country=BJ", "/api/shop/delivery-zones/"],
       ["/api/auth/csrf/", "/api/auth/csrf/"],
     ];
-    for (const [path, openApiPath] of reads) {
+    // Un visiteur sans compte (invité) ne lit que les points d'accès publics
+    const isPublic = (path: string) => /referentials|delivery-zones|auth\/csrf/.test(path);
+    for (const [path, openApiPath] of reads.filter(([path]) => SCENARIOS[scenario].me || isPublic(path))) {
       const { status, json } = await call(scenario, "GET", path);
       check(openApiPath, "GET", status, json);
     }

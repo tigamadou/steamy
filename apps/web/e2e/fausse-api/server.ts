@@ -4,6 +4,8 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import type { Schemas } from "@steamy/api-client";
 
 import { fail, newInstance, once, route, routes, type Body, type Call, type Context, type Instance, type Respond } from "./contexte.ts";
+import "./ecrans/boutique.ts";
+import "./ecrans/commandes.ts";
 import "./ecrans/demande-paiement.ts";
 import { resolve } from "./ecrans/paiement.ts";
 import { CHILD, COUNTRIES, NETWORKS, ZONES } from "./fixtures.ts";
@@ -56,7 +58,7 @@ function instanceOf(session: string | undefined): { id: string; instance: Instan
 
 function send(response: ServerResponse, status: number, body?: unknown, headers: Record<string, string | string[]> = {}) {
   response.writeHead(status, { "Content-Type": "application/json", ...headers });
-  response.end(body === undefined ? undefined : JSON.stringify(body));
+  response.end(body === undefined ? undefined : Buffer.isBuffer(body) ? body : JSON.stringify(body));
 }
 
 function readBody(request: IncomingMessage): Promise<unknown> {
@@ -86,9 +88,14 @@ route("GET", /^\/api\/referentials\/payment-networks\/$/, false, ({ instance, ur
   }
   respond(200, NETWORKS.filter((network) => network.country === url.searchParams.get("country")));
 });
-route("GET", /^\/api\/shop\/delivery-zones\/$/, false, ({ url, respond }) =>
-  respond(200, ZONES.filter((zone) => zone.country === url.searchParams.get("country"))),
-);
+route("GET", /^\/api\/shop\/delivery-zones\/$/, false, ({ instance, url, respond }) => {
+  if (once(instance, "zones-error", instance.scenario.faults.zonesError)) {
+    return respond(500, { code: "SERVER_ERROR", message: "Une erreur est survenue côté serveur." });
+  }
+  // Sans pays, toutes les zones (le panier vide annonce les délais de la boutique)
+  const country = url.searchParams.get("country");
+  respond(200, ZONES.filter((zone) => !country || zone.country === country));
+});
 
 // Compte
 route("GET", /^\/api\/accounts\/me\/$/, true, ({ instance, respond }) => respond(200, instance.scenario.me));
@@ -128,9 +135,9 @@ function settle(url: URL, respond: Respond) {
 const CORS = (origin: string) => ({
   "Access-Control-Allow-Origin": origin,
   "Access-Control-Allow-Credentials": "true",
-  "Access-Control-Allow-Headers": "Content-Type, X-CSRFToken",
+  "Access-Control-Allow-Headers": "Content-Type, X-CSRFToken, X-Guest-Token",
   "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-  "Access-Control-Expose-Headers": "Retry-After",
+  "Access-Control-Expose-Headers": "Retry-After, Content-Disposition",
   Vary: "Origin",
 });
 
@@ -162,7 +169,7 @@ export function start(port: number) {
     // Connexion : crée une session du scénario annoncé par le cookie `fx_scenario`
     if (method === "POST" && url.pathname === "/api/auth/login/") {
       const name = cookies[SCENARIO_COOKIE] ?? "";
-      if (!isScenario(name)) return fail(respond, "INVALID_CREDENTIALS", "Scénario inconnu.");
+      if (!isScenario(name) || !SCENARIOS[name].me) return fail(respond, "INVALID_CREDENTIALS", "Scénario inconnu.");
       const token = randomUUID();
       return respond(200, { user: SCENARIOS[name].me, csrfToken: token }, {
         "Set-Cookie": `${SESSION_COOKIE}=${name}.${randomUUID()}; Path=/; HttpOnly`,
@@ -174,14 +181,14 @@ export function start(port: number) {
       record(false);
       return;
     }
-    if (handler.auth) {
-      if (!found) return fail(respond, "NOT_AUTHENTICATED", "Non connecté.");
-      // CSRF : toute requête qui modifie des données doit porter le jeton du cookie (comme Django)
-      if (!["GET", "HEAD"].includes(method) && (!cookies[CSRF_COOKIE] || request.headers["x-csrftoken"] !== cookies[CSRF_COOKIE])) {
-        fail(respond, "PERMISSION_DENIED", "CSRF Failed: jeton absent ou incorrect.");
-        record(true);
-        return;
-      }
+    // Session exigée (401 sinon) ; ouvert à l'invité, la session n'est exigée que si un compte est connecté
+    const signedIn = !!found?.instance.scenario.me;
+    if (handler.auth === true && !signedIn) return fail(respond, "NOT_AUTHENTICATED", "Non connecté.");
+    // CSRF : toute requête qui modifie des données doit porter le jeton du cookie (comme Django)
+    if (signedIn && handler.auth && !["GET", "HEAD"].includes(method) && (!cookies[CSRF_COOKIE] || request.headers["x-csrftoken"] !== cookies[CSRF_COOKIE])) {
+      fail(respond, "PERMISSION_DENIED", "CSRF Failed: jeton absent ou incorrect.");
+      record(true);
+      return;
     }
     const placeholder = { scenario: BASE } as Instance;
     const match = handler.path.exec(url.pathname) as RegExpMatchArray;

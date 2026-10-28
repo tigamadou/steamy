@@ -1,3 +1,4 @@
+import { SCENARIOS_CHECKOUT_INVITE } from "./ecrans/checkout-invite.ts";
 import { SCENARIOS_DEMANDE_PAIEMENT } from "./ecrans/demande-paiement.ts";
 
 export { BASE, scenario, type Faults, type Scenario } from "./base.ts";
@@ -8,6 +9,7 @@ export { BASE, scenario, type Faults, type Scenario } from "./base.ts";
  */
 export const SCENARIOS = {
   ...SCENARIOS_DEMANDE_PAIEMENT,
+  ...SCENARIOS_CHECKOUT_INVITE,
 };
 
 export type ScenarioName = keyof typeof SCENARIOS;

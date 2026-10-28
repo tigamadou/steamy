@@ -2695,6 +2695,8 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 
 **Préparation des taxes (C25)** : taxes éteintes par défaut. Pour les lignes « TVA (n %) » et « AIB (n %) », activer dans l'admin Django (« Paramètres généraux », `PlatformSettings`) `vat_enabled` avec un taux (ex. 18) et `aib_enabled` avec un taux (ex. 5), puis rejouer les lignes marquées « Taxes activées ». Règle : total à payer = HT + livraison + TVA + AIB, arrondi au franc une seule fois sur le total ; taux et montants figés à la création de la commande.
 
+**Format de fiche** ([docs/tests/FORMAT-CAHIER.md](../../../docs/tests/FORMAT-CAHIER.md)) : les fiches du **checkout invité** (panier invité `/boutique/panier`, « Informations invité », « Livraison », « Paiement », « Confirmation & suivi », « Paiement échoué », « Panier vide » côté invité) sont au nouveau format : la colonne « Cas » commence par la **fixture** (une ligne de `apps/web/e2e/fausse-api/ecrans/checkout-invite.ts`, ou « vraie stack »), puis le type de cas, puis `auto` (étape `REC-APP-xxx` du test `apps/web/e2e/boutique/boutique-checkout-invite.fixtures.spec.ts`) ou `manuel`. Les montants sont ceux de la fixture, jamais recalculés. Les fiches `REC-APP-905` à `REC-APP-938` (sous-section « compléments issus de l'inventaire ») couvrent ce que l'inventaire des écrans a ajouté. Les autres fiches de la partie (catalogue, fiche kit, panier de l'apprenant, paiement par le parent) restent au format d'origine.
+
 #### Catalogue kits (/apprenant/boutique ; invité : /boutique)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
@@ -2746,98 +2748,98 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-700 | Diminuer la quantité jusqu'à 0 ou cliquer « Retirer Steamy Bot v1 » | Retrait | Toast « « Steamy Bot v1 » retiré du panier. » ; le focus revient en tête de liste ; sous-total mis à jour. | ☐ | |
 | REC-APP-701 | Augmenter la quantité | Au-delà du stock | Message d'erreur de l'API ; quantité inchangée (à confirmer : limite et texte). | ☐ | |
 | REC-APP-702 | Lire le récapitulatif | Taxes activées (TVA 18 %, AIB 5 %) | Entre le sous-total HT et la livraison : lignes « TVA (18 %) » et « AIB (5 %) » avec les montants lus de l'API ; « Total hors livraison » = HT + taxes ; rien n'est recalculé dans l'écran. | ☐ | |
-| REC-APP-703 | Lire le récapitulatif | Taxes éteintes | Aucune ligne de taxe. | ☐ | |
-| REC-APP-704 | Lire le récapitulatif | Panier invité | Libellés « Sous-total HT estimé », « Total estimé hors livraison » et note « Les taxes éventuelles sont ajoutées au moment du paiement. ». | ☐ | |
+| REC-APP-703 | Lire le récapitulatif invité | `invite-panier` · Nominal · auto | Aucune ligne de taxe (les taxes sont calculées par le serveur à la commande) | ☐ | |
+| REC-APP-704 | Lire le récapitulatif invité | `invite-panier` · Nominal · auto | « Sous-total HT estimé », « Total estimé hors livraison », note sur les taxes. | ☐ | |
 | REC-APP-705 | Cliquer « Demander à mon parent » | Apprenant, panier valide | Une demande est créée ; arrivée sur /apprenant/demandes/<id>. | ☐ | |
 | REC-APP-706 | Cliquer « Demander à mon parent » | Erreur serveur / réseau | Message d'erreur sous le bouton ; bouton de nouveau actif. | ☐ | |
 | REC-APP-707 | Cliquer « Demander à mon parent » | Un kit du panier est indisponible | Bouton désactivé ; alerte « Retire les kits indisponibles pour continuer. ». | ☐ | |
-| REC-APP-708 | Cliquer « Commander » | Invité, panier valide | Arrivée sur /boutique/commande/coordonnees. | ☐ | |
-| REC-APP-709 | Lire le bouton « Commander » | Invité, kit indisponible | Bouton désactivé ; alerte « Retirez les kits indisponibles pour continuer. ». | ☐ | |
-| REC-APP-710 | Cliquer « Continuer mes achats » | Nominal | Retour sur la liste des kits. | ☐ | |
+| REC-APP-708 | Cliquer « Commander » avec un panier valide | `invite-panier` · Nominal · auto | Arrivée sur /boutique/commande/coordonnees. | ☐ | |
+| REC-APP-709 | Lire le bouton « Commander » avec un kit indisponible | `invite-kit-indisponible` · Erreur · auto | Désactivé, alerte « Retirez les kits indisponibles pour continuer. » | ☐ | |
+| REC-APP-710 | Cliquer « Continuer mes achats » | `invite-panier` · Nominal · auto | Retour sur la liste des kits. | ☐ | |
 | REC-APP-711 | Se déconnecter puis se reconnecter | Panier serveur | Le panier de l'apprenant est conservé. | ☐ | |
-| REC-APP-712 | Ajouter un kit en invité, puis se connecter via /connexion?next=%2Fboutique%2Fpanier | Fusion du panier invité | Arrivée sur /apprenant/boutique/panier avec le kit ajouté ; « Sous-total HT (1 article) » ; le stockage local `steamy:panier` est vidé. | ☐ | |
+| REC-APP-712 | 1. Ajouter un kit en invité<br>2. Se connecter via /connexion?next=%2Fboutique%2Fpanier | vraie stack · Fusion du panier invité · manuel | Arrivée sur /apprenant/boutique/panier avec le kit ajouté ; « Sous-total HT (1 article) » ; le stockage local `steamy:panier` est vidé. Hors fixtures : la fusion s'appuie sur la connexion réelle et sur le panier serveur. | ☐ | |
 | REC-APP-713 | Fusionner un panier invité contenant un kit devenu indisponible | Kit retiré à la fusion | Message « Un kit de ton panier n'est plus disponible : il a été retiré. » (ou « n kits … ne sont plus disponibles : ils ont été retirés. »). | ☐ | |
-| REC-APP-714 | Ouvrir /boutique/panier connecté en apprenant | Panier public | Redirection vers /apprenant/boutique/panier. | ☐ | |
+| REC-APP-714 | Ouvrir /boutique/panier connecté en apprenant | `invite-session-apprenant` · Accès refusé · auto | Redirection vers /apprenant/boutique/panier. | ☐ | |
 | REC-APP-715 | Ouvrir le panier | Panier vide | Voir « Panier vide ». | ☐ | |
-| REC-APP-716 | Ouvrir le panier | Erreur serveur / réseau | Alerte avec le message d'erreur et bouton « Réessayer ». | ☐ | |
-| REC-APP-717 | Observer le chargement | Chargement | Squelette « Chargement du panier… ». | ☐ | |
-| REC-APP-718 | Recharger la page | Rechargement | Mêmes lignes et quantités. | ☐ | |
-| REC-APP-719 | Utiliser les boutons de quantité au clavier | Clavier | Les boutons « Ajouter un exemplaire de … » et « Retirer … » sont atteignables et activables. | ☐ | |
-| REC-APP-720 | Afficher la page à 360 px | Mobile 360 px | Récapitulatif sous les lignes (non fixe), boutons pleine largeur, aucun débordement. | ☐ | |
+| REC-APP-716 | Ouvrir le panier alors que l'API répond en erreur 500 | `invite-erreur-lecture-kit` · Erreur · auto | Alerte en français et « Réessayer » | ☐ | |
+| REC-APP-717 | Observer le chargement | `invite-erreur-lecture-kit` · Chargement · auto | Squelette « Chargement du panier… » puis les lignes. | ☐ | |
+| REC-APP-718 | Recharger la page | `invite-panier` · Nominal · auto | Mêmes lignes et quantités. | ☐ | |
+| REC-APP-719 | Utiliser les boutons de quantité au clavier | `invite-panier` · Nominal · auto | Atteignables et activables, la quantité s'arrête à 1. | ☐ | |
+| REC-APP-720 | Mobile 360 px | `invite-panier` · Mobile · auto | Récapitulatif sous les lignes, bouton « Commander » pleine largeur, aucun débordement. | ☐ | |
 
 #### Informations invité (/boutique/commande/coordonnees)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-721 | Ouvrir la page avec un panier invité non vide | Nominal | h1 « Vos coordonnées » ; étape 1 sur 3 « Vos coordonnées » ; « Pas besoin de compte pour commander : un SMS vous permettra de suivre la livraison. » ; champs « Prénom », « Nom », « Numéro de téléphone » (aide « Pour le suivi de la livraison par SMS. »), case « J'accepte… » jamais précochée ; bouton « Continuer vers la livraison ». | ☐ | |
-| REC-APP-722 | Cliquer « Continuer vers la livraison » | Formulaire vide | Récapitulatif « Corrigez les erreurs suivantes : » avec « Indiquez votre prénom. », « Indiquez votre nom. », « Indiquez un numéro de téléphone valide. », « Acceptez les conditions pour continuer. » (liens vers les champs). | ☐ | |
-| REC-APP-723 | Saisir un numéro invalide (ex. 123) | Téléphone invalide | Erreur « Indiquez un numéro de téléphone valide. ». | ☐ | |
-| REC-APP-724 | Ne pas cocher « J'accepte… » | Conditions non acceptées | Erreur « Acceptez les conditions pour continuer. ». | ☐ | |
-| REC-APP-725 | Remplir Prénom « Awa », Nom « Invitée », téléphone 0197123402, cocher les conditions puis valider | Nominal | Arrivée sur /boutique/commande/livraison. | ☐ | |
-| REC-APP-726 | Revenir sur la page après être allé à l'étape suivante | Retour arrière | Les coordonnées saisies sont conservées dans l'onglet. | ☐ | |
-| REC-APP-727 | Ouvrir la page avec un panier vide | Panier vide | Message « Votre panier est vide. » et bouton « Voir les kits ». | ☐ | |
-| REC-APP-728 | Ouvrir la page avec un kit indisponible dans le panier | Kit indisponible | « Un kit de votre panier n'est plus disponible : retirez-le pour continuer. » et bouton « Retour au panier ». | ☐ | |
-| REC-APP-729 | Ouvrir la page connecté en apprenant | Apprenant connecté | Redirection vers /apprenant/boutique/panier (il demande à son parent). | ☐ | |
+| REC-APP-721 | Ouvrir la page avec un panier non vide | `invite-panier` · Nominal · auto | Titre, texte d'accueil, champs, conditions jamais précochées. | ☐ | |
+| REC-APP-722 | « Continuer vers la livraison » avec le formulaire vide | `invite-panier` · Erreur · auto | Récapitulatif des quatre erreurs, focus sur le récapitulatif. | ☐ | |
+| REC-APP-723 | Saisir un numéro invalide (123) | `invite-panier` · Erreur · auto | « Indiquez un numéro de téléphone valide. » sous le champ. | ☐ | |
+| REC-APP-724 | Ne pas cocher « J'accepte… » | `invite-panier` · Nominal · auto | « Acceptez les conditions pour continuer. » | ☐ | |
+| REC-APP-725 | 1. Remplir Prénom « Awa », Nom « Invitée », téléphone 0197123402, cocher les conditions<br>2. Valider | `invite-panier` · Nominal · auto | Arrivée sur la livraison. | ☐ | |
+| REC-APP-726 | Revenir sur la page après l'étape suivante | `invite-panier` · Nominal · auto | Les coordonnées saisies sont conservées dans l'onglet. | ☐ | |
+| REC-APP-727 | Ouvrir la page avec un panier vide | `invite-panier` · Vide · auto | « Votre panier est vide. » et « Voir les kits » | ☐ | |
+| REC-APP-728 | Ouvrir la page avec un kit indisponible dans le panier | `invite-panier` · Erreur · auto | Message et « Retour au panier » | ☐ | |
+| REC-APP-729 | Ouvrir la page connecté en apprenant | `invite-kit-indisponible` · Accès refusé · auto | Redirection vers /apprenant/boutique/panier. | ☐ | |
 | REC-APP-730 | Ouvrir la page connecté en parent | Parent connecté | Redirection vers le panier du parent (/parent/boutique/panier). | ☐ | |
-| REC-APP-731 | Ouvrir la page | Erreur serveur / réseau au chargement du panier | Message d'erreur et bouton « Réessayer ». | ☐ | |
-| REC-APP-732 | Lire l'indicateur d'étape | Nominal | « Étape 1 sur 3 : Vos coordonnées » ; fil « Panier > … ». | ☐ | |
-| REC-APP-733 | Afficher la page à 360 px | Mobile 360 px | Champs pleine largeur, aucun débordement. | ☐ | |
+| REC-APP-731 | Ouvrir la page alors que la lecture du panier échoue | `invite-session-apprenant` · Nominal · auto | Message d'erreur et « Réessayer » | ☐ | |
+| REC-APP-732 | Lire l'indicateur d'étape | `invite-panier` · Nominal · auto | « Étape 1 sur 3 : Vos coordonnées » et fil « Panier > Vos coordonnées » | ☐ | |
+| REC-APP-733 | Mobile 360 px | `invite-panier` · Mobile · auto | Champs pleine largeur, aucun débordement. | ☐ | |
 
 #### Livraison (/boutique/commande/livraison)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-734 | Ouvrir la page | Nominal | Étape 2 sur 3 « Livraison » ; groupe « Adresse de livraison » : « Pays », « Ville ou zone de livraison », « Ville », « Quartier », « Rue / repère » ; « Téléphone du destinataire » (aide « Le livreur vous appelle à ce numéro. ») ; bouton « Continuer vers le paiement ». | ☐ | |
-| REC-APP-735 | Cliquer « Continuer vers le paiement » | Formulaire vide | Erreurs « Choisissez votre pays. », « Choisissez votre zone de livraison. », « Indiquez votre quartier. », « Indiquez une rue ou un repère. », « Indiquez un numéro de téléphone valide. ». | ☐ | |
-| REC-APP-736 | Choisir le pays Bénin | Nominal | La liste des zones du pays est chargée et activée. | ☐ | |
-| REC-APP-737 | Choisir la zone « Porto-Novo » | Nominal | Texte « Livraison Porto-Novo : 1 500 F CFA · délai annoncé 2 à 3 jours » (frais et délai lus de la zone). | ☐ | |
-| REC-APP-738 | Choisir un pays sans zone | Pays sans zone | La liste des zones reste vide ; message cohérent (à confirmer : spec muette). | ☐ | |
-| REC-APP-739 | Remplir quartier « Ouando », rue « Près du marché » puis « Continuer vers le paiement » | Nominal | La commande est créée (statut en attente), arrivée sur /boutique/commande/paiement. | ☐ | |
-| REC-APP-740 | Revenir sur cette page depuis « Paiement » sans rien changer | Retour arrière | Les valeurs sont conservées ; « Continuer vers le paiement » reprend la même commande en attente (aucune nouvelle commande, même référence). | ☐ | |
-| REC-APP-741 | Modifier la zone après un retour arrière | Adresse modifiée | Une nouvelle commande est créée avec les nouveaux frais (à confirmer : annulation de l'ancienne). | ☐ | |
-| REC-APP-742 | Valider | Kit épuisé entre-temps (OUT_OF_STOCK) | Message de stock insuffisant avec retour au panier. | ☐ | |
-| REC-APP-743 | Valider | Erreur de zone renvoyée par l'API | Erreur sous le champ « zone » avec le message de l'API. | ☐ | |
-| REC-APP-744 | Valider | Erreur serveur / réseau | Message d'erreur en tête du formulaire ; saisie conservée. | ☐ | |
-| REC-APP-745 | Ouvrir la page avec un panier vide | Panier vide | « Votre panier est vide. » et « Voir les kits ». | ☐ | |
-| REC-APP-746 | Afficher la page à 360 px | Mobile 360 px | Champs pleine largeur, aucun débordement. | ☐ | |
+| REC-APP-734 | Ouvrir la page | `invite-panier` · Nominal · auto | « Où livrer votre commande ? », étape 2 sur 3, adresse (pays, zone, quartier, rue), téléphone du destinataire prérempli, « Continuer vers le paiement » | ☐ | |
+| REC-APP-735 | « Continuer vers le paiement » sans rien saisir | `invite-panier` · Erreur · auto | Cinq erreurs, aucune commande créée. | ☐ | |
+| REC-APP-736 | Choisir le pays Bénin | `invite-panier` · Nominal · auto | Les zones du pays sont chargées dans la liste. | ☐ | |
+| REC-APP-737 | Choisir la zone « Porto-Novo » | `invite-panier` · Nominal · auto | Frais et délai lus de la zone. | ☐ | |
+| REC-APP-738 | Choisir un pays sans zone (Côte d'Ivoire) | `invite-panier` · Erreur · auto | La liste des zones reste vide, aucune ligne de frais. | ☐ | |
+| REC-APP-739 | 1. Remplir quartier « Ouando » et rue « Près du marché »<br>2. « Continuer vers le paiement » | `invite-panier` · Nominal · auto | Commande créée sans aucun prix, arrivée sur le paiement. | ☐ | |
+| REC-APP-740 | Revenir sur la livraison depuis le paiement sans rien changer | `invite-panier` · Nominal · auto | Valeurs conservées, la même commande est reprise, aucune nouvelle commande. | ☐ | |
+| REC-APP-741 | Modifier la zone après un retour arrière | `invite-panier` · Nominal · auto | Une nouvelle commande est créée avec les nouveaux frais. Écart relevé : la page de paiement déjà ouverte reste affichée avec l'ancienne commande (frais et total) tant qu'elle n'est pas rechargée ; à décider avec le produit. | ☐ | |
+| REC-APP-742 | Valider alors que le kit vient d'être épuisé | `invite-rupture-a-la-commande` · Erreur · auto | « Un kit de votre panier vient d'être épuisé. » et lien vers le panier. | ☐ | |
+| REC-APP-743 | Valider alors que l'API refuse l'adresse | `invite-adresse-refusee` · Nominal · auto | Son message sous le champ de la zone, saisie conservée. | ☐ | |
+| REC-APP-744 | Valider alors que l'API répond en erreur 500 | `invite-erreur-commande` · Erreur · auto | Message en tête du formulaire, saisie conservée. | ☐ | |
+| REC-APP-745 | Ouvrir la livraison avec un panier vide | `invite-panier` · Vide · auto | « Votre panier est vide. » et « Voir les kits » | ☐ | |
+| REC-APP-746 | Mobile 360 px | `invite-panier` · Mobile · auto | Champs pleine largeur, aucun débordement. | ☐ | |
 
 #### Paiement (/boutique/commande/paiement)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-747 | Ouvrir la page après « Livraison » | Nominal | Étape 3 sur 3 « Paiement » ; bloc « Total à payer · 1 article + livraison » avec le total en grand ; détail « Articles HT », « Livraison (<zone>) » ; « Vos kits sont réservés jusqu'à <hh:mm> : payez avant cette heure. » ; formulaire « Paiement Mobile Money ». | ☐ | |
-| REC-APP-748 | Lire le détail du total | Taxes activées (TVA 18 %, AIB 5 %) | Lignes « TVA (18 %) » et « AIB (5 %) » ajoutées au détail ; le total en grand est le total du serveur (HT + livraison + TVA + AIB) et le bouton affiche « Payer <ce total> F CFA ». | ☐ | |
-| REC-APP-749 | Lire le détail du total | Taxes éteintes | Aucune ligne de taxe ; total = HT + livraison. | ☐ | |
-| REC-APP-750 | Comparer le total au panier | Nominal | Le total est celui de la commande créée par le serveur (jamais recalculé dans le navigateur). | ☐ | |
-| REC-APP-751 | Payer | Numéro en `…02` | Voir « Paiement échoué » / « Paiement échoué ». | ☐ | |
-| REC-APP-752 | Payer | Numéro en `…01` | Voir « Paiement réussi » / « Confirmation & suivi ». | ☐ | |
-| REC-APP-753 | Payer | Numéro en `…03` | Voir « Paiement en cours » (reste en attente). | ☐ | |
-| REC-APP-754 | Ouvrir la page directement sans commande en cours | Aucune commande en session | Redirection vers /boutique/commande/livraison. | ☐ | |
-| REC-APP-755 | Ouvrir la page | Commande introuvable (NOT_FOUND) | Alerte « Cette commande est introuvable. Reprenez depuis votre panier. » et bouton « Retour au panier ». | ☐ | |
-| REC-APP-756 | Ouvrir la page | Commande déjà payée | Redirection vers /boutique/commandes/<référence>. | ☐ | |
-| REC-APP-757 | Ouvrir la page | Délai de réservation dépassé | « Le délai de réservation est dépassé : les kits ont été remis en vente. » ; « Votre panier est conservé : vous pouvez repasser commande. » ; bouton « Retour au panier ». | ☐ | |
-| REC-APP-758 | Ouvrir la page | Erreur serveur / réseau | Alerte avec message d'erreur et bouton « Réessayer ». | ☐ | |
-| REC-APP-759 | Observer le chargement | Chargement | Squelette « Chargement de votre commande… ». | ☐ | |
-| REC-APP-760 | Afficher la page à 360 px | Mobile 360 px | Bloc de total et formulaire pleine largeur, aucun débordement. | ☐ | |
+| REC-APP-747 | Ouvrir la page après la livraison | `invite-commande-en-attente` · Nominal · auto | Étape 3 sur 3, « Total à payer · 1 article + livraison », détail, heure limite, formulaire Mobile Money. | ☐ | |
+| REC-APP-748 | Lire le détail du total avec taxes | `invite-commande-en-attente` · Nominal · auto | Lignes TVA et AIB du serveur, total en grand et bouton « Payer » identiques. | ☐ | |
+| REC-APP-749 | Lire le détail du total sans taxes | `invite-commande-sans-taxes` · Nominal · auto | Ni TVA ni AIB, total égal à HT + livraison. | ☐ | |
+| REC-APP-750 | Comparer le total à la commande | `invite-commande-en-attente` · Nominal · auto | C'est celui de la commande lue dans l'API, jamais recalculé dans le navigateur. | ☐ | |
+| REC-APP-751 | Payer avec un numéro en …02 | `invite-commande-en-attente` · Nominal · auto | Attente « On confirme votre paiement… » puis « Paiement échoué » | ☐ | |
+| REC-APP-752 | Payer avec un numéro en …01 | `invite-commande-en-attente` · Accès refusé · auto | Attente puis redirection vers /boutique/commandes/<référence>, merci affiché. | ☐ | |
+| REC-APP-753 | Payer avec un numéro en …03 | `invite-commande-en-attente` · Nominal · auto | « On confirme votre paiement… », puis « toujours en attente » avec un lien vers le suivi de la commande. | ☐ | |
+| REC-APP-754 | Ouvrir la page sans commande en cours | `invite-commande-en-attente` · Vide · auto | Redirection vers /boutique/commande/livraison. | ☐ | |
+| REC-APP-755 | Ouvrir la page avec une commande que l'API ne connaît pas | `invite-commande-en-attente` · Accès refusé · auto | « Cette commande est introuvable… » et « Retour au panier » | ☐ | |
+| REC-APP-756 | Ouvrir la page d'une commande déjà payée | `invite-commande-introuvable` · Accès refusé · auto | Redirection vers /boutique/commandes/<référence>. | ☐ | |
+| REC-APP-757 | Ouvrir la page d'une commande dont la réservation est dépassée | `invite-commande-deja-payee` · Erreur · auto | Message, panier conservé, « Retour au panier » | ☐ | |
+| REC-APP-758 | Ouvrir la page alors que l'API répond en erreur 500 | `invite-commande-expiree` · Erreur · auto | Message et « Réessayer », puis le paiement s'affiche. | ☐ | |
+| REC-APP-759 | Observer le chargement | `invite-paiement-erreur-lecture` · Chargement · auto | Squelette « Chargement de votre commande… » puis le paiement. | ☐ | |
+| REC-APP-760 | Mobile 360 px | `invite-commande-en-attente` · Mobile · auto | Bloc de total et formulaire pleine largeur, aucun débordement. | ☐ | |
 
 #### Confirmation & suivi (/boutique/commandes/<référence>)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-761 | Payer en `…01` | Paiement réussi | Redirection vers /boutique/commandes/<référence> ; h1 « Merci, c'est commandé ! » ; « Commande <référence> · un reçu vous a été envoyé par SMS. Vous êtes prévenu à chaque étape de la livraison. » ; mascotte en fête. | ☐ | |
-| REC-APP-762 | Lire « Suivi de livraison » | Commande payée | Liste « Suivi de livraison » (étapes de la chronologie) ; « Délai annoncé : 2 à 3 jours » (zone Porto-Novo) ; « Le Kit Code est imprimé sur la notice du kit : l'apprenant le saisit dans son espace pour débloquer son parcours. ». | ☐ | |
-| REC-APP-763 | Lire « Récapitulatif » | Nominal | Lignes « <titre> × <quantité> » avec leur total ; « Sous-total HT », « Livraison (<zone>) », lignes de taxes éventuelles, « Total à payer » (en gras). | ☐ | |
-| REC-APP-764 | Lire « Récapitulatif » | Taxes activées | Entre la livraison et « Total à payer » : « TVA (18 %) » et « AIB (5 %) » avec montants ; « Total à payer » identique à celui payé. | ☐ | |
-| REC-APP-765 | Cliquer « Télécharger le reçu » | Commande payée avec facture | Téléchargement de `recu-<référence>.pdf`. | ☐ | |
-| REC-APP-766 | Cliquer « Télécharger le reçu » | Reçu pas encore prêt (PDF_NOT_READY) | Message « Le reçu est en cours de préparation. Réessayez dans un instant. ». | ☐ | |
-| REC-APP-767 | Cliquer « Télécharger le reçu » | Erreur serveur / réseau | Alerte avec message d'erreur en français. | ☐ | |
-| REC-APP-768 | Cliquer « Retour à la boutique » | Nominal | Arrivée sur /boutique. | ☐ | |
-| REC-APP-769 | Vérifier le panier après paiement | Commande payée | Le panier invité est vidé. | ☐ | |
-| REC-APP-770 | Vérifier l'en-tête de réponse | Page de suivi à jeton | `Referrer-Policy: no-referrer`. | ☐ | |
-| REC-APP-771 | Ouvrir le lien de suivi reçu par SMS (Mailpit) sur un autre appareil | Lien SMS | La commande s'affiche avec son jeton. | ☐ | |
-| REC-APP-772 | Ouvrir /boutique/commandes/<référence> sans jeton | Jeton absent ou invalide | Titre « Commande introuvable » ; « Ouvrez le lien reçu par SMS sur cet appareil pour suivre votre commande. » ; bouton « Retour à la boutique ». | ☐ | |
-| REC-APP-773 | Ouvrir une commande en attente | Statut en attente | Titre « Paiement en attente » ; « le paiement n'est pas encore confirmé. » ; pas de suivi de livraison. | ☐ | |
-| REC-APP-774 | Ouvrir une commande annulée | Statut annulé | Titre « Commande annulée » ; « elle n'a pas été payée à temps et le stock a été libéré. ». | ☐ | |
-| REC-APP-775 | Ouvrir une commande remboursée | Statut remboursé | Titre « Commande remboursée » ; « elle vous a été remboursée. ». | ☐ | |
-| REC-APP-776 | Ouvrir | Erreur serveur / réseau | Titre « Impossible d'afficher la commande » et bouton « Réessayer ». | ☐ | |
-| REC-APP-777 | Observer le chargement | Chargement | Squelette « Chargement de la commande… ». | ☐ | |
-| REC-APP-778 | Afficher la page à 360 px | Mobile 360 px | Chronologie et récapitulatif empilés, boutons pleine largeur, aucun débordement. | ☐ | |
+| REC-APP-761 | Lire la confirmation | `invite-commande-en-attente` · Nominal · auto | « Commande <référence> · un reçu vous a été envoyé par SMS… » | ☐ | |
+| REC-APP-762 | Lire « Suivi de livraison » | `invite-commande-payee` · Nominal · auto | Étapes, « Délai annoncé » de la zone, mention du Kit Code imprimé sur la notice. | ☐ | |
+| REC-APP-763 | Lire « Récapitulatif » | `invite-commande-payee` · Nominal · auto | Lignes, sous-total HT, livraison, taxes, « Total à payer » du serveur. | ☐ | |
+| REC-APP-764 | Lire le récapitulatif avec taxes | `invite-commande-en-attente` · Nominal · auto | « TVA (18 %) » et « AIB (1 %) » du serveur, « Total à payer » identique à celui payé. | ☐ | |
+| REC-APP-765 | Cliquer « Télécharger le reçu » | `invite-commande-payee` · Nominal · auto | Téléchargement de recu-<référence>.pdf avec le jeton de la commande. | ☐ | |
+| REC-APP-766 | Cliquer « Télécharger le reçu » alors que le PDF n'est pas prêt | `invite-commande-payee` · Erreur · auto | « Le reçu est en cours de préparation. Réessayez dans un instant. » | ☐ | |
+| REC-APP-767 | Cliquer « Télécharger le reçu » alors que l'API répond en erreur 500 | `invite-recu-pas-pret` · Erreur · auto | Alerte en français. | ☐ | |
+| REC-APP-768 | Cliquer « Retour à la boutique » | `invite-commande-payee` · Nominal · auto | Arrivée sur /boutique. | ☐ | |
+| REC-APP-769 | Vérifier le panier après le paiement | `invite-commande-en-attente` · Nominal · auto | Le panier invité est vidé, ainsi que le tunnel de commande. | ☐ | |
+| REC-APP-770 | Vérifier l'en-tête de réponse de la page de suivi | `invite-commande-payee` · Nominal · auto | Referrer-Policy: no-referrer. | ☐ | |
+| REC-APP-771 | Ouvrir le lien de suivi reçu par SMS (jeton dans le lien) | `invite-commande-payee` · Erreur · auto | La commande s'affiche, le jeton est retiré de l'adresse. | ☐ | |
+| REC-APP-772 | Ouvrir /boutique/commandes/<référence> sans jeton | `invite-commande-payee-sans-taxes` · Accès refusé · auto | « Commande introuvable », lien SMS à ouvrir, « Retour à la boutique » | ☐ | |
+| REC-APP-773 | Ouvrir une commande en attente | `invite-commande-payee` · Nominal · auto | « Paiement en attente », pas de suivi de livraison. | ☐ | |
+| REC-APP-774 | Ouvrir une commande annulée | `invite-commande-en-attente` · Erreur · auto | « Commande annulée », stock libéré. | ☐ | |
+| REC-APP-775 | Ouvrir une commande remboursée | `invite-commande-annulee` · Erreur · auto | « Commande remboursée » | ☐ | |
+| REC-APP-776 | Ouvrir le suivi alors que l'API répond en erreur 500 | `invite-commande-remboursee` · Erreur · auto | « Impossible d'afficher la commande » et « Réessayer » | ☐ | |
+| REC-APP-777 | Observer le chargement | `invite-commande-payee` · Chargement · auto | Squelette « Chargement de la commande… » puis la confirmation. | ☐ | |
+| REC-APP-778 | Mobile 360 px | `invite-commande-payee` · Mobile · auto | Chronologie et récapitulatif empilés, aucun débordement. | ☐ | |
 
 #### Paiement par le parent (/apprenant/demandes/<id> pour une demande de kit)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
@@ -2857,22 +2859,22 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 #### Paiement échoué (/boutique/commande/paiement)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-APP-790 | Payer avec un numéro en `…02` | Paiement refusé | h2 « Paiement échoué » ; « La transaction n'a pas pu aboutir. Aucun montant n'a été débité. » ; message « Votre panier est conservé : vous pouvez réessayer avec un autre numéro. ». | ☐ | |
-| REC-APP-791 | Vérifier le stockage local | Après échec | Le panier invité contient toujours le kit (`steamy:panier`). | ☐ | |
-| REC-APP-792 | Cliquer « Changer de numéro » | Après échec | Retour au formulaire de paiement ; choisir « MTN Mobile Money » et saisir 0197123401 mène à « Confirmation & suivi ». | ☐ | |
-| REC-APP-793 | Cliquer « Réessayer le paiement » | Après échec | Nouvel essai avec les mêmes informations. | ☐ | |
-| REC-APP-794 | Revenir en arrière puis repayer | Même commande | La commande en attente est reprise ; aucune nouvelle commande si rien n'a changé. | ☐ | |
-| REC-APP-795 | Afficher la page à 360 px | Mobile 360 px | Voir « Paiement échoué ». | ☐ | |
+| REC-APP-790 | Paiement refusé | `invite-commande-en-attente` · Erreur · auto | « Aucun montant n'a été débité. », raison, « Votre panier est conservé : vous pouvez réessayer avec un autre numéro. » | ☐ | |
+| REC-APP-791 | Vérifier le stockage local après l'échec | `invite-commande-en-attente` · Erreur · auto | Le panier invité contient toujours le kit. | ☐ | |
+| REC-APP-792 | 1. Cliquer « Changer de numéro »<br>2. Payer avec un numéro en …01 | `invite-commande-en-attente` · Nominal · auto | « Merci, c'est commandé ! » | ☐ | |
+| REC-APP-793 | Cliquer « Réessayer le paiement » | `invite-commande-en-attente` · Nominal · auto | Nouvel essai avec les mêmes informations, une seule commande. | ☐ | |
+| REC-APP-794 | 1. Revenir en arrière<br>2. Repayer | `invite-commande-en-attente` · Nominal · auto | La commande en attente est reprise, aucune nouvelle commande. | ☐ | |
+| REC-APP-795 | Mobile 360 px | `invite-commande-en-attente` · Mobile · auto | « Paiement échoué », boutons empilés et lisibles. | ☐ | |
 
 #### Panier vide (/apprenant/boutique/panier ; invité : /boutique/panier)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
 | REC-APP-796 | Ouvrir le panier avec un apprenant neuf | Apprenant | h1 « Mon panier » ; h2 « Ton panier est vide » ; « Choisis un kit pour construire pour de vrai, puis demande-le à ton parent. » ; bouton « Voir les kits » ; « Livraison selon ta zone » avec les délais par zone. | ☐ | |
-| REC-APP-797 | Ouvrir /boutique/panier sans panier | Invité | h1 « Votre panier » ; h2 « Votre panier est vide » ; « Choisissez un kit pour construire pour de vrai, livré chez vous. » ; « Livraison selon votre zone ». | ☐ | |
-| REC-APP-798 | Cliquer « Voir les kits » | Nominal | Arrivée sur /apprenant/boutique (apprenant) ou /boutique (invité). | ☐ | |
-| REC-APP-799 | Retirer le dernier article | Panier devenu vide | Toast de retrait puis état vide. | ☐ | |
-| REC-APP-800 | Ouvrir le panier | Tous les kits ont été retirés (plus en vente) | Message « Un kit de ton panier n'est plus disponible : il a été retiré. » au-dessus de l'état vide. | ☐ | |
-| REC-APP-801 | Afficher la page à 360 px | Mobile 360 px | Mascotte et bouton centrés, délais lisibles, aucun débordement. | ☐ | |
+| REC-APP-797 | Ouvrir /boutique/panier sans panier | `invite-panier` · Nominal · auto | « Votre panier est vide », délais de livraison par zone lus de l'API. | ☐ | |
+| REC-APP-798 | Cliquer « Voir les kits » | `invite-panier` · Nominal · auto | Arrivée sur /boutique. | ☐ | |
+| REC-APP-799 | Retirer le dernier article | `invite-panier` · Vide · auto | Message de retrait puis état vide. | ☐ | |
+| REC-APP-800 | Ouvrir le panier dont tous les kits ont été retirés de la vente | `invite-kits-retires` · Vide · auto | Avis au pluriel puis état vide. | ☐ | |
+| REC-APP-801 | Mobile 360 px | `invite-panier` · Mobile · auto | Mascotte et bouton « Voir les kits » centrés, délais lisibles, aucun débordement. | ☐ | |
 
 #### Stock épuisé (/apprenant/boutique/kit-energie-solaire ; invité : /boutique/kit-energie-solaire)
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
@@ -2885,6 +2887,45 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-807 | Ajouter le kit à un panier après un retour en stock | Réassort | Le kit redevient « En stock » et « Ajouter au panier » réapparaît ; la notification de retour est reçue. | ☐ | |
 | REC-APP-808 | Ouvrir la fiche pendant le chargement | Chargement | Texte « Chargement… » avant l'apparition du formulaire d'alerte. | ☐ | |
 | REC-APP-809 | Afficher la page à 360 px | Mobile 360 px | Formulaire d'alerte pleine largeur, aucun débordement. | ☐ | |
+
+#### Checkout invité · compléments issus de l'inventaire (tests sur fixtures)
+
+| N° | Action | Cas | Résultat attendu | Conforme | Remarques |
+| --- | --- | --- | --- | --- | --- |
+| REC-APP-905 | Ouvrir le panier invité avec deux kits | `invite-panier` · Nominal · auto | Lignes (nom lié au kit, prix unitaire HT, total de ligne HT, quantité) | ☐ | |
+| REC-APP-906 | Lire le prix d'un kit | `invite-panier` · Nominal · auto | Toujours « HT », jamais de prix TTC. | ☐ | |
+| REC-APP-907 | Cliquer « Ajouter un exemplaire de Pack Électronique » | `invite-panier` · Nominal · auto | La quantité et les totaux augmentent, le navigateur garde la quantité. | ☐ | |
+| REC-APP-908 | Cliquer « Retirer Steamy Bot v1 » | `invite-panier` · Erreur · auto | Message « retiré du panier », focus en tête de liste, sous-total mis à jour. | ☐ | |
+| REC-APP-909 | Accessibilité | `invite-panier` · Accessibilité · auto | Aucune violation WCAG 2 A/AA sur le panier invité. | ☐ | |
+| REC-APP-910 | Accessibilité | `invite-panier` · Accessibilité · auto | Aucune violation WCAG 2 A/AA sur le panier vide. | ☐ | |
+| REC-APP-911 | Retirer le kit indisponible | `invite-kit-indisponible` · Nominal · auto | La ligne et l'alerte disparaissent, état vide. | ☐ | |
+| REC-APP-912 | Ouvrir le panier dont un kit n'est plus en vente | `invite-kit-retire` · Erreur · auto | Avis « Un kit de votre panier n'est plus disponible : il a été retiré. », autre ligne conservée. | ☐ | |
+| REC-APP-913 | Cliquer « Réessayer » une fois l'API rétablie | `invite-erreur-lecture-kit` · Nominal · auto | Le panier s'affiche. | ☐ | |
+| REC-APP-914 | Ouvrir le panier réseau coupé | `invite-erreur-lecture-kit` · Erreur · auto | « Le serveur est injoignable… » et « Réessayer » | ☐ | |
+| REC-APP-915 | Lire les liens | `invite-panier` · Nominal · auto | Conditions d'utilisation, politique de confidentialité et « Se connecter » (retour au panier après connexion) | ☐ | |
+| REC-APP-916 | Observer le chargement du tunnel | `invite-erreur-lecture-kit` · Chargement · auto | Squelette « Chargement de votre commande… » | ☐ | |
+| REC-APP-917 | Ouvrir la livraison dans un onglet neuf, sans coordonnées | `invite-panier` · Nominal · auto | Retour à /boutique/commande/coordonnees. | ☐ | |
+| REC-APP-918 | Valider réseau coupé | `invite-erreur-commande` · Erreur · auto | « Le serveur est injoignable… », saisie conservée. | ☐ | |
+| REC-APP-919 | Valider alors que la zone n'est plus desservie | `invite-zone-indisponible` · Nominal · auto | Message de l'API en tête du formulaire. | ☐ | |
+| REC-APP-920 | Choisir un pays alors que la liste des zones est illisible | `invite-zone-indisponible` · Erreur · auto | Erreur et « Réessayer », puis zones chargées. | ☐ | |
+| REC-APP-921 | Accessibilité | `invite-commande-en-attente` · Accessibilité · auto | Aucune violation WCAG 2 A/AA sur le paiement invité. | ☐ | |
+| REC-APP-922 | Ouvrir la page réseau coupé | `invite-paiement-lent` · Erreur · auto | « Le serveur est injoignable… » et « Réessayer » | ☐ | |
+| REC-APP-923 | Dépasser le plafond d'essais | `invite-commande-en-attente` · Erreur · auto | « Trop de tentatives. Réessayez dans 45 secondes. », bouton désactivé. | ☐ | |
+| REC-APP-924 | Erreur 500 à l'initiation | `invite-paiement-trop-de-tentatives` · Erreur · auto | « Une erreur est survenue de notre côté… », le bouton « Payer » reste actif. | ☐ | |
+| REC-APP-925 | Payer pendant qu'un autre paiement de la commande est en cours | `invite-paiement-erreur-serveur` · Nominal · auto | Message de validation sur le téléphone. | ☐ | |
+| REC-APP-926 | Réseaux Mobile Money illisibles | `invite-paiement-deja-en-cours` · Erreur · auto | « Impossible de charger les réseaux Mobile Money. » puis « Réessayer » | ☐ | |
+| REC-APP-927 | Double-cliquer sur « Payer » | `invite-reseaux-indisponibles` · Nominal · auto | Un seul paiement initié. | ☐ | |
+| REC-APP-928 | Payer alors que la réservation vient d'expirer | `invite-commande-en-attente` · Erreur · auto | « Le délai de réservation est dépassé… » et « Retour au panier » | ☐ | |
+| REC-APP-929 | Payer une commande déjà payée dans un autre onglet | `invite-paiement-reservation-depassee` · Accès refusé · auto | Redirection vers /boutique/commandes/<référence>. | ☐ | |
+| REC-APP-930 | Échec dont le code n'établit pas l'absence de débit | `invite-echec-sans-certitude-de-debit` · Erreur · auto | Texte neutre « Vérifiez l'état de la commande… », sans « Aucun montant n'a été débité » | ☐ | |
+| REC-APP-931 | Paiement arrivé après le délai | `invite-echec-sans-certitude-de-debit` · Erreur · auto | « Commande remboursée » sur le suivi, panier conservé. | ☐ | |
+| REC-APP-932 | Accessibilité | `invite-commande-payee` · Accessibilité · auto | Aucune violation WCAG 2 A/AA sur le suivi de la commande payée. | ☐ | |
+| REC-APP-933 | Ouvrir une commande payée sans facture | `invite-recu-erreur` · Nominal · auto | Pas de bouton « Télécharger le reçu » | ☐ | |
+| REC-APP-934 | Ouvrir une commande expédiée | `invite-sans-facture` · Nominal · auto | « Expédiée » atteinte, « Délai annoncé » toujours affiché pour la livraison. | ☐ | |
+| REC-APP-935 | Ouvrir une commande livrée | `invite-commande-expediee` · Nominal · auto | Plus de « Délai annoncé » | ☐ | |
+| REC-APP-936 | Ouvrir une commande payée sans taxes | `invite-commande-livree` · Nominal · auto | Aucune ligne TVA ni AIB, « Total à payer » égal à HT + livraison. | ☐ | |
+| REC-APP-937 | Ouvrir le lien avec un jeton incorrect | `invite-commande-payee` · Accès refusé · auto | « Commande introuvable » | ☐ | |
+| REC-APP-938 | Ouvrir le suivi réseau coupé | `invite-suivi-erreur` · Erreur · auto | « Impossible d'afficher la commande », « Le serveur est injoignable… » | ☐ | |
 
 ### Navigation transverse de l'espace apprenant (shell, « Déconnexion »)
 
