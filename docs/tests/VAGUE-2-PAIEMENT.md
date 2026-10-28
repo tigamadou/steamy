@@ -10,7 +10,7 @@ Suite du [bilan du pilote](PILOTE-FIXTURES.md) (§ 6, « Prochaine vague propos�
 | Objets par défaut surchargés en typé (`scenario({ … })`, `fabrique`, `fusion`) ; statuts d'erreur lus dans `apps/api/libs/errors.py` | `fausse-api/base.ts`, `defauts.ts`, `statuts.ts` |
 | Visiteur sans compte (invité) : commande lue avec `X-Guest-Token`, état du navigateur posé par `seedBrowser` | `fausse-api/contexte.ts`, `support/navigateur.ts` |
 | 56 tests (112 exécutions), 183 étapes `REC-…`, bureau et mobile : 30 pour le checkout invité, 13 pour les commandes, 13 pour l'achat direct | `boutique/boutique-checkout-invite.fixtures.spec.ts`, `parent/parent-commandes.fixtures.spec.ts`, `parent/parent-achat-kits.fixtures.spec.ts` |
-| Test de contrat étendu (boutique, panier, suivi invité, facture PDF, liste paginée, enfants, catalogue) | `fausse-api/contract.test.ts` (136 tests au total avec les tests unitaires de `defauts` et `statuts`) |
+| Test de contrat étendu (boutique, panier, suivi invité, facture PDF, liste paginée, enfants, catalogue) | `fausse-api/contract.test.ts` (129 tests au total avec les tests unitaires de `defauts` et `statuts`) |
 | Cahier : 194 fiches de la vague au nouveau format dont 70 nouvelles issues de l'inventaire | `REC-APP-905` à `938`, `REC-PAR-441` à `476` |
 
 Les e2e existants sur la vraie stack (`boutique-checkout-p4`, `boutique-panier`, `boutique-demande-parent`, `parent-commandes`) sont **restés en place** ; ils seront réduits à leur parcours nominal quand le produit aura relu cette vague.
@@ -54,7 +54,7 @@ Le coût marginal de la vague est dans les tests, pas dans la fausse API : les t
 
 1. **Fausse API découpée par écran** : fait ; un écran = un fichier qui branche ses routes (`route()`), prépare son état de départ (`onInstance`) et exporte ses scénarios ; le serveur n'a plus changé depuis l'étape 1 que pour deux besoins d'ossature (l'invité, les réponses binaires).
 2. **Défauts d'objets surchargés en typé** : fait par `fabrique` / `fusion` / `scenario`, validés par le test de contrat. **Non généré du contrat** : un échantillonneur de schéma produit des valeurs sans sens (« string », 0) alors que chaque écran lit des montants, des libellés et des dates qui doivent se tenir ensemble ; le typage `Schemas` fait déjà échouer `pnpm typecheck` quand un champ requis est ajouté, et `contract.test.ts` valide chaque défaut contre son schéma JSON. À reconsidérer si les défauts se multiplient.
-3. **Pas de modification de l'API** : respecté. La liste de tolérance du test de contrat (`UNDOCUMENTED_ERRORS`) est restée en place. Ce qui en dépend : tous les incidents des scénarios (409 `OUT_OF_STOCK`, `PAYMENT_*`, `ORDER_*`, 410, 402, 500), le 404 de `accounts/me/delivery-address/`, et le retrait d'une ligne du panier (`DELETE shop/cart/items/{id}/` répond 200 avec le panier, le contrat annonce 204). Le contrat a depuis reçu les statuts d'erreur métier (PR « erreurs métier documentées dans le contrat OpenAPI ») : la liste pourra être réduite dans une PR dédiée.
+3. **Pas de modification de l'API** : respecté. Depuis la PR « erreurs métier documentées dans le contrat OpenAPI », la liste de tolérance du test de contrat (`UNDOCUMENTED_ERRORS`) a été **supprimée** : tout statut renvoyé par la fausse API doit être documenté par le contrat, et les 129 tests du contrat passent. Seul écart restant, assumé dans le test : le retrait d'une ligne du panier (`DELETE shop/cart/items/{id}/`) répond 200 avec le panier alors que le contrat annonce 204.
 
 ## 4. Difficultés rencontrées
 
@@ -92,4 +92,4 @@ Aucun des quatre défauts non décidés du pilote (libellé d'une demande de kit
 
 1. Réduire les e2e de la vraie stack de ces écrans à leur parcours nominal (gain : un shard sur quatre).
 2. Prochaine vague : **catalogue de kits, fiche kit et alerte de réassort** (nécessite un cache de rendu par scénario, ou une page non mise en cache en test), puis les écrans d'**inscription et de consentement** (priorité 3 du plan).
-3. Réduire la liste de tolérance du test de contrat maintenant que l'API documente ses erreurs métier.
+3. Faire documenter le 200 du retrait d'une ligne du panier (ou le faire répondre 204) pour fermer le dernier écart du contrat.

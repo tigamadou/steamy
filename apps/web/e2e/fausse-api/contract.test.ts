@@ -46,15 +46,6 @@ function validator(schema: object): ValidateFunction {
   return compiled;
 }
 
-/**
- * Ce qui dépend de cette liste de tolérance tant que l'API ne documente pas ses statuts d'erreur : tous les incidents
- * des scénarios (409 `OUT_OF_STOCK`, `PAYMENT_*`, `ORDER_*`, 410, 402, 500…) et le 404 de `accounts/me/delivery-address/` ;
- * le retrait d'une ligne du panier (`DELETE shop/cart/items/{id}/`) répond 200 avec le panier alors que le contrat annonce 204.
- *
- * Statuts que le contrat ne décrit pas mais que l'API renvoie (409/410/402 métier, 500, et 404 de l'adresse de livraison
- * absente, que le front lit comme « rien d'enregistré ») : seul le corps est contrôlé.
- */
-const UNDOCUMENTED_ERRORS = new Set([402, 404, 409, 410, 500]);
 
 let base = "";
 let close = () => {};
@@ -83,14 +74,8 @@ function check(openApiPath: string, method: string, status: number, json: unknow
   const operation = spec.paths[openApiPath]?.[method.toLowerCase()];
   expect(operation, `${method} ${openApiPath} absent du contrat`).toBeDefined();
   const documented = operation.responses[String(status)]?.content?.["application/json"]?.schema;
-  if (!documented) {
-    expect(UNDOCUMENTED_ERRORS.has(status), `statut ${status} absent du contrat pour ${method} ${openApiPath}`).toBe(true);
-    const errorSchema = { $ref: "#/components/schemas/Error" };
-    const valid = validator(errorSchema);
-    expect(valid(json), JSON.stringify(valid.errors)).toBe(true);
-    return;
-  }
-  const valid = validator(documented);
+  expect(documented, `statut ${status} absent du contrat pour ${method} ${openApiPath}`).toBeDefined();
+  const valid = validator(documented!);
   expect(valid(json), JSON.stringify(valid.errors)).toBe(true);
 }
 
