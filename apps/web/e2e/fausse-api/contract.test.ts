@@ -183,9 +183,8 @@ describe("boutique et checkout invité : réponses conformes au contrat", () => 
     const changed = await send(session, "PATCH", `/api/shop/cart/items/${id}/`, { quantity: 3 });
     check("/api/shop/cart/items/{id}/", "PATCH", changed.status, changed.json);
     const removed = await send(session, "DELETE", `/api/shop/cart/items/${id}/`);
-    // Le contrat annonce 204 ; l'API renvoie le panier (200), que le front relit comme tel
+    check("/api/shop/cart/items/{id}/", "DELETE", removed.status, removed.json);
     expect(removed.status).toBe(200);
-    expect(validator({ $ref: "#/components/schemas/Cart" })(removed.json)).toBe(true);
     const soldOut = await send("invite-kit-indisponible.vitest-panier", "GET", "/api/shop/kits/pack-electronique/");
     expect(soldOut.json.available).toBe(false);
   });

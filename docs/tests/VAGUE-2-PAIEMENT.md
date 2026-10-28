@@ -54,7 +54,7 @@ Le coût marginal de la vague est dans les tests, pas dans la fausse API : les t
 
 1. **Fausse API découpée par écran** : fait ; un écran = un fichier qui branche ses routes (`route()`), prépare son état de départ (`onInstance`) et exporte ses scénarios ; le serveur n'a plus changé depuis l'étape 1 que pour deux besoins d'ossature (l'invité, les réponses binaires).
 2. **Défauts d'objets surchargés en typé** : fait par `fabrique` / `fusion` / `scenario`, validés par le test de contrat. **Non généré du contrat** : un échantillonneur de schéma produit des valeurs sans sens (« string », 0) alors que chaque écran lit des montants, des libellés et des dates qui doivent se tenir ensemble ; le typage `Schemas` fait déjà échouer `pnpm typecheck` quand un champ requis est ajouté, et `contract.test.ts` valide chaque défaut contre son schéma JSON. À reconsidérer si les défauts se multiplient.
-3. **Pas de modification de l'API** : respecté. Depuis la PR « erreurs métier documentées dans le contrat OpenAPI », la liste de tolérance du test de contrat (`UNDOCUMENTED_ERRORS`) a été **supprimée** : tout statut renvoyé par la fausse API doit être documenté par le contrat, et les 129 tests du contrat passent. Seul écart restant, assumé dans le test : le retrait d'une ligne du panier (`DELETE shop/cart/items/{id}/`) répond 200 avec le panier alors que le contrat annonce 204.
+3. **Pas de modification de l'API** : respecté. Depuis la PR « erreurs métier documentées dans le contrat OpenAPI », la liste de tolérance du test de contrat (`UNDOCUMENTED_ERRORS`) a été **supprimée** : tout statut renvoyé par la fausse API doit être documenté par le contrat, et les 129 tests du contrat passent. Le dernier écart (retrait d'une ligne du panier, `DELETE shop/cart/items/{id}/`, 200 avec le panier) est fermé : le contrat annonce désormais 200.
 
 ## 4. Difficultés rencontrées
 
@@ -92,4 +92,3 @@ Aucun des quatre défauts non décidés du pilote (libellé d'une demande de kit
 
 1. Réduire les e2e de la vraie stack de ces écrans à leur parcours nominal (gain : un shard sur quatre).
 2. Prochaine vague : **catalogue de kits, fiche kit et alerte de réassort** (nécessite un cache de rendu par scénario, ou une page non mise en cache en test), puis les écrans d'**inscription et de consentement** (priorité 3 du plan).
-3. Faire documenter le 200 du retrait d'une ligne du panier (ou le faire répondre 204) pour fermer le dernier écart du contrat.
