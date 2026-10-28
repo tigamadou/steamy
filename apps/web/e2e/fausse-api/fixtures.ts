@@ -203,31 +203,69 @@ export function kitRequest(
   );
 }
 
-/** Commande d'un kit à livrer dans `zone`, avec ses taxes figées (HT + livraison + TVA + AIB). */
-export function kitOrder(
+/** Kit vendu par la boutique de la fausse API (fiche complète ; la liste en rend la partie `Kit`). */
+export type KitLine = { kit: Schemas["KitDetail"]; quantity: number };
+
+const ELECTRONIQUE: Schemas["CategorySummary"] = { slug: "electronique", label: "Électronique", color: "#2563EB", icon: "🔌" };
+const ENERGIE: Schemas["CategorySummary"] = { slug: "energie", label: "Énergie", color: "#F59E0B", icon: "☀️" };
+
+const kit = (slug: string, name: string, price: number, category: Schemas["CategorySummary"], available = true): Schemas["KitDetail"] => ({
+  slug,
+  name,
+  category,
+  price,
+  difficulty: "beginner",
+  emoji: "",
+  available,
+  description: `${name} : tout le matériel pour construire pour de vrai.`,
+  compatibleCourses: [],
+});
+
+/** Catalogue de la boutique : prix HT du serveur. Le Kit Énergie Solaire est en rupture. */
+export const KITS: Record<string, Schemas["KitDetail"]> = {
+  [KIT_SLUG]: kit(KIT_SLUG, "Pack Électronique", 22000, ELECTRONIQUE),
+  "steamy-bot-v1": kit("steamy-bot-v1", "Steamy Bot v1", 35000, ELECTRONIQUE),
+  "kit-energie-solaire": kit("kit-energie-solaire", "Kit Énergie Solaire", 18000, ENERGIE, false),
+};
+
+/** Fin de réservation que `newInstance` remplace par « dans 30 minutes » : l'heure limite est relative au moment du test. */
+export const RESERVATION_ACTIVE = "reservation-active";
+export const RESERVATION_ELAPSED = AT("2026-10-20T09:30:00+01:00");
+
+/** Commande de kits à livrer dans `zone`, avec ses taxes figées (HT + livraison + TVA + AIB). */
+export function kitsOrder(
   reference: string,
+  lines: KitLine[],
   zone: Schemas["DeliveryZone"],
   address: Schemas["DeliveryAddressInputRequest"] | Schemas["DeliveryAddress"],
   rates: TaxRates = DEFAULT_RATES,
   overrides: Partiel<Schemas["Order"]> = {},
 ): Schemas["Order"] {
-  const taxes = taxLines(22000, rates);
+  const goods = lines.reduce((total, line) => total + line.kit.price * line.quantity, 0);
+  const taxes = taxLines(goods, rates);
   return fusion<Schemas["Order"]>({
     reference,
     kind: "kit",
     status: "pending",
     shippingStatus: "preparing",
-    subtotal: 22000,
+    subtotal: goods,
     shippingFee: zone.fee,
     taxes,
-    total: 22000 + zone.fee + sum(taxes),
+    total: goods + zone.fee + sum(taxes),
     currency: "XOF",
-    items: [
-      { id: 1, title: "Pack Électronique", courseSlug: "", kitSlug: KIT_SLUG, eventSlug: "", unitPrice: 22000, quantity: 1, total: 22000 },
-    ],
+    items: lines.map((line, index) => ({
+      id: index + 1,
+      title: line.kit.name,
+      courseSlug: "",
+      kitSlug: line.kit.slug,
+      eventSlug: "",
+      unitPrice: line.kit.price,
+      quantity: line.quantity,
+      total: line.kit.price * line.quantity,
+    })),
     beneficiary: { id: CHILD_ID, firstName: "Léa" },
     deliveryZone: { id: zone.id, name: zone.name, delayLabel: zone.delayLabel },
-    expiresAt: AT("2026-10-20T09:30:00+01:00"),
+    expiresAt: RESERVATION_ELAPSED,
     paidAt: null,
     createdAt: CREATED_AT,
     deliveryAddress: {
@@ -242,6 +280,17 @@ export function kitOrder(
     kitCodes: [],
     invoice: null,
   }, overrides);
+}
+
+/** Commande d'un Pack Électronique. */
+export function kitOrder(
+  reference: string,
+  zone: Schemas["DeliveryZone"],
+  address: Schemas["DeliveryAddressInputRequest"] | Schemas["DeliveryAddress"],
+  rates: TaxRates = DEFAULT_RATES,
+  overrides: Partiel<Schemas["Order"]> = {},
+): Schemas["Order"] {
+  return kitsOrder(reference, [{ kit: KITS[KIT_SLUG], quantity: 1 }], zone, address, rates, overrides);
 }
 
 export function courseOrder(reference: string, rates: TaxRates = DEFAULT_RATES, overrides: Partiel<Schemas["Order"]> = {}): Schemas["Order"] {

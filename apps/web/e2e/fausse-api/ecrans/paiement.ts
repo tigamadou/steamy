@@ -1,6 +1,6 @@
 import type { Schemas } from "@steamy/api-client";
 
-import { fail, once, route, type Behaviour, type Context, type Instance } from "../contexte.ts";
+import { accessOrder, fail, once, route, updateOrder, type Behaviour, type Context, type Instance } from "../contexte.ts";
 import { apiError, CREATED_AT, DECIDED_AT, payment } from "../fixtures.ts";
 
 // Paiement Mobile Money d'une commande, commun à la demande de paiement, au checkout invité et aux commandes du
@@ -27,23 +27,21 @@ export function paymentBehaviour(msisdn: string): Behaviour {
   return "success";
 }
 
-route("GET", /^\/api\/payments\/orders\/([\w-]+)\/$/, true, ({ instance, match, respond }) =>
-  instance.order?.reference === match[1] ? respond(200, instance.order) : fail(respond, "NOT_FOUND", "Introuvable."),
-);
-
-route("POST", /^\/api\/payments\/orders\/([\w-]+)\/payments\/$/, true, ({ instance, body, respond }) => {
+route("POST", /^\/api\/payments\/orders\/([\w-]+)\/payments\/$/, "invite", (context) => {
+  const { instance, body, respond, match } = context;
   const { faults } = instance.scenario;
-  const order = instance.order;
+  const order = accessOrder(context, match[1]);
   if (faults.paymentServerError) return respond(500, SERVER_ERROR);
   if (faults.throttled) {
     return fail(respond, "THROTTLED", "Trop de tentatives.", { "Retry-After": String(faults.throttled) });
   }
-  if (faults.paymentInProgress) return fail(respond, "PAYMENT_IN_PROGRESS", "Un paiement est en cours.");
+  if (faults.paymentInProgress) return fail(respond, "PAYMENT_IN_PROGRESS");
   if (faults.requestClosedOnPay) {
     close(instance, "declined");
     return fail(respond, "PAYMENT_REQUEST_CLOSED", "Cette demande n'est plus en attente.");
   }
   if (once(instance, "order-expired", faults.orderExpiredOnPay)) {
+    instance.store.delete(match[1]);
     instance.order = null;
     if (instance.request) instance.request.pendingOrderReference = null;
     return fail(respond, "ORDER_EXPIRED", "Cette commande a expiré.");
@@ -59,9 +57,10 @@ route("POST", /^\/api\/payments\/orders\/([\w-]+)\/payments\/$/, true, ({ instan
   respond(201, created);
 });
 
-route("GET", /^\/api\/payments\/payments\/(\d+)\/$/, true, ({ instance, match, respond }: Context) => {
+route("GET", /^\/api\/payments\/payments\/(\d+)\/$/, "invite", (context: Context) => {
+  const { instance, match, respond } = context;
   const entry = instance.payments.get(Number(match[1]));
-  if (!entry) return fail(respond, "NOT_FOUND", "Introuvable.");
+  if (!entry || !accessOrder(context, entry.payment.orderReference)) return fail(respond, "NOT_FOUND", "Introuvable.");
   // L'issue arrive à la première interrogation, comme le webhook du prestataire (S9)
   resolve(instance, entry);
   respond(200, entry.payment);
@@ -73,9 +72,9 @@ export function resolve(instance: Instance, entry: { payment: Schemas["Payment"]
   if (entry.payment.status !== "pending") return;
   if (entry.behaviour === "success") {
     entry.payment = { ...entry.payment, status: "succeeded", confirmedAt: CREATED_AT };
-    const order = instance.order;
+    const order = instance.store.get(entry.payment.orderReference)?.order;
     if (order) {
-      instance.order = { ...order, status: faults.latePayment ? "refunded" : "paid", paidAt: CREATED_AT };
+      updateOrder(instance, { ...order, status: faults.latePayment ? "refunded" : "paid", paidAt: CREATED_AT });
       close(instance, "paid", order);
     }
   } else if (entry.behaviour === "failure") {

@@ -2,6 +2,7 @@ import { expect, test, type Page, type TestInfo } from "@playwright/test";
 
 import { courseRequest, kitOrder, kitRequest, REQUEST_ID, SAVED_ADDRESS, ZONES } from "../fausse-api/fixtures.ts";
 import { expectAccessible } from "../support/a11y";
+import { chooseNetwork, freezeClock, pay, payButton, phoneField } from "../support/paiement";
 import { openShellMenu } from "../support/session";
 import { chooseScenario, expectNoUnhandledCall, settlePayment, signInAs } from "../support/fausse-api";
 
@@ -27,35 +28,6 @@ test.beforeEach(async ({}, testInfo) => {
 /** Étape jouée sur le projet mobile (360 px) seulement. */
 async function onMobile(testInfo: TestInfo, title: string, body: () => Promise<void>) {
   if (testInfo.project.name === "mobile") await test.step(title, body);
-}
-
-/** Carte de réseau : clic sur la carte visible (la case radio est masquée sous son libellé). */
-async function chooseNetwork(page: Page, index = 0) {
-  const radio = page.getByRole("radio").nth(index);
-  const label = (await radio.getAttribute("aria-labelledby")) as string;
-  await page.locator(`[id="${label}"]`).click();
-  await expect(radio).toBeChecked();
-}
-
-/**
- * Fige l'horloge de la page : l'interrogation du statut (toutes les 3 s) n'avance plus que sur `fastForward`, le test ne
- * dépend plus de la vitesse de la machine. Pas d'attente réelle de 3 s ni de 2 minutes.
- */
-async function freezeClock(page: Page, { ready = true } = {}) {
-  // Page prête (réseaux chargés) : une horloge figée pendant l'hydratation bloquerait le chargement
-  if (ready) await expect(page.getByRole("radio").first()).toBeVisible();
-  const now = await page.evaluate(() => Date.now());
-  await page.clock.pauseAt(now + 1_000);
-}
-
-const phoneField = (page: Page) => page.getByRole("textbox", { name: /Numéro Mobile Money/ });
-const payButton = (page: Page) => page.getByRole("button", { name: /^Payer/ });
-
-async function pay(page: Page, national: string, options: { double?: boolean } = {}) {
-  await chooseNetwork(page);
-  await phoneField(page).fill(national);
-  if (options.double) await payButton(page).dblclick();
-  else await payButton(page).click();
 }
 
 test("à payer · parcours : formulaire, validations, pays, réseau coupé, paiement et lecture seule", async ({ page, context }, testInfo) => {

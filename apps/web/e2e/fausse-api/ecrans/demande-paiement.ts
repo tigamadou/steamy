@@ -1,7 +1,7 @@
 import type { Schemas } from "@steamy/api-client";
 
 import { BASE, scenario, type Scenario } from "../base.ts";
-import { fail, once, onInstance, route, sleep, type Instance } from "../contexte.ts";
+import { fail, once, onInstance, putOrder, route, sleep, type Context, type Instance } from "../contexte.ts";
 import {
   apiError,
   COURSE_WITH_KIT,
@@ -50,7 +50,8 @@ route("POST", /^\/api\/payments\/payment-requests\/(\d+)\/decline\/$/, true, ({ 
   respond(200, instance.request);
 });
 
-route("POST", /^\/api\/payments\/orders\/$/, true, ({ instance, body, respond }) => {
+/** Création de la commande d'une demande de paiement (`POST payments/orders/` avec `paymentRequestId`). */
+export function createOrderOfRequest({ instance, body, respond }: Context) {
   const { faults } = instance.scenario;
   if (!instance.request || instance.request.status !== "pending") {
     return fail(respond, "PAYMENT_REQUEST_CLOSED", "Cette demande n'est plus en attente.");
@@ -64,7 +65,7 @@ route("POST", /^\/api\/payments\/orders\/$/, true, ({ instance, body, respond })
     return fail(respond, "DELIVERY_ZONE_UNAVAILABLE", "Cette zone n'est plus desservie.");
   }
   respond(201, orderOfRequest(instance, body?.deliveryAddress));
-});
+}
 
 function orderOfRequest(instance: Instance, address?: Schemas["DeliveryAddressInputRequest"]): Schemas["OrderCreated"] {
   const { request, scenario: current } = instance;
@@ -75,7 +76,7 @@ function orderOfRequest(instance: Instance, address?: Schemas["DeliveryAddressIn
     request?.kind === "kit" && address
       ? kitOrder(reference, zone, address, current.rates)
       : courseOrder(reference, current.rates);
-  instance.order = order;
+  putOrder(instance, order);
   if (request) request.pendingOrderReference = reference;
   return { ...order, guestToken: null };
 }
@@ -84,10 +85,12 @@ function orderOfRequest(instance: Instance, address?: Schemas["DeliveryAddressIn
 onInstance((instance) => {
   const { scenario: current, request, address } = instance;
   if (!current.pendingOrder || !request) return;
-  instance.order =
+  putOrder(
+    instance,
     request.kind === "kit"
       ? kitOrder("CMD-501", ZONES[0], address ?? { zoneId: 1, recipientName: "Marie Adjovi", city: "Cotonou", district: "Fidjrossè", addressLine: "Rue 12, villa verte" }, current.rates)
-      : courseOrder("CMD-501", current.rates);
+      : courseOrder("CMD-501", current.rates),
+  );
 });
 
 const closed = (status: Schemas["PaymentRequest"]["status"], overrides: Partial<Schemas["PaymentRequest"]> = {}) =>

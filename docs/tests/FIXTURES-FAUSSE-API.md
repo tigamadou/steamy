@@ -34,12 +34,16 @@ apps/web/e2e/fausse-api/
   scenarios.ts    catalogue des scénarios : réunit ceux de chaque écran (un nom = une fixture)
   ecrans/         un fichier par écran : ses routes, ses incidents, ses scénarios
     paiement.ts           paiement Mobile Money et issue (commun à plusieurs écrans)
+    commandes.ts          création (demande, achat de kits), lecture et facture des commandes
+    boutique.ts           fiche d'un kit et panier serveur
     demande-paiement.ts   demande de paiement du parent
+    checkout-invite.ts    checkout de l'invité (scénarios : visiteur sans compte, commande lue avec son jeton)
   contract.test.ts  Vitest : fixtures et réponses validées contre apps/api/openapi.yaml
 apps/web/e2e/support/fausse-api.ts   aides Playwright (signInAs, journal des appels)
 apps/web/playwright.fixtures.config.ts   démarre la fausse API et `next start` (port 3100), projets bureau et mobile
 ```
 
+- **Visiteur sans compte (invité).** Un scénario dont `me` est `null` n'a pas de compte : `accounts/me/` répond 401 (le front le traite en invité) ; les commandes ne se lisent qu'avec leur `X-Guest-Token`. Le panier de l'invité et l'état du tunnel vivent dans le navigateur : le test les pose avec `seedBrowser` (`support/navigateur.ts`) avant d'ouvrir l'écran.
 - **Choix de la fixture.** Le scénario voyage dans le cookie de session : `sessionid=<scénario>.<identifiant>`. Le navigateur envoie le cookie à l'API ; le serveur Next le relaie (il relaie déjà `sessionid` et `csrftoken`). `signInAs(context, "demande-payee")` pose ce cookie. Un test nomme donc sa fixture dans son premier appel.
 - **Isolation.** L'identifiant est un UUID par test : la fausse API garde l'état (commande créée, paiements, statut de la demande) **par identifiant**. Aucun test ne consomme la donnée d'un autre ; tous tournent en parallèle, sur les deux projets.
 - **Connexion.** Pour le parcours « lien sans session », `chooseScenario` pose le cookie `fx_scenario`, que `POST auth/login/` transforme en session du scénario.

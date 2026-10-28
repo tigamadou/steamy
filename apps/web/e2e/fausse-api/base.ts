@@ -40,11 +40,33 @@ export type Faults = {
   declineServerError?: boolean;
   /** Référentiel des réseaux Mobile Money : 500 à la première lecture seulement. */
   networksError?: boolean;
+  /** Création d'une commande de kits : 500. */
+  orderServerError?: boolean;
+  /** Lecture d'une commande : 500 à la première lecture seulement. */
+  orderReadError?: boolean;
+  /** Lecture d'une commande : réponse lente (millisecondes), pour voir le squelette. */
+  orderReadDelayMs?: number;
+  /** Zones de livraison d'un pays : 500 à la première lecture seulement. */
+  zonesError?: boolean;
+  /** Panier serveur : lecture en 500 à la première lecture seulement. */
+  cartReadError?: boolean;
+  /** Panier serveur : ajout, changement de quantité ou retrait en 500. */
+  cartWriteError?: boolean;
+  /** Panier serveur : l'ajout d'un kit répond `OUT_OF_STOCK` (épuisé entre-temps). */
+  cartOutOfStock?: boolean;
+  /** Fiche d'un kit : 500 à la première lecture seulement. */
+  kitReadError?: boolean;
+  /** Création d'une commande de kits : l'adresse de livraison est refusée (erreur du champ, message de l'API). */
+  deliveryAddressRefused?: string;
+  /** Facture : `PDF_NOT_READY`. */
+  invoiceNotReady?: boolean;
+  /** Facture : 500. */
+  invoiceServerError?: boolean;
 };
 
 export type Scenario = {
-  /** Utilisateur connecté (parent de la famille par défaut). */
-  me: Schemas["Me"];
+  /** Utilisateur connecté (parent de la famille par défaut), ou `null` : visiteur sans compte (invité). */
+  me: Schemas["Me"] | null;
   /** Demande servie à `/parent/demandes/501`, ou `null` (404 : demande d'une autre famille). */
   request: Schemas["PaymentRequest"] | null;
   course: Schemas["CourseDetail"];
@@ -54,8 +76,19 @@ export type Scenario = {
   rates: TaxRates;
   /** La demande a déjà une commande en attente (reprise du paiement). */
   pendingOrder: boolean;
+  /** Kits de la boutique en rupture de stock pour ce scénario (en plus de ceux du catalogue). */
+  soldOut: string[];
+  /** Panier serveur de départ (apprenant ou parent connecté) : kits et quantités. */
+  cart: Array<{ kitSlug: string; quantity: number }>;
+  /** Kits retirés de la vente pour ce scénario : leur fiche répond 404. */
+  withdrawn: string[];
+  /** Commande de départ (suivi, paiement) : sa référence, son jeton d'accès invité éventuel et son propriétaire. */
+  orders: SeedOrder[];
   faults: Faults;
 };
+
+/** Commande déjà créée au démarrage de l'instance. `token` : commande invitée (lue avec `X-Guest-Token`). */
+export type SeedOrder = { order: Schemas["Order"]; token?: string; foreign?: boolean };
 
 /** Parent de la famille par défaut, demande de parcours en attente à 15 000 F CFA HT, TVA 18 % et AIB 1 %. */
 export const BASE: Scenario = {
@@ -66,6 +99,10 @@ export const BASE: Scenario = {
   address: null,
   rates: { vat: 18, aib: 1 },
   pendingOrder: false,
+  soldOut: [],
+  cart: [],
+  withdrawn: [],
+  orders: [],
   faults: {},
 };
 
