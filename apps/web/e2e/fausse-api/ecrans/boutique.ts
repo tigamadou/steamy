@@ -1,7 +1,7 @@
 import type { Schemas } from "@steamy/api-client";
 
 import { fail, once, route, type Context, type Instance } from "../contexte.ts";
-import { apiError, taxLines } from "../fixtures.ts";
+import { apiError, KITS, taxLines } from "../fixtures.ts";
 import { kitOf } from "./commandes.ts";
 
 // Boutique de kits : fiche d'un kit, avec sa disponibilité du moment (le panier de l'invité relit le prix et le stock),
@@ -73,4 +73,19 @@ route("DELETE", /^\/api\/shop\/cart\/items\/(\d+)\/$/, true, (context) => {
   if (writeFails(instance)) return respond(500, SERVER_ERROR);
   instance.cart = instance.cart.filter((item) => item.id !== Number(match[1]));
   respond(200, cartOf(context));
+});
+
+// Catalogue (kits et catégories) lu par le serveur Next sans session : la même réponse pour tous les scénarios.
+
+route("GET", /^\/api\/catalog\/categories\/$/, false, ({ respond }) =>
+  respond(200, [
+    { slug: "electronique", label: "Électronique", color: "#2563EB", icon: "🔌", courseCount: 3 },
+    { slug: "energie", label: "Énergie", color: "#F59E0B", icon: "☀️", courseCount: 1 },
+  ] satisfies Schemas["Category"][]),
+);
+
+route("GET", /^\/api\/shop\/kits\/$/, false, ({ url, respond }) => {
+  const category = url.searchParams.get("category");
+  const results = Object.values(KITS).filter((kit) => !category || kit.category.slug === category);
+  respond(200, { count: results.length, next: null, previous: null, results } satisfies Schemas["PaginatedKitList"]);
 });

@@ -1,7 +1,7 @@
 import type { Schemas } from "@steamy/api-client";
 
 import { fusion, type Partiel } from "./defauts.ts";
-import { COURSE, courseRequest, PARENT_ME, PARENT_PROFILE, type TaxRates } from "./fixtures.ts";
+import { CHILD, COURSE, courseRequest, PARENT_ME, PARENT_PROFILE, type TaxRates } from "./fixtures.ts";
 
 /**
  * Incidents que la fausse API sait provoquer à la demande d'un scénario. Ils rejouent les codes d'erreur du contrat
@@ -54,6 +54,10 @@ export type Faults = {
   cartWriteError?: boolean;
   /** Panier serveur : l'ajout d'un kit répond `OUT_OF_STOCK` (épuisé entre-temps). */
   cartOutOfStock?: boolean;
+  /** Liste des commandes du parent : 500. */
+  ordersListError?: boolean;
+  /** Liste des commandes du parent : réponse lente (millisecondes), pour voir le squelette. */
+  ordersListDelayMs?: number;
   /** Fiche d'un kit : 500 à la première lecture seulement. */
   kitReadError?: boolean;
   /** Création d'une commande de kits : l'adresse de livraison est refusée (erreur du champ, message de l'API). */
@@ -78,6 +82,8 @@ export type Scenario = {
   pendingOrder: boolean;
   /** Kits de la boutique en rupture de stock pour ce scénario (en plus de ceux du catalogue). */
   soldOut: string[];
+  /** Enfants du parent (bénéficiaires possibles d'un kit). */
+  children: Array<Schemas["Child"]>;
   /** Panier serveur de départ (apprenant ou parent connecté) : kits et quantités. */
   cart: Array<{ kitSlug: string; quantity: number }>;
   /** Kits retirés de la vente pour ce scénario : leur fiche répond 404. */
@@ -100,6 +106,7 @@ export const BASE: Scenario = {
   rates: { vat: 18, aib: 1 },
   pendingOrder: false,
   soldOut: [],
+  children: [CHILD],
   cart: [],
   withdrawn: [],
   orders: [],

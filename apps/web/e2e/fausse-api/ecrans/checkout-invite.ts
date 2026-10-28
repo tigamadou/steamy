@@ -1,7 +1,7 @@
 import type { Schemas } from "@steamy/api-client";
 
 import { scenario, type Scenario } from "../base.ts";
-import { KITS, kitsOrder, LEARNER_ME, PARENT_ME, RESERVATION_ACTIVE, ZONES } from "../fixtures.ts";
+import { KITS, kitsOrder, LEARNER_ME, RESERVATION_ACTIVE, ZONES } from "../fixtures.ts";
 import type { Partiel } from "../defauts.ts";
 
 // Checkout de l'invité (`/boutique/panier`, `/boutique/commande/…`, `/boutique/commandes/<référence>`) : visiteur sans
@@ -40,13 +40,11 @@ const avecCommande = (order: Schemas["Order"], surcharge: Partiel<Scenario> = {}
 export const SCENARIOS_CHECKOUT_INVITE = {
   // Panier et coordonnées
   "invite-panier": invite(),
-  "invite-panier-sans-taxes": invite({ rates: TAXES_OFF }),
   "invite-kit-indisponible": invite({ soldOut: ["pack-electronique"] }),
   "invite-kit-retire": invite({ withdrawn: ["steamy-bot-v1"] }),
   "invite-kits-retires": invite({ withdrawn: ["pack-electronique", "steamy-bot-v1"] }),
   "invite-erreur-lecture-kit": invite({ faults: { kitReadError: true } }),
   "invite-session-apprenant": invite({ me: LEARNER_ME }),
-  "invite-session-parent": invite({ me: PARENT_ME }),
   // Livraison
   "invite-zones-erreur": invite({ faults: { zonesError: true } }),
   "invite-adresse-refusee": invite({ faults: { deliveryAddressRefused: "Cette zone n'est pas desservie pour cette adresse." } }),

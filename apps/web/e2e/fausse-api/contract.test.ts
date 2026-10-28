@@ -6,7 +6,7 @@ import Ajv, { type ValidateFunction } from "ajv";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { parse } from "yaml";
 
-import { courseOrder, courseRequest, kitOrder, kitRequest, payment, ZONES } from "./fixtures.ts";
+import { courseOrder, courseRequest, eventOrder, kitOrder, kitRequest, KITS, kitsOrder, payment, ZONES } from "./fixtures.ts";
 import { SCENARIOS, type ScenarioName } from "./scenarios.ts";
 import { start } from "./server.ts";
 
@@ -147,6 +147,45 @@ describe("boutique et checkout invité : réponses conformes au contrat", () => 
     expect(me.status).toBe(401);
   });
 
+  it("commandes du parent : liste filtrée et paginée, suivi, enfants, catalogue", async () => {
+    const session = "commandes-nombreuses.vitest-liste";
+    const first = await send(session, "GET", "/api/payments/orders/?page=1&pageSize=10");
+    check("/api/payments/orders/", "GET", first.status, first.json);
+    expect(first.json.results).toHaveLength(10);
+    expect(first.json.next).toContain("page=2");
+    const second = await send(session, "GET", "/api/payments/orders/?page=2&pageSize=10");
+    check("/api/payments/orders/", "GET", second.status, second.json);
+    expect(second.json.results).toHaveLength(2);
+    expect(second.json.next).toBeNull();
+    const family = "commandes-parent.vitest-famille";
+    const pending = await send(family, "GET", "/api/payments/orders/?status=pending");
+    check("/api/payments/orders/", "GET", pending.status, pending.json);
+    expect(pending.json.results.map((order: { reference: string }) => order.reference)).toEqual(["CMD-K2"]);
+    const kit = await send(family, "GET", "/api/payments/orders/CMD-K1/");
+    check("/api/payments/orders/{reference}/", "GET", kit.status, kit.json);
+    expect((await send(family, "GET", "/api/payments/orders/CMD-AUTRE/")).status).toBe(404);
+    const children = await send(family, "GET", "/api/accounts/children/");
+    check("/api/accounts/children/", "GET", children.status, children.json);
+    const kits = await send(family, "GET", "/api/shop/kits/");
+    check("/api/shop/kits/", "GET", kits.status, kits.json);
+    const categories = await send(family, "GET", "/api/catalog/categories/");
+    check("/api/catalog/categories/", "GET", categories.status, categories.json);
+  });
+
+  it("achat de kits du parent : commande payée avec facture et Kit Codes", async () => {
+    const session = "achat-adresse-enregistree.vitest-achat";
+    const created = await send(session, "POST", "/api/payments/orders/", { kind: "kit", items: [{ kitSlug: "pack-electronique", quantity: 2 }], deliveryAddress: kitAddress, beneficiaryId: 21 });
+    check("/api/payments/orders/", "POST", created.status, created.json);
+    expect(created.json.guestToken).toBeNull();
+    const pay = await send(session, "POST", `/api/payments/orders/${created.json.reference}/payments/`, { country: "BJ", network: "mtn", msisdn: "0197000001" });
+    await send(session, "GET", `/api/payments/payments/${pay.json.id}/`);
+    const paid = await send(session, "GET", `/api/payments/orders/${created.json.reference}/`);
+    check("/api/payments/orders/{reference}/", "GET", paid.status, paid.json);
+    expect(paid.json.status).toBe("paid");
+    expect(paid.json.kitCodes).toHaveLength(2);
+    expect(paid.json.invoice).toEqual({ number: "FAC-2026-900001", pdfStatus: "pending" });
+  });
+
   it("panier serveur : lecture, ajout, quantité, retrait", async () => {
     const session = "parcours-en-attente.vitest-panier";
     const empty = await send(session, "GET", "/api/shop/cart/");
@@ -174,6 +213,8 @@ describe("les objets par défaut respectent le contrat OpenAPI", () => {
     ["PaymentRequest", "demande de kit", kitRequest()],
     ["PaymentRequest", "demande sans taxes", courseRequest({}, { vat: null, aib: null })],
     ["Order", "commande de parcours", courseOrder("CMD-1")],
+    ["Order", "commande de kits", kitsOrder("CMD-3", [{ kit: KITS["pack-electronique"], quantity: 2 }, { kit: KITS["steamy-bot-v1"], quantity: 1 }], ZONES[1], { zoneId: 2, recipientName: "A", city: "B", district: "C", addressLine: "D" })],
+    ["Order", "commande d'événement", eventOrder("CMD-4")],
     ["Order", "commande de kit", kitOrder("CMD-2", ZONES[0], { zoneId: 1, recipientName: "A", city: "B", district: "C", addressLine: "D" })],
     ["Payment", "paiement", payment(1, courseOrder("CMD-1"), "pending", { country: "BJ", network: "mtn", msisdn: "0197000001" })],
   ];

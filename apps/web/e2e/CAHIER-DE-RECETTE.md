@@ -2779,7 +2779,7 @@ Deux contextes : la boutique **dans le shell apprenant** (/apprenant/boutique, t
 | REC-APP-727 | Ouvrir la page avec un panier vide | `invite-panier` · Vide · auto | « Votre panier est vide. » et « Voir les kits » | ☐ | |
 | REC-APP-728 | Ouvrir la page avec un kit indisponible dans le panier | `invite-panier` · Erreur · auto | Message et « Retour au panier » | ☐ | |
 | REC-APP-729 | Ouvrir la page connecté en apprenant | `invite-kit-indisponible` · Accès refusé · auto | Redirection vers /apprenant/boutique/panier. | ☐ | |
-| REC-APP-730 | Ouvrir la page connecté en parent | Parent connecté | Redirection vers le panier du parent (/parent/boutique/panier). | ☐ | |
+| REC-APP-730 | Ouvrir /boutique/commande/coordonnees connecté en parent | `achat-panier` · Accès refusé · auto | Redirection vers le panier du parent. | ☐ | |
 | REC-APP-731 | Ouvrir la page alors que la lecture du panier échoue | `invite-session-apprenant` · Nominal · auto | Message d'erreur et « Réessayer » | ☐ | |
 | REC-APP-732 | Lire l'indicateur d'étape | `invite-panier` · Nominal · auto | « Étape 1 sur 3 : Vos coordonnées » et fil « Panier > Vos coordonnées » | ☐ | |
 | REC-APP-733 | Mobile 360 px | `invite-panier` · Mobile · auto | Champs pleine largeur, aucun débordement. | ☐ | |
@@ -3312,63 +3312,111 @@ Remarque : plusieurs cas modifient le jeu D2 (acceptation, refus, paiement, supp
 | REC-PAR-163 | Ouvrir une fiche dont la date limite est passée, puis une fiche d'événement passé | Clos ou passé | Bouton désactivé « Candidatures closes » + « La date limite de candidature est passée. » ; « Événement terminé » + « Cet événement a déjà eu lieu. » | ☐ | |
 | REC-PAR-164 | Ouvrir `/parent/evenements/inconnu` | Événement inconnu | « Cet événement est introuvable » / « Il n'existe pas ou n'est plus publié. Découvrez les prochains Steamy Events. » ; bouton « Voir les événements » | ☐ | |
 
+**Format de fiche** ([docs/tests/FORMAT-CAHIER.md](../../../docs/tests/FORMAT-CAHIER.md)) : les fiches de « Historique de commande », de son suivi et de l'**achat direct de kit** (`REC-PAR-165` à `REC-PAR-207`, compléments `REC-PAR-441` à `REC-PAR-476`) sont au nouveau format : la colonne « Cas » commence par la **fixture** (une ligne de `apps/web/e2e/fausse-api/ecrans/commandes-parent.ts` ou `achat-kits.ts`, ou « vraie stack »), puis le type de cas, puis `auto` (étape `REC-PAR-xxx` des tests `apps/web/e2e/parent/parent-commandes.fixtures.spec.ts` et `parent-achat-kits.fixtures.spec.ts`), `auto, partiel` ou `manuel`. Les montants et les dates sont ceux de la fixture, jamais recalculés.
+
 ### Historique de commande (`/parent/commandes`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-165 | Ouvrir `/parent/commandes` | Chargement | Squelette « Chargement de vos commandes… » | ☐ | |
-| REC-PAR-166 | Ouvrir la page en Marie | Nominal | h1 « Commandes » ; onglets « Toutes », « Payées », « En attente », « Annulées », « Remboursées » (navigation « Filtrer les commandes ») ; bouton « Acheter un kit » ; liste « Mes commandes » avec la commande de kit de Léa | ☐ | |
-| REC-PAR-167 | Lire une ligne de commande de kit payée | Contenu d'une ligne | Pictogramme 📦 selon le `kind` (jamais déduit du libellé), repère « Kit », titre des articles, « Pour <bénéficiaire> · N° <référence> · <date> · Livraison : En préparation / Expédiée / Livrée » ; badge « Payée » ; montant (total à payer du serveur, taxes comprises) ; boutons « Facture » et « Suivre » | ☐ | |
-| REC-PAR-168 | Lire des commandes de parcours et d'événement | Icône par `kind` | 📚 « Parcours » et 🎟️ « Événement » ; pas de livraison ni de « Suivre » (réservé aux kits) ; commande de parcours d'une demande (`« Demande de paiement »`) ou d'événement payé listée avec le bénéficiaire | ☐ | |
-| REC-PAR-169 | Cliquer l'onglet « Payées » | Filtre dans l'URL | URL `/parent/commandes?statut=payees` ; onglet actif ; seules les commandes payées ; rechargement de la page conserve le filtre | ☐ | |
-| REC-PAR-170 | Cliquer « En attente », « Annulées », « Remboursées » | Autres filtres | URLs `?statut=en-attente`, `?statut=annulees`, `?statut=remboursees` ; badges respectifs « En attente de paiement », « Annulée », « Remboursée » | ☐ | |
-| REC-PAR-171 | Filtrer sur un statut sans commande | État vide filtré | « Aucune commande « <libellé du filtre> » pour l'instant. » | ☐ | |
-| REC-PAR-172 | Ouvrir `/parent/commandes?statut=inconnu` | Filtre inconnu | Retour à « Toutes » | ☐ | |
-| REC-PAR-173 | Ouvrir la page avec un parent sans commande | État vide | h2 « Aucune commande pour l'instant » ; « Les parcours, kits et événements que vous réglez apparaîtront ici, avec leurs factures. » ; bouton « Voir la boutique de kits » vers `/parent/boutique` | ☐ | |
-| REC-PAR-174 | Avoir plus de 10 commandes puis parcourir | Pagination | 10 commandes par page ; liens « Plus anciennes › » et « ‹ Plus récentes » (navigation « Pages des commandes ») avec le filtre conservé | ☐ | |
-| REC-PAR-175 | Cliquer « Facture » sur une commande payée dont le PDF est prêt | Téléchargement de la facture | Lien direct vers `/api/payments/orders/<référence>/invoice/` ; le navigateur reçoit le PDF (redirection vers une URL signée valable 5 minutes) nommé `facture-<numéro>.pdf` ; contenu : voir la section « Montants, TVA, AIB et facture normalisée » | ☐ | |
-| REC-PAR-176 | Ouvrir la liste juste après un paiement, avant la fin de la génération du PDF | Facture en préparation | À la place du bouton : « Facture en préparation » ; le bouton « Facture » apparaît quand le PDF est prêt (après rechargement) | ☐ | |
-| REC-PAR-177 | Se connecter en Bernard puis ouvrir `/parent/commandes`, puis se connecter en Léa (bénéficiaire) et ouvrir ses commandes | Facture réservée au payeur (C12) | La commande payée par Marie n'est pas listée chez Bernard ; l'apprenante bénéficiaire (Léa) n'a aucun bouton « Facture » sur ses commandes (`« Historique de commande »`) ; le lien direct de facture répond « introuvable » à un autre compte | ☐ | |
-| REC-PAR-178 | Cliquer « Payer » sur une commande « En attente de paiement » | Reprise de paiement | Mène à `/parent/commandes/<référence>` (détail), qui reprend le paiement (voir suivi) | ☐ | |
-| REC-PAR-179 | Supprimer l'enfant bénéficiaire (`« Supprimer un enfant »`) puis ouvrir `« Historique de commande »` | Factures conservées (D40) | La commande reste listée, la facture reste téléchargeable | ☐ | |
-| REC-PAR-180 | Ouvrir la liste en 360 px | Version mobile | Lignes en colonne, badge, montant et boutons sous le libellé ; onglets défilables ou renvoyés à la ligne ; pas de défilement horizontal de la page | ☐ | |
-| REC-PAR-181 | Rendre l'API indisponible puis ouvrir la liste | Erreur serveur | État d'erreur « Oups, ça a coupé » du shell | ☐ | |
+| REC-PAR-165 | Ouvrir la page pendant que l'API répond lentement | `commandes-nombreuses` · Chargement · auto | Squelette « Chargement de vos commandes… » puis la liste. | ☐ | |
+| REC-PAR-166 | Ouvrir la page | `commandes-parent` · Nominal · auto | Titre, onglets de filtre, « Acheter un kit », liste « Mes commandes » | ☐ | |
+| REC-PAR-167 | Lire une ligne de commande de kit payée | `commandes-parent` · Nominal · auto | Repère, bénéficiaire, référence, date, livraison, badge, montant du serveur, « Facture » et « Suivre » | ☐ | |
+| REC-PAR-168 | Lire des commandes de parcours et d'événement | `commandes-parent` · Nominal · auto | Repères « Parcours » et « Événement », pas de livraison ni de « Suivre » | ☐ | |
+| REC-PAR-169 | Cliquer l'onglet « Payées » | `commandes-parent` · Nominal · auto | URL ?statut=payees, onglet actif, seulement les commandes payées, filtre conservé au rechargement. | ☐ | |
+| REC-PAR-170 | Cliquer « En attente », « Annulées », « Remboursées » | `commandes-parent` · Erreur · auto | URL du filtre et badge de chaque statut. | ☐ | |
+| REC-PAR-171 | Filtrer sur un statut sans commande | `commandes-vide` · Vide · auto | « Aucune commande « Payées » pour l'instant. » | ☐ | |
+| REC-PAR-172 | Ouvrir /parent/commandes?statut=inconnu | `commandes-parent` · Nominal · auto | Retour à « Toutes » | ☐ | |
+| REC-PAR-173 | Ouvrir la page d'un parent sans commande | `commandes-vide` · Vide · auto | « Aucune commande pour l'instant », texte d'aide, « Voir la boutique de kits » | ☐ | |
+| REC-PAR-174 | 1. Avoir plus de 10 commandes<br>2. Parcourir | `commandes-nombreuses` · Nominal · auto | Dix par page, « Plus anciennes › » et « ‹ Plus récentes », filtre conservé. | ☐ | |
+| REC-PAR-175 | Cliquer « Facture » sur une commande payée dont le PDF est prêt | `commandes-parent` · Nominal · auto | Le navigateur reçoit facture-<numéro>.pdf. | ☐ | |
+| REC-PAR-176 | Ouvrir la liste d'une commande payée dont le PDF n'est pas prêt | `commandes-vide` · Erreur · auto | « Facture en préparation » à la place du bouton. | ☐ | |
+| REC-PAR-177 | Lire la liste d'un parent | `commandes-parent` · Accès refusé · auto, partiel | La commande d'une autre famille n'est jamais listée et son lien de facture répond « introuvable ». Hors fixtures : l'apprenant bénéficiaire n'a aucun bouton « Facture » sur ses commandes (à vérifier côté apprenant) | ☐ | |
+| REC-PAR-178 | Cliquer « Payer » sur une commande « En attente de paiement » | `commandes-parent` · Nominal · auto | Détail de la commande, qui reprend le paiement. | ☐ | |
+| REC-PAR-179 | 1. Supprimer l'enfant bénéficiaire (« Supprimer un enfant »)<br>2. Ouvrir « Historique de commande » | vraie stack · Factures conservées (D40) · manuel | La commande reste listée, la facture reste téléchargeable. Hors fixtures : dépend de la suppression réelle d'un enfant dans l'API. | ☐ | |
+| REC-PAR-180 | Mobile 360 px | `commandes-parent` · Mobile · auto | Lignes en colonne, badge, montant et boutons sous le libellé, onglets sans défilement horizontal de la page. | ☐ | |
+| REC-PAR-181 | Ouvrir la liste alors que l'API répond en erreur 500 | `commandes-chargement-lent` · Erreur · auto | État d'erreur « Oups, ça a coupé » du shell. | ☐ | |
 
 #### « Historique de commande » (suite) · Suivi d'une commande (`/parent/commandes/[reference]`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-182 | Cliquer « Suivre » sur la commande de kit de Léa | Commande de kit payée | Fil d'Ariane « Commandes › <référence> » ; carte : « Kit · N° <référence> », titre, badge « Payée », « Passée le … · pour Léa · payée le … » ; lignes d'articles, « Livraison (<zone>) », une ligne par taxe, « Total à payer » (valeurs du serveur) ; adresse « 🚚 <destinataire> · <quartier>, <rue>, <ville> » ; bouton « Télécharger la facture » | ☐ | |
-| REC-PAR-183 | Lire la section « Livraison » | Frise de livraison | Liste « Suivi de livraison » : confirmée, en préparation, expédiée, livrée selon le statut serveur | ☐ | |
-| REC-PAR-184 | Lire la section « Kit Codes » | Kit Codes (C10, D35) | Texte « Transmettez un code à votre enfant … Il est aussi imprimé sur la notice du kit. » ; liste « Kit Codes de la commande » au format `STEAMY-XXXX-XXXX` avec le nom du kit ; bouton « Copier » (devient « Copié », annonce « Code … copié. ») | ☐ | |
-| REC-PAR-185 | L'enfant saisit le Kit Code sur un parcours compatible puis rouvrir le suivi | Code utilisé | Le code porte le badge « Utilisé » sans bouton « Copier » ; le parcours compatible est débloqué côté enfant | ☐ | |
-| REC-PAR-186 | Faire révoquer un Kit Code par le Support puis rouvrir le suivi | Code révoqué | Badge rouge « Révoqué », pas de bouton « Copier » ; le code reste listé | ☐ | |
-| REC-PAR-187 | Ouvrir une commande en attente (kit réservé) | Commande en attente | Badge « En attente de paiement » ; encart « À payer avant le <heure> : passé ce délai, la commande est annulée. » ; formulaire « Payer par Mobile Money » prérempli avec le Mobile Money préféré ; paiement réussi → la page se relit (payée, facture, livraison, Kit Codes) | ☐ | |
-| REC-PAR-188 | Ouvrir une commande annulée puis une commande remboursée | Commande annulée ou remboursée | « Commande annulée : elle n'a pas été payée à temps et le stock a été libéré. » ; « Commande remboursée : elle vous a été remboursée. » ; aucun formulaire de paiement ni bouton facture (sauf remboursée payée : à confirmer, spec muette) | ☐ | |
-| REC-PAR-189 | En Bernard, ouvrir la référence d'une commande de Marie | Commande d'un autre payeur | « Commande introuvable » / « Cette commande n'existe pas ou n'a pas été passée depuis votre compte. » ; bouton « Voir mes commandes » ; aucune donnée de la commande | ☐ | |
-| REC-PAR-190 | Ouvrir le suivi en 360 px | Version mobile | Cartes empilées, frise et Kit Codes lisibles, bouton « Copier » accessible | ☐ | |
+| REC-PAR-182 | Cliquer « Suivre » sur la commande de kit de Léa | `commandes-parent` · Nominal · auto | Fil d'Ariane, carte, articles, livraison, taxes et « Total à payer » du serveur, adresse, « Télécharger la facture » | ☐ | |
+| REC-PAR-183 | Lire la section « Livraison » | `commandes-parent` · Nominal · auto | Frise « Commande confirmée », « En préparation » (en cours), « Expédiée », « Livrée » | ☐ | |
+| REC-PAR-184 | Lire la section « Kit Codes » | `commandes-parent` · Nominal · auto | Texte d'aide, liste au format STEAMY-XXXX-XXXX avec le nom du kit, « Copier » puis « Copié » et annonce. | ☐ | |
+| REC-PAR-185 | Lire un Kit Code déjà saisi par l'enfant | `commandes-parent` · Nominal · auto, partiel | Badge « Utilisé », sans bouton « Copier ». Hors fixtures : la saisie du code par l'enfant et le déblocage du parcours se vérifient côté apprenant | ☐ | |
+| REC-PAR-186 | Lire un Kit Code révoqué par le Support | `commandes-parent` · Nominal · auto | Badge « Révoqué », sans « Copier », le code reste listé. | ☐ | |
+| REC-PAR-187 | Ouvrir une commande en attente (kit réservé) | `commande-en-attente-paiement-prefere` · Nominal · auto | Badge « En attente de paiement », encart « À payer avant le … », formulaire prérempli avec le Mobile Money préféré. | ☐ | |
+| REC-PAR-188 | 1. Ouvrir une commande annulée<br>2. Une commande remboursée | `commandes-parent` · Lecture seule · auto | Phrase de clôture, ni formulaire de paiement ni facture. | ☐ | |
+| REC-PAR-189 | Ouvrir la référence d'une commande d'une autre famille, ou inconnue | `commandes-parent` · Accès refusé · auto | « Commande introuvable », aucune donnée de la commande. | ☐ | |
+| REC-PAR-190 | Mobile 360 px | `commandes-parent` · Mobile · auto | Cartes empilées, frise et Kit Codes lisibles, bouton « Copier » d'au moins 44 px de large. | ☐ | |
+
+#### « Historique de commande » (suite) · Compléments de l'inventaire (tests sur fixtures)
+
+| N° | Action | Cas | Résultat attendu | Conforme | Remarques |
+| --- | --- | --- | --- | --- | --- |
+| REC-PAR-441 | Accessibilité | `commandes-parent` · Accessibilité · auto | Aucune violation WCAG 2 A/AA sur la liste des commandes. | ☐ | |
+| REC-PAR-442 | Ouvrir la liste avec les taxes éteintes | `commandes-facture-en-preparation` · Nominal · auto | Le montant de chaque ligne est le total du serveur (HT + livraison) | ☐ | |
+| REC-PAR-443 | Accessibilité | `commandes-parent` · Accessibilité · auto | Aucune violation WCAG 2 A/AA sur le suivi d'une commande de kit payée. | ☐ | |
+| REC-PAR-444 | Cliquer « Télécharger la facture » | `commandes-parent` · Nominal · auto | Le navigateur reçoit facture-<numéro>.pdf. | ☐ | |
+| REC-PAR-445 | Ouvrir une commande de kit expédiée | `commandes-parent` · Nominal · auto | « Expédiée » en cours, « Délai annoncé » sous « Livrée » | ☐ | |
+| REC-PAR-446 | Ouvrir une commande de kit livrée | `commande-kit-expediee` · Nominal · auto | « Livrée » atteinte, plus de « Délai annoncé » | ☐ | |
+| REC-PAR-447 | Ouvrir une commande payée sans Kit Code | `commande-kit-livree` · Nominal · auto | Aucune section « Kit Codes » | ☐ | |
+| REC-PAR-448 | Ouvrir une commande payée dont le PDF n'est pas prêt | `commande-sans-code` · Erreur · auto | « Facture en préparation » à la place du bouton. | ☐ | |
+| REC-PAR-449 | Ouvrir une commande de parcours payée | `commandes-parent` · Nominal · auto | Repère « Parcours », pas de livraison, pas de Kit Codes, facture. | ☐ | |
+| REC-PAR-450 | Ouvrir le suivi pendant que l'API répond lentement | `commandes-parent` · Chargement · auto | Squelette « Chargement de la commande… » puis la commande. | ☐ | |
+| REC-PAR-451 | Ouvrir le suivi alors que l'API répond en erreur 500 | `commande-chargement-lent` · Erreur · auto | « Oups, ça a coupé » puis « Réessayer » | ☐ | |
+| REC-PAR-452 | Mobile 360 px | `commande-en-attente-paiement-prefere` · Mobile · auto | Le formulaire de paiement passe sous la carte de la commande, bouton « Payer » pleine largeur. | ☐ | |
+| REC-PAR-453 | Payer avec un numéro en …01 | `commande-en-attente-paiement-prefere` · Nominal · auto | La page se relit, commande « Payée », frise de livraison, Kit Code, facture en préparation, plus de formulaire. | ☐ | |
+| REC-PAR-454 | Payer avec un numéro en …02 | `commande-en-attente-paiement-prefere` · Erreur · auto | « Paiement échoué », « Changer de numéro » et « Réessayer le paiement », la commande reste en attente. | ☐ | |
+| REC-PAR-455 | Payer au-delà du plafond d'essais | `commande-en-attente-trop-de-tentatives` · Erreur · auto | « Trop de tentatives. Réessayez dans 45 secondes. », bouton désactivé. | ☐ | |
+| REC-PAR-456 | Payer une commande dont le paiement arrive après le délai | `commande-en-attente-tardive` · Erreur · auto | La page se relit, « Commande remboursée : elle vous a été remboursée. » | ☐ | |
+| REC-PAR-457 | Ouvrir une commande en attente sans Mobile Money préféré | `commandes-parent` · Nominal · auto | Aucun réseau coché, numéro vide, choix du réseau puis numéro avant de payer. | ☐ | |
 
 #### « Historique de commande » (suite) · Achat direct de kit par le parent (`/parent/boutique`, `/parent/boutique/panier`, `/parent/boutique/commande`)
 
 | N° | Action | Cas | Résultat attendu | Conforme | Remarques |
 | --- | --- | --- | --- | --- | --- |
-| REC-PAR-191 | Cliquer « Acheter un kit » (ou ouvrir `/parent/boutique`) | Catalogue dans l'espace parent | h1 « Boutique de kits » ; prix HT du serveur ; bouton « Ajouter <kit> au panier » pour les kits en stock | ☐ | |
-| REC-PAR-192 | Cliquer « Ajouter Pack Électronique au panier » | Ajout au panier | Message « « Pack Électronique » est dans votre panier. » ; lien « Mon panier » | ☐ | |
-| REC-PAR-193 | Ouvrir `/boutique/panier` (panier public) en étant connecté en parent | Redirection (C10) | Redirection vers `/parent/boutique/panier` (h1 « Mon panier ») | ☐ | |
-| REC-PAR-194 | Ouvrir `/parent/boutique/panier` avec un panier vide | Panier vide | « Votre panier est vide » / « Choisissez un kit pour construire pour de vrai, livré chez vous. » | ☐ | |
-| REC-PAR-195 | Ouvrir le panier avec un kit | Panier | Lignes, « Sous-total HT (N article) », « Livraison : Calculée à l'étape suivante », « Total hors livraison », « Les taxes éventuelles sont ajoutées au moment du paiement. » ; bouton « Commander » | ☐ | |
-| REC-PAR-196 | Avoir un kit devenu indisponible dans le panier puis « Commander » | Kit indisponible | « Retirez les kits indisponibles pour continuer. » ; commande bloquée ; sur `/commande` : « Un kit de votre panier n'est plus disponible : retirez-le avant de commander. » | ☐ | |
-| REC-PAR-197 | Cliquer « Commander » | Étape livraison | `/parent/boutique/commande` (h1 « Commande de kits ») : « Votre panier » avec « Sous-total HT hors livraison », taxes éventuelles, « Total hors livraison » ; champ « Pour quel enfant ? (facultatif) » (option « Pour la famille » + enfants actifs, aide « Il recevra les Kit Codes du kit pour débloquer ses parcours. ») ; formulaire « Adresse de livraison » prérempli avec l'adresse par défaut de `« Paramètres parent »` | ☐ | |
-| REC-PAR-198 | Cliquer « Continuer vers le paiement » sans zone, ville, quartier ni rue | Adresse incomplète | Récapitulatif « Corrigez les erreurs suivantes : » : « Choisissez la zone de livraison. », « Indiquez la ville. », « Indiquez le quartier. », « Indiquez la rue ou un repère. » ; aucune commande créée | ☐ | |
-| REC-PAR-199 | Saisir une adresse valide, cocher « Enregistrer comme adresse par défaut », « Continuer vers le paiement » | Commande créée | Encart « Commande <référence> » avec le total du serveur, lignes d'articles, « Livraison (<zone>) » (frais de la zone), taxes, « Vos kits sont réservés jusqu'au <heure> : payez avant cette heure. » ; l'adresse est enregistrée dans `« Paramètres parent »` ; le stock est réservé 30 minutes | ☐ | |
-| REC-PAR-200 | Payer avec un numéro en `01` | Paiement réussi | « Paiement réussi ! » + « Votre commande est confirmée : suivez sa livraison et retrouvez ses Kit Codes. » + bouton « Suivre ma commande » ; la commande est « Payée » dans `« Historique de commande »` avec le bénéficiaire choisi | ☐ | |
-| REC-PAR-201 | Payer avec un numéro en `02` puis `03` | Échec et attente | Échec : « Paiement échoué », « Raison : … », « Changer de numéro » / « Réessayer le paiement » ; `03` : attente puis « toujours en attente » après 2 minutes | ☐ | |
-| REC-PAR-202 | Laisser expirer la réservation (30 min) puis payer | Délai de réservation dépassé | Message « Le délai de réservation est dépassé : confirmez de nouveau l'adresse pour réserver vos kits. » ; retour au formulaire d'adresse | ☐ | |
-| REC-PAR-203 | Valider la commande alors que le kit vient d'être épuisé | Rupture à la commande (`OUT_OF_STOCK`) | « Un kit vient d'être épuisé : votre panier a été relu, vérifiez-le avant de commander. » ; aucune commande créée | ☐ | |
-| REC-PAR-204 | Revenir sur `/parent/boutique/commande` avec une commande de kit déjà en attente et réservée | Commande en attente existante | « Une commande de kit attend déjà votre paiement. » / « Commande <référence>, réservée jusqu'au <heure> : payez-la plutôt que d'en passer une seconde. » ; boutons « Reprendre le paiement » (vers le suivi) et « Passer une nouvelle commande » | ☐ | |
-| REC-PAR-205 | Payer la commande dans un autre onglet puis payer dans le premier | Commande déjà payée (`ORDER_ALREADY_PAID`) | « Cette commande est déjà payée. » + bouton « Suivre ma commande » | ☐ | |
-| REC-PAR-206 | Rendre l'API du panier indisponible | Erreur de chargement du panier | Message d'erreur avec bouton « Réessayer » | ☐ | |
-| REC-PAR-207 | Parcourir le tunnel en 360 px | Version mobile | Panier, adresse, paiement lisibles sans défilement horizontal ; boutons pleine largeur | ☐ | |
+| REC-PAR-191 | Ouvrir /parent/boutique | `achat-panier-vide` · Nominal · auto | Titre « Boutique de kits », prix HT du serveur, bouton « Ajouter <kit> au panier » pour les kits en stock seulement. | ☐ | |
+| REC-PAR-192 | Cliquer « Ajouter Pack Électronique au panier » | `achat-panier-vide` · Nominal · auto | Message « « Pack Électronique » est dans votre panier. », kit ajouté au panier du serveur. | ☐ | |
+| REC-PAR-193 | Ouvrir /boutique/panier connecté en parent | `achat-panier` · Accès refusé · auto | Redirection vers /parent/boutique/panier. | ☐ | |
+| REC-PAR-194 | Ouvrir /parent/boutique/panier avec un panier vide | `achat-panier` · Vide · auto | « Votre panier est vide » et texte d'aide, « Voir les kits », délais de livraison par zone. | ☐ | |
+| REC-PAR-195 | Ouvrir le panier avec des kits | `achat-panier` · Nominal · auto | Lignes, « Sous-total HT », taxes du serveur, « Livraison : Calculée à l'étape suivante », « Total hors livraison », « Commander » | ☐ | |
+| REC-PAR-196 | Avoir un kit devenu indisponible dans le panier | `achat-panier-sans-taxes` · Erreur · auto | Badge « Indisponible », « Retirez les kits indisponibles pour continuer. », « Commander » désactivé. | ☐ | |
+| REC-PAR-197 | Lire l'étape livraison | `achat-panier` · Nominal · auto | « Votre panier » (sous-total HT, taxes, total hors livraison), « Pour quel enfant ? (facultatif) », formulaire « Adresse de livraison » | ☐ | |
+| REC-PAR-198 | Cliquer « Continuer vers le paiement » sans zone, ville, quartier ni rue | `achat-panier` · Nominal · auto | Quatre erreurs, aucune commande créée. | ☐ | |
+| REC-PAR-199 | Choisir Léa, saisir une adresse valide, cocher « Enregistrer comme adresse par défaut » | `achat-panier` · Nominal · auto | Commande créée sans prix, total, articles, livraison, taxes et heure limite du serveur, adresse enregistrée. | ☐ | |
+| REC-PAR-200 | Payer avec un numéro en …01 | `achat-panier` · Nominal · auto | « Paiement réussi ! », « Votre commande est confirmée… », « Suivre ma commande » | ☐ | |
+| REC-PAR-201 | Payer avec un numéro en …02 | `achat-adresse-enregistree` · Nominal · auto | « Paiement échoué », raison, « Changer de numéro » et « Réessayer le paiement » | ☐ | |
+| REC-PAR-202 | Payer après l'expiration de la réservation | `achat-commande-erreur-serveur` · Erreur · auto | « Le délai de réservation est dépassé : confirmez de nouveau l'adresse… », retour au formulaire d'adresse. | ☐ | |
+| REC-PAR-203 | Valider la commande alors que le kit vient d'être épuisé | `achat-adresse-enregistree` · Erreur · auto | « Un kit vient d'être épuisé : votre panier a été relu… », aucune commande. | ☐ | |
+| REC-PAR-204 | Revenir sur la commande avec une commande de kit déjà en attente et réservée | `achat-commande-en-attente` · Nominal · auto | « Une commande de kit attend déjà votre paiement. », référence, heure limite, « Reprendre le paiement » et « Passer une nouvelle commande » | ☐ | |
+| REC-PAR-205 | Payer une commande déjà payée dans un autre onglet | `achat-reservation-depassee` · Erreur · auto | « Cette commande est déjà payée. » et « Suivre ma commande » | ☐ | |
+| REC-PAR-206 | Ouvrir le panier alors que l'API répond en erreur 500 | `achat-panier-kit-indisponible` · Erreur · auto | Message d'erreur et « Réessayer », puis le panier s'affiche. | ☐ | |
+| REC-PAR-207 | Mobile 360 px | `achat-panier` · Mobile · auto | Panier lisible sans défilement horizontal, bouton « Commander » pleine largeur. | ☐ | |
+
+#### Achat direct de kit · compléments de l'inventaire (tests sur fixtures)
+
+| N° | Action | Cas | Résultat attendu | Conforme | Remarques |
+| --- | --- | --- | --- | --- | --- |
+| REC-PAR-458 | Cliquer « Ajouter » alors que le kit vient d'être épuisé | `achat-ajout-epuise` · Erreur · auto | « Ce kit vient d'être épuisé. » | ☐ | |
+| REC-PAR-459 | Cliquer « Ajouter » alors que l'API répond en erreur 500 | `achat-ajout-epuise` · Erreur · auto | Message d'erreur en français. | ☐ | |
+| REC-PAR-460 | Accessibilité | `achat-panier` · Accessibilité · auto | Aucune violation WCAG 2 A/AA sur le panier du parent. | ☐ | |
+| REC-PAR-461 | Cliquer « Ajouter un exemplaire de Steamy Bot v1 » | `achat-panier` · Nominal · auto | La quantité augmente, totaux relus du serveur, quantité enregistrée côté serveur. | ☐ | |
+| REC-PAR-462 | Cliquer « Retirer Steamy Bot v1 » | `achat-panier` · Erreur · auto | Message « retiré du panier », focus en tête de liste, sous-total relu du serveur. | ☐ | |
+| REC-PAR-463 | Recharger la page | `achat-panier` · Nominal · auto | Mêmes lignes et quantités (panier gardé par le serveur) | ☐ | |
+| REC-PAR-464 | Cliquer « Continuer mes achats » | `achat-panier` · Nominal · auto | Retour au catalogue /parent/boutique. | ☐ | |
+| REC-PAR-465 | Ouvrir le panier avec les taxes éteintes | `achat-panier-vide` · Nominal · auto | Aucune ligne TVA ni AIB, total hors livraison égal au sous-total HT. | ☐ | |
+| REC-PAR-466 | Ouvrir /parent/boutique/commande avec un kit indisponible | `achat-panier-kit-indisponible` · Erreur · auto | « Un kit de votre panier n'est plus disponible : retirez-le avant de commander. » et « Retour au panier » | ☐ | |
+| REC-PAR-467 | Changer une quantité alors que l'API répond en erreur 500 | `achat-panier-erreur` · Erreur · auto | Message d'erreur, quantité inchangée. | ☐ | |
+| REC-PAR-468 | Mobile 360 px | `achat-panier` · Mobile · auto | Récapitulatif et formulaire d'adresse sans débordement, bouton pleine largeur. | ☐ | |
+| REC-PAR-469 | 1. Ouvrir « Suivre ma commande »<br>2. L'historique | `achat-panier` · Nominal · auto | La commande est « Payée », pour Léa, avec ses Kit Codes, et le panier est vidé. | ☐ | |
+| REC-PAR-470 | Ouvrir la livraison avec une adresse par défaut | `achat-adresse-enregistree` · Nominal · auto | Zone, ville, quartier et rue préremplis, « Pour la famille » sélectionné. | ☐ | |
+| REC-PAR-471 | Ouvrir la livraison d'un parent sans enfant actif | `achat-sans-enfant` · Nominal · auto | Aucun champ « Pour quel enfant ? » | ☐ | |
+| REC-PAR-472 | Ouvrir la livraison avec un panier vide | `achat-panier-vide` · Vide · auto | « Votre panier est vide. » et « Voir la boutique » | ☐ | |
+| REC-PAR-473 | Payer avec un numéro en …03 | `achat-adresse-enregistree` · Nominal · auto | Attente de confirmation, puis « toujours en attente » après 2 minutes. | ☐ | |
+| REC-PAR-474 | Valider la commande vers une zone qui n'est plus desservie | `achat-rupture-a-la-commande` · Erreur · auto | « Cette zone n'est plus desservie. Choisissez-en une autre. » sous le champ zone. | ☐ | |
+| REC-PAR-475 | Valider la commande alors que l'API répond en erreur 500 | `achat-zone-indisponible` · Erreur · auto | Message d'erreur, saisie conservée. | ☐ | |
+| REC-PAR-476 | Cliquer « Passer une nouvelle commande » | `achat-commande-en-attente` · Nominal · auto | Le formulaire de livraison s'affiche. | ☐ | |
 
 ### Rapport hebdomadaire (`/parent/enfants/[id]/rapport`)
 
