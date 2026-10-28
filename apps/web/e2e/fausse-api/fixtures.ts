@@ -1,5 +1,7 @@
 import type { Schemas } from "@steamy/api-client";
 
+import { fusion, type Partiel } from "./defauts.ts";
+
 // Données de la fausse API (docs/tests/FIXTURES-FAUSSE-API.md). Chaque objet est typé par le contrat OpenAPI
 // (`Schemas`) : un champ ajouté, retiré ou renommé dans `apps/api/openapi.yaml` fait échouer `pnpm typecheck`, et le test
 // Vitest `fixtures.test.ts` les valide en plus contre le schéma JSON du contrat.
@@ -156,11 +158,11 @@ export function taxLines(goods: number, rates: TaxRates = DEFAULT_RATES): Schema
 const sum = (lines: Schemas["TaxLine"][]) => lines.reduce((total, line) => total + line.amount, 0);
 
 export function courseRequest(
-  overrides: Partial<Schemas["PaymentRequest"]> = {},
+  overrides: Partiel<Schemas["PaymentRequest"]> = {},
   rates: TaxRates = DEFAULT_RATES,
 ): Schemas["PaymentRequest"] {
   const taxes = taxLines(15000, rates);
-  return {
+  return fusion<Schemas["PaymentRequest"]>({
     id: REQUEST_ID,
     kind: "course",
     status: "pending",
@@ -179,12 +181,11 @@ export function courseRequest(
     declineReason: "",
     orderReference: null,
     pendingOrderReference: null,
-    ...overrides,
-  };
+  }, overrides);
 }
 
 export function kitRequest(
-  overrides: Partial<Schemas["PaymentRequest"]> = {},
+  overrides: Partiel<Schemas["PaymentRequest"]> = {},
   rates: TaxRates = DEFAULT_RATES,
 ): Schemas["PaymentRequest"] {
   const taxes = taxLines(22000, rates);
@@ -208,10 +209,10 @@ export function kitOrder(
   zone: Schemas["DeliveryZone"],
   address: Schemas["DeliveryAddressInputRequest"] | Schemas["DeliveryAddress"],
   rates: TaxRates = DEFAULT_RATES,
-  overrides: Partial<Schemas["Order"]> = {},
+  overrides: Partiel<Schemas["Order"]> = {},
 ): Schemas["Order"] {
   const taxes = taxLines(22000, rates);
-  return {
+  return fusion<Schemas["Order"]>({
     reference,
     kind: "kit",
     status: "pending",
@@ -240,13 +241,12 @@ export function kitOrder(
     },
     kitCodes: [],
     invoice: null,
-    ...overrides,
-  };
+  }, overrides);
 }
 
-export function courseOrder(reference: string, rates: TaxRates = DEFAULT_RATES, overrides: Partial<Schemas["Order"]> = {}): Schemas["Order"] {
+export function courseOrder(reference: string, rates: TaxRates = DEFAULT_RATES, overrides: Partiel<Schemas["Order"]> = {}): Schemas["Order"] {
   const taxes = taxLines(15000, rates);
-  return {
+  return fusion<Schemas["Order"]>({
     reference,
     kind: "course",
     status: "pending",
@@ -267,8 +267,7 @@ export function courseOrder(reference: string, rates: TaxRates = DEFAULT_RATES, 
     deliveryAddress: null,
     kitCodes: [],
     invoice: null,
-    ...overrides,
-  };
+  }, overrides);
 }
 
 export function payment(
@@ -276,9 +275,9 @@ export function payment(
   order: Schemas["Order"],
   status: Schemas["Payment"]["status"],
   input: Schemas["PaymentCreateRequest"],
-  overrides: Partial<Schemas["Payment"]> = {},
+  overrides: Partiel<Schemas["Payment"]> = {},
 ): Schemas["Payment"] {
-  return {
+  return fusion<Schemas["Payment"]>({
     id,
     orderReference: order.reference,
     status,
@@ -291,8 +290,7 @@ export function payment(
     failureReason: "",
     createdAt: CREATED_AT,
     confirmedAt: null,
-    ...overrides,
-  };
+  }, overrides);
 }
 
 export function apiError(code: Schemas["ErrorCodeEnum"], message: string): Schemas["Error"] {

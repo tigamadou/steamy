@@ -25,9 +25,16 @@ Next.js appelle l'API depuis son **serveur** (Server Components, `getServerApi()
 
 ```
 apps/web/e2e/fausse-api/
+  server.ts       l'ossature (port 4010) : session, CSRF, CORS, journal, connexion, référentiels, compte
+  contexte.ts     état d'une instance, contexte d'un appel, registre des routes (`route()`), `fail()`, `once()`
+  base.ts         `Scenario`, `Faults`, `BASE` et `scenario({…})` : un scénario ne dit que ce qui le distingue
+  defauts.ts      `fusion` / `fabrique` : objets par défaut surchargés en typé
+  statuts.ts      table code d'erreur → statut HTTP et message, lue dans apps/api/libs/errors.py
   fixtures.ts     données typées par le contrat (Schemas) : parent, enfant, parcours, kit, taxes, commandes, paiements
-  scenarios.ts    catalogue des scénarios (un nom = une fixture) et des incidents rejouables
-  server.ts       le serveur HTTP (port 4010)
+  scenarios.ts    catalogue des scénarios : réunit ceux de chaque écran (un nom = une fixture)
+  ecrans/         un fichier par écran : ses routes, ses incidents, ses scénarios
+    paiement.ts           paiement Mobile Money et issue (commun à plusieurs écrans)
+    demande-paiement.ts   demande de paiement du parent
   contract.test.ts  Vitest : fixtures et réponses validées contre apps/api/openapi.yaml
 apps/web/e2e/support/fausse-api.ts   aides Playwright (signInAs, journal des appels)
 apps/web/playwright.fixtures.config.ts   démarre la fausse API et `next start` (port 3100), projets bureau et mobile
@@ -59,10 +66,11 @@ Prérequis : `pnpm install` et les navigateurs Playwright (`pnpm --filter @steam
 2. **Schéma JSON.** `contract.test.ts` (Vitest, dans `pnpm test`) démarre la fausse API et valide **ce qu'elle répond réellement**, pour chaque scénario : le statut doit être documenté dans le contrat (ou être une erreur métier connue 402, 404, 409, 410, 500) et le corps doit respecter le schéma de la réponse. Il vérifie aussi le refus d'une requête sans jeton CSRF.
 3. **Parcours de bout en bout.** Les quelques parcours sur la vraie stack restent le filet contre une fausse API qui divergerait du comportement réel (le contrat dit la forme, pas la règle métier).
 
-## 6. Ajouter un scénario
+## 6. Ajouter un écran, ou un scénario
 
-1. Ajouter la fixture (ou la variante) dans `fixtures.ts` / `scenarios.ts` : un nom en français qui dit l'état (`demande-expiree`), un seul écart avec la base.
-2. Si l'écran appelle un point d'accès nouveau, l'ajouter à `server.ts` ; le test de contrat le validera.
-3. Dans le test d'écran, démarrer par `signInAs(context, "<scénario>")`.
+1. **Nouvel écran** : créer `ecrans/<écran>.ts`. Il branche ses routes avec `route(méthode, chemin, auth, gestionnaire)` (erreurs par `fail(respond, "CODE")`, dont le statut vient de `errors.py`), prépare l'état de départ par `onInstance`, et exporte ses scénarios (`SCENARIOS_<ÉCRAN>`). Puis l'importer dans `server.ts` (routes) et l'ajouter au catalogue de `scenarios.ts`. Le serveur n'est pas modifié.
+2. **Nouveau scénario** : `scenario({ … })` avec **seulement** ce qui le distingue de `BASE` (objets imbriqués fusionnés, tableaux et `null` remplacés) : un nom en français qui dit l'état (`demande-expiree`). Un incident ajoute un champ à `Faults`.
+3. **Nouvelle donnée** : une fabrique typée dans `fixtures.ts` (objet par défaut complet, surchargé en profondeur par ses arguments), validée par `contract.test.ts` contre le schéma de l'API.
+4. Dans le test d'écran, démarrer par `signInAs(context, "<scénario>")`.
 
 Aucune donnée de prix n'est codée dans le front : les montants, la TVA et l'AIB viennent des fixtures, comme de l'API.
