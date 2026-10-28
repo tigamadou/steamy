@@ -319,6 +319,29 @@ export function courseOrder(reference: string, rates: TaxRates = DEFAULT_RATES, 
   }, overrides);
 }
 
+/** Fiche de l'événement payant des demandes d'événement : date, lieu et prix HT du serveur. */
+export const EVENT_SLUG = "defi-robots-cotonou";
+export const EVENT: Schemas["SteamyEventDetail"] = {
+  slug: EVENT_SLUG,
+  title: "Défi robots de Cotonou",
+  emoji: "🤖",
+  color: "#0EA5E9",
+  startsAt: AT("2026-11-14T09:00:00+01:00"),
+  endsAt: AT("2026-11-14T16:00:00+01:00"),
+  online: false,
+  place: "Palais des congrès",
+  city: "Cotonou",
+  audience: "10 – 17 ans",
+  price: 5000,
+  isFree: false,
+  capacity: 40,
+  seatsLeft: 12,
+  applicationDeadline: AT("2026-11-10T18:00:00+01:00"),
+  applicationsOpen: true,
+  isPast: false,
+  description: "Une journée de défis de robotique.",
+};
+
 /** Commande d'un événement payant (5 000 F CFA HT). */
 export function eventOrder(reference: string, rates: TaxRates = DEFAULT_RATES, overrides: Partiel<Schemas["Order"]> = {}): Schemas["Order"] {
   const taxes = taxLines(5000, rates);

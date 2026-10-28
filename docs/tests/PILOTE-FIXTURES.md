@@ -69,7 +69,7 @@ Aucun n'a été corrigé hors du premier ; les autres sont listés pour décisio
 | --- | --- | --- |
 | 1 | Message d'erreur d'un champ (`Field`) : contraste 4,29:1 (rouge `#dc2626` sur le fond de l'adresse de livraison), 4,5:1 exigé | **Corrigé** dans cette PR (`text-error-700`) ; trouvé par axe sur l'état « erreurs d'adresse », jamais testé avant |
 | 2 | Demande de kit **payée** : le libellé reste « Montant demandé hors livraison », la page close étant relue sans sa commande | À décider : afficher la commande (frais et total payés) |
-| 3 | Demande d'événement : la date et le lieu annoncés par le cahier ne sont pas affichés, et la phrase du bas dit « Le parcours est débloqué… » | À décider (spec muette, D53 amendé) : l'événement payant passe par une commande, pas par une demande |
+| 3 | Demande d'événement : la date et le lieu annoncés par le cahier ne sont pas affichés, et la phrase du bas dit « Le parcours est débloqué… » | **Corrigé** (tranché le 2026-10-28, écran conservé) : date et lieu affichés, texte « place confirmée » ; ils viennent de la fiche de l'événement de la commande en attente |
 | 4 | Demande close entre la commande et le paiement : le message est affiché mais la page n'est pas relue en lecture seule (elle l'est quand la fermeture est vue à la création de la commande) | À décider ; la fiche `REC-PAR-439` décrit le comportement actuel |
 | 5 | « Modifier » l'adresse d'un kit rouvre un formulaire vierge si aucune adresse par défaut n'est enregistrée | À décider (confort) |
 | 6 | Le contrat OpenAPI ne documente pas les statuts d'erreur métier ni le 404 de l'adresse de livraison | À corriger côté API (`@extend_schema`) |

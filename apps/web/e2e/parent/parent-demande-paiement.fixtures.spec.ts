@@ -1,6 +1,6 @@
 import { expect, test, type Page, type TestInfo } from "@playwright/test";
 
-import { courseRequest, kitOrder, kitRequest, REQUEST_ID, SAVED_ADDRESS, ZONES } from "../fausse-api/fixtures.ts";
+import { courseRequest, eventOrder, kitOrder, kitRequest, REQUEST_ID, SAVED_ADDRESS, ZONES } from "../fausse-api/fixtures.ts";
 import { expectAccessible } from "../support/a11y";
 import { chooseNetwork, freezeClock, pay, payButton, phoneField } from "../support/paiement";
 import { openShellMenu } from "../support/session";
@@ -307,14 +307,42 @@ test("à payer · taxes éteintes : aucune ligne de taxe, total égal au HT", as
   });
 });
 
-test("à payer · événement : repère « Événement » et titre", async ({ page, context }) => {
-  await signInAs(context, "evenement-en-attente");
+test("à payer · événement : repère, date et lieu, place confirmée après le paiement", async ({ page, context }, testInfo) => {
+  await page.clock.install();
+  const session = await signInAs(context, "evenement-en-attente");
   await page.goto(PATH);
+  const order = eventOrder("CMD-501");
 
   await test.step("REC-PAR-335 · Ouvrir une demande portant sur un événement : repère « Événement » et titre de l'événement", async () => {
     await expect(page.getByText("Événement", { exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { level: 2, name: "Défi robots de Cotonou" })).toBeVisible();
   });
+
+  await test.step("REC-PAR-478 · Lire la demande d'événement : date et lieu de l'événement, texte adapté (la place, pas le parcours)", async () => {
+    await expect(page.getByText(/14 novembre 2026 · 📍 Cotonou · Palais des congrès/)).toBeVisible();
+    await expect(line(page, "Total à payer")).toContainText(fcfa(order.total));
+    await expect(page.getByText("La place de Léa est confirmée dès la confirmation du paiement.")).toBeVisible();
+    await expect(page.getByText(/débloqué/)).toHaveCount(0);
+    await expectAccessible(page);
+  });
+
+  await onMobile(testInfo, "REC-PAR-479 · Mobile 360 px : date, lieu et montant lisibles sans débordement", async () => {
+    await expect(page.getByText(/Palais des congrès/)).toBeVisible();
+    await expectAccessible(page);
+  });
+
+  await test.step("REC-PAR-480 · Payer la demande d'événement (…01) : « Votre place à … est confirmée », Léa prévenu·e", async () => {
+    await freezeClock(page);
+    await pay(page, "0197000001");
+    await expect(page.getByRole("heading", { level: 2, name: "On confirme votre paiement…" })).toBeVisible();
+    await page.clock.fastForward(3_000);
+    await expect(page.getByRole("heading", { name: "Paiement réussi !" })).toBeVisible();
+    await expect(page.getByText("Votre place à Défi robots de Cotonou est confirmée pour Léa. Léa a été prévenu·e.")).toBeVisible();
+    await expect(page.getByText(/Le parcours .* est débloqué/)).toHaveCount(0);
+    await page.clock.resume();
+    await expectAccessible(page);
+  });
+  await expectNoUnhandledCall(session);
 });
 
 test("à payer · kit : adresse de livraison, commande créée, reprise après rechargement, paiement", async ({ page, context }, testInfo) => {

@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { EVENT } from "@/test/api-fixtures";
 import { ADDRESS, CHILD, COUNTRIES, KIT_REQUEST, order, paymentRequest } from "@/test/payment-request-fixtures";
 
 const GET = vi.fn();
@@ -88,6 +89,39 @@ describe("PaymentRequestScreen (WPD15, serveur)", () => {
       params: { path: { reference: "CMD-ABC123" } },
     });
     expect(tree.props).toMatchObject({ order: order(), address: ADDRESS, requiredKit: null, defaultCountry: "" });
+  });
+
+  it("demande d'événement : date et lieu lus sur la fiche de l'événement de la commande", async () => {
+    GET.mockImplementation(async (path: string) =>
+      path === "/api/events/{slug}/"
+        ? respond(200, EVENT)
+        : path === "/api/payments/payment-requests/{id}/"
+          ? respond(200, { ...paymentRequest({ kind: "event" as never }), pendingOrderReference: "CMD-EV" })
+          : path === "/api/payments/orders/{reference}/"
+            ? respond(200, order({ kind: "event", items: [{ ...order().items[0], eventSlug: EVENT.slug }] }))
+            : path === "/api/accounts/me/parent-profile/"
+              ? respond(200, PROFILE)
+              : respond(200, CHILD),
+    );
+    const tree = (await PaymentRequestScreen({ params: params("12") })) as Flow;
+    expect(GET).toHaveBeenCalledWith("/api/events/{slug}/", { params: { path: { slug: EVENT.slug } } });
+    expect(tree.props.event).toEqual(EVENT);
+  });
+
+  it("fiche de l'événement illisible : demande sans date ni lieu", async () => {
+    GET.mockImplementation(async (path: string) =>
+      path === "/api/events/{slug}/"
+        ? respond(404)
+        : path === "/api/payments/payment-requests/{id}/"
+          ? respond(200, { ...paymentRequest({ kind: "event" as never }), pendingOrderReference: "CMD-EV" })
+          : path === "/api/payments/orders/{reference}/"
+            ? respond(200, order({ kind: "event", items: [{ ...order().items[0], eventSlug: EVENT.slug }] }))
+            : path === "/api/accounts/me/parent-profile/"
+              ? respond(200, PROFILE)
+              : respond(200, CHILD),
+    );
+    const tree = (await PaymentRequestScreen({ params: params("12") })) as Flow;
+    expect(tree.props.event).toBeNull();
   });
 
   it("commande en attente illisible : nouvelle commande au paiement", async () => {

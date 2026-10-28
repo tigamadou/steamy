@@ -12,7 +12,7 @@ import { routes } from "@/lib/routes";
 type SteamyEvent = Schemas["SteamyEvent"];
 
 /** Lieu affiché : « En ligne » ou « Ville · lieu ». */
-export function eventPlace(event: SteamyEvent): string {
+export function eventPlace(event: Pick<SteamyEvent, "online" | "city" | "place">): string {
   if (event.online) {
     return "En ligne";
   }

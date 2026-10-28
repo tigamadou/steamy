@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { apiCall } from "@/lib/api-call";
 import { resetReferentials } from "@/lib/use-referential";
+import { EVENT } from "@/test/api-fixtures";
 import { axe } from "@/test/axe";
 import {
   ADDRESS,
@@ -195,6 +196,21 @@ describe("PaymentRequestSummary (3 objets, 8 états)", () => {
     render(<PaymentRequestSummary request={paymentRequest({ kind: "event" as never })} child={CHILD} state={state} />);
     expect(screen.getByText(label)).toBeInTheDocument();
     expect(screen.getByText("Événement")).toBeInTheDocument();
+  });
+
+  it("événement : date et lieu sous le titre, place confirmée dès le paiement (et non parcours débloqué)", () => {
+    render(
+      <PaymentRequestSummary
+        request={paymentRequest({ kind: "event" as never })}
+        child={CHILD}
+        state="pending"
+        event={EVENT}
+      />,
+    );
+    expect(screen.getByText(/5 novembre 2026/)).toBeInTheDocument();
+    expect(screen.getByText(/Porto-Novo · Maison des jeunes/)).toBeInTheDocument();
+    expect(screen.getByText("La place de Léa est confirmée dès la confirmation du paiement.")).toBeInTheDocument();
+    expect(screen.queryByText(/débloqué/)).toBeNull();
   });
 });
 
@@ -459,6 +475,24 @@ describe("PaymentRequestFlow (WPD15 en attente)", () => {
     expect(await screen.findByText("Payée")).toBeInTheDocument();
     expect(screen.getByText(/Capteurs électroniques/, { selector: "strong" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Refuser la demande" })).toBeNull();
+  });
+
+  it("événement : date et lieu affichés, « Votre place est confirmée » après le paiement", async () => {
+    const user = userEvent.setup();
+    POST.mockResolvedValue(respond(201, payment()));
+    render(
+      <PaymentRequestFlow
+        {...BASE}
+        request={paymentRequest({ kind: "event" as never, course: null, items: [{ kitSlug: "", title: "Défi robots", unitPrice: 5000, quantity: 1 }] })}
+        order={order({ kind: "event", total: 5900 })}
+        event={EVENT}
+      />,
+    );
+    expect(screen.getByText(/Porto-Novo · Maison des jeunes/)).toBeInTheDocument();
+    await screen.findByRole("radio", { name: "MTN Mobile Money" });
+    await user.click(payButton());
+    expect(await screen.findByRole("heading", { name: "Paiement réussi !" })).toBeInTheDocument();
+    expect(screen.getByText(/Votre place à/)).toHaveTextContent("Votre place à Défi robots est confirmée pour Léa. Léa a été prévenu·e.");
   });
 
   it("demande close entre-temps : l'écran se relit", async () => {
