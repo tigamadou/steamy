@@ -12,7 +12,7 @@ import { formatPrice } from "@/lib/format";
 import { routes } from "@/lib/routes";
 
 import { DeclineRequestDialog } from "./DeclineRequestDialog";
-import { KitAddressStep } from "./KitAddressStep";
+import { KitAddressStep, type EnteredAddress } from "./KitAddressStep";
 import type { ScreenState } from "./messages";
 import { OrderPayment } from "./OrderPayment";
 import { PaymentRequestSummary } from "./PaymentRequestSummary";
@@ -39,6 +39,13 @@ export type PaymentRequestFlowProps = {
   countries: PhoneCountry[];
   preferred: PaymentFormProps["preferred"];
 };
+
+/** Adresse déjà saisie pour la commande, à reprendre dans le formulaire. */
+function enteredAddress(order: Order | null): EnteredAddress | null {
+  const { deliveryAddress: address, deliveryZone: zone } = order ?? {};
+  if (!address || !zone) return null;
+  return { zoneId: zone.id, country: address.country, city: address.city, district: address.district, addressLine: address.addressLine };
+}
 
 /** Adresse de livraison de la commande créée, avec « Modifier » (nouvelle commande au prochain envoi). */
 function AddressRecap({ order, onEdit, locked }: { order: Order; onEdit: () => void; locked: boolean }) {
@@ -84,6 +91,8 @@ export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
   const isKit = request.kind === "kit";
   const [order, setOrder] = useState<Order | null>(props.order);
   const [editing, setEditing] = useState(isKit && !props.order);
+  // Dernière adresse saisie, gardée quand la commande est perdue (réservation dépassée)
+  const [entered, setEntered] = useState<EnteredAddress | null>(null);
   const [state, setState] = useState<ScreenState>("pending");
   const [notice, setNotice] = useState<string>();
   const [declining, setDeclining] = useState(false);
@@ -97,18 +106,24 @@ export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
       api.POST("/api/payments/orders/", { body: { paymentRequestId: request.id } }),
     );
     if (!result.ok) {
-      if (result.code === "PAYMENT_REQUEST_CLOSED") router.refresh();
+      if (result.code === "PAYMENT_REQUEST_CLOSED") requestClosed();
       return result;
     }
     setOrder(result.data);
     return { ok: true, data: result.data.reference };
   }
 
-  function orderClosed(code: "ORDER_EXPIRED" | "ORDER_ALREADY_PAID") {
-    if (code === "ORDER_ALREADY_PAID") {
-      router.refresh();
+  /** Demande fermée (réglée, refusée, annulée, expirée) : un seul comportement, la page se relit en lecture seule. */
+  function requestClosed() {
+    router.refresh();
+  }
+
+  function orderClosed(code: "ORDER_EXPIRED" | "ORDER_ALREADY_PAID" | "PAYMENT_REQUEST_CLOSED") {
+    if (code === "ORDER_ALREADY_PAID" || code === "PAYMENT_REQUEST_CLOSED") {
+      requestClosed();
       return;
     }
+    setEntered(enteredAddress(order));
     setOrder(null);
     if (isKit) {
       setEditing(true);
@@ -169,6 +184,7 @@ export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
             )
           }
           address={address}
+          entered={enteredAddress(order) ?? entered}
           defaultCountry={defaultCountry}
           recipientName={parentName}
           onOrder={(created) => {
@@ -177,6 +193,7 @@ export function PaymentRequestFlow(props: PaymentRequestFlowProps) {
             setNotice(undefined);
           }}
           onOutOfStock={() => setState("outofstock")}
+          onRequestClosed={requestClosed}
         />
       </div>
     );

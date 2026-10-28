@@ -430,11 +430,15 @@ test("à payer · kit : adresse de livraison, commande créée, reprise après r
     await expectAccessible(page);
   });
 
-  await test.step("REC-PAR-342 · « Modifier » l'adresse : retour au formulaire, nouvelle commande, frais et total recalculés par le serveur", async () => {
+  await test.step("REC-PAR-342 · « Modifier » l'adresse : formulaire prérempli avec l'adresse saisie, nouvelle commande, frais et total recalculés par le serveur", async () => {
     await page.getByRole("button", { name: "Modifier l'adresse de livraison" }).click();
     await expect(address).toBeVisible();
+    // Aucune adresse par défaut enregistrée : le formulaire s'ouvre prérempli avec l'adresse déjà saisie (REC-PAR-342)
+    await expect(address.getByRole("combobox", { name: /^Ville ou zone/ })).toHaveValue("1");
+    await expect(address.getByRole("textbox", { name: /^Ville\b/ })).toHaveValue("Cotonou");
+    await expect(address.getByRole("textbox", { name: /^Quartier/ })).toHaveValue("Akpakpa");
+    await expect(address.getByRole("textbox", { name: /^Rue/ })).toHaveValue("Rue 5, maison bleue");
     await address.getByRole("combobox", { name: /^Ville ou zone/ }).selectOption("2");
-    // Sans adresse enregistrée, le formulaire revient vierge : l'adresse est saisie de nouveau
     await address.getByRole("textbox", { name: /^Ville\b/ }).fill("Porto-Novo");
     await address.getByRole("textbox", { name: /^Quartier/ }).fill("Ouando");
     await address.getByRole("textbox", { name: /^Rue/ }).fill("Rue 8, maison blanche");
@@ -552,6 +556,9 @@ test("à payer · kit : réservation dépassée au paiement, retour à l'adresse
       page.getByText("Le délai de réservation est dépassé : confirmez l'adresse pour réserver de nouveau le kit."),
     ).toBeVisible();
     await expect(page.getByRole("form", { name: "Adresse de livraison" })).toBeVisible();
+    // Aucune adresse par défaut : le formulaire garde l'adresse de la commande perdue
+    await expect(page.getByRole("textbox", { name: /^Quartier/ })).toHaveValue("Fidjrossè");
+    await expect(page.getByRole("textbox", { name: /^Rue/ })).toHaveValue("Rue 12, villa verte");
     await expect(page.getByRole("textbox", { name: /Numéro Mobile Money/ })).toHaveCount(0);
   });
   await expectNoUnhandledCall(session);
@@ -662,13 +669,27 @@ test("paiement · demande close entre-temps : message puis lecture seule", async
     await expect(page.getByRole("textbox", { name: /Numéro Mobile Money/ })).toHaveCount(0);
   });
 
-  await test.step("REC-PAR-439 · Payer une demande refusée dans un autre onglet : « Cette demande n'est plus en attente… » dans le formulaire", async () => {
+  await test.step("REC-PAR-439 · Payer une demande refusée dans un autre onglet, après la création de la commande : la page se relit en lecture seule", async () => {
     await signInAs(context, "paiement-demande-close-au-paiement");
     await page.goto(PATH);
     await pay(page, "0197000001");
-    await expect(
-      page.getByText("Cette demande n'est plus en attente : elle a été réglée, refusée, annulée ou a expiré."),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: "Vous avez refusé cette demande" })).toBeVisible();
+    await expect(page.getByRole("textbox", { name: /Numéro Mobile Money/ })).toHaveCount(0);
+    await expectAccessible(page);
+  });
+
+  await test.step("REC-PAR-481 · Demande de kit réglée dans un autre onglet pendant la saisie de l'adresse : la page se relit en lecture seule", async () => {
+    await signInAs(context, "kit-demande-close-a-la-commande");
+    await page.goto(PATH);
+    const address = page.getByRole("form", { name: "Adresse de livraison" });
+    await address.getByRole("combobox", { name: /^Ville ou zone/ }).selectOption("1");
+    await address.getByRole("textbox", { name: /^Ville\b/ }).fill("Cotonou");
+    await address.getByRole("textbox", { name: /^Quartier/ }).fill("Akpakpa");
+    await address.getByRole("textbox", { name: /^Rue/ }).fill("Rue 5, maison bleue");
+    await address.getByRole("button", { name: "Continuer vers le paiement" }).click();
+    await expect(page.getByRole("heading", { level: 2, name: "Cette demande est réglée" })).toBeVisible();
+    await expect(address).toHaveCount(0);
+    await expectAccessible(page);
   });
 });
 
