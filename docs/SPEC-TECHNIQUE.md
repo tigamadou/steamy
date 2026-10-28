@@ -498,6 +498,14 @@ Détail : écrans `WX01`-`WX03` (lot 1).
 | Erreurs | `{ "code": "…", "message": "…", "fields": { "<champ>": [{ "code", "message" }] } }`, message en français (D4) |
 | Téléphones, montants | E.164 ; entiers en FCFA |
 
+**Statuts dans le contrat.** Le statut HTTP de chaque code est défini une seule fois, dans `apps/api/libs/errors.py`
+(`CATALOG`). `openapi.yaml` déclare sur chaque opération les statuts génériques (400, 401, 403, 404 sur un chemin
+paramétré, 429, 500) et, pour les erreurs métier propres à une opération (402, 404, 409, 410…), ceux de la table
+`OPERATION_ERRORS` de `apps/api/libs/schema.py` : le statut vient du catalogue, la description de la réponse liste les
+codes possibles (`Codes : ORDER_ALREADY_PAID, PAYMENT_IN_PROGRESS.`). Un nouveau code métier se déclare dans `CATALOG`
+(avec son statut) puis dans `OPERATION_ERRORS` des opérations qui peuvent le renvoyer, et `make openapi` régénère le
+contrat. Les tests de contrat du front s'appuient sur ces statuts plutôt que de les recopier.
+
 Catalogue des codes métier (extensible, chaque code a son message français) :
 
 | Domaine | Codes |
