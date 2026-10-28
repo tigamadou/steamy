@@ -133,7 +133,10 @@ export const SCENARIOS_DEMANDE_PAIEMENT = {
   }),
   // Demande close (lecture seule)
   "demande-payee": scenario({ request: closed("paid", { orderReference: "CMD-501" }) }),
-  "demande-payee-kit": scenario({ request: kitRequest({ status: "paid", decidedAt: DECIDED_AT, orderReference: "CMD-501" }) }),
+  "demande-payee-kit": scenario({
+    request: kitRequest({ status: "paid", decidedAt: DECIDED_AT, orderReference: "CMD-501" }),
+    orders: [{ order: kitOrder("CMD-501", ZONES[0], SAVED_ADDRESS, undefined, { status: "paid", paidAt: DECIDED_AT }) }],
+  }),
   "demande-refusee": scenario({ request: closed("declined", { declineReason: "On en reparle après les examens." }) }),
   "demande-refusee-sans-motif": scenario({ request: closed("declined") }),
   "demande-expiree": scenario({ request: closed("expired") }),

@@ -7768,8 +7768,12 @@ paths:
       security:
       - cookieAuth: []
       responses:
-        '204':
-          description: No response body
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
         '401':
           content:
             application/json:

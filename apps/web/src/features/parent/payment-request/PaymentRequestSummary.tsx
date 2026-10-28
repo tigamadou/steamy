@@ -32,11 +32,12 @@ const KINDS = {
   event: { icon: "📅", label: "Événement" },
 } as const;
 
-/** Libellé du montant : à payer tant que la demande est ouverte, « demandé » une fois close ; hors livraison pour un kit
- * sans commande (frais de zone encore inconnus). */
+/** Libellé du montant : à payer tant que la demande est ouverte, « payé » quand la commande réglée est relue,
+ * « demandé » une fois close ; hors livraison pour un kit sans commande (frais de zone encore inconnus). */
 export function amountLabel(kind: PaymentRequest["kind"], state: ScreenState, hasOrder: boolean): string {
   const closed =
     state === "paid" || state === "refunded" || state === "declined" || state === "expired" || state === "cancelled";
+  if (state === "paid" && hasOrder) return "Total payé";
   const base = closed ? "Montant demandé" : "Total à payer";
   return kind === "kit" && !hasOrder ? `${base} hors livraison` : base;
 }

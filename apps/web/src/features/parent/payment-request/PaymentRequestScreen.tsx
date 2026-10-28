@@ -42,6 +42,11 @@ export async function PaymentRequestScreen({ params }: { params: Promise<{ id: s
   const requiredKit = course?.data?.requiredKit ?? null;
 
   if (request.status !== "pending") {
+    // Un kit réglé est relu avec sa commande : montants figés par le serveur, livraison comprise
+    const paidOrder =
+      request.kind === "kit" && request.status === "paid" && request.orderReference
+        ? await api.GET("/api/payments/orders/{reference}/", { params: { path: { reference: request.orderReference } } })
+        : null;
     return (
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
         <PaymentRequestSummary
@@ -49,6 +54,7 @@ export async function PaymentRequestScreen({ params }: { params: Promise<{ id: s
           child={child}
           state={request.status}
           requiredKit={requiredKit}
+          order={paidOrder?.data ?? null}
         />
         <ClosedRequest request={request} firstName={child.firstName} />
       </div>

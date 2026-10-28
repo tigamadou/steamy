@@ -184,7 +184,7 @@ class CartItemView(APIView):
         item.save(update_fields=["quantity"])
         return Response(cart_body(request.user))
 
-    @extend_schema(responses=CartSerializer)
+    @extend_schema(responses={200: CartSerializer})
     def delete(self, request, pk):
         self.item(request, pk).delete()
         return Response(cart_body(request.user))

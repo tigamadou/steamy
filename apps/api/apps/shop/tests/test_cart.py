@@ -53,7 +53,9 @@ def test_add_update_and_remove_kits(shopper):
 
     updated = client.patch(f"{ITEMS}{item['id']}/", {"quantity": 1}, format="json").json()
     assert updated["subtotal"] == 35000
-    assert client.delete(f"{ITEMS}{item['id']}/").json()["items"] == []
+    removed = client.delete(f"{ITEMS}{item['id']}/")
+    assert removed.status_code == 200  # le contrat annonce 200 avec le panier, pas 204
+    assert removed.json()["items"] == []
 
 
 @pytest.mark.parametrize(
