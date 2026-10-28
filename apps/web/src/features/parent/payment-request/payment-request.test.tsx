@@ -107,6 +107,8 @@ describe("messages de WPD15", () => {
     expect(amountLabel("kit", "pending", false)).toBe("Total à payer hors livraison");
     expect(amountLabel("kit", "pending", true)).toBe("Total à payer");
     expect(amountLabel("course", "declined", false)).toBe("Montant demandé");
+    expect(amountLabel("kit", "paid", true)).toBe("Total payé");
+    expect(amountLabel("kit", "paid", false)).toBe("Montant demandé hors livraison");
   });
 });
 
