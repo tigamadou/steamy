@@ -538,11 +538,12 @@ def test_late_payment_is_refunded_when_the_kit_is_gone(parent):
         ),
     )
     order.refresh_from_db()
-    assert order.status == Order.Status.REFUNDED
+    assert order.status == Order.Status.CANCELLED
     refund_ = Refund.objects.get()
-    assert refund_.payment == payment
+    assert refund_.payment == payment and refund_.processed is False
     notification = Notification.objects.get(user=parent, type="order")
-    assert notification.title == "Paiement remboursé"
+    assert notification.title == "Remboursement en cours"
+    assert "sera remboursé" in notification.message
 
 
 def test_late_payment_of_a_course_is_honoured(course_order):
