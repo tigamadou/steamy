@@ -25,7 +25,9 @@ permissions:
 jobs:
   changes:
     runs-on: ubuntu-latest
+    # Les permissions d'un job remplacent celles du workflow : contents est nécessaire au checkout (dépôt privé)
     permissions:
+      contents: read
       pull-requests: read
     outputs:
       api: ${{ steps.filter.outputs.api }}
