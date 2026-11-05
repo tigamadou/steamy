@@ -47,13 +47,13 @@ autorité ; documentation FedaPay de référence en annexe). Plan du chantier `p
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 1
+Statut : 🟡 en cours · Prochaine tâche : 2
 
-- [ ] **Tâche 1** Réglages FedaPay et réseau `TG:togocel` désactivé · `feature/paiement-fedapay-fedapay`
-  - [ ] Test : table `FEDAPAY_MODES` par défaut et mode du bac à sable
-  - [ ] `settings.py` : `TG:togocel`, `FEDAPAY_SANDBOX_MODE`
-  - [ ] Test : réseau `TG:togocel` désactivé, migration idempotente et non destructive
-  - [ ] `data.py` + migration de données `referentials`
+- [x] **Tâche 1** Réglages FedaPay et réseau `TG:togocel` désactivé · `feature/paiement-fedapay-fedapay`
+  - [x] Test : table `FEDAPAY_MODES` par défaut et mode du bac à sable
+  - [x] `settings.py` : `TG:togocel`, `FEDAPAY_SANDBOX_MODE`
+  - [x] Test : réseau `TG:togocel` désactivé, migration idempotente et non destructive
+  - [x] `data.py` + migration de données `referentials`
 - [ ] **Tâche 2** Mode, `supports`, numéro, `merchant_reference`, `custom_metadata`, erreurs avec identifiant
   - [ ] Tests : sandbox (`momo_test`, 8 derniers chiffres), live (table, `togocel`), `supports`
   - [ ] Tests : corps de `POST /transactions`, erreurs après création (définitive / temporaire) avec `provider_tx_id`

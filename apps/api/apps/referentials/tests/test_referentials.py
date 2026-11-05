@@ -100,3 +100,44 @@ def test_labels():
     benin = Country.objects.get(code="BJ")
     assert str(Locality(country=benin, city="Cotonou")) == "Cotonou"
     assert str(Locality(country=benin, city="Cotonou", district="Akpakpa")) == "Cotonou, Akpakpa"
+
+
+def load_togocel_migration():
+    import importlib
+
+    return importlib.import_module("apps.referentials.migrations.0004_reseau_togocel").load
+
+
+def test_togocel_network_exists_but_is_disabled():
+    network = PaymentNetwork.objects.get(country="TG", code="togocel")
+    assert network.label == "Mixx By Yas" and network.enabled is False
+    assert APIClient().get(f"{BASE}payment-networks/?country=TG").json() == []
+    codes = [n["code"] for n in APIClient().get(f"{BASE}payment-networks/?country=BJ").json()]
+    assert codes == ["mtn", "moov", "celtiis"]
+
+
+def test_togocel_migration_recreates_the_missing_row():
+    from django.apps import apps
+
+    PaymentNetwork.objects.filter(country="TG", code="togocel").delete()
+    load_togocel_migration()(apps, None)
+    assert PaymentNetwork.objects.get(country="TG", code="togocel").enabled is False
+
+
+def test_togocel_migration_does_not_touch_existing_rows():
+    from django.apps import apps
+
+    PaymentNetwork.objects.filter(country="TG", code="togocel").update(enabled=True)
+    PaymentNetwork.objects.filter(country="BJ", code="celtiis").update(enabled=False)
+    load_togocel_migration()(apps, None)
+    assert PaymentNetwork.objects.get(country="TG", code="togocel").enabled is True
+    assert PaymentNetwork.objects.get(country="BJ", code="celtiis").enabled is False
+
+
+def test_togocel_migration_does_nothing_without_the_country():
+    from django.apps import apps
+
+    PaymentNetwork.objects.filter(country="TG").delete()
+    Country.objects.filter(code="TG").delete()
+    load_togocel_migration()(apps, None)
+    assert not PaymentNetwork.objects.filter(code="togocel").exists()
