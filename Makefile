@@ -2,8 +2,14 @@
 # Dans le worktree d'un agent, `.agent.env` (écrit par `make agent-up`) pose AGENT_LOT et les numéros Redis.
 -include .agent.env
 
+ifdef AGENT_LOT
+COMPOSE := docker compose -p steamy-ag-$(AGENT_LOT) -f compose.yml -f compose.agent.yml
+else
 COMPOSE := docker compose
+endif
 API     := $(COMPOSE) run --rm api
+# Tests comme en CI : DJANGO_ENV=test (api.env pose dev, ce qui change des pages testées)
+API_TEST := $(COMPOSE) run --rm -e DJANGO_ENV=test api
 WEB     := $(COMPOSE) run --rm --no-deps web sh -c
 # Stack des parcours Playwright : projet séparé (par lot d'agent), réseau d'infra et image web propres, sans port publié (cohabite avec `make up`)
 E2E_P   := steamy-e2e$(if $(AGENT_LOT),-$(AGENT_LOT))
@@ -14,7 +20,7 @@ E2E_BUILD ?= --build
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
         test-api coverage-api lint-api fix-api psql flower clean openapi lint-web typecheck-web \
-        test-web coverage-web e2e e2e-down agent-up agent-down agent-status
+        test-web coverage-web e2e e2e-down agent-up agent-down agent-status lint typecheck generate check-generated migrations-check test-cible
 
 help: ## Affiche cette aide
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -50,6 +56,16 @@ flower: ## Lance Flower (supervision Celery) sur http://localhost:5555
 clean: ## ⚠️ Arrête la stack ET supprime toutes les données locales
 	$(COMPOSE) --profile tools down -v
 
+# --- Cibles standard (routées vers l'environnement d'agent si .agent.env est présent) ---
+lint: ## Lint API (ruff) et front (eslint) selon le profil
+	@COMPOSE="$(COMPOSE)" scripts/cibles.sh lint
+
+typecheck: ## Vérification TypeScript (profils web, complet et stack principale)
+	@COMPOSE="$(COMPOSE)" scripts/cibles.sh typecheck
+
+test-cible: ## Tests ciblés : make test-cible T="apps/api/apps/core apps/web/src/..."
+	@COMPOSE="$(COMPOSE)" scripts/cibles.sh test-cible $(T)
+
 # --- Environnements d'agent (docs/infra/agents.md) --------------------------------
 agent-up: ## Environnement d'agent : make agent-up LOT=<lot> PROFIL=<web|api|complet> BASE=<branche>
 	@test -n "$(LOT)" -a -n "$(PROFIL)" -a -n "$(BASE)" || { echo "Usage : make agent-up LOT=<lot> PROFIL=<web|api|complet> BASE=<branche>"; exit 2; }
@@ -79,10 +95,10 @@ seed: ## Charge les fixtures et le jeu de démonstration (comptes : apps/api/fix
 	$(API) sh -c "python manage.py loaddata fixtures/admin.json fixtures/mail.json && python manage.py seed_demo $(SEED_ARGS)"
 
 test-api: ## Lance les tests de l'API
-	$(API) pytest
+	$(API_TEST) pytest
 
 coverage-api: ## Tests de l'API + couverture 100 % exigée sur le code modifié (diff-cover)
-	$(API) sh -c "pytest --cov --cov-report=term --cov-report=xml:coverage.xml"
+	$(API_TEST) sh -c "pytest --cov --cov-report=term --cov-report=xml:coverage.xml"
 	docker run --rm -v "$(CURDIR):/repo" -w /repo/apps/api python:3.11.13-bookworm sh -c \
 	  "git config --global --add safe.directory /repo && pip install -q --root-user-action=ignore diff-cover==10.6.0 \
 	   && diff-cover coverage.xml --compare-branch=origin/development --fail-under=100"
@@ -94,9 +110,16 @@ fix-api: ## Corrige automatiquement le lint et formate l'API
 	$(API) sh -c "ruff check --fix . && ruff format ."
 
 # --- Contrat front/back -----------------------------------------------------
-openapi: ## Régénère openapi.yaml + les types TS du client (à committer)
-	$(API) python manage.py spectacular --file openapi.yaml --validate --fail-on-warn
-	$(WEB) "corepack enable && pnpm api-client:generate"
+generate: ## Régénère openapi.yaml + les types TS du client (à committer)
+	@COMPOSE="$(COMPOSE)" scripts/cibles.sh generate
+
+openapi: generate ## Alias de generate
+
+check-generated: ## Vérifie que openapi.yaml et schema.d.ts sont à jour (sans git, en conteneur)
+	@COMPOSE="$(COMPOSE)" scripts/cibles.sh check-generated
+
+migrations-check: ## Vérifie qu'aucune migration Django n'est à générer
+	@COMPOSE="$(COMPOSE)" scripts/cibles.sh migrations-check
 
 # --- Front Next.js ------------------------------------------------------------
 lint-web: ## Lint du front

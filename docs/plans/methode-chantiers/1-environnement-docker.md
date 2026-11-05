@@ -19,7 +19,7 @@
 
 ## Avancement
 
-Statut : 🟦 en cours · Prochaine tâche : 1.4
+Statut : 🟦 en cours · Prochaine tâche : 1.5
 
 - [x] **1.1** Réseau d'infrastructure partagé et nom de projet · `compose.yml`, `compose.e2e.yml`
   - [x] Réseau `steamy-infra`, `name: steamy`, services d'infra attachés
@@ -31,9 +31,9 @@ Statut : 🟦 en cours · Prochaine tâche : 1.4
   - [x] Préalables, lot valide, trap d'échec, worktree
   - [x] Base, buckets, numéros Redis, `.agent.env`
   - [x] Budget mémoire, `down` conservatoire, `status`
-- [ ] **1.4** Cibles standard : `lint`, `typecheck`, `generate`, `check-generated`, `migrations-check`, `test-cible`
-  - [ ] `scripts/cibles.sh` (routage et garde par profil)
-  - [ ] Makefile routé vers l'agent, cibles existantes conservées
+- [x] **1.4** Cibles standard : `lint`, `typecheck`, `generate`, `check-generated`, `migrations-check`, `test-cible`
+  - [x] `scripts/cibles.sh` (routage et garde par profil)
+  - [x] Makefile routé vers l'agent, cibles existantes conservées
 - [ ] **1.5** `make coverage-diff BASE=…`
   - [ ] `scripts/coverage-diff.sh` (tests touchés + diff-cover)
   - [ ] `coverage-api`/`coverage-web` paramétrés par `BASE`
