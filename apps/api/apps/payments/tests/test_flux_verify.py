@@ -208,6 +208,13 @@ def test_transaction_naming_an_order_but_no_payment_creates_nothing():
     assert fresh(other).status == P.PENDING
 
 
+def test_transaction_without_merchant_reference_nor_known_id_creates_nothing():
+    tx = provider_tx(PaymentFactory(), merchant_reference="")
+    tx = type(tx)(**{**tx.__dict__, "provider_tx_id": "fake-sans-reference"})
+    assert apply_transaction("fake", tx) is None
+    assert AuditLog.objects.filter(action="payment.webhook_ignored").count() == 1
+
+
 # --- Montant et devise ----------------------------------------------------------------------
 
 

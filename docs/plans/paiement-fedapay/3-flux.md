@@ -63,7 +63,7 @@ autorité). Plan du chantier `paiement-fedapay`, lot 3 sur 5.
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 8
+Statut : ✅ terminé · Prochaine tâche : aucune
 
 - [x] **Tâche 1** Support de test du lot (`test_flux_support.py`) · `feature/paiement-fedapay-flux`
   - [x] Aides : transaction relue simulée, livraison d'un webhook signé, rejeu concurrent
@@ -79,9 +79,11 @@ Statut : 🟡 en cours · Prochaine tâche : 8
 - [x] **Tâche 5** Webhook : 400 seulement signature invalide / prestataire inconnu, sinon 200 (§ 5)
 - [x] **Tâche 6** Réconciliation : 10 min, expiration 24 h, rattrapage 48 h, erreur isolée (§ 6)
 - [x] **Tâche 7** Contrat OpenAPI et documentation de code
-- [ ] **Tâche 8** Vérification du lot
+- [x] **Tâche 8** Vérification du lot
 
 > Reprise : (vide)
+>
+> Signalé au superviseur (tests hors du lot cassés par conception, non modifiés) : `test_providers.py` (3 tests : webhook du faux prestataire sans `Payment`, plus d'orphelin créé), `test_socle_verify.py::test_verify_pending_changes_nothing` (attend `payload` nul, l'ADR l'écrit à chaque relecture), `apps/events/tests/test_admin_wad12.py::test_a_payment_after_a_staff_refusal_is_refunded_never_accepted` (attend `refunded`, l'ADR laisse la commande `cancelled` tant que la Finance n'a pas remboursé).
 
 Statuts : ⬜ à faire · 🟡 en cours · ✅ terminé. Cocher une case **seulement après tests verts**. Interruption en cours
 de tâche : cocher ce qui est fini et noter ici `> Reprise :` l'étape en cours, les fichiers touchés et la prochaine

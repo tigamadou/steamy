@@ -199,6 +199,13 @@ def test_payment_settled_meanwhile_is_not_touched():
     assert checkout.reconcile_payment(payment.pk) is False
 
 
+def test_expiry_and_lost_initiation_leave_a_payment_settled_meanwhile_alone():
+    payment = aged(hours=25, remote=PaymentStatus.SUCCEEDED, status=P.SUCCEEDED)
+    assert checkout.expire_payment(payment.pk) is False
+    assert checkout.lose_initiation(payment.pk) is False
+    assert fresh(payment).status == P.SUCCEEDED
+
+
 # --- Concurrence avec le webhook ------------------------------------------------------------
 
 
