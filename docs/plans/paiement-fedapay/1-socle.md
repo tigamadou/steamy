@@ -33,15 +33,15 @@ autorité). Plan du chantier `paiement-fedapay`, lot 1 sur 5.
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 2
+Statut : 🟡 en cours · Prochaine tâche : 3
 
 - [x] **Tâche 1** Champs `Payment` et `Refund`, `merchant_reference` automatique, migrations · `feature/paiement-fedapay-socle`
   - [x] Tests des modèles et de la migration de données, vus échouer
   - [x] Modèles, `Payment.save()`, `FailureCode.EXPIRED`
   - [x] Migrations `0014` (champs + remplissage) et `0015` (contrainte d'unicité), `make migrations-check`
-- [ ] **Tâche 2** Fabriques pour tous les lots
-  - [ ] `PaymentFactory` (traits), `RefundFactory`, traits `OrderFactory`, aide `fake_transaction`
-  - [ ] Tests des fabriques
+- [x] **Tâche 2** Fabriques pour tous les lots
+  - [x] `PaymentFactory` (traits), `RefundFactory`, traits `OrderFactory` ; `fake_transaction` reste à la tâche 3
+  - [x] Tests des fabriques
 - [ ] **Tâche 3** Contrat prestataire, faux prestataire, FedaPay minimal, `Charge` dans `initiate_payment`
   - [ ] Tests de `test_providers.py` adaptés et nouveaux, vus échouer
   - [ ] `base.py`, `__init__.py`, `fake.py`, `fedapay.py`, `checkout.initiate_payment`
