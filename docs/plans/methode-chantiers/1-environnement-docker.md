@@ -40,6 +40,10 @@ Statut : ✅ terminé
 - [x] **1.6** `make e2e-fixtures` en conteneur et `make e2e` par lot
 - [x] **1.7** Mesures mémoire et `docs/infra/agents.md`
 - [x] **1.8** Vérification du lot
+- [x] **1.9** Corrections après relecture et tests des scripts · 2026-11-05 · `scripts/tests/`, `make test-scripts`, `make shellcheck`
+  - [x] Reprise Redis, codes 75 (budget, numéros), `down` sûr (numéros validés, `AGENT_ACTIF=0` garanti, jeton rendu)
+  - [x] `coverage-diff` (rapports supprimés, « No lines » vérifié, code 3 autre profil, arguments sans interpolation)
+  - [x] Jeton e2e repris atomiquement, avertissements, longueur du lot, doc d'exploitation
 
 > Reprise : (à renseigner si la session est interrompue)
 

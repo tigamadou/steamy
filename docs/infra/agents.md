@@ -38,6 +38,17 @@ flowchart LR
 - **Aucun port n'est publié** : tout se joue dans les réseaux Docker (Playwright tourne lui aussi en conteneur).
 - **Convention de nommage** : dans un environnement d'agent, un service applicatif s'adresse par `<service>-<lot>`
   (`api-lot1`), jamais par son nom nu (`api`) : plusieurs agents portent le même alias `api` sur `steamy-infra`.
+  **Ne jamais écrire d'URL avec le nom de service nu** (`http://api:8000`, `http://web:3000`) dans un test, un
+  fichier d'environnement ou une commande : elle pourrait joindre l'API ou le front d'un autre lot. Les URL internes
+  d'un lot sont posées par `compose.agent.yml`.
+- **Stack principale** : elle se lance **toujours depuis le dépôt principal** (`make up` dans `steamy/`, jamais depuis
+  un worktree). Ne jamais supprimer un worktree depuis lequel `steamy` a été montée : ses conteneurs gardent ce dossier
+  comme répertoire de travail (`agent-up` avertit quand c'est le cas). **`make down` ou `make restart` sur la stack
+  principale coupe l'infrastructure de tous les lots actifs** : les arrêter avant (`make agent-down`) ou les reprendre
+  après (`make agent-up`, idempotent).
+- **PostgreSQL partagé en superutilisateur** : tous les lots se connectent avec le même rôle (`steamy`), qui peut lire
+  et supprimer les bases des autres. Risque accepté en développement : l'isolation protège des collisions, pas de la
+  malveillance.
 
 ## Isolation des données
 
@@ -49,6 +60,9 @@ flowchart LR
 | Redis | deux numéros de base dédiés (cache et broker Celery), attribués dans `2..15` sous verrou |
 | E-mails | Mailpit partagé ; les tests pytest utilisent la boîte mémoire de Django ; les e2e de la vraie stack ont **leur propre** Mailpit |
 | Variable | `AGENT_LOT=<lot>` dans tous les conteneurs de l'agent |
+
+Le nom du lot fait **46 caractères au plus** : `test_steamy_<lot>_gwNN` et `steamy-<lot>-test` doivent tenir dans les
+63 caractères d'un identifiant PostgreSQL et d'un nom de bucket.
 
 Sans lot (stack principale), la base de tests est `test_steamy[_gwN]` : c'est ce que vérifie le garde-fou du plan 2.
 
@@ -72,13 +86,14 @@ budget agents = mémoire Docker − MAIN_STACK_MO − 2048 Mo (marge)
 ```
 
 `scripts/agent-env.sh up` refuse de démarrer un lot si la somme des coûts des profils déjà réservés plus celui du
-profil demandé dépasse le budget (message chiffré, aucune option pour contourner). `scripts/agent-env.sh budget`
+profil demandé dépasse le budget (message chiffré, aucune option pour contourner), avec le **code de sortie 75**. `scripts/agent-env.sh budget`
 imprime `budget_mo=<n> utilise_mo=<n> libre_mo=<n>`.
 
 **Jeton e2e** : au plus **1** e2e sur la vraie stack à la fois (`make e2e`). Le jeton est un verrou dans le dépôt Git
 commun (`e2e.lock`), pris avant la construction de l'image et rendu en fin de `make e2e` ou par `make e2e-down` ; un
 second `make e2e` est refusé en nommant le projet occupant. Un verrou orphelin de plus de 30 minutes dont les conteneurs
-ont disparu est repris.
+ont disparu est repris. La reprise est atomique (le verrou périmé est déplacé par `mv`, un seul candidat gagne), puis recréé. Lancer
+`make e2e-down` **en fin de lot** pour rendre le jeton et supprimer la stack e2e ; `agent-down` rend toujours le jeton du lot.
 
 ## Cibles `make`
 
@@ -91,7 +106,7 @@ ses conteneurs).
 | `make agent-down LOT=<lot>` | Arrête les conteneurs et volumes **de l'agent** | — |
 | `make agent-status` | Environnements, mémoire courante, budget | — |
 | `make test-cible T="<chemins>"` | Tests ciblés : `apps/api/…` (pytest), `apps/web/…` ou `packages/…` (Vitest) | selon les chemins |
-| `make coverage-diff BASE=<branche>` | Rejoue avec couverture les tests des apps Django et fichiers front touchés, puis diff-cover à 100 % contre la base | l'autre moitié du diff est ignorée avec un avertissement |
+| `make coverage-diff BASE=<branche>` | Rejoue avec couverture les tests des apps Django et fichiers front touchés, puis diff-cover à 100 % contre la base | une moitié du diff relevant de l'autre profil n'est pas vérifiée : **code 3** avec message (`COVERAGE_IGNORE_AUTRE_PROFIL=1` pour l'accepter) |
 | `make lint` | ruff (API) et eslint (front) | api : ruff ; web : eslint |
 | `make typecheck` | TypeScript (web + api-client) | web, complet |
 | `make generate` | Régénère `openapi.yaml` et `schema.d.ts` | api, complet |
@@ -99,6 +114,11 @@ ses conteneurs).
 | `make migrations-check` | `makemigrations --check --dry-run` | api, complet |
 | `make e2e-fixtures` | Parcours Playwright sur fixtures (front de production + fausse API), en conteneur ; `PW_ARGS=…` pour filtrer | web, complet |
 | `make e2e` | Parcours Playwright sur la vraie stack, projet `steamy-e2e-<lot>` avec sa base et son Mailpit jetables | complet |
+| `make test-scripts` | Tests bats de `scripts/agent-env.sh`, `cibles.sh` et `coverage-diff.sh` (faux `docker` et `git`, en conteneur `alpine`, rien n'est démarré) | tous |
+| `make shellcheck` | shellcheck (conteneur) sur `scripts/*.sh` | tous |
+
+Une cible lancée depuis un worktree dont l'environnement est arrêté (`AGENT_ACTIF=0` après `agent-down`) est refusée :
+`make agent-up` pour le reprendre.
 
 Les cibles historiques (`up`, `down`, `test-api`, `coverage-api`, `lint-api`, `openapi`, `e2e-down`, …) restent
 disponibles. `coverage-api` et `coverage-web` acceptent `BASE=` (défaut `origin/development`).
@@ -126,10 +146,20 @@ disponibles. `coverage-api` et `coverage-web` acceptent `BASE=` (défaut `origin
 3. Travail dans `../steamy-wt-<lot>` avec les cibles ci-dessus.
 4. `make agent-down LOT=<lot>` : conteneurs et volumes de l'agent supprimés, Redis du lot vidé ; **sont conservés** le
    worktree, la branche, les bases `steamy_<lot>` et `test_steamy_<lot>*`, les buckets et `.agent.env` (la reprise
-   retrouve les mêmes numéros Redis). Le volume partagé `steamy_pnpm_store` n'est jamais touché.
+   retrouve les mêmes numéros Redis, sauf si un autre lot les a pris entre-temps : réattribution annoncée). Le volume partagé `steamy_pnpm_store` n'est jamais touché.
 5. Nettoyage final, à la main, une fois le lot fusionné : `git worktree remove --force ../steamy-wt-<lot>`,
    `git branch -d <branche>`, `DROP DATABASE` des bases du lot, suppression des buckets (la commande exacte est
    affichée par `agent-down`).
+
+## Codes de sortie
+
+| Code | Sens |
+| --- | --- |
+| 0 | succès |
+| 1 | erreur (prérequis, entrée invalide, conteneurs en échec) |
+| 2 | usage |
+| **75** | **pas de place, réessayer plus tard** : budget mémoire dépassé, ou plus de numéro de base Redis libre (`agent-up`) |
+| 3 | `coverage-diff` : une moitié du diff relève de l'autre profil et n'a pas été vérifiée |
 
 ## Dépannage
 
@@ -144,6 +174,8 @@ disponibles. `coverage-api` et `coverage-web` acceptent `BASE=` (défaut `origin
 | Redis à purger | `agent-down` vide les deux numéros du lot ; à la main : `redis-cli -n <n> FLUSHDB` dans le conteneur `redis` |
 | OOM, timeouts | Machine chargée (`uptime`) : rejouer le fichier seul avant de conclure à un bug |
 | 404 HTML sur une route existante du `web` | Redémarrer le conteneur web de l'agent |
+| 429 dans l'e2e complet (hors lot) | Lire le champ `detail` des réponses 429 : il dit quel plafond est atteint. Les compteurs Redis de l'e2e **survivent entre deux runs** (ils ne sont vidés qu'à `e2e-down`) : relancer `make e2e-down` puis `make e2e`, ou purger les clés du plafond concerné |
+| Reprise d'un lot : « numéros Redis réattribués » | Normal : sa paire mémorisée avait été prise par un autre lot actif ; `.agent.env` est mis à jour |
 
 ---
 
