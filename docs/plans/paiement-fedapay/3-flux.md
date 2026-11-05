@@ -541,4 +541,4 @@ suivant ; les erreurs du prestataire sont de simples avertissements) :
 
 ## Écarts
 
-- Tests périmés par conception (ADR 0008 § 5, § 7, § 8), mis à jour hors lot sur arbitrage du lead dev (#210) : trois tests de `test_providers.py` (le webhook ne crée plus de `Payment`), `test_socle_verify.py::test_verify_pending_changes_nothing` (payload écrit à chaque relecture) et `test_admin_wad12.py::test_a_payment_after_a_staff_refusal_is_refunded_never_accepted` (commande `cancelled` jusqu'au remboursement effectif). Aucun code de production modifié.
+- Tests périmés par conception (ADR 0008 § 5, § 7, § 8), mis à jour hors lot sur arbitrage du lead dev (#210) : trois tests de `test_providers.py` (le webhook ne crée plus de `Payment`), `test_socle_verify.py::test_verify_pending_changes_nothing` (payload écrit à chaque relecture) et `test_admin_wad12.py::test_a_payment_after_a_staff_refusal_is_refunded_never_accepted` (commande `cancelled` jusqu'au remboursement effectif). Seuls les tests sont modifiés par cet arbitrage ; le retrait de `WebhookRejected` de `apps/api/apps/payments/backoffice_api.py` est un correctif de production lié à l'intégration du lot fedapay.
