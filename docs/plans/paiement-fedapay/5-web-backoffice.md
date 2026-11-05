@@ -79,7 +79,7 @@ Statut : ⬜ à faire · Prochaine tâche : 1
 - [x] **Tâche 5** Écran Remboursements : à traiter / traités, « Marquer comme remboursé »
   - [x] `RefundsTable`, `ProcessRefundModal` et leurs tests
   - [x] Page `/backoffice/remboursements` et son test
-- [ ] **Tâche 6** Vue d'ensemble : « À traiter » suit le chemin web
+- [x] **Tâche 6** Vue d'ensemble : « À traiter » suit le chemin web
 - [ ] **Tâche 7** e2e sur fixtures, contrôle visuel, SPEC-ECRANS (WAD11 et nouvelles lignes)
 - [ ] **Tâche 8** Vérification du lot
 

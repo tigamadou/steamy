@@ -28,11 +28,13 @@ export const REPORT_STATUS = {
 /** Entrées connues de « À traiter » ; un type ajouté côté API s'affiche avec son seul libellé. */
 const TODO_KINDS: Record<string, { icon: IconName; text: string }> = {
   consents_pending: { icon: "lock", text: "Suivi des demandes adressées aux parents" },
+  payments_failed: { icon: "phone", text: "Paiements à examiner" },
+  refunds_pending: { icon: "arrow-left", text: "Remboursements à solder" },
 };
 
 export type OverviewProps = {
   overview: OverviewData;
-  /** URL publique de l'API : « À traiter » ouvre les listes de l'admin Django. */
+  /** URL publique de l'API : les entrées « À traiter » sans écran web ouvrent la liste filtrée de l'admin Django. */
   apiUrl: string;
   /** L'utilisateur peut ouvrir l'Impact Tracker (Finance, Super-admin). */
   canOpenImpact: boolean;
@@ -150,34 +152,44 @@ function ReportCard({ report, canOpen }: { report: Report; canOpen: boolean }) {
 function TodoCard({ todo, apiUrl }: { todo: OverviewData["todo"]; apiUrl: string }) {
   return (
     <section aria-labelledby="overview-todo" className={CARD}>
-      <SectionHead id="overview-todo" title="À traiter" sub="Files d'attente de vos groupes, dans l'admin Django" />
+      <SectionHead id="overview-todo" title="À traiter" sub="Files d'attente de vos groupes" />
       {todo.length === 0 ? (
         <p className="m-0 text-sm font-semibold text-ink-600">Rien à traiter pour vos groupes.</p>
       ) : (
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {todo.map((item) => {
             const kind = TODO_KINDS[item.kind];
+            const className = cx(
+              "flex items-center gap-3 rounded-xl border border-ink-100 bg-ink-50 px-3.5 py-3 text-ink-900 no-underline hover:border-ink-300",
+              FOCUS,
+            );
+            const content = (
+              <>
+                <span aria-hidden className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface text-ink-700">
+                  <Icon name={kind?.icon ?? "eye"} size={16} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[13px] font-extrabold">{item.label}</span>
+                  {kind && <span className="block text-xs font-semibold text-ink-600">{kind.text}</span>}
+                </span>
+                <span className="text-xl font-black tabular-nums">
+                  <span className="sr-only"> : </span>
+                  {formatNumber(item.count)}
+                </span>
+              </>
+            );
             return (
               <li key={item.kind}>
-                <a
-                  href={adminPathUrl(apiUrl, item.adminPath)}
-                  className={cx(
-                    "flex items-center gap-3 rounded-xl border border-ink-100 bg-ink-50 px-3.5 py-3 text-ink-900 no-underline hover:border-ink-300",
-                    FOCUS,
-                  )}
-                >
-                  <span aria-hidden className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface text-ink-700">
-                    <Icon name={kind?.icon ?? "eye"} size={16} />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[13px] font-extrabold">{item.label}</span>
-                    {kind && <span className="block text-xs font-semibold text-ink-600">{kind.text}</span>}
-                  </span>
-                  <span className="text-xl font-black tabular-nums">
-                    <span className="sr-only"> : </span>
-                    {formatNumber(item.count)}
-                  </span>
-                </a>
+                {/* Un écran du back-office, sinon la liste filtrée de l'admin Django */}
+                {item.path ? (
+                  <Link href={item.path} className={className}>
+                    {content}
+                  </Link>
+                ) : (
+                  <a href={adminPathUrl(apiUrl, item.adminPath)} className={className}>
+                    {content}
+                  </a>
+                )}
               </li>
             );
           })}
