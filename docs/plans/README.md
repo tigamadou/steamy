@@ -179,3 +179,9 @@ Les URL sont en français, avec un *route group* et un layout par espace :
 - **Paramètres d'URL partagés.** WL24 : `/aide?sujet=<sujet>#contact` (`question`, `paiement`, `livraison`,
   `changement-parent`, `candidature`, `autre`) ; « Rejoindre l'équipe » → `/aide?sujet=candidature#contact`.
 - **Pages publiques en cache.** Elles utilisent un client API anonyme, ce qui permet de les mettre en cache.
+
+## Chantiers (méthode ADR 0007)
+
+Les **nouveaux chantiers** suivent l'[ADR 0007](../adr/0007-methode-chantiers-paralleles.md) et le skill `chantier`
+(`.claude/skills/chantier/`) : un plan par lot dans `docs/plans/<slug>/<n>-<lot>.md`, avec un `README.md` du chantier
+(graphe et tableau de bord). Les plans existants (`LOT-*`, `PLAN-API`, `docs/tests/plans/`) restent au format actuel.

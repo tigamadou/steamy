@@ -25,7 +25,7 @@
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 7
+Statut : 🟡 en cours · Prochaine tâche : 8
 
 - [x] **Tâche 1** Script de périmètre et ses tests · `feature/methode-chantiers-3`
   - [x] Tests bats écrits et rouges
@@ -37,7 +37,7 @@ Statut : 🟡 en cours · Prochaine tâche : 7
 - [x] **Tâche 4** Les sept agents `chantier-*`
 - [x] **Tâche 5** Gabarit du superviseur
 - [x] **Tâche 6** Skill `chantier` (SKILL.md)
-- [ ] **Tâche 7** Adaptateur : `CLAUDE.md` racine, `.claude/chantier.projet.md`, `docs/plans/README.md`
+- [x] **Tâche 7** Adaptateur : `CLAUDE.md` racine, `.claude/chantier.projet.md`, `docs/plans/README.md`
 - [ ] **Tâche 8** Ligne `include` dans le `Makefile` (point de fusion avec le lot 1)
 - [ ] **Tâche 9** Vérification du lot
 
