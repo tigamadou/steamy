@@ -119,7 +119,12 @@ def test_verify_pending_changes_nothing():
     fake_transaction(payment, PaymentStatus.PENDING)
     result = checkout.verify_payment(payment)
     assert result.status == Payment.Status.PENDING
-    assert result.payload is None and result.confirmed_at is None
+    assert result.payload == {
+        "status": "pending",
+        "amount": payment.amount,
+        "currency": payment.currency,
+    }
+    assert result.confirmed_at is None
     assert result.order.status == Order.Status.PENDING
 
 

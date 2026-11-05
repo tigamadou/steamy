@@ -213,7 +213,7 @@ def test_a_payment_after_a_staff_refusal_is_refunded_never_accepted():
     app.refresh_from_db()
     order.refresh_from_db()
     assert app.status == EventApplication.Status.CANCELLED
-    assert order.status == Order.Status.REFUNDED
+    assert order.status == Order.Status.CANCELLED  # reste annulée jusqu'au remboursement effectif (ADR 0008 § 8)
     assert Refund.objects.filter(payment=payment, amount=2000).exists()
 
 
