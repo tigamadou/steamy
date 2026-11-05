@@ -191,3 +191,16 @@ jeton() { echo "$FAKE_GIT_COMMON/e2e.lock"; }
   run CI e2e-jeton-rendre
   [ "$status" -ne 0 ]
 }
+
+@test "G2d test-cible : PYTEST_XDIST et PYTEST_ARGS sont ajoutés à pytest, découpés en mots, pas au front" {
+  PYTEST_XDIST="-n auto" PYTEST_ARGS="--maxfail=0 -q" run CI test-cible apps/api/apps/core apps/web/src/lib/a.test.ts
+  [ "$status" -eq 0 ]
+  assert_call 'pytest apps/core -n auto --maxfail=0 -q'
+  refute_call 'vitest run .*-n auto'
+}
+
+@test "G2e test-cible : sans variable, pytest n'a que les chemins" {
+  run CI test-cible apps/api/apps/core
+  [ "$status" -eq 0 ]
+  assert_call 'pytest apps/core$'
+}

@@ -214,3 +214,55 @@ changes() {
   assert_call 'pytest'
   refute_call 'vitest'
 }
+
+@test "F15 PYTEST_XDIST et PYTEST_ARGS sont ajoutés à la commande pytest de l'API" {
+  changes apps/api/apps/core/models.py
+  PYTEST_XDIST="-n auto" PYTEST_ARGS="--maxfail=0" run CD feature/base
+  [ "$status" -eq 0 ]
+  assert_call 'pytest apps/core --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider -n auto --maxfail=0'
+}
+
+@test "F16 sans variable, la commande pytest de l'API est inchangée" {
+  changes apps/api/apps/core/models.py
+  run CD feature/base
+  [ "$status" -eq 0 ]
+  assert_call 'pytest apps/core --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider$'
+}
+
+@test "F10e « No lines » acceptable quand le diff front n'ajoute que des tests et une config .mts (hors couverture)" {
+  changes apps/web/src/a.test.ts apps/web/vitest.config.mts
+  FAKE_DIFFCOVER_OUT="No lines with coverage information in this diff." run CD feature/base
+  [ "$status" -eq 0 ]
+}
+
+@test "F17 COVERAGE_COMPLET : suite API complète avec couverture, jamais un sous-ensemble" {
+  changes apps/api/apps/core/models.py
+  COVERAGE_COMPLET=1 COVERAGE_PARTIE=api run CD feature/base
+  [ "$status" -eq 0 ]
+  assert_output_contains "suite complète"
+  assert_call 'pytest --cov --cov-report=xml:coverage.xml'
+  refute_call 'pytest apps/core'
+}
+
+@test "F18 COVERAGE_COMPLET : la suite tourne même si le diff ne touche aucun code" {
+  : >"$FIX/names"
+  : >"$FIX/full.diff"
+  COVERAGE_COMPLET=1 COVERAGE_PARTIE=api run CD feature/base
+  [ "$status" -eq 0 ]
+  assert_call 'pytest --cov'
+}
+
+@test "F19 COVERAGE_COMPLET côté front : vitest run complet avec couverture, pas vitest related" {
+  changes apps/web/src/a.ts
+  COVERAGE_COMPLET=1 COVERAGE_PARTIE=web run CD feature/base
+  [ "$status" -eq 0 ]
+  assert_call 'vitest run --coverage'
+  refute_call 'vitest related'
+  refute_call 'pytest'
+}
+
+@test "F20 le nombre de workers xdist du contexte est transmis au conteneur de test" {
+  changes apps/api/apps/core/models.py
+  run CD feature/base
+  assert_call '-e PYTEST_XDIST_AUTO_NUM_WORKERS api pytest'
+}
