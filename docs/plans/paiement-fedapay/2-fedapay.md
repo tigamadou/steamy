@@ -47,20 +47,20 @@ autorité ; documentation FedaPay de référence en annexe). Plan du chantier `p
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 2
+Statut : 🟡 en cours · Prochaine tâche : 3
 
 - [x] **Tâche 1** Réglages FedaPay et réseau `TG:togocel` désactivé · `feature/paiement-fedapay-fedapay`
   - [x] Test : table `FEDAPAY_MODES` par défaut et mode du bac à sable
   - [x] `settings.py` : `TG:togocel`, `FEDAPAY_SANDBOX_MODE`
   - [x] Test : réseau `TG:togocel` désactivé, migration idempotente et non destructive
   - [x] `data.py` + migration de données `referentials`
-- [ ] **Tâche 2** Mode, `supports`, numéro, `merchant_reference`, `custom_metadata`, erreurs avec identifiant
-  - [ ] Tests : sandbox (`momo_test`, 8 derniers chiffres), live (table, `togocel`), `supports`
-  - [ ] Tests : corps de `POST /transactions`, erreurs après création (définitive / temporaire) avec `provider_tx_id`
-  - [ ] Implémentation, adaptation des tests FedaPay de `test_providers.py`
-- [ ] **Tâche 3** `fetch_transaction` (enveloppe, devise, frais, statut brut)
-  - [ ] Tests : enveloppe `v1/transaction` ou racine, `currency.iso` / `currency_id`, `fees`, statuts
-  - [ ] Implémentation, retrait du `fetch_status` FedaPay
+- [x] **Tâche 2** Mode, `supports`, numéro, `merchant_reference`, `custom_metadata`, erreurs avec identifiant
+  - [x] Tests : sandbox (`momo_test`, 8 derniers chiffres), live (table, `togocel`), `supports`
+  - [x] Tests : corps de `POST /transactions`, erreurs après création (définitive / temporaire) avec `provider_tx_id`
+  - [x] Implémentation, adaptation des tests FedaPay de `test_providers.py`
+- [x] **Tâche 3** `fetch_transaction` (enveloppe, devise, frais, statut brut)
+  - [x] Tests : enveloppe `v1/transaction` ou racine, `currency.iso` / `currency_id`, `fees`, statuts
+  - [x] Implémentation, retrait du `fetch_status` FedaPay
 - [ ] **Tâche 4** Commande `manage.py fedapay_probe`
   - [ ] Tests : refus hors bac à sable, parcours complet, relecture bornée, aucune commande créée, aucun secret
   - [ ] Implémentation

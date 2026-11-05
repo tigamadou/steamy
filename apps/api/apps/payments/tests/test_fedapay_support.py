@@ -1,8 +1,7 @@
-"""Aides communes aux tests FedaPay du lot : réponses simulées, charge type, fixtures de configuration."""
+"""Aides communes aux tests FedaPay du lot : réponses simulées, charge type, configuration (les fixtures `fedapay`
+et `live` sont déclarées dans chaque fichier : `configure(settings, "sandbox" | "live")`)."""
 
 from unittest import mock
-
-import pytest
 
 from apps.payments.providers import Charge
 
@@ -41,13 +40,3 @@ def configure(settings, environment):
     settings.FEDAPAY_WEBHOOK_SECRET = WEBHOOK_SECRET
     settings.FEDAPAY_ENVIRONMENT = environment
     return settings
-
-
-@pytest.fixture
-def fedapay(settings):
-    return configure(settings, "sandbox")
-
-
-@pytest.fixture
-def live(settings):
-    return configure(settings, "live")
