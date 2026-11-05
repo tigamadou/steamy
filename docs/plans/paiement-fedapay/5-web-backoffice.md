@@ -61,11 +61,11 @@ fait autorité). Plan du chantier `paiement-fedapay`, lot 5 sur 5.
 
 Statut : ⬜ à faire · Prochaine tâche : 1
 
-- [ ] **Tâche 1** Socle web : routes, groupes, menu, formats et libellés · `feature/paiement-fedapay-web-backoffice`
-  - [ ] Lire le client régénéré et figer les noms de champs
-  - [ ] Routes `paiements`, `paiement(id)`, `remboursements` ; `PAGE_GROUPS.payments` / `refunds`
-  - [ ] Menu : entrées internes « Paiements » et « Remboursements », retrait du lien Django
-  - [ ] `lib/backoffice/payments.ts` (libellés, tons, filtres d'URL) et `formatDateTime`
+- [x] **Tâche 1** Socle web : routes, groupes, menu, formats et libellés · `feature/paiement-fedapay-web-backoffice`
+  - [x] Lire le client régénéré et figer les noms de champs
+  - [x] Routes `paiements`, `paiement(id)`, `remboursements` ; `PAGE_GROUPS.payments` / `refunds`
+  - [x] Menu : entrées internes « Paiements » et « Remboursements », retrait du lien Django
+  - [x] `lib/backoffice/payments.ts` (libellés, tons, filtres d'URL) et `formatDateTime`
 - [ ] **Tâche 2** Fausse API : endpoints, fixtures, scénarios, contrat
   - [ ] Fabriques typées et écran `ecrans/backoffice-paiements.ts`
   - [ ] Scénarios et incidents, branchement `server.ts` / `scenarios.ts`
@@ -83,7 +83,7 @@ Statut : ⬜ à faire · Prochaine tâche : 1
 - [ ] **Tâche 7** e2e sur fixtures, contrôle visuel, SPEC-ECRANS (WAD11 et nouvelles lignes)
 - [ ] **Tâche 8** Vérification du lot
 
-> Reprise : (vide)
+> Reprise : noms retenus du client régénéré : `PaymentPage {count,next,previous,results,totals{volume,count,succeeded,failed,failureRate}}`, `PaymentRow`, `PaymentDetail` (`refundable`, `attempts`, `refunds`, `auditLog`, `order`, `maskedMsisdn`, `providerFees`, `checkedAt`), `RefundPage`, `BackofficeRefund`, `RefundSummary`, `RefundProcessResult`, `Todo.path?` ; paramètres API `status,network,country,kind,from,to,q,page` et `processed`. Prochaine étape : tâche 2.
 
 Statuts : ⬜ à faire · 🟡 en cours · ✅ terminé. Cocher une case **seulement après tests verts**. Interruption en cours
 de tâche : cocher ce qui est fini et noter ici `> Reprise :` l'étape en cours, les fichiers touchés et la prochaine
