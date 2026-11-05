@@ -63,10 +63,10 @@ autorité). Plan du chantier `paiement-fedapay`, lot 3 sur 5.
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 1
+Statut : 🟡 en cours · Prochaine tâche : 2
 
-- [ ] **Tâche 1** Support de test du lot (`test_flux_support.py`) · `feature/paiement-fedapay-flux`
-  - [ ] Aides : transaction relue simulée, livraison d'un webhook signé, rejeu concurrent
+- [x] **Tâche 1** Support de test du lot (`test_flux_support.py`) · `feature/paiement-fedapay-flux`
+  - [x] Aides : transaction relue simulée, livraison d'un webhook signé, rejeu concurrent
 - [ ] **Tâche 2** Initiation : `supports`, `PAYMENT_UNAVAILABLE`, `merchant_reference`, identifiant conservé (§ 3)
   - [ ] Code d'erreur `PAYMENT_UNAVAILABLE` (503) dans `libs/errors.py`
   - [ ] `initiate_payment` réécrit
