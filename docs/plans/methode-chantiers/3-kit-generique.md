@@ -40,6 +40,7 @@ Statut : ✅ terminé · Prochaine tâche : —
 - [x] **Tâche 7** Adaptateur : `CLAUDE.md` racine, `.claude/chantier.projet.md`, `docs/plans/README.md`
 - [x] **Tâche 8** Ligne `include` dans le `Makefile` (point de fusion avec le lot 1)
 - [x] **Tâche 9** Vérification du lot (31 tests bats verts ; périmètre OK, 22 fichiers ; aucune occurrence du nom du projet dans le kit ; seuls les sept agents `chantier-*` ; 10 marqueurs du superviseur tous listés dans le skill ; relecture ADR § 1 à 10 faite)
+- [x] **Corrections après relecture** (2026-11-05) : périmètre lu depuis la base et `--no-renames` (34 tests bats verts), leads qui exécutent leurs écritures GitHub, automate des labels, rapports de passage, compteurs, battement, worktrees, correctifs, clés `stack_principale`/`notification`/`cahier_tests`
 
 > Reprise : (vide)
 

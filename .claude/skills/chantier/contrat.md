@@ -84,4 +84,11 @@ Les noms de cibles `make` ci-dessous sont ceux du contrat ; le fichier projet di
 ## Valeurs complémentaires lues dans le fichier projet
 
 En plus des neuf clés, le fichier projet donne : la commande des labels (`SLUG`, `LOTS`), la commande de périmètre
-(`LOT`, `PLAN`, `BASE`), l'emplacement des plans, la convention de commit et la liste des labels.
+(`LOT`, `PLAN`, `BASE`), l'emplacement des plans, la convention de commit et la liste des labels, ainsi que :
+
+- **`stack_principale`** : commande de démarrage et de vérification de la stack principale (le superviseur la lance
+  en préalable de chaque passage).
+- **`notification`** : moyen de notifier l'utilisateur (l'outil `PushNotification` s'il est disponible dans la
+  session, sinon une ligne `NOTIF …` dans `state.md`).
+- **`cahier_tests`** (optionnelle) : fichier du cahier de tests et forme des identifiants de scénarios ; lue par le
+  testeur et le lead QA. Absente : pas de cahier, aucun identifiant exigé.

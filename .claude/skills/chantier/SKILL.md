@@ -91,19 +91,52 @@ ne tourne que **application de bureau ouverte, machine éveillée, Docker lancé
 
 ## 8. Rôles
 
-**Seul le superviseur lance des agents** : un sous-agent ne lance personne. Les chefs d'équipe décident et écrivent
-le travail (issues, commentaires, labels, fusions) ; le superviseur l'exécute. Issues et PR sont le support durable de
-la coordination.
+**Seul le superviseur lance des agents** : un sous-agent ne lance personne. Les chefs d'équipe décident et exécutent
+eux-mêmes leurs écritures GitHub (issues, commentaires, labels, fusions) ; le superviseur lance les agents, tient le
+verrou, l'état et les compteurs (voir § 9). Issues et PR sont le support durable de la coordination.
 
 | Agent | Rôle | Interdits |
 | --- | --- | --- |
 | `chantier-surveillant` | Contrôle les agents actifs, arrête les bloqués, demande la relance | Coder, décider du contenu |
-| `chantier-lead-dev` | CI, issues de correctif, arbitrages, fusion des PR de lot, PR finale | Coder un correctif, fusionner la PR finale |
+| `chantier-lead-dev` | CI, issues de correctif, arbitrages, fusion (`--merge`) des PR de lot et de correctif, PR finale | Coder un correctif, fusionner la PR finale |
 | `chantier-lead-qa` | Qualité des tests de chaque PR de lot, issues testeur | Modifier du code |
-| `chantier-planificateur` | Rédige le plan d'un lot, signale un lot à scinder | Toucher au code |
+| `chantier-planificateur` | Rédige le plan d'un lot (préparation ou re-planification), signale un lot à scinder | Toucher au code |
 | `chantier-developpeur` | Exécute une issue `role:dev` en TDD, PR de lot, répond aux revues | Sortir de ses fichiers, force push |
 | `chantier-testeur` | Tests e2e, scénarios, tests manquants | Modifier le code de production |
-| `chantier-relecteur` | Relecture en lecture seule, un fil par constat, `revue:ok` | Modifier le code, approuver |
+| `chantier-relecteur` | Relecture en lecture seule d'une PR (lot, correctif, finale), un fil par constat, `revue:ok` | Modifier le code, approuver |
 
 Le superviseur adapte l'équipe au graphe (un développeur par lot actif, testeurs selon les lots de test, un relecteur
 par PR prête).
+
+## 9. Cycle des labels et exécution des décisions
+
+**Qui écrit quoi** : les **leads et agents exécutent eux-mêmes leurs écritures GitHub** (`gh issue create/close/comment/
+edit`, labels, `gh pr merge`). Le **superviseur** ne fait que : verrou, état, lancement et arrêt des agents, label
+`etat:en-cours` au lancement, compteurs, notifications. Chaque lead écrit en plus un rapport de passage à chemin fixe
+`.superpowers/sdd/<slug>/passages/<AAAAMMJJ-HHMM>-<role>.md` (sections `Décisions prises`, `Issues créées / fermées`,
+`PR fusionnées`, `Demandes au superviseur`).
+
+**Automate des labels** (une transition, un responsable) :
+
+| Transition | Responsable |
+| --- | --- |
+| issue créée sans `etat:*` (ou `etat:pret`) et dépendances `Dépend de #…` toutes closes → lancée, `etat:en-cours` | superviseur |
+| PR ouverte → `etat:en-revue` (PR et issue), retire `etat:en-cours` | développeur / testeur |
+| relecture : fils ouverts → `etat:a-corriger` ; sinon `revue:ok` ; retire `etat:en-revue` | relecteur |
+| PR `etat:a-corriger`, ou issue « mettre à jour depuis la branche du chantier » → développeur du lot relancé, `etat:en-cours` | superviseur |
+| push après une revue → retire `revue:ok` et `etat:a-corriger`, pose `etat:en-revue` | développeur / testeur |
+| fusion d'une PR de lot ou de correctif (exige `revue:ok` **postérieur au dernier commit**) ; fermeture de l'issue de lot ; fermeture de l'issue de correctif quand la CI est verte | lead dev |
+| `etat:bloque` (plafonds atteints ou action à risque) ; **jamais relancé automatiquement** | superviseur (sur demande d'un lead ou du surveillant) |
+
+`type:revue` marque les issues `role:dev` de **reprise de revue** (PR de correctif ou finale en `etat:a-corriger`, sans
+développeur de lot à relancer). Compteurs (`relances <issue> n/2`, `echec <issue> <signature> n/3`) : tenus par le
+superviseur dans `state.md`.
+
+**Correctifs** : le lead écrit dans l'issue de correctif la **branche visée** ; le développeur ou testeur part de cette
+branche sur `fix/<slug>-<sujet>`, ouvre une PR vers elle ; le lead dev la fusionne (`--merge`) aux mêmes conditions
+qu'un lot (périmètre : fichiers listés dans l'issue). La régénération des fichiers générés et le contrôle des
+migrations après fusion passent par une issue `role:dev` sur la branche du chantier, exécutée dans le worktree
+d'intégration `../<projet>-wt-integration` sur `feature/<slug>`.
+
+**Branche locale à jour** : le superviseur fait `git fetch` puis `git pull --ff-only` sur la branche du chantier avant
+chaque `agent-up`, et utilise `origin/<branche>` comme base de la commande de périmètre.

@@ -3,6 +3,7 @@
 # Usage : check-perimetre.sh <lot> <plan> <base>
 # Lit la section « ## Fichiers du lot (exclusifs) » du plan : le premier segment entre accents graves
 # de chaque puce est un glob (`**` = tout, `*` = sans « / », `?` = un caractère sans « / »).
+# Globs lus depuis la base (repli : fichier courant) ; renommage = suppression + ajout.
 # Sorties : 0 périmètre respecté · 1 fichiers hors périmètre · 2 erreur d'usage.
 set -euo pipefail
 

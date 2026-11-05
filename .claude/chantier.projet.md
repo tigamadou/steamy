@@ -15,6 +15,7 @@ Sur l'hôte : `docker`, `make`, `git`, `gh` seulement.
   `make agent-status`.
 - Worktree `../steamy-wt-<lot>` ; projet Compose `steamy-ag-<lot>` ; variable `AGENT_LOT` posée dans les conteneurs
   de l'agent.
+- Worktree d'intégration `../steamy-wt-integration` sur `feature/<slug>` (régénération des fichiers générés après fusion).
 - Profils : voir `docs/infra/agents.md`.
 
 ## isolation
@@ -68,3 +69,16 @@ Application de bureau Claude ouverte, machine éveillée, Docker lancé.
 - Labels : `chantier:<slug>`, `lot:<id>`, `role:dev`, `role:testeur`, `role:planificateur`, `type:lot`, `type:ci`,
   `type:test`, `type:revue`, `etat:pret`, `etat:en-cours`, `etat:en-revue`, `etat:a-corriger`, `etat:bloque`,
   `revue:ok`.
+
+## stack_principale
+
+Démarrage : `make up` ; vérification : `make ps` (tous les services sains).
+
+## notification
+
+Outil `PushNotification` s'il est disponible dans la session, sinon une ligne `NOTIF …` dans
+`.superpowers/sdd/<slug>/state.md`.
+
+## cahier_tests
+
+Cahier de recette : `apps/web/e2e/CAHIER-DE-RECETTE.md` ; scénarios identifiés `REC-…`.

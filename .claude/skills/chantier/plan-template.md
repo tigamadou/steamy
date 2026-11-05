@@ -41,7 +41,10 @@ de tâche : cocher ce qui est fini et noter ici `> Reprise :` l'étape en cours,
 ## Fichiers du lot (exclusifs)
 
 Une puce = **un glob entre accents graves** (premier segment entre accents graves de la puce : c'est ce que lit le
-script de périmètre). Le reste de la ligne (`[nouveau]`, commentaire) est libre.
+script de périmètre). Le reste de la ligne (`[nouveau]`, commentaire) est libre. Syntaxe des globs : `**` = tout, y
+compris les sous-dossiers (un dossier entier s'écrit `dossier/**`) ; `*` = sans `/` ; `?` = un caractère sans `/` ;
+un fichier s'écrit par son chemin exact. Les globs sont lus **depuis la base** : les modifier dans la branche du lot
+ne change rien.
 
 - `{{glob}}` [nouveau]
 - `{{glob}}` (commentaire éventuel)
