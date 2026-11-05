@@ -228,3 +228,9 @@ changes() {
   [ "$status" -eq 0 ]
   assert_call 'pytest apps/core --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider$'
 }
+
+@test "F10e « No lines » acceptable quand le diff front n'ajoute que des tests et une config .mts (hors couverture)" {
+  changes apps/web/src/a.test.ts apps/web/vitest.config.mts
+  FAKE_DIFFCOVER_OUT="No lines with coverage information in this diff." run CD feature/base
+  [ "$status" -eq 0 ]
+}

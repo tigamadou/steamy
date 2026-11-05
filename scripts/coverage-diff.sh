@@ -158,7 +158,7 @@ if [ -n "$API_FILES" ]; then
     fi
     echo "coverage-diff : API, tests rejoués : ${cibles[*]:-suite complète}"
     if $COMPOSE run --rm --no-deps -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage api pytest ${cibles[@]+"${cibles[@]}"} --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider ${PYTEST_EXTRA[@]+"${PYTEST_EXTRA[@]}"}; then
-      verifier "$DIFF_API" apps/api/coverage.xml '\.py$'
+      verifier "$DIFF_API" apps/api/coverage.xml '[.]py$'
     else
       echo "coverage-diff : les tests de l'API échouent" >&2
       pire 1
@@ -176,7 +176,7 @@ if [ -n "$WEB_FILES" ]; then
     echo "coverage-diff : front, fichiers liés rejoués : ${rel[*]}"
     # Les fichiers sont des arguments de sh (`"$@"`), jamais interpolés dans le script
     if $COMPOSE run --rm --no-deps web sh -c "$PNPM_INSTALL && pnpm --filter @steamy/web exec vitest related --run --passWithNoTests --coverage \"\$@\"" sh "${rel[@]}"; then
-      verifier "$DIFF_WEB" apps/web/coverage/cobertura-coverage.xml '\.tsx?$'
+      verifier "$DIFF_WEB" apps/web/coverage/cobertura-coverage.xml '[.]tsx?$'
     else
       echo "coverage-diff : les tests du front échouent" >&2
       pire 1
