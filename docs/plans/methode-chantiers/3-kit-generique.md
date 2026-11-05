@@ -25,7 +25,7 @@
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 9
+Statut : ✅ terminé · Prochaine tâche : —
 
 - [x] **Tâche 1** Script de périmètre et ses tests · `feature/methode-chantiers-3`
   - [x] Tests bats écrits et rouges
@@ -39,7 +39,7 @@ Statut : 🟡 en cours · Prochaine tâche : 9
 - [x] **Tâche 6** Skill `chantier` (SKILL.md)
 - [x] **Tâche 7** Adaptateur : `CLAUDE.md` racine, `.claude/chantier.projet.md`, `docs/plans/README.md`
 - [x] **Tâche 8** Ligne `include` dans le `Makefile` (point de fusion avec le lot 1)
-- [ ] **Tâche 9** Vérification du lot
+- [x] **Tâche 9** Vérification du lot (31 tests bats verts ; périmètre OK, 22 fichiers ; aucune occurrence du nom du projet dans le kit ; seuls les sept agents `chantier-*` ; 10 marqueurs du superviseur tous listés dans le skill ; relecture ADR § 1 à 10 faite)
 
 > Reprise : (vide)
 
