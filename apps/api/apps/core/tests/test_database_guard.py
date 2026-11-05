@@ -15,6 +15,8 @@ conftest_racine = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(conftest_racine)
 check_test_database_name = conftest_racine.check_test_database_name
 pytest_configure = conftest_racine.pytest_configure
+default_xdist_workers = conftest_racine.default_xdist_workers
+pytest_xdist_auto_num_workers = conftest_racine.pytest_xdist_auto_num_workers
 
 
 def use_database(settings, monkeypatch, **overrides):
@@ -110,3 +112,19 @@ def test_the_running_test_database_is_the_expected_one():
     )
 
     assert error is None
+
+
+@pytest.mark.parametrize(
+    ("agent_lot", "cpu_count", "expected"),
+    [("lot2", 10, 2), (None, 10, 4), (None, 2, 2), (None, None, 4), ("", 10, 4)],
+)
+def test_default_xdist_workers(agent_lot, cpu_count, expected):
+    assert default_xdist_workers(agent_lot, cpu_count) == expected
+
+
+def test_auto_num_workers_hook_reads_the_environment(monkeypatch):
+    monkeypatch.setenv("AGENT_LOT", "lot2")
+    assert pytest_xdist_auto_num_workers(config=None) == 2
+
+    monkeypatch.delenv("AGENT_LOT")
+    assert 1 <= pytest_xdist_auto_num_workers(config=None) <= 4

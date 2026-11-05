@@ -28,6 +28,18 @@ def check_test_database_name(name: str, agent_lot: str | None, worker: str | Non
     )
 
 
+def default_xdist_workers(agent_lot: str | None, cpu_count: int | None) -> int:
+    """Processus xdist : 2 dans un environnement d'agent (budget machine partagé), sinon 4 au plus."""
+    if agent_lot:
+        return 2
+    return min(4, cpu_count or 4)
+
+
+def pytest_xdist_auto_num_workers(config):
+    """Nombre de processus de `-n auto`, décidé dans le conteneur (là où AGENT_LOT est connu)."""
+    return default_xdist_workers(os.environ.get("AGENT_LOT"), os.cpu_count())
+
+
 def _configured_test_database_name() -> str:
     """Nom de la base de test que Django utilisera (avant suffixe xdist, sauf si pytest-django l'a déjà posé)."""
     from django.conf import settings
