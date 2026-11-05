@@ -1,3 +1,5 @@
+name: steamy
+
 # Stack de développement local : tous les services tournent dans Docker.
 # Point d'entrée : `make up` (voir `make help`).
 # Ne PAS utiliser en production : identifiants de dev, runserver, montage du code.
@@ -18,6 +20,7 @@ x-api: &api
 services:
   postgres:
     image: postgres:17.2
+    networks: [default, infra]
     environment:
       POSTGRES_DB: steamy
       POSTGRES_USER: steamy
@@ -34,12 +37,14 @@ services:
 
   redis:
     image: redis:7.4
+    networks: [default, infra]
     volumes:
       - redis_data:/data
 
   # Stockage objet S3-compatible (remplace MinIO)
   rustfs:
     image: rustfs/rustfs:1.0.1
+    networks: [default, infra]
     environment:
       RUSTFS_ACCESS_KEY: rustfsadmin
       RUSTFS_SECRET_KEY: rustfsadmin
@@ -75,6 +80,7 @@ services:
   # Capture tous les e-mails sortants : http://localhost:8025
   mailpit:
     image: axllent/mailpit:v1.21
+    networks: [default, infra]
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
@@ -146,6 +152,11 @@ services:
     command: celery -A project flower --address=0.0.0.0 --port=5555
     ports:
       - "5555:5555"
+
+# Réseau partagé avec les environnements d'agent (compose.agent.yml) : seuls les services d'infrastructure y sont attachés
+networks:
+  infra:
+    name: ${INFRA_NETWORK:-steamy-infra}
 
 volumes:
   postgres_data:

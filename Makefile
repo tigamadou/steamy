@@ -2,8 +2,9 @@
 COMPOSE := docker compose
 API     := $(COMPOSE) run --rm api
 WEB     := $(COMPOSE) run --rm --no-deps web sh -c
-# Stack des parcours Playwright : projet séparé, sans port publié (cohabite avec `make up`)
-E2E     := docker compose -p steamy-e2e -f compose.yml -f compose.e2e.yml
+# Stack des parcours Playwright : projet séparé (par lot d'agent), réseau d'infra et image web propres, sans port publié (cohabite avec `make up`)
+E2E_P   := steamy-e2e$(if $(AGENT_LOT),-$(AGENT_LOT))
+E2E     := INFRA_NETWORK=$(E2E_P)-infra E2E_WEB_IMAGE=steamy-web-e2e$(if $(AGENT_LOT),-$(AGENT_LOT)) docker compose -p $(E2E_P) -f compose.yml -f compose.e2e.yml
 # `--no-build` en CI (images déjà construites, avec cache) ; PW_ARGS=--shard=1/4 pour n'en jouer qu'une part
 E2E_BUILD ?= --build
 

@@ -53,7 +53,7 @@ services:
       retries: 30
 
   web:
-    image: steamy-web-e2e
+    image: ${E2E_WEB_IMAGE:-steamy-web-e2e}
     build:
       context: .
       dockerfile: apps/web/Dockerfile

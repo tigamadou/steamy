@@ -49,3 +49,8 @@ apps/web/test-results/
 # Rapports de couverture
 coverage.xml
 htmlcov/
+
+# Environnements d'agent (méthode des chantiers)
+.agent.env
+.agent/
+.superpowers/
