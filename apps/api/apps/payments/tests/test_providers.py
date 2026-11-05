@@ -133,7 +133,11 @@ def test_fake_success_posts_a_signed_webhook_after_commit(order, initiate):
     assert payment.provider == "fake" and payment.provider_transaction_id == result.provider_tx_id
     fetched = FakePaymentProvider().fetch_transaction(result.provider_tx_id)
     assert fetched.status == PaymentStatus.SUCCEEDED and fetched.provider_status == "approved"
-    assert (fetched.amount, fetched.currency, fetched.merchant_reference) == (5000, "XOF", "CM-0001-1")
+    assert (fetched.amount, fetched.currency, fetched.merchant_reference) == (
+        5000,
+        "XOF",
+        "CM-0001-1",
+    )
     assert fetched.fees is None and fetched.provider_tx_id == result.provider_tx_id
 
 
@@ -429,9 +433,7 @@ def test_fedapay_unreadable_amount_is_temporary(fedapay, amount):
 
 
 def test_fedapay_fetch_without_amount_key_is_temporary(fedapay):
-    with mock.patch(
-        "requests.request", return_value=response(200, {"v1/transaction": {"id": 1}})
-    ):
+    with mock.patch("requests.request", return_value=response(200, {"v1/transaction": {"id": 1}})):
         with pytest.raises(PaymentTemporaryError):
             FedaPayProvider().fetch_transaction("1")
 

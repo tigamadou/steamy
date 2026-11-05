@@ -303,7 +303,9 @@ class Payment(models.Model):
     #: Dernier statut brut relu chez le prestataire (vocabulaire du prestataire, minuscules)
     provider_status = models.CharField(_("statut du prestataire"), max_length=32, blank=True)
     #: Frais du prestataire en FCFA, quand il les communique
-    provider_fees = models.PositiveIntegerField(_("frais du prestataire (FCFA)"), null=True, blank=True)
+    provider_fees = models.PositiveIntegerField(
+        _("frais du prestataire (FCFA)"), null=True, blank=True
+    )
     #: Dernière relecture de la transaction chez le prestataire
     checked_at = models.DateTimeField(_("vérifié le"), null=True, blank=True)
 

@@ -71,9 +71,7 @@ def test_reconcile_leaves_a_pending_payment_alone():
 
 def test_reconcile_skips_an_unknown_transaction_and_goes_on():
     unknown = PaymentFactory(provider_transaction_id="fake-inconnue")
-    Payment.objects.filter(pk=unknown.pk).update(
-        created_at=timezone.now() - timedelta(hours=1)
-    )
+    Payment.objects.filter(pk=unknown.pk).update(created_at=timezone.now() - timedelta(hours=1))
     ok = stale(remote=PaymentStatus.SUCCEEDED)
     assert checkout.reconcile_pending_payments() == 1
     assert refreshed(unknown).status == Payment.Status.PENDING
