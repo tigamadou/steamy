@@ -56,8 +56,16 @@ Principe : l'API et la base sont déjà testées en unitaire. Les tests fonction
 - **API en parallèle** : `make test-api` lance `pytest -n auto` (pytest-xdist). Chaque worker a sa propre base
   (`test_steamy[_<lot>]_gwN`). Le nombre de workers est décidé **dans le conteneur** (`conftest.py`) : 2 dans un
   environnement d'agent (`AGENT_LOT` posé, budget machine partagé), au plus 4 sinon ; `PYTEST_XDIST_AUTO_NUM_WORKERS`
-  l'emporte. `make test-api PYTEST_XDIST=` rejoue en série, `PYTEST_ARGS=--maxfail=0` liste tous les échecs (la CI).
-  Un test ciblé (`make test-cible`) reste en série : pas de démarrage de workers pour quelques tests.
+  (lue en premier par le hook, transmise au conteneur par les cibles `make`) l'emporte. `make test-api PYTEST_XDIST=`
+  rejoue en série, `PYTEST_ARGS=--maxfail=0` liste tous les échecs (la CI). `PYTEST_ARGS` est découpé en mots :
+  pas d'argument contenant lui-même un espace.
+  `make test-cible`, `make coverage-api` et `make coverage-diff` restent en série (pas de démarrage de workers pour
+  quelques tests) sauf `PYTEST_XDIST="-n auto"` passé explicitement. Les cibles de test et de lint de l'API
+  tournent sans dépendances (`--no-deps`) : seul Postgres doit tourner (stockage fichier, e-mails en mémoire).
+- **Couverture : agents et CI** : les agents lancent `make coverage-diff` / `coverage-api` / `coverage-web` (apps ou
+  fichiers touchés seulement). La CI exécute **une seule fois** la suite complète avec couverture
+  (`make coverage-api-complet`, `make coverage-web-complet`, variable `COVERAGE_COMPLET=1`), puis diff-cover compare ce
+  rapport à la base de la PR.
 - **Garde-fou de la base de test** : `conftest.py` refuse de tourner (code 4) si la base de test n'est pas exactement
   `test_steamy` (+ `_<lot>` si `AGENT_LOT`, + `_gwN` sous xdist) ; `AGENT_LOT` vide est refusé. Contrôlé au démarrage
   de pytest puis, avec le suffixe du worker, avant toute création de base (`apps/core/tests/test_database_guard.py`).
