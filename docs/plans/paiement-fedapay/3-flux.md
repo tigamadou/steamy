@@ -63,7 +63,7 @@ autorité). Plan du chantier `paiement-fedapay`, lot 3 sur 5.
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 5
+Statut : 🟡 en cours · Prochaine tâche : 6
 
 - [x] **Tâche 1** Support de test du lot (`test_flux_support.py`) · `feature/paiement-fedapay-flux`
   - [x] Aides : transaction relue simulée, livraison d'un webhook signé, rejeu concurrent
@@ -76,7 +76,7 @@ Statut : 🟡 en cours · Prochaine tâche : 5
   - [x] Rattachement, montant et devise, table des statuts, échec non définitif, écart → `Refund`
   - [x] Observations (frais, statut brut, `checked_at`) avant l'idempotence
   - [x] Adaptation des tests existants qui appellent `handle_payment_event`
-- [ ] **Tâche 5** Webhook : 400 seulement signature invalide / prestataire inconnu, sinon 200 (§ 5)
+- [x] **Tâche 5** Webhook : 400 seulement signature invalide / prestataire inconnu, sinon 200 (§ 5)
 - [ ] **Tâche 6** Réconciliation : 10 min, expiration 24 h, rattrapage 48 h, erreur isolée (§ 6)
 - [ ] **Tâche 7** Contrat OpenAPI et documentation de code
 - [ ] **Tâche 8** Vérification du lot

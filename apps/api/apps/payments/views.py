@@ -18,7 +18,7 @@ from rest_framework import mixins, permissions, serializers, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle, ScopedRateThrottle, SimpleRateThrottle
+from rest_framework.throttling import ScopedRateThrottle, SimpleRateThrottle
 from rest_framework.views import APIView
 
 from apps.catalog.models import Course
@@ -34,7 +34,7 @@ from .invoices import filename as invoice_filename
 from .kit_codes import redeem
 from .models import Invoice, Order, Payment, PaymentRequest
 from .orders import GUEST_TOKEN_HEADER, create_order, order_for_guest
-from .providers import PROVIDERS, get_provider
+from .providers import PROVIDERS, PaymentProviderError, get_provider
 from .requests import close, create_request, order_for_request, resend
 from .serializers import (
     BeneficiaryOrderSerializer,
@@ -303,10 +303,6 @@ class PaymentViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
 
 # Webhook endpoint for providers (unprotected CSRF exempt; verify signature inside)
-class WebhookRateThrottle(AnonRateThrottle):
-    scope = "webhook"  # S9
-
-
 @extend_schema(
     summary="Webhook des prestataires de paiement (appelé par le prestataire, pas par le front)",
     parameters=[
@@ -322,41 +318,45 @@ class WebhookRateThrottle(AnonRateThrottle):
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([permissions.AllowAny])
-@throttle_classes([WebhookRateThrottle])
+# Jamais de limitation : un 429 sur une notification signée compte comme un échec chez le prestataire
+@throttle_classes([])
 def provider_webhook(request, provider_name: str):
     """
-    Point d'entrée des notifications des prestataires (S9, ADR 0003). La signature est vérifiée **avant** toute
-    lecture du contenu ; le prestataire normalise ensuite la notification (`parse_event`).
+    Point d'entrée des notifications des prestataires (S9, ADR 0003 et 0008). La signature est vérifiée **avant**
+    toute lecture du contenu. Le corps ne sert qu'à connaître l'identifiant de la transaction, relue chez le
+    prestataire : rien de ce qu'il affirme n'est cru. Seuls un prestataire inconnu ou non configuré et une signature
+    invalide donnent 400 ; tout le reste répond 200 (le prestataire ne doit pas réessayer en boucle) et la
+    réconciliation rattrape ce qui n'a pas pu être traité.
     """
     # Réponses volontairement neutres (S5) : aucun détail n'est renvoyé à l'appelant, la cause
-    # est journalisée côté serveur.
-    rejected = Response({"ok": False}, status=status.HTTP_400_BAD_REQUEST)
+    # est journalisée côté serveur (jamais le corps de la notification).
     try:
         provider = get_provider(provider_name)
     except ImproperlyConfigured:
         logger.warning("Webhook %s : prestataire inconnu ou non configuré", provider_name)
-        return rejected
+        return Response({"ok": False}, status=status.HTTP_400_BAD_REQUEST)
     if not provider.verify_webhook(request):
         logger.warning("Webhook %s : signature invalide", provider_name)
-        return rejected
+        return Response({"ok": False}, status=status.HTTP_400_BAD_REQUEST)
+
+    acknowledged = Response({"ok": True})
     try:
         data = json.loads(request.body)
-        if not isinstance(data, dict):
-            raise ValueError("corps qui n'est pas un objet")
-    except (ValueError, UnicodeDecodeError) as exc:
-        logger.warning("Webhook %s : notification illisible (%s)", provider_name, exc)
-        return rejected
-    provider_tx_id = provider.transaction_id_of(data)
+    except ValueError:
+        logger.warning("Webhook %s : corps illisible", provider_name)
+        return acknowledged
+    provider_tx_id = provider.transaction_id_of(data) if isinstance(data, dict) else None
     if provider_tx_id is None:
-        return Response({"ok": True})  # événement sans rapport avec un paiement
+        logger.warning("Webhook %s : notification sans transaction", provider_name)
+        return acknowledged
 
     try:
         handle_payment_event(provider.name, provider_tx_id)
+    except PaymentProviderError:
+        logger.warning("Webhook %s : relecture de %s impossible", provider_name, provider_tx_id)
     except Exception:
         logger.exception("Webhook %s : erreur de traitement", provider_name)
-        return rejected
-
-    return Response({"ok": True})
+    return acknowledged
 
 
 # --- Kit Codes -----------------------------------------------------------------------------------
