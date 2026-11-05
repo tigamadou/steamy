@@ -9,6 +9,8 @@ from apps.accounts.models import ParentChildLink
 from apps.accounts.tests.factories import LearnerFactory, ParentFactory, StaffFactory
 from apps.catalog.tests.factories import CourseFactory
 from apps.payments.models import Order, OrderItem, Payment, Refund
+from apps.payments.providers import PaymentStatus
+from apps.payments.providers.fake import FakePaymentProvider
 from apps.referentials.models import Relationship
 
 
@@ -126,3 +128,19 @@ def load_referentials():
     from apps.referentials.data import load
 
     load(apps)
+
+
+def fake_transaction(payment, status=PaymentStatus.PENDING, **changes) -> str:
+    """Enregistre dans le faux prestataire la transaction du paiement (`changes` surcharge `create_transaction`) et
+    renvoie son identifiant."""
+    values = {
+        "provider_tx_id": payment.provider_transaction_id,
+        "reference": payment.order.reference,
+        "merchant_reference": payment.merchant_reference,
+        "amount": payment.amount,
+        "currency": payment.currency,
+        "status": status,
+        **changes,
+    }
+    FakePaymentProvider().create_transaction(**values)
+    return values["provider_tx_id"]

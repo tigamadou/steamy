@@ -84,6 +84,7 @@ def initiate_payment(order: Order, *, country: str, network: str, msisdn: str) -
             result = provider.initiate(
                 Charge(
                     reference=order.reference,
+                    merchant_reference=payment.merchant_reference,
                     amount=order.total,
                     currency=order.currency,
                     country=country,
@@ -92,6 +93,7 @@ def initiate_payment(order: Order, *, country: str, network: str, msisdn: str) -
                     description=f"Steamy · commande {order.reference}",
                     first_name=first_name,
                     last_name=last_name,
+                    metadata={"order": order.reference, "payment": payment.pk},
                 )
             )
         except PaymentTemporaryError:
@@ -131,7 +133,9 @@ def reconcile_pending_payments() -> int:
             settled += 1
             continue
         try:
-            status = get_provider(payment.provider).fetch_status(payment.provider_transaction_id)
+            status = get_provider(payment.provider).fetch_transaction(
+                payment.provider_transaction_id
+            ).status
         except (PaymentProviderError, ImproperlyConfigured):
             log.warning("Réconciliation du paiement %s impossible pour l'instant", payment.pk)
             continue

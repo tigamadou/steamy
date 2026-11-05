@@ -3,7 +3,7 @@ Prestataire réel : FedaPay (ADR 0003), par son API REST v1 et ses webhooks sign
 
 Paiement sans redirection, initié par le serveur : création de la transaction (`POST /transactions`, référence de
 la commande dans `merchant_reference`), jeton (`POST /transactions/{id}/token`), puis débit direct sur le réseau
-choisi (`POST /{mode}` : le payeur valide sur son téléphone). Le webhook signé fait foi ; `fetch_status` sert à la
+choisi (`POST /{mode}` : le payeur valide sur son téléphone). Le webhook signé fait foi ; `fetch_transaction` sert à la
 réconciliation.
 
 Configuration lue dans l'environnement, jamais dans le dépôt : `FEDAPAY_SECRET_KEY` (clé secrète `sk_…`),
@@ -29,6 +29,7 @@ from .base import (
     PaymentProviderError,
     PaymentStatus,
     PaymentTemporaryError,
+    ProviderTransaction,
     RefundOutcome,
 )
 
@@ -125,7 +126,7 @@ class FedaPayProvider(PaymentProvider):
                     "description": charge.description or f"Commande {charge.reference}",
                     "amount": charge.amount,
                     "currency": {"iso": charge.currency},
-                    "merchant_reference": charge.reference,
+                    "merchant_reference": charge.merchant_reference,
                     "callback_url": settings.FEDAPAY_CALLBACK_URL,
                     "customer": {
                         "firstname": charge.first_name,
@@ -184,9 +185,34 @@ class FedaPayProvider(PaymentProvider):
             failure_reason=FAILURE_REASONS.get(entity["status"], ""),
         )
 
-    def fetch_status(self, provider_tx_id: str) -> PaymentStatus:
+    def transaction_id_of(self, payload: dict) -> str | None:
+        if not str(payload.get("name", "")).startswith("transaction."):
+            return None
+        entity = payload.get("entity")
+        if not isinstance(entity, dict) or not entity.get("id"):
+            return None
+        return str(entity["id"])
+
+    def fetch_transaction(self, provider_tx_id: str) -> ProviderTransaction:
         transaction = self._transaction(self._call("GET", f"/transactions/{provider_tx_id}"))
-        return STATUSES.get(transaction.get("status"), PaymentStatus.PENDING)
+        try:
+            amount = int(transaction["amount"])
+        except (KeyError, TypeError, ValueError):
+            raise PaymentTemporaryError("Montant illisible dans la réponse de FedaPay") from None
+        raw_status = str(transaction.get("status") or "")
+        fees = transaction.get("fees")
+        return ProviderTransaction(
+            provider_tx_id=str(transaction["id"]),
+            status=STATUSES.get(raw_status, PaymentStatus.PENDING),
+            provider_status=raw_status,
+            amount=amount,
+            currency=currency_of(transaction),
+            merchant_reference=str(transaction.get("merchant_reference") or ""),
+            fees=fees if isinstance(fees, int) and not isinstance(fees, bool) else None,
+        )
+
+    def supports(self, country: str, network: str) -> bool:
+        return f"{country}:{network}" in settings.FEDAPAY_MODES
 
     def refund(self, provider_tx_id: str, amount: int) -> RefundOutcome:
         """Pas d'API publique de remboursement (ADR 0003 §6) : traité par la Finance dans le tableau de bord."""
