@@ -47,7 +47,7 @@ autorité ; documentation FedaPay de référence en annexe). Plan du chantier `p
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 5
+Statut : ✅ terminé
 
 - [x] **Tâche 1** Réglages FedaPay et réseau `TG:togocel` désactivé · `feature/paiement-fedapay-fedapay`
   - [x] Test : table `FEDAPAY_MODES` par défaut et mode du bac à sable
@@ -64,7 +64,7 @@ Statut : 🟡 en cours · Prochaine tâche : 5
 - [x] **Tâche 4** Commande `manage.py fedapay_probe`
   - [x] Tests : refus hors bac à sable, parcours complet, relecture bornée, aucune commande créée, aucun secret
   - [x] Implémentation
-- [ ] **Tâche 5** Vérification du lot
+- [x] **Tâche 5** Vérification du lot
 
 > Reprise : (vide)
 
