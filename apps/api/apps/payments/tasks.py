@@ -40,7 +40,8 @@ def release_expired_reservations() -> int:
 
 @shared_task
 def reconcile_pending_payments() -> int:
-    """Toutes les 5 min : vérifie auprès du prestataire les paiements sans issue depuis 10 min (webhook perdu)."""
+    """Toutes les 5 min : vérifie auprès du prestataire les paiements sans issue depuis 10 min (webhook perdu),
+    expire ceux qui attendent depuis 24 h et rattrape sur 48 h les échecs non définitifs (ADR 0008 §6)."""
     from .checkout import reconcile_pending_payments as reconcile
 
     return reconcile()
