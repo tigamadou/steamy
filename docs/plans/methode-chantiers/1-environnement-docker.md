@@ -19,18 +19,18 @@
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 1.1
+Statut : 🟦 en cours · Prochaine tâche : 1.4
 
-- [ ] **1.1** Réseau d'infrastructure partagé et nom de projet · `compose.yml`, `compose.e2e.yml`
-  - [ ] Réseau `steamy-infra`, `name: steamy`, services d'infra attachés
-  - [ ] Stack e2e isolée (réseau et image web par lot)
-- [ ] **1.2** Surcouche `compose.agent.yml`
-  - [ ] Services api, api-migrate, worker, web de l'agent, sans port
-  - [ ] Variables d'isolation (`AGENT_LOT`, base, Redis, bucket)
-- [ ] **1.3** Script `scripts/agent-env.sh` et cibles `agent-*`
-  - [ ] Préalables, lot valide, trap d'échec, worktree
-  - [ ] Base, buckets, numéros Redis, `.agent.env`
-  - [ ] Budget mémoire, `down` conservatoire, `status`
+- [x] **1.1** Réseau d'infrastructure partagé et nom de projet · `compose.yml`, `compose.e2e.yml`
+  - [x] Réseau `steamy-infra`, `name: steamy`, services d'infra attachés
+  - [x] Stack e2e isolée (réseau et image web par lot)
+- [x] **1.2** Surcouche `compose.agent.yml`
+  - [x] Services api, api-migrate, worker, web de l'agent, sans port
+  - [x] Variables d'isolation (`AGENT_LOT`, base, Redis, bucket)
+- [x] **1.3** Script `scripts/agent-env.sh` et cibles `agent-*`
+  - [x] Préalables, lot valide, trap d'échec, worktree
+  - [x] Base, buckets, numéros Redis, `.agent.env`
+  - [x] Budget mémoire, `down` conservatoire, `status`
 - [ ] **1.4** Cibles standard : `lint`, `typecheck`, `generate`, `check-generated`, `migrations-check`, `test-cible`
   - [ ] `scripts/cibles.sh` (routage et garde par profil)
   - [ ] Makefile routé vers l'agent, cibles existantes conservées

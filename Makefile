@@ -1,4 +1,7 @@
 # Point d'entrée unique du monorepo. `make help` pour la liste.
+# Dans le worktree d'un agent, `.agent.env` (écrit par `make agent-up`) pose AGENT_LOT et les numéros Redis.
+-include .agent.env
+
 COMPOSE := docker compose
 API     := $(COMPOSE) run --rm api
 WEB     := $(COMPOSE) run --rm --no-deps web sh -c
@@ -11,10 +14,10 @@ E2E_BUILD ?= --build
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
         test-api coverage-api lint-api fix-api psql flower clean openapi lint-web typecheck-web \
-        test-web coverage-web e2e e2e-down
+        test-web coverage-web e2e e2e-down agent-up agent-down agent-status
 
 help: ## Affiche cette aide
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
+	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
 # --- Stack ------------------------------------------------------------------
 up: ## Démarre toute la stack en arrière-plan
@@ -46,6 +49,18 @@ flower: ## Lance Flower (supervision Celery) sur http://localhost:5555
 
 clean: ## ⚠️ Arrête la stack ET supprime toutes les données locales
 	$(COMPOSE) --profile tools down -v
+
+# --- Environnements d'agent (docs/infra/agents.md) --------------------------------
+agent-up: ## Environnement d'agent : make agent-up LOT=<lot> PROFIL=<web|api|complet> BASE=<branche>
+	@test -n "$(LOT)" -a -n "$(PROFIL)" -a -n "$(BASE)" || { echo "Usage : make agent-up LOT=<lot> PROFIL=<web|api|complet> BASE=<branche>"; exit 2; }
+	@scripts/agent-env.sh up "$(LOT)" "$(PROFIL)" "$(BASE)"
+
+agent-down: ## Arrête l'environnement d'un agent (conserve worktree, branche et bases) : make agent-down LOT=<lot>
+	@test -n "$(LOT)" || { echo "Usage : make agent-down LOT=<lot>"; exit 2; }
+	@scripts/agent-env.sh down "$(LOT)"
+
+agent-status: ## Environnements d'agent actifs, mémoire et budget
+	@scripts/agent-env.sh status
 
 # --- API Django -------------------------------------------------------------
 shell: ## Ouvre un shell dans le conteneur API
