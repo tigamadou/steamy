@@ -47,7 +47,7 @@ autorité ; documentation FedaPay de référence en annexe). Plan du chantier `p
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 3
+Statut : 🟡 en cours · Prochaine tâche : 4
 
 - [x] **Tâche 1** Réglages FedaPay et réseau `TG:togocel` désactivé · `feature/paiement-fedapay-fedapay`
   - [x] Test : table `FEDAPAY_MODES` par défaut et mode du bac à sable

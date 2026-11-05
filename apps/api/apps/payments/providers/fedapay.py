@@ -214,22 +214,25 @@ class FedaPayProvider(PaymentProvider):
             return None
         return str(entity["id"])
 
+    def raw_transaction(self, provider_tx_id: str) -> dict:
+        """Réponse brute de `GET /transactions/{id}`, sans transformation (sonde de validation)."""
+        return self._call("GET", f"/transactions/{provider_tx_id}")
+
     def fetch_transaction(self, provider_tx_id: str) -> ProviderTransaction:
-        transaction = self._transaction(self._call("GET", f"/transactions/{provider_tx_id}"))
+        transaction = self._transaction(self.raw_transaction(provider_tx_id))
         try:
             amount = int(transaction["amount"])
         except (KeyError, TypeError, ValueError):
             raise PaymentTemporaryError("Montant illisible dans la réponse de FedaPay") from None
         raw_status = str(transaction.get("status") or "")
-        fees = transaction.get("fees")
         return ProviderTransaction(
             provider_tx_id=str(transaction["id"]),
-            status=STATUSES.get(raw_status, PaymentStatus.PENDING),
+            status=normalize_status(raw_status),
             provider_status=raw_status,
             amount=amount,
             currency=currency_of(transaction),
             merchant_reference=str(transaction.get("merchant_reference") or ""),
-            fees=fees if isinstance(fees, int) and not isinstance(fees, bool) else None,
+            fees=fees_of(transaction),
         )
 
     def supports(self, country: str, network: str) -> bool:
@@ -239,6 +242,23 @@ class FedaPayProvider(PaymentProvider):
         """Pas d'API publique de remboursement (ADR 0003 §6) : traité par la Finance dans le tableau de bord."""
         log.info("Remboursement FedaPay %s (%s FCFA) à traiter à la main", provider_tx_id, amount)
         return RefundOutcome.PENDING_MANUAL
+
+
+def normalize_status(raw: str) -> PaymentStatus:
+    """Statut FedaPay → statut Steamy ; tout statut « refunded » (même partiel) est un échec, l'inconnu est en attente."""
+    if "refunded" in raw:
+        return PaymentStatus.FAILED
+    return STATUSES.get(raw, PaymentStatus.PENDING)
+
+
+def fees_of(transaction: dict) -> int | None:
+    fees = transaction.get("fees")
+    if isinstance(fees, bool):
+        return None
+    try:
+        return int(fees)
+    except (TypeError, ValueError):
+        return None
 
 
 def currency_of(entity: dict) -> str:

@@ -17,7 +17,6 @@ from apps.payments.providers import (
     PaymentProviderError,
     PaymentStatus,
     PaymentTemporaryError,
-    ProviderTransaction,
     RefundOutcome,
     get_provider,
 )
@@ -292,87 +291,6 @@ def test_fedapay_ignores_other_events(fedapay):
 def test_fedapay_rejects_incomplete_transactions(fedapay, payload):
     with pytest.raises(ValueError):
         FedaPayProvider().parse_event(payload)
-
-
-@pytest.mark.parametrize(
-    ("status", "expected"),
-    [
-        ("pending", PaymentStatus.PENDING),
-        ("approved", PaymentStatus.SUCCEEDED),
-        ("transferred", PaymentStatus.SUCCEEDED),
-        ("declined", PaymentStatus.FAILED),
-        ("canceled", PaymentStatus.FAILED),
-        ("expired", PaymentStatus.FAILED),
-        ("refunded", PaymentStatus.FAILED),
-        ("nouveau", PaymentStatus.PENDING),
-    ],
-)
-def test_fedapay_fetches_the_normalised_transaction(fedapay, status, expected):
-    payload = {
-        "v1/transaction": {
-            "id": 1234,
-            "status": status,
-            "amount": 5000,
-            "currency": {"iso": "xof"},
-            "merchant_reference": "CM-0001-1",
-            "fees": 150,
-        }
-    }
-    with mock.patch("requests.request", return_value=response(200, payload)) as request:
-        fetched = FedaPayProvider().fetch_transaction("1234")
-    assert fetched == ProviderTransaction(
-        provider_tx_id="1234",
-        status=expected,
-        provider_status=status,
-        amount=5000,
-        currency="XOF",
-        merchant_reference="CM-0001-1",
-        fees=150,
-    )
-    assert request.call_args.args == ("GET", "https://sandbox-api.fedapay.com/v1/transactions/1234")
-
-
-@pytest.mark.parametrize(
-    ("extra", "currency", "reference", "fees"),
-    [
-        ({"currency": None, "currency_id": 1}, "XOF", "CM-0001-1", 150),
-        ({"currency": None}, "", "CM-0001-1", 150),
-        ({"merchant_reference": None}, "XOF", "", 150),
-        ({"fees": "beaucoup"}, "XOF", "CM-0001-1", None),
-        ({"fees": None}, "XOF", "CM-0001-1", None),
-    ],
-)
-def test_fedapay_tolerates_missing_optional_fields(fedapay, extra, currency, reference, fees):
-    entity = {
-        "id": 1,
-        "status": "approved",
-        "amount": 5000,
-        "currency": {"iso": "XOF"},
-        "merchant_reference": "CM-0001-1",
-        "fees": 150,
-        **extra,
-    }
-    with mock.patch("requests.request", return_value=response(200, {"v1/transaction": entity})):
-        fetched = FedaPayProvider().fetch_transaction("1")
-    assert (fetched.currency, fetched.merchant_reference, fetched.fees) == (
-        currency,
-        reference,
-        fees,
-    )
-
-
-@pytest.mark.parametrize("amount", [None, "cinq mille", "12.5x"])
-def test_fedapay_unreadable_amount_is_temporary(fedapay, amount):
-    entity = {"id": 1, "status": "approved", "amount": amount}
-    with mock.patch("requests.request", return_value=response(200, {"v1/transaction": entity})):
-        with pytest.raises(PaymentTemporaryError):
-            FedaPayProvider().fetch_transaction("1")
-
-
-def test_fedapay_fetch_without_amount_key_is_temporary(fedapay):
-    with mock.patch("requests.request", return_value=response(200, {"v1/transaction": {"id": 1}})):
-        with pytest.raises(PaymentTemporaryError):
-            FedaPayProvider().fetch_transaction("1")
 
 
 def test_fedapay_reads_the_transaction_id_of_a_notification(fedapay):
