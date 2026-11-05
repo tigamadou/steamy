@@ -134,7 +134,7 @@ Le chemin est exprimé avec les **noms des filtres de l'API** ; `web-backoffice`
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 8
+Statut : ✅ terminé · Prochaine tâche : aucune
 
 - [x] **Tâche 1** `process_refund` avec référence et commande annulée, retrait de l'action de l'admin · `feature/paiement-fedapay-api-backoffice`
   - [x] relire le contrat du socle (noms exacts) et corriger ce plan si besoin
@@ -146,7 +146,7 @@ Statut : 🟡 en cours · Prochaine tâche : 8
 - [x] **Tâche 5** Liste des remboursements et marquage « fait »
 - [x] **Tâche 6** Vue d'ensemble WAD01 : entrées Finance et champ `path`
 - [x] **Tâche 7** `make generate` et SPEC-TECHNIQUE §7.8
-- [ ] **Tâche 8** Vérification du lot
+- [x] **Tâche 8** Vérification du lot
 
 > Reprise : (vide)
 
