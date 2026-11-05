@@ -4,6 +4,8 @@ filtres, recherche, totaux sur tout le filtre, requêtes en nombre constant, dé
 """
 
 import datetime
+import json
+from unittest import mock
 
 import pytest
 from django.db import connection
@@ -18,8 +20,9 @@ from apps.core.models import AuditLog
 from apps.core.tests.staff import staff_member, verified_client
 from apps.payments import backoffice
 from apps.payments.models import Order, Payment, Refund
+from apps.payments.providers import PaymentStatus
 
-from .factories import OrderFactory, PaymentFactory, RefundFactory
+from .factories import OrderFactory, PaymentFactory, RefundFactory, fake_transaction
 
 pytestmark = pytest.mark.django_db
 
@@ -405,3 +408,139 @@ def test_the_detail_query_count_does_not_grow_with_the_audit_log(finance):
         RefundFactory(payment=payment, amount=100, done=True)
         PaymentFactory(order=payment.order, failed=True)
     assert count() == few
+
+
+# --- Relecture chez le prestataire ------------------------------------------------------------------------------
+
+
+def test_recheck_applies_the_provider_outcome_and_is_audited(finance):
+    order = OrderFactory()
+    payment = PaymentFactory(order=order)
+    fake_transaction(payment, PaymentStatus.SUCCEEDED)
+    response = finance.post(detail_url(payment, "recheck/"))
+    assert response.status_code == 200
+    body = response.json()
+    assert body["id"] == payment.pk and body["status"] == "succeeded"
+    assert body["order"]["status"] == "paid"
+    entry = AuditLog.objects.get(action="payment.rechecked")
+    assert entry.target_id == str(payment.pk) and entry.actor is not None
+    assert entry.data == {"before": "pending", "after": "succeeded"}
+    assert [e["action"] for e in body["auditLog"]].count("payment.rechecked") == 1
+
+
+def test_recheck_of_a_succeeded_payment_changes_nothing_but_is_audited(finance):
+    payment = PaymentFactory(succeeded=True)
+    fake_transaction(payment, PaymentStatus.SUCCEEDED)
+    body = finance.post(detail_url(payment, "recheck/")).json()
+    assert body["status"] == "succeeded"
+    assert AuditLog.objects.get(action="payment.rechecked").data == {
+        "before": "succeeded",
+        "after": "succeeded",
+    }
+
+
+def test_recheck_without_a_transaction_id_is_a_409(finance):
+    payment = PaymentFactory(unsent=True)
+    with mock.patch("apps.payments.checkout.verify_payment") as verify:
+        response = finance.post(detail_url(payment, "recheck/"))
+    assert (response.status_code, response.json()["code"]) == (409, "VALIDATION_ERROR")
+    verify.assert_not_called()
+    assert not AuditLog.objects.filter(action="payment.rechecked").exists()
+
+
+@pytest.mark.parametrize("deployed", [False, True])
+def test_recheck_when_the_provider_is_unreachable_is_a_502(finance, settings, deployed):
+    # Faux prestataire : transaction inconnue → erreur du prestataire ; en production simulée : prestataire non configuré
+    settings.DEPLOYED = deployed
+    payment = PaymentFactory(provider_transaction_id="inconnue")
+    response = finance.post(detail_url(payment, "recheck/"))
+    body = response.json()
+    assert (response.status_code, body["code"]) == (502, "SERVER_ERROR")
+    assert "n'a pas répondu" in body["message"]
+    payment.refresh_from_db()
+    assert payment.status == Payment.Status.PENDING
+    assert not AuditLog.objects.filter(action="payment.rechecked").exists()
+
+
+def test_recheck_of_an_unknown_payment_is_a_404_and_refused_to_support(finance, client):
+    assert finance.post(f"{PAYMENTS}999999/recheck/").status_code == 404
+    support = APIClient()
+    verified_client(support, SUPPORT)
+    assert support.post(detail_url(PaymentFactory(), "recheck/")).status_code == 403
+
+
+# --- Demande de remboursement ------------------------------------------------------------------------------------
+
+
+def request_refund(client, payment, **body):
+    return client.post(
+        detail_url(payment, "refunds/"), json.dumps(body), content_type="application/json"
+    )
+
+
+def test_a_refund_request_is_created_and_audited(finance):
+    payment = PaymentFactory(succeeded=True, amount=15000, msisdn="+2290197123456")
+    response = request_refund(finance, payment, amount=5000, reason="Kit abîmé")
+    assert response.status_code == 201
+    body = response.json()
+    refund = Refund.objects.get()
+    assert "+2290197123456" not in response.content.decode()
+    assert body == {
+        "id": refund.pk,
+        "createdAt": body["createdAt"],
+        "amount": 5000,
+        "reason": "Kit abîmé",
+        "processed": False,
+        "processedAt": None,
+        "processedBy": None,
+        "reference": "",
+        "paymentId": payment.pk,
+        "orderReference": payment.order.reference,
+        "merchantReference": payment.merchant_reference,
+        "providerTransactionId": payment.provider_transaction_id,
+        "network": "mtn",
+        "maskedMsisdn": backoffice.masked("+2290197123456"),
+        "paymentAmount": 15000,
+        "payer": payment.order.payer.get_full_name(),
+        "beneficiary": payment.order.beneficiary.get_full_name(),
+    }
+    assert AuditLog.objects.filter(action="refund.requested", target_id=str(payment.pk)).exists()
+    # Un second remboursement dans la limite du reste est accepté
+    assert request_refund(finance, payment, amount=10000, reason="Solde").status_code == 201
+
+
+def test_a_refund_above_the_remainder_or_on_an_unsuccessful_payment_is_a_409(finance):
+    payment = PaymentFactory(succeeded=True, amount=15000)
+    response = request_refund(finance, payment, amount=20000, reason="Trop")
+    assert (response.status_code, response.json()["code"]) == (409, "VALIDATION_ERROR")
+    assert response.json()["message"] == "Montant remboursable : 15000 FCFA au plus."
+    failed = request_refund(finance, PaymentFactory(failed=True), amount=100, reason="x")
+    assert failed.status_code == 409 and "paiement réussi" in failed.json()["message"]
+    assert not Refund.objects.exists()
+
+
+@pytest.mark.parametrize(
+    ("body", "field"),
+    [
+        ({"amount": 0, "reason": "x"}, "amount"),
+        ({"amount": -5, "reason": "x"}, "amount"),
+        ({"reason": "x"}, "amount"),
+        ({"amount": 100, "reason": ""}, "reason"),
+        ({"amount": 100, "reason": "   "}, "reason"),
+        ({"amount": 100}, "reason"),
+    ],
+)
+def test_an_invalid_refund_body_is_a_400_with_its_field(finance, body, field):
+    response = request_refund(finance, PaymentFactory(succeeded=True), **body)
+    assert (response.status_code, response.json()["code"]) == (400, "VALIDATION_ERROR")
+    assert field in response.json()["fields"] and not Refund.objects.exists()
+
+
+def test_a_refund_request_on_an_unknown_payment_is_a_404_and_refused_to_support(finance):
+    assert (
+        finance.post(f"{PAYMENTS}999999/refunds/", {"amount": 1, "reason": "x"}).status_code == 404
+    )
+    support = APIClient()
+    verified_client(support, SUPPORT)
+    payment = PaymentFactory(succeeded=True)
+    assert request_refund(support, payment, amount=1, reason="x").status_code == 403

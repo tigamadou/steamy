@@ -3,24 +3,32 @@ API du backoffice Next.js pour les paiements et les remboursements (§7.8, WAD11
 des services de `backoffice.py`, réservées à la Finance (D72). Écritures journalisées par les services ou par la vue.
 """
 
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.audit import audit
 from apps.core.groups import FINANCE
 from apps.core.models import AuditLog
+from libs.errors import ApiError
 from libs.pagination import PagePagination
 from libs.permissions import IsStaffVerified
 
-from . import backoffice
+from . import backoffice, checkout
 from .backoffice_serializers import (
+    BackofficeRefundSerializer,
     PaymentDetailSerializer,
     PaymentPageSerializer,
     PaymentQuerySerializer,
+    RefundRequestSerializer,
 )
-from .models import Payment
+from .models import Payment, Refund
+from .providers import PaymentProviderError
+from .utils import WebhookRejected
 
 FINANCE_ONLY = [IsStaffVerified.of(FINANCE)]
 
@@ -75,6 +83,13 @@ class PaymentListView(APIView):
         return Response(PaymentPageSerializer(data).data)
 
 
+def refund_queryset():
+    """Remboursements avec de quoi décrire leur paiement et leur commande sans requête par ligne."""
+    return Refund.objects.select_related(
+        "payment__order__payer", "payment__order__beneficiary", "processed_by"
+    )
+
+
 def load_detail(pk: int) -> Payment:
     """Paiement avec ce que sa fiche affiche : autres tentatives, remboursements, entrées d'audit (paiement ou commande)."""
     payment = get_object_or_404(
@@ -105,3 +120,72 @@ class PaymentDetailView(APIView):
     @extend_schema(operation_id="backoffice_payments_retrieve", responses=PaymentDetailSerializer)
     def get(self, request, pk):
         return Response(PaymentDetailSerializer(load_detail(pk)).data)
+
+
+class PaymentRecheckView(APIView):
+    """« Revérifier » : relit la transaction chez le prestataire et applique le résultat."""
+
+    permission_classes = FINANCE_ONLY
+
+    @extend_schema(
+        operation_id="backoffice_payments_recheck",
+        request=None,
+        responses=PaymentDetailSerializer,
+    )
+    def post(self, request, pk):
+        payment = get_object_or_404(Payment.objects.select_related("order"), pk=pk)
+        if not payment.provider_transaction_id:
+            raise ApiError(
+                "VALIDATION_ERROR",
+                "Ce paiement n'a pas de transaction chez le prestataire : rien à relire.",
+                status_code=status.HTTP_409_CONFLICT,
+            )
+        before = payment.status
+        try:
+            checked = checkout.verify_payment(payment)
+        except (PaymentProviderError, ImproperlyConfigured, WebhookRejected) as error:
+            raise ApiError(
+                "SERVER_ERROR",
+                "Le prestataire de paiement n'a pas répondu : réessayez dans quelques instants.",
+                status_code=status.HTTP_502_BAD_GATEWAY,
+            ) from error
+        audit(
+            "payment.rechecked",
+            request=request,
+            actor=request.user,
+            target=checked,
+            data={"before": before, "after": checked.status},
+        )
+        return Response(PaymentDetailSerializer(load_detail(pk)).data)
+
+
+class PaymentRefundRequestView(APIView):
+    """Demande de remboursement sur un paiement réussi, dans la limite du reste remboursable."""
+
+    permission_classes = FINANCE_ONLY
+
+    @extend_schema(
+        operation_id="backoffice_payments_refunds_create",
+        request=RefundRequestSerializer,
+        responses={201: BackofficeRefundSerializer},
+    )
+    def post(self, request, pk):
+        payment = get_object_or_404(Payment, pk=pk)
+        body = RefundRequestSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        try:
+            refund = backoffice.request_refund(
+                payment,
+                body.validated_data["amount"],
+                body.validated_data["reason"],
+                request.user,
+                request,
+            )
+        except backoffice.BackofficeError as error:
+            raise ApiError(
+                "VALIDATION_ERROR", str(error), status_code=status.HTTP_409_CONFLICT
+            ) from error
+        return Response(
+            BackofficeRefundSerializer(refund_queryset().get(pk=refund.pk)).data,
+            status=status.HTTP_201_CREATED,
+        )

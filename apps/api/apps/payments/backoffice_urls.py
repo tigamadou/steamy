@@ -7,4 +7,14 @@ from . import backoffice_api as api
 urlpatterns = [
     path("payments/", api.PaymentListView.as_view(), name="backoffice-payments"),
     path("payments/<int:pk>/", api.PaymentDetailView.as_view(), name="backoffice-payment"),
+    path(
+        "payments/<int:pk>/recheck/",
+        api.PaymentRecheckView.as_view(),
+        name="backoffice-payment-recheck",
+    ),
+    path(
+        "payments/<int:pk>/refunds/",
+        api.PaymentRefundRequestView.as_view(),
+        name="backoffice-payment-refunds",
+    ),
 ]
