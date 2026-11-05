@@ -24,6 +24,10 @@ from .backoffice_serializers import (
     PaymentDetailSerializer,
     PaymentPageSerializer,
     PaymentQuerySerializer,
+    ProcessRefundSerializer,
+    RefundPageSerializer,
+    RefundProcessResultSerializer,
+    RefundQuerySerializer,
     RefundRequestSerializer,
 )
 from .models import Payment, Refund
@@ -189,3 +193,58 @@ class PaymentRefundRequestView(APIView):
             BackofficeRefundSerializer(refund_queryset().get(pk=refund.pk)).data,
             status=status.HTTP_201_CREATED,
         )
+
+
+class RefundListView(APIView):
+    """WAD11 : remboursements à traiter (défaut, du plus ancien au plus récent) ou déjà traités."""
+
+    permission_classes = FINANCE_ONLY
+
+    @extend_schema(
+        operation_id="backoffice_refunds_list",
+        parameters=[RefundQuerySerializer, *PAGE_PARAMETERS],
+        responses=RefundPageSerializer,
+    )
+    def get(self, request):
+        query = RefundQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        processed = query.validated_data["processed"]
+        refunds = refund_queryset().filter(processed=processed)
+        refunds = (
+            refunds.order_by("-processed_at", "-id")
+            if processed
+            else refunds.order_by("created_at", "id")
+        )
+        paginator = PagePagination()
+        page = paginator.paginate_queryset(refunds, request, view=self)
+        data = {**paginator.get_paginated_response(None).data, "results": page}
+        return Response(RefundPageSerializer(data).data)
+
+
+class RefundProcessView(APIView):
+    """Marque un remboursement « fait » une fois l'argent rendu, avec sa référence chez l'opérateur."""
+
+    permission_classes = FINANCE_ONLY
+
+    @extend_schema(
+        operation_id="backoffice_refunds_process",
+        request=ProcessRefundSerializer,
+        responses=RefundProcessResultSerializer,
+    )
+    def post(self, request, pk):
+        refund = get_object_or_404(Refund, pk=pk)
+        body = ProcessRefundSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        try:
+            order_refunded = backoffice.process_refund(
+                refund, body.validated_data["reference"], request.user, request
+            )
+        except backoffice.BackofficeError as error:
+            already = isinstance(error, backoffice.AlreadyProcessedError)
+            raise ApiError(
+                "VALIDATION_ERROR",
+                str(error),
+                status_code=status.HTTP_409_CONFLICT if already else status.HTTP_400_BAD_REQUEST,
+            ) from error
+        result = {"refund": refund_queryset().get(pk=pk), "order_refunded": order_refunded}
+        return Response(RefundProcessResultSerializer(result).data)

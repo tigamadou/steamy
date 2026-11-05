@@ -17,4 +17,10 @@ urlpatterns = [
         api.PaymentRefundRequestView.as_view(),
         name="backoffice-payment-refunds",
     ),
+    path("refunds/", api.RefundListView.as_view(), name="backoffice-refunds"),
+    path(
+        "refunds/<int:pk>/process/",
+        api.RefundProcessView.as_view(),
+        name="backoffice-refund-process",
+    ),
 ]
