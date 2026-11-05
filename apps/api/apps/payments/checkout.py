@@ -16,9 +16,7 @@ from libs.errors import ApiError
 from .models import Order, Payment
 from .providers import (
     Charge,
-    PaymentEvent,
     PaymentProviderError,
-    PaymentStatus,
     PaymentTemporaryError,
     get_provider,
 )
@@ -35,6 +33,14 @@ IN_PROGRESS = (Payment.Status.INITIATED, Payment.Status.PENDING)
 #: pour abandonné (demande USSD ignorée) et le payeur peut réessayer ; si ce paiement aboutit quand même, le second
 #: débit est remboursé à l'exécution (paiement en double, C17).
 PAYMENT_IN_PROGRESS_TTL = timedelta(minutes=5)
+
+#: Échecs qui ne sont pas définitifs : un paiement ainsi échoué est revérifié chez le prestataire et peut encore
+#: passer à réussi (le payeur a validé après le délai, l'initiation n'avait pas abouti côté Steamy…)
+RETRIABLE_FAILURES = (
+    Payment.FailureCode.DECLINED,
+    Payment.FailureCode.EXPIRED,
+    Payment.FailureCode.INITIATION_LOST,
+)
 
 
 def check_payable(order: Order) -> None:
@@ -131,33 +137,20 @@ def initiate_payment(order: Order, *, country: str, network: str, msisdn: str) -
 
 
 def verify_payment(payment: Payment) -> Payment:
-    """Relit la transaction chez le prestataire et applique le résultat (webhook, réconciliation, « Revérifier »).
+    """Relit la transaction chez le prestataire et applique le résultat (réconciliation, « Revérifier »).
     Renvoie une instance **neuve** du paiement (avec `order` chargée), à jour. Sans identifiant de transaction, ne
-    fait rien. Les erreurs du prestataire, `ImproperlyConfigured` et `WebhookRejected` se propagent."""
-    from .utils import handle_payment_event
+    fait rien. Les erreurs du prestataire et `ImproperlyConfigured` se propagent."""
+    from .utils import apply_transaction
 
     if payment.provider_transaction_id:
-        provider = get_provider(payment.provider)
-        status = provider.fetch_transaction(payment.provider_transaction_id).status
-        if status in (PaymentStatus.SUCCEEDED, PaymentStatus.FAILED):
-            handle_payment_event(
-                payment.provider,
-                PaymentEvent(
-                    reference=payment.order.reference,
-                    provider_tx_id=payment.provider_transaction_id,
-                    amount=payment.amount,
-                    currency=payment.currency,
-                    status=status,
-                ),
-            )
+        tx = get_provider(payment.provider).fetch_transaction(payment.provider_transaction_id)
+        apply_transaction(payment.provider, tx)
         return Payment.objects.select_related("order").get(pk=payment.pk)
     return payment
 
 
 def reconcile_pending_payments() -> int:
     """Interroge le prestataire pour les paiements sans issue depuis 10 min (webhook perdu). Renvoie leur nombre."""
-    from .utils import WebhookRejected
-
     stale = Payment.objects.select_related("order").filter(
         status__in=IN_PROGRESS,
         created_at__lte=timezone.now() - RECONCILE_AFTER,
@@ -175,9 +168,6 @@ def reconcile_pending_payments() -> int:
             result = verify_payment(payment)
         except (PaymentProviderError, ImproperlyConfigured):
             log.warning("Réconciliation du paiement %s impossible pour l'instant", payment.pk)
-            continue
-        except WebhookRejected:  # pragma: no cover - commande et transaction viennent de notre base
-            log.exception("Réconciliation du paiement %s refusée", payment.pk)
             continue
         if result.status in (Payment.Status.SUCCEEDED, Payment.Status.FAILED):
             settled += 1

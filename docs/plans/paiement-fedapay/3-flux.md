@@ -63,7 +63,7 @@ autorité). Plan du chantier `paiement-fedapay`, lot 3 sur 5.
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 4
+Statut : 🟡 en cours · Prochaine tâche : 5
 
 - [x] **Tâche 1** Support de test du lot (`test_flux_support.py`) · `feature/paiement-fedapay-flux`
   - [x] Aides : transaction relue simulée, livraison d'un webhook signé, rejeu concurrent
@@ -72,10 +72,10 @@ Statut : 🟡 en cours · Prochaine tâche : 4
   - [x] `initiate_payment` réécrit
 - [x] **Tâche 3** Exécution post-paiement : remboursement à traiter, commande `cancelled`, message « sera remboursé » (§ 8)
   - [x] `refund(payment, reason, amount=None)` et branche `settle`
-- [ ] **Tâche 4** Cœur de vérification : `apply_transaction`, `verify_payment`, `handle_payment_event` (§ 4)
-  - [ ] Rattachement, montant et devise, table des statuts, échec non définitif, écart → `Refund`
-  - [ ] Observations (frais, statut brut, `checked_at`) avant l'idempotence
-  - [ ] Adaptation des tests existants qui appellent `handle_payment_event`
+- [x] **Tâche 4** Cœur de vérification : `apply_transaction`, `verify_payment`, `handle_payment_event` (§ 4)
+  - [x] Rattachement, montant et devise, table des statuts, échec non définitif, écart → `Refund`
+  - [x] Observations (frais, statut brut, `checked_at`) avant l'idempotence
+  - [x] Adaptation des tests existants qui appellent `handle_payment_event`
 - [ ] **Tâche 5** Webhook : 400 seulement signature invalide / prestataire inconnu, sinon 200 (§ 5)
 - [ ] **Tâche 6** Réconciliation : 10 min, expiration 24 h, rattrapage 48 h, erreur isolée (§ 6)
 - [ ] **Tâche 7** Contrat OpenAPI et documentation de code

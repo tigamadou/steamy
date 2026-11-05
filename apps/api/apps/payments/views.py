@@ -49,7 +49,7 @@ from .serializers import (
     PaymentRequestSerializer,
     PaymentSerializer,
 )
-from .utils import WebhookRejected, handle_payment_event
+from .utils import handle_payment_event
 
 logger = logging.getLogger(__name__)
 
@@ -343,19 +343,15 @@ def provider_webhook(request, provider_name: str):
         data = json.loads(request.body)
         if not isinstance(data, dict):
             raise ValueError("corps qui n'est pas un objet")
-        event = provider.parse_event(data)
     except (ValueError, UnicodeDecodeError) as exc:
         logger.warning("Webhook %s : notification illisible (%s)", provider_name, exc)
         return rejected
-    if event is None:
+    provider_tx_id = provider.transaction_id_of(data)
+    if provider_tx_id is None:
         return Response({"ok": True})  # événement sans rapport avec un paiement
 
     try:
-        if not handle_payment_event(provider.name, event):
-            return rejected
-    except WebhookRejected as exc:
-        logger.warning("Webhook %s refusé : %s", provider_name, exc)
-        return rejected
+        handle_payment_event(provider.name, provider_tx_id)
     except Exception:
         logger.exception("Webhook %s : erreur de traitement", provider_name)
         return rejected

@@ -27,9 +27,7 @@ def cancelled_kit_order(**kwargs):
     order = OrderFactory(
         cancelled=True, kind=Order.Kind.KIT, items=[], subtotal=kit.price, **kwargs
     )
-    item = OrderItemFactory(
-        order=order, course=None, kit=kit, unit_price=kit.price, title=kit.name
-    )
+    item = OrderItemFactory(order=order, course=None, kit=kit, unit_price=kit.price, title=kit.name)
     now = timezone.now()
     StockReservation.objects.create(
         kit=kit, order_item=item, quantity=1, expires_at=now, released_at=now

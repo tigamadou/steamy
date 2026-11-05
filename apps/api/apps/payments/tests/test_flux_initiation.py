@@ -1,7 +1,6 @@
 """Initiation d'un paiement (ADR 0008 §3) : prestataire disponible, réseau pris en charge, référence marchande
 unique par tentative, identifiant de transaction jamais perdu."""
 
-import threading
 from unittest import mock
 
 import pytest

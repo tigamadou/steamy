@@ -12,10 +12,9 @@ from apps.accounts.tests.factories import ParentFactory, TeacherFactory
 from apps.payments import tasks
 from apps.payments.invoices import filename, issue_invoice
 from apps.payments.models import Invoice, Order
-from apps.payments.providers import PaymentEvent, PaymentStatus
-from apps.payments.utils import handle_payment_event
 
 from .factories import OrderFactory, PaymentFactory
+from .test_flux_support import deliver
 
 pytestmark = pytest.mark.django_db
 
@@ -29,15 +28,8 @@ def client_for(user=None):
 
 def pay(order, commit):
     payment = PaymentFactory(order=order)
-    event = PaymentEvent(
-        order.reference,
-        payment.provider_transaction_id,
-        order.total,
-        "XOF",
-        PaymentStatus.SUCCEEDED,
-    )
     with commit(execute=True):
-        handle_payment_event("fake", event)
+        deliver(payment)
     order.refresh_from_db()
     return payment
 

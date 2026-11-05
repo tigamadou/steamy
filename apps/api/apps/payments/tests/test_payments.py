@@ -23,7 +23,6 @@ from apps.payments.checkout import PAYMENT_IN_PROGRESS_TTL, reconcile_pending_pa
 from apps.payments.fulfillment import refund
 from apps.payments.models import Order, Payment, Refund
 from apps.payments.providers import (
-    PaymentEvent,
     PaymentProviderError,
     PaymentStatus,
     PaymentTemporaryError,
@@ -34,7 +33,14 @@ from apps.payments.utils import handle_payment_event
 from apps.shop.models import Cart, CartItem, StockReservation
 from apps.shop.tests.factories import DeliveryZoneFactory, KitFactory
 
-from .factories import OrderFactory, PaymentFactory, link_child, load_referentials
+from .factories import (
+    OrderFactory,
+    PaymentFactory,
+    fake_transaction,
+    link_child,
+    load_referentials,
+)
+from .test_flux_support import deliver, run_concurrently
 
 pytestmark = pytest.mark.django_db
 
@@ -109,14 +115,7 @@ def test_parent_pays_and_the_child_is_enrolled_once(parent, course_order, commit
     read = client_for(parent).get(f"/api/payments/payments/{payment.pk}/").json()
     assert read["status"] == "succeeded"
     # Rejeu du même webhook : rien ne change
-    event = PaymentEvent(
-        course_order.reference,
-        payment.provider_transaction_id,
-        15000,
-        "XOF",
-        PaymentStatus.SUCCEEDED,
-    )
-    assert handle_payment_event("fake", event) is True
+    assert deliver(payment) == payment
     assert Enrollment.objects.count() == 1 and not Refund.objects.exists()
 
 
@@ -417,21 +416,9 @@ def test_concurrent_webhooks_fulfil_the_order_once():
     load_referentials()
     order = OrderFactory()
     payment = PaymentFactory(order=order, provider_transaction_id="TX-1")
-    event = PaymentEvent(order.reference, "TX-1", order.total, "XOF", PaymentStatus.SUCCEEDED)
-    barrier = threading.Barrier(2)
-
-    def deliver():
-        try:
-            barrier.wait()
-            handle_payment_event("fake", event)
-        finally:
-            connection.close()
-
-    threads = [threading.Thread(target=deliver) for _ in range(2)]
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
+    fake_transaction(payment, PaymentStatus.SUCCEEDED)
+    results = run_concurrently(*[lambda: handle_payment_event("fake", "TX-1")] * 2)
+    assert not [r for r in results if isinstance(r, BaseException)]
     order.refresh_from_db()
     payment.refresh_from_db()
     assert order.status == Order.Status.PAID and payment.status == Payment.Status.SUCCEEDED
@@ -444,16 +431,7 @@ def test_second_successful_payment_is_refunded(course_order):
     first = PaymentFactory(order=course_order)
     second = PaymentFactory(order=course_order)
     for payment in (first, second):
-        handle_payment_event(
-            "fake",
-            PaymentEvent(
-                course_order.reference,
-                payment.provider_transaction_id,
-                15000,
-                "XOF",
-                PaymentStatus.SUCCEEDED,
-            ),
-        )
+        deliver(payment)
     course_order.refresh_from_db()
     assert course_order.status == Order.Status.PAID
     refund_ = Refund.objects.get()
@@ -461,10 +439,16 @@ def test_second_successful_payment_is_refunded(course_order):
     assert AuditLog.objects.filter(action="payment.refunded").exists()
 
 
-def test_notification_for_an_unknown_transaction_is_recorded(course_order):
-    event = PaymentEvent(course_order.reference, "TX-HORS", 15000, "XOF", PaymentStatus.PENDING)
-    assert handle_payment_event("fake", event) is True
-    assert Payment.objects.get().status == Payment.Status.PENDING
+def test_unknown_transaction_has_no_effect(course_order):
+    FakePaymentProvider().create_transaction(
+        provider_tx_id="TX-HORS",
+        reference="CMD-HORS",
+        merchant_reference="CMD-HORS-1",
+        amount=15000,
+        currency="XOF",
+    )
+    assert handle_payment_event("fake", "TX-HORS") is None
+    assert not Payment.objects.exists()
 
 
 def expire(order):
@@ -503,16 +487,7 @@ def test_late_payment_is_honoured_when_the_kit_is_still_available(parent):
     order = kit_order_for(parent, kit)
     payment = PaymentFactory(order=order)
     expire(order)
-    handle_payment_event(
-        "fake",
-        PaymentEvent(
-            order.reference,
-            payment.provider_transaction_id,
-            order.total,
-            "XOF",
-            PaymentStatus.SUCCEEDED,
-        ),
-    )
+    deliver(payment)
     order.refresh_from_db()
     kit.refresh_from_db()
     assert order.status == Order.Status.PAID and kit.stock_quantity == 1
@@ -527,16 +502,7 @@ def test_late_payment_is_refunded_when_the_kit_is_gone(parent):
     payment = PaymentFactory(order=order)
     expire(order)
     kit_order_for(ParentFactory(), kit)  # le dernier kit est parti ailleurs
-    handle_payment_event(
-        "fake",
-        PaymentEvent(
-            order.reference,
-            payment.provider_transaction_id,
-            order.total,
-            "XOF",
-            PaymentStatus.SUCCEEDED,
-        ),
-    )
+    deliver(payment)
     order.refresh_from_db()
     assert order.status == Order.Status.CANCELLED
     refund_ = Refund.objects.get()
@@ -549,16 +515,7 @@ def test_late_payment_is_refunded_when_the_kit_is_gone(parent):
 def test_late_payment_of_a_course_is_honoured(course_order):
     payment = PaymentFactory(order=course_order)
     expire(course_order)
-    handle_payment_event(
-        "fake",
-        PaymentEvent(
-            course_order.reference,
-            payment.provider_transaction_id,
-            15000,
-            "XOF",
-            PaymentStatus.SUCCEEDED,
-        ),
-    )
+    deliver(payment)
     course_order.refresh_from_db()
     assert course_order.status == Order.Status.PAID
 
@@ -576,16 +533,7 @@ def test_guest_without_payer_and_learnerless_order_are_notified_quietly():
         payer=None, beneficiary=TeacherFactory(), guest_phone="", kind="kit", items=[]
     )
     payment = PaymentFactory(order=order)
-    handle_payment_event(
-        "fake",
-        PaymentEvent(
-            order.reference,
-            payment.provider_transaction_id,
-            order.total,
-            "XOF",
-            PaymentStatus.SUCCEEDED,
-        ),
-    )
+    deliver(payment)
     order.refresh_from_db()
     assert order.status == Order.Status.PAID and not Notification.objects.exists()
 
