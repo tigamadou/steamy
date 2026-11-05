@@ -76,14 +76,14 @@ Statut : ⬜ à faire · Prochaine tâche : 1
 - [x] **Tâche 4** Écran Détail d'un paiement : tentatives, remboursements, journal, actions
   - [x] `PaymentDetail`, `RecheckButton`, `RefundRequestModal` et leurs tests
   - [x] Page `/backoffice/paiements/[id]` et son test
-- [ ] **Tâche 5** Écran Remboursements : à traiter / traités, « Marquer comme remboursé »
-  - [ ] `RefundsTable`, `ProcessRefundModal` et leurs tests
-  - [ ] Page `/backoffice/remboursements` et son test
+- [x] **Tâche 5** Écran Remboursements : à traiter / traités, « Marquer comme remboursé »
+  - [x] `RefundsTable`, `ProcessRefundModal` et leurs tests
+  - [x] Page `/backoffice/remboursements` et son test
 - [ ] **Tâche 6** Vue d'ensemble : « À traiter » suit le chemin web
 - [ ] **Tâche 7** e2e sur fixtures, contrôle visuel, SPEC-ECRANS (WAD11 et nouvelles lignes)
 - [ ] **Tâche 8** Vérification du lot
 
-> Reprise : noms retenus du client régénéré : `PaymentPage {count,next,previous,results,totals{volume,count,succeeded,failed,failureRate}}`, `PaymentRow`, `PaymentDetail` (`refundable`, `attempts`, `refunds`, `auditLog`, `order`, `maskedMsisdn`, `providerFees`, `checkedAt`), `RefundPage`, `BackofficeRefund`, `RefundSummary`, `RefundProcessResult`, `Todo.path?` ; paramètres API `status,network,country,kind,from,to,q,page` et `processed`. Prochaine étape : tâche 2. Tâche 3 : pas de `paiements/loading.tsx` (le `backoffice/loading.tsx` parent couvre déjà le segment) ; réseaux lus par `GET referentials/payment-networks/` sans pays.
+> Reprise : noms retenus du client régénéré : `PaymentPage {count,next,previous,results,totals{volume,count,succeeded,failed,failureRate}}`, `PaymentRow`, `PaymentDetail` (`refundable`, `attempts`, `refunds`, `auditLog`, `order`, `maskedMsisdn`, `providerFees`, `checkedAt`), `RefundPage`, `BackofficeRefund`, `RefundSummary`, `RefundProcessResult`, `Todo.path?` ; paramètres API `status,network,country,kind,from,to,q,page` et `processed`. Prochaine étape : tâche 2. Tâche 3 : pas de `paiements/loading.tsx` (le `backoffice/loading.tsx` parent couvre déjà le segment) ; réseaux lus par `GET referentials/payment-networks/` sans pays. Tâche 5 : onglets « À traiter » / « Traités » en liens d'encre (`RefundTabs`, le `Tabs` du DS emploie la couleur primaire, interdite au back-office) ; le résultat d'une action est annoncé par `RefundsTable` (la ligne quitte la liste au rafraîchissement).
 
 Statuts : ⬜ à faire · 🟡 en cours · ✅ terminé. Cocher une case **seulement après tests verts**. Interruption en cours
 de tâche : cocher ce qui est fini et noter ici `> Reprise :` l'étape en cours, les fichiers touchés et la prochaine
