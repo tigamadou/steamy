@@ -15,6 +15,8 @@ from apps.core.groups import CONTENT, FINANCE, SUPER_ADMIN, SUPPORT
 from apps.core.tests.staff import staff_member, verified_client
 from apps.impact.models import ImpactReport, KpiDefinition, KpiValue
 from apps.impact.periods import MONTH, QUARTER, YEAR, Period
+from apps.payments.models import Payment
+from apps.payments.tests.factories import PaymentFactory, RefundFactory
 from apps.referentials.models import Relationship
 
 pytestmark = pytest.mark.django_db
@@ -78,6 +80,34 @@ def test_a_superuser_without_group_reads_everything(client):
 # --- WAD01 -------------------------------------------------------------------------------------------------
 
 
+CONSENTS_ENTRY = {
+    "kind": "consents_pending",
+    "label": "Consentements en attente",
+    "count": 1,
+    "adminPath": "/admin/accounts/consentrequest/?status__exact=pending",
+}
+
+
+def finance_entries(failed, refunds, since=None):
+    since = since or timezone.localdate() - datetime.timedelta(days=7)
+    return [
+        {
+            "kind": "payments_failed",
+            "label": "Paiements échoués",
+            "count": failed,
+            "path": f"/backoffice/paiements?status=failed&from={since.isoformat()}",
+            "adminPath": "/admin/payments/payment/?status__exact=failed",
+        },
+        {
+            "kind": "refunds_pending",
+            "label": "Remboursements à traiter",
+            "count": refunds,
+            "path": "/backoffice/remboursements",
+            "adminPath": "/admin/payments/refund/?processed__exact=0",
+        },
+    ]
+
+
 def test_overview_todo_is_filtered_by_group(client):
     pending_consent()
     expired = pending_consent()
@@ -85,18 +115,33 @@ def test_overview_todo_is_filtered_by_group(client):
         expires_at=timezone.now() - datetime.timedelta(minutes=1)
     )
     verified_client(client, SUPPORT)
-    todo = client.get(OVERVIEW).json()["todo"]
-    assert todo == [
-        {
-            "kind": "consents_pending",
-            "label": "Consentements en attente",
-            "count": 1,
-            "adminPath": "/admin/accounts/consentrequest/?status__exact=pending",
-        }
-    ]
+    assert client.get(OVERVIEW).json()["todo"] == [CONSENTS_ENTRY]
     client.logout()
     verified_client(client, FINANCE)
+    assert client.get(OVERVIEW).json()["todo"] == finance_entries(0, 0)
+    client.logout()
+    verified_client(client, CONTENT)
     assert client.get(OVERVIEW).json()["todo"] == []
+    client.logout()
+    verified_client(client, SUPER_ADMIN)
+    assert client.get(OVERVIEW).json()["todo"] == [CONSENTS_ENTRY, *finance_entries(0, 0)]
+    client.logout()
+    verified_client(client, None, is_superuser=True)
+    assert client.get(OVERVIEW).json()["todo"] == [CONSENTS_ENTRY, *finance_entries(0, 0)]
+
+
+def test_finance_todo_counts_recent_failed_payments_and_pending_refunds(client):
+    PaymentFactory(failed=True)
+    PaymentFactory(failed=True)
+    old = PaymentFactory(failed=True)
+    Payment.objects.filter(pk=old.pk).update(created_at=timezone.now() - datetime.timedelta(days=8))
+    PaymentFactory()
+    PaymentFactory(succeeded=True)
+    RefundFactory()
+    RefundFactory()
+    RefundFactory(done=True)
+    verified_client(client, FINANCE)
+    assert client.get(OVERVIEW).json()["todo"] == finance_entries(2, 2)
 
 
 def test_overview_counts_highlight_and_report_deadline(client):
