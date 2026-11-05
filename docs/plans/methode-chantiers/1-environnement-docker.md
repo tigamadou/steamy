@@ -19,29 +19,43 @@
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 1.1
+Statut : ✅ terminé
 
-- [ ] **1.1** Réseau d'infrastructure partagé et nom de projet · `compose.yml`, `compose.e2e.yml`
-  - [ ] Réseau `steamy-infra`, `name: steamy`, services d'infra attachés
-  - [ ] Stack e2e isolée (réseau et image web par lot)
-- [ ] **1.2** Surcouche `compose.agent.yml`
-  - [ ] Services api, api-migrate, worker, web de l'agent, sans port
-  - [ ] Variables d'isolation (`AGENT_LOT`, base, Redis, bucket)
-- [ ] **1.3** Script `scripts/agent-env.sh` et cibles `agent-*`
-  - [ ] Préalables, lot valide, trap d'échec, worktree
-  - [ ] Base, buckets, numéros Redis, `.agent.env`
-  - [ ] Budget mémoire, `down` conservatoire, `status`
-- [ ] **1.4** Cibles standard : `lint`, `typecheck`, `generate`, `check-generated`, `migrations-check`, `test-cible`
-  - [ ] `scripts/cibles.sh` (routage et garde par profil)
-  - [ ] Makefile routé vers l'agent, cibles existantes conservées
-- [ ] **1.5** `make coverage-diff BASE=…`
-  - [ ] `scripts/coverage-diff.sh` (tests touchés + diff-cover)
-  - [ ] `coverage-api`/`coverage-web` paramétrés par `BASE`
-- [ ] **1.6** `make e2e-fixtures` en conteneur et `make e2e` par lot
-- [ ] **1.7** Mesures mémoire et `docs/infra/agents.md`
-- [ ] **1.8** Vérification du lot
+- [x] **1.1** Réseau d'infrastructure partagé et nom de projet · `compose.yml`, `compose.e2e.yml`
+  - [x] Réseau `steamy-infra`, `name: steamy`, services d'infra attachés
+  - [x] Stack e2e isolée (réseau et image web par lot)
+- [x] **1.2** Surcouche `compose.agent.yml`
+  - [x] Services api, api-migrate, worker, web de l'agent, sans port
+  - [x] Variables d'isolation (`AGENT_LOT`, base, Redis, bucket)
+- [x] **1.3** Script `scripts/agent-env.sh` et cibles `agent-*`
+  - [x] Préalables, lot valide, trap d'échec, worktree
+  - [x] Base, buckets, numéros Redis, `.agent.env`
+  - [x] Budget mémoire, `down` conservatoire, `status`
+- [x] **1.4** Cibles standard : `lint`, `typecheck`, `generate`, `check-generated`, `migrations-check`, `test-cible`
+  - [x] `scripts/cibles.sh` (routage et garde par profil)
+  - [x] Makefile routé vers l'agent, cibles existantes conservées
+- [x] **1.5** `make coverage-diff BASE=…`
+  - [x] `scripts/coverage-diff.sh` (tests touchés + diff-cover)
+  - [x] `coverage-api`/`coverage-web` paramétrés par `BASE`
+- [x] **1.6** `make e2e-fixtures` en conteneur et `make e2e` par lot
+- [x] **1.7** Mesures mémoire et `docs/infra/agents.md`
+- [x] **1.8** Vérification du lot
+- [x] **1.9** Corrections après relecture et tests des scripts · 2026-11-05 · `scripts/tests/`, `make test-scripts`, `make shellcheck`
+  - [x] Reprise Redis, codes 75 (budget, numéros), `down` sûr (numéros validés, `AGENT_ACTIF=0` garanti, jeton rendu)
+  - [x] `coverage-diff` (rapports supprimés, « No lines » vérifié, code 3 autre profil, arguments sans interpolation)
+  - [x] Jeton e2e repris atomiquement, avertissements, longueur du lot, doc d'exploitation
 
 > Reprise : (à renseigner si la session est interrompue)
+
+### Arbitrages d'exécution
+
+- **Image Playwright** : Node 26.13 **sans corepack** (le `corepack enable` du service `playwright` existant échouait). `compose.yml` (`playwright-fixtures`) et `compose.e2e.yml` (`playwright`) installent pnpm 10.34.7 par npm. Volumes de dépendances `pw_*` dédiés pour `playwright-fixtures`.
+- **Tests API** lancés comme la CI : `DJANGO_ENV=test` et `DEFAULT_FILE_STORAGE` local (`make test-api`, `coverage-api`, `test-cible`, `coverage-diff`) : sous l'env de dev (api.env), un test d'admin et un test d'URL d'image échouent.
+- **Jeton e2e** : verrou `e2e.lock` dans le dépôt git commun (pris avant la construction de l'image, rendu en fin de `make e2e` / `e2e-down`), car un contrôle sur les conteneurs laissait passer deux e2e pendant la construction.
+- **diff-cover** : image `python:3.11.13-bookworm` (git requis, absent de `steamy-api`), cache pip dans le volume `steamy_pip_cache`, dépôt vide, diff fourni par `--diff-file` découpé par moitié (chemins relatifs à `apps/api` et `apps/web`).
+- **Budget** vérifié avant la création du worktree (un refus ne laisse rien derrière). `agent-down` passe `--profile fixtures` pour supprimer aussi les volumes `pw_*` du service `playwright-fixtures`.
+- **Mesures** (voir `docs/infra/agents.md` § « Valeurs déclarées ») : MAIN 2 000, web 3 400, api 1 200, complet 6 500, budget 9 910 Mo.
+- **e2e complet** (vraie stack, lot `complet`) : 426 passés, 23 en échec (429 sur la connexion), 3 ignorés, en 8 min 30 ; les specs en échec passent seules. Non attribué à l'infrastructure (l'ancien service `playwright` ne démarrait pas sur cette image, pas de base de comparaison).
 
 ## Fichiers du lot (exclusifs)
 
