@@ -19,7 +19,9 @@ Les noms de cibles `make` ci-dessous sont ceux du contrat ; le fichier projet di
 - **Énoncé** : `make agent-up LOT=<lot> PROFIL=<profil> BASE=<branche>`, `make agent-down LOT=<lot>` et
   `make agent-status`. Un environnement = un worktree `../<projet>-wt-<lot>` sur la branche du lot + ses conteneurs
   applicatifs ; les services d'infrastructure sont partagés (une base, un bucket, un espace de cache par agent,
-  jamais un service dupliqué). Chaque profil déclare son coût mémoire mesuré.
+  jamais un service dupliqué). Chaque profil déclare son coût mémoire mesuré. `agent-up` sort avec un **code
+  dédié « pas de place »** (budget mémoire ou ressource partagée épuisée), distinct des erreurs, déclaré dans le
+  fichier projet.
 - **Vérification** : `make -n agent-up LOT=x PROFIL=web BASE=y`, `make -n agent-down LOT=x` et `make -n agent-status`
   s'exécutent à blanc sans erreur « No rule » ; le document des profils cité par le fichier projet existe et donne un
   coût mémoire par profil.

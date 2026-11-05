@@ -17,14 +17,15 @@ development
 
 | Lot | Plan | Branche | Dépend de | Statut |
 | --- | --- | --- | --- | --- |
-| 1 | [Environnement Docker des agents](1-environnement-docker.md) | `feature/methode-chantiers-1` | — | ⬜ à faire |
+| 1 | [Environnement Docker des agents](1-environnement-docker.md) | `feature/methode-chantiers-1` | — | ✅ fusionné |
 | 2 | [Tests plus rapides et CI alignée](2-tests-rapides.md) | `feature/methode-chantiers-2` | 1 | ⬜ à faire |
-| 3 | [Kit générique](3-kit-generique.md) | `feature/methode-chantiers-3` | — | ⬜ à faire |
+| 3 | [Kit générique](3-kit-generique.md) | `feature/methode-chantiers-3` | — | ✅ fusionné |
 | 4 | [Chantier pilote](4-chantier-pilote.md) | selon le chantier choisi | 1, 2, 3 | ⬜ à faire |
 
 ## Fusion
 
-- Chaque lot passe par une PR vers `feature/methode-chantiers` (CI verte requise), fusionnée en merge commit.
+- Chaque lot est relu, corrigé puis fusionné **en local** dans `feature/methode-chantiers` (merge commit), sans push :
+  ces lots préparent l'outillage des PR de lot. La CI juge l'ensemble sur la PR finale vers `development`.
 - Ordre : 1 et 3 (dans n'importe quel ordre), puis 2, puis la PR `feature/methode-chantiers` → `development`
   avant de lancer le pilote, qui part de `development` à jour.
 - Points de fusion connus entre 1 et 3 : la ligne `include make/chantier.mk` du `Makefile` (ajoutée par le lot 3,

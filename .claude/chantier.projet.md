@@ -17,6 +17,10 @@ Sur l'hôte : `docker`, `make`, `git`, `gh` seulement.
   de l'agent.
 - Worktree d'intégration `../steamy-wt-integration` sur `feature/<slug>` (régénération des fichiers générés après fusion).
 - Profils : voir `docs/infra/agents.md`.
+- Codes de sortie (`docs/infra/agents.md` § « Codes de sortie ») : `agent-up` **75 = pas de place** (budget mémoire
+  ou numéro Redis épuisé : file d'attente, réessayer plus tard), 1 = erreur, 2 = usage. `make coverage-diff` **3** =
+  une partie du diff relève de l'autre profil (API ou front) : à couvrir par un lot du bon profil ou en CI.
+- La stack principale se lance toujours depuis le dépôt principal ; ne jamais supprimer un worktree monté par elle.
 
 ## isolation
 

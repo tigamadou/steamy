@@ -38,7 +38,7 @@ Dans cet ordre exact :
    - **jeton e2e** : un e2e complet seulement si le nombre d'e2e en cours (fichier `e2e.lock`) est sous le maximum déclaré (**N = 1 par défaut**) ;
    - **un seul agent par issue**.
    Sinon l'issue reste en **file d'attente** : dès qu'une place se libère, la prochaine issue prête démarre (pas de vagues fixes). Le nombre de lots actifs n'a aucun plafond fixe : il est borné par le budget.
-   Lancer un lot = créer son environnement (commande `agent-up` du fichier projet) puis l'agent, avec un brief auto-suffisant : issue, plan, worktree, branche, jeton e2e le cas échéant, consigne de reprise si relance. Les issues d'intégration tournent dans le worktree `../<projet>-wt-integration` sur `{{branche}}`.
+   Lancer un lot = créer son environnement (commande `agent-up` du fichier projet) puis l'agent. Si `agent-up` sort avec le code « pas de place » déclaré dans le fichier projet, l'issue reste en file d'attente (ce n'est pas un échec, aucun compteur) ; tout autre code non nul est un échec d'environnement. Lancer l'agent : avec un brief auto-suffisant : issue, plan, worktree, branche, jeton e2e le cas échéant, consigne de reprise si relance. Les issues d'intégration tournent dans le worktree `../<projet>-wt-integration` sur `{{branche}}`.
 
 ## 4. Agents
 - Lancés **en arrière-plan**, un par issue ; leur identifiant est noté dans leur journal `agents/<issue>.md`.
