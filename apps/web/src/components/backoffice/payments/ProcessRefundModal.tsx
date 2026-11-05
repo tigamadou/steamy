@@ -82,10 +82,13 @@ export function ProcessRefundModal({ refund, onDone }: ProcessRefundModalProps) 
 
   return (
     <>
-      <Button variant="ink-outline" size="sm" onClick={show}>
-        Marquer comme remboursé
-        <span className="sr-only"> : commande {refund.orderReference}</span>
-      </Button>
+      {/* `relative` : le texte masqué (sr-only, absolu) doit rester dans la zone défilante du tableau, sinon il élargit la page */}
+      <span className="relative inline-block">
+        <Button variant="ink-outline" size="sm" onClick={show}>
+          Marquer comme remboursé
+          <span className="sr-only"> : commande {refund.orderReference}</span>
+        </Button>
+      </span>
       <Modal
         open={open}
         onClose={() => setOpen(false)}

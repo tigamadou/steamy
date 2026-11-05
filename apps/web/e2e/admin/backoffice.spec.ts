@@ -108,5 +108,6 @@ test("6.6 ouvre l'Impact Tracker au Super-admin", async ({ page }) => {
   await openMenu(page);
   const nav = page.getByRole("navigation", { name: "Navigation du back-office" });
   await expect(nav.getByRole("link", { name: "Impact Tracker" })).toHaveAttribute("aria-current", "page");
-  await expect(nav.getByRole("link", { name: /^Paiements/ })).toHaveAttribute("href", `${API_URL}/admin/payments/`);
+  await expect(nav.getByRole("link", { name: /^Paiements/ })).toHaveAttribute("href", "/backoffice/paiements");
+  await expect(nav.getByRole("link", { name: /^Remboursements/ })).toHaveAttribute("href", "/backoffice/remboursements");
 });
