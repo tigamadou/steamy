@@ -122,7 +122,23 @@ def test_default_xdist_workers(agent_lot, cpu_count, expected):
     assert default_xdist_workers(agent_lot, cpu_count) == expected
 
 
+@pytest.mark.parametrize(
+    ("override", "expected"),
+    [("3", 3), ("1", 1), (" 5 ", 5), ("0", 2), ("", 2), ("auto", 2), ("-2", 2)],
+)
+def test_xdist_workers_override_wins_when_it_is_a_positive_number(override, expected):
+    assert default_xdist_workers("lot2", 10, override) == expected
+
+
+def test_auto_num_workers_hook_reads_the_override_first(monkeypatch):
+    monkeypatch.setenv("AGENT_LOT", "lot2")
+    monkeypatch.setenv("PYTEST_XDIST_AUTO_NUM_WORKERS", "3")
+
+    assert pytest_xdist_auto_num_workers(config=None) == 3
+
+
 def test_auto_num_workers_hook_reads_the_environment(monkeypatch):
+    monkeypatch.delenv("PYTEST_XDIST_AUTO_NUM_WORKERS", raising=False)
     monkeypatch.setenv("AGENT_LOT", "lot2")
     assert pytest_xdist_auto_num_workers(config=None) == 2
 

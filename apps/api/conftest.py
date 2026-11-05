@@ -28,16 +28,30 @@ def check_test_database_name(name: str, agent_lot: str | None, worker: str | Non
     )
 
 
-def default_xdist_workers(agent_lot: str | None, cpu_count: int | None) -> int:
-    """Processus xdist : 2 dans un environnement d'agent (budget machine partagé), sinon 4 au plus."""
+def default_xdist_workers(
+    agent_lot: str | None, cpu_count: int | None, override: str | None = None
+) -> int:
+    """
+    Processus xdist : `override` (PYTEST_XDIST_AUTO_NUM_WORKERS) s'il est un entier positif, sinon 2 dans un
+    environnement d'agent (budget machine partagé), sinon 4 au plus.
+    """
+    if override and override.strip().isdigit() and int(override) > 0:
+        return int(override)
     if agent_lot:
         return 2
     return min(4, cpu_count or 4)
 
 
 def pytest_xdist_auto_num_workers(config):
-    """Nombre de processus de `-n auto`, décidé dans le conteneur (là où AGENT_LOT est connu)."""
-    return default_xdist_workers(os.environ.get("AGENT_LOT"), os.cpu_count())
+    """
+    Nombre de processus de `-n auto`, décidé dans le conteneur (là où AGENT_LOT est connu). Ce hook passe avant
+    celui de xdist, qui lit lui aussi PYTEST_XDIST_AUTO_NUM_WORKERS : on la lit donc ici en premier.
+    """
+    return default_xdist_workers(
+        os.environ.get("AGENT_LOT"),
+        os.cpu_count(),
+        os.environ.get("PYTEST_XDIST_AUTO_NUM_WORKERS"),
+    )
 
 
 def _configured_test_database_name() -> str:
