@@ -279,6 +279,7 @@ class Payment(models.Model):
         INITIATION_LOST = "INITIATION_LOST", _("Initiation jamais aboutie")
         AMOUNT_MISMATCH = "AMOUNT_MISMATCH", _("Montant ou devise incohérents")
         DECLINED = "DECLINED", _("Paiement refusé")
+        EXPIRED = "EXPIRED", _("Paiement expiré")
 
     order = models.ForeignKey(Order, models.PROTECT, related_name="payments")
     provider = models.CharField(_("prestataire"), max_length=16, choices=PaymentProvider)
@@ -295,6 +296,16 @@ class Payment(models.Model):
     payload = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     confirmed_at = models.DateTimeField(_("confirmé le"), null=True, blank=True)
+    #: Référence envoyée au prestataire, unique par tentative : `<référence de la commande>-<rang>` (ADR 0008 §2)
+    merchant_reference = models.CharField(
+        _("référence marchande"), max_length=40, unique=True, editable=False
+    )
+    #: Dernier statut brut relu chez le prestataire (vocabulaire du prestataire, minuscules)
+    provider_status = models.CharField(_("statut du prestataire"), max_length=32, blank=True)
+    #: Frais du prestataire en FCFA, quand il les communique
+    provider_fees = models.PositiveIntegerField(_("frais du prestataire (FCFA)"), null=True, blank=True)
+    #: Dernière relecture de la transaction chez le prestataire
+    checked_at = models.DateTimeField(_("vérifié le"), null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at", "-id"]
@@ -311,6 +322,13 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.provider} {self.amount} FCFA ({self.status})"
+
+    def save(self, *args, **kwargs):
+        if not self.merchant_reference:
+            # Appelée sous le verrou de la commande à l'initiation : le rang ne peut pas être pris deux fois
+            rank = Payment.objects.filter(order_id=self.order_id).count() + 1
+            self.merchant_reference = f"{self.order.reference}-{rank}"
+        super().save(*args, **kwargs)
 
 
 def invoice_path(invoice, filename) -> str:
@@ -376,6 +394,12 @@ class Refund(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     provider_refund_id = models.CharField(max_length=128, blank=True)
     processed = models.BooleanField(default=False)
+    #: Référence du remboursement chez le prestataire, saisie par la Finance
+    reference = models.CharField(_("référence du remboursement"), max_length=128, blank=True)
+    processed_at = models.DateTimeField(_("traité le"), null=True, blank=True)
+    processed_by = models.ForeignKey(
+        User, models.SET_NULL, null=True, blank=True, related_name="+", verbose_name=_("traité par")
+    )
 
     class Meta:
         verbose_name = _("remboursement")

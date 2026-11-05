@@ -33,12 +33,12 @@ autorité). Plan du chantier `paiement-fedapay`, lot 1 sur 5.
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 1
+Statut : 🟡 en cours · Prochaine tâche : 2
 
-- [ ] **Tâche 1** Champs `Payment` et `Refund`, `merchant_reference` automatique, migrations · `feature/paiement-fedapay-socle`
-  - [ ] Tests des modèles et de la migration de données, vus échouer
-  - [ ] Modèles, `Payment.save()`, `FailureCode.EXPIRED`
-  - [ ] Migrations `0014` (champs + remplissage) et `0015` (contrainte d'unicité), `make migrations-check`
+- [x] **Tâche 1** Champs `Payment` et `Refund`, `merchant_reference` automatique, migrations · `feature/paiement-fedapay-socle`
+  - [x] Tests des modèles et de la migration de données, vus échouer
+  - [x] Modèles, `Payment.save()`, `FailureCode.EXPIRED`
+  - [x] Migrations `0014` (champs + remplissage) et `0015` (contrainte d'unicité), `make migrations-check`
 - [ ] **Tâche 2** Fabriques pour tous les lots
   - [ ] `PaymentFactory` (traits), `RefundFactory`, traits `OrderFactory`, aide `fake_transaction`
   - [ ] Tests des fabriques
