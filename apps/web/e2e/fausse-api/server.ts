@@ -89,7 +89,8 @@ route("GET", /^\/api\/referentials\/payment-networks\/$/, false, ({ instance, ur
   if (instance && once(instance, "networks-error", instance.scenario.faults.networksError)) {
     return respond(500, { code: "SERVER_ERROR", message: "Une erreur est survenue côté serveur." });
   }
-  respond(200, NETWORKS.filter((network) => network.country === url.searchParams.get("country")));
+  const country = url.searchParams.get("country");
+  respond(200, NETWORKS.filter((network) => !country || network.country === country));
 });
 route("GET", /^\/api\/shop\/delivery-zones\/$/, false, ({ instance, url, respond }) => {
   if (once(instance, "zones-error", instance.scenario.faults.zonesError)) {

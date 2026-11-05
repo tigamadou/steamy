@@ -70,9 +70,9 @@ Statut : ⬜ à faire · Prochaine tâche : 1
   - [x] Fabriques typées et écran `ecrans/backoffice-paiements.ts`
   - [x] Scénarios et incidents, branchement `server.ts` / `scenarios.ts`
   - [x] `contract.test.ts` couvre les nouveaux endpoints
-- [ ] **Tâche 3** Écran Paiements : liste, filtres, totaux, pagination
-  - [ ] Composants `payments/` (totaux, filtres, tableau, pagination, pastilles) et leurs tests
-  - [ ] Page `/backoffice/paiements` et son test
+- [x] **Tâche 3** Écran Paiements : liste, filtres, totaux, pagination
+  - [x] Composants `payments/` (totaux, filtres, tableau, pagination, pastilles) et leurs tests
+  - [x] Page `/backoffice/paiements` et son test
 - [ ] **Tâche 4** Écran Détail d'un paiement : tentatives, remboursements, journal, actions
   - [ ] `PaymentDetail`, `RecheckButton`, `RefundRequestModal` et leurs tests
   - [ ] Page `/backoffice/paiements/[id]` et son test
@@ -83,7 +83,7 @@ Statut : ⬜ à faire · Prochaine tâche : 1
 - [ ] **Tâche 7** e2e sur fixtures, contrôle visuel, SPEC-ECRANS (WAD11 et nouvelles lignes)
 - [ ] **Tâche 8** Vérification du lot
 
-> Reprise : noms retenus du client régénéré : `PaymentPage {count,next,previous,results,totals{volume,count,succeeded,failed,failureRate}}`, `PaymentRow`, `PaymentDetail` (`refundable`, `attempts`, `refunds`, `auditLog`, `order`, `maskedMsisdn`, `providerFees`, `checkedAt`), `RefundPage`, `BackofficeRefund`, `RefundSummary`, `RefundProcessResult`, `Todo.path?` ; paramètres API `status,network,country,kind,from,to,q,page` et `processed`. Prochaine étape : tâche 2.
+> Reprise : noms retenus du client régénéré : `PaymentPage {count,next,previous,results,totals{volume,count,succeeded,failed,failureRate}}`, `PaymentRow`, `PaymentDetail` (`refundable`, `attempts`, `refunds`, `auditLog`, `order`, `maskedMsisdn`, `providerFees`, `checkedAt`), `RefundPage`, `BackofficeRefund`, `RefundSummary`, `RefundProcessResult`, `Todo.path?` ; paramètres API `status,network,country,kind,from,to,q,page` et `processed`. Prochaine étape : tâche 2. Tâche 3 : pas de `paiements/loading.tsx` (le `backoffice/loading.tsx` parent couvre déjà le segment) ; réseaux lus par `GET referentials/payment-networks/` sans pays.
 
 Statuts : ⬜ à faire · 🟡 en cours · ✅ terminé. Cocher une case **seulement après tests verts**. Interruption en cours
 de tâche : cocher ce qui est fini et noter ici `> Reprise :` l'étape en cours, les fichiers touchés et la prochaine
