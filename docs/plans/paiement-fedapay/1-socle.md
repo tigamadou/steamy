@@ -33,7 +33,7 @@ autorité). Plan du chantier `paiement-fedapay`, lot 1 sur 5.
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 5
+Statut : 🟡 en cours · Prochaine tâche : 6
 
 - [x] **Tâche 1** Champs `Payment` et `Refund`, `merchant_reference` automatique, migrations · `feature/paiement-fedapay-socle`
   - [x] Tests des modèles et de la migration de données, vus échouer
@@ -48,7 +48,7 @@ Statut : 🟡 en cours · Prochaine tâche : 5
 - [x] **Tâche 4** `checkout.verify_payment`
   - [x] Test de caractérisation de la réconciliation, puis tests de `verify_payment`
   - [x] Extraction depuis la boucle, comportement inchangé
-- [ ] **Tâche 5** `make generate` et SPEC-TECHNIQUE §3.3
+- [x] **Tâche 5** `make generate` et SPEC-TECHNIQUE §3.3
 - [ ] **Tâche 6** Vérification du lot
 
 > Reprise : (vide)

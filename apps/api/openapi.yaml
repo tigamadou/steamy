@@ -13582,6 +13582,7 @@ components:
       - INITIATION_LOST
       - AMOUNT_MISMATCH
       - DECLINED
+      - EXPIRED
       type: string
       description: |-
         * `PROVIDER_UNAVAILABLE` - Prestataire indisponible
@@ -13589,6 +13590,7 @@ components:
         * `INITIATION_LOST` - Initiation jamais aboutie
         * `AMOUNT_MISMATCH` - Montant ou devise incohérents
         * `DECLINED` - Paiement refusé
+        * `EXPIRED` - Paiement expiré
     PaymentNetwork:
       type: object
       properties:

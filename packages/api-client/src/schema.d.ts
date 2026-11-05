@@ -4859,9 +4859,10 @@ export interface components {
          *     * `INITIATION_LOST` - Initiation jamais aboutie
          *     * `AMOUNT_MISMATCH` - Montant ou devise incohérents
          *     * `DECLINED` - Paiement refusé
+         *     * `EXPIRED` - Paiement expiré
          * @enum {string}
          */
-        PaymentFailureCodeEnum: "PROVIDER_UNAVAILABLE" | "PROVIDER_REFUSED" | "INITIATION_LOST" | "AMOUNT_MISMATCH" | "DECLINED";
+        PaymentFailureCodeEnum: "PROVIDER_UNAVAILABLE" | "PROVIDER_REFUSED" | "INITIATION_LOST" | "AMOUNT_MISMATCH" | "DECLINED" | "EXPIRED";
         PaymentNetwork: {
             readonly id: number;
             code: string;
