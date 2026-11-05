@@ -25,21 +25,22 @@
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 1
+Statut : ✅ terminé · Prochaine tâche : —
 
-- [ ] **Tâche 1** Script de périmètre et ses tests · `feature/methode-chantiers-3`
-  - [ ] Tests bats écrits et rouges
-  - [ ] `scripts/chantier/check-perimetre.sh` vert
-- [ ] **Tâche 2** Script des labels, cibles `make/chantier.mk` et exécuteur de tests
-  - [ ] Tests bats écrits et rouges
-  - [ ] `labels.sh` et `make/chantier.mk` verts
-- [ ] **Tâche 3** Contrat et gabarit de plan du kit
-- [ ] **Tâche 4** Les sept agents `chantier-*`
-- [ ] **Tâche 5** Gabarit du superviseur
-- [ ] **Tâche 6** Skill `chantier` (SKILL.md)
-- [ ] **Tâche 7** Adaptateur : `CLAUDE.md` racine, `.claude/chantier.projet.md`, `docs/plans/README.md`
-- [ ] **Tâche 8** Ligne `include` dans le `Makefile` (point de fusion avec le lot 1)
-- [ ] **Tâche 9** Vérification du lot
+- [x] **Tâche 1** Script de périmètre et ses tests · `feature/methode-chantiers-3`
+  - [x] Tests bats écrits et rouges
+  - [x] `scripts/chantier/check-perimetre.sh` vert
+- [x] **Tâche 2** Script des labels, cibles `make/chantier.mk` et exécuteur de tests
+  - [x] Tests bats écrits et rouges
+  - [x] `labels.sh` et `make/chantier.mk` verts
+- [x] **Tâche 3** Contrat et gabarit de plan du kit
+- [x] **Tâche 4** Les sept agents `chantier-*`
+- [x] **Tâche 5** Gabarit du superviseur
+- [x] **Tâche 6** Skill `chantier` (SKILL.md)
+- [x] **Tâche 7** Adaptateur : `CLAUDE.md` racine, `.claude/chantier.projet.md`, `docs/plans/README.md`
+- [x] **Tâche 8** Ligne `include` dans le `Makefile` (point de fusion avec le lot 1)
+- [x] **Tâche 9** Vérification du lot (31 tests bats verts ; périmètre OK, 22 fichiers ; aucune occurrence du nom du projet dans le kit ; seuls les sept agents `chantier-*` ; 10 marqueurs du superviseur tous listés dans le skill ; relecture ADR § 1 à 10 faite)
+- [x] **Corrections après relecture** (2026-11-05) : périmètre lu depuis la base et `--no-renames` (34 tests bats verts), leads qui exécutent leurs écritures GitHub, automate des labels, rapports de passage, compteurs, battement, worktrees, correctifs, clés `stack_principale`/`notification`/`cahier_tests`
 
 > Reprise : (vide)
 

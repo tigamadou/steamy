@@ -163,3 +163,4 @@ e2e-down: ## Arrête la stack e2e et supprime ses données
 
 psql: ## Console PostgreSQL
 	$(COMPOSE) exec postgres psql -U steamy steamy
+-include make/chantier.mk
