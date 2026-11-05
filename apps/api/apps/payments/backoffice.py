@@ -1,15 +1,17 @@
 """
-Actions du personnel sur le commerce (WAD10, WAD11, LOT-6 6.4), appelées par l'admin Django. Aucune ne passe une
+Actions du personnel sur le commerce (WAD10, WAD11, LOT-6 6.4), appelées par l'admin Django et par l'API du
+backoffice (`backoffice_api.py`). Aucune ne passe une
 commande à « payée » (S9 : le webhook vérifié fait foi) ; chacune est journalisée dans `AuditLog`.
 
 - Livraison : `preparing → shipped → delivered`, une étape à la fois, sur une commande payée ; le payeur est prévenu.
 - Kit Code : révocation d'un code non utilisé (perdu, vendu par erreur).
 - Remboursement : demandé par la Finance sur un paiement réussi (dans la limite du montant), puis « traité » une fois
-  effectué auprès de l'opérateur ; la commande passe alors à « remboursée ».
+  effectué auprès de l'opérateur ; « traité » veut dire marqué fait avec sa référence, et la commande passe alors à
+  « remboursée » (ADR 0008 § 8).
 """
 
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
 from apps.core.audit import audit
@@ -33,6 +35,37 @@ SHIPPING_MESSAGES = {
 
 class BackofficeError(ValueError):
     """Action refusée : le message est affiché tel quel dans l'admin."""
+
+
+class AlreadyProcessedError(BackofficeError):
+    """Remboursement déjà marqué fait."""
+
+
+def masked(msisdn: str) -> str:
+    """Numéro Mobile Money partiellement masqué (`+229 •••• 00 01`)."""
+    if len(msisdn) < 8:
+        return "—" if not msisdn else "••••"
+    return f"{msisdn[:4]} •••• {msisdn[-4:-2]} {msisdn[-2:]}"
+
+
+def payment_totals(queryset) -> dict:
+    """Agrégats de WAD11 sur les paiements listés : volume encaissé, nombre, taux d'échec (réussis + échoués)."""
+    totals = queryset.aggregate(
+        volume=Sum("amount", filter=Q(status=Payment.Status.SUCCEEDED)),
+        succeeded=Count("id", filter=Q(status=Payment.Status.SUCCEEDED)),
+        failed=Count("id", filter=Q(status=Payment.Status.FAILED)),
+        count=Count("id"),
+    )
+    settled = totals["succeeded"] + totals["failed"]
+    volume = totals["volume"] or 0
+    return {
+        "volume": volume,
+        "volume_label": f"{volume:,} FCFA".replace(",", "\u202f"),
+        "count": totals["count"],
+        "succeeded": totals["succeeded"],
+        "failed": totals["failed"],
+        "failure_rate": round(100 * totals["failed"] / settled, 1) if settled else None,
+    }
 
 
 def set_shipping_status(order: Order, target: str, user, request=None) -> None:
@@ -104,13 +137,18 @@ def settling_payment(order: Order) -> Payment | None:
     )
 
 
-def process_refund(refund: Refund, user, request=None) -> bool:
+def process_refund(refund: Refund, reference: str, user, request=None) -> bool:
     """
-    Remboursement effectué auprès de l'opérateur : marqué traité, payeur prévenu. La commande ne passe à « remboursée »
-    que si le paiement remboursé est celui qui l'a réglée et que les remboursements traités en couvrent le total (un
-    doublon ou un remboursement partiel la laissent payée) ; ses Kit Codes non utilisés sont alors révoqués. Verrous
-    dans l'ordre du webhook : commande, puis paiement. Renvoie si la commande est passée à « remboursée ».
+    Remboursement effectué auprès de l'opérateur : marqué fait avec sa référence, payeur prévenu. Une commande payée
+    ne passe à « remboursée » que si le paiement remboursé est celui qui l'a réglée et que les remboursements faits en
+    couvrent le total (un doublon ou un remboursement partiel la laissent payée). Une commande annulée (paiement
+    tardif) y passe quand plus aucun remboursement de ses paiements n'est à faire. Ses Kit Codes non utilisés sont
+    alors révoqués. Verrous dans l'ordre du webhook : commande, puis paiement. Renvoie si la commande est passée à
+    « remboursée ».
     """
+    reference = reference.strip()
+    if not reference:
+        raise BackofficeError("La référence du remboursement est obligatoire.")
     with transaction.atomic():
         order_id = (
             Refund.objects.filter(pk=refund.pk).values_list("payment__order_id", flat=True).get()
@@ -119,20 +157,26 @@ def process_refund(refund: Refund, user, request=None) -> bool:
         refund = Refund.objects.select_for_update().get(pk=refund.pk)
         payment = Payment.objects.select_for_update().get(pk=refund.payment_id)
         if refund.processed:
-            raise BackofficeError(f"Remboursement n° {refund.pk} : déjà traité.")
+            raise AlreadyProcessedError(f"Remboursement n° {refund.pk} : déjà traité.")
         refund.processed = True
-        refund.save(update_fields=["processed"])
+        refund.reference = reference
+        refund.processed_at = timezone.now()
+        refund.processed_by = user
+        refund.save(update_fields=["processed", "reference", "processed_at", "processed_by"])
 
-        settled_by = settling_payment(order)
-        processed_total = (
-            payment.refunds.filter(processed=True).aggregate(total=Sum("amount"))["total"] or 0
-        )
-        refunded = (
-            order.status == Order.Status.PAID
-            and settled_by is not None
-            and settled_by.pk == payment.pk
-            and processed_total >= order.total
-        )
+        if order.status == Order.Status.CANCELLED:
+            refunded = not Refund.objects.filter(payment__order=order, processed=False).exists()
+        else:
+            settled_by = settling_payment(order)
+            processed_total = (
+                payment.refunds.filter(processed=True).aggregate(total=Sum("amount"))["total"] or 0
+            )
+            refunded = (
+                order.status == Order.Status.PAID
+                and settled_by is not None
+                and settled_by.pk == payment.pk
+                and processed_total >= order.total
+            )
         revoked = []
         if refunded:
             order.status = Order.Status.REFUNDED
@@ -146,6 +190,7 @@ def process_refund(refund: Refund, user, request=None) -> bool:
             data={
                 "refund": refund.pk,
                 "amount": refund.amount,
+                "reference": reference,
                 "order_refunded": refunded,
                 "revoked_codes": revoked,
             },
