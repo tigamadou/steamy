@@ -25,13 +25,13 @@
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 1
+Statut : 🟡 en cours · Prochaine tâche : 2
 
-- [ ] **Tâche 1** Script de périmètre et ses tests · `feature/methode-chantiers-3`
-  - [ ] Tests bats écrits et rouges
-  - [ ] `scripts/chantier/check-perimetre.sh` vert
+- [x] **Tâche 1** Script de périmètre et ses tests · `feature/methode-chantiers-3`
+  - [x] Tests bats écrits et rouges
+  - [x] `scripts/chantier/check-perimetre.sh` vert
 - [ ] **Tâche 2** Script des labels, cibles `make/chantier.mk` et exécuteur de tests
-  - [ ] Tests bats écrits et rouges
+  - [x] Tests bats écrits et rouges
   - [ ] `labels.sh` et `make/chantier.mk` verts
 - [ ] **Tâche 3** Contrat et gabarit de plan du kit
 - [ ] **Tâche 4** Les sept agents `chantier-*`
