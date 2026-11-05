@@ -33,7 +33,8 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       web: ${{ steps.filter.outputs.web }}
       infra: ${{ steps.filter.outputs.infra }}
-      e2e: ${{ steps.filter.outputs.e2e }}
+      # Parcours relancés si la stack e2e change, ou si le code (hors tests unitaires et leur configuration) change
+      e2e: ${{ steps.filter.outputs.e2e == 'true' || steps.code-e2e.outputs.api == 'true' || steps.code-e2e.outputs.web == 'true' }}
       compare: ${{ steps.compare.outputs.compare }}
     steps:
       - uses: actions/checkout@v5
@@ -100,18 +101,41 @@ jobs:
               - *ci
               - 'infra/**'
               - '.github/workflows/deploy.yml'
-            # Parcours de bout en bout : un changement d'API peut casser un parcours,
-            # le filtre `web` seul ne suffit pas.
+            # Parcours de bout en bout, partie « stack » : CI, cibles make, compose, dépendances. Le code de l'API et
+            # du front est filtré à l'étape suivante, sans les tests unitaires.
             e2e:
               - *ci
               - *runtime
-              - 'apps/api/**'
-              - 'apps/web/**'
               - 'packages/**'
               - 'compose.yml'
               - 'compose.e2e.yml'
               - 'Makefile'
               - 'pnpm-lock.yaml'
+              - 'apps/api/requirements*.txt'
+      # Parcours de bout en bout, partie « code » : un changement d'API peut casser un parcours (le filtre `web` seul ne
+      # suffit pas), mais les tests unitaires et leur configuration ne changent rien au comportement servi.
+      # `every` : un fichier compte s'il correspond au premier motif et à aucune exclusion.
+      - uses: dorny/paths-filter@v3
+        id: code-e2e
+        with:
+          base: ${{ startsWith(github.ref_name, 'hotfix/') && 'main' || (github.ref_name == 'main' && 'main' || 'development') }}
+          predicate-quantifier: every
+          filters: |
+            api:
+              - 'apps/api/**'
+              - '!apps/api/**/tests/**'
+              - '!apps/api/**/test_*.py'
+              - '!apps/api/conftest.py'
+              - '!apps/api/pytest.ini'
+              - '!apps/api/pyproject.toml'
+              - '!**/*.md'
+            web:
+              - 'apps/web/**'
+              - '!apps/web/**/*.test.ts'
+              - '!apps/web/**/*.test.tsx'
+              - '!apps/web/src/test/**'
+              - '!apps/web/vitest.config.mts'
+              - '!**/*.md'
 
   # Les jobs appellent les cibles `make` des agents (docs/infra/agents.md) : tout tourne en conteneur, rien n'est
   # installé sur le runner. Le projet Compose est `steamy` (`name:` de compose.yml) : `docker compose run` retrouve les
