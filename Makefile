@@ -10,6 +10,9 @@ endif
 API     := $(COMPOSE) run --rm api
 # Tests comme en CI : DJANGO_ENV=test (api.env pose dev) et stockage fichiers local (pas de S3 en CI)
 API_TEST := $(COMPOSE) run --rm -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage api
+# Parallélisme pytest (une base par worker ; nombre de workers décidé dans le conteneur, conftest.py) et arguments ajoutés
+PYTEST_XDIST ?= -n auto
+PYTEST_ARGS ?=
 WEB     := $(COMPOSE) run --rm --no-deps web sh -c
 # Stack des parcours Playwright : projet séparé (par lot d'agent), réseau d'infra et image web propres, sans port publié (cohabite avec `make up`)
 E2E_P   := steamy-e2e$(if $(AGENT_LOT),-$(AGENT_LOT))
@@ -100,8 +103,8 @@ makemigrations: ## Génère les migrations
 seed: ## Charge les fixtures et le jeu de démonstration (comptes : apps/api/fixtures/README.md)
 	$(API) sh -c "python manage.py loaddata fixtures/admin.json fixtures/mail.json && python manage.py seed_demo $(SEED_ARGS)"
 
-test-api: ## Lance les tests de l'API
-	$(API_TEST) pytest
+test-api: ## Lance les tests de l'API en parallèle (PYTEST_XDIST="" pour la série, PYTEST_ARGS pour ajouter des arguments)
+	$(API_TEST) pytest $(PYTEST_XDIST) $(PYTEST_ARGS)
 
 coverage-api: ## Tests de l'API + couverture 100 % du code modifié (BASE=origin/development par défaut)
 	@COMPOSE="$(COMPOSE)" COVERAGE_PARTIE=api scripts/coverage-diff.sh "$(or $(BASE),origin/development)"
