@@ -3213,6 +3213,409 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/backoffice/payments/:
+    get:
+      operationId: backoffice_payments_list
+      description: 'WAD11 : paiements filtrables, avec les totaux du filtre entier
+        (pas de la page).'
+      parameters:
+      - in: query
+        name: country
+        schema:
+          type: string
+          minLength: 1
+      - in: query
+        name: from
+        schema:
+          type: string
+          format: date
+        description: Créés à partir de cette date (AAAA-MM-JJ, incluse)
+      - in: query
+        name: kind
+        schema:
+          enum:
+          - course
+          - kit
+          - event
+          type: string
+          minLength: 1
+        description: |-
+          * `course` - Parcours
+          * `kit` - Kit
+          * `event` - Événement
+      - in: query
+        name: network
+        schema:
+          type: string
+          minLength: 1
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Numéro de page (1 par défaut)
+      - in: query
+        name: pageSize
+        schema:
+          type: integer
+        description: Taille de page (25 par défaut, 100 au plus)
+      - in: query
+        name: q
+        schema:
+          type: string
+          minLength: 1
+        description: Référence de commande, référence marchande ou identifiant de
+          transaction (sous-chaîne)
+      - in: query
+        name: status
+        schema:
+          enum:
+          - initiated
+          - pending
+          - succeeded
+          - failed
+          type: string
+          minLength: 1
+        description: |-
+          * `initiated` - Initié
+          * `pending` - En attente de validation
+          * `succeeded` - Réussi
+          * `failed` - Échoué
+      - in: query
+        name: to
+        schema:
+          type: string
+          format: date
+        description: Créés jusqu'à cette date (AAAA-MM-JJ, incluse)
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentPage'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/payments/{id}/:
+    get:
+      operationId: backoffice_payments_retrieve
+      description: 'WAD11 : fiche d''un paiement, avec son contexte (commande, tentatives,
+        remboursements, journal).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/payments/{id}/recheck/:
+    post:
+      operationId: backoffice_payments_recheck
+      description: '« Revérifier » : relit la transaction chez le prestataire et applique
+        le résultat.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/payments/{id}/refunds/:
+    post:
+      operationId: backoffice_payments_refunds_create
+      description: Demande de remboursement sur un paiement réussi, dans la limite
+        du reste remboursable.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - backoffice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackofficeRefund'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/refunds/:
+    get:
+      operationId: backoffice_refunds_list
+      description: 'WAD11 : remboursements à traiter (défaut, du plus ancien au plus
+        récent) ou déjà traités.'
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Numéro de page (1 par défaut)
+      - in: query
+        name: pageSize
+        schema:
+          type: integer
+        description: Taille de page (25 par défaut, 100 au plus)
+      - in: query
+        name: processed
+        schema:
+          type: boolean
+          default: false
+        description: 'Faux (défaut) : à traiter ; vrai : déjà traités'
+      tags:
+      - backoffice
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundPage'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/backoffice/refunds/{id}/process/:
+    post:
+      operationId: backoffice_refunds_process
+      description: Marque un remboursement « fait » une fois l'argent rendu, avec
+        sa référence chez l'opérateur.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - backoffice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessRefundRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundProcessResult'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/catalog/categories/:
     get:
       operationId: catalog_categories_list
@@ -8494,6 +8897,34 @@ components:
         * `ok` - Réussi
         * `warn` - À refaire
         * `ko` - Échoué
+    AuditEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        action:
+          type: string
+        actor:
+          type: string
+          nullable: true
+          readOnly: true
+        target:
+          type: string
+          readOnly: true
+          description: payment ou order
+        data:
+          type: object
+          additionalProperties: {}
+      required:
+      - action
+      - actor
+      - createdAt
+      - data
+      - id
+      - target
     Avatar:
       type: object
       properties:
@@ -8522,6 +8953,73 @@ components:
       - emoji
       - id
       - label
+    BackofficeRefund:
+      type: object
+      description: Remboursement vu depuis son paiement.
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        amount:
+          type: integer
+        reason:
+          type: string
+        processed:
+          type: boolean
+        processedAt:
+          type: string
+          format: date-time
+          nullable: true
+        processedBy:
+          type: string
+          nullable: true
+          readOnly: true
+        reference:
+          type: string
+          description: Vide tant que le remboursement n'est pas fait
+        paymentId:
+          type: integer
+        orderReference:
+          type: string
+        merchantReference:
+          type: string
+        providerTransactionId:
+          type: string
+          nullable: true
+        network:
+          type: string
+        maskedMsisdn:
+          type: string
+          readOnly: true
+        paymentAmount:
+          type: integer
+        payer:
+          type: string
+          readOnly: true
+        beneficiary:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - amount
+      - beneficiary
+      - createdAt
+      - id
+      - maskedMsisdn
+      - merchantReference
+      - network
+      - orderReference
+      - payer
+      - paymentAmount
+      - paymentId
+      - processed
+      - processedAt
+      - processedBy
+      - providerTransactionId
+      - reason
+      - reference
     Badge:
       type: object
       properties:
@@ -13550,6 +14048,36 @@ components:
       - network
       - orderReference
       - status
+    PaymentAttempt:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        merchantReference:
+          type: string
+        providerTransactionId:
+          type: string
+          nullable: true
+        status:
+          type: string
+        providerStatus:
+          type: string
+        failureCode:
+          type: string
+        amount:
+          type: integer
+      required:
+      - amount
+      - createdAt
+      - failureCode
+      - id
+      - merchantReference
+      - providerStatus
+      - providerTransactionId
+      - status
     PaymentCreateRequest:
       type: object
       description: 'Mobile Money uniquement : pays, réseau (référentiel `payment-networks`)
@@ -13575,6 +14103,113 @@ components:
       - country
       - msisdn
       - network
+    PaymentDetail:
+      type: object
+      description: Lit les attributs posés par `backoffice_api.load_detail` (`attempts`,
+        `refund_list`, `audit_entries`).
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        orderReference:
+          type: string
+        merchantReference:
+          type: string
+        providerTransactionId:
+          type: string
+          nullable: true
+        payer:
+          type: string
+          readOnly: true
+        beneficiary:
+          type: string
+          nullable: true
+          readOnly: true
+        kind:
+          type: string
+          description: course, kit ou event
+        country:
+          type: string
+        network:
+          type: string
+        maskedMsisdn:
+          type: string
+          readOnly: true
+        amount:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+          description: initiated, pending, succeeded ou failed
+        providerStatus:
+          type: string
+          description: Vide si inconnu
+        failureCode:
+          type: string
+          description: Vide si aucun
+        failureReason:
+          type: string
+        provider:
+          type: string
+        providerFees:
+          type: integer
+          nullable: true
+        checkedAt:
+          type: string
+          format: date-time
+          nullable: true
+        confirmedAt:
+          type: string
+          format: date-time
+          nullable: true
+        refundable:
+          type: integer
+          readOnly: true
+          description: Reste remboursable ; 0 si le paiement n'est pas réussi
+        order:
+          $ref: '#/components/schemas/PaymentOrder'
+        attempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentAttempt'
+        refunds:
+          type: array
+          items:
+            $ref: '#/components/schemas/RefundSummary'
+        auditLog:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditEntry'
+      required:
+      - amount
+      - attempts
+      - auditLog
+      - beneficiary
+      - checkedAt
+      - confirmedAt
+      - country
+      - createdAt
+      - currency
+      - failureCode
+      - failureReason
+      - id
+      - kind
+      - maskedMsisdn
+      - merchantReference
+      - network
+      - order
+      - orderReference
+      - payer
+      - provider
+      - providerFees
+      - providerStatus
+      - providerTransactionId
+      - refundable
+      - refunds
+      - status
     PaymentFailureCodeEnum:
       enum:
       - PROVIDER_UNAVAILABLE
@@ -13613,6 +14248,62 @@ components:
       - country
       - id
       - label
+    PaymentOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+        kind:
+          type: string
+        status:
+          type: string
+        total:
+          type: integer
+        currency:
+          type: string
+        payer:
+          type: string
+          readOnly: true
+        beneficiary:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - beneficiary
+      - currency
+      - id
+      - kind
+      - payer
+      - reference
+      - status
+      - total
+    PaymentPage:
+      type: object
+      description: Page de paiements ; `totals` porte sur tout le filtre, pas sur
+        la page.
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentRow'
+        totals:
+          $ref: '#/components/schemas/PaymentTotals'
+      required:
+      - count
+      - next
+      - previous
+      - results
+      - totals
     PaymentRequest:
       type: object
       description: Demande vue par l'enfant (WA02, WK08) et par son parent (WPD01,
@@ -13781,6 +14472,71 @@ components:
         * `declined` - Refusée
         * `expired` - Expirée
         * `cancelled` - Annulée
+    PaymentRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        orderReference:
+          type: string
+        merchantReference:
+          type: string
+        providerTransactionId:
+          type: string
+          nullable: true
+        payer:
+          type: string
+          readOnly: true
+        beneficiary:
+          type: string
+          nullable: true
+          readOnly: true
+        kind:
+          type: string
+          description: course, kit ou event
+        country:
+          type: string
+        network:
+          type: string
+        maskedMsisdn:
+          type: string
+          readOnly: true
+        amount:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+          description: initiated, pending, succeeded ou failed
+        providerStatus:
+          type: string
+          description: Vide si inconnu
+        failureCode:
+          type: string
+          description: Vide si aucun
+        failureReason:
+          type: string
+      required:
+      - amount
+      - beneficiary
+      - country
+      - createdAt
+      - currency
+      - failureCode
+      - failureReason
+      - id
+      - kind
+      - maskedMsisdn
+      - merchantReference
+      - network
+      - orderReference
+      - payer
+      - providerStatus
+      - providerTransactionId
+      - status
     PaymentStatusEnum:
       enum:
       - initiated
@@ -13793,6 +14549,31 @@ components:
         * `pending` - En attente de validation
         * `succeeded` - Réussi
         * `failed` - Échoué
+    PaymentTotals:
+      type: object
+      properties:
+        volume:
+          type: integer
+          description: Somme des paiements réussis, brut hors remboursements
+        count:
+          type: integer
+        succeeded:
+          type: integer
+        failed:
+          type: integer
+          description: Tous codes d'échec confondus
+        failureRate:
+          type: number
+          format: double
+          nullable: true
+          description: Échoués / (réussis + échoués) en %, une décimale ; nul sans
+            paiement réglé
+      required:
+      - count
+      - failed
+      - failureRate
+      - succeeded
+      - volume
     PdfStatusEnum:
       enum:
       - pending
@@ -13932,6 +14713,16 @@ components:
       required:
       - fields
       - url
+    ProcessRefundRequest:
+      type: object
+      properties:
+        reference:
+          type: string
+          minLength: 1
+          description: Référence du remboursement chez l'opérateur
+          maxLength: 128
+      required:
+      - reference
     ProfileStepEnum:
       enum:
       - learner-info
@@ -14441,6 +15232,84 @@ components:
       - id
       - order
       - title
+    RefundPage:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BackofficeRefund'
+      required:
+      - count
+      - next
+      - previous
+      - results
+    RefundProcessResult:
+      type: object
+      properties:
+        refund:
+          $ref: '#/components/schemas/BackofficeRefund'
+        orderRefunded:
+          type: boolean
+          description: La commande est passée à « remboursée » avec ce marquage
+      required:
+      - orderRefunded
+      - refund
+    RefundRequestRequest:
+      type: object
+      properties:
+        amount:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+          minLength: 1
+      required:
+      - amount
+      - reason
+    RefundSummary:
+      type: object
+      description: Remboursement vu depuis son paiement.
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        amount:
+          type: integer
+        reason:
+          type: string
+        processed:
+          type: boolean
+        processedAt:
+          type: string
+          format: date-time
+          nullable: true
+        processedBy:
+          type: string
+          nullable: true
+          readOnly: true
+        reference:
+          type: string
+          description: Vide tant que le remboursement n'est pas fait
+      required:
+      - amount
+      - createdAt
+      - id
+      - processed
+      - processedAt
+      - processedBy
+      - reason
+      - reference
     RefusalReason:
       type: object
       properties:
@@ -15379,11 +16248,16 @@ components:
       properties:
         kind:
           type: string
-          description: consents_pending (d'autres types suivront avec API-L3b)
+          description: consents_pending, payments_failed ou refunds_pending (d'autres
+            types suivront avec API-L3b)
         label:
           type: string
         count:
           type: integer
+        path:
+          type: string
+          description: Chemin de l'écran du backoffice Next.js (commence par /backoffice)
+            ; absent s'il n'existe pas encore
         adminPath:
           type: string
           description: Chemin de la liste filtrée dans l'admin Django
