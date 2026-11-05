@@ -6,6 +6,7 @@ comment le code arrive en production, et comment exploiter les serveurs.
 | Page | Pour qui, pour quoi |
 | --- | --- |
 | [Développement local](developpement-local.md) | Lancer la stack, commandes du quotidien, contrat front/API |
+| [Environnements d'agent](agents.md) | Environnements Docker isolés par lot, profils et budget mémoire, cibles `make` standard (méthode des chantiers) |
 | [CI/CD](ci-cd.md) | Vérifications sur les PR, publication d'une version, promotion staging → prod |
 | [Workflows GitHub](workflows-github.md) | Référence technique de `ci.yml` et `deploy.yml` : chaque job, chaque étape, que faire quand ça échoue |
 | [Mise en place](mise-en-place.md) | Créer un environnement de zéro (VPS, DNS, Wasabi, GitHub) |

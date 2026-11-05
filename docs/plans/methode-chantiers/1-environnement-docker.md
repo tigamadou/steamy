@@ -19,7 +19,7 @@
 
 ## Avancement
 
-Statut : 🟦 en cours · Prochaine tâche : 1.7
+Statut : 🟦 en cours · Prochaine tâche : 1.8
 
 - [x] **1.1** Réseau d'infrastructure partagé et nom de projet · `compose.yml`, `compose.e2e.yml`
   - [x] Réseau `steamy-infra`, `name: steamy`, services d'infra attachés
@@ -38,10 +38,20 @@ Statut : 🟦 en cours · Prochaine tâche : 1.7
   - [x] `scripts/coverage-diff.sh` (tests touchés + diff-cover)
   - [x] `coverage-api`/`coverage-web` paramétrés par `BASE`
 - [x] **1.6** `make e2e-fixtures` en conteneur et `make e2e` par lot
-- [ ] **1.7** Mesures mémoire et `docs/infra/agents.md`
+- [x] **1.7** Mesures mémoire et `docs/infra/agents.md`
 - [ ] **1.8** Vérification du lot
 
 > Reprise : (à renseigner si la session est interrompue)
+
+### Arbitrages d'exécution
+
+- **Image Playwright** : Node 26.13 **sans corepack** (le `corepack enable` du service `playwright` existant échouait). `compose.yml` (`playwright-fixtures`) et `compose.e2e.yml` (`playwright`) installent pnpm 10.34.7 par npm. Volumes de dépendances `pw_*` dédiés pour `playwright-fixtures`.
+- **Tests API** lancés avec `DJANGO_ENV=test` (`make test-api`, `coverage-api`, `test-cible`, `coverage-diff`) : sous `dev` (api.env), un test d'admin échoue.
+- **Jeton e2e** : verrou `e2e.lock` dans le dépôt git commun (pris avant la construction de l'image, rendu en fin de `make e2e` / `e2e-down`), car un contrôle sur les conteneurs laissait passer deux e2e pendant la construction.
+- **diff-cover** : image `python:3.11.13-bookworm` (git requis, absent de `steamy-api`), cache pip dans le volume `steamy_pip_cache`, dépôt vide, diff fourni par `--diff-file` découpé par moitié (chemins relatifs à `apps/api` et `apps/web`).
+- **Budget** vérifié avant la création du worktree (un refus ne laisse rien derrière).
+- **Mesures** (voir `docs/infra/agents.md` § « Valeurs déclarées ») : MAIN 2 000, web 3 400, api 1 200, complet 6 500, budget 9 910 Mo.
+- **e2e complet** (vraie stack, lot `complet`) : 426 passés, 23 en échec (429 sur la connexion), 3 ignorés, en 8 min 30 ; les specs en échec passent seules. Non attribué à l'infrastructure (l'ancien service `playwright` ne démarrait pas sur cette image, pas de base de comparaison).
 
 ## Fichiers du lot (exclusifs)
 

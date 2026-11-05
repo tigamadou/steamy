@@ -13,11 +13,11 @@
 set -euo pipefail
 
 # --- Valeurs déclarées (mesurées : docs/infra/agents.md § « Valeurs déclarées ») -------------------------------
-MAIN_STACK_MO=0   # mémoire de la stack principale en régime établi
+MAIN_STACK_MO=2000   # mémoire de la stack principale en régime établi
 MARGE_MO=2048     # marge laissée à la machine
-COUT_MO_web=0
-COUT_MO_api=0
-COUT_MO_complet=0
+COUT_MO_web=3400
+COUT_MO_api=1200
+COUT_MO_complet=6500
 # ---------------------------------------------------------------------------------------------------------------
 
 INFRA_NETWORK="${INFRA_NETWORK:-steamy-infra}"
@@ -241,7 +241,7 @@ cmd_up() {
   fi
 
   # Worktree : créé, ou repris s'il est déjà sur la branche attendue
-  local reprise=0
+  local reprise=0 creer=0
   if [ -d "$wt" ]; then
     if [ "$(git -C "$wt" rev-parse --abbrev-ref HEAD 2>/dev/null || true)" = "$branch" ]; then
       reprise=1
@@ -251,17 +251,14 @@ cmd_up() {
   elif git show-ref --verify --quiet "refs/heads/$branch"; then
     die "la branche $branch existe déjà sans worktree : « git worktree add $wt $branch » pour la reprendre, ou « git branch -d $branch » si c'est un reste"
   else
-    git worktree add -q -b "$branch" "$wt" "$base"
-    info "worktree $wt créé sur $branch"
+    creer=1
   fi
-  [ -f "$wt/compose.agent.yml" ] || die "$base ne contient pas compose.agent.yml (la base du chantier doit contenir le plan 1)"
-
-  HINT="agent-env : échec. Reprise : scripts/agent-env.sh up $lot $profil $base (idempotent). Nettoyage : scripts/agent-env.sh down $lot puis git worktree remove --force $wt && git branch -D $branch (rien n'a été supprimé automatiquement)."
+  git ls-tree -r --name-only "$base" -- compose.agent.yml | grep -q . || die "$base ne contient pas compose.agent.yml (la base du chantier doit contenir le plan 1)"
 
   # Réservation (verrou) : numéros Redis, budget, .agent.env
   local cache broker pair
   acquire_lock
-  if [ -f "$wt/.agent.env" ]; then
+  if [ "$creer" = 0 ] && [ -f "$wt/.agent.env" ]; then
     cache="$(env_get "$wt/.agent.env" REDIS_DB_CACHE)"
     broker="$(env_get "$wt/.agent.env" REDIS_DB_BROKER)"
   else
@@ -276,6 +273,12 @@ cmd_up() {
   if [ $((utilise + cout)) -gt "$budget" ]; then
     die "budget mémoire dépassé : profil $profil = $cout Mo, déjà utilisés $utilise Mo, budget $budget Mo (libre $((budget - utilise)) Mo). Attendre la fin d'un lot (« make agent-status »)"
   fi
+  # Budget respecté : seulement maintenant, on crée le worktree (un refus ne laisse rien derrière lui)
+  if [ "$creer" = 1 ]; then
+    git worktree add -q -b "$branch" "$wt" "$base"
+    info "worktree $wt créé sur $branch"
+  fi
+  HINT="agent-env : échec. Reprise : scripts/agent-env.sh up $lot $profil $base (idempotent). Nettoyage : scripts/agent-env.sh down $lot puis git worktree remove --force $wt && git branch -D $branch (rien n'a été supprimé automatiquement)."
   ecrire_env "$wt/.agent.env" "$lot" "$profil" "$cache" "$broker" 1
   release_lock
 
