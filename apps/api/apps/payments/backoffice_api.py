@@ -32,7 +32,6 @@ from .backoffice_serializers import (
 )
 from .models import Payment, Refund
 from .providers import PaymentProviderError
-from .utils import WebhookRejected
 
 FINANCE_ONLY = [IsStaffVerified.of(FINANCE)]
 
@@ -147,7 +146,7 @@ class PaymentRecheckView(APIView):
         before = payment.status
         try:
             checked = checkout.verify_payment(payment)
-        except (PaymentProviderError, ImproperlyConfigured, WebhookRejected) as error:
+        except (PaymentProviderError, ImproperlyConfigured) as error:
             raise ApiError(
                 "SERVER_ERROR",
                 "Le prestataire de paiement n'a pas répondu : réessayez dans quelques instants.",
