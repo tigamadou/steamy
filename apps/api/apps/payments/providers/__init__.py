@@ -15,6 +15,7 @@ from .base import (
     PaymentProviderError,
     PaymentStatus,
     PaymentTemporaryError,
+    ProviderTransaction,
     RefundOutcome,
 )
 from .fake import FakePaymentProvider
@@ -34,6 +35,7 @@ __all__ = [
     "PaymentProviderError",
     "PaymentStatus",
     "PaymentTemporaryError",
+    "ProviderTransaction",
     "RefundOutcome",
     "get_provider",
 ]

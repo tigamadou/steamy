@@ -33,23 +33,23 @@ autorité). Plan du chantier `paiement-fedapay`, lot 1 sur 5.
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 1
+Statut : ✅ terminé
 
-- [ ] **Tâche 1** Champs `Payment` et `Refund`, `merchant_reference` automatique, migrations · `feature/paiement-fedapay-socle`
-  - [ ] Tests des modèles et de la migration de données, vus échouer
-  - [ ] Modèles, `Payment.save()`, `FailureCode.EXPIRED`
-  - [ ] Migrations `0014` (champs + remplissage) et `0015` (contrainte d'unicité), `make migrations-check`
-- [ ] **Tâche 2** Fabriques pour tous les lots
-  - [ ] `PaymentFactory` (traits), `RefundFactory`, traits `OrderFactory`, aide `fake_transaction`
-  - [ ] Tests des fabriques
-- [ ] **Tâche 3** Contrat prestataire, faux prestataire, FedaPay minimal, `Charge` dans `initiate_payment`
-  - [ ] Tests de `test_providers.py` adaptés et nouveaux, vus échouer
-  - [ ] `base.py`, `__init__.py`, `fake.py`, `fedapay.py`, `checkout.initiate_payment`
-- [ ] **Tâche 4** `checkout.verify_payment`
-  - [ ] Test de caractérisation de la réconciliation, puis tests de `verify_payment`
-  - [ ] Extraction depuis la boucle, comportement inchangé
-- [ ] **Tâche 5** `make generate` et SPEC-TECHNIQUE §3.3
-- [ ] **Tâche 6** Vérification du lot
+- [x] **Tâche 1** Champs `Payment` et `Refund`, `merchant_reference` automatique, migrations · `feature/paiement-fedapay-socle`
+  - [x] Tests des modèles et de la migration de données, vus échouer
+  - [x] Modèles, `Payment.save()`, `FailureCode.EXPIRED`
+  - [x] Migrations `0014` (champs + remplissage) et `0015` (contrainte d'unicité), `make migrations-check`
+- [x] **Tâche 2** Fabriques pour tous les lots
+  - [x] `PaymentFactory` (traits), `RefundFactory`, traits `OrderFactory` ; `fake_transaction` reste à la tâche 3
+  - [x] Tests des fabriques
+- [x] **Tâche 3** Contrat prestataire, faux prestataire, FedaPay minimal, `Charge` dans `initiate_payment`
+  - [x] Tests de `test_providers.py` adaptés et nouveaux, vus échouer
+  - [x] `base.py`, `__init__.py`, `fake.py`, `fedapay.py`, `checkout.initiate_payment`
+- [x] **Tâche 4** `checkout.verify_payment`
+  - [x] Test de caractérisation de la réconciliation, puis tests de `verify_payment`
+  - [x] Extraction depuis la boucle, comportement inchangé
+- [x] **Tâche 5** `make generate` et SPEC-TECHNIQUE §3.3
+- [x] **Tâche 6** Vérification du lot
 
 > Reprise : (vide)
 
