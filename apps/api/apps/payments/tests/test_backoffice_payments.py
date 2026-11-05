@@ -12,12 +12,14 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.accounts.tests.factories import ParentFactory
+from apps.core.audit import audit
 from apps.core.groups import CONTENT, FINANCE, SUPER_ADMIN, SUPPORT
+from apps.core.models import AuditLog
 from apps.core.tests.staff import staff_member, verified_client
 from apps.payments import backoffice
 from apps.payments.models import Order, Payment, Refund
 
-from .factories import OrderFactory, PaymentFactory
+from .factories import OrderFactory, PaymentFactory, RefundFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -247,4 +249,159 @@ def test_the_list_does_not_query_per_row(finance):
     few = count()
     for _ in range(8):
         PaymentFactory(failed=True)
+    assert count() == few
+
+
+# --- Détail --------------------------------------------------------------------------------------------------
+
+
+def detail_url(payment, suffix=""):
+    return f"{PAYMENTS}{payment.pk}/{suffix}"
+
+
+def test_the_detail_has_the_exact_contract_fields(finance):
+    staff = staff_member(FINANCE)
+    payment = PaymentFactory(
+        succeeded=True,
+        payload={"event": "secret"},
+        msisdn="+2290197123456",
+        provider_fees=150,
+        provider_transaction_id="tx-1",
+    )
+    refund = RefundFactory(payment=payment, amount=5000, reason="Geste", processed_by=staff)
+    refund.refresh_from_db()
+    response = finance.get(detail_url(payment))
+    raw = response.content.decode()
+    assert "+2290197123456" not in raw and "secret" not in raw and "payload" not in raw
+    body = response.json()
+    order = payment.order
+    assert set(body) == {
+        *finance.get(PAYMENTS).json()["results"][0],
+        "provider",
+        "providerFees",
+        "checkedAt",
+        "confirmedAt",
+        "refundable",
+        "order",
+        "attempts",
+        "refunds",
+        "auditLog",
+    }
+    assert body["provider"] == "fake" and body["providerFees"] == 150
+    assert body["checkedAt"] and body["confirmedAt"]
+    assert body["refundable"] == 10000
+    assert body["order"] == {
+        "id": order.pk,
+        "reference": order.reference,
+        "kind": "course",
+        "status": "pending",
+        "total": 15000,
+        "currency": "XOF",
+        "payer": order.payer.get_full_name(),
+        "beneficiary": order.beneficiary.get_full_name(),
+    }
+    assert body["refunds"] == [
+        {
+            "id": refund.pk,
+            "createdAt": body["refunds"][0]["createdAt"],
+            "amount": 5000,
+            "reason": "Geste",
+            "processed": False,
+            "processedAt": None,
+            "processedBy": staff.get_full_name(),
+            "reference": "",
+        }
+    ]
+
+
+def test_attempts_are_the_other_payments_of_the_order_oldest_first(finance):
+    order = OrderFactory()
+    first = stamp(PaymentFactory(order=order, failed=True), minutes=30)
+    second = stamp(PaymentFactory(order=order, failed=True), minutes=20)
+    current = PaymentFactory(order=order)
+    PaymentFactory()
+    body = finance.get(detail_url(current)).json()
+    assert [a["id"] for a in body["attempts"]] == [first.pk, second.pk]
+    assert body["attempts"][0] == {
+        "id": first.pk,
+        "createdAt": body["attempts"][0]["createdAt"],
+        "merchantReference": first.merchant_reference,
+        "providerTransactionId": first.provider_transaction_id,
+        "status": "failed",
+        "providerStatus": "declined",
+        "failureCode": "DECLINED",
+        "amount": 15000,
+    }
+
+
+def test_refundable_is_the_remaining_amount_and_zero_when_not_succeeded(finance):
+    paid = PaymentFactory(succeeded=True, amount=15000)
+    RefundFactory(payment=paid, amount=4000)
+    assert finance.get(detail_url(paid)).json()["refundable"] == 11000
+    assert finance.get(detail_url(PaymentFactory(failed=True))).json()["refundable"] == 0
+
+
+def test_refunds_are_listed_oldest_first_with_who_did_them(finance):
+    payment = PaymentFactory(succeeded=True, amount=15000)
+    done = RefundFactory(payment=payment, amount=1000, done=True)
+    Refund.objects.filter(pk=done.pk).update(created_at=timezone.now() - datetime.timedelta(days=1))
+    waiting = RefundFactory(payment=payment, amount=2000)
+    refunds = finance.get(detail_url(payment)).json()["refunds"]
+    assert [r["id"] for r in refunds] == [done.pk, waiting.pk]
+    assert refunds[0]["processed"] and refunds[0]["reference"] == done.reference
+    assert refunds[0]["processedBy"] == done.processed_by.get_full_name()
+    assert refunds[0]["processedAt"] is not None
+
+
+def test_the_audit_log_holds_the_entries_of_the_payment_and_of_its_order_only(finance):
+    payment = PaymentFactory()
+    other_payment = PaymentFactory()
+    staff = staff_member(FINANCE)
+    first = audit("payment.rechecked", actor=staff, target=payment, data={"before": "pending"})
+    system = audit("order.expired", target=payment.order, data={"order_refunded": True})
+    audit("payment.rechecked", target=other_payment)
+    audit("order.expired", target=other_payment.order)
+    audit("user.created", target=staff)
+    AuditLog.objects.filter(pk=first.pk).update(
+        created_at=timezone.now() - datetime.timedelta(hours=1)
+    )
+    entries = finance.get(detail_url(payment)).json()["auditLog"]
+    assert [e["id"] for e in entries] == [first.pk, system.pk]
+    assert entries[0] == {
+        "id": first.pk,
+        "createdAt": entries[0]["createdAt"],
+        "action": "payment.rechecked",
+        "actor": staff.get_full_name(),
+        "target": "payment",
+        "data": {"before": "pending"},
+    }
+    assert (entries[1]["actor"], entries[1]["target"]) == (None, "order")
+
+
+def test_an_unknown_payment_is_a_404(finance):
+    response = finance.get(f"{PAYMENTS}999999/")
+    assert (response.status_code, response.json()["code"]) == (404, "NOT_FOUND")
+
+
+def test_the_detail_is_refused_to_support(client):
+    verified_client(client, SUPPORT)
+    assert client.get(detail_url(PaymentFactory())).status_code == 403
+
+
+def test_the_detail_query_count_does_not_grow_with_the_audit_log(finance):
+    payment = PaymentFactory(succeeded=True)
+
+    def count():
+        finance.get(detail_url(payment))
+        with CaptureQueriesContext(connection) as queries:
+            assert finance.get(detail_url(payment)).status_code == 200
+        return len(queries)
+
+    audit("payment.rechecked", actor=staff_member(FINANCE), target=payment)
+    few = count()
+    for _ in range(6):
+        audit("payment.rechecked", actor=staff_member(FINANCE), target=payment)
+        audit("order.expired", target=payment.order)
+        RefundFactory(payment=payment, amount=100, done=True)
+        PaymentFactory(order=payment.order, failed=True)
     assert count() == few
