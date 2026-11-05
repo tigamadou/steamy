@@ -178,3 +178,39 @@ run_check() { run "$SCRIPT" 3 "$PLAN" base; }
   [ "$status" -eq 1 ]
   [[ "$output" == *"HORS PÉRIMÈTRE : secret/x.ts"* ]]
 }
+
+@test "déplacement depuis l'extérieur du périmètre → 1" {
+  git checkout -q base
+  commit_files secret/x.ts
+  git checkout -q -B lot
+  write_plan '`src/**`'
+  mkdir -p src
+  git mv secret/x.ts src/x.ts
+  git commit -q -m "deplacement"
+  run_check
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"HORS PÉRIMÈTRE : secret/x.ts"* ]]
+}
+
+@test "glob ajouté dans la branche → ignoré (globs lus depuis la base)" {
+  git checkout -q base
+  mkdir -p docs
+  printf '# Plan\n\n## Fichiers du lot (exclusifs)\n\n- `src/**`\n\n## Fichiers en lecture seule\n' > docs/plan.md
+  git add -A
+  git commit -q -m "plan"
+  git checkout -q -B lot
+  printf '# Plan\n\n## Fichiers du lot (exclusifs)\n\n- `src/**`\n- `lib/**`\n\n## Fichiers en lecture seule\n' > docs/plan.md
+  commit_files lib/a.ts
+  run "$SCRIPT" 3 docs/plan.md base
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"HORS PÉRIMÈTRE : lib/a.ts"* ]]
+  [[ "$output" != *"HORS PÉRIMÈTRE : docs/plan.md"* ]]
+}
+
+@test "plan absent de la base → globs du fichier courant" {
+  mkdir -p docs
+  printf '# Plan\n\n## Fichiers du lot (exclusifs)\n\n- `src/**`\n' > docs/plan.md
+  commit_files src/a.ts
+  run "$SCRIPT" 3 docs/plan.md base
+  [ "$status" -eq 0 ]
+}
