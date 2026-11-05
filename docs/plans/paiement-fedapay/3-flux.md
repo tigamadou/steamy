@@ -63,13 +63,13 @@ autorité). Plan du chantier `paiement-fedapay`, lot 3 sur 5.
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 2
+Statut : 🟡 en cours · Prochaine tâche : 3
 
 - [x] **Tâche 1** Support de test du lot (`test_flux_support.py`) · `feature/paiement-fedapay-flux`
   - [x] Aides : transaction relue simulée, livraison d'un webhook signé, rejeu concurrent
-- [ ] **Tâche 2** Initiation : `supports`, `PAYMENT_UNAVAILABLE`, `merchant_reference`, identifiant conservé (§ 3)
-  - [ ] Code d'erreur `PAYMENT_UNAVAILABLE` (503) dans `libs/errors.py`
-  - [ ] `initiate_payment` réécrit
+- [x] **Tâche 2** Initiation : `supports`, `PAYMENT_UNAVAILABLE`, `merchant_reference`, identifiant conservé (§ 3)
+  - [x] Code d'erreur `PAYMENT_UNAVAILABLE` (503) dans `libs/errors.py`
+  - [x] `initiate_payment` réécrit
 - [ ] **Tâche 3** Exécution post-paiement : remboursement à traiter, commande `cancelled`, message « sera remboursé » (§ 8)
   - [ ] `refund(payment, reason, amount=None)` et branche `settle`
 - [ ] **Tâche 4** Cœur de vérification : `apply_transaction`, `verify_payment`, `handle_payment_event` (§ 4)

@@ -57,7 +57,13 @@ def initiate_payment(order: Order, *, country: str, network: str, msisdn: str) -
         country_id=country, country__active=True, code=network, enabled=True, active=True
     ).exists():
         raise ApiError("NETWORK_UNAVAILABLE", fields={"network": "NETWORK_UNAVAILABLE"})
-    provider = get_provider()
+    try:
+        provider = get_provider()
+    except ImproperlyConfigured:
+        log.error("Initiation du paiement impossible : prestataire non configuré")
+        raise ApiError("PAYMENT_UNAVAILABLE") from None
+    if not provider.supports(country, network):
+        raise ApiError("NETWORK_UNAVAILABLE", fields={"network": "NETWORK_UNAVAILABLE"})
     first_name, last_name = payer_name(order)
     with transaction.atomic():
         # Verrou de la commande jusqu'à l'enregistrement de la transaction : un webhook très rapide attend, puis
@@ -71,6 +77,7 @@ def initiate_payment(order: Order, *, country: str, network: str, msisdn: str) -
         recent = timezone.now() - PAYMENT_IN_PROGRESS_TTL
         if locked.payments.filter(status__in=IN_PROGRESS, created_at__gt=recent).exists():
             raise ApiError("PAYMENT_IN_PROGRESS")
+        # `merchant_reference` (`<référence>-<rang>`) est posée par `Payment.save`, sous ce verrou
         payment = Payment.objects.create(
             order=order,
             provider=provider.name,
@@ -96,18 +103,26 @@ def initiate_payment(order: Order, *, country: str, network: str, msisdn: str) -
                     metadata={"order": order.reference, "payment": payment.pk},
                 )
             )
-        except PaymentTemporaryError:
-            log.exception("Initiation du paiement %s : prestataire indisponible", payment.pk)
-            payment.status = Payment.Status.FAILED
-            payment.failure_code = Payment.FailureCode.PROVIDER_UNAVAILABLE
-            payment.failure_reason = (
-                "Le service de paiement est indisponible. Réessayez dans un instant."
-            )
-        except PaymentProviderError:
-            log.exception("Initiation du paiement %s refusée", payment.pk)
-            payment.status = Payment.Status.FAILED
-            payment.failure_code = Payment.FailureCode.PROVIDER_REFUSED
-            payment.failure_reason = "Le paiement a été refusé. Vérifiez le numéro et le réseau."
+        except PaymentProviderError as error:
+            # La transaction a pu être créée avant l'échec : son identifiant n'est jamais perdu
+            payment.provider_transaction_id = error.provider_tx_id
+            if isinstance(error, PaymentTemporaryError):
+                log.warning("Initiation du paiement %s : prestataire indisponible", payment.pk)
+                if error.provider_tx_id:  # à retrouver : la réconciliation tranche
+                    payment.status = Payment.Status.PENDING
+                else:
+                    payment.status = Payment.Status.FAILED
+                    payment.failure_code = Payment.FailureCode.PROVIDER_UNAVAILABLE
+                    payment.failure_reason = (
+                        "Le service de paiement est indisponible. Réessayez dans un instant."
+                    )
+            else:
+                log.warning("Initiation du paiement %s refusée", payment.pk)
+                payment.status = Payment.Status.FAILED
+                payment.failure_code = Payment.FailureCode.PROVIDER_REFUSED
+                payment.failure_reason = (
+                    "Le paiement a été refusé. Vérifiez le numéro et le réseau."
+                )
         else:
             payment.provider_transaction_id = result.provider_tx_id
             payment.status = result.status
