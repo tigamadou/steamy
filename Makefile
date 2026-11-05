@@ -20,7 +20,7 @@ E2E_BUILD ?= --build
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
         test-api coverage-api lint-api fix-api psql flower clean openapi lint-web typecheck-web \
-        test-web coverage-web e2e e2e-down agent-up agent-down agent-status lint typecheck generate check-generated migrations-check test-cible
+        test-web coverage-web coverage-diff e2e e2e-down agent-up agent-down agent-status lint typecheck generate check-generated migrations-check test-cible
 
 help: ## Affiche cette aide
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -97,11 +97,8 @@ seed: ## Charge les fixtures et le jeu de démonstration (comptes : apps/api/fix
 test-api: ## Lance les tests de l'API
 	$(API_TEST) pytest
 
-coverage-api: ## Tests de l'API + couverture 100 % exigée sur le code modifié (diff-cover)
-	$(API_TEST) sh -c "pytest --cov --cov-report=term --cov-report=xml:coverage.xml"
-	docker run --rm -v "$(CURDIR):/repo" -w /repo/apps/api python:3.11.13-bookworm sh -c \
-	  "git config --global --add safe.directory /repo && pip install -q --root-user-action=ignore diff-cover==10.6.0 \
-	   && diff-cover coverage.xml --compare-branch=origin/development --fail-under=100"
+coverage-api: ## Tests de l'API + couverture 100 % du code modifié (BASE=origin/development par défaut)
+	@COMPOSE="$(COMPOSE)" COVERAGE_PARTIE=api scripts/coverage-diff.sh "$(or $(BASE),origin/development)"
 
 lint-api: ## Lint et format de l'API (vérification seule)
 	$(API) sh -c "ruff check . && ruff format --check ."
@@ -131,11 +128,12 @@ typecheck-web: ## Vérification TypeScript (web + api-client)
 test-web: ## Tests de composants du front (Vitest)
 	$(WEB) "corepack enable && pnpm test"
 
-coverage-web: ## Tests du front + couverture 100 % exigée sur le code modifié (diff-cover)
-	$(WEB) "corepack enable && pnpm --filter @steamy/web test:coverage"
-	docker run --rm -v "$(CURDIR):/repo" -w /repo python:3.11.13-bookworm sh -c \
-	  "git config --global --add safe.directory /repo && pip install -q --root-user-action=ignore diff-cover==10.6.0 \
-	   && diff-cover apps/web/coverage/cobertura-coverage.xml --compare-branch=origin/development --fail-under=100"
+coverage-web: ## Tests du front + couverture 100 % du code modifié (BASE=origin/development par défaut)
+	@COMPOSE="$(COMPOSE)" COVERAGE_PARTIE=web scripts/coverage-diff.sh "$(or $(BASE),origin/development)"
+
+coverage-diff: ## Couverture 100 % du code modifié, tests touchés seulement : make coverage-diff BASE=<branche>
+	@test -n "$(BASE)" || { echo "Usage : make coverage-diff BASE=<branche>"; exit 2; }
+	@COMPOSE="$(COMPOSE)" scripts/coverage-diff.sh "$(BASE)"
 
 e2e: ## Parcours Playwright sur la stack Docker (web en image prod, worker pour les emails et PDF, données rechargées avec seed_demo --e2e)
 	$(E2E) up -d $(E2E_BUILD) --wait web worker

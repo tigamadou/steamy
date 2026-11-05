@@ -19,7 +19,7 @@
 
 ## Avancement
 
-Statut : 🟦 en cours · Prochaine tâche : 1.5
+Statut : 🟦 en cours · Prochaine tâche : 1.6
 
 - [x] **1.1** Réseau d'infrastructure partagé et nom de projet · `compose.yml`, `compose.e2e.yml`
   - [x] Réseau `steamy-infra`, `name: steamy`, services d'infra attachés
@@ -34,9 +34,9 @@ Statut : 🟦 en cours · Prochaine tâche : 1.5
 - [x] **1.4** Cibles standard : `lint`, `typecheck`, `generate`, `check-generated`, `migrations-check`, `test-cible`
   - [x] `scripts/cibles.sh` (routage et garde par profil)
   - [x] Makefile routé vers l'agent, cibles existantes conservées
-- [ ] **1.5** `make coverage-diff BASE=…`
-  - [ ] `scripts/coverage-diff.sh` (tests touchés + diff-cover)
-  - [ ] `coverage-api`/`coverage-web` paramétrés par `BASE`
+- [x] **1.5** `make coverage-diff BASE=…`
+  - [x] `scripts/coverage-diff.sh` (tests touchés + diff-cover)
+  - [x] `coverage-api`/`coverage-web` paramétrés par `BASE`
 - [ ] **1.6** `make e2e-fixtures` en conteneur et `make e2e` par lot
 - [ ] **1.7** Mesures mémoire et `docs/infra/agents.md`
 - [ ] **1.8** Vérification du lot
