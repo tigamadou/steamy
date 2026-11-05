@@ -234,3 +234,35 @@ changes() {
   FAKE_DIFFCOVER_OUT="No lines with coverage information in this diff." run CD feature/base
   [ "$status" -eq 0 ]
 }
+
+@test "F17 COVERAGE_COMPLET : suite API complète avec couverture, jamais un sous-ensemble" {
+  changes apps/api/apps/core/models.py
+  COVERAGE_COMPLET=1 COVERAGE_PARTIE=api run CD feature/base
+  [ "$status" -eq 0 ]
+  assert_output_contains "suite complète"
+  assert_call 'pytest --cov --cov-report=xml:coverage.xml'
+  refute_call 'pytest apps/core'
+}
+
+@test "F18 COVERAGE_COMPLET : la suite tourne même si le diff ne touche aucun code" {
+  : >"$FIX/names"
+  : >"$FIX/full.diff"
+  COVERAGE_COMPLET=1 COVERAGE_PARTIE=api run CD feature/base
+  [ "$status" -eq 0 ]
+  assert_call 'pytest --cov'
+}
+
+@test "F19 COVERAGE_COMPLET côté front : vitest run complet avec couverture, pas vitest related" {
+  changes apps/web/src/a.ts
+  COVERAGE_COMPLET=1 COVERAGE_PARTIE=web run CD feature/base
+  [ "$status" -eq 0 ]
+  assert_call 'vitest run --coverage'
+  refute_call 'vitest related'
+  refute_call 'pytest'
+}
+
+@test "F20 le nombre de workers xdist du contexte est transmis au conteneur de test" {
+  changes apps/api/apps/core/models.py
+  run CD feature/base
+  assert_call '-e PYTEST_XDIST_AUTO_NUM_WORKERS api pytest'
+}

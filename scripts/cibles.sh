@@ -39,7 +39,7 @@ read -r -a PYTEST_EXTRA <<<"${PYTEST_XDIST:-} ${PYTEST_ARGS:-}"
 
 run_api() { $COMPOSE run --rm --no-deps api "$@"; }
 # Les tests tournent comme en CI (DJANGO_ENV=test) : l'environnement de dev (api.env) change des pages testées
-run_api_test() { $COMPOSE run --rm --no-deps -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage api "$@"; }
+run_api_test() { $COMPOSE run --rm --no-deps -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage -e PYTEST_XDIST_AUTO_NUM_WORKERS api "$@"; }
 # run_web <script> [args…] : les arguments sont passés à sh ($1…), jamais interpolés dans le script
 run_web() { local s="$1"; shift; $COMPOSE run --rm --no-deps web sh -c "$PNPM_INSTALL && $s" sh "$@"; }
 

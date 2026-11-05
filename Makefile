@@ -9,10 +9,16 @@ COMPOSE := docker compose
 endif
 API     := $(COMPOSE) run --rm api
 # Tests comme en CI : DJANGO_ENV=test (api.env pose dev) et stockage fichiers local (pas de S3 en CI)
-API_TEST := $(COMPOSE) run --rm -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage api
-# Parallélisme pytest (une base par worker ; nombre de workers décidé dans le conteneur, conftest.py) et arguments ajoutés
+# Sans dépendances (ni migrate, ni S3, ni Mailpit : stockage fichier et e-mails en mémoire) : seul Postgres doit tourner
+API_TEST := $(COMPOSE) run --rm --no-deps -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage -e PYTEST_XDIST_AUTO_NUM_WORKERS api
+API_NODEPS := $(COMPOSE) run --rm --no-deps api
+# Parallélisme pytest : `make test-api` est parallèle par défaut (`-n auto`, une base par worker, nombre de workers décidé
+# dans le conteneur par conftest.py ; PYTEST_XDIST_AUTO_NUM_WORKERS le force) ; test-cible, coverage-api et coverage-diff
+# restent en série sauf PYTEST_XDIST passé explicitement. PYTEST_ARGS : arguments ajoutés à pytest, séparés par des
+# espaces (pas d'argument contenant lui-même un espace).
 PYTEST_XDIST ?= -n auto
 PYTEST_ARGS ?=
+PYTEST_XDIST_EXPLICITE = $(if $(filter command line environment,$(origin PYTEST_XDIST)),$(PYTEST_XDIST))
 WEB     := $(COMPOSE) run --rm --no-deps web sh -c
 # Stack des parcours Playwright : projet séparé (par lot d'agent), réseau d'infra et image web propres, sans port publié (cohabite avec `make up`)
 E2E_P   := steamy-e2e$(if $(AGENT_LOT),-$(AGENT_LOT))
@@ -22,7 +28,7 @@ E2E_BUILD ?= --build
 
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
-        test-api coverage-api lint-api fix-api psql flower clean openapi lint-web typecheck-web \
+        test-api coverage-api coverage-api-complet coverage-web-complet lint-api fix-api psql flower clean openapi lint-web typecheck-web \
         test-web coverage-web coverage-diff e2e-fixtures e2e e2e-run e2e-down agent-up agent-down agent-status lint typecheck generate check-generated migrations-check test-cible test-scripts shellcheck
 
 help: ## Affiche cette aide
@@ -67,7 +73,7 @@ typecheck: ## Vérification TypeScript (profils web, complet et stack principale
 	@COMPOSE="$(COMPOSE)" scripts/cibles.sh typecheck
 
 test-cible: ## Tests ciblés : make test-cible T="apps/api/apps/core apps/web/src/..."
-	@COMPOSE="$(COMPOSE)" PYTEST_XDIST="$(if $(filter command line,$(origin PYTEST_XDIST)),$(PYTEST_XDIST))" PYTEST_ARGS="$(PYTEST_ARGS)" scripts/cibles.sh test-cible $(T)
+	@COMPOSE="$(COMPOSE)" PYTEST_XDIST="$(PYTEST_XDIST_EXPLICITE)" PYTEST_ARGS="$(PYTEST_ARGS)" scripts/cibles.sh test-cible $(T)
 
 # --- Environnements d'agent (docs/infra/agents.md) --------------------------------
 agent-up: ## Environnement d'agent : make agent-up LOT=<lot> PROFIL=<web|api|complet> BASE=<branche>
@@ -106,14 +112,18 @@ seed: ## Charge les fixtures et le jeu de démonstration (comptes : apps/api/fix
 test-api: ## Lance les tests de l'API en parallèle (PYTEST_XDIST="" pour la série, PYTEST_ARGS pour ajouter des arguments)
 	$(API_TEST) pytest $(PYTEST_XDIST) $(PYTEST_ARGS)
 
-coverage-api: ## Tests de l'API + couverture 100 % du code modifié (BASE=origin/development par défaut)
-	@COMPOSE="$(COMPOSE)" PYTEST_XDIST="$(PYTEST_XDIST)" PYTEST_ARGS="$(PYTEST_ARGS)" COVERAGE_PARTIE=api scripts/coverage-diff.sh "$(or $(BASE),origin/development)"
+coverage-api: ## Tests des apps touchées + couverture 100 % du code modifié (BASE=origin/development par défaut)
+	@COMPOSE="$(COMPOSE)" PYTEST_XDIST="$(PYTEST_XDIST_EXPLICITE)" PYTEST_ARGS="$(PYTEST_ARGS)" COVERAGE_PARTIE=api scripts/coverage-diff.sh "$(or $(BASE),origin/development)"
+
+coverage-api-complet: ## CI : suite API complète avec couverture (une exécution), puis 100 % du code modifié : BASE=<réf> requis
+	@test -n "$(BASE)" || { echo "Usage : make coverage-api-complet BASE=<réf>"; exit 2; }
+	@COMPOSE="$(COMPOSE)" PYTEST_XDIST="$(PYTEST_XDIST_EXPLICITE)" PYTEST_ARGS="$(PYTEST_ARGS)" COVERAGE_COMPLET=1 COVERAGE_PARTIE=api scripts/coverage-diff.sh "$(BASE)"
 
 lint-api: ## Lint et format de l'API (vérification seule)
-	$(API) sh -c "ruff check . && ruff format --check ."
+	$(API_NODEPS) sh -c "ruff check . && ruff format --check ."
 
 fix-api: ## Corrige automatiquement le lint et formate l'API
-	$(API) sh -c "ruff check --fix . && ruff format ."
+	$(API_NODEPS) sh -c "ruff check --fix . && ruff format ."
 
 # --- Contrat front/back -----------------------------------------------------
 generate: ## Régénère openapi.yaml + les types TS du client (à committer)
@@ -137,12 +147,16 @@ typecheck-web: ## Vérification TypeScript (web + api-client)
 test-web: ## Tests de composants du front (Vitest)
 	$(WEB) "corepack enable && pnpm test"
 
-coverage-web: ## Tests du front + couverture 100 % du code modifié (BASE=origin/development par défaut)
+coverage-web: ## Tests liés aux fichiers touchés + couverture 100 % du code modifié (BASE=origin/development par défaut)
 	@COMPOSE="$(COMPOSE)" COVERAGE_PARTIE=web scripts/coverage-diff.sh "$(or $(BASE),origin/development)"
+
+coverage-web-complet: ## CI : suite Vitest complète avec couverture (une exécution), puis 100 % du code modifié : BASE=<réf> requis
+	@test -n "$(BASE)" || { echo "Usage : make coverage-web-complet BASE=<réf>"; exit 2; }
+	@COMPOSE="$(COMPOSE)" COVERAGE_COMPLET=1 COVERAGE_PARTIE=web scripts/coverage-diff.sh "$(BASE)"
 
 coverage-diff: ## Couverture 100 % du code modifié, tests touchés seulement : make coverage-diff BASE=<branche>
 	@test -n "$(BASE)" || { echo "Usage : make coverage-diff BASE=<branche>"; exit 2; }
-	@COMPOSE="$(COMPOSE)" PYTEST_XDIST="$(PYTEST_XDIST)" PYTEST_ARGS="$(PYTEST_ARGS)" scripts/coverage-diff.sh "$(BASE)"
+	@COMPOSE="$(COMPOSE)" PYTEST_XDIST="$(PYTEST_XDIST_EXPLICITE)" PYTEST_ARGS="$(PYTEST_ARGS)" scripts/coverage-diff.sh "$(BASE)"
 
 e2e-fixtures: ## Parcours Playwright sur fixtures, en conteneur (front de production + fausse API) ; PW_ARGS pour filtrer
 	@COMPOSE="$(COMPOSE)" scripts/cibles.sh e2e-fixtures-garde

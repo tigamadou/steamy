@@ -5,7 +5,7 @@
 # Le diff est calculé SUR L'HÔTE (le `.git` d'un worktree pointe vers un chemin hôte, illisible en conteneur) et
 # inclut les modifications non commitées et les fichiers neufs (les fichiers supprimés ne sont pas rejoués). Seuls les
 # tests des apps Django et des fichiers du front touchés par le diff sont rejoués avec couverture, puis diff-cover
-# (en conteneur) compare au diff.
+# (en conteneur) compare au diff. COVERAGE_COMPLET=1 (CI) : suite complète à la place du sous-ensemble.
 #
 # Codes de sortie : 0 tout est couvert · 1 tests en échec, ligne non couverte ou aucun rapport · 2 usage ou base
 # inconnue · 3 une moitié du diff relève de l'autre profil et n'a pas été vérifiée (COVERAGE_IGNORE_AUTRE_PROFIL=1
@@ -94,6 +94,19 @@ case "${COVERAGE_PARTIE:-}" in
   web) API_FILES="" ;;
 esac
 
+# COVERAGE_COMPLET=1 (CI : `make coverage-api-complet`, `coverage-web-complet`) : une seule exécution de la suite
+# COMPLÈTE avec couverture, jamais un sous-ensemble, même si le diff ne touche aucun fichier de code
+COMPLET="${COVERAGE_COMPLET:-}"
+COMPLET_API=0
+COMPLET_WEB=0
+if [ "$COMPLET" = 1 ]; then
+  case "${COVERAGE_PARTIE:-}" in
+    api) COMPLET_API=1 ;;
+    web) COMPLET_WEB=1 ;;
+    *) COMPLET_API=1; COMPLET_WEB=1 ;;
+  esac
+fi
+
 rc=0
 pire() { if [ "$1" -gt "$rc" ]; then rc="$1"; fi; }
 
@@ -144,20 +157,22 @@ autre_profil() { # <profil de l'agent> <partie> <fichiers>
 }
 
 # --- API ----------------------------------------------------------------------------------------------------------
-if [ -n "$API_FILES" ]; then
+if [ -n "$API_FILES" ] || [ "$COMPLET_API" = 1 ]; then
   if [ "$PROFIL" = web ]; then
     autre_profil web "l'API" "$API_FILES"
   else
     cibles=()
     while IFS= read -r a; do cibles+=("$a"); done < <(printf '%s\n' "$API_FILES" | sed -nE 's#^apps/api/(apps/[^/]+)/.*#\1#p' | sort -u)
     hors_app="$(printf '%s\n' "$API_FILES" | grep -vE '^apps/api/apps/[^/]+/' || true)"
-    if [ -n "$hors_app" ]; then
+    if [ "$COMPLET" = 1 ]; then
+      cibles=()
+    elif [ -n "$hors_app" ]; then
       # Un fichier hors app absent du rapport serait ignoré par diff-cover (faux vert) : suite complète
       echo "coverage-diff : fichier API hors app touché, suite API complète" >&2
       cibles=()
     fi
     echo "coverage-diff : API, tests rejoués : ${cibles[*]:-suite complète}"
-    if $COMPOSE run --rm --no-deps -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage api pytest ${cibles[@]+"${cibles[@]}"} --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider ${PYTEST_EXTRA[@]+"${PYTEST_EXTRA[@]}"}; then
+    if $COMPOSE run --rm --no-deps -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage -e PYTEST_XDIST_AUTO_NUM_WORKERS api pytest ${cibles[@]+"${cibles[@]}"} --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider ${PYTEST_EXTRA[@]+"${PYTEST_EXTRA[@]}"}; then
       verifier "$DIFF_API" apps/api/coverage.xml '[.]py$'
     else
       echo "coverage-diff : les tests de l'API échouent" >&2
@@ -167,15 +182,21 @@ if [ -n "$API_FILES" ]; then
 fi
 
 # --- Front --------------------------------------------------------------------------------------------------------
-if [ -n "$WEB_FILES" ]; then
+if [ -n "$WEB_FILES" ] || [ "$COMPLET_WEB" = 1 ]; then
   if [ "$PROFIL" = api ]; then
     autre_profil api "le front" "$WEB_FILES"
   else
     rel=()
-    while IFS= read -r w; do rel+=("${w#apps/web/}"); done <<<"$WEB_FILES"
-    echo "coverage-diff : front, fichiers liés rejoués : ${rel[*]}"
+    while IFS= read -r w; do [ -z "$w" ] || rel+=("${w#apps/web/}"); done <<<"$WEB_FILES"
+    if [ "$COMPLET" = 1 ]; then
+      echo "coverage-diff : front, suite complète"
+      vitest_cmd='vitest run --coverage'
+    else
+      echo "coverage-diff : front, fichiers liés rejoués : ${rel[*]}"
+      vitest_cmd='vitest related --run --passWithNoTests --coverage "$@"'
+    fi
     # Les fichiers sont des arguments de sh (`"$@"`), jamais interpolés dans le script
-    if $COMPOSE run --rm --no-deps web sh -c "$PNPM_INSTALL && pnpm --filter @steamy/web exec vitest related --run --passWithNoTests --coverage \"\$@\"" sh "${rel[@]}"; then
+    if $COMPOSE run --rm --no-deps web sh -c "$PNPM_INSTALL && pnpm --filter @steamy/web exec $vitest_cmd" sh ${rel[@]+"${rel[@]}"}; then
       verifier "$DIFF_WEB" apps/web/coverage/cobertura-coverage.xml '[.]tsx?$'
     else
       echo "coverage-diff : les tests du front échouent" >&2
@@ -184,7 +205,7 @@ if [ -n "$WEB_FILES" ]; then
   fi
 fi
 
-if [ -z "$API_FILES" ] && [ -z "$WEB_FILES" ]; then
+if [ -z "$API_FILES" ] && [ -z "$WEB_FILES" ] && [ "$COMPLET" != 1 ]; then
   echo "coverage-diff : aucun fichier de code API ou front modifié par rapport à $REF : rien à vérifier."
 fi
 exit "$rc"
