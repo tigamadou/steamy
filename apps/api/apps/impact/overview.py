@@ -1,12 +1,15 @@
 """Vue d'ensemble du back-office (WAD01) : chiffres clés, échéance du rapport, « À traiter » filtré par groupe."""
 
 import datetime
+from collections.abc import Callable
+from typing import NamedTuple
 
 from django.db.models import Q
 from django.utils import timezone
 
 from apps.accounts.models import ConsentRequest, User
-from apps.core.groups import SUPER_ADMIN, SUPPORT
+from apps.core.groups import FINANCE, SUPER_ADMIN, SUPPORT
+from apps.payments.models import Payment, Refund
 
 from .models import ImpactReport, KpiDefinition
 from .periods import MONTH, QUARTER, Period
@@ -17,6 +20,8 @@ REPORT_DUE_DAYS = 15
 #: Fenêtre des « apprenants actifs » (dernière connexion).
 ACTIVE_DAYS = 30
 HIGHLIGHT = "na"
+#: Fenêtre des « paiements échoués » à relire (jours).
+FAILED_PAYMENTS_DAYS = 7
 
 
 def _in_groups(user, *groups) -> bool:
@@ -29,24 +34,75 @@ def _pending_consents() -> int:
     ).count()
 
 
-#: « À traiter » : (type, libellé, groupes, compteur, chemin de la liste filtrée dans l'admin Django). Paiements
-#: échoués (Finance) et candidatures à suivre (Support) s'ajoutent avec leurs modèles (API-L3b).
+def _failed_since() -> datetime.date:
+    return timezone.localdate() - datetime.timedelta(days=FAILED_PAYMENTS_DAYS)
+
+
+def _failed_payments() -> int:
+    return Payment.objects.filter(
+        status=Payment.Status.FAILED, created_at__date__gte=_failed_since()
+    ).count()
+
+
+def _failed_payments_path() -> str:
+    return f"/backoffice/paiements?status=failed&from={_failed_since().isoformat()}"
+
+
+def _pending_refunds() -> int:
+    return Refund.objects.filter(processed=False).count()
+
+
+class TodoEntry(NamedTuple):
+    kind: str
+    label: str
+    groups: tuple[str, ...]
+    count: Callable[[], int]
+    #: Chemin de l'écran du backoffice Next.js, quand il existe
+    path: Callable[[], str] | None
+    #: Chemin de la liste filtrée dans l'admin Django
+    admin_path: str
+
+
+#: « À traiter » : candidatures à suivre (Support) s'ajoutent avec leurs modèles (API-L3b).
 TODO = (
-    (
+    TodoEntry(
         "consents_pending",
         "Consentements en attente",
         (SUPPORT,),
         _pending_consents,
+        None,
         "/admin/accounts/consentrequest/?status__exact=pending",
+    ),
+    TodoEntry(
+        "payments_failed",
+        "Paiements échoués",
+        (FINANCE,),
+        _failed_payments,
+        _failed_payments_path,
+        "/admin/payments/payment/?status__exact=failed",
+    ),
+    TodoEntry(
+        "refunds_pending",
+        "Remboursements à traiter",
+        (FINANCE,),
+        _pending_refunds,
+        lambda: "/backoffice/remboursements",
+        "/admin/payments/refund/?processed__exact=0",
     ),
 )
 
 
 def todo(user) -> list[dict]:
     return [
-        {"kind": kind, "label": label, "count": count(), "admin_path": path}
-        for kind, label, groups, count, path in TODO
-        if _in_groups(user, *groups)
+        {
+            "kind": entry.kind,
+            "label": entry.label,
+            "count": entry.count(),
+            **({"path": entry.path()} if entry.path else {}),
+            "admin_path": entry.admin_path,
+        }
+        for entry in TODO
+        if _in_groups(user, *entry.groups)
     ]
 
 

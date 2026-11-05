@@ -104,10 +104,14 @@ class KpiDetailSerializer(KpiSummarySerializer):
 class TodoSerializer(serializers.Serializer):
     # Texte et non énumération : `kind` est déjà une énumération d'un autre composant (`KindEnum`)
     kind = serializers.CharField(
-        help_text="consents_pending (d'autres types suivront avec API-L3b)"
+        help_text="consents_pending, payments_failed ou refunds_pending (d'autres types suivront avec API-L3b)"
     )
     label = serializers.CharField()
     count = serializers.IntegerField()
+    path = serializers.CharField(
+        required=False,
+        help_text="Chemin de l'écran du backoffice Next.js (commence par /backoffice) ; absent s'il n'existe pas encore",
+    )
     admin_path = serializers.CharField(help_text="Chemin de la liste filtrée dans l'admin Django")
 
 
