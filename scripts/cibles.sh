@@ -27,7 +27,7 @@ garde() {
 
 run_api() { $COMPOSE run --rm --no-deps api "$@"; }
 # Les tests tournent comme en CI (DJANGO_ENV=test) : l'environnement de dev (api.env) change des pages testées
-run_api_test() { $COMPOSE run --rm --no-deps -e DJANGO_ENV=test api "$@"; }
+run_api_test() { $COMPOSE run --rm --no-deps -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage api "$@"; }
 run_web() { $COMPOSE run --rm --no-deps web sh -c "$PNPM_INSTALL && $1"; }
 
 # Combine les codes de sortie : le pire gagne

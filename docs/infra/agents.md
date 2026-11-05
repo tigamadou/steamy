@@ -105,7 +105,7 @@ disponibles. `coverage-api` et `coverage-web` acceptent `BASE=` (défaut `origin
 
 ### Détails utiles
 
-- **Tests API** : lancés avec `DJANGO_ENV=test`, comme la CI (le `dev` de `infra/dev/api.env` change des pages testées).
+- **Tests API** : lancés comme la CI (`DJANGO_ENV=test`, stockage de fichiers local) ; l'environnement de dev de `infra/dev/api.env` change des pages et des URL testées.
 - **Le diff de `coverage-diff` est calculé sur l'hôte**, working tree compris (fichiers neufs inclus) : le `.git` d'un
   worktree pointe vers un chemin de l'hôte, illisible dans un conteneur. Un fichier Python hors d'une app Django
   (`project/`, `libs/`, `conftest.py`) touché déclenche la suite API complète. diff-cover tourne dans l'image

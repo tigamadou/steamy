@@ -87,7 +87,7 @@ if [ -n "$API_FILES" ]; then
     fi
     echo "coverage-diff : API, tests rejoués : ${cibles:-suite complète}"
     # shellcheck disable=SC2086
-    if $COMPOSE run --rm --no-deps -e DJANGO_ENV=test api pytest $cibles --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider; then
+    if $COMPOSE run --rm --no-deps -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage api pytest $cibles --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider; then
       diff_cover "$DIFF_API" apps/api/coverage.xml || pire $?
     else
       echo "coverage-diff : les tests de l'API échouent" >&2

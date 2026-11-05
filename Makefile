@@ -8,8 +8,8 @@ else
 COMPOSE := docker compose
 endif
 API     := $(COMPOSE) run --rm api
-# Tests comme en CI : DJANGO_ENV=test (api.env pose dev, ce qui change des pages testées)
-API_TEST := $(COMPOSE) run --rm -e DJANGO_ENV=test api
+# Tests comme en CI : DJANGO_ENV=test (api.env pose dev) et stockage fichiers local (pas de S3 en CI)
+API_TEST := $(COMPOSE) run --rm -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage api
 WEB     := $(COMPOSE) run --rm --no-deps web sh -c
 # Stack des parcours Playwright : projet séparé (par lot d'agent), réseau d'infra et image web propres, sans port publié (cohabite avec `make up`)
 E2E_P   := steamy-e2e$(if $(AGENT_LOT),-$(AGENT_LOT))

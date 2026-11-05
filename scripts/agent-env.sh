@@ -329,7 +329,7 @@ cmd_down() {
   if [ -n "$(docker ps -aq --filter "label=com.docker.compose.project=steamy-e2e-$lot")" ]; then
     (cd "$wt" && AGENT_LOT="$lot" make e2e-down) || info "arrêt de la stack e2e du lot en échec (voir « make e2e-down » dans le worktree)"
   fi
-  compose_agent "$lot" "$wt" down -v --remove-orphans
+  compose_agent "$lot" "$wt" --profile fixtures down -v --remove-orphans
   redis="$(main_container redis)"
   if [ -n "$redis" ]; then
     docker exec "$redis" redis-cli -n "$cache" FLUSHDB >/dev/null
