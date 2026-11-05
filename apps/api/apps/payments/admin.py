@@ -1,14 +1,14 @@
 """
 Commerce dans l'admin Django (WAD10, WAD11, LOT-6 6.4). Commandes et paiements se lisent sans se réécrire : montants
 et statut de paiement viennent du serveur (`pricing`) et des webhooks (S9). Les seules écritures passent par les
-services de `backoffice.py` : statut de livraison (Support), révocation d'un Kit Code (Support), demande et
-traitement d'un remboursement (Finance).
+services de `backoffice.py` : statut de livraison (Support), révocation d'un Kit Code (Support), demande d'un
+remboursement (Finance). Le traitement d'un remboursement a lieu dans le backoffice Next.js.
 """
 
 from django import forms
 from django.contrib import admin, messages
 from django.db import transaction
-from django.db.models import Count, F, Q, Sum
+from django.db.models import F, Sum
 from django.db.models.functions import Coalesce
 from django.http import FileResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -19,6 +19,7 @@ from apps.core.admin_actions import form_action
 from apps.core.groups import FINANCE
 
 from . import backoffice
+from .backoffice import masked, payment_totals
 from .models import Invoice, KitCode, Order, OrderItem, Payment, PaymentRequest, Refund
 
 
@@ -34,13 +35,6 @@ def run(modeladmin, request, objects, action, done: str) -> None:
             count += 1
     if count:
         modeladmin.message_user(request, f"{done} : {count}.", messages.SUCCESS)
-
-
-def masked(msisdn: str) -> str:
-    """Numéro Mobile Money partiellement masqué (`+229 •••• 00 01`)."""
-    if len(msisdn) < 8:
-        return "—" if not msisdn else "••••"
-    return f"{msisdn[:4]} •••• {msisdn[-4:-2]} {msisdn[-2:]}"
 
 
 class ReadOnlyInline(admin.TabularInline):
@@ -192,26 +186,6 @@ class PaymentKindFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         return queryset.filter(order__kind=self.value()) if self.value() else queryset
-
-
-def payment_totals(queryset) -> dict:
-    """Agrégats de WAD11 sur les paiements listés : volume encaissé, nombre, taux d'échec (réussis + échoués)."""
-    totals = queryset.aggregate(
-        volume=Sum("amount", filter=Q(status=Payment.Status.SUCCEEDED)),
-        succeeded=Count("id", filter=Q(status=Payment.Status.SUCCEEDED)),
-        failed=Count("id", filter=Q(status=Payment.Status.FAILED)),
-        count=Count("id"),
-    )
-    settled = totals["succeeded"] + totals["failed"]
-    volume = totals["volume"] or 0
-    return {
-        "volume": volume,
-        "volume_label": f"{volume:,} FCFA".replace(",", "\u202f"),
-        "count": totals["count"],
-        "succeeded": totals["succeeded"],
-        "failed": totals["failed"],
-        "failure_rate": round(100 * totals["failed"] / settled, 1) if settled else None,
-    }
 
 
 @admin.register(Payment)
@@ -403,18 +377,6 @@ class RefundForm(forms.ModelForm):
         return data
 
 
-class ProcessRefundForm(forms.Form):
-    """Double confirmation : le remboursement est fait chez l'opérateur, et la commande passera à « remboursée »."""
-
-    done = forms.BooleanField(
-        label="Le remboursement a été effectué auprès de l'opérateur.", required=True
-    )
-    order_refunded = forms.BooleanField(
-        label="Je comprends que la commande passe à « remboursée » et que le payeur est prévenu.",
-        required=True,
-    )
-
-
 @admin.register(Refund)
 class RefundAdmin(admin.ModelAdmin):
     list_display = (
@@ -430,7 +392,6 @@ class RefundAdmin(admin.ModelAdmin):
     search_fields = ("payment__order__reference",)
     list_select_related = ("payment__order",)
     form = RefundForm
-    actions = ["process"]
 
     def has_change_permission(self, request, obj=None):
         return False
@@ -466,28 +427,6 @@ class RefundAdmin(admin.ModelAdmin):
         if getattr(request, "refund_refused", False):
             return HttpResponseRedirect(reverse("admin:payments_refund_changelist"))
         return super().response_add(request, obj, post_url_continue)
-
-    def has_process_permission(self, request):
-        return request.user.has_perm("payments.process_refund")
-
-    @admin.action(description="Traiter (remboursement effectué)", permissions=["process"])
-    def process(self, request, queryset):
-        return form_action(
-            self,
-            request,
-            queryset,
-            ProcessRefundForm,
-            title="Traiter des remboursements",
-            intro="À faire seulement une fois l'argent rendu au payeur par l'opérateur Mobile Money.",
-            submit_label="Traiter",
-            apply=lambda _data: run(
-                self,
-                request,
-                queryset,
-                lambda refund: backoffice.process_refund(refund, request.user, request),
-                "Remboursements traités",
-            ),
-        )
 
 
 @admin.register(KitCode)
