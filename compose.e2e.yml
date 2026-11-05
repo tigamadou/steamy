@@ -53,7 +53,7 @@ services:
       retries: 30
 
   web:
-    image: steamy-web-e2e
+    image: ${E2E_WEB_IMAGE:-steamy-web-e2e}
     build:
       context: .
       dockerfile: apps/web/Dockerfile
@@ -90,7 +90,7 @@ services:
       MAILPIT_URL: http://mailpit:8025
       COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
     command: >
-      sh -c "corepack enable
+      sh -c "npm install -g --silent --no-fund --no-audit pnpm@10.34.7
       && pnpm install --frozen-lockfile --filter '@steamy/web...' --store-dir /pnpm-store --config.confirm-modules-purge=false
       && pnpm --filter @steamy/web e2e ${PW_ARGS:-}"
     volumes:

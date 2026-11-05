@@ -1,0 +1,103 @@
+# Surcouche d'un environnement d'agent (méthode des chantiers, ADR 0007) :
+#   docker compose -p steamy-ag-<lot> -f compose.yml -f compose.agent.yml …
+# Lancée par `make agent-up` (scripts/agent-env.sh), qui fournit `.agent.env` (AGENT_LOT, numéros Redis).
+# - seuls les conteneurs applicatifs (api-migrate, api, worker, web) sont propres à l'agent ;
+# - PostgreSQL, Redis, RustFS et Mailpit sont ceux de la stack principale, joints par le réseau `steamy-infra` ;
+# - aucun port publié ; l'agent n'adresse jamais un service applicatif par son nom nu mais par `<service>-<lot>`
+#   (plusieurs agents portent le même alias `api` sur `steamy-infra`).
+
+x-agent-api-env: &agent-api-env
+  AGENT_LOT: ${AGENT_LOT:?AGENT_LOT requis}
+  POSTGRES_DB: steamy_${AGENT_LOT:?AGENT_LOT requis}
+  REDIS_URL: redis://redis:6379/${REDIS_DB_CACHE:?REDIS_DB_CACHE requis}
+  CELERY_BROKER_URL: redis://redis:6379/${REDIS_DB_BROKER:?REDIS_DB_BROKER requis}
+  AWS_STORAGE_BUCKET_NAME: steamy-${AGENT_LOT:?AGENT_LOT requis}
+  AWS_STORAGE_BUCKET_NAME_TEST: steamy-${AGENT_LOT:?AGENT_LOT requis}-test
+  ALLOWED_HOSTS: localhost,127.0.0.1,api,api-${AGENT_LOT:?AGENT_LOT requis}
+
+x-agent-api: &agent-api
+  image: steamy-api
+  build: !reset null
+  pull_policy: never
+  ports: !reset []
+
+services:
+  # Infrastructure partagée et services de la stack principale : jamais démarrés par un agent
+  postgres:
+    profiles: ["manuel"]
+  redis:
+    profiles: ["manuel"]
+  rustfs:
+    profiles: ["manuel"]
+  rustfs-init:
+    profiles: ["manuel"]
+  mailpit:
+    profiles: ["manuel"]
+  beat:
+    profiles: ["manuel"]
+  flower:
+    profiles: ["manuel"]
+
+  api-migrate:
+    <<: *agent-api
+    depends_on: !reset null
+    environment: *agent-api-env
+    networks:
+      default:
+        aliases: ["api-migrate-${AGENT_LOT:?AGENT_LOT requis}"]
+      infra: {}
+
+  api:
+    <<: *agent-api
+    depends_on: !override
+      api-migrate:
+        condition: service_completed_successfully
+    environment: *agent-api-env
+    networks:
+      default:
+        aliases: ["api-${AGENT_LOT:?AGENT_LOT requis}"]
+      infra: {}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/')"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  worker:
+    <<: *agent-api
+    depends_on: !override
+      api-migrate:
+        condition: service_completed_successfully
+    environment: *agent-api-env
+    networks:
+      default:
+        aliases: ["worker-${AGENT_LOT:?AGENT_LOT requis}"]
+      infra: {}
+
+  web:
+    ports: !reset []
+    depends_on: !reset null
+    environment:
+      AGENT_LOT: ${AGENT_LOT:?AGENT_LOT requis}
+      API_URL: http://api-${AGENT_LOT:?AGENT_LOT requis}:8000
+      PUBLIC_API_URL: http://api-${AGENT_LOT:?AGENT_LOT requis}:8000
+    networks:
+      default:
+        aliases: ["web-${AGENT_LOT:?AGENT_LOT requis}"]
+    # Dépendances installées puis serveur de dev à l'écoute (le premier démarrage installe tout le dépôt pnpm)
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 3000"]
+      interval: 5s
+      timeout: 5s
+      retries: 120
+
+networks:
+  infra:
+    external: true
+    name: ${INFRA_NETWORK:-steamy-infra}
+
+volumes:
+  # Magasin pnpm partagé entre agents (jamais supprimé par `agent-down`)
+  pnpm_store:
+    external: true
+    name: steamy_pnpm_store

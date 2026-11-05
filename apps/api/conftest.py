@@ -1,4 +1,88 @@
+import os
+
 import pytest
+
+BASE_TEST_DATABASE = "test_steamy"
+
+
+def check_test_database_name(name: str, agent_lot: str | None, worker: str | None) -> str | None:
+    """
+    Message d'erreur si `name` n'est pas la base de test attendue, sinon None.
+
+    attendu = test_steamy[_<lot>][_<worker>] ; une égalité stricte (ni préfixe, ni motif), pour qu'aucun test
+    ne tourne sur une base qui n'est pas celle de l'agent. `agent_lot == ""` (variable posée mais vide) est refusé.
+    """
+    if agent_lot is not None and not agent_lot:
+        return "Tests refusés : AGENT_LOT est posé mais vide. Retirez la variable ou donnez-lui le nom du lot."
+    expected = (
+        BASE_TEST_DATABASE
+        + (f"_{agent_lot}" if agent_lot else "")
+        + (f"_{worker}" if worker else "")
+    )
+    if name == expected:
+        return None
+    return (
+        f"Tests refusés : la base « {name} » n'est pas celle attendue (« {expected} »). "
+        "Avec AGENT_LOT=<lot>, la base de test est test_steamy_<lot> ; sans, test_steamy. "
+        "Lancez les tests avec `make test-cible` ou `make test-api`."
+    )
+
+
+def default_xdist_workers(
+    agent_lot: str | None, cpu_count: int | None, override: str | None = None
+) -> int:
+    """
+    Processus xdist : `override` (PYTEST_XDIST_AUTO_NUM_WORKERS) s'il est un entier positif, sinon 2 dans un
+    environnement d'agent (budget machine partagé), sinon 4 au plus.
+    """
+    if override and override.strip().isdigit() and int(override) > 0:
+        return int(override)
+    if agent_lot:
+        return 2
+    return min(4, cpu_count or 4)
+
+
+def pytest_xdist_auto_num_workers(config):
+    """
+    Nombre de processus de `-n auto`, décidé dans le conteneur (là où AGENT_LOT est connu). Ce hook passe avant
+    celui de xdist, qui lit lui aussi PYTEST_XDIST_AUTO_NUM_WORKERS : on la lit donc ici en premier.
+    """
+    return default_xdist_workers(
+        os.environ.get("AGENT_LOT"),
+        os.cpu_count(),
+        os.environ.get("PYTEST_XDIST_AUTO_NUM_WORKERS"),
+    )
+
+
+def _configured_test_database_name() -> str:
+    """Nom de la base de test que Django utilisera (avant suffixe xdist, sauf si pytest-django l'a déjà posé)."""
+    from django.conf import settings
+
+    db = settings.DATABASES["default"]
+    return db.get("TEST", {}).get("NAME") or f"test_{db['NAME']}"
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_configure(config):
+    """Arrêt immédiat, avant toute collecte, si la base de test n'est pas celle du contexte (agent ou non)."""
+    # Nom sans suffixe de worker : ce hook tourne aussi dans le processus maître de xdist
+    error = check_test_database_name(
+        _configured_test_database_name(), os.environ.get("AGENT_LOT"), None
+    )
+    if error:
+        raise pytest.UsageError(error)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def assert_test_database(django_db_modify_db_settings):
+    """Contrôle le nom EFFECTIF (suffixe `_gwN` compris) avant que `django_db_setup` ne crée la moindre base."""
+    error = check_test_database_name(
+        _configured_test_database_name(),
+        os.environ.get("AGENT_LOT"),
+        os.environ.get("PYTEST_XDIST_WORKER"),
+    )
+    if error:
+        pytest.exit(error, returncode=4)
 
 
 @pytest.fixture(autouse=True)

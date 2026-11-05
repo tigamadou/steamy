@@ -1,3 +1,5 @@
+name: steamy
+
 # Stack de développement local : tous les services tournent dans Docker.
 # Point d'entrée : `make up` (voir `make help`).
 # Ne PAS utiliser en production : identifiants de dev, runserver, montage du code.
@@ -18,6 +20,7 @@ x-api: &api
 services:
   postgres:
     image: postgres:17.2
+    networks: [default, infra]
     environment:
       POSTGRES_DB: steamy
       POSTGRES_USER: steamy
@@ -34,12 +37,14 @@ services:
 
   redis:
     image: redis:7.4
+    networks: [default, infra]
     volumes:
       - redis_data:/data
 
   # Stockage objet S3-compatible (remplace MinIO)
   rustfs:
     image: rustfs/rustfs:1.0.1
+    networks: [default, infra]
     environment:
       RUSTFS_ACCESS_KEY: rustfsadmin
       RUSTFS_SECRET_KEY: rustfsadmin
@@ -75,6 +80,7 @@ services:
   # Capture tous les e-mails sortants : http://localhost:8025
   mailpit:
     image: axllent/mailpit:v1.21
+    networks: [default, infra]
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
@@ -139,6 +145,30 @@ services:
       api:
         condition: service_started
 
+  # Parcours Playwright sur fixtures (`make e2e-fixtures`) : front de production + fausse API (apps/web/e2e/fausse-api/),
+  # sans base ni vraie API. Image Playwright (glibc, navigateurs embarqués) : volumes de dépendances dédiés, pour ne pas
+  # mélanger ses binaires avec ceux du `web` d'Alpine ni écraser le .next du serveur de dev. Cette image embarque Node 26
+  # sans corepack : pnpm est installé par npm (version de `packageManager` dans package.json).
+  playwright-fixtures:
+    image: mcr.microsoft.com/playwright:v1.64.1-noble
+    profiles: ["fixtures"]
+    working_dir: /repo
+    environment:
+      CI: ${CI:-}
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+    command: >
+      sh -c "npm install -g --silent --no-fund --no-audit pnpm@10.34.7
+      && pnpm install --frozen-lockfile --filter '@steamy/web...' --store-dir /pnpm-store --config.confirm-modules-purge=false
+      && pnpm --filter @steamy/web build
+      && pnpm --filter @steamy/web e2e:fixtures ${PW_ARGS:-}"
+    volumes:
+      - .:/repo
+      - pw_node_modules:/repo/node_modules
+      - pw_web_node_modules:/repo/apps/web/node_modules
+      - pw_api_client_node_modules:/repo/packages/api-client/node_modules
+      - pw_web_next:/repo/apps/web/.next
+      - pnpm_store:/pnpm-store
+
   # Supervision Celery, à la demande : `make flower`
   flower:
     <<: *api
@@ -146,6 +176,11 @@ services:
     command: celery -A project flower --address=0.0.0.0 --port=5555
     ports:
       - "5555:5555"
+
+# Réseau partagé avec les environnements d'agent (compose.agent.yml) : seuls les services d'infrastructure y sont attachés
+networks:
+  infra:
+    name: ${INFRA_NETWORK:-steamy-infra}
 
 volumes:
   postgres_data:
@@ -155,4 +190,8 @@ volumes:
   web_node_modules:
   api_client_node_modules:
   web_next:
+  pw_node_modules:
+  pw_web_node_modules:
+  pw_api_client_node_modules:
+  pw_web_next:
   pnpm_store:

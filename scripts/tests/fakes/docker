@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# Faux `docker` des tests : journalise ses arguments et répond d'après des variables et fichiers de fixtures ($FIX).
+echo "docker $*" >>"$CALLS_LOG"
+
+fix_out() { [ -f "$1" ] && cat "$1"; return 0; }
+
+case "${1:-}" in
+  info)
+    case "$*" in
+      *MemTotal*) echo $((${FAKE_MEM_MO:-13958} * 1048576)) ;;
+      *) exit "${FAKE_DOCKER_INFO_RC:-0}" ;;
+    esac
+    ;;
+  ps)
+    projet=""
+    service=""
+    for a in "$@"; do
+      case "$a" in
+        label=com.docker.compose.project=*) projet="${a#label=com.docker.compose.project=}" ;;
+        label=com.docker.compose.service=*) service="${a#label=com.docker.compose.service=}" ;;
+      esac
+    done
+    key="$projet"
+    [ -z "$service" ] || key="$projet.$service"
+    fix_out "$FIX/ps/$key"
+    ;;
+  inspect)
+    echo "${FAKE_PG_WORKDIR:-$MAIN}"
+    ;;
+  network)
+    exit "${FAKE_NETWORK_RC:-0}"
+    ;;
+  image)
+    case " ${FAKE_IMAGE_MISSING:-} " in
+      *" ${*: -1} "*) exit 1 ;;
+    esac
+    ;;
+  pull) ;;
+  stats) echo "${FAKE_STATS:-100MiB / 1GiB}" ;;
+  exec)
+    case "$*" in
+      *redis-cli*) exit "${FAKE_REDIS_RC:-0}" ;;
+      *psql*)
+        [ "${FAKE_DB_EXISTS:-0}" != 1 ] || echo 1
+        ;;
+    esac
+    ;;
+  run)
+    case "$*" in
+      *diff-cover*)
+        [ -z "${FAKE_DIFFCOVER_OUT:-}" ] || echo "$FAKE_DIFFCOVER_OUT"
+        exit "${FAKE_DIFFCOVER_RC:-0}"
+        ;;
+    esac
+    ;;
+  compose)
+    sub=""
+    for a in "$@"; do
+      case "$a" in up | down | logs | run) sub="$a"; break ;; esac
+    done
+    case "$sub" in
+      up) exit "${FAKE_COMPOSE_UP_RC:-0}" ;;
+      down) exit "${FAKE_COMPOSE_DOWN_RC:-0}" ;;
+      run)
+        if [ -n "${FAKE_RUN_SEES_REPORT:-}" ]; then
+          [ ! -e apps/api/coverage.xml ] || echo "RAPPORT_API_PRESENT" >>"$CALLS_LOG"
+          [ ! -e apps/web/coverage/cobertura-coverage.xml ] || echo "RAPPORT_WEB_PRESENT" >>"$CALLS_LOG"
+        fi
+        if [ "${FAKE_RUN_RC:-0}" = 0 ] && [ -z "${FAKE_NO_REPORT:-}" ]; then
+          case "$*" in
+            *--cov-report*) mkdir -p apps/api && : >apps/api/coverage.xml ;;
+            *--coverage*) mkdir -p apps/web/coverage && : >apps/web/coverage/cobertura-coverage.xml ;;
+          esac
+        fi
+        exit "${FAKE_RUN_RC:-0}"
+        ;;
+    esac
+    ;;
+esac
+exit 0
