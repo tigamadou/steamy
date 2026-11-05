@@ -78,6 +78,7 @@ jobs:
               - 'infra/dev/**'
               - 'scripts/cibles.sh'
               - 'scripts/coverage-diff.sh'
+              - 'make/**'
             api:
               - *ci
               - *runtime
@@ -101,6 +102,7 @@ jobs:
             # le filtre `web` seul ne suffit pas.
             e2e:
               - *ci
+              - *runtime
               - 'apps/api/**'
               - 'apps/web/**'
               - 'packages/**'
@@ -110,14 +112,15 @@ jobs:
               - 'pnpm-lock.yaml'
 
   # Les jobs appellent les cibles `make` des agents (docs/infra/agents.md) : tout tourne en conteneur, rien n'est
-  # installé sur le runner. Le projet Compose s'appelle `steamy` pour que `docker compose run` retrouve les images
-  # chargées ci-dessous (tags `steamy-<service>`). Une base par worker xdist : `test_steamy_gwN`.
+  # installé sur le runner. Le projet Compose est `steamy` (`name:` de compose.yml) : `docker compose run` retrouve les
+  # images chargées ci-dessous (tags `steamy-<service>`). Une base par worker xdist : `test_steamy_gwN`.
+  # La suite complète tourne UNE fois, avec couverture ; diff-cover compare ce rapport à la base de la PR.
   api:
     needs: changes
     if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     env:
-      COMPOSE_PROJECT_NAME: steamy
       CI: "true"
     steps:
       - uses: actions/checkout@v5
@@ -140,19 +143,20 @@ jobs:
       # En cas d'échec du lint : `make fix-api`, puis committer
       - run: make lint-api
       - run: make migrations-check
-      # Suite complète en parallèle (pytest-xdist, une base par worker) : `--maxfail=0` liste tous les échecs en un run
-      - name: Tests (suite complète)
-        run: make test-api PYTEST_ARGS=--maxfail=0
-      # Règle : 100 % de couverture (lignes et branches) sur le code ajouté ou modifié. En local : `make coverage-api`.
-      - name: Couverture du code modifié = 100 %
-        run: make coverage-api BASE=${{ needs.changes.outputs.compare }}
+      # Suite complète en parallèle (pytest-xdist, une base par worker) avec couverture ; `--maxfail=0` liste tous les
+      # échecs en un run. Règle : 100 % de couverture (lignes et branches) sur le code ajouté ou modifié.
+      # En local, les agents utilisent `make coverage-api` (apps touchées seulement).
+      - name: Tests (suite complète) et couverture du code modifié = 100 %
+        env:
+          BASE: ${{ needs.changes.outputs.compare }}
+        run: make coverage-api-complet BASE="$BASE" PYTEST_XDIST="-n auto" PYTEST_ARGS=--maxfail=0
 
   web:
     needs: changes
     if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     env:
-      COMPOSE_PROJECT_NAME: steamy
       CI: "true"
     steps:
       - uses: actions/checkout@v5
@@ -161,19 +165,20 @@ jobs:
       # `make typecheck` installe les dépendances dans les volumes du conteneur web : à lancer avant les autres cibles
       - run: make typecheck
       - run: make lint-web
-      - name: Tests (suite complète)
-        run: make test-web
-      # Règle : 100 % de couverture sur le code ajouté ou modifié. En local : `make coverage-web`.
-      - name: Couverture du code modifié = 100 %
-        run: make coverage-web BASE=${{ needs.changes.outputs.compare }}
+      # Suite complète avec couverture, une seule exécution. Règle : 100 % de couverture sur le code ajouté ou modifié.
+      # En local, les agents utilisent `make coverage-web` (fichiers liés aux modifications seulement).
+      - name: Tests (suite complète) et couverture du code modifié = 100 %
+        env:
+          BASE: ${{ needs.changes.outputs.compare }}
+        run: make coverage-web-complet BASE="$BASE"
 
   # Contrat d'API : openapi.yaml et les types TypeScript du client doivent être à jour (l'API et le front y sont nécessaires)
   generated:
     needs: changes
     if: needs.changes.outputs.api == 'true' || needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     env:
-      COMPOSE_PROJECT_NAME: steamy
       CI: "true"
     steps:
       - uses: actions/checkout@v5
@@ -186,8 +191,6 @@ jobs:
           load: true
           tags: steamy-api
           cache-from: type=gha,scope=api-dev
-      - name: Postgres et Redis
-        run: docker compose up -d --wait postgres redis
       - run: make check-generated
 
   # Une image par job : modifier le front ne reconstruit pas l'image de l'API
@@ -294,7 +297,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      COMPOSE_PROJECT_NAME: steamy
       CI: "true"
     steps:
       - uses: actions/checkout@v5
@@ -358,5 +360,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Tous les jobs exécutés ont réussi
+        env:
+          NEEDS: ${{ toJSON(needs) }}
         run: |
-          echo '${{ toJSON(needs) }}' | jq -e 'all(.[]; .result == "success" or .result == "skipped")'
+          echo "$NEEDS" | jq -e 'all(.[]; .result == "success" or .result == "skipped")'
