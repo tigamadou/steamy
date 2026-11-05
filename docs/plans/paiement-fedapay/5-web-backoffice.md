@@ -73,9 +73,9 @@ Statut : ⬜ à faire · Prochaine tâche : 1
 - [x] **Tâche 3** Écran Paiements : liste, filtres, totaux, pagination
   - [x] Composants `payments/` (totaux, filtres, tableau, pagination, pastilles) et leurs tests
   - [x] Page `/backoffice/paiements` et son test
-- [ ] **Tâche 4** Écran Détail d'un paiement : tentatives, remboursements, journal, actions
-  - [ ] `PaymentDetail`, `RecheckButton`, `RefundRequestModal` et leurs tests
-  - [ ] Page `/backoffice/paiements/[id]` et son test
+- [x] **Tâche 4** Écran Détail d'un paiement : tentatives, remboursements, journal, actions
+  - [x] `PaymentDetail`, `RecheckButton`, `RefundRequestModal` et leurs tests
+  - [x] Page `/backoffice/paiements/[id]` et son test
 - [ ] **Tâche 5** Écran Remboursements : à traiter / traités, « Marquer comme remboursé »
   - [ ] `RefundsTable`, `ProcessRefundModal` et leurs tests
   - [ ] Page `/backoffice/remboursements` et son test

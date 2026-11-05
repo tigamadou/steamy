@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { COUNTRY_LIST, NETWORK_LIST, paymentPage } from "@/components/backoffice/payments/fixtures";
+import { COUNTRY_LIST, NETWORK_LIST, paymentDetail, paymentPage } from "@/components/backoffice/payments/fixtures";
 
 const requireGroups = vi.fn();
 const apiGet = vi.fn();
@@ -78,5 +78,36 @@ describe("WAD11 · page Paiements", () => {
     api({ error: { code: "SERVER_ERROR", message: "" }, response: new Response(null, { status: 500 }) });
     const { default: Page } = await import("./page");
     await expect(Page({ searchParams: Promise.resolve({}) } as never)).rejects.toThrow("réponse inattendue de l'API (500)");
+  });
+});
+
+describe("WAD16 · page Détail d'un paiement", () => {
+  beforeEach(() => {
+    requireGroups.mockReset().mockResolvedValue({ staffGroups: ["Finance"] });
+    apiGet.mockReset();
+  });
+
+  const renderDetail = async (id: string) => {
+    const { default: Page } = await import("./[id]/page");
+    render(await Page({ params: Promise.resolve({ id }) } as never));
+  };
+
+  it("exige Finance ou Super-admin et lit le paiement demandé", async () => {
+    apiGet.mockResolvedValue(ok(paymentDetail()));
+    await renderDetail("1");
+    expect(requireGroups).toHaveBeenCalledWith(["Finance", "Super-admin"]);
+    expect(apiGet).toHaveBeenCalledWith("/api/backoffice/payments/{id}/", { params: { path: { id: 1 } } });
+    expect(screen.getByRole("heading", { level: 1, name: "Paiement CMD-7001" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Commande" })).toBeInTheDocument();
+  });
+
+  it.each(["abc", "12x", "-3", "1.5"])("identifiant « %s » : introuvable, sans appeler l'API", async (id) => {
+    await expect(renderDetail(id)).rejects.toThrow("notFound");
+    expect(apiGet).not.toHaveBeenCalled();
+  });
+
+  it("paiement inconnu de l'API : introuvable", async () => {
+    apiGet.mockResolvedValue({ error: { code: "NOT_FOUND", message: "" }, response: new Response(null, { status: 404 }) });
+    await expect(renderDetail("99")).rejects.toThrow("notFound");
   });
 });

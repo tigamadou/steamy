@@ -2,9 +2,10 @@ import type { Schemas } from "@steamy/api-client";
 
 import { routes } from "@/lib/routes";
 
-import type { StatusTone } from "@/components/backoffice/StatusBadge";
-
 export type PaymentStatus = Schemas["PaymentStatusEnum"];
+/** Tons de pastille admis au back-office (voir `StatusBadge`). */
+type StatusTone = "neutral" | "success" | "amber" | "error" | "info";
+
 export type OrderKind = "course" | "kit" | "event";
 
 /** Statut Steamy d'un paiement → libellé et ton de la pastille (la couleur ne sert qu'aux statuts). */
@@ -125,4 +126,25 @@ export function refundsHref(tab: RefundTab, page: number): string {
   if (page > 1) query.set("page", String(page));
   const text = query.toString();
   return text ? `${routes.backoffice.refunds}?${text}` : routes.backoffice.refunds;
+}
+
+/** Statut d'une commande (`Order.status`) → libellé ; un statut inconnu s'affiche tel quel. */
+export const ORDER_STATUS: Record<string, string> = {
+  pending: "En attente",
+  paid: "Payée",
+  cancelled: "Annulée",
+  refunded: "Remboursée",
+};
+
+/** Actions du journal d'audit d'un paiement → libellé ; une action inconnue s'affiche telle quelle. */
+export const AUDIT_ACTIONS: Record<string, string> = {
+  "payment.confirmed": "Paiement confirmé",
+  "payment.rechecked": "Paiement revérifié chez FedaPay",
+  "refund.requested": "Remboursement demandé",
+  "refund.processed": "Remboursement marqué comme fait",
+};
+
+/** Libellé d'une table de libellés, ou la valeur elle-même quand elle est inconnue. */
+export function labelOf(labels: Record<string, string>, value: string): string {
+  return labels[value] ?? value;
 }
