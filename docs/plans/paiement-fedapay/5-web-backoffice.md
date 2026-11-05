@@ -59,7 +59,7 @@ fait autorité). Plan du chantier `paiement-fedapay`, lot 5 sur 5.
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 8
+Statut : ⬜ à faire · Terminé
 
 - [x] **Tâche 1** Socle web : routes, groupes, menu, formats et libellés · `feature/paiement-fedapay-web-backoffice`
   - [x] Lire le client régénéré et figer les noms de champs
@@ -81,7 +81,7 @@ Statut : ⬜ à faire · Prochaine tâche : 8
   - [x] Page `/backoffice/remboursements` et son test
 - [x] **Tâche 6** Vue d'ensemble : « À traiter » suit le chemin web
 - [x] **Tâche 7** e2e sur fixtures, contrôle visuel, SPEC-ECRANS (WAD11 et nouvelles lignes)
-- [ ] **Tâche 8** Vérification du lot
+- [x] **Tâche 8** Vérification du lot
 
 > Reprise : noms retenus du client régénéré : `PaymentPage {count,next,previous,results,totals{volume,count,succeeded,failed,failureRate}}`, `PaymentRow`, `PaymentDetail` (`refundable`, `attempts`, `refunds`, `auditLog`, `order`, `maskedMsisdn`, `providerFees`, `checkedAt`), `RefundPage`, `BackofficeRefund`, `RefundSummary`, `RefundProcessResult`, `Todo.path?` ; paramètres API `status,network,country,kind,from,to,q,page` et `processed`. Prochaine étape : tâche 2. Tâche 3 : pas de `paiements/loading.tsx` (le `backoffice/loading.tsx` parent couvre déjà le segment) ; réseaux lus par `GET referentials/payment-networks/` sans pays. Tâche 5 : onglets « À traiter » / « Traités » en liens d'encre (`RefundTabs`, le `Tabs` du DS emploie la couleur primaire, interdite au back-office) ; le résultat d'une action est annoncé par `RefundsTable` (la ligne quitte la liste au rafraîchissement).
 
