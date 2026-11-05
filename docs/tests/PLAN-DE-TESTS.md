@@ -46,9 +46,30 @@ Principe : l'API et la base sont déjà testées en unitaire. Les tests fonction
 | Environnement | Usage |
 | --- | --- |
 | Local (`make e2e`) | Développement, une stack à la fois |
-| CI GitHub Actions | Toutes les PR, e2e en 4 shards |
+| Environnement d'agent (`make agent-up`) | Worktree et conteneurs d'un lot ; bases `test_steamy_<lot>[_gwN]`, 2 workers xdist ([agents](../infra/agents.md)) |
+| CI GitHub Actions | Toutes les PR (y compris les PR de lot vers `feature/<slug>`), mêmes cibles `make` que les agents, API en xdist, e2e en 4 shards |
 | Préproduction | Parcours de bout en bout avec le serveur de **test** de la DGI (jeton de test) |
 | Production | Aucun test automatique ; jeton de production dans le secret de déploiement |
+
+### Rapidité de la suite
+
+- **API en parallèle** : `make test-api` lance `pytest -n auto` (pytest-xdist). Chaque worker a sa propre base
+  (`test_steamy[_<lot>]_gwN`). Le nombre de workers est décidé **dans le conteneur** (`conftest.py`) : 2 dans un
+  environnement d'agent (`AGENT_LOT` posé, budget machine partagé), au plus 4 sinon ; `PYTEST_XDIST_AUTO_NUM_WORKERS`
+  l'emporte. `make test-api PYTEST_XDIST=` rejoue en série, `PYTEST_ARGS=--maxfail=0` liste tous les échecs (la CI).
+  Un test ciblé (`make test-cible`) reste en série : pas de démarrage de workers pour quelques tests.
+- **Garde-fou de la base de test** : `conftest.py` refuse de tourner (code 4) si la base de test n'est pas exactement
+  `test_steamy` (+ `_<lot>` si `AGENT_LOT`, + `_gwN` sous xdist) ; `AGENT_LOT` vide est refusé. Contrôlé au démarrage
+  de pytest puis, avec le suffixe du worker, avant toute création de base (`apps/core/tests/test_database_guard.py`).
+- **Pas de `--reruns`, pas de `--reuse-db`** : un test qui échoue en parallèle seulement révèle un état partagé, on le
+  corrige ; une base réutilisée masquerait une migration ajoutée.
+- **Vitest** : parallèle par fichier ; en environnement d'agent, `maxWorkers` est borné à 2 (`vitest.config.mts`),
+  `VITEST_MAX_WORKERS` l'emporte.
+- **Base de la couverture du code modifié** : la CI compare avec la branche cible de la PR (`origin/feature/<slug>`
+  pour un lot, `origin/development` pour la PR finale), calculée une fois dans le job `changes`.
+- **Mesures** (Mac 10 cœurs, suite API de 1 864 tests) : série 52,8 s ; xdist 2 workers 48,3 s ; xdist 4 workers 38,6 s.
+  La suite est déjà courte (le hachage MD5 des tests a supprimé l'essentiel des anciennes ~20 minutes) : le gain de
+  xdist est modeste, la création de la base étant payée par chaque worker.
 
 ## 6. Priorités
 

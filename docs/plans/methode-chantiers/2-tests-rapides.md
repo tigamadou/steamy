@@ -37,38 +37,63 @@ GitHub Actions, Docker Compose.
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 2.1
+Statut : 🟨 partiel · Prochaine tâche : 2.5 (profil `web` requis), puis 2.8
 
-### 2 · Tests plus rapides et CI alignée — ⬜ à faire
-- [ ] **2.1** Mesures de référence et inventaire des risques en parallèle · `feature/methode-chantiers-2`
-  - [ ] Mesurer la suite API complète en série (durée, nombre de tests) et la création de la base de test
-  - [ ] Mesurer la suite Vitest complète avec les réglages actuels
-  - [ ] Inventorier les tests susceptibles de casser en parallèle (liste de la tâche 2.1, étape 3)
-  - [ ] Inscrire les mesures dans le tableau « Mesures » ci-dessous
-- [ ] **2.2** Garde-fou de la base de test (`conftest.py`) · tests d'abord
-  - [ ] `apps/core/tests/test_database_guard.py` : fonction pure, hook, base effective
-  - [ ] `conftest.py` : `check_test_database_name`, `pytest_configure`, fixture de session
-- [ ] **2.3** pytest-xdist : dépendance, nombre de workers par contexte, parité de couverture
-  - [ ] `requirements.txt`, `pytest.ini` inchangé hors commentaire, hook `pytest_xdist_auto_num_workers`
-  - [ ] Suite complète verte en parallèle, 3 fois de suite ; couverture identique à la série
-- [ ] **2.4** Cibles `make` : xdist, environnement de test, `BASE` et `PYTEST_ARGS`
-- [ ] **2.5** Vitest : parallélisme borné en agent, choix `forks` ou `threads` (indépendante de 2.2 à 2.4)
-- [ ] **2.6** CI : base de la PR, cibles `make`, xdist, job `generated`, `ci-ok`
-- [ ] **2.7** Documentation : `docs/tests/PLAN-DE-TESTS.md`, mesures après
+### 2 · Tests plus rapides et CI alignée — 🟨 partiel
+- [~] **2.1** Mesures de référence et inventaire des risques en parallèle · `feature/methode-chantiers-2` (2026-11-05)
+  - [x] Mesurer la suite API complète en série (durée, nombre de tests) et la création de la base de test
+  - [ ] Mesurer la suite Vitest complète avec les réglages actuels (profil `api` : cibles front refusées)
+  - [x] Inventorier les tests susceptibles de casser en parallèle (liste de la tâche 2.1, étape 3)
+  - [x] Inscrire les mesures dans le tableau « Mesures » ci-dessous
+- [x] **2.2** Garde-fou de la base de test (`conftest.py`) · tests d'abord (2026-11-05)
+  - [x] `apps/core/tests/test_database_guard.py` : fonction pure, hook, base effective
+  - [x] `conftest.py` : `check_test_database_name`, `pytest_configure`, fixture de session
+- [x] **2.3** pytest-xdist : dépendance, nombre de workers par contexte, parité de couverture (2026-11-05)
+  - [x] `requirements.txt`, `pytest.ini` inchangé hors commentaire, hook `pytest_xdist_auto_num_workers`
+  - [x] Suite complète verte en parallèle, 3 fois de suite ; couverture identique à la série (`coverage.xml` identiques)
+- [~] **2.4** Cibles `make` : xdist, environnement de test, `BASE` et `PYTEST_ARGS` (2026-11-05)
+  - Fait : `PYTEST_XDIST`, `PYTEST_ARGS` pour `test-api`. Déjà posés par le lot 1 (rien refait) : `API_TEST`
+    (`DJANGO_ENV=test` + stockage fichier), `BASE` de `coverage-api` et `coverage-web`.
+  - Non fait : `test-cible`, `coverage-api` et `coverage-diff` passent par `scripts/cibles.sh` et
+    `scripts/coverage-diff.sh` (lot 1, lecture seule ici) qui lancent leur propre `pytest` : ils ne lisent ni
+    `PYTEST_XDIST` ni `PYTEST_ARGS`. À signaler.
+- [~] **2.5** Vitest : parallélisme borné en agent (indépendante de 2.2 à 2.4) : `vitest.config.mts` et
+  `src/test/vitest-config.test.ts` écrits, **non exécutés ni committés** (profil `api` : cibles front refusées).
+  Choix `forks` / `threads` non mesuré.
+- [~] **2.6** CI : base de la PR, cibles `make`, job `generated`, `ci-ok` : écrit, validé par actionlint 1.7.7, jamais exécuté
+- [~] **2.7** Documentation : `docs/tests/PLAN-DE-TESTS.md` écrit ; mesures Vitest et durée du job CI à compléter
 - [ ] **2.8** Vérification du lot
 
-> Reprise : (vide)
+> Reprise : 2.5 à exécuter dans un environnement de profil `web` ou `complet` : `make test-cible
+> T=apps/web/src/test/vitest-config.test.ts`, `make test-web` (mesurer `forks` et `threads`), `make lint-web
+> typecheck`, puis commit `test(web): parallelisme de Vitest borne en environnement d'agent`. Ensuite 2.8.
+>
+> Écarts avec le plan :
+> - La suite API dure 52 s en série (1 836 tests) et non ~20 minutes : xdist gagne peu (2 workers : 48 s, 4 : 39 s).
+> - `coverage-api` et `coverage-web` (lot 1) ne rejouent que les tests liés aux fichiers touchés : la CI ajoute
+>   `make test-api` et `make test-web` (suites complètes) avant la couverture, pour ne pas perdre le test complet.
+> - Les cibles web (`lint-web`, `test-web`) n'installent pas les dépendances : la CI lance `make typecheck` d'abord.
+> - La CI démarre `postgres` et `redis` (les scripts du lot 1 utilisent `--no-deps`).
+> - Image : `docker compose -p steamy-ag-2 -f compose.yml build api` produit `steamy-ag-2-api` ; le retag du tag
+>   partagé `steamy-api` a été refusé par le harnais. Les mesures ont été faites avec
+>   `COMPOSE="docker compose -p steamy-ag-2 -f compose.yml -f compose.agent.yml -f .agent/img.yml"` (surcharge d'image
+>   locale, non versionnée).
+>
+> Inventaire des risques (2.1, étape 3) : fichiers partagés, `test_admin_site.py` ne fait que lire `fixtures/admin.json`
+> (sûr) ; aucun `tmp_path`, `MEDIA_ROOT` ni chemin fixe écrit (sûr) ; Redis jamais appelé par les tests (sûr) ;
+> 9 tests `transaction=True` (sûr : flush de la base du worker, référentiels rechargés par la fabrique) ; un seul
+> `cached_property` (instance) et aucun `lru_cache` de production (sûr). Trois exécutions xdist consécutives vertes.
 
 ### Mesures (à remplir par l'agent ; machine : Mac 10 cœurs, 14,6 Go Docker, voir ADR § 6)
 
 | Mesure | Avant | Après | Notes |
 | --- | --- | --- | --- |
-| Suite API complète (tests, durée) | | | série vs `-n auto` (2 workers en agent, 4 en local et CI) |
-| Création de la base de test (1 processus) | | | `--create-db` forcé, durée du `migrate` |
-| `make test-cible` sur une app Django (ex. `apps/core`) | | | série vs `-n auto` : valide le choix « série par défaut » |
-| Suite API complète avec couverture | | | série vs `-n auto` ; XML de couverture comparé |
-| Suite Vitest complète (fichiers, durée) | | | `forks` vs `threads`, `maxWorkers` |
-| Job CI `api` (durée) | | | sur la PR du lot, comparée à la dernière PR verte de `development` |
+| Suite API complète (tests, durée) | 1 836 tests, 52,4 s (série) | 1 864 tests (28 du garde-fou en plus) : série 52,8 s ; 2 workers 48,7 / 48,3 / 48,5 s ; 4 workers 38,6 s | 3 runs `-n auto` verts |
+| Création de la base de test (1 processus) | ≤ 2,8 s (fichier d'un test `django_db`, tout compris) | | pas de mesure `--create-db` isolée ; chaque worker la paie |
+| `make test-cible` sur une app Django (ex. `apps/core`) | 347 tests, 25,5 s (série) | non mesuré | `test-cible` ignore `PYTEST_XDIST` (script du lot 1) : reste en série |
+| Suite API complète avec couverture | série : lignes 13 052, branches 1 868 | `-n auto` : identique | `coverage.xml` identiques octet pour octet |
+| Suite Vitest complète (fichiers, durée) | non mesuré | non mesuré | profil `api` : à faire dans un environnement `web` |
+| Job CI `api` (durée) | non mesuré | non mesuré | rien n'est poussé |
 
 ## Fichiers du lot (exclusifs)
 
