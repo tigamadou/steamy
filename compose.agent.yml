@@ -37,8 +37,6 @@ services:
     profiles: ["manuel"]
   flower:
     profiles: ["manuel"]
-  playwright-fixtures:
-    profiles: ["manuel"]
 
   api-migrate:
     <<: *agent-api

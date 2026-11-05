@@ -21,6 +21,7 @@ garde() {
     web:api) die "profil web : pas de cible API (relève d'un lot API)" ;;
     web:generate) die "profil web : pas de génération du contrat (relève d'un lot API)" ;;
     api:web) die "profil api : pas de cible front (relève d'un lot web)" ;;
+    web:e2e | api:e2e) die "profil $PROFIL : « make e2e » (vraie stack) exige le profil complet" ;;
   esac
 }
 
@@ -85,6 +86,33 @@ case "$cible" in
     if [ -n "$api_paths" ]; then run_api_test pytest $api_paths || pire $?; fi
     # shellcheck disable=SC2086
     if [ -n "$web_paths" ]; then run_web "pnpm --filter @steamy/web exec vitest run $web_paths" || pire $?; fi
+    ;;
+  e2e-garde)
+    # $1 = projet Compose de la stack e2e du lot. Jeton e2e : au plus une stack e2e simultanée (N = 1), tenu par un
+    # verrou dans le dépôt git commun (pris AVANT la construction de l'image, rendu en fin de `make e2e` ou `e2e-down`).
+    garde e2e
+    projet="${1:?projet e2e requis}"
+    jeton="$(git rev-parse --path-format=absolute --git-common-dir)/e2e.lock"
+    if ! mkdir "$jeton" 2>/dev/null; then
+      titulaire="$(cat "$jeton/projet" 2>/dev/null || true)"
+      if [ "$titulaire" != "$projet" ]; then
+        if [ -n "$titulaire" ] && [ -z "$(docker ps -aq --filter "label=com.docker.compose.project=$titulaire")" ] \
+          && [ -n "$(find "$jeton" -maxdepth 0 -mmin +30)" ]; then
+          rm -rf "$jeton"
+          mkdir "$jeton"
+        else
+          die "jeton e2e occupé par « ${titulaire:-inconnu} » (une seule stack e2e à la fois) : attendre sa fin, ou « make e2e-down » dans son worktree"
+        fi
+      fi
+    fi
+    echo "$projet" >"$jeton/projet"
+    ;;
+  e2e-jeton-rendre)
+    jeton="$(git rev-parse --path-format=absolute --git-common-dir)/e2e.lock"
+    if [ "$(cat "$jeton/projet" 2>/dev/null || true)" = "${1:?projet e2e requis}" ]; then rm -rf "$jeton"; fi
+    ;;
+  e2e-fixtures-garde)
+    garde web
     ;;
   *) die "cible inconnue : $cible" ;;
 esac

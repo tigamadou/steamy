@@ -20,7 +20,7 @@ E2E_BUILD ?= --build
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
         test-api coverage-api lint-api fix-api psql flower clean openapi lint-web typecheck-web \
-        test-web coverage-web coverage-diff e2e e2e-down agent-up agent-down agent-status lint typecheck generate check-generated migrations-check test-cible
+        test-web coverage-web coverage-diff e2e-fixtures e2e e2e-run e2e-down agent-up agent-down agent-status lint typecheck generate check-generated migrations-check test-cible
 
 help: ## Affiche cette aide
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -135,7 +135,15 @@ coverage-diff: ## Couverture 100 % du code modifié, tests touchés seulement : 
 	@test -n "$(BASE)" || { echo "Usage : make coverage-diff BASE=<branche>"; exit 2; }
 	@COMPOSE="$(COMPOSE)" scripts/coverage-diff.sh "$(BASE)"
 
+e2e-fixtures: ## Parcours Playwright sur fixtures, en conteneur (front de production + fausse API) ; PW_ARGS pour filtrer
+	@COMPOSE="$(COMPOSE)" scripts/cibles.sh e2e-fixtures-garde
+	$(COMPOSE) --profile fixtures run --rm --no-deps playwright-fixtures
+
 e2e: ## Parcours Playwright sur la stack Docker (web en image prod, worker pour les emails et PDF, données rechargées avec seed_demo --e2e)
+	@COMPOSE="$(COMPOSE)" scripts/cibles.sh e2e-garde "$(E2E_P)"
+	@$(MAKE) --no-print-directory e2e-run; rc=$$?; COMPOSE="$(COMPOSE)" scripts/cibles.sh e2e-jeton-rendre "$(E2E_P)"; exit $$rc
+
+e2e-run:
 	$(E2E) up -d $(E2E_BUILD) --wait web worker
 	$(MAKE) migrate seed COMPOSE="$(E2E)" SEED_ARGS=--e2e
 	@# Tous les parcours partent d'une même IP : plafonds quotidiens d'OTP relevés (D24, testés côté API)
@@ -145,6 +153,7 @@ e2e: ## Parcours Playwright sur la stack Docker (web en image prod, worker pour 
 
 e2e-down: ## Arrête la stack e2e et supprime ses données
 	$(E2E) --profile e2e down -v
+	@COMPOSE="$(COMPOSE)" scripts/cibles.sh e2e-jeton-rendre "$(E2E_P)"
 
 psql: ## Console PostgreSQL
 	$(COMPOSE) exec postgres psql -U steamy steamy

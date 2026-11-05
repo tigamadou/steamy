@@ -19,7 +19,7 @@
 
 ## Avancement
 
-Statut : 🟦 en cours · Prochaine tâche : 1.6
+Statut : 🟦 en cours · Prochaine tâche : 1.7
 
 - [x] **1.1** Réseau d'infrastructure partagé et nom de projet · `compose.yml`, `compose.e2e.yml`
   - [x] Réseau `steamy-infra`, `name: steamy`, services d'infra attachés
@@ -37,7 +37,7 @@ Statut : 🟦 en cours · Prochaine tâche : 1.6
 - [x] **1.5** `make coverage-diff BASE=…`
   - [x] `scripts/coverage-diff.sh` (tests touchés + diff-cover)
   - [x] `coverage-api`/`coverage-web` paramétrés par `BASE`
-- [ ] **1.6** `make e2e-fixtures` en conteneur et `make e2e` par lot
+- [x] **1.6** `make e2e-fixtures` en conteneur et `make e2e` par lot
 - [ ] **1.7** Mesures mémoire et `docs/infra/agents.md`
 - [ ] **1.8** Vérification du lot
 
