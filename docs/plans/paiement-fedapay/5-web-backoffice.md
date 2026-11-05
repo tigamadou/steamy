@@ -66,10 +66,10 @@ Statut : ⬜ à faire · Prochaine tâche : 1
   - [x] Routes `paiements`, `paiement(id)`, `remboursements` ; `PAGE_GROUPS.payments` / `refunds`
   - [x] Menu : entrées internes « Paiements » et « Remboursements », retrait du lien Django
   - [x] `lib/backoffice/payments.ts` (libellés, tons, filtres d'URL) et `formatDateTime`
-- [ ] **Tâche 2** Fausse API : endpoints, fixtures, scénarios, contrat
-  - [ ] Fabriques typées et écran `ecrans/backoffice-paiements.ts`
-  - [ ] Scénarios et incidents, branchement `server.ts` / `scenarios.ts`
-  - [ ] `contract.test.ts` couvre les nouveaux endpoints
+- [x] **Tâche 2** Fausse API : endpoints, fixtures, scénarios, contrat
+  - [x] Fabriques typées et écran `ecrans/backoffice-paiements.ts`
+  - [x] Scénarios et incidents, branchement `server.ts` / `scenarios.ts`
+  - [x] `contract.test.ts` couvre les nouveaux endpoints
 - [ ] **Tâche 3** Écran Paiements : liste, filtres, totaux, pagination
   - [ ] Composants `payments/` (totaux, filtres, tableau, pagination, pastilles) et leurs tests
   - [ ] Page `/backoffice/paiements` et son test

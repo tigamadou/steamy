@@ -5,6 +5,7 @@ import type { Schemas } from "@steamy/api-client";
 
 import { fail, newInstance, once, route, routes, type Body, type Call, type Context, type Instance, type Respond } from "./contexte.ts";
 import "./ecrans/achat-kits.ts";
+import "./ecrans/backoffice-paiements.ts";
 import "./ecrans/boutique.ts";
 import "./ecrans/commandes.ts";
 import "./ecrans/commandes-parent.ts";
