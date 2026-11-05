@@ -2,7 +2,7 @@
 WAD10 · Boutique et commandes, WAD11 · Paiements dans l'admin Django (LOT-6 6.4). Aucune voie de l'admin ne passe
 une commande à « payée » (S9) ; livraison monotone et notifiée ; révocation d'un Kit Code non utilisé seulement ;
 paiements en lecture seule, numéro masqué, `payload` réservé à la Finance, agrégats exacts ; remboursements demandés
-puis traités par la Finance avec double confirmation ; factures téléchargeables.
+demandés par la Finance (le traitement a lieu dans le backoffice) ; factures téléchargeables.
 """
 
 import pytest
@@ -277,27 +277,8 @@ def test_finance_requests_a_refund_on_a_succeeded_payment_within_its_amount():
     assert payment.order.reference in response.content.decode()
 
 
-def test_processing_a_refund_needs_a_double_confirmation():
-    finance = member(FINANCE)
-    payment = PaymentFactory(status=Payment.Status.SUCCEEDED, order=OrderFactory(paid=True))
-    refund = Refund.objects.create(payment=payment, amount=payment.amount, reason="Doublon")
-    form = act(finance, REFUNDS, "process", [refund])
-    assert "Le remboursement a été effectué" in form.content.decode()
-    act(finance, REFUNDS, "process", [refund], apply="1", done="on")  # une seule case : rien
-    refund.refresh_from_db()
-    assert not refund.processed
-
-    response = act(finance, REFUNDS, "process", [refund], apply="1", done="on", order_refunded="on")
-    assert "Remboursements traités : 1." in texts(response)
-    refund.refresh_from_db()
-    payment.order.refresh_from_db()
-    assert refund.processed and payment.order.status == Order.Status.REFUNDED
-    assert Notification.objects.filter(
-        user=payment.order.payer, title="Remboursement effectué"
-    ).exists()
-
-    again = act(finance, REFUNDS, "process", [refund], apply="1", done="on", order_refunded="on")
-    assert f"Remboursement n° {refund.pk} : déjà traité." in texts(again)
+def test_the_admin_no_longer_offers_to_process_a_refund():
+    assert "process" not in action_names(member(FINANCE), REFUNDS)
 
 
 def test_refund_service_refuses_invalid_requests():
@@ -379,7 +360,7 @@ def process(refund):
 
     staff = verified_client(APIClient(), FINANCE)
     with TestCase.captureOnCommitCallbacks(execute=True):
-        return backoffice.process_refund(refund, staff)
+        return backoffice.process_refund(refund, "RMB-TEST", staff)
 
 
 def test_refunding_a_duplicate_payment_keeps_the_order_paid():

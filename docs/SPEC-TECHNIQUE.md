@@ -652,16 +652,22 @@ Catalogue des codes métier (extensible, chaque code a son message français) :
 
 ### 7.8 `backoffice` (écrans Next.js uniquement)
 
-Les écrans WAD06-WAD15 sont dans l'admin Django et n'ont **pas** d'API.
+Les écrans WAD06-WAD15 sont dans l'admin Django et n'ont **pas** d'API, sauf WAD11 (paiements et remboursements), aussi servi par l'API ci-dessous (Finance, ADR 0008 § 9).
 
 | Endpoint | Écrans | État |
 | --- | --- | --- |
-| `GET backoffice/overview/` (« À traiter » : `{ kind, count, adminPath }` filtré par groupe) | WAD01 | à créer (remplace `analytics/dashboard/summary/`) |
+| `GET backoffice/overview/` (« À traiter » : `{ kind, label, count, path?, adminPath }` filtré par groupe ; `path` = chemin interne du backoffice Next.js, `adminPath` = liste de l'admin Django) | WAD01 | à créer (remplace `analytics/dashboard/summary/`) |
 | `GET backoffice/kpis/?period=` · `GET backoffice/kpis/{code}/` | WAD02, WAD03 | à créer |
 | `GET backoffice/impact-reports/{period}/` | WAD04 | à créer |
 | `PATCH backoffice/impact-reports/{period}/values/` | WAD05 | à créer |
 | `POST backoffice/impact-reports/{period}/submit/` | WAD04 | à créer |
 | `POST backoffice/impact-reports/{period}/exports/` `{ format }` · `GET backoffice/exports/{id}/` | WAD04 | à créer (remplace `analytics/export/events.csv`) |
+| `GET backoffice/payments/?status=&network=&country=&kind=&from=&to=&q=` (liste paginée + `totals` du filtre entier) | WAD11 | à créer |
+| `GET backoffice/payments/{id}/` (commande, tentatives, remboursements, journal d'audit) | WAD11 | à créer |
+| `POST backoffice/payments/{id}/recheck/` (relecture chez le prestataire ; 409 sans transaction, 502 prestataire injoignable) | WAD11 | à créer |
+| `POST backoffice/payments/{id}/refunds/` `{ amount, reason }` | WAD11 | à créer |
+| `GET backoffice/refunds/?processed=` (à traiter par défaut) | WAD11 | à créer |
+| `POST backoffice/refunds/{id}/process/` `{ reference }` → `{ refund, orderRefunded }` (409 si déjà fait) | WAD11 | à créer |
 
 ### 7.9 Endpoints existants à supprimer ou fermer
 

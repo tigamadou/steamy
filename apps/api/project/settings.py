@@ -389,15 +389,19 @@ FEDAPAY_WEBHOOK_SECRET = os.getenv("FEDAPAY_WEBHOOK_SECRET", "")
 FEDAPAY_ENVIRONMENT = os.getenv("FEDAPAY_ENVIRONMENT", "sandbox")
 # Page de retour du mode redirection : inutilisée par le débit direct, mais exigée par FedaPay
 FEDAPAY_CALLBACK_URL = os.getenv("FEDAPAY_CALLBACK_URL", WEB_URL)
-# Mode de débit direct FedaPay (`POST /v1/{mode}`) par « PAYS:réseau » (référentiel PaymentNetwork, D76). À
-# confirmer dans le bac à sable, Celtiis surtout (ADR 0003, inconnue 1) ; surchargeable en JSON.
+# Mode de débit direct FedaPay (`POST /v1/{mode}`) par « PAYS:réseau » (référentiel PaymentNetwork, D76). Cette table ne
+# sert qu'en `live` (ADR 0008 §1) ; Celtiis et Mixx By Yas à confirmer au premier paiement réel (ADR 0003, inconnue 1) ;
+# surchargeable en JSON.
 FEDAPAY_MODES = json.loads(
     os.getenv(
         "FEDAPAY_MODES",
         '{"BJ:mtn": "mtn_open", "BJ:moov": "moov", "BJ:celtiis": "sbin", '
-        '"TG:moov": "moov_tg", "CI:mtn": "mtn_ci"}',
+        '"TG:moov": "moov_tg", "TG:togocel": "togocel", "CI:mtn": "mtn_ci"}',
     )
 )
+# Bac à sable : depuis le 7 novembre 2025, `momo_test` est le seul mode Mobile Money disponible, quel que soit le
+# réseau (numéros de succès `64000001` / `66000001`).
+FEDAPAY_SANDBOX_MODE = os.getenv("FEDAPAY_SANDBOX_MODE", "momo_test")
 # Factures (ADR 0005) : le format légal attend la comptabilité (P1 facture normalisée MECeF, P2 TVA). Tout ce qui a
 # une valeur légale est réglé ici, jamais inventé dans le code ; par défaut, un « reçu » non fiscal sans TVA.
 INVOICE_PROVISIONAL = os.getenv("INVOICE_PROVISIONAL", "true").lower() == "true"
