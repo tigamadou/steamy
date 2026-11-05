@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo "make $* [AGENT_LOT=${AGENT_LOT:-}]" >>"$CALLS_LOG"
+exit "${FAKE_MAKE_RC:-0}"

@@ -20,7 +20,7 @@ E2E_BUILD ?= --build
 .DEFAULT_GOAL := help
 .PHONY: help up down build restart logs ps shell manage migrate makemigrations seed \
         test-api coverage-api lint-api fix-api psql flower clean openapi lint-web typecheck-web \
-        test-web coverage-web coverage-diff e2e-fixtures e2e e2e-run e2e-down agent-up agent-down agent-status lint typecheck generate check-generated migrations-check test-cible
+        test-web coverage-web coverage-diff e2e-fixtures e2e e2e-run e2e-down agent-up agent-down agent-status lint typecheck generate check-generated migrations-check test-cible test-scripts shellcheck
 
 help: ## Affiche cette aide
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -77,6 +77,12 @@ agent-down: ## Arrête l'environnement d'un agent (conserve worktree, branche et
 
 agent-status: ## Environnements d'agent actifs, mémoire et budget
 	@scripts/agent-env.sh status
+
+test-scripts: ## Tests bats des scripts d'environnement d'agent (faux docker et git, en conteneur)
+	docker run --rm -v "$(CURDIR):/work:ro" -w /work alpine:3.20 sh -c 'apk add -q --no-cache bash git bats coreutils && bats scripts/tests/*.bats'
+
+shellcheck: ## shellcheck sur scripts/*.sh (en conteneur)
+	docker run --rm -v "$(CURDIR):/mnt:ro" -w /mnt koalaman/shellcheck:v0.10.0 scripts/*.sh
 
 # --- API Django -------------------------------------------------------------
 shell: ## Ouvre un shell dans le conteneur API

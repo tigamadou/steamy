@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Faux `git` des tests : journalise et répond d'après les fixtures de $FIX.
+echo "git $*" >>"$CALLS_LOG"
+dir=""
+if [ "${1:-}" = "-C" ]; then
+  dir="$2"
+  shift 2
+fi
+case "${1:-}" in
+  rev-parse)
+    case "$*" in
+      *--git-common-dir*) echo "$FAKE_GIT_COMMON" ;;
+      *--abbrev-ref*)
+        f="$FIX/head/$(basename "$dir")"
+        [ -f "$f" ] && cat "$f" || exit 1
+        ;;
+      *--verify*)
+        ref="${*: -1}"
+        ref="${ref%'^{commit}'}"
+        grep -qxF -- "$ref" "$FIX/refs"
+        exit $?
+        ;;
+    esac
+    ;;
+  show-ref)
+    ref="${*: -1}"
+    grep -qxF -- "${ref#refs/heads/}" "$FIX/branches"
+    exit $?
+    ;;
+  ls-tree)
+    [ -f "$FIX/no_compose_agent" ] || echo compose.agent.yml
+    ;;
+  worktree)
+    case "${2:-}" in
+      add) mkdir -p "${*: -2:1}" ;;
+    esac
+    ;;
+  merge-base) echo MERGEBASE ;;
+  ls-files) [ ! -f "$FIX/untracked" ] || cat "$FIX/untracked" ;;
+  diff)
+    case "$*" in
+      *--no-index*) [ ! -f "$FIX/untracked.diff" ] || cat "$FIX/untracked.diff" ;;
+      *--name-only*) [ ! -f "$FIX/names" ] || cat "$FIX/names" ;;
+      *) [ ! -f "$FIX/full.diff" ] || cat "$FIX/full.diff" ;;
+    esac
+    ;;
+esac
+exit 0
