@@ -18,7 +18,7 @@ development
 | Lot | Plan | Branche | Dépend de | Statut |
 | --- | --- | --- | --- | --- |
 | 1 | [Environnement Docker des agents](1-environnement-docker.md) | `feature/methode-chantiers-1` | — | ✅ fusionné |
-| 2 | [Tests plus rapides et CI alignée](2-tests-rapides.md) | `feature/methode-chantiers-2` | 1 | ⬜ à faire |
+| 2 | [Tests plus rapides et CI alignée](2-tests-rapides.md) | `feature/methode-chantiers-2` | 1 | ✅ fusionné |
 | 3 | [Kit générique](3-kit-generique.md) | `feature/methode-chantiers-3` | — | ✅ fusionné |
 | 4 | [Chantier pilote](4-chantier-pilote.md) | selon le chantier choisi | 1, 2, 3 | ⬜ à faire |
 
