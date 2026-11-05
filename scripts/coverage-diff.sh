@@ -18,6 +18,8 @@ case "$BASE" in -*) echo "coverage-diff : base invalide « $BASE »" >&2; exit 2
 
 COMPOSE="${COMPOSE:-docker compose}"
 PROFIL="${AGENT_PROFIL:-principal}"
+# Parallélisme et arguments de pytest (make : PYTEST_XDIST, PYTEST_ARGS), découpés en mots
+read -r -a PYTEST_EXTRA <<<"${PYTEST_XDIST:-} ${PYTEST_ARGS:-}"
 PNPM_INSTALL="corepack enable && pnpm install --frozen-lockfile --store-dir /pnpm-store --config.confirm-modules-purge=false"
 
 if git rev-parse --verify --quiet --end-of-options "$BASE^{commit}" >/dev/null; then
@@ -155,7 +157,7 @@ if [ -n "$API_FILES" ]; then
       cibles=()
     fi
     echo "coverage-diff : API, tests rejoués : ${cibles[*]:-suite complète}"
-    if $COMPOSE run --rm --no-deps -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage api pytest ${cibles[@]+"${cibles[@]}"} --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider; then
+    if $COMPOSE run --rm --no-deps -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage api pytest ${cibles[@]+"${cibles[@]}"} --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider ${PYTEST_EXTRA[@]+"${PYTEST_EXTRA[@]}"}; then
       verifier "$DIFF_API" apps/api/coverage.xml '\.py$'
     else
       echo "coverage-diff : les tests de l'API échouent" >&2

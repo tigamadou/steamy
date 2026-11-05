@@ -67,7 +67,7 @@ typecheck: ## Vérification TypeScript (profils web, complet et stack principale
 	@COMPOSE="$(COMPOSE)" scripts/cibles.sh typecheck
 
 test-cible: ## Tests ciblés : make test-cible T="apps/api/apps/core apps/web/src/..."
-	@COMPOSE="$(COMPOSE)" scripts/cibles.sh test-cible $(T)
+	@COMPOSE="$(COMPOSE)" PYTEST_XDIST="$(if $(filter command line,$(origin PYTEST_XDIST)),$(PYTEST_XDIST))" PYTEST_ARGS="$(PYTEST_ARGS)" scripts/cibles.sh test-cible $(T)
 
 # --- Environnements d'agent (docs/infra/agents.md) --------------------------------
 agent-up: ## Environnement d'agent : make agent-up LOT=<lot> PROFIL=<web|api|complet> BASE=<branche>
@@ -107,7 +107,7 @@ test-api: ## Lance les tests de l'API en parallèle (PYTEST_XDIST="" pour la sé
 	$(API_TEST) pytest $(PYTEST_XDIST) $(PYTEST_ARGS)
 
 coverage-api: ## Tests de l'API + couverture 100 % du code modifié (BASE=origin/development par défaut)
-	@COMPOSE="$(COMPOSE)" COVERAGE_PARTIE=api scripts/coverage-diff.sh "$(or $(BASE),origin/development)"
+	@COMPOSE="$(COMPOSE)" PYTEST_XDIST="$(PYTEST_XDIST)" PYTEST_ARGS="$(PYTEST_ARGS)" COVERAGE_PARTIE=api scripts/coverage-diff.sh "$(or $(BASE),origin/development)"
 
 lint-api: ## Lint et format de l'API (vérification seule)
 	$(API) sh -c "ruff check . && ruff format --check ."
@@ -142,7 +142,7 @@ coverage-web: ## Tests du front + couverture 100 % du code modifié (BASE=origin
 
 coverage-diff: ## Couverture 100 % du code modifié, tests touchés seulement : make coverage-diff BASE=<branche>
 	@test -n "$(BASE)" || { echo "Usage : make coverage-diff BASE=<branche>"; exit 2; }
-	@COMPOSE="$(COMPOSE)" scripts/coverage-diff.sh "$(BASE)"
+	@COMPOSE="$(COMPOSE)" PYTEST_XDIST="$(PYTEST_XDIST)" PYTEST_ARGS="$(PYTEST_ARGS)" scripts/coverage-diff.sh "$(BASE)"
 
 e2e-fixtures: ## Parcours Playwright sur fixtures, en conteneur (front de production + fausse API) ; PW_ARGS pour filtrer
 	@COMPOSE="$(COMPOSE)" scripts/cibles.sh e2e-fixtures-garde

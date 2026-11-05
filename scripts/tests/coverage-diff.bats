@@ -214,3 +214,17 @@ changes() {
   assert_call 'pytest'
   refute_call 'vitest'
 }
+
+@test "F15 PYTEST_XDIST et PYTEST_ARGS sont ajoutés à la commande pytest de l'API" {
+  changes apps/api/apps/core/models.py
+  PYTEST_XDIST="-n auto" PYTEST_ARGS="--maxfail=0" run CD feature/base
+  [ "$status" -eq 0 ]
+  assert_call 'pytest apps/core --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider -n auto --maxfail=0'
+}
+
+@test "F16 sans variable, la commande pytest de l'API est inchangée" {
+  changes apps/api/apps/core/models.py
+  run CD feature/base
+  [ "$status" -eq 0 ]
+  assert_call 'pytest apps/core --cov --cov-report=xml:coverage.xml --cov-report=term:skip-covered -q -p no:cacheprovider$'
+}

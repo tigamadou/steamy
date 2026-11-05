@@ -34,6 +34,9 @@ garde() {
   esac
 }
 
+# Parallélisme et arguments de pytest (make : PYTEST_XDIST, PYTEST_ARGS), découpés en mots
+read -r -a PYTEST_EXTRA <<<"${PYTEST_XDIST:-} ${PYTEST_ARGS:-}"
+
 run_api() { $COMPOSE run --rm --no-deps api "$@"; }
 # Les tests tournent comme en CI (DJANGO_ENV=test) : l'environnement de dev (api.env) change des pages testées
 run_api_test() { $COMPOSE run --rm --no-deps -e DJANGO_ENV=test -e DEFAULT_FILE_STORAGE=django.core.files.storage.FileSystemStorage api "$@"; }
@@ -94,7 +97,7 @@ case "$cible" in
     [ "${#api_paths[@]}" -eq 0 ] || garde api
     [ "${#web_paths[@]}" -eq 0 ] || garde web
     # Les chemins sont des arguments (jamais du shell)
-    if [ "${#api_paths[@]}" -gt 0 ]; then run_api_test pytest "${api_paths[@]}" || pire $?; fi
+    if [ "${#api_paths[@]}" -gt 0 ]; then run_api_test pytest "${api_paths[@]}" ${PYTEST_EXTRA[@]+"${PYTEST_EXTRA[@]}"} || pire $?; fi
     if [ "${#web_paths[@]}" -gt 0 ]; then run_web 'pnpm --filter @steamy/web exec vitest run "$@"' "${web_paths[@]}" || pire $?; fi
     ;;
   e2e-garde)
