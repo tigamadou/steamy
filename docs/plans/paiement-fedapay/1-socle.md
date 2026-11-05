@@ -33,7 +33,7 @@ autorité). Plan du chantier `paiement-fedapay`, lot 1 sur 5.
 
 ## Avancement
 
-Statut : 🟡 en cours · Prochaine tâche : 4
+Statut : 🟡 en cours · Prochaine tâche : 5
 
 - [x] **Tâche 1** Champs `Payment` et `Refund`, `merchant_reference` automatique, migrations · `feature/paiement-fedapay-socle`
   - [x] Tests des modèles et de la migration de données, vus échouer
@@ -45,9 +45,9 @@ Statut : 🟡 en cours · Prochaine tâche : 4
 - [x] **Tâche 3** Contrat prestataire, faux prestataire, FedaPay minimal, `Charge` dans `initiate_payment`
   - [x] Tests de `test_providers.py` adaptés et nouveaux, vus échouer
   - [x] `base.py`, `__init__.py`, `fake.py`, `fedapay.py`, `checkout.initiate_payment`
-- [ ] **Tâche 4** `checkout.verify_payment`
-  - [ ] Test de caractérisation de la réconciliation, puis tests de `verify_payment`
-  - [ ] Extraction depuis la boucle, comportement inchangé
+- [x] **Tâche 4** `checkout.verify_payment`
+  - [x] Test de caractérisation de la réconciliation, puis tests de `verify_payment`
+  - [x] Extraction depuis la boucle, comportement inchangé
 - [ ] **Tâche 5** `make generate` et SPEC-TECHNIQUE §3.3
 - [ ] **Tâche 6** Vérification du lot
 
