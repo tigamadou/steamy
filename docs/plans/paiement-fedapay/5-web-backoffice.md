@@ -59,31 +59,31 @@ fait autorité). Plan du chantier `paiement-fedapay`, lot 5 sur 5.
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 1
+Statut : ⬜ à faire · Terminé
 
-- [ ] **Tâche 1** Socle web : routes, groupes, menu, formats et libellés · `feature/paiement-fedapay-web-backoffice`
-  - [ ] Lire le client régénéré et figer les noms de champs
-  - [ ] Routes `paiements`, `paiement(id)`, `remboursements` ; `PAGE_GROUPS.payments` / `refunds`
-  - [ ] Menu : entrées internes « Paiements » et « Remboursements », retrait du lien Django
-  - [ ] `lib/backoffice/payments.ts` (libellés, tons, filtres d'URL) et `formatDateTime`
-- [ ] **Tâche 2** Fausse API : endpoints, fixtures, scénarios, contrat
-  - [ ] Fabriques typées et écran `ecrans/backoffice-paiements.ts`
-  - [ ] Scénarios et incidents, branchement `server.ts` / `scenarios.ts`
-  - [ ] `contract.test.ts` couvre les nouveaux endpoints
-- [ ] **Tâche 3** Écran Paiements : liste, filtres, totaux, pagination
-  - [ ] Composants `payments/` (totaux, filtres, tableau, pagination, pastilles) et leurs tests
-  - [ ] Page `/backoffice/paiements` et son test
-- [ ] **Tâche 4** Écran Détail d'un paiement : tentatives, remboursements, journal, actions
-  - [ ] `PaymentDetail`, `RecheckButton`, `RefundRequestModal` et leurs tests
-  - [ ] Page `/backoffice/paiements/[id]` et son test
-- [ ] **Tâche 5** Écran Remboursements : à traiter / traités, « Marquer comme remboursé »
-  - [ ] `RefundsTable`, `ProcessRefundModal` et leurs tests
-  - [ ] Page `/backoffice/remboursements` et son test
-- [ ] **Tâche 6** Vue d'ensemble : « À traiter » suit le chemin web
-- [ ] **Tâche 7** e2e sur fixtures, contrôle visuel, SPEC-ECRANS (WAD11 et nouvelles lignes)
-- [ ] **Tâche 8** Vérification du lot
+- [x] **Tâche 1** Socle web : routes, groupes, menu, formats et libellés · `feature/paiement-fedapay-web-backoffice`
+  - [x] Lire le client régénéré et figer les noms de champs
+  - [x] Routes `paiements`, `paiement(id)`, `remboursements` ; `PAGE_GROUPS.payments` / `refunds`
+  - [x] Menu : entrées internes « Paiements » et « Remboursements », retrait du lien Django
+  - [x] `lib/backoffice/payments.ts` (libellés, tons, filtres d'URL) et `formatDateTime`
+- [x] **Tâche 2** Fausse API : endpoints, fixtures, scénarios, contrat
+  - [x] Fabriques typées et écran `ecrans/backoffice-paiements.ts`
+  - [x] Scénarios et incidents, branchement `server.ts` / `scenarios.ts`
+  - [x] `contract.test.ts` couvre les nouveaux endpoints
+- [x] **Tâche 3** Écran Paiements : liste, filtres, totaux, pagination
+  - [x] Composants `payments/` (totaux, filtres, tableau, pagination, pastilles) et leurs tests
+  - [x] Page `/backoffice/paiements` et son test
+- [x] **Tâche 4** Écran Détail d'un paiement : tentatives, remboursements, journal, actions
+  - [x] `PaymentDetail`, `RecheckButton`, `RefundRequestModal` et leurs tests
+  - [x] Page `/backoffice/paiements/[id]` et son test
+- [x] **Tâche 5** Écran Remboursements : à traiter / traités, « Marquer comme remboursé »
+  - [x] `RefundsTable`, `ProcessRefundModal` et leurs tests
+  - [x] Page `/backoffice/remboursements` et son test
+- [x] **Tâche 6** Vue d'ensemble : « À traiter » suit le chemin web
+- [x] **Tâche 7** e2e sur fixtures, contrôle visuel, SPEC-ECRANS (WAD11 et nouvelles lignes)
+- [x] **Tâche 8** Vérification du lot
 
-> Reprise : (vide)
+> Reprise : noms retenus du client régénéré : `PaymentPage {count,next,previous,results,totals{volume,count,succeeded,failed,failureRate}}`, `PaymentRow`, `PaymentDetail` (`refundable`, `attempts`, `refunds`, `auditLog`, `order`, `maskedMsisdn`, `providerFees`, `checkedAt`), `RefundPage`, `BackofficeRefund`, `RefundSummary`, `RefundProcessResult`, `Todo.path?` ; paramètres API `status,network,country,kind,from,to,q,page` et `processed`. Prochaine étape : tâche 2. Tâche 3 : pas de `paiements/loading.tsx` (le `backoffice/loading.tsx` parent couvre déjà le segment) ; réseaux lus par `GET referentials/payment-networks/` sans pays. Tâche 5 : onglets « À traiter » / « Traités » en liens d'encre (`RefundTabs`, le `Tabs` du DS emploie la couleur primaire, interdite au back-office) ; le résultat d'une action est annoncé par `RefundsTable` (la ligne quitte la liste au rafraîchissement).
 
 Statuts : ⬜ à faire · 🟡 en cours · ✅ terminé. Cocher une case **seulement après tests verts**. Interruption en cours
 de tâche : cocher ce qui est fini et noter ici `> Reprise :` l'étape en cours, les fichiers touchés et la prochaine
@@ -430,10 +430,10 @@ Pour toute UI : un test e2e **et** un contrôle visuel à 360, 1024 et 1280 px.
   écran à **360, 1024 et 1280 px** (tableau qui défile dans sa région sans casser la page, filtres qui passent à la
   ligne, boutons et modales utilisables au tactile, tiroir du menu) ; noter le résultat dans le rapport.
 
-- [ ] **Étape 1** : écrire le test e2e et les scénarios du cahier, les voir échouer (`make e2e-fixtures PW_ARGS="admin/backoffice-paiements"`).
-- [ ] **Étape 2** : corriger **le plan ou le test**, jamais le code de production pour un test : tout écart de
+- [x] **Étape 1** : écrire le test e2e et les scénarios du cahier, les voir échouer (`make e2e-fixtures PW_ARGS="admin/backoffice-paiements"`).
+- [x] **Étape 2** : corriger **le plan ou le test**, jamais le code de production pour un test : tout écart de
   comportement trouvé ici se corrige dans les composants du lot (tâches 3 à 6), pas en contournant l'e2e.
-- [ ] **Étape 3** : e2e vert sur les deux projets ; spécification mise à jour ; cocher ; commit
+- [x] **Étape 3** : e2e vert sur les deux projets ; spécification mise à jour ; cocher ; commit
   (`test(web): e2e sur fixtures des écrans paiements et remboursements`, puis `docs: écrans WAD11, WAD16 et WAD17 du back-office`).
 
 ---

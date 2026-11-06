@@ -6,6 +6,15 @@ export type KpiUnit = Schemas["KpiUnitEnum"];
 
 const NUMBER = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
 
+const DATE_TIME = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Africa/Porto-Novo",
+});
+
 const SHORT_DATE = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
   month: "short",
@@ -31,6 +40,11 @@ export function formatKpiValue(value: KpiValue, unit?: KpiUnit): string {
 export function numericSeries(points: Array<{ label: string; value: KpiValue }>): { values: number[]; labels: string[] } {
   const numeric = points.filter((point): point is { label: string; value: number } => typeof point.value === "number");
   return { values: numeric.map((point) => point.value), labels: numeric.map((point) => point.label) };
+}
+
+/** `2026-11-05T13:32:00Z` → « 5 nov. 2026, 14:32 » (heure du Bénin). */
+export function formatDateTime(iso: string): string {
+  return DATE_TIME.format(new Date(iso));
 }
 
 /** `2027-01-15` → « 15 janv. 2027 ». */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatKpiValue, formatShortDate, numericSeries } from "./format";
+import { formatDateTime, formatKpiValue, formatShortDate, numericSeries } from "./format";
 
 describe("format des valeurs du back-office", () => {
   it.each([
@@ -19,6 +19,13 @@ describe("format des valeurs du back-office", () => {
 
   it("formate une date courte", () => {
     expect(formatShortDate("2027-01-15")).toBe("15 janv. 2027");
+  });
+});
+
+describe("date et heure", () => {
+  it("est affichée à l'heure du Bénin", () => {
+    expect(formatDateTime("2026-11-05T13:32:00Z").replace(/\s/g, " ")).toBe("5 nov. 2026, 14:32");
+    expect(formatDateTime("2026-11-05T23:30:00Z").replace(/\s/g, " ")).toBe("6 nov. 2026, 00:30");
   });
 });
 

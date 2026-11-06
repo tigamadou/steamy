@@ -1,6 +1,6 @@
 import type { Schemas } from "@steamy/api-client";
 
-import { fusion, type Partiel } from "./defauts.ts";
+import { fabrique, fusion, type Partiel } from "./defauts.ts";
 
 // Données de la fausse API (docs/tests/FIXTURES-FAUSSE-API.md). Chaque objet est typé par le contrat OpenAPI
 // (`Schemas`) : un champ ajouté, retiré ou renommé dans `apps/api/openapi.yaml` fait échouer `pnpm typecheck`, et le test
@@ -381,3 +381,76 @@ export function payment(
 export function apiError(code: Schemas["ErrorCodeEnum"], message: string): Schemas["Error"] {
   return { code, message };
 }
+
+/** Membre du Finance, session vérifiée par TOTP : ouvre les écrans paiements et remboursements du back-office. */
+export const STAFF: Schemas["Me"] = {
+  ...PARENT_ME,
+  id: 90,
+  firstName: "Fatou",
+  lastName: "Kouassi",
+  phone: null,
+  email: "fatou.kouassi@steamy.test",
+  isStaff: true,
+  otpVerified: true,
+  staffGroups: ["Finance"],
+};
+
+/** Paiement vu du back-office : réussi, 44 000 FCFA, sans remboursement. Les numéros sont déjà masqués par l'API. */
+export const backofficePayment = fabrique<Schemas["PaymentDetail"]>({
+  id: 1,
+  createdAt: AT("2026-11-03T10:15:00+01:00"),
+  orderReference: "CMD-7001",
+  merchantReference: "STY-7001-1",
+  providerTransactionId: "4810001",
+  payer: "Marie Adjovi",
+  beneficiary: "Léa Adjovi",
+  kind: "kit",
+  country: "BJ",
+  network: "mtn",
+  maskedMsisdn: "01 ** ** ** 01",
+  amount: 44000,
+  currency: "XOF",
+  status: "succeeded",
+  providerStatus: "approved",
+  failureCode: "",
+  failureReason: "",
+  provider: "fedapay",
+  providerFees: 440,
+  checkedAt: AT("2026-11-03T10:16:00+01:00"),
+  confirmedAt: AT("2026-11-03T10:16:00+01:00"),
+  refundable: 44000,
+  order: {
+    id: 7001,
+    reference: "CMD-7001",
+    kind: "kit",
+    status: "paid",
+    total: 44000,
+    currency: "XOF",
+    payer: "Marie Adjovi",
+    beneficiary: "Léa Adjovi",
+  },
+  attempts: [],
+  refunds: [],
+  auditLog: [],
+});
+
+/** Remboursement à traiter de 10 000 FCFA sur le paiement 1. */
+export const backofficeRefund = fabrique<Schemas["BackofficeRefund"]>({
+  id: 1,
+  createdAt: AT("2026-11-04T09:00:00+01:00"),
+  amount: 10000,
+  reason: "Kit reçu défectueux",
+  processed: false,
+  processedAt: null,
+  processedBy: null,
+  reference: "",
+  paymentId: 1,
+  orderReference: "CMD-7001",
+  merchantReference: "STY-7001-1",
+  providerTransactionId: "4810001",
+  network: "mtn",
+  maskedMsisdn: "01 ** ** ** 01",
+  paymentAmount: 44000,
+  payer: "Marie Adjovi",
+  beneficiary: "Léa Adjovi",
+});

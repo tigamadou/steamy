@@ -347,3 +347,132 @@ describe("la fausse API répond selon le contrat OpenAPI", () => {
     expect((await response.json()).code).toBe("PERMISSION_DENIED");
   });
 });
+
+describe("back-office Finance : paiements et remboursements conformes au contrat", () => {
+  const session = (name: string) => `${name}.vitest-${++counter}`;
+  const send = async (id: string, method: string, path: string, body?: object, csrf = true) => {
+    const response = await fetch(`${base}${path}`, {
+      method,
+      headers: { "Content-Type": "application/json", ...(csrf && { "X-CSRFToken": "t" }), Cookie: `sessionid=${id}; csrftoken=t` },
+      body: body && JSON.stringify(body),
+    });
+    const text = await response.text();
+    return { status: response.status, json: text ? JSON.parse(text) : undefined };
+  };
+
+  it("liste : totaux sur tout le filtre, filtres et pagination", async () => {
+    const id = session("backoffice-finance");
+    const all = await send(id, "GET", "/api/backoffice/payments/");
+    check("/api/backoffice/payments/", "GET", all.status, all.json);
+    expect(all.json.count).toBe(5);
+    expect(all.json.totals).toEqual({ volume: 74000, count: 5, succeeded: 2, failed: 2, failureRate: 50 });
+    const failed = await send(id, "GET", "/api/backoffice/payments/?status=failed&network=moov");
+    check("/api/backoffice/payments/", "GET", failed.status, failed.json);
+    expect(failed.json.results.map((row: { id: number }) => row.id)).toEqual([2, 5]);
+    expect(failed.json.totals).toEqual({ volume: 0, count: 2, succeeded: 0, failed: 2, failureRate: 100 });
+    // Les totaux portent sur tout le filtre, pas sur la page
+    const paged = await send(id, "GET", "/api/backoffice/payments/?pageSize=2&page=1");
+    check("/api/backoffice/payments/", "GET", paged.status, paged.json);
+    expect(paged.json.results).toHaveLength(2);
+    expect(paged.json.totals.count).toBe(5);
+    expect(paged.json.next).toContain("page=2");
+    expect((await send(id, "GET", "/api/backoffice/payments/?pageSize=2&page=9")).status).toBe(404);
+    const search = await send(id, "GET", "/api/backoffice/payments/?q=cmd-7004&country=TG&kind=course&from=2026-10-28&to=2026-10-28");
+    expect(search.json.results.map((row: { id: number }) => row.id)).toEqual([4]);
+    const none = await send(id, "GET", "/api/backoffice/payments/?q=introuvable");
+    expect(none.json.totals.failureRate).toBeNull();
+    const empty = await send(session("backoffice-finance-vide"), "GET", "/api/backoffice/payments/");
+    check("/api/backoffice/payments/", "GET", empty.status, empty.json);
+    expect(empty.json.results).toEqual([]);
+  });
+
+  it("détail : tentatives, remboursements, reste remboursable, 404", async () => {
+    const id = session("backoffice-finance");
+    const kit = await send(id, "GET", "/api/backoffice/payments/1/");
+    check("/api/backoffice/payments/{id}/", "GET", kit.status, kit.json);
+    expect(kit.json.refundable).toBe(34000);
+    expect(kit.json.refunds).toHaveLength(1);
+    const retry = await send(id, "GET", "/api/backoffice/payments/2/");
+    expect(retry.json.attempts.map((attempt: { id: number }) => attempt.id)).toEqual([5]);
+    expect(retry.json.refundable).toBe(0);
+    expect((await send(id, "GET", "/api/backoffice/payments/99/")).status).toBe(404);
+  });
+
+  it("revérification : un paiement en attente est réglé ; le prestataire peut ne pas répondre", async () => {
+    const id = session("backoffice-finance");
+    const checked = await send(id, "POST", "/api/backoffice/payments/3/recheck/", {});
+    check("/api/backoffice/payments/{id}/recheck/", "POST", checked.status, checked.json);
+    expect(checked.json.status).toBe("succeeded");
+    expect(checked.json.auditLog.at(-1).action).toBe("payment.rechecked");
+    const down = await send(session("backoffice-reverification-impossible"), "POST", "/api/backoffice/payments/3/recheck/", {});
+    expect(down.status).toBe(502);
+    expect(down.json.code).toBe("SERVER_ERROR");
+    expect((await send(id, "POST", "/api/backoffice/payments/99/recheck/", {})).status).toBe(404);
+  });
+
+  it("demande de remboursement : validation, borne du reste, liste à jour", async () => {
+    const id = session("backoffice-finance");
+    const noReason = await send(id, "POST", "/api/backoffice/payments/1/refunds/", { amount: 1000, reason: " " });
+    expect(noReason.status).toBe(400);
+    expect(noReason.json.code).toBe("VALIDATION_ERROR");
+    expect(noReason.json.fields.reason[0].message).toBeTruthy();
+    const noAmount = await send(id, "POST", "/api/backoffice/payments/1/refunds/", { amount: "x", reason: "Doublon" });
+    expect(noAmount.json.fields.amount).toBeDefined();
+    expect((await send(id, "POST", "/api/backoffice/payments/1/refunds/", { amount: 34001, reason: "Trop" })).status).toBe(409);
+    expect((await send(id, "POST", "/api/backoffice/payments/2/refunds/", { amount: 100, reason: "Échoué" })).status).toBe(409);
+    const created = await send(id, "POST", "/api/backoffice/payments/1/refunds/", { amount: 34000, reason: "Reste du kit" });
+    check("/api/backoffice/payments/{id}/refunds/", "POST", created.status, created.json);
+    expect(created.json.processed).toBe(false);
+    expect((await send(id, "GET", "/api/backoffice/payments/1/")).json.refundable).toBe(0);
+    const pending = await send(id, "GET", "/api/backoffice/refunds/");
+    check("/api/backoffice/refunds/", "GET", pending.status, pending.json);
+    expect(pending.json.results.map((refund: { id: number }) => refund.id)).toEqual([1, created.json.id]);
+  });
+
+  it("remboursements : à traiter, traités, marquage avec référence, 409", async () => {
+    const id = session("backoffice-finance");
+    const done = await send(id, "GET", "/api/backoffice/refunds/?processed=true");
+    check("/api/backoffice/refunds/", "GET", done.status, done.json);
+    expect(done.json.results.map((refund: { id: number }) => refund.id)).toEqual([2]);
+    const missing = await send(id, "POST", "/api/backoffice/refunds/1/process/", { reference: " " });
+    expect(missing.status).toBe(400);
+    expect(missing.json.fields.reference).toBeDefined();
+    const marked = await send(id, "POST", "/api/backoffice/refunds/1/process/", { reference: "FDP-REM-9" });
+    check("/api/backoffice/refunds/{id}/process/", "POST", marked.status, marked.json);
+    expect(marked.json.refund).toMatchObject({ processed: true, reference: "FDP-REM-9", processedBy: "Fatou Kouassi" });
+    expect((await send(id, "GET", "/api/backoffice/refunds/")).json.results).toEqual([]);
+    const again = await send(id, "POST", "/api/backoffice/refunds/1/process/", { reference: "FDP-REM-9" });
+    expect(again.status).toBe(409);
+    const flagged = await send(session("backoffice-remboursement-deja-fait"), "POST", "/api/backoffice/refunds/1/process/", { reference: "X" });
+    expect(flagged.status).toBe(409);
+    expect((await send(id, "POST", "/api/backoffice/refunds/99/process/", { reference: "X" })).status).toBe(404);
+  });
+
+  it("vue d'ensemble : « À traiter » porte les chemins web des files Finance", async () => {
+    const overview = await send(session("backoffice-finance"), "GET", "/api/backoffice/overview/");
+    check("/api/backoffice/overview/", "GET", overview.status, overview.json);
+    expect(overview.json.todo.map((item: { kind: string; path: string }) => [item.kind, item.path])).toEqual([
+      ["payments_failed", "/backoffice/paiements?statut=failed"],
+      ["refunds_pending", "/backoffice/remboursements"],
+    ]);
+    const support = await send(session("backoffice-support"), "GET", "/api/backoffice/overview/");
+    check("/api/backoffice/overview/", "GET", support.status, support.json);
+    expect(support.json.todo).toEqual([]);
+  });
+
+  it("groupe insuffisant, erreur serveur, jeton CSRF absent", async () => {
+    const support = session("backoffice-support");
+    for (const [method, path] of [["GET", "/api/backoffice/payments/"], ["GET", "/api/backoffice/payments/1/"], ["POST", "/api/backoffice/payments/1/recheck/"], ["POST", "/api/backoffice/payments/1/refunds/"], ["GET", "/api/backoffice/refunds/"], ["POST", "/api/backoffice/refunds/1/process/"]]) {
+      const denied = await send(support, method, path, method === "POST" ? {} : undefined);
+      expect(denied.status).toBe(403);
+      expect(denied.json.code).toBe("PERMISSION_DENIED");
+      check(path.replace(/\/\d+\//, "/{id}/") as string, method, 403, denied.json);
+    }
+    const broken = await send(session("backoffice-erreur-serveur"), "GET", "/api/backoffice/payments/");
+    expect(broken.status).toBe(500);
+    check("/api/backoffice/payments/", "GET", broken.status, broken.json);
+    const noCsrf = await send(session("backoffice-finance"), "POST", "/api/backoffice/payments/3/recheck/", {}, false);
+    expect(noCsrf.status).toBe(403);
+    expect(noCsrf.json.code).toBe("PERMISSION_DENIED");
+  });
+});

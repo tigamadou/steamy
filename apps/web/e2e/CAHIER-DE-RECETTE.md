@@ -4276,7 +4276,7 @@ Registre de l'espace : vouvoiement. Vocabulaire : « élèves », « À revoir �
 
 ## Partie 6 · Administration, taxes et factures normalisées (lot 6)
 
-*610 lignes de scénario.*
+*630 lignes de scénario.*
 
 
 Domaine : back-office du personnel Steamy (« Vue d'ensemble » à « Connexion admin »), droits des quatre groupes, admin Django, facturation normalisée e-MECeF, TVA et AIB paramétrables, remboursements.
@@ -4320,7 +4320,8 @@ Domaine : back-office du personnel Steamy (« Vue d'ensemble » à « Connexion 
 | Modération et consentements | /admin/accounts/consentrequest/ et /admin/accounts/publicprofilereview/ |
 | Contenu / Parcours | /admin/catalog/course/ |
 | Boutique et commandes (kits, stock, commandes, Kit Codes) | /admin/shop/kit/, /admin/payments/order/, /admin/payments/kitcode/ |
-| Paiements Mobile Money | /admin/payments/payment/ |
+| Paiements Mobile Money (liste, détail, revérification, demande de remboursement) | /backoffice/paiements, /backoffice/paiements/[id] |
+| Remboursements (à traiter, traités) | /backoffice/remboursements |
 | Steamy Events (modération) | /admin/events/steamyevent/ et /admin/events/eventapplication/ |
 | Équipe et rôles (RBAC), appareils TOTP | /admin/accounts/staffmember/ |
 | Activation d'un membre invité | /admin/activation/[jeton]/ |
@@ -4427,8 +4428,8 @@ Garde du back-office (layout) : session vérifiée par TOTP, puis contrôle du g
 | REC-ADM-059 | Menu du back-office à moins de 1024 px | Responsive | Bouton « Menu du back-office » (aria-expanded) ouvre la navigation « Navigation du back-office » | ☐ | |
 | REC-ADM-060 | Menu : se connecter en Support | Navigation filtrée | Pilotage : « Vue d'ensemble » seulement (pas d'« Impact Tracker ») ; Plateforme : « Utilisateurs », « Modération », « Boutique », « Steamy Events » ; pas de « Paiements », ni « Contenu » ; pas de groupe Système | ☐ | |
 | REC-ADM-061 | Menu : se connecter en Contenu | Navigation filtrée | « Vue d'ensemble » ; « Contenu », « Boutique », « Steamy Events » ; ni « Utilisateurs », ni « Paiements », ni Impact Tracker | ☐ | |
-| REC-ADM-062 | Menu : se connecter en Finance | Navigation filtrée | « Vue d'ensemble », « Impact Tracker », « Paiements » ; ni Utilisateurs ni Contenu | ☐ | |
-| REC-ADM-063 | Menu : se connecter en Super-admin | Navigation filtrée | Toutes les entrées, dont Système : « Équipe & rôles » (groupes) et « Paramètres » ; lien « Paiements » vers /admin/payments/ | ☐ | |
+| REC-ADM-062 | Menu : se connecter en Finance | Navigation filtrée | « Vue d'ensemble », « Impact Tracker » ; groupe « Finance » : « Paiements » et « Remboursements » (pages du back-office) ; ni Utilisateurs ni Contenu | ☐ | |
+| REC-ADM-063 | Menu : se connecter en Super-admin | Navigation filtrée | Toutes les entrées, dont Système : « Équipe & rôles » (groupes) et « Paramètres » ; groupe « Finance » : « Paiements » et « Remboursements » vers /backoffice/paiements et /backoffice/remboursements | ☐ | |
 | REC-ADM-064 | Vérifier le bloc utilisateur du shell | Identité | Nom issu de la session et groupe(s) (ex. « Support ») sous le nom ; si plusieurs groupes, séparés par « · » | ☐ | |
 | REC-ADM-065 | Cliquer « Se déconnecter » | Déconnexion | Retour sur /admin/login/ ; /backoffice renvoie ensuite vers « Connexion admin » | ☐ | |
 | REC-ADM-066 | Parcourir les écrans du back-office en monochrome | Aspect | Aucune couleur primaire de marque ; couleur réservée aux statuts et aux graphes | ☐ | |
@@ -5110,6 +5111,33 @@ Alerte à la Finance : courriel (objet « [Steamy] Facture normalisée e-MECeF �
 | REC-ADM-581 | `emecef_probe --yes-test` avec serveur injoignable | Erreur API | Erreur « e-MECeF : <détail> » | ☐ | |
 | REC-ADM-582 | Renseigner `EMECEF_AIB_IN_TOTAL` selon le bloc « À rapporter » puis activer e-MECeF avec AIB | Après la sonde | L'activation avec AIB (1 % ou 5 %) devient possible (voir « Facture normalisée e-MECeF ») | ☐ | |
 | REC-ADM-583 | Lancer `emecef_probe --yes-test` en CI | Hors CI | Ne doit jamais être exécutée en CI ; vérifier que la CI ne l'appelle pas (aucun appel réseau réel en test) | ☐ | |
+
+#### Paiements et remboursements du back-office (/backoffice/paiements, /backoffice/paiements/[id], /backoffice/remboursements)
+
+Réservés à Finance et Super-admin (la liste des paiements de l'admin Django n'est plus liée au menu). Totaux, statuts et montants sont ceux du serveur ; le numéro de téléphone n'est jamais affiché en clair.
+
+| N° | Action | Cas | Résultat attendu | Conforme | Remarques |
+| --- | --- | --- | --- | --- | --- |
+| REC-ADM-611 | Ouvrir « Paiements » depuis le groupe « Finance » du menu | `backoffice-finance` · Nominal · auto | Titre « Paiements » ; titre d'onglet « Paiements · Back-office » ; groupe « Finance » avec « Paiements » et « Remboursements » ; formulaire « Filtres des paiements » et tableau « Paiements Mobile Money » ; aucune violation d'accessibilité | ☐ | |
+| REC-ADM-612 | Lire les quatre totaux | `backoffice-finance` · Nominal · auto | « Volume encaissé » 74 000 FCFA ; « Paiements » 5 ; « Réussis / échoués » 2 / 2 ; « Taux d'échec » 50 % : valeurs du serveur, calculées sur tout le filtre | ☐ | |
+| REC-ADM-613 | Lire le tableau des paiements | `backoffice-finance` · Nominal · auto | Colonnes date, commande (lien vers le détail), référence marchande, identifiant FedaPay, payeur, bénéficiaire, type, pays · réseau, numéro, montant, statut, statut FedaPay, motif d'échec ; numéro masqué (« 01 ** ** ** 02 ») ; paiement échoué : « Paiement refusé » et « Solde insuffisant » ; aucun numéro complet dans la page | ☐ | |
+| REC-ADM-614 | 1. Filtrer par statut « Échoué »<br>2. Ajouter le réseau « Moov Money »<br>3. Rechercher « STY-7002-2 »<br>4. Recharger la page | `backoffice-finance` · Nominal · auto | L'URL porte les filtres (`statut=`, `reseau=`, `q=`) ; la liste et les totaux suivent le filtre entier ; le rechargement conserve les champs et la liste | ☐ | |
+| REC-ADM-615 | 1. Rechercher une référence inconnue<br>2. Cliquer « Réinitialiser » | `backoffice-finance` · Vide · auto | « Aucun paiement ne correspond à ces filtres. », puis liste complète sur /backoffice/paiements | ☐ | |
+| REC-ADM-616 | Ouvrir « Paiements » à 360 px | `backoffice-finance` · Mobile · auto | Le tableau défile dans sa région (focalisable), la page ne défile pas horizontalement | ☐ | |
+| REC-ADM-617 | Ouvrir le détail d'un paiement échoué | `backoffice-finance` · Nominal · auto | Fil d'Ariane « Paiements › CMD-7002 » ; cartes « Paiement » (motif d'échec, numéro masqué) et « Commande » ; « Autres tentatives » avec lien vers l'autre paiement ; « Aucun remboursement. » ; « Revérifier chez FedaPay » proposé, pas « Demander un remboursement » | ☐ | |
+| REC-ADM-618 | Cliquer « Revérifier chez FedaPay » sur un paiement en attente | `backoffice-finance` · Nominal · auto | Message « Paiement revérifié : statut Réussi. » ; statut mis à jour ; plus de « Revérifier » ; « Demander un remboursement » proposé ; journal : « Paiement revérifié chez FedaPay » | ☐ | |
+| REC-ADM-619 | 1. Cliquer « Demander un remboursement » sur un paiement réussi<br>2. Valider sans motif<br>3. Saisir un montant supérieur au reste | `backoffice-finance` · Erreur · auto | Montant prérempli au reste remboursable (34000) ; « Le motif est obligatoire. » ; « Saisissez un montant entier entre 1 et … » ; aucun appel émis | ☐ | |
+| REC-ADM-620 | Demander 5 000 FCFA avec un motif | `backoffice-finance` · Nominal · auto | La modale se ferme ; « Remboursement demandé : il apparaît dans les remboursements à traiter. » ; « Reste remboursable » 29 000 FCFA ; le remboursement est listé sur le paiement | ☐ | |
+| REC-ADM-621 | Ouvrir « Remboursements » depuis le menu | `backoffice-finance` · Nominal · auto | Titre « Remboursements » ; onglet « À traiter » courant ; le remboursement demandé est listé avec sa commande, son montant et son motif | ☐ | |
+| REC-ADM-622 | 1. Cliquer « Marquer comme remboursé »<br>2. Confirmer sans référence<br>3. Saisir « FDP-REM-0099 » et confirmer<br>4. Ouvrir « Traités » | `backoffice-finance` · Nominal · auto | « La référence du remboursement est obligatoire. » sans appel ; puis « Remboursement de la commande CMD-7001 marqué comme fait. » ; la ligne quitte « À traiter » et apparaît dans « Traités » avec sa référence et « Fatou Kouassi » ; plus d'action dans « Traités » | ☐ | |
+| REC-ADM-623 | Marquer un remboursement déjà fait par un autre membre | `backoffice-remboursement-deja-fait` · Erreur · auto | « Ce remboursement est déjà marqué comme remboursé. » ; la liste est rafraîchie : il est dans « Traités » | ☐ | |
+| REC-ADM-624 | Revérifier alors que FedaPay ne répond pas | `backoffice-reverification-impossible` · Erreur · auto | « Le prestataire de paiement n'a pas répondu … » en alerte ; statut inchangé ; nouvel essai possible | ☐ | |
+| REC-ADM-625 | Ouvrir « Paiements » alors que l'API est en erreur | `backoffice-erreur-serveur` · Erreur · auto | « Chargement impossible » dans le shell ; la navigation reste disponible | ☐ | |
+| REC-ADM-626 | Support : ouvrir « Paiements », « Remboursements » et un détail | `backoffice-support` · Accès refusé · auto | Redirection vers « Accès refusé » ; le menu n'a ni groupe « Finance » ni « Paiements » ni « Remboursements » | ☐ | |
+| REC-ADM-627 | Ouvrir « Paiements échoués » depuis « À traiter » de la vue d'ensemble | `backoffice-finance` · Nominal · auto | /backoffice/paiements?statut=failed ; filtre « Échoué » appliqué | ☐ | |
+| REC-ADM-628 | Ouvrir « Remboursements à traiter » depuis « À traiter » | `backoffice-finance` · Nominal · auto | /backoffice/remboursements ; onglet « À traiter » courant | ☐ | |
+| REC-ADM-629 | Ouvrir « Paiements » sans aucun paiement | `backoffice-finance-vide` · Vide · auto | « Aucun paiement ne correspond à ces filtres. » ; « Taux d'échec » : « — » et « aucun paiement réglé » (jamais 0) | ☐ | |
+| REC-ADM-630 | Ouvrir « Remboursements » sans remboursement | `backoffice-finance-vide` · Vide · auto | « Aucun remboursement à traiter. » ; onglet « Traités » : « Aucun remboursement traité. » | ☐ | |
 
 ---
 

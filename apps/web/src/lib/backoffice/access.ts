@@ -17,6 +17,8 @@ const { superAdmin, content, support, finance } = STAFF_GROUPS;
 export const PAGE_GROUPS = {
   overview: [],
   impact: [finance, superAdmin],
+  payments: [finance, superAdmin],
+  refunds: [finance, superAdmin],
 } as const satisfies Record<string, readonly StaffGroup[]>;
 
 export type StaffUser = Pick<Me, "isStaff" | "otpVerified" | "staffGroups">;
@@ -48,7 +50,7 @@ export function adminUrl(apiUrl: string, path = ""): string {
 export type NavItem = {
   id: string;
   label: string;
-  icon: "home" | "sparkle" | "user" | "eye" | "book" | "cart" | "phone" | "trophy" | "lock" | "gear";
+  icon: "home" | "sparkle" | "user" | "eye" | "book" | "cart" | "phone" | "trophy" | "lock" | "gear" | "arrow-left";
   /** Chemin Next.js (Pilotage) ou chemin de l'admin Django relatif à `/admin/` (Plateforme, Système). */
   href: string;
   external?: boolean;
@@ -82,6 +84,26 @@ const NAV: Array<{ label: string; external: boolean; items: NavEntry[] }> = [
     ],
   },
   {
+    label: "Finance",
+    external: false,
+    items: [
+      {
+        id: "payments",
+        label: "Paiements",
+        icon: "phone",
+        href: routes.backoffice.payments,
+        groups: PAGE_GROUPS.payments,
+      },
+      {
+        id: "refunds",
+        label: "Remboursements",
+        icon: "arrow-left",
+        href: routes.backoffice.refunds,
+        groups: PAGE_GROUPS.refunds,
+      },
+    ],
+  },
+  {
     label: "Plateforme",
     external: true,
     items: [
@@ -95,7 +117,6 @@ const NAV: Array<{ label: string; external: boolean; items: NavEntry[] }> = [
       },
       { id: "content", label: "Contenu", icon: "book", href: "catalog/", groups: [content, superAdmin] },
       { id: "shop", label: "Boutique", icon: "cart", href: "shop/", groups: [content, support, superAdmin] },
-      { id: "payments", label: "Paiements", icon: "phone", href: "payments/", groups: [finance, superAdmin] },
       { id: "events", label: "Steamy Events", icon: "trophy", href: "events/", groups: [content, support, superAdmin] },
     ],
   },

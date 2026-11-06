@@ -101,7 +101,7 @@ describe("WAD01 · Vue d'ensemble", () => {
       <Overview
         overview={overview({
           report: { period: "2026-t3", label: "T3 2026", dueDate: "2026-10-15", status: "submitted", entered: 12, total: 12 },
-          todo: [{ kind: "payments_failed", label: "Paiements échoués", count: 2, adminPath: "admin/payments/" }],
+          todo: [{ kind: "nouveau_type", label: "File à venir", count: 2, adminPath: "/admin/autre/" }],
         })}
         apiUrl={API}
         canOpenImpact
@@ -109,9 +109,54 @@ describe("WAD01 · Vue d'ensemble", () => {
     );
     expect(screen.getByText("Rapport T3 2026 soumis.")).toBeInTheDocument();
     expect(screen.getByText("Soumis")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Paiements échoués/ })).toHaveAttribute("href", `${API}/admin/payments/`);
+    const link = screen.getByRole("link", { name: /File à venir/ });
+    expect(link).toHaveAttribute("href", `${API}/admin/autre/`);
+    expect(link).toHaveTextContent("File à venir");
+  });
+
+  it("ouvre les écrans du back-office pour les entrées qui portent un chemin web", async () => {
+    const { container } = render(
+      <Overview
+        overview={overview({
+          todo: [
+            {
+              kind: "payments_failed",
+              label: "Paiements échoués",
+              count: 2,
+              path: "/backoffice/paiements?statut=failed",
+              adminPath: "/admin/payments/payment/?status__exact=failed",
+            },
+            {
+              kind: "refunds_pending",
+              label: "Remboursements à traiter",
+              count: 1,
+              path: "/backoffice/remboursements",
+              adminPath: "/admin/payments/refund/",
+            },
+            { kind: "consents_pending", label: "Consentements en attente", count: 3, adminPath: "/admin/accounts/consentrequest/" },
+          ],
+        })}
+        apiUrl={API}
+        canOpenImpact
+      />,
+    );
+    const todo = screen.getByRole("region", { name: "À traiter" });
+    const failed = within(todo).getByRole("link", { name: /Paiements échoués/ });
+    expect(failed).toHaveAttribute("href", "/backoffice/paiements?statut=failed");
+    expect(failed).toHaveTextContent("Paiements à examiner");
+    const refunds = within(todo).getByRole("link", { name: /Remboursements à traiter/ });
+    expect(refunds).toHaveAttribute("href", "/backoffice/remboursements");
+    expect(refunds).toHaveTextContent("Remboursements à solder");
+    // Les consentements n'ont pas encore d'écran web : ils gardent le lien de l'admin Django
+    expect(within(todo).getByRole("link", { name: /Consentements en attente/ })).toHaveAttribute(
+      "href",
+      `${API}/admin/accounts/consentrequest/`,
+    );
+    expect(within(todo).queryByText(/admin Django/)).not.toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
+
 
 describe("étapes du rapport", () => {
   const report = { period: "2026-t4", label: "T4 2026", dueDate: "2027-01-15", entered: 3, total: 12 } as const;
