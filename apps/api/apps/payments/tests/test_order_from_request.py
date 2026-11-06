@@ -9,11 +9,10 @@ from rest_framework.test import APIClient
 from apps.accounts.tests.factories import ParentFactory
 from apps.catalog.tests.factories import CourseFactory
 from apps.payments.models import Order, PaymentRequest
-from apps.payments.providers import PaymentEvent, PaymentStatus
-from apps.payments.utils import handle_payment_event
 from apps.shop.tests.factories import DeliveryZoneFactory, KitFactory
 
 from .factories import PaymentFactory, link_child
+from .test_flux_support import deliver
 
 pytestmark = pytest.mark.django_db
 ORDERS = "/api/payments/orders/"
@@ -54,16 +53,7 @@ def test_the_parent_pays_the_course_requested_by_the_child(parent, child):
     assert (order.kind, order.beneficiary, order.total) == (Order.Kind.COURSE, child, 15000)
     assert order.payment_request == request
     payment = PaymentFactory(order=order)
-    handle_payment_event(
-        "fake",
-        PaymentEvent(
-            order.reference,
-            payment.provider_transaction_id,
-            order.total,
-            "XOF",
-            PaymentStatus.SUCCEEDED,
-        ),
-    )
+    deliver(payment)
     request.refresh_from_db()
     assert request.status == PaymentRequest.Status.PAID
 

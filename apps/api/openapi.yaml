@@ -7513,8 +7513,11 @@ paths:
     post:
       operationId: payments_webhook_create
       description: |-
-        Point d'entrée des notifications des prestataires (S9, ADR 0003). La signature est vérifiée **avant** toute
-        lecture du contenu ; le prestataire normalise ensuite la notification (`parse_event`).
+        Point d'entrée des notifications des prestataires (S9, ADR 0003 et 0008). La signature est vérifiée **avant**
+        toute lecture du contenu. Le corps ne sert qu'à connaître l'identifiant de la transaction, relue chez le
+        prestataire : rien de ce qu'il affirme n'est cru. Seuls un prestataire inconnu ou non configuré et une signature
+        invalide donnent 400 ; tout le reste répond 200 (le prestataire ne doit pas réessayer en boucle) et la
+        réconciliation rattrape ce qui n'a pas pu être traité.
       summary: Webhook des prestataires de paiement (appelé par le prestataire, pas
         par le front)
       parameters:
@@ -10749,6 +10752,7 @@ components:
       - PAYMENT_IN_PROGRESS
       - PAYMENT_REQUEST_CLOSED
       - PAYMENT_REQUIRED
+      - PAYMENT_UNAVAILABLE
       - PDF_NOT_READY
       - PERMISSION_DENIED
       - PHONE_INVALID
@@ -10826,6 +10830,7 @@ components:
         * `PAYMENT_IN_PROGRESS` - PAYMENT_IN_PROGRESS
         * `PAYMENT_REQUEST_CLOSED` - PAYMENT_REQUEST_CLOSED
         * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
+        * `PAYMENT_UNAVAILABLE` - PAYMENT_UNAVAILABLE
         * `PDF_NOT_READY` - PDF_NOT_READY
         * `PERMISSION_DENIED` - PERMISSION_DENIED
         * `PHONE_INVALID` - PHONE_INVALID

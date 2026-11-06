@@ -23,7 +23,7 @@ from apps.payments.providers import (
 from apps.payments.providers.fake import FakePaymentProvider, outcome_for
 from apps.payments.providers.fedapay import FedaPayProvider, national_number
 from apps.payments.tasks import deliver_fake_webhook
-from apps.payments.tests.factories import OrderFactory
+from apps.payments.tests.factories import OrderFactory, PaymentFactory
 
 
 def charge(msisdn="+2290197000001", **overrides):
@@ -47,9 +47,16 @@ def charge(msisdn="+2290197000001", **overrides):
 def initiate(django_capture_on_commit_callbacks):
     """Initie un faux paiement puis valide la transaction : la notification part à ce moment-là."""
 
-    def run(msisdn="+2290197000001"):
+    def run(msisdn="+2290197000001", order=None):
         with django_capture_on_commit_callbacks(execute=True):
-            return FakePaymentProvider().initiate(charge(msisdn))
+            result = FakePaymentProvider().initiate(charge(msisdn))
+            if order is not None:  # le webhook ne crée jamais de paiement (ADR 0008 § 5)
+                PaymentFactory(
+                    order=order,
+                    provider_transaction_id=result.provider_tx_id,
+                    merchant_reference="CM-0001-1",
+                )
+            return result
 
     return run
 
@@ -123,7 +130,7 @@ def test_fake_outcome_depends_on_the_test_number(msisdn, outcome):
 
 
 def test_fake_success_posts_a_signed_webhook_after_commit(order, initiate):
-    result = initiate()
+    result = initiate(order=order)
     assert result.status == PaymentStatus.PENDING and result.redirect_url is None
     order.refresh_from_db()
     assert order.status == Order.Status.PAID
@@ -140,7 +147,7 @@ def test_fake_success_posts_a_signed_webhook_after_commit(order, initiate):
 
 
 def test_fake_failure_is_notified_with_a_reason(order, initiate):
-    result = initiate("+2290197000002")
+    result = initiate("+2290197000002", order=order)
     order.refresh_from_db()
     assert order.status == Order.Status.PENDING
     assert Payment.objects.get(order=order).status == Payment.Status.FAILED
@@ -164,9 +171,13 @@ def test_fake_notification_waits_for_the_commit(order):
 
 def test_fake_webhook_can_be_delivered_later_by_hand(order):
     result = FakePaymentProvider().initiate(charge("+2290197000003"))
+    payment = PaymentFactory(
+        order=order, provider_transaction_id=result.provider_tx_id, merchant_reference="CM-0001-1"
+    )
     assert deliver_fake_webhook(result.provider_tx_id, "succeeded") == 200
     order.refresh_from_db()
-    assert order.status == Order.Status.PAID
+    payment.refresh_from_db()
+    assert order.status == Order.Status.PAID and payment.status == Payment.Status.SUCCEEDED
 
 
 def test_fake_unknown_transaction(db):

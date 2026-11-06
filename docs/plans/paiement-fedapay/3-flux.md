@@ -63,25 +63,27 @@ autorité). Plan du chantier `paiement-fedapay`, lot 3 sur 5.
 
 ## Avancement
 
-Statut : ⬜ à faire · Prochaine tâche : 1
+Statut : ✅ terminé · Prochaine tâche : aucune
 
-- [ ] **Tâche 1** Support de test du lot (`test_flux_support.py`) · `feature/paiement-fedapay-flux`
-  - [ ] Aides : transaction relue simulée, livraison d'un webhook signé, rejeu concurrent
-- [ ] **Tâche 2** Initiation : `supports`, `PAYMENT_UNAVAILABLE`, `merchant_reference`, identifiant conservé (§ 3)
-  - [ ] Code d'erreur `PAYMENT_UNAVAILABLE` (503) dans `libs/errors.py`
-  - [ ] `initiate_payment` réécrit
-- [ ] **Tâche 3** Exécution post-paiement : remboursement à traiter, commande `cancelled`, message « sera remboursé » (§ 8)
-  - [ ] `refund(payment, reason, amount=None)` et branche `settle`
-- [ ] **Tâche 4** Cœur de vérification : `apply_transaction`, `verify_payment`, `handle_payment_event` (§ 4)
-  - [ ] Rattachement, montant et devise, table des statuts, échec non définitif, écart → `Refund`
-  - [ ] Observations (frais, statut brut, `checked_at`) avant l'idempotence
-  - [ ] Adaptation des tests existants qui appellent `handle_payment_event`
-- [ ] **Tâche 5** Webhook : 400 seulement signature invalide / prestataire inconnu, sinon 200 (§ 5)
-- [ ] **Tâche 6** Réconciliation : 10 min, expiration 24 h, rattrapage 48 h, erreur isolée (§ 6)
-- [ ] **Tâche 7** Contrat OpenAPI et documentation de code
-- [ ] **Tâche 8** Vérification du lot
+- [x] **Tâche 1** Support de test du lot (`test_flux_support.py`) · `feature/paiement-fedapay-flux`
+  - [x] Aides : transaction relue simulée, livraison d'un webhook signé, rejeu concurrent
+- [x] **Tâche 2** Initiation : `supports`, `PAYMENT_UNAVAILABLE`, `merchant_reference`, identifiant conservé (§ 3)
+  - [x] Code d'erreur `PAYMENT_UNAVAILABLE` (503) dans `libs/errors.py`
+  - [x] `initiate_payment` réécrit
+- [x] **Tâche 3** Exécution post-paiement : remboursement à traiter, commande `cancelled`, message « sera remboursé » (§ 8)
+  - [x] `refund(payment, reason, amount=None)` et branche `settle`
+- [x] **Tâche 4** Cœur de vérification : `apply_transaction`, `verify_payment`, `handle_payment_event` (§ 4)
+  - [x] Rattachement, montant et devise, table des statuts, échec non définitif, écart → `Refund`
+  - [x] Observations (frais, statut brut, `checked_at`) avant l'idempotence
+  - [x] Adaptation des tests existants qui appellent `handle_payment_event`
+- [x] **Tâche 5** Webhook : 400 seulement signature invalide / prestataire inconnu, sinon 200 (§ 5)
+- [x] **Tâche 6** Réconciliation : 10 min, expiration 24 h, rattrapage 48 h, erreur isolée (§ 6)
+- [x] **Tâche 7** Contrat OpenAPI et documentation de code
+- [x] **Tâche 8** Vérification du lot
 
 > Reprise : (vide)
+>
+> Signalé au superviseur (tests hors du lot cassés par conception, non modifiés) : `test_providers.py` (3 tests : webhook du faux prestataire sans `Payment`, plus d'orphelin créé), `test_socle_verify.py::test_verify_pending_changes_nothing` (attend `payload` nul, l'ADR l'écrit à chaque relecture), `apps/events/tests/test_admin_wad12.py::test_a_payment_after_a_staff_refusal_is_refunded_never_accepted` (attend `refunded`, l'ADR laisse la commande `cancelled` tant que la Finance n'a pas remboursé).
 
 Statuts : ⬜ à faire · 🟡 en cours · ✅ terminé. Cocher une case **seulement après tests verts**. Interruption en cours
 de tâche : cocher ce qui est fini et noter ici `> Reprise :` l'étape en cours, les fichiers touchés et la prochaine
@@ -536,3 +538,7 @@ suivant ; les erreurs du prestataire sont de simples avertissements) :
   attendu : « Périmètre OK » (une ligne `HORS PÉRIMÈTRE` est corrigée ou signalée, jamais le plan modifié pour la faire
   disparaître).
 - [ ] Rapport final : `Statut: DONE|PARTIAL|BLOCKED`, tâches, commits, commandes et résultats, points à signaler.
+
+## Écarts
+
+- Tests périmés par conception (ADR 0008 § 5, § 7, § 8), mis à jour hors lot sur arbitrage du lead dev (#210) : trois tests de `test_providers.py` (le webhook ne crée plus de `Payment`), `test_socle_verify.py::test_verify_pending_changes_nothing` (payload écrit à chaque relecture) et `test_admin_wad12.py::test_a_payment_after_a_staff_refusal_is_refunded_never_accepted` (commande `cancelled` jusqu'au remboursement effectif). Seuls les tests sont modifiés par cet arbitrage ; le retrait de `WebhookRejected` de `apps/api/apps/payments/backoffice_api.py` est un correctif de production lié à l'intégration du lot fedapay.

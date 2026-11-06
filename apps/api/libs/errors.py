@@ -151,6 +151,10 @@ CATALOG: dict[str, tuple[int, str]] = {
         S.HTTP_400_BAD_REQUEST,
         "Ce réseau Mobile Money n'est pas disponible pour ce pays.",
     ),
+    "PAYMENT_UNAVAILABLE": (
+        S.HTTP_503_SERVICE_UNAVAILABLE,
+        "Le paiement est momentanément indisponible. Réessayez dans un instant.",
+    ),
     "ORDER_EXPIRED": (S.HTTP_410_GONE, "Cette commande a expiré."),
     "ORDER_ALREADY_PAID": (S.HTTP_409_CONFLICT, "Cette commande est déjà payée."),
     "PAYMENT_IN_PROGRESS": (

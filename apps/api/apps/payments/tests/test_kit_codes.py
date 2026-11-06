@@ -12,12 +12,11 @@ from apps.catalog.tests.factories import CourseFactory
 from apps.learning.models import Enrollment
 from apps.payments.kit_codes import normalize, redeem
 from apps.payments.models import KitCode
-from apps.payments.providers import PaymentEvent, PaymentStatus
-from apps.payments.utils import handle_payment_event
 from apps.shop.tests.factories import KitFactory
 from libs.errors import ApiError
 
 from .factories import OrderItemFactory, PaymentFactory, link_child, load_referentials
+from .test_flux_support import deliver
 
 pytestmark = pytest.mark.django_db
 URL = "/api/payments/kit-codes/redeem/"
@@ -86,16 +85,7 @@ def test_codes_are_generated_at_payment_and_shown_to_the_payer_only(kit):
     )
     order = item.order
     payment = PaymentFactory(order=order)
-    handle_payment_event(
-        "fake",
-        PaymentEvent(
-            order.reference,
-            payment.provider_transaction_id,
-            order.total,
-            "XOF",
-            PaymentStatus.SUCCEEDED,
-        ),
-    )
+    deliver(payment)
     codes = KitCode.objects.filter(order_item=item)
     assert codes.count() == 2 and len({c.code for c in codes}) == 2
     url = f"/api/payments/orders/{order.reference}/"
