@@ -17,6 +17,9 @@ CONFIG=/etc/steamy/deploy.env   # STEAMY_ENV, GHCR_OWNER, NAMESPACE (écrit par 
 # shellcheck source=/dev/null
 source "$CONFIG"
 : "${STEAMY_ENV:?}" "${GHCR_OWNER:?}" "${NAMESPACE:?}"
+# Le kubectl de k3s lit /etc/rancher/k3s/k3s.yaml (root seul) si KUBECONFIG est vide :
+# on vise la copie du compte deploy, posée par Ansible.
+export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/config}"
 
 log() { printf '[steamy-deploy %s] %s\n' "$(date -u +%H:%M:%S)" "$*" >&2; }
 die() { log "ERREUR : $*"; exit 1; }
