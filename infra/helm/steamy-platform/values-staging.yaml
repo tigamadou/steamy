@@ -3,3 +3,8 @@ postgres:
   storage: 5Gi
 rustfs:
   storage: 10Gi
+backups:
+  wasabi:
+    region: eu-west-2
+    endpoint: https://s3.eu-west-2.wasabisys.com
+    bucket: steamy-backups-staging
