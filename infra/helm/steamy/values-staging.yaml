@@ -1,6 +1,7 @@
-# TODO : remplacer les domaines une fois le DNS choisi
 environment: staging
 hosts:
-  web: staging.steamy.example
-  api: api.staging.steamy.example
-  cookieDomain: .staging.steamy.example
+  web: staging.steamyacademy.com
+  api: api.staging.steamyacademy.com
+  cookieDomain: .staging.steamyacademy.com
+email:
+  from: noreply@steamyacademy.com

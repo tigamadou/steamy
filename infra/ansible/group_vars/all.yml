@@ -8,9 +8,9 @@ cnpg_barman_plugin_version: v0.15.1
 
 # --- Comptes ---------------------------------------------------------------------
 # Administrateurs humains : clés publiques autorisées (mot de passe désactivé)
-admin_users: []
-#  - name: amadou
-#    pubkey: "ssh-ed25519 AAAA… amadou@laptop"
+admin_users:
+  - name: amadou
+    pubkey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDfDJr4+UKEZUPorcr9bN42rCpvdFCsHgQHmQ3wXhjy2xp89v8rol6uXh3ShRoDypoa9TMKdzEVO56UFPP7E4TQr95WoC0lpgm2pnee7HpuewRc6Va8z36K8qeti9u12fGVfCYuZgQf1FoJA6vPHuYYwig8xShJCUPTcF8mJvEyLr1D8jGev1xV8pZ0bPr0T8wEmof/z/v6spfuIk7ZxdoCBIRSZ4aVr/kMjHxh3uaFkUaYsJODZhEco5jErSBaN0dtAYQC84j33ORkhFwphjdpj2dcdtcdfsmuQl6Yxy1detBkSpCSS7t5NJszUgMJxH09PjG+NJ4MxiK5o19IUGc8AtQB4tabswL+NzC4PR3Ne/rZjnGRp5aMVY2J+tcc/USk2TjcMO/YHBk5HCe5E9JUcdf0Gq/k9uIqys3qFBEr9+Oj+zJLP+bqHPx2pM/lbnGSqedKVwZJEoLz2YCR++A1sWkNUUZZcsVoDUM56B/Rnoz2PsrEPaC25Rt9z0REBdI/x0zcvHXex/Gcj0fsHYyNSQy6zT6BY6o4MVEy3zjIKR86xBFFJdb0ldfV4KeTB3pPLgZEln/atyNjmC0e2VneAFgI4rLFrQ2jiPotAV8FKQzwfFokDGxrN0GbP6O3hchYl5JSXk40NFW3xXOeobWkUwu0DzSlYV2CQpfHpkqyAQ== amadou140589@gmail.com"
 
 # Clé publique de la CI, restreinte à la commande `steamy-deploy` : à définir
 # PAR SERVEUR dans inventory.yml (la clé privée va dans le secret DEPLOY_SSH_KEY
@@ -20,4 +20,4 @@ deploy_ci_pubkey: ""
 # --- Application -------------------------------------------------------------------
 ghcr_owner: tigamadou
 steamy_namespace: steamy
-letsencrypt_email: ""     # TODO : adresse de contact Let's Encrypt
+letsencrypt_email: contact@steamyacademy.com
