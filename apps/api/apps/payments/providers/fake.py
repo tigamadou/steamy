@@ -8,6 +8,8 @@ Faux prestataire de paiement : le seul autorisé hors staging et production (S9,
 | `…01` | succès |
 | `…02` | échec (solde insuffisant) |
 | `…03` | reste en attente (aucune notification : webhook perdu, réconciliation) |
+| `…04` | transaction créée puis refus définitif (`PaymentProviderError` portant l'identifiant, aucune notification) |
+| `…05` | transaction créée puis échec temporaire (`PaymentTemporaryError` portant l'identifiant, aucune notification) |
 | autre | succès |
 
 L'issue est notifiée comme le ferait un vrai prestataire : un webhook **signé** est posté de façon asynchrone
@@ -36,6 +38,8 @@ from .base import (
     PaymentProvider,
     PaymentProviderError,
     PaymentStatus,
+    PaymentTemporaryError,
+    ProviderTransaction,
     RefundOutcome,
 )
 
@@ -51,6 +55,16 @@ OUTCOMES = {
     "01": PaymentStatus.SUCCEEDED,
     "02": PaymentStatus.FAILED,
     "03": PaymentStatus.PENDING,
+}
+#: Numéros qui créent la transaction puis échouent à l'initiation (le paiement reste à retrouver chez le prestataire)
+REFUSED_AFTER_CREATION = "04"
+TEMPORARY_AFTER_CREATION = "05"
+#: Statut brut du prestataire pour chaque statut normalisé
+RAW_STATUSES = {
+    PaymentStatus.PENDING: "pending",
+    PaymentStatus.INITIATED: "pending",
+    PaymentStatus.SUCCEEDED: "approved",
+    PaymentStatus.FAILED: "declined",
 }
 FAILURE_REASON = "Solde insuffisant (faux prestataire)."
 
@@ -69,6 +83,8 @@ def _key(provider_tx_id: str) -> str:
 
 class FakePaymentProvider(PaymentProvider):
     name = "fake"
+    #: Couples `(pays, réseau)` que `supports` refuse ; les tests le posent avec `monkeypatch.setattr`
+    UNSUPPORTED: frozenset[tuple[str, str]] = frozenset()
 
     def __init__(self):
         if settings.DEPLOYED:
@@ -87,9 +103,40 @@ class FakePaymentProvider(PaymentProvider):
     def _save(self, provider_tx_id: str, record: dict) -> None:
         cache.set(_key(provider_tx_id), record, TRANSACTION_TTL)
 
+    def create_transaction(
+        self,
+        *,
+        provider_tx_id: str,
+        reference: str,
+        merchant_reference: str,
+        amount: int,
+        currency: str,
+        status: PaymentStatus = PaymentStatus.PENDING,
+        provider_status: str | None = None,
+        fees: int | None = None,
+    ) -> None:
+        """Écrit (ou remplace) une transaction du cache sans rien notifier : prise des tests pour fabriquer
+        `expired`, `refunded`, un montant ou des frais différents, ou une transaction connue d'un paiement."""
+        self._save(
+            provider_tx_id,
+            {
+                "reference": reference,
+                "merchant_reference": merchant_reference,
+                "amount": amount,
+                "currency": currency,
+                "status": str(status),
+                "provider_status": provider_status or RAW_STATUSES[status],
+                "fees": fees,
+            },
+        )
+
     def settle(self, provider_tx_id: str, status: PaymentStatus) -> dict:
         """Fixe l'issue d'une transaction (notification ou `simulate_payment`) et renvoie la notification à poster."""
-        record = {**self.get(provider_tx_id), "status": str(status)}
+        record = {
+            **self.get(provider_tx_id),
+            "status": str(status),
+            "provider_status": RAW_STATUSES[status],
+        }
         self._save(provider_tx_id, record)
         payload = {
             "reference": record["reference"],
@@ -106,15 +153,22 @@ class FakePaymentProvider(PaymentProvider):
 
     def initiate(self, charge: Charge) -> InitiateResult:
         provider_tx_id = f"fake-{uuid.uuid4().hex}"
-        self._save(
-            provider_tx_id,
-            {
-                "reference": charge.reference,
-                "amount": charge.amount,
-                "currency": charge.currency,
-                "status": str(PaymentStatus.PENDING),
-            },
+        self.create_transaction(
+            provider_tx_id=provider_tx_id,
+            reference=charge.reference,
+            merchant_reference=charge.merchant_reference,
+            amount=charge.amount,
+            currency=charge.currency,
         )
+        suffix = charge.msisdn[-2:]
+        if suffix == REFUSED_AFTER_CREATION:
+            raise PaymentProviderError(
+                "refusé après création (faux prestataire)", provider_tx_id=provider_tx_id
+            )
+        if suffix == TEMPORARY_AFTER_CREATION:
+            raise PaymentTemporaryError(
+                "échec passager après création (faux prestataire)", provider_tx_id=provider_tx_id
+            )
         outcome = outcome_for(charge.msisdn)
         log.info(
             "Faux paiement %s (%s, %s) : issue %s",
@@ -150,8 +204,25 @@ class FakePaymentProvider(PaymentProvider):
         except (KeyError, TypeError) as error:
             raise ValueError(f"notification incomplète : {error}") from None
 
-    def fetch_status(self, provider_tx_id: str) -> PaymentStatus:
-        return PaymentStatus(self.get(provider_tx_id)["status"])
+    def transaction_id_of(self, payload: dict) -> str | None:
+        tx_id = payload.get("transactionId")
+        return tx_id if isinstance(tx_id, str) and tx_id else None
+
+    def fetch_transaction(self, provider_tx_id: str) -> ProviderTransaction:
+        record = self.get(provider_tx_id)
+        status = PaymentStatus(record["status"])
+        return ProviderTransaction(
+            provider_tx_id=provider_tx_id,
+            status=status,
+            provider_status=record.get("provider_status") or RAW_STATUSES[status],
+            amount=record["amount"],
+            currency=record["currency"],
+            merchant_reference=record.get("merchant_reference", ""),
+            fees=record.get("fees"),
+        )
+
+    def supports(self, country: str, network: str) -> bool:
+        return (country, network) not in self.UNSUPPORTED
 
     def refund(self, provider_tx_id: str, amount: int) -> RefundOutcome:
         self.get(provider_tx_id)

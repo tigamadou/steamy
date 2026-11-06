@@ -1,4 +1,5 @@
 import { SCENARIOS_ACHAT_KITS } from "./ecrans/achat-kits.ts";
+import { SCENARIOS_BACKOFFICE_PAIEMENTS } from "./ecrans/backoffice-paiements.ts";
 import { SCENARIOS_CHECKOUT_INVITE } from "./ecrans/checkout-invite.ts";
 import { SCENARIOS_COMMANDES_PARENT } from "./ecrans/commandes-parent.ts";
 import { SCENARIOS_DEMANDE_PAIEMENT } from "./ecrans/demande-paiement.ts";
@@ -14,6 +15,7 @@ export const SCENARIOS = {
   ...SCENARIOS_CHECKOUT_INVITE,
   ...SCENARIOS_COMMANDES_PARENT,
   ...SCENARIOS_ACHAT_KITS,
+  ...SCENARIOS_BACKOFFICE_PAIEMENTS,
 };
 
 export type ScenarioName = keyof typeof SCENARIOS;

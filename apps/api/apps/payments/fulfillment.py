@@ -37,16 +37,25 @@ def settle(order: Order, payment: Payment) -> None:
         fulfill(order, payment)
         audit("payment.late_honored", target=order, data={"payment": payment.pk})
     elif order.status == Order.Status.CANCELLED:
-        refund(payment, "Commande expirée et kit ou place plus disponible (C17).")
-        order.status = Order.Status.REFUNDED
-        order.save(update_fields=["status", "updated_at"])
-        tell_payer(
-            order,
-            "Paiement remboursé",
-            f"La commande {order.reference} avait expiré et n'est plus disponible : "
-            "votre paiement est remboursé.",
-            tone="warning",
-        )
+        refunded = refund(payment, "Commande expirée et kit ou place plus disponible (C17).")
+        if refunded.processed:  # remboursé par l'API du prestataire : rien n'est plus dû
+            order.status = Order.Status.REFUNDED
+            order.save(update_fields=["status", "updated_at"])
+            tell_payer(
+                order,
+                "Paiement remboursé",
+                f"La commande {order.reference} avait expiré et n'est plus disponible : "
+                "votre paiement est remboursé.",
+                tone="warning",
+            )
+        else:  # à traiter par la Finance : la commande reste annulée, le payeur est prévenu sans promesse de date
+            tell_payer(
+                order,
+                "Remboursement en cours",
+                f"Commande {order.reference} expirée : votre paiement de {payment.amount} FCFA "
+                "sera remboursé.",
+                tone="warning",
+            )
     else:  # déjà payée (paiement en double) ou remboursée
         refund(payment, "Paiement reçu sur une commande déjà réglée.")
 
@@ -111,25 +120,25 @@ def reacquire_stock(order: Order) -> bool:
     return True
 
 
-def refund(payment: Payment, reason: str) -> Refund:
-    """Rembourse un paiement réussi : par l'API du prestataire, sinon à traiter par la Finance (ADR 0003 §6)."""
+def refund(payment: Payment, reason: str, amount: int | None = None) -> Refund:
+    """Rembourse un paiement réussi (par défaut en entier) : par l'API du prestataire, sinon à traiter par la
+    Finance (ADR 0003 §6). `amount` sert à l'écart de montant : rembourser ce qui a réellement été reçu."""
+    amount = payment.amount if amount is None else amount
     try:
-        outcome = get_provider(payment.provider).refund(
-            payment.provider_transaction_id, payment.amount
-        )
+        outcome = get_provider(payment.provider).refund(payment.provider_transaction_id, amount)
     except PaymentProviderError:
         log.exception("Remboursement de %s impossible par l'API", payment.pk)
         outcome = RefundOutcome.PENDING_MANUAL
     refund = Refund.objects.create(
         payment=payment,
-        amount=payment.amount,
+        amount=amount,
         reason=reason,
         processed=outcome == RefundOutcome.DONE,
     )
     audit(
         "payment.refunded",
         target=payment,
-        data={"order": payment.order.reference, "amount": payment.amount, "outcome": outcome},
+        data={"order": payment.order.reference, "amount": amount, "outcome": outcome},
     )
     return refund
 

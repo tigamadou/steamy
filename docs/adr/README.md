@@ -13,3 +13,4 @@ qu'elles précèdent sont listées dans [PLAN-API](../plans/PLAN-API.md#adr-à-�
 | [0005](0005-pdf-et-stockage-prive.md) | PDF (certificats, factures) et stockage privé | Accepté (moteur, accès) · P1 et P2 tranchés · autres points proposés |
 | [0006](0006-facture-normalisee-emecef.md) | Facture normalisée e-MECeF (DGI du Bénin) | Proposé (cartographie à valider) |
 | [0007](0007-methode-chantiers-paralleles.md) | Méthode des chantiers parallèles (agents, Docker, GitHub) | Accepté |
+| [0008](0008-paiement-fedapay-fiable.md) | Paiement FedaPay fiable et suivi des paiements dans le backoffice | Accepté |

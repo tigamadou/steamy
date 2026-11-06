@@ -28,6 +28,14 @@ describe("hasGroup", () => {
     expect(hasGroup({ staffGroups: [] }, PAGE_GROUPS.overview)).toBe(true);
   });
 
+  it("réserve les paiements et remboursements à Finance et Super-admin", () => {
+    for (const groups of [PAGE_GROUPS.payments, PAGE_GROUPS.refunds]) {
+      expect(hasGroup({ staffGroups: [STAFF_GROUPS.finance] }, groups)).toBe(true);
+      expect(hasGroup({ staffGroups: [STAFF_GROUPS.superAdmin] }, groups)).toBe(true);
+      expect(hasGroup({ staffGroups: [STAFF_GROUPS.support, STAFF_GROUPS.content] }, groups)).toBe(false);
+    }
+  });
+
   it("réserve l'Impact Tracker à Finance et Super-admin", () => {
     expect(hasGroup({ staffGroups: [STAFF_GROUPS.finance] }, PAGE_GROUPS.impact)).toBe(true);
     expect(hasGroup({ staffGroups: [STAFF_GROUPS.superAdmin] }, PAGE_GROUPS.impact)).toBe(true);
@@ -61,13 +69,17 @@ describe("backofficeNav", () => {
 
   it("montre tout au Super-admin, Pilotage en Next.js et le reste dans l'admin Django", () => {
     const nav = backofficeNav({ staffGroups: [STAFF_GROUPS.superAdmin] }, API);
-    expect(nav.map((g) => g.label)).toEqual(["Pilotage", "Plateforme", "Système"]);
+    expect(nav.map((g) => g.label)).toEqual(["Pilotage", "Finance", "Plateforme", "Système"]);
     expect(nav[0].items).toEqual([
       { id: "overview", label: "Vue d'ensemble", icon: "home", href: "/backoffice" },
       { id: "impact", label: "Impact Tracker", icon: "sparkle", href: "/backoffice/impact" },
     ]);
-    expect(nav[1].items.every((i) => i.external && i.href.startsWith(`${API}/admin/`))).toBe(true);
-    expect(nav[2].items.map((i) => i.href)).toEqual([
+    expect(nav[1].items).toEqual([
+      { id: "payments", label: "Paiements", icon: "phone", href: "/backoffice/paiements" },
+      { id: "refunds", label: "Remboursements", icon: "arrow-left", href: "/backoffice/remboursements" },
+    ]);
+    expect(nav[2].items.every((i) => i.external && i.href.startsWith(`${API}/admin/`))).toBe(true);
+    expect(nav[3].items.map((i) => i.href)).toEqual([
       `${API}/admin/auth/group/`,
       `${API}/admin/core/platformsettings/`,
     ]);
@@ -84,7 +96,7 @@ describe("backofficeNav", () => {
     ]);
     expect(labels([STAFF_GROUPS.finance])).toEqual([
       ["Pilotage", ["Vue d'ensemble", "Impact Tracker"]],
-      ["Plateforme", ["Paiements"]],
+      ["Finance", ["Paiements", "Remboursements"]],
     ]);
     expect(labels([])).toEqual([["Pilotage", ["Vue d'ensemble"]]]);
   });
@@ -95,5 +107,21 @@ describe("liens de l'admin fournis par le serveur", () => {
     expect(adminPathUrl("http://api:8000/", "/admin/accounts/consentrequest/?status__exact=pending")).toBe(
       "http://api:8000/admin/accounts/consentrequest/?status__exact=pending",
     );
+  });
+});
+
+describe("menu Finance", () => {
+  const all = (groups: string[]) => backofficeNav({ staffGroups: groups }, API).flatMap((g) => g.items);
+
+  it("n'a plus de lien vers les paiements de l'admin Django", () => {
+    for (const groups of [[STAFF_GROUPS.finance], [STAFF_GROUPS.superAdmin]]) {
+      expect(all(groups).some((item) => item.href.includes("/admin/payments/"))).toBe(false);
+    }
+  });
+
+  it("est absent pour Support et Contenu", () => {
+    for (const group of [STAFF_GROUPS.support, STAFF_GROUPS.content]) {
+      expect(backofficeNav({ staffGroups: [group] }, API).map((g) => g.label)).not.toContain("Finance");
+    }
   });
 });

@@ -12,9 +12,9 @@ from apps.learning.tests.factories import EnrollmentFactory
 from apps.notifications.models import Notification
 from apps.payments.models import Order, Refund
 from apps.payments.orders import release_expired_orders
-from apps.payments.providers import PaymentEvent, PaymentStatus
-from apps.payments.tests.factories import PaymentFactory, link_child
-from apps.payments.utils import handle_payment_event
+from apps.payments.providers import PaymentStatus
+from apps.payments.tests.factories import PaymentFactory, fake_transaction, link_child
+from apps.payments.tests.test_flux_support import deliver
 
 from .factories import SteamyEventFactory
 
@@ -52,16 +52,10 @@ def ticket_for(learner):
 
 def pay(order):
     payment = PaymentFactory(order=order)
-    handle_payment_event(
-        "fake",
-        PaymentEvent(
-            order.reference,
-            payment.provider_transaction_id,
-            order.total,
-            "XOF",
-            PaymentStatus.SUCCEEDED,
-        ),
-    )
+    fake_transaction(
+        payment, PaymentStatus.SUCCEEDED
+    )  # connue du prestataire : un remboursement y aboutit
+    deliver(payment)
     order.refresh_from_db()
 
 

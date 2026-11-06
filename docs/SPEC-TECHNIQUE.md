@@ -245,9 +245,9 @@ Les migrations sont réinitialisées (S1). Tous les montants sont en **FCFA (XOF
 | `RestockAlert` | `kit`, `phone?` \| `user?`, `notifiedAt?` | Un seul SMS (D38) pour un invité ou un parent ; notification in-app pour un apprenant, sans téléphone (D30) | à créer |
 | `Order` | `reference`, `kind` ∈ `course`\|`kit`\|`event`, `payer?` (parent) \| `guest` (prénom, nom, téléphone), `beneficiary?` (apprenant), `status` ∈ `pending`\|`paid`\|`cancelled`\|`refunded`, `shippingStatus?` ∈ `preparing`\|`shipped`\|`delivered`, `subtotal`, `shippingFee`, `total`, `deliveryAddress` (instantané), `paymentRequest?`, `guestAccessTokenHash?`, `paidAt?`, `expiresAt` | Payeur ≠ bénéficiaire ; **prix toujours calculé par le serveur** (D37). Invité : kits uniquement (D12), accès par jeton opaque (C10). Paiement reçu après `expiresAt` : honoré si le stock ou la place est encore disponible, sinon remboursé automatiquement (C17) | à refondre (`paid` booléen, prix client) |
 | `OrderItem` | `order`, `course?` \| `kit?` \| `eventApplication?`, `title`, `unitPrice`, `quantity`, `total` | Instantané du prix serveur | à refondre |
-| `Payment` | `order`, `provider`, `providerTransactionId`, `country`, `network`, `msisdn`, `amount`, `status` ∈ `initiated`\|`pending`\|`succeeded`\|`failed`, `failureCode?`, `failureReason?`, `payload`, `confirmedAt?` | Initié par le serveur ; seul le **webhook** vérifié fait foi (S9) | à refondre (`success` booléen, pas d'initiation) |
+| `Payment` | `order`, `provider`, `providerTransactionId`, `country`, `network`, `msisdn`, `amount`, `status` ∈ `initiated`\|`pending`\|`succeeded`\|`failed`, `merchantReference` (unique), `providerStatus?`, `providerFees?`, `checkedAt?`, `failureCode?` (dont `EXPIRED`), `failureReason?`, `payload`, `confirmedAt?` | Initié par le serveur ; une référence marchande unique par tentative (`<référence de la commande>-<n>`) est envoyée au prestataire ; le paiement n'est tenu pour réussi qu'après **relecture** de la transaction chez le prestataire (ADR 0008) (S9) | à refondre (`success` booléen, pas d'initiation) |
 | `Invoice` | `order`, `number`, `pdf`, `issuedAt` | Générée en asynchrone au paiement ; conservée après suppression de compte (D40) | existe (à brancher) |
-| `Refund` | `payment`, `amount`, `reason`, `processed` | Traité depuis l'admin Django (Finance) | existe |
+| `Refund` | `payment`, `amount`, `reason`, `processed`, `reference?`, `processedAt?`, `processedBy?` | À traiter par la Finance dans le backoffice ; la référence du remboursement est obligatoire pour le marquer fait ; `amount` peut différer de `Payment.amount` (écart de montant reçu) ; voir ADR 0008 | existe |
 | `KitCode` | `code`, `kit`, `orderItem`, `redeemedBy?`, `redeemedCourse?`, `redeemedAt?` | Format `STEAMY-XXXX-XXXX`, Crockford base32, insensible à la casse, consommation atomique, tentatives limitées (D35). Généré à la commande de kit, imprimé sur la notice (D36) | à créer |
 | `PaymentRequest` | `requestedBy` (apprenant), `parent`, `kind`, `course?` \| `items[]` \| `eventApplication?`, `amount`, `status` ∈ `pending`\|`paid`\|`declined`\|`expired`\|`cancelled`, `order?`, `lastSentAt` | Demande de paiement de l'enfant au parent ; lien SMS vers `WPD15` (D52). Expire à 7 jours, renvoi limité, annulable par l'enfant (C4) | à créer |
 
@@ -652,16 +652,22 @@ Catalogue des codes métier (extensible, chaque code a son message français) :
 
 ### 7.8 `backoffice` (écrans Next.js uniquement)
 
-Les écrans WAD06-WAD15 sont dans l'admin Django et n'ont **pas** d'API.
+Les écrans WAD06-WAD15 sont dans l'admin Django et n'ont **pas** d'API, sauf WAD11 (paiements et remboursements), aussi servi par l'API ci-dessous (Finance, ADR 0008 § 9).
 
 | Endpoint | Écrans | État |
 | --- | --- | --- |
-| `GET backoffice/overview/` (« À traiter » : `{ kind, count, adminPath }` filtré par groupe) | WAD01 | à créer (remplace `analytics/dashboard/summary/`) |
+| `GET backoffice/overview/` (« À traiter » : `{ kind, label, count, path?, adminPath }` filtré par groupe ; `path` = chemin interne du backoffice Next.js, `adminPath` = liste de l'admin Django) | WAD01 | à créer (remplace `analytics/dashboard/summary/`) |
 | `GET backoffice/kpis/?period=` · `GET backoffice/kpis/{code}/` | WAD02, WAD03 | à créer |
 | `GET backoffice/impact-reports/{period}/` | WAD04 | à créer |
 | `PATCH backoffice/impact-reports/{period}/values/` | WAD05 | à créer |
 | `POST backoffice/impact-reports/{period}/submit/` | WAD04 | à créer |
 | `POST backoffice/impact-reports/{period}/exports/` `{ format }` · `GET backoffice/exports/{id}/` | WAD04 | à créer (remplace `analytics/export/events.csv`) |
+| `GET backoffice/payments/?status=&network=&country=&kind=&from=&to=&q=` (liste paginée + `totals` du filtre entier) | WAD11 | à créer |
+| `GET backoffice/payments/{id}/` (commande, tentatives, remboursements, journal d'audit) | WAD11 | à créer |
+| `POST backoffice/payments/{id}/recheck/` (relecture chez le prestataire ; 409 sans transaction, 502 prestataire injoignable) | WAD11 | à créer |
+| `POST backoffice/payments/{id}/refunds/` `{ amount, reason }` | WAD11 | à créer |
+| `GET backoffice/refunds/?processed=` (à traiter par défaut) | WAD11 | à créer |
+| `POST backoffice/refunds/{id}/process/` `{ reference }` → `{ refund, orderRefunded }` (409 si déjà fait) | WAD11 | à créer |
 
 ### 7.9 Endpoints existants à supprimer ou fermer
 

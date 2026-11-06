@@ -958,6 +958,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/backoffice/payments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WAD11 : paiements filtrables, avec les totaux du filtre entier (pas de la page). */
+        get: operations["backoffice_payments_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/payments/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WAD11 : fiche d'un paiement, avec son contexte (commande, tentatives, remboursements, journal). */
+        get: operations["backoffice_payments_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/payments/{id}/recheck/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description « Revérifier » : relit la transaction chez le prestataire et applique le résultat. */
+        post: operations["backoffice_payments_recheck"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/payments/{id}/refunds/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Demande de remboursement sur un paiement réussi, dans la limite du reste remboursable. */
+        post: operations["backoffice_payments_refunds_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/refunds/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WAD11 : remboursements à traiter (défaut, du plus ancien au plus récent) ou déjà traités. */
+        get: operations["backoffice_refunds_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/backoffice/refunds/{id}/process/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Marque un remboursement « fait » une fois l'argent rendu, avec sa référence chez l'opérateur. */
+        post: operations["backoffice_refunds_process"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/catalog/categories/": {
         parameters: {
             query?: never;
@@ -2127,8 +2229,11 @@ export interface paths {
         put?: never;
         /**
          * Webhook des prestataires de paiement (appelé par le prestataire, pas par le front)
-         * @description Point d'entrée des notifications des prestataires (S9, ADR 0003). La signature est vérifiée **avant** toute
-         *     lecture du contenu ; le prestataire normalise ensuite la notification (`parse_event`).
+         * @description Point d'entrée des notifications des prestataires (S9, ADR 0003 et 0008). La signature est vérifiée **avant**
+         *     toute lecture du contenu. Le corps ne sert qu'à connaître l'identifiant de la transaction, relue chez le
+         *     prestataire : rien de ce qu'il affirme n'est cru. Seuls un prestataire inconnu ou non configuré et une signature
+         *     invalide donnent 400 ; tout le reste répond 200 (le prestataire ne doit pas réessayer en boucle) et la
+         *     réconciliation rattrape ce qui n'a pas pu être traité.
          */
         post: operations["payments_webhook_create"];
         delete?: never;
@@ -2648,6 +2753,18 @@ export interface components {
          * @enum {string}
          */
         AttemptStatusEnum: "ok" | "warn" | "ko";
+        AuditEntry: {
+            id: number;
+            /** Format: date-time */
+            createdAt: string;
+            action: string;
+            readonly actor: string | null;
+            /** @description payment ou order */
+            readonly target: string;
+            data: {
+                [key: string]: unknown;
+            };
+        };
         Avatar: {
             readonly id: number;
             code: string;
@@ -2659,6 +2776,29 @@ export interface components {
              * @description Jeton du design system, ex. « primary-500 »
              */
             color: string;
+        };
+        /** @description Remboursement vu depuis son paiement. */
+        BackofficeRefund: {
+            id: number;
+            /** Format: date-time */
+            createdAt: string;
+            amount: number;
+            reason: string;
+            processed: boolean;
+            /** Format: date-time */
+            processedAt: string | null;
+            readonly processedBy: string | null;
+            /** @description Vide tant que le remboursement n'est pas fait */
+            reference: string;
+            paymentId: number;
+            orderReference: string;
+            merchantReference: string;
+            providerTransactionId: string | null;
+            network: string;
+            readonly maskedMsisdn: string;
+            paymentAmount: number;
+            readonly payer: string;
+            readonly beneficiary: string | null;
         };
         Badge: {
             id: number;
@@ -3372,6 +3512,7 @@ export interface components {
          *     * `PAYMENT_IN_PROGRESS` - PAYMENT_IN_PROGRESS
          *     * `PAYMENT_REQUEST_CLOSED` - PAYMENT_REQUEST_CLOSED
          *     * `PAYMENT_REQUIRED` - PAYMENT_REQUIRED
+         *     * `PAYMENT_UNAVAILABLE` - PAYMENT_UNAVAILABLE
          *     * `PDF_NOT_READY` - PDF_NOT_READY
          *     * `PERMISSION_DENIED` - PERMISSION_DENIED
          *     * `PHONE_INVALID` - PHONE_INVALID
@@ -3390,7 +3531,7 @@ export interface components {
          *     * `VALIDATION_ERROR` - VALIDATION_ERROR
          * @enum {string}
          */
-        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "APPLICATION_ALREADY_RESOLVED" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELETION_ALREADY_RESOLVED" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "EXPORT_NOT_READY" | "IMPORT_INVALID_FILE" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_DAILY_LIMIT" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_IN_PROGRESS" | "PAYMENT_REQUEST_CLOSED" | "PAYMENT_REQUIRED" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SCHOOL_OFFER_EXPIRED" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
+        ErrorCodeEnum: "ACCOUNT_DEACTIVATED" | "ACCOUNT_PENDING_CONSENT" | "ACCOUNT_SUSPENDED" | "AGE_OUT_OF_RANGE" | "ALREADY_APPLIED" | "ALREADY_IN_CLASSROOM" | "APPLICATION_ALREADY_RESOLVED" | "BIRTHDATE_AGE_MISMATCH" | "CHILDREN_STILL_LINKED" | "CLASSROOM_NAME_TAKEN" | "CLASSROOM_QUOTA_EXCEEDED" | "CONSENT_ALREADY_RESOLVED" | "CONSENT_COOLDOWN" | "CONSENT_PHONE_MISMATCH" | "CONSENT_REQUEST_EXPIRED" | "CONTENT_LOCKED" | "COURSE_NOT_IN_OFFER" | "DELETION_ALREADY_RESOLVED" | "DELIVERY_ZONE_UNAVAILABLE" | "DUPLICATE_ROW" | "EMAIL_TAKEN" | "EVENT_ALREADY_PROPOSED" | "EVENT_CLOSED" | "EVENT_FULL" | "EXPORT_NOT_READY" | "IMPORT_INVALID_FILE" | "IMPORT_TOO_LARGE" | "INVALID_CREDENTIALS" | "INVITATION_DAILY_LIMIT" | "INVITATION_INVALID" | "KIT_CODE_ALREADY_USED" | "KIT_CODE_INVALID" | "KIT_CODE_NOT_COMPATIBLE" | "KIT_CODE_REQUIRED" | "LEARNER_QUOTA_EXCEEDED" | "MALFORMED_ROW" | "METHOD_NOT_ALLOWED" | "NETWORK_UNAVAILABLE" | "NOT_ACCEPTABLE" | "NOT_AUTHENTICATED" | "NOT_ENROLLED" | "NOT_FOUND" | "ORDER_ALREADY_PAID" | "ORDER_EXPIRED" | "OTP_DAILY_LIMIT" | "OTP_EXPIRED" | "OTP_INVALID" | "OTP_REQUIRED" | "OTP_RESEND_TOO_EARLY" | "OTP_TOO_MANY_ATTEMPTS" | "OUT_OF_STOCK" | "PARENT_APPROVAL_REQUIRED" | "PARSE_ERROR" | "PASSWORD_RESET_BY_PARENT" | "PASSWORD_TOO_WEAK" | "PAYMENT_FAILED" | "PAYMENT_IN_PROGRESS" | "PAYMENT_REQUEST_CLOSED" | "PAYMENT_REQUIRED" | "PAYMENT_UNAVAILABLE" | "PDF_NOT_READY" | "PERMISSION_DENIED" | "PHONE_INVALID" | "PHONE_TAKEN" | "QUIZ_COOLDOWN" | "REPORT_LOCKED" | "RESET_TOKEN_INVALID" | "RESUME_CODE_INVALID" | "SCHOOL_OFFER_EXPIRED" | "SERVER_ERROR" | "SIGNUP_EXPIRED" | "THROTTLED" | "UNSUPPORTED_MEDIA_TYPE" | "USERNAME_INVALID" | "USERNAME_TAKEN" | "VALIDATION_ERROR";
         EventSummary: {
             readonly slug: string;
             /** Titre */
@@ -4844,6 +4985,17 @@ export interface components {
              */
             readonly confirmedAt: string | null;
         };
+        PaymentAttempt: {
+            id: number;
+            /** Format: date-time */
+            createdAt: string;
+            merchantReference: string;
+            providerTransactionId: string | null;
+            status: string;
+            providerStatus: string;
+            failureCode: string;
+            amount: number;
+        };
         /** @description Mobile Money uniquement : pays, réseau (référentiel `payment-networks`) et numéro du payeur (D76). */
         PaymentCreateRequest: {
             /** @description Code ISO (BJ) */
@@ -4853,15 +5005,53 @@ export interface components {
             /** @description Numéro Mobile Money qui validera le paiement */
             msisdn: string;
         };
+        /** @description Lit les attributs posés par `backoffice_api.load_detail` (`attempts`, `refund_list`, `audit_entries`). */
+        PaymentDetail: {
+            id: number;
+            /** Format: date-time */
+            createdAt: string;
+            orderReference: string;
+            merchantReference: string;
+            providerTransactionId: string | null;
+            readonly payer: string;
+            readonly beneficiary: string | null;
+            /** @description course, kit ou event */
+            kind: string;
+            country: string;
+            network: string;
+            readonly maskedMsisdn: string;
+            amount: number;
+            currency: string;
+            /** @description initiated, pending, succeeded ou failed */
+            status: string;
+            /** @description Vide si inconnu */
+            providerStatus: string;
+            /** @description Vide si aucun */
+            failureCode: string;
+            failureReason: string;
+            provider: string;
+            providerFees: number | null;
+            /** Format: date-time */
+            checkedAt: string | null;
+            /** Format: date-time */
+            confirmedAt: string | null;
+            /** @description Reste remboursable ; 0 si le paiement n'est pas réussi */
+            readonly refundable: number;
+            order: components["schemas"]["PaymentOrder"];
+            attempts: components["schemas"]["PaymentAttempt"][];
+            refunds: components["schemas"]["RefundSummary"][];
+            auditLog: components["schemas"]["AuditEntry"][];
+        };
         /**
          * @description * `PROVIDER_UNAVAILABLE` - Prestataire indisponible
          *     * `PROVIDER_REFUSED` - Initiation refusée par le prestataire
          *     * `INITIATION_LOST` - Initiation jamais aboutie
          *     * `AMOUNT_MISMATCH` - Montant ou devise incohérents
          *     * `DECLINED` - Paiement refusé
+         *     * `EXPIRED` - Paiement expiré
          * @enum {string}
          */
-        PaymentFailureCodeEnum: "PROVIDER_UNAVAILABLE" | "PROVIDER_REFUSED" | "INITIATION_LOST" | "AMOUNT_MISMATCH" | "DECLINED";
+        PaymentFailureCodeEnum: "PROVIDER_UNAVAILABLE" | "PROVIDER_REFUSED" | "INITIATION_LOST" | "AMOUNT_MISMATCH" | "DECLINED" | "EXPIRED";
         PaymentNetwork: {
             readonly id: number;
             code: string;
@@ -4869,6 +5059,24 @@ export interface components {
             label: string;
             /** @description Code ISO du pays */
             country: string;
+        };
+        PaymentOrder: {
+            id: number;
+            reference: string;
+            kind: string;
+            status: string;
+            total: number;
+            currency: string;
+            readonly payer: string;
+            readonly beneficiary: string | null;
+        };
+        /** @description Page de paiements ; `totals` porte sur tout le filtre, pas sur la page. */
+        PaymentPage: {
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["PaymentRow"][];
+            totals: components["schemas"]["PaymentTotals"];
         };
         /** @description Demande vue par l'enfant (WA02, WK08) et par son parent (WPD01, WPD15). */
         PaymentRequest: {
@@ -4944,6 +5152,30 @@ export interface components {
          * @enum {string}
          */
         PaymentRequestStatusEnum: "pending" | "paid" | "declined" | "expired" | "cancelled";
+        PaymentRow: {
+            id: number;
+            /** Format: date-time */
+            createdAt: string;
+            orderReference: string;
+            merchantReference: string;
+            providerTransactionId: string | null;
+            readonly payer: string;
+            readonly beneficiary: string | null;
+            /** @description course, kit ou event */
+            kind: string;
+            country: string;
+            network: string;
+            readonly maskedMsisdn: string;
+            amount: number;
+            currency: string;
+            /** @description initiated, pending, succeeded ou failed */
+            status: string;
+            /** @description Vide si inconnu */
+            providerStatus: string;
+            /** @description Vide si aucun */
+            failureCode: string;
+            failureReason: string;
+        };
         /**
          * @description * `initiated` - Initié
          *     * `pending` - En attente de validation
@@ -4952,6 +5184,19 @@ export interface components {
          * @enum {string}
          */
         PaymentStatusEnum: "initiated" | "pending" | "succeeded" | "failed";
+        PaymentTotals: {
+            /** @description Somme des paiements réussis, brut hors remboursements */
+            volume: number;
+            count: number;
+            succeeded: number;
+            /** @description Tous codes d'échec confondus */
+            failed: number;
+            /**
+             * Format: double
+             * @description Échoués / (réussis + échoués) en %, une décimale ; nul sans paiement réglé
+             */
+            failureRate: number | null;
+        };
         /**
          * @description * `pending` - En préparation
          *     * `ready` - Prêt
@@ -5023,6 +5268,10 @@ export interface components {
             fields: {
                 [key: string]: string;
             };
+        };
+        ProcessRefundRequest: {
+            /** @description Référence du remboursement chez l'opérateur */
+            reference: string;
         };
         /** @enum {string} */
         ProfileStepEnum: "learner-info" | "learner-school" | "learner-goals" | "learner-avatar" | "parent-location" | "parent-about" | "parent-children";
@@ -5225,6 +5474,35 @@ export interface components {
             id: number;
             order: number;
             title: string;
+        };
+        RefundPage: {
+            count: number;
+            next: string | null;
+            previous: string | null;
+            results: components["schemas"]["BackofficeRefund"][];
+        };
+        RefundProcessResult: {
+            refund: components["schemas"]["BackofficeRefund"];
+            /** @description La commande est passée à « remboursée » avec ce marquage */
+            orderRefunded: boolean;
+        };
+        RefundRequestRequest: {
+            amount: number;
+            reason: string;
+        };
+        /** @description Remboursement vu depuis son paiement. */
+        RefundSummary: {
+            id: number;
+            /** Format: date-time */
+            createdAt: string;
+            amount: number;
+            reason: string;
+            processed: boolean;
+            /** Format: date-time */
+            processedAt: string | null;
+            readonly processedBy: string | null;
+            /** @description Vide tant que le remboursement n'est pas fait */
+            reference: string;
         };
         RefusalReason: {
             readonly id: number;
@@ -5638,10 +5916,12 @@ export interface components {
             readonly usedFor: components["schemas"]["EventSummary"] | null;
         };
         Todo: {
-            /** @description consents_pending (d'autres types suivront avec API-L3b) */
+            /** @description consents_pending, payments_failed ou refunds_pending (d'autres types suivront avec API-L3b) */
             kind: string;
             label: string;
             count: number;
+            /** @description Chemin de l'écran du backoffice Next.js (commence par /backoffice) ; absent s'il n'existe pas encore */
+            path?: string;
             /** @description Chemin de la liste filtrée dans l'admin Django */
             adminPath: string;
         };
@@ -9662,6 +9942,417 @@ export interface operations {
                 };
             };
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_payments_list: {
+        parameters: {
+            query?: {
+                country?: string;
+                /** @description Créés à partir de cette date (AAAA-MM-JJ, incluse) */
+                from?: string;
+                /**
+                 * @description * `course` - Parcours
+                 *     * `kit` - Kit
+                 *     * `event` - Événement
+                 */
+                kind?: "course" | "kit" | "event";
+                network?: string;
+                /** @description Numéro de page (1 par défaut) */
+                page?: number;
+                /** @description Taille de page (25 par défaut, 100 au plus) */
+                pageSize?: number;
+                /** @description Référence de commande, référence marchande ou identifiant de transaction (sous-chaîne) */
+                q?: string;
+                /**
+                 * @description * `initiated` - Initié
+                 *     * `pending` - En attente de validation
+                 *     * `succeeded` - Réussi
+                 *     * `failed` - Échoué
+                 */
+                status?: "initiated" | "pending" | "succeeded" | "failed";
+                /** @description Créés jusqu'à cette date (AAAA-MM-JJ, incluse) */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentPage"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_payments_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_payments_recheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_payments_refunds_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackofficeRefund"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_refunds_list: {
+        parameters: {
+            query?: {
+                /** @description Numéro de page (1 par défaut) */
+                page?: number;
+                /** @description Taille de page (25 par défaut, 100 au plus) */
+                pageSize?: number;
+                /** @description Faux (défaut) : à traiter ; vrai : déjà traités */
+                processed?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundPage"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    backoffice_refunds_process: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProcessRefundRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundProcessResult"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

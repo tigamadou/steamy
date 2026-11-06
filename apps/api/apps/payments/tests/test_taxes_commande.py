@@ -12,13 +12,12 @@ from apps.accounts.tests.factories import ParentFactory
 from apps.catalog.tests.factories import CourseFactory
 from apps.core.models import PlatformSettings
 from apps.payments.models import Order, Payment
-from apps.payments.providers import PaymentEvent, PaymentStatus
 from apps.payments.taxes import taxes_share
-from apps.payments.utils import handle_payment_event
 from apps.shop.models import CartItem
 from apps.shop.tests.factories import DeliveryZoneFactory, KitFactory
 
 from .factories import OrderFactory, link_child, load_referentials
+from .test_flux_support import deliver
 
 pytestmark = pytest.mark.django_db
 
@@ -108,14 +107,15 @@ def test_taxes_are_frozen_at_creation_and_the_webhook_expects_the_frozen_total()
         amount=11800,
         provider_transaction_id="tx-1",
     )
-    ht_only = PaymentEvent(order.reference, "tx-ht", 10000, "XOF", PaymentStatus.SUCCEEDED)
-    assert handle_payment_event("fake", ht_only) is False
+    ht_only = Payment.objects.create(
+        order=order, provider="fake", amount=11800, provider_transaction_id="tx-ht"
+    )
+    deliver(ht_only, "approved", amount=10000)
+    ht_only.refresh_from_db()
+    assert ht_only.failure_code == Payment.FailureCode.AMOUNT_MISMATCH
     order.refresh_from_db()
     assert order.status == Order.Status.PENDING
-    frozen = PaymentEvent(
-        order.reference, payment.provider_transaction_id, 11800, "XOF", PaymentStatus.SUCCEEDED
-    )
-    handle_payment_event("fake", frozen)
+    deliver(payment)
     order.refresh_from_db()
     assert order.status == Order.Status.PAID
 

@@ -37,6 +37,7 @@ urlpatterns = [
     path("api/payments/", include("apps.payments.urls")),
     path("api/analytics/", include("apps.analytics.urls")),
     path("api/backoffice/", include("apps.impact.urls")),
+    path("api/backoffice/", include("apps.payments.backoffice_urls")),
     path("api/notifications/", include("apps.notifications.urls")),
     path("api/public/", include("apps.public.urls")),
     path("api/referentials/", include("apps.referentials.urls")),

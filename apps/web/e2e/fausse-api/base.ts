@@ -66,6 +66,12 @@ export type Faults = {
   invoiceNotReady?: boolean;
   /** Facture : 500. */
   invoiceServerError?: boolean;
+  /** Revérification d'un paiement : le prestataire ne répond pas (502, `SERVER_ERROR`). */
+  recheckProviderDown?: boolean;
+  /** Marquage d'un remboursement : déjà fait (409). */
+  refundAlreadyProcessed?: boolean;
+  /** Liste des paiements du back-office : 500. */
+  backofficeServerError?: boolean;
 };
 
 export type Scenario = {
@@ -90,6 +96,8 @@ export type Scenario = {
   withdrawn: string[];
   /** Commande de départ (suivi, paiement) : sa référence, son jeton d'accès invité éventuel et son propriétaire. */
   orders: SeedOrder[];
+  /** Paiements et remboursements vus du back-office (écran Finance), leur état de départ. */
+  backoffice: { payments: Schemas["PaymentDetail"][]; refunds: Schemas["BackofficeRefund"][] };
   faults: Faults;
 };
 
@@ -110,6 +118,7 @@ export const BASE: Scenario = {
   cart: [],
   withdrawn: [],
   orders: [],
+  backoffice: { payments: [], refunds: [] },
   faults: {},
 };
 

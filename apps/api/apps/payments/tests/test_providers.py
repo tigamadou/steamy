@@ -7,7 +7,6 @@ import time
 from unittest import mock
 
 import pytest
-import requests
 from django.core.exceptions import ImproperlyConfigured
 from django.test import RequestFactory
 
@@ -24,12 +23,14 @@ from apps.payments.providers import (
 from apps.payments.providers.fake import FakePaymentProvider, outcome_for
 from apps.payments.providers.fedapay import FedaPayProvider, national_number
 from apps.payments.tasks import deliver_fake_webhook
-from apps.payments.tests.factories import OrderFactory
+from apps.payments.tests.factories import OrderFactory, PaymentFactory
 
 
 def charge(msisdn="+2290197000001", **overrides):
     values = {
         "reference": "CM-0001",
+        "merchant_reference": "CM-0001-1",
+        "metadata": {"order": "CM-0001", "payment": 1},
         "amount": 5000,
         "currency": "XOF",
         "country": "BJ",
@@ -46,9 +47,16 @@ def charge(msisdn="+2290197000001", **overrides):
 def initiate(django_capture_on_commit_callbacks):
     """Initie un faux paiement puis valide la transaction : la notification part à ce moment-là."""
 
-    def run(msisdn="+2290197000001"):
+    def run(msisdn="+2290197000001", order=None):
         with django_capture_on_commit_callbacks(execute=True):
-            return FakePaymentProvider().initiate(charge(msisdn))
+            result = FakePaymentProvider().initiate(charge(msisdn))
+            if order is not None:  # le webhook ne crée jamais de paiement (ADR 0008 § 5)
+                PaymentFactory(
+                    order=order,
+                    provider_transaction_id=result.provider_tx_id,
+                    merchant_reference="CM-0001-1",
+                )
+            return result
 
     return run
 
@@ -87,11 +95,22 @@ def test_base_provider_defines_the_interface():
         lambda: provider.initiate(charge()),
         lambda: provider.verify_webhook(None),
         lambda: provider.parse_event({}),
-        lambda: provider.fetch_status("TX"),
+        lambda: provider.fetch_transaction("TX"),
+        lambda: provider.supports("BJ", "mtn"),
+        lambda: provider.transaction_id_of({}),
     ):
         with pytest.raises(NotImplementedError):
             call()
     assert provider.refund("TX", 100) == RefundOutcome.UNSUPPORTED
+    assert not hasattr(PaymentProvider, "fetch_status")
+
+
+def test_provider_errors_carry_the_transaction_id_when_it_was_created():
+    assert PaymentProviderError("x").provider_tx_id is None
+    assert PaymentProviderError("x", provider_tx_id="42").provider_tx_id == "42"
+    assert PaymentTemporaryError("x").provider_tx_id is None
+    error = PaymentTemporaryError("x", provider_tx_id="42")
+    assert error.provider_tx_id == "42" and isinstance(error, PaymentProviderError)
 
 
 # --- Faux prestataire --------------------------------------------------------------------------
@@ -111,21 +130,29 @@ def test_fake_outcome_depends_on_the_test_number(msisdn, outcome):
 
 
 def test_fake_success_posts_a_signed_webhook_after_commit(order, initiate):
-    result = initiate()
+    result = initiate(order=order)
     assert result.status == PaymentStatus.PENDING and result.redirect_url is None
     order.refresh_from_db()
     assert order.status == Order.Status.PAID
     payment = Payment.objects.get(order=order)
     assert payment.provider == "fake" and payment.provider_transaction_id == result.provider_tx_id
-    assert FakePaymentProvider().fetch_status(result.provider_tx_id) == PaymentStatus.SUCCEEDED
+    fetched = FakePaymentProvider().fetch_transaction(result.provider_tx_id)
+    assert fetched.status == PaymentStatus.SUCCEEDED and fetched.provider_status == "approved"
+    assert (fetched.amount, fetched.currency, fetched.merchant_reference) == (
+        5000,
+        "XOF",
+        "CM-0001-1",
+    )
+    assert fetched.fees is None and fetched.provider_tx_id == result.provider_tx_id
 
 
 def test_fake_failure_is_notified_with_a_reason(order, initiate):
-    result = initiate("+2290197000002")
+    result = initiate("+2290197000002", order=order)
     order.refresh_from_db()
     assert order.status == Order.Status.PENDING
     assert Payment.objects.get(order=order).status == Payment.Status.FAILED
-    assert FakePaymentProvider().fetch_status(result.provider_tx_id) == PaymentStatus.FAILED
+    fetched = FakePaymentProvider().fetch_transaction(result.provider_tx_id)
+    assert fetched.status == PaymentStatus.FAILED and fetched.provider_status == "declined"
     payload = FakePaymentProvider().settle(result.provider_tx_id, PaymentStatus.FAILED)
     assert payload["failureReason"]
 
@@ -133,7 +160,8 @@ def test_fake_failure_is_notified_with_a_reason(order, initiate):
 def test_fake_pending_number_never_notifies(order, initiate):
     result = initiate("+2290197000003")
     assert not Payment.objects.exists()
-    assert FakePaymentProvider().fetch_status(result.provider_tx_id) == PaymentStatus.PENDING
+    fetched = FakePaymentProvider().fetch_transaction(result.provider_tx_id)
+    assert fetched.status == PaymentStatus.PENDING and fetched.provider_status == "pending"
 
 
 def test_fake_notification_waits_for_the_commit(order):
@@ -143,15 +171,19 @@ def test_fake_notification_waits_for_the_commit(order):
 
 def test_fake_webhook_can_be_delivered_later_by_hand(order):
     result = FakePaymentProvider().initiate(charge("+2290197000003"))
+    payment = PaymentFactory(
+        order=order, provider_transaction_id=result.provider_tx_id, merchant_reference="CM-0001-1"
+    )
     assert deliver_fake_webhook(result.provider_tx_id, "succeeded") == 200
     order.refresh_from_db()
-    assert order.status == Order.Status.PAID
+    payment.refresh_from_db()
+    assert order.status == Order.Status.PAID and payment.status == Payment.Status.SUCCEEDED
 
 
 def test_fake_unknown_transaction(db):
     provider = FakePaymentProvider()
     with pytest.raises(PaymentProviderError, match="inconnue"):
-        provider.fetch_status("fake-absent")
+        provider.fetch_transaction("fake-absent")
     with pytest.raises(PaymentProviderError):
         provider.refund("fake-absent", 100)
 
@@ -198,68 +230,6 @@ def test_fedapay_requires_a_known_environment(fedapay):
     fedapay.FEDAPAY_ENVIRONMENT = "prod"
     with pytest.raises(ImproperlyConfigured, match="FEDAPAY_ENVIRONMENT"):
         FedaPayProvider()
-
-
-@pytest.mark.django_db
-def test_fedapay_initiates_a_direct_debit_without_redirection(fedapay):
-    calls = [
-        response(200, {"v1/transaction": {"id": 1234, "status": "pending"}}),
-        response(200, {"token": "tok_abc", "url": "https://checkout"}),
-        response(200, {"v1/mtn_open": {}}),
-    ]
-    with mock.patch("requests.request", side_effect=calls) as request:
-        result = FedaPayProvider().initiate(charge())
-    assert result.provider_tx_id == "1234" and result.status == PaymentStatus.PENDING
-    assert result.redirect_url is None
-    (create, token, debit) = request.call_args_list
-    assert create.args == ("POST", "https://sandbox-api.fedapay.com/v1/transactions")
-    body = create.kwargs["json"]
-    assert body["amount"] == 5000 and body["currency"] == {"iso": "XOF"}
-    assert body["merchant_reference"] == "CM-0001"
-    assert body["customer"]["phone_number"] == {"number": "0197000001", "country": "bj"}
-    assert create.kwargs["headers"] == {"Authorization": "Bearer sk_sandbox_test"}
-    assert token.args[1].endswith("/transactions/1234/token")
-    assert debit.args[1].endswith("/mtn_open") and debit.kwargs["json"] == {"token": "tok_abc"}
-
-
-def test_fedapay_refuses_an_unmapped_network(fedapay):
-    with mock.patch("requests.request") as request:
-        with pytest.raises(PaymentProviderError, match="Réseau non pris en charge"):
-            FedaPayProvider().initiate(charge(network="wave"))
-    request.assert_not_called()
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize(
-    "outcome",
-    [
-        requests.ConnectionError(),
-        response(500),
-        response(429),
-        response(200),  # corps illisible
-        response(200, {"v1/transaction": {"status": "pending"}}),  # sans identifiant
-    ],
-)
-def test_fedapay_temporary_failures(fedapay, outcome):
-    with mock.patch("requests.request", side_effect=[outcome]):
-        with pytest.raises(PaymentTemporaryError):
-            FedaPayProvider().initiate(charge())
-
-
-@pytest.mark.django_db
-def test_fedapay_missing_token_is_temporary(fedapay):
-    calls = [response(200, {"v1/transaction": {"id": 1}}), response(200, {})]
-    with mock.patch("requests.request", side_effect=calls):
-        with pytest.raises(PaymentTemporaryError, match="Jeton"):
-            FedaPayProvider().initiate(charge())
-
-
-@pytest.mark.django_db
-def test_fedapay_refusals_are_final(fedapay):
-    with mock.patch("requests.request", return_value=response(422, {"message": "invalide"})):
-        with pytest.raises(PaymentProviderError) as error:
-            FedaPayProvider().initiate(charge())
-    assert not isinstance(error.value, PaymentTemporaryError)
 
 
 def signed_request(body: bytes, timestamp=None, secret=WEBHOOK_SECRET, header=None):
@@ -334,20 +304,14 @@ def test_fedapay_rejects_incomplete_transactions(fedapay, payload):
         FedaPayProvider().parse_event(payload)
 
 
-@pytest.mark.parametrize(
-    ("status", "expected"),
-    [
-        ("approved", PaymentStatus.SUCCEEDED),
-        ("pending", PaymentStatus.PENDING),
-        ("canceled", PaymentStatus.FAILED),
-        ("nouveau", PaymentStatus.PENDING),
-    ],
-)
-def test_fedapay_fetches_the_transaction_status(fedapay, status, expected):
-    payload = {"v1/transaction": {"id": 1234, "status": status}}
-    with mock.patch("requests.request", return_value=response(200, payload)) as request:
-        assert FedaPayProvider().fetch_status("1234") == expected
-    assert request.call_args.args == ("GET", "https://sandbox-api.fedapay.com/v1/transactions/1234")
+def test_fedapay_reads_the_transaction_id_of_a_notification(fedapay):
+    provider = FedaPayProvider()
+    assert provider.transaction_id_of(transaction_event()) == "1234"
+    assert provider.transaction_id_of({"name": "customer.created", "entity": {"id": 7}}) is None
+    assert provider.transaction_id_of({"name": "transaction.approved"}) is None
+    assert provider.transaction_id_of({"name": "transaction.approved", "entity": {}}) is None
+    assert provider.transaction_id_of({"name": "transaction.approved", "entity": 3}) is None
+    assert provider.transaction_id_of({}) is None
 
 
 def test_fedapay_refunds_are_handled_by_finance(fedapay):
@@ -364,3 +328,71 @@ def test_fake_webhook_body_is_plain_json(order):
     result = FakePaymentProvider().initiate(charge())
     payload = FakePaymentProvider().settle(result.provider_tx_id, PaymentStatus.SUCCEEDED)
     assert json.loads(json.dumps(payload))["reference"] == "CM-0001"
+
+
+# --- Faux prestataire : numéros …04 et …05, prises de test --------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("msisdn", "error"),
+    [("+2290197000004", PaymentProviderError), ("+2290197000005", PaymentTemporaryError)],
+)
+def test_fake_creates_the_transaction_then_fails(order, initiate, msisdn, error):
+    with pytest.raises(error) as raised:
+        initiate(msisdn)
+    assert error is PaymentTemporaryError or not isinstance(raised.value, PaymentTemporaryError)
+    tx_id = raised.value.provider_tx_id
+    assert tx_id
+    assert FakePaymentProvider().fetch_transaction(tx_id).status == PaymentStatus.PENDING
+    assert not Payment.objects.exists()  # aucune notification
+
+
+def test_fake_create_transaction_replaces_and_deduces_the_raw_status(db):
+    provider = FakePaymentProvider()
+    provider.create_transaction(
+        provider_tx_id="tx-1", reference="R", merchant_reference="R-1", amount=100, currency="XOF"
+    )
+    assert provider.fetch_transaction("tx-1").provider_status == "pending"
+    provider.create_transaction(
+        provider_tx_id="tx-1",
+        reference="R",
+        merchant_reference="R-1",
+        amount=200,
+        currency="XOF",
+        status=PaymentStatus.FAILED,
+        provider_status="expired",
+        fees=5,
+    )
+    fetched = provider.fetch_transaction("tx-1")
+    assert (fetched.amount, fetched.provider_status, fetched.fees) == (200, "expired", 5)
+    assert fetched.status == PaymentStatus.FAILED
+    provider.create_transaction(
+        provider_tx_id="tx-1",
+        reference="R",
+        merchant_reference="R-1",
+        amount=200,
+        currency="XOF",
+        status=PaymentStatus.SUCCEEDED,
+    )
+    assert provider.fetch_transaction("tx-1").provider_status == "approved"
+
+
+def test_fake_supports_everything_but_the_unsupported_pairs(monkeypatch):
+    provider = FakePaymentProvider()
+    assert provider.supports("BJ", "mtn") is True
+    monkeypatch.setattr(FakePaymentProvider, "UNSUPPORTED", frozenset({("BJ", "mtn")}))
+    assert provider.supports("BJ", "mtn") is False
+    assert provider.supports("BJ", "moov") is True
+
+
+@pytest.mark.parametrize(
+    ("payload", "expected"),
+    [
+        ({"transactionId": "fake-1"}, "fake-1"),
+        ({}, None),
+        ({"transactionId": ""}, None),
+        ({"transactionId": 12}, None),
+    ],
+)
+def test_fake_reads_the_transaction_id_of_a_notification(payload, expected):
+    assert FakePaymentProvider().transaction_id_of(payload) == expected

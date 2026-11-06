@@ -3,13 +3,15 @@ Prestataire réel : FedaPay (ADR 0003), par son API REST v1 et ses webhooks sign
 
 Paiement sans redirection, initié par le serveur : création de la transaction (`POST /transactions`, référence de
 la commande dans `merchant_reference`), jeton (`POST /transactions/{id}/token`), puis débit direct sur le réseau
-choisi (`POST /{mode}` : le payeur valide sur son téléphone). Le webhook signé fait foi ; `fetch_status` sert à la
+choisi (`POST /{mode}` : le payeur valide sur son téléphone). Le webhook signé fait foi ; `fetch_transaction` sert à la
 réconciliation.
 
 Configuration lue dans l'environnement, jamais dans le dépôt : `FEDAPAY_SECRET_KEY` (clé secrète `sk_…`),
-`FEDAPAY_WEBHOOK_SECRET` (secret du webhook `wh_…`), `FEDAPAY_ENVIRONMENT` (`sandbox` ou `live`). Les modes de débit
-par réseau (`FEDAPAY_MODES`) et les identifiants de devise (`FEDAPAY_CURRENCY_IDS`) sont à confirmer dans le bac à
-sable (inconnues 1 et 5 de l'ADR 0003), d'où des réglages plutôt que des constantes.
+`FEDAPAY_WEBHOOK_SECRET` (secret du webhook `wh_…`), `FEDAPAY_ENVIRONMENT` (`sandbox` ou `live`). Le mode de débit
+dépend de l'environnement (ADR 0008 §1) : `FEDAPAY_SANDBOX_MODE` (`momo_test`) pour tous les réseaux dans le bac à
+sable, la table `FEDAPAY_MODES` en live. Une fois la transaction créée, toute erreur porte son identifiant
+(`provider_tx_id`) : définitive si FedaPay refuse le débit (4xx), temporaire sinon. Les identifiants de devise
+(`FEDAPAY_CURRENCY_IDS`) sont un réglage plutôt qu'une constante.
 """
 
 import hashlib
@@ -29,6 +31,7 @@ from .base import (
     PaymentProviderError,
     PaymentStatus,
     PaymentTemporaryError,
+    ProviderTransaction,
     RefundOutcome,
 )
 
@@ -77,6 +80,7 @@ class FedaPayProvider(PaymentProvider):
                 f"FEDAPAY_ENVIRONMENT inconnu : {environment!r} (attendu : sandbox ou live)"
             )
         self.api_url = API_URLS[environment]
+        self.sandbox = environment == "sandbox"
 
     # --- Appels à l'API ------------------------------------------------------------------------
 
@@ -111,8 +115,14 @@ class FedaPayProvider(PaymentProvider):
 
     # --- Interface -----------------------------------------------------------------------------
 
+    def _mode(self, country: str, network: str) -> str | None:
+        """Mode de débit : `momo_test` en bac à sable quel que soit le réseau, la table `FEDAPAY_MODES` en live."""
+        if self.sandbox:
+            return settings.FEDAPAY_SANDBOX_MODE
+        return settings.FEDAPAY_MODES.get(f"{country}:{network}")
+
     def initiate(self, charge: Charge) -> InitiateResult:
-        mode = settings.FEDAPAY_MODES.get(f"{charge.country}:{charge.network}")
+        mode = self._mode(charge.country, charge.network)
         if not mode:
             raise PaymentProviderError(
                 f"Réseau non pris en charge : {charge.country}:{charge.network}"
@@ -125,13 +135,14 @@ class FedaPayProvider(PaymentProvider):
                     "description": charge.description or f"Commande {charge.reference}",
                     "amount": charge.amount,
                     "currency": {"iso": charge.currency},
-                    "merchant_reference": charge.reference,
+                    "merchant_reference": charge.merchant_reference,
+                    "custom_metadata": dict(charge.metadata),
                     "callback_url": settings.FEDAPAY_CALLBACK_URL,
                     "customer": {
                         "firstname": charge.first_name,
                         "lastname": charge.last_name,
                         "phone_number": {
-                            "number": national_number(charge.msisdn, charge.country),
+                            "number": request_number(charge.msisdn, charge.country, self.sandbox),
                             "country": charge.country.lower(),
                         },
                     },
@@ -139,10 +150,21 @@ class FedaPayProvider(PaymentProvider):
             )
         )
         provider_tx_id = str(transaction["id"])
-        token = self._call("POST", f"/transactions/{provider_tx_id}/token").get("token")
+        # La transaction existe désormais chez FedaPay : toute erreur doit la porter, pour la réconcilier.
+        try:
+            token = self._call("POST", f"/transactions/{provider_tx_id}/token").get("token")
+        except PaymentProviderError as error:
+            raise PaymentTemporaryError(str(error), provider_tx_id=provider_tx_id) from error
         if not token:
-            raise PaymentTemporaryError("Jeton de paiement FedaPay absent")
-        self._call("POST", f"/{mode}", {"token": token})
+            raise PaymentTemporaryError(
+                "Jeton de paiement FedaPay absent", provider_tx_id=provider_tx_id
+            )
+        try:
+            self._call("POST", f"/{mode}", {"token": token})
+        except PaymentTemporaryError as error:
+            raise PaymentTemporaryError(str(error), provider_tx_id=provider_tx_id) from error
+        except PaymentProviderError as error:
+            raise PaymentProviderError(str(error), provider_tx_id=provider_tx_id) from error
         return InitiateResult(provider_tx_id=provider_tx_id, status=PaymentStatus.PENDING)
 
     def verify_webhook(self, request) -> bool:
@@ -184,9 +206,37 @@ class FedaPayProvider(PaymentProvider):
             failure_reason=FAILURE_REASONS.get(entity["status"], ""),
         )
 
-    def fetch_status(self, provider_tx_id: str) -> PaymentStatus:
-        transaction = self._transaction(self._call("GET", f"/transactions/{provider_tx_id}"))
-        return STATUSES.get(transaction.get("status"), PaymentStatus.PENDING)
+    def transaction_id_of(self, payload: dict) -> str | None:
+        if not str(payload.get("name", "")).startswith("transaction."):
+            return None
+        entity = payload.get("entity")
+        if not isinstance(entity, dict) or not entity.get("id"):
+            return None
+        return str(entity["id"])
+
+    def raw_transaction(self, provider_tx_id: str) -> dict:
+        """Réponse brute de `GET /transactions/{id}`, sans transformation (sonde de validation)."""
+        return self._call("GET", f"/transactions/{provider_tx_id}")
+
+    def fetch_transaction(self, provider_tx_id: str) -> ProviderTransaction:
+        transaction = self._transaction(self.raw_transaction(provider_tx_id))
+        try:
+            amount = int(transaction["amount"])
+        except (KeyError, TypeError, ValueError):
+            raise PaymentTemporaryError("Montant illisible dans la réponse de FedaPay") from None
+        raw_status = str(transaction.get("status") or "")
+        return ProviderTransaction(
+            provider_tx_id=str(transaction["id"]),
+            status=normalize_status(raw_status),
+            provider_status=raw_status,
+            amount=amount,
+            currency=currency_of(transaction),
+            merchant_reference=str(transaction.get("merchant_reference") or ""),
+            fees=fees_of(transaction),
+        )
+
+    def supports(self, country: str, network: str) -> bool:
+        return self._mode(country, network) is not None
 
     def refund(self, provider_tx_id: str, amount: int) -> RefundOutcome:
         """Pas d'API publique de remboursement (ADR 0003 §6) : traité par la Finance dans le tableau de bord."""
@@ -194,11 +244,34 @@ class FedaPayProvider(PaymentProvider):
         return RefundOutcome.PENDING_MANUAL
 
 
+def normalize_status(raw: str) -> PaymentStatus:
+    """Statut FedaPay → statut Steamy ; tout statut « refunded » (même partiel) est un échec, l'inconnu est en attente."""
+    if "refunded" in raw:
+        return PaymentStatus.FAILED
+    return STATUSES.get(raw, PaymentStatus.PENDING)
+
+
+def fees_of(transaction: dict) -> int | None:
+    fees = transaction.get("fees")
+    if isinstance(fees, bool):
+        return None
+    try:
+        return int(fees)
+    except (TypeError, ValueError):
+        return None
+
+
 def currency_of(entity: dict) -> str:
     currency = entity.get("currency")
     if isinstance(currency, dict) and currency.get("iso"):
         return str(currency["iso"]).upper()
     return settings.FEDAPAY_CURRENCY_IDS.get(str(entity.get("currency_id")), "")
+
+
+def request_number(msisdn: str, country: str, sandbox: bool) -> str:
+    """Numéro envoyé à FedaPay : national complet en live, ses 8 derniers chiffres dans le bac à sable."""
+    number = national_number(msisdn, country)
+    return number[-8:] if sandbox else number
 
 
 def national_number(msisdn: str, country: str) -> str:

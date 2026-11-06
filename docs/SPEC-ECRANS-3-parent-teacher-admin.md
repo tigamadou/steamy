@@ -9,7 +9,7 @@ Font foi, dans cet ordre : [ARBITRAGES](alignement/ARBITRAGES.md) (S1-S12, D1-D7
 | §5.11 Espace parent | `WPD01`-`WPD15` | 4 |
 | §5.12 Espace enseignant | `WT01`-`WT13` | 5 |
 | §5.13 Boutique de kits | `WK01`-`WK11` | 3 |
-| §5.14 Back-office | `WAD01`-`WAD15` | 6 |
+| §5.14 Back-office | `WAD01`-`WAD17` | 6 |
 | §6 États transversaux | `WX01`-`WX03` | 1 (enveloppes) |
 
 **Statuts** (CONVENTIONS) : **v1** · **v1 · admin Django** · **À concevoir** (absent de la maquette, décrit ici).
@@ -265,29 +265,29 @@ WK10 = panier vide · WK11 = rupture de stock
 
 ---
 
-## 5.14 Back-office — `WAD01`-`WAD15` · **Lot 6** · `screens-admin-web.jsx`
+## 5.14 Back-office — `WAD01`-`WAD17` · **Lot 6** · `screens-admin-web.jsx`
 
 ### Réalisation hybride (S6)
 
 | Réalisation | Écrans | Rôle de la maquette |
 | --- | --- | --- |
-| Next.js | `WAD01`-`WAD05` | Référence visuelle (shell sombre, monochrome) |
+| Next.js | `WAD01`-`WAD05`, `WAD11`, `WAD16`, `WAD17` | Référence visuelle (shell sombre, monochrome) ; `WAD11`, `WAD16` et `WAD17` sont des écrans Finance réalisés sans maquette (ADR 0008) |
 | Django (avec TOTP) | `WAD15` | Référence pour les champs |
-| Admin Django | `WAD06`-`WAD14` | **Référence fonctionnelle** : colonnes (`list_display`), filtres (`list_filter`, `date_hierarchy`), recherche, actions et inlines. Pas d'écran Next.js |
+| Admin Django | `WAD06`-`WAD10`, `WAD12`-`WAD14` | **Référence fonctionnelle** : colonnes (`list_display`), filtres (`list_filter`, `date_hierarchy`), recherche, actions et inlines. Pas d'écran Next.js |
 
 - **Accès** : `is_staff` ouvre le back-office ; droits par 4 groupes Django (D71). `User.role` n'a plus de valeur `admin`.
 - **2FA** : django-otp (TOTP) exigé sur l'admin Django **et** sur les endpoints `/api/backoffice/…/` (D72). Les pages Next.js renvoient vers `WAD15` si la session n'est pas vérifiée par OTP.
 - **Routes** : `/admin/` est réservé à l'admin Django ; l'API sous `/api/backoffice/…/` (D5).
 - **Direction visuelle** : monochrome (`--ink-*`), couleur réservée aux statuts et aux graphes ; thème monochrome appliqué aussi à l'admin Django.
 - **Registre** : vouvoiement ou tournures neutres.
-- **Shell Next.js** (`WebAdminShell`) : groupes Pilotage / Plateforme / Système ; les entrées Plateforme et Système pointent vers les pages correspondantes de l'admin Django. Utilisateur issu de la session.
+- **Shell Next.js** (`WebAdminShell`) : groupes Pilotage / Finance / Plateforme / Système ; « Paiements » et « Remboursements » (groupe Finance) sont des pages Next.js ; les autres entrées Plateforme et Système pointent vers les pages correspondantes de l'admin Django. Utilisateur issu de la session.
 
 | Groupe Django (D71) | Écrans |
 | --- | --- |
-| Super-admin | Tous, dont `WAD13`, `WAD14` |
+| Super-admin | Tous, dont `WAD13`, `WAD14`, `WAD16`, `WAD17` |
 | Contenu | `WAD09`, kits et stock de `WAD10`, événements de `WAD12` |
 | Support | `WAD06`-`WAD08`, commandes et livraisons de `WAD10`, candidatures de `WAD12` |
-| Finance | `WAD02`-`WAD05`, `WAD11` |
+| Finance | `WAD02`-`WAD05`, `WAD11`, `WAD16`, `WAD17` |
 | Tout membre du personnel | `WAD01` |
 
 La répartition des écrans hors libellés de `WAD13` (événements, commandes) est une proposition.
@@ -296,7 +296,7 @@ La répartition des écrans hors libellés de `WAD13` (événements, commandes) 
 
 | ID | Écran | Statut | Contenu et actions |
 | --- | --- | --- | --- |
-| `WAD01` | Vue d'ensemble | v1 | Hero (chiffre clé du mois, prochaine échéance du rapport) → `WAD02`. 4 `StatCard` (utilisateurs, apprenants actifs, ventes du mois, taux de complétion calculé depuis `learning`). Carte échéance : `DeadlineTracker` + complétude du rapport → `WAD04`. **« À traiter »** : consentements en attente (suivi, D70) → `WAD08` · paiements échoués → `WAD11` · candidatures à suivre → `WAD12`, chaque lien ouvrant la liste Django filtrée |
+| `WAD01` | Vue d'ensemble | v1 | Hero (chiffre clé du mois, prochaine échéance du rapport) → `WAD02`. 4 `StatCard` (utilisateurs, apprenants actifs, ventes du mois, taux de complétion calculé depuis `learning`). Carte échéance : `DeadlineTracker` + complétude du rapport → `WAD04`. **« À traiter »** : consentements en attente (suivi, D70) → `WAD08` · paiements à examiner (échoués ou expirés) → `WAD11` filtré · remboursements à solder → `WAD17` · candidatures à suivre → `WAD12`, chaque lien ouvrant la liste Django filtrée |
 | `WAD02` | Impact Tracker | v1 | « Saisie manuelle » → `WAD05` · « Rapport trimestriel » → `WAD04`. Légende des sources (Auto / Manuel / Indisponible). `SegmentedControl` Mois / Trimestre / Année **qui recharge les données**. KPI principaux, cartes démographiques alimentées par le profil (genre, date de naissance, handicap, localité qualifiée, D75), 6 groupes de KPI. Statut de chaque KPI par `kpiStatus` (D73) |
 | `WAD03` | Détail indicateur | v1 | Statut, valeur, cible et taux d'atteinte ; histogramme par période ; historique (période, réponse, statut) ; composition ; **définition** issue du serveur (source, mode de calcul, fréquence) |
 | `WAD04` | Rapport trimestriel | v1 | En-tête (trimestre, complétude, échéances). Table des indicateurs : Indicateur / Du / Au / Réponse / Statut / Source ; plages calculées par le serveur. « Exporter CSV » / « Exporter PDF » : génération **asynchrone**, lien de téléchargement à la fin (notification). « Soumettre » : confirmation, puis **rapport verrouillé** en lecture seule, statut « Soumis » (D74) |
@@ -313,7 +313,7 @@ La répartition des écrans hors libellés de `WAD13` (événements, commandes) 
 | 70 % ≤ valeur < 100 % de la cible | En dessous | ambre |
 | Valeur ≥ cible | Atteinte | succès |
 
-### Plateforme et système (admin Django, sauf `WAD15`)
+### Plateforme et système (admin Django, sauf `WAD15` ; `WAD11`, `WAD16` et `WAD17` sont en Next.js)
 
 | ID | Écran | Statut | Référence fonctionnelle |
 | --- | --- | --- | --- |
@@ -322,7 +322,9 @@ La répartition des écrans hors libellés de `WAD13` (événements, commandes) 
 | `WAD08` | Consentements et modération | v1 · admin Django | **Suivi uniquement** (D70). Demandes de consentement : colonnes enfant, âge, origine (enfant / parent / enseignant), parent, date, statut (en attente, acceptée, refusée, expirée) ; filtres statut, origine ; actions **relancer le parent**, **marquer en litige**. Changement de parent depuis `WAD07`. **Modération a priori** des éléments publics des mineurs (pseudonyme, avatar, D15) : approuver / rejeter. Aucun bouton « Valider » à la place du parent |
 | `WAD09` | Contenu / Parcours | v1 · admin Django | `Course` avec inlines Projet → Niveau → Mission (S2) et quiz (formatif au niveau, sommatif au projet). Colonnes : parcours, catégorie, difficulté, accès (gratuit / payant + prix), kit requis, inscrits, statut (publié / brouillon). Filtres : catégorie, difficulté, accès, kit, statut. Mission : `vimeoId` et/ou contenu |
 | `WAD10` | Boutique et commandes | v1 · admin Django | **Kits** : prix, catégorie, difficulté, parcours compatibles, stock (badge à 3 seuils : rupture / < 10 / en stock). **Zones de livraison** : frais et délai (D38). **Commandes kit** : réf., articles, payeur, bénéficiaire, statut de paiement, statut de livraison ; filtres ; action « changer le statut de livraison » (notifie le payeur). **Kit Codes** : lecture par commande, révocation. **Alertes de réassort** |
-| `WAD11` | Paiements Mobile Money | v1 · admin Django | Colonnes : référence, payeur, bénéficiaire, type de commande, réseau, montant, date, statut. Filtres : statut, réseau, pays, type ; `date_hierarchy` (remplace le sélecteur Mois / Trimestre). Agrégats (volume, taux d'échec) en tête de liste ou dans `WAD01` |
+| `WAD11` | Paiements Mobile Money | v2 · Next.js (`/backoffice/paiements`, Finance et Super-admin) | Titre, 4 totaux calculés sur **tout** le filtre (volume encaissé, nombre de paiements, réussis / échoués, taux d'échec ; « — » sans paiement réglé), filtres dans l'URL (statut, réseau, pays, type, période du / au, recherche), tableau paginé (10 par page) : commande, payeur, réseau, montant, date, statut, motif d'échec lisible. Numéro de téléphone masqué. Remplace l'écran de l'admin Django ; la période est une plage de dates, pas un sélecteur Mois / Trimestre |
+| `WAD16` | Détail d'un paiement | v2 · Next.js (`/backoffice/paiements/[id]`) | Statut, montant, réseau, numéro masqué, références, motif d'échec, événements (journal). « Revérifier chez FedaPay » (paiement en attente) : met le statut à jour, ou signale que le prestataire n'a pas répondu. « Demander un remboursement » (paiement réussi) : montant (entier, au plus le reste remboursable) et motif obligatoires ; liste des remboursements du paiement |
+| `WAD17` | Remboursements | v2 · Next.js (`/backoffice/remboursements`, Finance et Super-admin) | Onglets « À traiter » / « Traités » (adressables). À traiter : demandé le, commande, montant, motif, payeur, « Marquer comme remboursé » (référence obligatoire, saisie après le remboursement chez l'opérateur ; déjà traité par ailleurs : message dédié et liste rafraîchie). Traités : référence, traité par, traité le |
 | `WAD12` | Steamy Events | v1 · admin Django | **Événements** (`SteamyEvent`) : titre, date, lieu, capacité, prix (gratuit / payant, S8), publication. **Candidatures** (`EventApplication`) : élève, âge, événement, accord parental, paiement, statut ; filtres. L'accord du parent est un invariant serveur : aucune acceptation avant lui, quel que soit l'âge (S3). **Pas de sélection** : l'accord (et le paiement si payant) confirme l'inscription dans la limite des places (C3) ; le personnel suit, et peut seulement refuser exceptionnellement une candidature (motif obligatoire, remboursement si elle était payée) |
 | `WAD13` | Équipe et rôles | v1 · admin Django | `User` (`is_staff`) + `Group` : Super-admin, Contenu, Support, Finance (D71). Invitation d'un membre ; enrôlement TOTP obligatoire (D72) |
 | `WAD14` | Paramètres | v1 · admin Django | Réglages (singleton) : **réseaux Mobile Money par pays, Celtiis compris** (D76, lus publiquement par les formulaires de paiement), fournisseur SMS actif (S10), **seuil de décrochage** (7 jours par défaut, D66), annonce plateforme (diffusée en notification, D7). « Mode maintenance » et « inscriptions ouvertes » : hors v1 (arbitrage C22, 2026-10-23) |
@@ -332,15 +334,15 @@ La répartition des écrans hors libellés de `WAD13` (événements, commandes) 
 
 | Domaine | Besoins |
 | --- | --- |
-| `backoffice` | `WAD01`-`WAD05` seulement : synthèse de la vue d'ensemble ; KPI (définitions, valeurs par période, statut `kpiStatus`) ; rapport trimestriel (lecture, saisie, brouillon, validation, soumission, exports asynchrones). Session staff + OTP + groupe |
-| Admin Django | `WAD06`-`WAD14` : `ModelAdmin` sur les modèles des domaines `accounts`, `catalog`, `learning`, `shop`, `payments`, `events`, `classrooms`, `notifications` et des réglages ; pas d'API dédiée |
+| `backoffice` | `WAD01`-`WAD05`, `WAD11`, `WAD16`, `WAD17` : paiements (liste, détail, revérification), remboursements (demande, liste, traitement) ; synthèse de la vue d'ensemble ; KPI (définitions, valeurs par période, statut `kpiStatus`) ; rapport trimestriel (lecture, saisie, brouillon, validation, soumission, exports asynchrones). Session staff + OTP + groupe |
+| Admin Django | `WAD06`-`WAD10`, `WAD12`-`WAD14` : `ModelAdmin` sur les modèles des domaines `accounts`, `catalog`, `learning`, `shop`, `payments`, `events`, `classrooms`, `notifications` et des réglages ; pas d'API dédiée |
 | Tâches asynchrones | Recalcul nocturne des KPI auto, exports CSV / PDF (D74) |
 
 ### À ne pas porter de la maquette
 
 | Écran | Élément | Raison |
 | --- | --- | --- |
-| `WAD02`, `WAD11` | Sélecteur de période sans effet sur les données | Recharge (`WAD02`) ou `date_hierarchy` (`WAD11`) |
+| `WAD02`, `WAD11` | Sélecteur de période sans effet sur les données | Recharge (`WAD02`) ou plage de dates du / au (`WAD11`) |
 | `WAD02`, `WAD05` | Tuiles « Indisponible » zone rurale et handicap, « Activer / Configurer la collecte » | D75 |
 | `WAD04` | Export et soumission non branchés | D74 |
 | `screens-admin-web.jsx:283` | Commentaire « ⭐ TA CONTRIBUTION », baseline de `kpiStatus` | D73, §8.16 |

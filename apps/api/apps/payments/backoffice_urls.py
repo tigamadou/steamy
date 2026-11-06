@@ -1,0 +1,26 @@
+"""Routes `/api/backoffice/` des paiements et des remboursements (§7.8), réservées à la Finance."""
+
+from django.urls import path
+
+from . import backoffice_api as api
+
+urlpatterns = [
+    path("payments/", api.PaymentListView.as_view(), name="backoffice-payments"),
+    path("payments/<int:pk>/", api.PaymentDetailView.as_view(), name="backoffice-payment"),
+    path(
+        "payments/<int:pk>/recheck/",
+        api.PaymentRecheckView.as_view(),
+        name="backoffice-payment-recheck",
+    ),
+    path(
+        "payments/<int:pk>/refunds/",
+        api.PaymentRefundRequestView.as_view(),
+        name="backoffice-payment-refunds",
+    ),
+    path("refunds/", api.RefundListView.as_view(), name="backoffice-refunds"),
+    path(
+        "refunds/<int:pk>/process/",
+        api.RefundProcessView.as_view(),
+        name="backoffice-refund-process",
+    ),
+]

@@ -29,7 +29,7 @@ describe("BackofficeGate", () => {
     const tree = (await BackofficeGate({ children: "page" })) as Shell;
     expect(tree.type).toBe(AdminShell);
     expect(tree.props.user).toEqual({ name: "Awa Sossou", groups: "Finance" });
-    expect(tree.props.nav.map((g) => g.label)).toEqual(["Pilotage", "Plateforme"]);
+    expect(tree.props.nav.map((g) => g.label)).toEqual(["Pilotage", "Finance"]);
     expect(tree.props.loginUrl).toBe("http://api.test/admin/login/?next=/backoffice");
   });
 

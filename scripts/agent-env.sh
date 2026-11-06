@@ -70,7 +70,7 @@ LOT_MAX=46
 
 check_lot() {
   local lot="$1"
-  [[ "$lot" =~ ^[a-z0-9]+$ ]] || die "lot invalide « $lot » (attendu : lettres minuscules et chiffres, sans tiret)"
+  [[ "$lot" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || die "lot invalide « $lot » (attendu : lettres minuscules, chiffres et tirets internes)"
   [ "${#lot}" -le "$LOT_MAX" ] || die "lot invalide : plus de $LOT_MAX caractères (les noms de bases et de buckets dépasseraient 63 caractères)"
   case "$lot" in
     test | e2e) die "lot réservé « $lot » (noms réservés : test, e2e)" ;;

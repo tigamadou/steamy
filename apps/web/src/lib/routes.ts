@@ -243,6 +243,9 @@ export const routes = {
     reports: "/backoffice/impact/rapports",
     report: (period: string) => `/backoffice/impact/rapports/${encodeURIComponent(period)}`,
     reportEntry: (period: string) => `/backoffice/impact/rapports/${encodeURIComponent(period)}/saisie`,
+    payments: "/backoffice/paiements",
+    payment: (id: number) => `/backoffice/paiements/${id}`,
+    refunds: "/backoffice/remboursements",
     accessDenied: "/backoffice/acces-refuse",
   },
 } as const;

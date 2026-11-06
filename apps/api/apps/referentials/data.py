@@ -16,6 +16,7 @@ PAYMENT_NETWORKS = [
     ("BJ", "moov", "Moov Money", True),
     ("BJ", "celtiis", "Celtiis Cash", True),
     ("TG", "moov", "Moov Money (Flooz)", False),
+    ("TG", "togocel", "Mixx By Yas", False),
     ("CI", "orange", "Orange Money", False),
     ("CI", "mtn", "MTN Mobile Money", False),
     ("CI", "moov", "Moov Money", False),
